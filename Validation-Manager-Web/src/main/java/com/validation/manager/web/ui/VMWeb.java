@@ -202,20 +202,28 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 // Identify the fields by their Property ID.
                 String pid = (String) propertyId;
                 if ("name".equals(pid)) {
-                    TextField textField = new TextField(getInstance().getResource().getString("general.name") + ":");
+                    TextField textField =
+                            new TextField(getInstance().getResource()
+                            .getString("general.name") + ":");
                     textField.addValidator(new Validator() {
                         @Override
-                        public void validate(Object value) throws InvalidValueException {
+                        public void validate(Object value)
+                                throws InvalidValueException {
                             if (!isValid(value)) {
-                                throw new InvalidValueException("Invalid value: " + value);
+                                throw new InvalidValueException(
+                                        "Invalid value: " + value);
                             }
                         }
 
                         @Override
                         public boolean isValid(Object value) {
-                            for (Iterator<RequirementSpec> it = currentProject.getRequirementSpecList().iterator(); it.hasNext();) {
+                            for (Iterator<RequirementSpec> it =
+                                    currentProject.getRequirementSpecList()
+                                    .iterator(); it.hasNext();) {
                                 RequirementSpec reqSpec = it.next();
-                                if (reqSpec.getName().equals(form.getField("name").getValue().toString())) {
+                                if (reqSpec.getName().equals(
+                                        form.getField("name").getValue()
+                                        .toString())) {
                                     return false;
                                 }
                             }
@@ -228,11 +236,14 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     // Wrap them in a container for binding to a Select
                     final BeanItemContainer<Project> productContainer =
                             new BeanItemContainer<Project>(Project.class);
-                    for (Iterator<Object> it = DataBaseManager.namedQuery("Project.findAll").iterator(); it.hasNext();) {
+                    for (Iterator<Object> it =
+                            DataBaseManager.namedQuery("Project.findAll")
+                            .iterator(); it.hasNext();) {
                         productContainer.addBean((Project) it.next());
                     }
                     Select select = new Select(
-                            getInstance().getResource().getString("general.project") + ":",
+                            getInstance().getResource()
+                            .getString("general.project") + ":",
                             productContainer);
                     // Show the Project names in the select list
                     select.setItemCaptionPropertyId("name");
@@ -242,15 +253,18 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     select.setNullSelectionAllowed(false);
                     select.addValidator(new Validator() {
                         @Override
-                        public void validate(Object value) throws InvalidValueException {
+                        public void validate(Object value)
+                                throws InvalidValueException {
                             if (!isValid(value)) {
-                                throw new InvalidValueException("Invalid value: " + value);
+                                throw new InvalidValueException(
+                                        "Invalid value: " + value);
                             }
                         }
 
                         @Override
                         public boolean isValid(Object value) {
-                            return value != null && !value.toString().trim().isEmpty();
+                            return value != null
+                                    && !value.toString().trim().isEmpty();
                         }
                     });
                     if (rs.getProject() != null) {
@@ -263,11 +277,14 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     // Wrap them in a container for binding to a Select
                     final BeanItemContainer<SpecLevel> specLevelContainer =
                             new BeanItemContainer<SpecLevel>(SpecLevel.class);
-                    for (Iterator<Object> it = DataBaseManager.namedQuery("SpecLevel.findAll").iterator(); it.hasNext();) {
+                    for (Iterator<Object> it =
+                            DataBaseManager.namedQuery("SpecLevel.findAll")
+                            .iterator(); it.hasNext();) {
                         specLevelContainer.addBean((SpecLevel) it.next());
                     }
                     Select select = new Select(
-                            getInstance().getResource().getString("general.requirement.level") + ":",
+                            getInstance().getResource()
+                            .getString("general.requirement.level") + ":",
                             specLevelContainer);
                     // Show the Project names in the select list
                     select.setItemCaptionPropertyId("name");
@@ -277,15 +294,18 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     select.setNullSelectionAllowed(false);
                     select.addValidator(new Validator() {
                         @Override
-                        public void validate(Object value) throws InvalidValueException {
+                        public void validate(Object value)
+                                throws InvalidValueException {
                             if (!isValid(value)) {
-                                throw new InvalidValueException("Invalid value: " + value);
+                                throw new InvalidValueException(
+                                        "Invalid value: " + value);
                             }
                         }
 
                         @Override
                         public boolean isValid(Object value) {
-                            return value != null && !value.toString().trim().isEmpty();
+                            return value != null
+                                    && !value.toString().trim().isEmpty();
                         }
                     });
                     if (rs.getSpecLevel() != null) {
@@ -293,11 +313,15 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     }
                     return select;
                 } else if ("description".equals(pid)) {
-                    TextArea textArea = new TextArea(getInstance().getResource().getString("general.description") + ":");
+                    TextArea textArea =
+                            new TextArea(getInstance().getResource()
+                            .getString("general.description") + ":");
                     textArea.setEnabled(true);
                     return textArea;
                 } else if ("version".equals(pid)) {
-                    TextField textField = new TextField(getInstance().getResource().getString("general.version") + ":");
+                    TextField textField =
+                            new TextField(getInstance().getResource()
+                            .getString("general.version") + ":");
                     textField.setEnabled(false);
                     return textField;
                 } else {
@@ -315,11 +339,12 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             @Override
             public void buttonClick(ClickEvent event) {
                 try {
-                    new RequirementSpecJpaController( DataBaseManager.getEntityManagerFactory()).create(rs);
+                    new RequirementSpecJpaController(
+                            DataBaseManager.getEntityManagerFactory()).create(rs);
                 } catch (PreexistingEntityException ex) {
-                    Logger.getLogger(VMWeb.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 } catch (Exception ex) {
-                    Logger.getLogger(VMWeb.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 } finally {
                     if (createWindow != null) {
                         getMainWindow().removeWindow(createWindow);
@@ -351,13 +376,15 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         // Create a form and use FormLayout as its layout.
         final Form form = new Form();
         // Set form caption and description texts
-        form.setCaption(getInstance().getResource().getString("message.requirement.create"));
+        form.setCaption(getInstance().getResource().getString(
+                "message.requirement.create"));
         // Set the form to act immediately on user input. This is
         // necessary for the validation of the fields to occur immediately
         // when the input focus changes and not just on commit.
         form.setImmediate(true);
         final com.vaadin.ui.TextField name =
-                new com.vaadin.ui.TextField(getInstance().getResource().getString("general.name") + ":");
+                new com.vaadin.ui.TextField(getInstance().getResource()
+                .getString("general.name") + ":");
         form.addField("name", name);
         form.setFooter(new HorizontalLayout());
         // The Commit button calls form.commit().
@@ -388,11 +415,13 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         getMainWindow().addWindow(createWindow);
     }
 
-    private Form getRequirementForm(final Requirement r, final boolean edit, final Window createWindow) {
+    private Form getRequirementForm(final Requirement r, final boolean edit,
+            final Window createWindow) {
         // Create a form and use FormLayout as its layout.
         final Form form = new Form();
         // Set form caption and description texts
-        form.setCaption(edit ? "" : getInstance().getResource().getString("message.requirement.create"));
+        form.setCaption(edit ? "" : getInstance().getResource().getString(
+                "message.requirement.create"));
         // Set the form to act immediately on user input. This is
         // necessary for the validation of the fields to occur immediately
         // when the input focus changes and not just on commit.
@@ -400,30 +429,40 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         //Set field factory to create the fields of the form
         form.setFormFieldFactory(new FormFieldFactory() {
             @Override
-            public Field createField(Item item, Object propertyId, Component uiContext) {
+            public Field createField(Item item, Object propertyId,
+                    Component uiContext) {
                 // Identify the fields by their Property ID.
                 String pid = (String) propertyId;
                 if ("uniqueId".equals(pid)) {
-                    TextField textField = new TextField(getInstance().getResource().getString("general.unique.id") + ":");
+                    TextField textField =
+                            new TextField(getInstance().getResource()
+                            .getString("general.unique.id") + ":");
                     if (!edit) {
                         textField.addValidator(new Validator() {
                             @Override
-                            public void validate(Object value) throws InvalidValueException {
+                            public void validate(Object value)
+                                    throws InvalidValueException {
                                 if (!isValid(value)) {
-                                    throw new InvalidValueException("Invalid value: " + value);
+                                    throw new InvalidValueException(
+                                            "Invalid value: " + value);
                                 }
                             }
 
                             @Override
                             public boolean isValid(Object value) {
-                                HashMap<String, Object> parameters = new HashMap<String, Object>();
+                                HashMap<String, Object> parameters =
+                                        new HashMap<String, Object>();
                                 parameters.put("id", value);
                                 parameters.put("product",
                                         new ProjectJpaController(
-                                        DataBaseManager.getEntityManagerFactory()).findProject(currentProject.getId()));
-                                List<Object> result = DataBaseManager.createdQuery(
+                                        DataBaseManager
+                                        .getEntityManagerFactory())
+                                        .findProject(currentProject.getId()));
+                                List<Object> result =
+                                        DataBaseManager.createdQuery(
                                         "select r from Requirement r where "
-                                        + "r.uniqueId=:id and r.productId=:product", parameters);
+                                        + "r.uniqueId=:id and r.productId=:product",
+                                        parameters);
                                 if (result.isEmpty()) {
                                     return true;
                                 }
@@ -435,24 +474,32 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     return textField;
                 }
                 if ("description".equals(pid)) {
-                    TextArea textArea = new TextArea(getInstance().getResource().getString("general.description") + ":");
+                    TextArea textArea =
+                            new TextArea(getInstance().getResource()
+                            .getString("general.description") + ":");
                     textArea.setEnabled(true);
                     return textArea;
                 }
                 if ("notes".equals(pid)) {
-                    TextArea textArea = new TextArea(getInstance().getResource().getString("general.notes") + ":");
+                    TextArea textArea =
+                            new TextArea(getInstance().getResource()
+                            .getString("general.notes") + ":");
                     textArea.setEnabled(true);
                     return textArea;
                 }
-                if ("requirementTypeId".equals(pid)) {
+                if ("requirementType".equals(pid)) {
                     // Wrap them in a container for binding to a Select
                     final BeanItemContainer<RequirementType> requirementTypeContainer =
                             new BeanItemContainer<RequirementType>(RequirementType.class);
-                    for (Iterator<Object> it = DataBaseManager.namedQuery("RequirementType.findAll").iterator(); it.hasNext();) {
-                        requirementTypeContainer.addBean((RequirementType) it.next());
+                    for (Iterator<Object> it =
+                            DataBaseManager.namedQuery(
+                            "RequirementType.findAll").iterator(); it.hasNext();) {
+                        requirementTypeContainer.addBean(
+                                (RequirementType) it.next());
                     }
                     Select select = new Select(
-                            getInstance().getResource().getString("message.requirement.type") + ":",
+                            getInstance().getResource()
+                            .getString("message.requirement.type") + ":",
                             requirementTypeContainer);
                     // Show the RequirementType names in the select list
                     select.setItemCaptionPropertyId("name");
@@ -463,15 +510,18 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     if (!edit) {
                         select.addValidator(new Validator() {
                             @Override
-                            public void validate(Object value) throws InvalidValueException {
+                            public void validate(Object value)
+                                    throws InvalidValueException {
                                 if (!isValid(value)) {
-                                    throw new InvalidValueException("Invalid value: " + value);
+                                    throw new InvalidValueException(
+                                            "Invalid value: " + value);
                                 }
                             }
 
                             @Override
                             public boolean isValid(Object value) {
-                                return value != null && !value.toString().trim().isEmpty();
+                                return value != null
+                                        && !value.toString().trim().isEmpty();
                             }
                         });
                     }
@@ -493,8 +543,9 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         //Required fields
         fields.add("uniqueId");
         fields.add("description");
-        fields.add("requirementTypeId");
+        fields.add("requirementType");
         for (String field : fields) {
+            LOG.log(Level.INFO, "Marking field {0} as required...", field);
             form.getField(field).setRequired(true);
             form.getField(field).setRequiredError(
                     getInstance().getResource().getString(
@@ -513,13 +564,19 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             @Override
             public void buttonClick(ClickEvent event) {
                 HashMap<String, Object> parameters = new HashMap<String, Object>();
-                parameters.put("name", ((RequirementType) form.getField("requirementTypeId").getValue()).getName());
-                List result = DataBaseManager.namedQuery("RequirementType.findByName", parameters);
+                parameters.put("name",
+                        ((RequirementType) form.getField("requirementTypeId")
+                        .getValue()).getName());
+                List result =
+                        DataBaseManager.namedQuery("RequirementType.findByName",
+                        parameters);
                 RequirementType rt;
                 if (result.isEmpty()) {
                     //Create a new one
-                    rt = new RequirementType(form.getField("requirementTypeId").getValue().toString().trim());
-                    new RequirementTypeJpaController( DataBaseManager.getEntityManagerFactory()).create(rt);
+                    rt = new RequirementType(form.getField("requirementTypeId")
+                            .getValue().toString().trim());
+                    new RequirementTypeJpaController(
+                            DataBaseManager.getEntityManagerFactory()).create(rt);
                 } else {
                     rt = (RequirementType) result.get(0);
                 }
@@ -533,14 +590,22 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                             + "r.uniqueId=:id and "
                             + "r.productId.id=:productId", parameters);
                     reqs = new RequirementServer((Requirement) result.get(0));
-                    reqs.setDescription(form.getField("description").getValue().toString().trim());
-                    reqs.setNotes(form.getField("notes").getValue().toString().trim());
+                    reqs.setDescription(
+                            form.getField("description").getValue().toString()
+                            .trim());
+                    reqs.setNotes(form.getField("notes").getValue().toString()
+                            .trim());
                 } else {
                     reqs = new RequirementServer(
-                            form.getField("uniqueId").getValue().toString().trim(),
-                            form.getField("description").getValue().toString().trim(),
-                            new ProjectJpaController( DataBaseManager.getEntityManagerFactory()).findProject(currentProject.getId()),
-                            form.getField("notes").getValue().toString().trim(), rt.getId(), 1);
+                            form.getField("uniqueId").getValue().toString()
+                            .trim(),
+                            form.getField("description").getValue().toString()
+                            .trim(),
+                            new ProjectJpaController(
+                            DataBaseManager.getEntityManagerFactory())
+                            .findProject(currentProject.getId()),
+                            form.getField("notes").getValue().toString().trim(),
+                            rt.getId(), 1);
                 }
                 reqs.setRequirementType(rt);
                 if (createWindow != null) {
@@ -549,9 +614,11 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 try {
                     reqs.write2DB();
                 } catch (Exception ex) {
-                    Logger.getLogger(VMWeb.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                     getMainWindow().showNotification(
-                            getInstance().getResource().getString("message.requirement.create.failed"), ex.getLocalizedMessage(),
+                            getInstance().getResource()
+                            .getString("message.requirement.create.failed"),
+                            ex.getLocalizedMessage(),
                             Window.Notification.TYPE_ERROR_MESSAGE);
                 }
                 //Update view
@@ -586,10 +653,12 @@ public class VMWeb extends Application implements HttpServletRequestListener {
     private Component getProjectRequirementMainComponent(final ProjectServer p) {
         com.vaadin.ui.Panel panel = new com.vaadin.ui.Panel();
         panel.setContent(new VerticalLayout());
-        panel.addComponent(new Label(getInstance().getResource().getString("general.menu") + ":"));
+        panel.addComponent(new Label(getInstance().getResource()
+                .getString("general.menu") + ":"));
         com.vaadin.ui.Panel bpanel = new com.vaadin.ui.Panel();
         bpanel.setContent(new HorizontalLayout());
-        Button create = new Button(getInstance().getResource().getString("general.create"));
+        Button create = new Button(getInstance().getResource()
+                .getString("general.create"));
         create.setEnabled(loggedUser != null);
         create.addListener(new ClickListener() {
             @Override
@@ -597,7 +666,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 showRequirementForm();
             }
         });
-        Button export = new Button(getInstance().getResource().getString("message.export.requirement"));
+        Button export = new Button(getInstance().getResource()
+                .getString("message.export.requirement"));
         export.setEnabled(loggedUser != null);
         export.addListener(new ClickListener() {
             @Override
@@ -605,90 +675,110 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 //TODO
             }
         });
-        Button importer = new Button(getInstance().getResource().getString("general.import"));
+        Button importer = new Button(getInstance().getResource()
+                .getString("general.import"));
         importer.setEnabled(loggedUser != null);
         importer.addListener(new ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
                 Wizard wizard = new Wizard();
-                final com.vaadin.ui.Window wizardWindow = new com.vaadin.ui.Window();
+                final com.vaadin.ui.Window wizardWindow =
+                        new com.vaadin.ui.Window();
                 wizard.addStep(new WizardStep() {
                     final UploadManager um = new UploadManager();
                     final Upload upload = new Upload(
                             getInstance().getResource().getString(
                             "message.import.requirement.select.file"), um);
-                    final Upload.SucceededListener successListener = new Upload.SucceededListener() {
-                        @Override
-                        public void uploadSucceeded(Upload.SucceededEvent event) {
-                            if (upload != null) {
-                                upload.setEnabled(false);
-                                LOG.log(Level.FINE,
-                                        "Renaming uploaded file to: {0}", getFileName());
-                                File toImport = new File(um.getFile().getParentFile().getAbsolutePath()
-                                        + System.getProperty("file.separator") + getFileName());
-                                boolean rename = um.getFile().renameTo(toImport);
-                                if (rename && reqImportFilter.accept(toImport)) {
-                                    getMainWindow().showNotification(
-                                            getInstance().getResource().getString("message.file.upload.success"),
-                                            Window.Notification.TYPE_HUMANIZED_MESSAGE);
-                                    //Import
-                                    RequirementImporter ri = new RequirementImporter(
-                                            new ProjectJpaController(
-                                            DataBaseManager.getEntityManagerFactory()).findProject(p.getId()),
-                                            toImport);
-                                    try {
-                                        //Show import approval screen
-                                        showRequirementImportApprovalWindow(ri.importFile());
-                                    } catch (UnsupportedOperationException ex) {
-                                        LOG.log(Level.SEVERE, null, ex);
-                                        getMainWindow().showNotification(
-                                                ex.getLocalizedMessage(),
-                                                Window.Notification.TYPE_HUMANIZED_MESSAGE);
-                                    } catch (RequirementImportException ex) {
-                                        LOG.log(Level.SEVERE, null, ex);
-                                        getMainWindow().showNotification(
-                                                ex.getLocalizedMessage(),
-                                                Window.Notification.TYPE_HUMANIZED_MESSAGE);
-                                    } catch (Exception ex) {
-                                        LOG.log(Level.SEVERE, null, ex);
-                                        getMainWindow().showNotification(
-                                                ex.getLocalizedMessage(),
-                                                Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                    final Upload.SucceededListener successListener =
+                            new Upload.SucceededListener() {
+                                @Override
+                                public void uploadSucceeded(Upload.SucceededEvent event) {
+                                    if (upload != null) {
+                                        upload.setEnabled(false);
+                                        LOG.log(Level.FINE,
+                                                "Renaming uploaded file to: {0}",
+                                                getFileName());
+                                        File toImport =
+                                                new File(um.getFile().getParentFile()
+                                                .getAbsolutePath()
+                                                + System.getProperty("file.separator")
+                                                + getFileName());
+                                        boolean rename = um.getFile().renameTo(toImport);
+                                        if (rename && reqImportFilter.accept(toImport)) {
+                                            getMainWindow().showNotification(
+                                                    getInstance().getResource()
+                                                    .getString(
+                                                    "message.file.upload.success"),
+                                                    Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                            //Import
+                                            RequirementImporter ri = new RequirementImporter(
+                                                    new ProjectJpaController(
+                                                    DataBaseManager
+                                                    .getEntityManagerFactory())
+                                                    .findProject(p.getId()),
+                                                    toImport);
+                                            try {
+                                                //Show import approval screen
+                                                showRequirementImportApprovalWindow(
+                                                        ri.importFile());
+                                            } catch (UnsupportedOperationException ex) {
+                                                LOG.log(Level.SEVERE, null, ex);
+                                                getMainWindow().showNotification(
+                                                        ex.getLocalizedMessage(),
+                                                        Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                            } catch (RequirementImportException ex) {
+                                                LOG.log(Level.SEVERE, null, ex);
+                                                getMainWindow().showNotification(
+                                                        ex.getLocalizedMessage(),
+                                                        Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                            } catch (Exception ex) {
+                                                LOG.log(Level.SEVERE, null, ex);
+                                                getMainWindow().showNotification(
+                                                        ex.getLocalizedMessage(),
+                                                        Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                            }
+                                            //Cleanup
+                                            toImport.delete();
+                                            //Update view
+                                            showRequirementSpecWindow();
+                                        } else {
+                                            getMainWindow().showNotification(
+                                                    getInstance().getResource()
+                                                    .getString(
+                                                    "message.file.upload.unsupportedformat"),
+                                                    Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                        }
                                     }
-                                    //Cleanup
-                                    toImport.delete();
-                                    //Update view
-                                    showRequirementSpecWindow();
-                                } else {
-                                    getMainWindow().showNotification(
-                                            getInstance().getResource().getString("message.file.upload.unsupportedformat"),
-                                            Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                    getMainWindow().removeWindow(wizardWindow);
+                                    LOG.log(Level.FINE, "Imported file:{0}",
+                                            um.getFile().getAbsolutePath());
                                 }
-                            }
-                            getMainWindow().removeWindow(wizardWindow);
-                            LOG.log(Level.FINE, "Imported file:{0}", um.getFile().getAbsolutePath());
-                        }
-                    };
-                    final Upload.FailedListener failureListener = new Upload.FailedListener() {
-                        @Override
-                        public void uploadFailed(Upload.FailedEvent event) {
-                            getMainWindow().showNotification(
-                                    VMWeb.getInstance().getResource().getString(
-                                    "message.unable.to.load.file"), Window.Notification.TYPE_ERROR_MESSAGE);
-                        }
-                    };
+                            };
+                    final Upload.FailedListener failureListener =
+                            new Upload.FailedListener() {
+                                @Override
+                                public void uploadFailed(Upload.FailedEvent event) {
+                                    getMainWindow().showNotification(
+                                            VMWeb.getInstance().getResource().getString(
+                                            "message.unable.to.load.file"),
+                                            Window.Notification.TYPE_ERROR_MESSAGE);
+                                }
+                            };
 
                     @Override
                     public String getCaption() {
-                        return getInstance().getResource().getString("message.import.requirement.select.file");
+                        return getInstance().getResource().getString(
+                                "message.import.requirement.select.file");
                     }
 
                     @Override
                     public Component getContent() {
                         upload.addListener((Upload.SucceededListener) um);
-                        upload.addListener((Upload.SucceededListener) successListener);
+                        upload.addListener(
+                                (Upload.SucceededListener) successListener);
                         upload.addListener((Upload.FailedListener) um);
-                        upload.addListener((Upload.FailedListener) failureListener);
+                        upload.addListener(
+                                (Upload.FailedListener) failureListener);
                         return upload;
                     }
 
@@ -696,7 +786,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     public boolean onAdvance() {
                         if (!um.isSuccess()) {
                             getMainWindow().showNotification(
-                                    getInstance().getResource().getString("message.missing.file"),
+                                    getInstance().getResource()
+                                    .getString("message.missing.file"),
                                     Window.Notification.TYPE_ERROR_MESSAGE);
                         }
                         return um.isSuccess();
@@ -728,7 +819,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         return panel;
     }
 
-    private void showRequirementImportApprovalWindow(List<Requirement> requirements) {
+    private void showRequirementImportApprovalWindow(
+            List<Requirement> requirements) {
         VerticalLayout mainLayout = new VerticalLayout();
         final HashMap<String, Requirement> map = new HashMap<String, Requirement>();
         mainLayout.setSizeUndefined();
@@ -750,7 +842,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             Item reqItem = table.addItem(req.getUniqueId());
             reqItem.getItemProperty("ID").setValue(req.getUniqueId());
             reqItem.getItemProperty(getInstance().getResource().getString(
-                    "message.requirement.type")).setValue(req.getRequirementType().getName());
+                    "message.requirement.type")).setValue(
+                    req.getRequirementType().getName());
             reqItem.getItemProperty(getInstance().getResource().getString(
                     "general.description")).setValue(req.getDescription());
             reqItem.getItemProperty(getInstance().getResource().getString(
@@ -764,7 +857,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         table.setPageLength(25);
         //Add Multiple selection controls
         HorizontalLayout selection = new HorizontalLayout();
-        Button selectAll = new Button(getInstance().getResource().getString("general.selectall"));
+        Button selectAll = new Button(getInstance().getResource()
+                .getString("general.selectall"));
         selectAll.addListener(new ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
@@ -773,21 +867,27 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     Item item = table.getItem(obj);
                     item.getItemProperty(getInstance().getResource().getString(
                             "general.import")).setValue(
-                            new CustomCheckBox((String) item.getItemProperty("ID").getValue(), null, true));
+                            new CustomCheckBox(
+                            (String) item.getItemProperty("ID").getValue(),
+                            null, true));
                 }
             }
         });
         selection.addComponent(selectAll);
-        Button unselectAll = new Button(getInstance().getResource().getString("general.unselectall"));
+        Button unselectAll = new Button(getInstance().getResource()
+                .getString("general.unselectall"));
         unselectAll.addListener(new ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
-                for (Iterator<?> it = table.getItemIds().iterator(); it.hasNext();) {
+                for (Iterator<?> it = table.getItemIds().iterator();
+                        it.hasNext();) {
                     Object obj = it.next();
                     Item item = table.getItem(obj);
                     item.getItemProperty(getInstance().getResource().getString(
                             "general.import")).setValue(
-                            new CustomCheckBox((String) item.getItemProperty("ID").getValue(), null, false));
+                            new CustomCheckBox(
+                            (String) item.getItemProperty("ID").getValue(),
+                            null, false));
                 }
             }
         });
@@ -796,7 +896,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         tableWindow.addComponent(table);
         //Setup the processing menu
         HorizontalLayout processing = new HorizontalLayout();
-        Button importButton = new Button(getInstance().getResource().getString("general.import"));
+        Button importButton = new Button(getInstance().getResource()
+                .getString("general.import"));
         importButton.addListener(new ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
@@ -810,34 +911,42 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     List<Object> result = DataBaseManager.createdQuery(
                             "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId "
                             + "and r.productId.id = :productId", parameters);
-                    if (result.isEmpty() && ((Boolean) ((CustomCheckBox) item.getItemProperty(getInstance().getResource().getString(
+                    if (result.isEmpty()
+                            && ((Boolean) ((CustomCheckBox) item
+                            .getItemProperty(getInstance().getResource().getString(
                             "general.import")).getValue()).getValue())) {
                         try {
-                            new RequirementJpaController( DataBaseManager.getEntityManagerFactory()).create(
+                            new RequirementJpaController(
+                                    DataBaseManager.getEntityManagerFactory())
+                                    .create(
                                     map.get(itemId));
                         } catch (PreexistingEntityException ex) {
-                            Logger.getLogger(VMWeb.class.getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         } catch (Exception ex) {
-                            Logger.getLogger(VMWeb.class.getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         }
                     } else {
-                        LOG.log(Level.WARNING, "Not importing requirement with ID: {0}", id);
+                        LOG.log(Level.WARNING,
+                                "Not importing requirement with ID: {0}", id);
                     }
                 }
                 getMainWindow().removeWindow(tableWindow);
                 getMainWindow().showNotification(
-                        getInstance().getResource().getString("message.requirement.import.success"),
+                        getInstance().getResource().getString(
+                        "message.requirement.import.success"),
                         Window.Notification.TYPE_HUMANIZED_MESSAGE);
                 //Refresh screen
                 showRequirementSpecWindow();
             }
         });
         processing.addComponent(importButton);
-        Button cancel = new Button(getInstance().getResource().getString("general.cancel"));
+        Button cancel = new Button(getInstance().getResource()
+                .getString("general.cancel"));
         cancel.addListener(new ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
-                getMainWindow().removeWindow(tableWindow);
+                getMainWindow()
+                        .removeWindow(tableWindow);
             }
         });
         processing.addComponent(importButton);
@@ -859,19 +968,24 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         tree.addListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
-                if (tree.getValue() != null && !tree.getValue().toString().trim().isEmpty()
-                        && tree.getValue().toString().startsWith(requirementPrefix)) {
-                    String id = tree.getValue().toString().substring(requirementPrefix.length(), tree.getValue().toString().length());
+                if (tree.getValue() != null && !tree.getValue()
+                        .toString().trim().isEmpty()
+                        && tree.getValue().toString()
+                        .startsWith(requirementPrefix)) {
+                    String id = tree.getValue().toString()
+                            .substring(requirementPrefix.length(),
+                            tree.getValue().toString().length());
                     HashMap<String, Object> parameters = new HashMap<String, Object>();
                     parameters.put("id", id);
-                    parameters.put("productId", currentProject.getId());
+                    parameters.put("projectId", currentProject.getId());
                     List<Object> result = DataBaseManager.createdQuery(
                             "SELECT r FROM Requirement r WHERE "
                             + "r.uniqueId=:id and "
-                            + "r.productId.id=:productId", parameters);
+                            + "r.project.id=:projectId", parameters);
                     //Show the Values
                     Form form = getRequirementForm(result.isEmpty()
-                            ? new Requirement() : (Requirement) result.get(0), true);
+                            ? new Requirement() : (Requirement) result.get(0),
+                            true);
                     setRightComponent(form);
                     updateRightComponent();
                 }
@@ -898,7 +1012,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     return;
                 }
 
-                TreeTargetDetails target = (TreeTargetDetails) event.getTargetDetails();
+                TreeTargetDetails target =
+                        (TreeTargetDetails) event.getTargetDetails();
                 // Get ids of the dragged item and the target item
                 Object sourceItemId = t.getData("itemId");
                 Object targetItemId = target.getItemIdOver();
@@ -909,7 +1024,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 // On which side of the target the item was dropped
                 VerticalDropLocation location = target.getDropLocation();
 
-                HierarchicalContainer container = (HierarchicalContainer) tree.getContainerDataSource();
+                HierarchicalContainer container =
+                        (HierarchicalContainer) tree.getContainerDataSource();
 
                 // Drop right on an item -> make it a child
                 if (location == VerticalDropLocation.MIDDLE) {
@@ -925,15 +1041,18 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                         //TODO: Make DB changes
                     } else {
                         if (targetItemId.toString().startsWith(requirementPrefix)
-                                && sourceItemId.toString().startsWith(requirementPrefix)) {
+                                && sourceItemId.toString()
+                                .startsWith(requirementPrefix)) {
                             getMainWindow().showNotification(
-                                    getInstance().getResource().getString("message.requirement.dnd.invalid"),
+                                    getInstance().getResource()
+                                    .getString("message.requirement.dnd.invalid"),
                                     Window.Notification.TYPE_ERROR_MESSAGE);
                         }
                         if (targetItemId.toString().startsWith(requirementPrefix)
                                 && sourceItemId.toString().startsWith(folderPrefix)) {
                             getMainWindow().showNotification(
-                                    getInstance().getResource().getString("message.section.dnd.invalid"),
+                                    getInstance().getResource()
+                                    .getString("message.section.dnd.invalid"),
                                     Window.Notification.TYPE_ERROR_MESSAGE);
                         }
                     }
@@ -948,7 +1067,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                         //TODO: Make DB changes
                     } else {
                         getMainWindow().showNotification(
-                                getInstance().getResource().getString("message.requirement.dnd.invalid"),
+                                getInstance().getResource()
+                                .getString("message.requirement.dnd.invalid"),
                                 Window.Notification.TYPE_ERROR_MESSAGE);
                     }
                 } // Drop below another item -> make it next
@@ -961,7 +1081,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                         //TODO: Make DB changes
                     } else {
                         getMainWindow().showNotification(
-                                getInstance().getResource().getString("message.requirement.dnd.invalid"),
+                                getInstance().getResource()
+                                .getString("message.requirement.dnd.invalid"),
                                 Window.Notification.TYPE_ERROR_MESSAGE);
                     }
                 }
@@ -981,9 +1102,11 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 getMainWindow().addComponent(menu);
                 if (event.getSource() == tree) {
                     Object itemId = event.getItemId();
-                    if (itemId != null && itemId.toString().startsWith(specPrefix)) {
+                    if (itemId != null && itemId.toString()
+                            .startsWith(specPrefix)) {
                         final ContextMenuItem createItem = menu.addItem(
-                                getInstance().getResource().getString("menu.requirement.create.section"));
+                                getInstance().getResource()
+                                .getString("menu.requirement.create.section"));
                         menu.addListener(new ContextMenu.ClickListener() {
                             @Override
                             public void contextItemClick(ContextMenu.ClickEvent event) {
@@ -999,9 +1122,11 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                         if (ItemClickEvent.BUTTON_RIGHT == event.getButton()) {
                             menu.show(event.getClientX(), event.getClientY());
                         }
-                    } else if (itemId != null && itemId.toString().startsWith(folderPrefix)) {
+                    } else if (itemId != null && itemId.toString()
+                            .startsWith(folderPrefix)) {
                         final ContextMenuItem createItem = menu.addItem(
-                                getInstance().getResource().getString("menu.requirement.create.spec"));
+                                getInstance().getResource()
+                                .getString("menu.requirement.create.spec"));
                         menu.addListener(new ContextMenu.ClickListener() {
                             @Override
                             public void contextItemClick(ContextMenu.ClickEvent event) {
@@ -1017,27 +1142,34 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                         if (ItemClickEvent.BUTTON_RIGHT == event.getButton()) {
                             menu.show(event.getClientX(), event.getClientY());
                         }
-                    } else if (itemId != null && itemId.toString().startsWith(requirementPrefix)) {
+                    } else if (itemId != null && itemId.toString()
+                            .startsWith(requirementPrefix)) {
                         menu.addListener(new ContextMenu.ClickListener() {
                             @Override
                             public void contextItemClick(ContextMenu.ClickEvent event) {
                                 // Get reference to clicked item
                                 ContextMenuItem clickedItem = event.getClickedItem();
                                 if (clickedItem.getName().equals(
-                                        getInstance().getResource().getString("menu.requirement.copy"))) {
+                                        getInstance().getResource()
+                                        .getString("menu.requirement.copy"))) {
                                     getMainWindow().showNotification(clickedItem.getName());
                                 } else if (clickedItem.getName().equals(
-                                        getInstance().getResource().getString("menu.requirement.delete"))) {
+                                        getInstance().getResource()
+                                        .getString("menu.requirement.delete"))) {
                                     getMainWindow().showNotification(clickedItem.getName());
                                 } else if (clickedItem.getName().equals(
-                                        getInstance().getResource().getString("menu.requirement.create.section"))) {
+                                        getInstance().getResource()
+                                        .getString("menu.requirement.create.section"))) {
                                     getMainWindow().showNotification(clickedItem.getName());
                                 }
                             }
                         });
-                        menu.addItem(getInstance().getResource().getString("menu.requirement.create.section"));
-                        menu.addItem(getInstance().getResource().getString("menu.requirement.copy"));
-                        menu.addItem(getInstance().getResource().getString("menu.requirement.delete"));
+                        menu.addItem(getInstance().getResource()
+                                .getString("menu.requirement.create.section"));
+                        menu.addItem(getInstance().getResource()
+                                .getString("menu.requirement.copy"));
+                        menu.addItem(getInstance().getResource()
+                                .getString("menu.requirement.delete"));
                         menu.setEnabled(true);
                         if (ItemClickEvent.BUTTON_RIGHT == event.getButton()) {
                             menu.show(event.getClientX(), event.getClientY());
@@ -1048,18 +1180,23 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         });
         Item reqs = tree.addItem(folderPrefix + "Requirements");
         tree.setChildrenAllowed("general.requirement", true);
-        reqs.getItemProperty("caption").setValue(getInstance().getResource().getString("general.requirement"));
+        reqs.getItemProperty("caption").setValue(getInstance().getResource()
+                .getString("general.requirement"));
         //Populate the tree
-        for (Iterator<Requirement> it = p.getRequirementList().iterator(); it.hasNext();) {
+        List<Requirement> requirements = p.getRequirementList();
+        LOG.log(Level.INFO, "Requirements found: {0}", requirements.size());
+        for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
             Requirement req = (Requirement) it.next();
             Item item = tree.addItem(requirementPrefix + req.getUniqueId());
             item.getItemProperty("caption").setValue(req.getUniqueId());
             //Make it a leaf
             tree.setChildrenAllowed(requirementPrefix + req.getUniqueId(), false);
             //Set the parent
-            tree.setParent(requirementPrefix + req.getUniqueId(), "general.requirement");
+            tree.setParent(requirementPrefix + req.getUniqueId(),
+                    "general.requirement");
             //Add icon
-            item.getItemProperty("icon").setValue(new ThemeResource("icons/Papermart/Text-Edit.png"));
+            item.getItemProperty("icon").setValue(
+                    new ThemeResource("icons/Papermart/Text-Edit.png"));
         }
         tree.setSizeFull();
         panel.addComponent(tree);
@@ -1069,15 +1206,18 @@ public class VMWeb extends Application implements HttpServletRequestListener {
 
     private Component getProjectTreeComponent() {
         com.vaadin.ui.Panel panel = new com.vaadin.ui.Panel();
-        final Tree tree = new Tree(getInstance().getResource().getString("general.project.plural"));
+        final Tree tree = new Tree(getInstance().getResource()
+                .getString("general.project.plural"));
         tree.setImmediate(true);
         tree.addListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
-                if (tree.getValue() != null && !tree.getValue().toString().isEmpty()) {
+                if (tree.getValue() != null && !tree.getValue()
+                        .toString().isEmpty()) {
                     HashMap<String, Object> parameters = new HashMap<String, Object>();
                     parameters.put("name", tree.getValue());
-                    List<Object> result = DataBaseManager.namedQuery("Project.findByName", parameters);
+                    List<Object> result = DataBaseManager.namedQuery(
+                            "Project.findByName", parameters);
                     if (!result.isEmpty()) {
                         currentProject = new ProjectServer((Project) result.get(0));
                         try {
@@ -1090,6 +1230,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             }
         });
         List<Object> result = DataBaseManager.namedQuery("Project.findAll");
+        LOG.log(Level.INFO, "Projects found: {0}", result.size());
         for (Iterator<Object> it = result.iterator(); it.hasNext();) {
             Project product = (Project) it.next();
             tree.addItem(product.getName());
@@ -1110,6 +1251,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 .setCommand(new com.vaadin.ui.MenuBar.Command() {
             @Override
             public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+
                 showLoginDialog();
             }
         }).createVMMenuItem();//Need admin access
@@ -1136,7 +1278,9 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 .setName("message.admin.userProfile")
                 .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
             @Override
-            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+            public void menuSelected(
+                    com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+
                 showUserAdminWindow(false);
             }
         }).setLoggedIn(true).createVMMenuItem();
@@ -1147,6 +1291,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 .setCommand(new com.vaadin.ui.MenuBar.Command() {
             @Override
             public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+
                 showProjectCreationWindow();
             }
         }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
@@ -1155,7 +1300,9 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 .setGroupName("menu.requirement").setName("menu.requirement")
                 .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
             @Override
-            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+            public void menuSelected(
+                    com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+
                 showRequirementSpecWindow();
             }
         }).setSelected(true).createVMMenuItem();
@@ -1164,61 +1311,70 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 .setGroupName("menu.requirement").setName("menu.requirement.spec.level")
                 .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
             @Override
-            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+            public void menuSelected(
+                    com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+
                 showRequirementSpecLevelCreationWindow();
             }
-        }).setLoggedIn(true).setSelected(true).setAdmin(true).createVMMenuItem();
+        })
+                .setLoggedIn(true).setSelected(true).setAdmin(true).createVMMenuItem();
         addItem(item);
         item = new VMMenuItemBuilder().setIndex(i += 1000)
                 .setGroupName("menu.test").setName("menu.test")
                 .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
             @Override
-            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+            public void menuSelected(
+                    com.vaadin.ui.MenuBar.MenuItem selectedItem) {
                 //TODO
             }
         }).setSelected(true).createVMMenuItem();
         addItem(item);
         item = new VMMenuItemBuilder().setIndex(i += 1000)
                 .setGroupName("menu.test.execution").setName("menu.test.execution")
-                .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
-            @Override
-            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
-                //TODO
-            }
-        }).setSelected(true).createVMMenuItem();
+                .setIcon(smallIcon).setCommand(
+                new com.vaadin.ui.MenuBar.Command() {
+                    @Override
+                    public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+                        //TODO
+                    }
+                }).setSelected(true).createVMMenuItem();
         addItem(item);
         item = new VMMenuItemBuilder().setIndex(i += 1000)
                 .setGroupName("menu.test.report").setName("menu.test.report")
                 .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
             @Override
-            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+            public void menuSelected(
+                    com.vaadin.ui.MenuBar.MenuItem selectedItem) {
                 //TODO
             }
         }).setSelected(true).createVMMenuItem();
         addItem(item);
         item = new VMMenuItemBuilder().setIndex(i += 1000)
                 .setGroupName("menu.user").setName("menu.user")
-                .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
-            @Override
-            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
-                //TODO
-            }
-        }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
+                .setIcon(smallIcon).setCommand(
+                new com.vaadin.ui.MenuBar.Command() {
+                    @Override
+                    public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+                        //TODO
+                    }
+                }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
         addItem(item);
         item = new VMMenuItemBuilder().setIndex(i += 1000)
                 .setGroupName("menu.admin").setName("message.admin.userAdmin")
-                .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
-            @Override
-            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
-                showUserAdminWindow(true);
-            }
-        }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
+                .setIcon(smallIcon).setCommand(
+                new com.vaadin.ui.MenuBar.Command() {
+                    @Override
+                    public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+                        showUserAdminWindow(true);
+                    }
+                }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
         addItem(item);
         item = new VMMenuItemBuilder().setIndex(i += 1000)
                 .setGroupName("menu.admin").setName("message.admin.groupAdmin")
                 .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
             @Override
-            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+            public void menuSelected(
+                    com.vaadin.ui.MenuBar.MenuItem selectedItem) {
                 showGroupAdminWindow();
             }
         }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
@@ -1253,13 +1409,15 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         final Form form = new Form();
         final SpecLevel sl = new SpecLevel();
         // Set form caption and description texts
-        form.setCaption(getInstance().getResource().getString("menu.requirement.create.spec.level"));
+        form.setCaption(getInstance().getResource()
+                .getString("menu.requirement.create.spec.level"));
         // Set the form to act immediately on user input. This is
         // necessary for the validation of the fields to occur immediately
         // when the input focus changes and not just on commit.
         form.setImmediate(true);
         final com.vaadin.ui.TextField name =
-                new com.vaadin.ui.TextField(getInstance().getResource().getString("general.name") + ":");
+                new com.vaadin.ui.TextField(getInstance()
+                .getResource().getString("general.name") + ":");
         form.addField("name", name);
         // Create a bean item that is bound to the bean.
         sl.setName("");
@@ -1282,24 +1440,33 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         //Set field factory to create the fields of the form
         form.setFormFieldFactory(new FormFieldFactory() {
             @Override
-            public Field createField(Item item, Object propertyId, Component uiContext) {
+            public Field createField(Item item, Object propertyId,
+                    Component uiContext) {
                 // Identify the fields by their Property ID.
                 String pid = (String) propertyId;
                 if ("name".equals(pid)) {
-                    TextField textField = new TextField(getInstance().getResource().getString("general.name") + ":");
+                    TextField textField = new TextField(getInstance()
+                            .getResource().getString("general.name") + ":");
                     textField.addValidator(new Validator() {
                         @Override
-                        public void validate(Object value) throws InvalidValueException {
+                        public void validate(Object value)
+                                throws InvalidValueException {
                             if (!isValid(value)) {
-                                throw new InvalidValueException("Invalid value: " + value);
+                                throw new InvalidValueException(
+                                        "Invalid value: " + value);
                             }
                         }
 
                         @Override
                         public boolean isValid(Object value) {
-                            for (Iterator<SpecLevel> it = new SpecLevelJpaController( DataBaseManager.getEntityManagerFactory()).findSpecLevelEntities().iterator(); it.hasNext();) {
+                            for (Iterator<SpecLevel> it =
+                                    new SpecLevelJpaController(
+                                    DataBaseManager.getEntityManagerFactory())
+                                    .findSpecLevelEntities().iterator();
+                                    it.hasNext();) {
                                 SpecLevel sl = it.next();
-                                if (sl.getName().equals(form.getField("name").getValue().toString())) {
+                                if (sl.getName().equals(form.getField("name")
+                                        .getValue().toString())) {
                                     return false;
                                 }
                             }
@@ -1309,7 +1476,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     textField.setEnabled(true);
                     return textField;
                 } else if ("description".equals(pid)) {
-                    TextArea textArea = new TextArea(getInstance().getResource().getString("general.description") + ":");
+                    TextArea textArea = new TextArea(getInstance()
+                            .getResource().getString("general.description") + ":");
                     textArea.setEnabled(true);
                     return textArea;
                 } else {
@@ -1327,9 +1495,11 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             @Override
             public void buttonClick(ClickEvent event) {
                 try {
-                    new SpecLevelJpaController( DataBaseManager.getEntityManagerFactory()).create(sl);
+                    new SpecLevelJpaController(
+                            DataBaseManager.getEntityManagerFactory())
+                            .create(sl);
                 } catch (Exception ex) {
-                    Logger.getLogger(VMWeb.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 } finally {
                     if (createWindow != null) {
                         getMainWindow().removeWindow(createWindow);
@@ -1363,8 +1533,10 @@ public class VMWeb extends Application implements HttpServletRequestListener {
 
     private void showRequirementSpecWindow() {
         //Recreate the ProjectServer to make sure we have the latest info from database
-        setLeftComponent(getProjectRequirementTreeComponent(new ProjectServer(currentProject)));
-        setRightComponent(getProjectRequirementMainComponent(new ProjectServer(currentProject)));
+        setLeftComponent(getProjectRequirementTreeComponent(
+                new ProjectServer(currentProject)));
+        setRightComponent(getProjectRequirementMainComponent(
+                new ProjectServer(currentProject)));
         try {
             showMainWindow();
         } catch (VMException ex) {
@@ -1377,12 +1549,15 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         final Form form = new Form();
         form.getLayout().addComponent(logo);
         form.getLayout().addComponent(new com.vaadin.ui.Label(
-                getInstance().getResource().getString("general.provide.info") + ":"));
+                getInstance().getResource()
+                .getString("general.provide.info") + ":"));
         final com.vaadin.ui.TextField name =
-                new com.vaadin.ui.TextField(getInstance().getResource().getString("general.name") + ":");
+                new com.vaadin.ui.TextField(getInstance().getResource()
+                .getString("general.name") + ":");
         form.addField("name", name);
         final com.vaadin.ui.TextArea notes =
-                new com.vaadin.ui.TextArea(getInstance().getResource().getString("general.notes") + ":");
+                new com.vaadin.ui.TextArea(getInstance().getResource()
+                .getString("general.notes") + ":");
         form.addField("notes", notes);
         //Used for validation purposes
         final com.vaadin.ui.Button commit = new com.vaadin.ui.Button("Submit",
@@ -1420,9 +1595,12 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         creation.center();
         creation.setWidth(logo.getWidth(), logo.getWidthUnits());
         WebApplicationContext context = (WebApplicationContext) getContext();
-        creation.setWidth(getImageDim(context.getHttpSession().getServletContext().getRealPath(
-                "/VAADIN/themes/vm") + System.getProperty("file.separator") + "icons"
-                + System.getProperty("file.separator") + "vm_logo.png").width + 30,
+        creation.setWidth(getImageDim(context.getHttpSession()
+                .getServletContext().getRealPath(
+                "/VAADIN/themes/vm") + System.getProperty("file.separator")
+                + "icons"
+                + System.getProperty("file.separator")
+                + "vm_logo.png").width + 30,
                 logo.getWidthUnits());
         getMainWindow().addWindow(creation);
     }
@@ -1442,12 +1620,14 @@ public class VMWeb extends Application implements HttpServletRequestListener {
     }
 
     @Override
-    public void onRequestStart(HttpServletRequest request, HttpServletResponse response) {
+    public void onRequestStart(HttpServletRequest request,
+            HttpServletResponse response) {
         VMWeb.setInstance(this);
     }
 
     @Override
-    public void onRequestEnd(HttpServletRequest request, HttpServletResponse response) {
+    public void onRequestEnd(HttpServletRequest request,
+            HttpServletResponse response) {
         threadLocal.remove();
     }
 
@@ -1456,13 +1636,16 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         ArrayList<String> locales = new ArrayList<String>();
         ResourceBundle lrb = ResourceBundle.getBundle(
                 "com.validation.manager.resources.Locale", Locale.getDefault());
-        locales.addAll(Arrays.asList(lrb.getString("AvailableLocales").split(",")));
+        locales.addAll(Arrays.asList(
+                lrb.getString("AvailableLocales").split(",")));
         for (Iterator<String> it = locales.iterator(); it.hasNext();) {
             String tempLocale = it.next();
             languages.addItem(tempLocale);
-            languages.setItemCaption(tempLocale, lrb.getString("Locale." + tempLocale));
+            languages.setItemCaption(tempLocale,
+                    lrb.getString("Locale." + tempLocale));
             try {
-                FileResource flagIcon = getFlagIcon(tempLocale.isEmpty() ? "us" : tempLocale);
+                FileResource flagIcon =
+                        getFlagIcon(tempLocale.isEmpty() ? "us" : tempLocale);
                 languages.setItemIcon(tempLocale, flagIcon);
             } catch (IOException ex) {
                 LOG.log(Level.SEVERE, null, ex);
@@ -1478,17 +1661,21 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             if (code.contains("_")) {
                 String newCode = code.substring(code.lastIndexOf('_') + 1);
                 Logger.getLogger(VMWeb.class.getSimpleName()).log(Level.FINE,
-                        "Converting code from: {0} to {1}!", new Object[]{code, newCode});
+                        "Converting code from: {0} to {1}!",
+                        new Object[]{code, newCode});
                 code = newCode;
             }
             Logger.getLogger(VMWeb.class.getSimpleName()).log(Level.FINE,
                     "Requested icon for code: {0}", code);
             WebApplicationContext context = (WebApplicationContext) getContext();
-            File iconsFolder = new File(context.getHttpSession().getServletContext().getRealPath(
-                    "/VAADIN/themes/vm") + System.getProperty("file.separator") + "icons"
+            File iconsFolder = new File(context.getHttpSession()
+                    .getServletContext().getRealPath(
+                    "/VAADIN/themes/vm") + System.getProperty("file.separator")
+                    + "icons"
                     + System.getProperty("file.separator") + "flags");
             File tempIcon = new File(iconsFolder.getAbsolutePath()
-                    + System.getProperty("file.separator") + code.toLowerCase() + ".png");
+                    + System.getProperty("file.separator") + code.toLowerCase()
+                    + ".png");
             if (tempIcon.exists()) {
                 Logger.getLogger(VMWeb.class.getSimpleName()).log(Level.FINE,
                         "Found icon for code: {0}!", code);
@@ -1555,9 +1742,12 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         lang.setModal(true);
         lang.center();
         WebApplicationContext context = (WebApplicationContext) getContext();
-        lang.setWidth(getImageDim(context.getHttpSession().getServletContext().getRealPath(
-                "/VAADIN/themes/vm") + System.getProperty("file.separator") + "icons"
-                + System.getProperty("file.separator") + "vm_logo.png").width + 50,
+        lang.setWidth(getImageDim(context.getHttpSession()
+                .getServletContext().getRealPath(
+                "/VAADIN/themes/vm") + System.getProperty("file.separator")
+                + "icons"
+                + System.getProperty("file.separator") + "vm_logo.png").width
+                + 50,
                 logo.getWidthUnits());
         getMainWindow().addWindow(lang);
     }
@@ -1569,7 +1759,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         if (iter.hasNext()) {
             ImageReader reader = iter.next();
             try {
-                ImageInputStream stream = new FileImageInputStream(new File(path));
+                ImageInputStream stream = new FileImageInputStream(
+                        new File(path));
                 reader.setInput(stream);
                 int width = reader.getWidth(reader.getMinIndex());
                 int height = reader.getHeight(reader.getMinIndex());
@@ -1611,7 +1802,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
 
             @Override
             public void click(MouseEvents.ClickEvent event) {
-                //Do nothing. Based on https://vaadin.com/es/forum/-/message_boards/view_message/359139
+                //Do nothing. 
+                //Based on https://vaadin.com/es/forum/-/message_boards/view_message/359139
             }
         });
 
@@ -1681,10 +1873,12 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     loc = Locale.getDefault();
                 }
                 setLocale(loc);
-                languages.setCaption(getInstance().getResource().getString("general.language") + ":");
+                languages.setCaption(getInstance().getResource()
+                        .getString("general.language") + ":");
             }
         });
-        languages.setCaption(getInstance().getResource().getString("general.language") + ":");
+        languages.setCaption(getInstance().getResource()
+                .getString("general.language") + ":");
         languages.setValue(getLocale().getLanguage());
         getMainWindow().addComponent(logo);
         getMainWindow().addComponent(languages);
@@ -1741,22 +1935,28 @@ public class VMWeb extends Application implements HttpServletRequestListener {
     private void showLoginDialog() {
         final com.vaadin.ui.Window loginWindow = new com.vaadin.ui.Window();
         final Form form = new Form();
-        form.setCaption(getInstance().getResource().getString("window.connection") + ":");
+        form.setCaption(getInstance().getResource()
+                .getString("window.connection") + ":");
         com.vaadin.ui.TextField username =
-                new com.vaadin.ui.TextField(getInstance().getResource().getString("general.username") + ":");
+                new com.vaadin.ui.TextField(getInstance().getResource()
+                .getString("general.username") + ":");
         PasswordField password =
-                new PasswordField(getInstance().getResource().getString("general.password") + ":");
+                new PasswordField(getInstance().getResource()
+                .getString("general.password") + ":");
         form.addField("username", username);
         form.addField("password", password);
         form.getField("username").setRequired(true);
         form.getField("username").focus();
-        form.getField("username").setRequiredError(getInstance().getResource().getString("message.missing.username"));
+        form.getField("username").setRequiredError(getInstance().getResource()
+                .getString("message.missing.username"));
         form.getField("password").setRequired(true);
-        form.getField("password").setRequiredError(getInstance().getResource().getString("message.missing.password"));
+        form.getField("password").setRequiredError(getInstance().getResource()
+                .getString("message.missing.password"));
         form.setFooter(new HorizontalLayout());
         //Used for validation purposes
         final com.vaadin.ui.Button commit = new com.vaadin.ui.Button(
-                getInstance().getResource().getString("general.login"), form, "commit");
+                getInstance().getResource().getString("general.login"), form,
+                "commit");
         final com.vaadin.ui.Button cancel = new com.vaadin.ui.Button(
                 getInstance().getResource().getString("general.cancel"),
                 new com.vaadin.ui.Button.ClickListener() {
@@ -1779,13 +1979,18 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 commit.setEnabled(false);
                 cancel.setEnabled(false);
                 if (!VMUserServer.validCredentials(
-                        ((com.vaadin.ui.TextField) form.getField("username")).getValue().toString(),
-                        ((PasswordField) form.getField("password")).getValue().toString(),
+                        ((com.vaadin.ui.TextField) form.getField("username"))
+                        .getValue().toString(),
+                        ((PasswordField) form.getField("password")).getValue()
+                        .toString(),
                         true)) {
                     getMainWindow().showNotification(
-                            getInstance().getResource().getString("menu.connection.error.user"),
+                            getInstance().getResource()
+                            .getString("menu.connection.error.user"),
                             Window.Notification.TYPE_WARNING_MESSAGE);
-                    String username = ((com.vaadin.ui.TextField) form.getField("username")).getValue().toString();
+                    String username =
+                            ((com.vaadin.ui.TextField) form.getField("username"))
+                            .getValue().toString();
                     //Wrong password or username
                     java.util.List result = DataBaseManager.createdQuery(
                             "SELECT x FROM VmUser x WHERE x.username='"
@@ -1793,32 +1998,42 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     //Check if the username is correct if not just throw the wrong login message
                     if (result.isEmpty()) {
                         getMainWindow().showNotification("Login "
-                                + getInstance().getResource().getString("general.fail")
+                                + getInstance().getResource()
+                                .getString("general.fail")
                                 + " Username and/or Password may be incorrect!",
                                 Window.Notification.TYPE_WARNING_MESSAGE);
                     } else {
-                        result = DataBaseManager.createdQuery("SELECT x FROM XincoCoreUser x WHERE x.username='"
+                        result = DataBaseManager.createdQuery(
+                                "SELECT x FROM XincoCoreUser x WHERE x.username='"
                                 + username + "'");
                         if (result.size() > 0) {
                             try {
-                                VMUserServer temp_user = new VMUserServer((VmUser) result.get(0));
+                                VMUserServer temp_user =
+                                        new VMUserServer((VmUser) result.get(0));
                                 long attempts = Long.parseLong(VMSettingServer.getSetting(
                                         "password.attempts").getLongVal());
                                 //If user exists increase the atempt tries in the db. If limit reached lock account
-                                if (temp_user.getAttempts() >= attempts && temp_user.getId() != 1) {
+                                if (temp_user.getAttempts()
+                                        >= attempts && temp_user.getId() != 1) {
                                     //The logged in admin does the locking
                                     int adminId = 1;
                                     temp_user.setModifierId(adminId);
                                     //Reason for change
-                                    temp_user.setModificationReason(getInstance().getResource().getString("password.attempt.limitReached"));
+                                    temp_user.setModificationReason(
+                                            getInstance().getResource()
+                                            .getString("password.attempt.limitReached"));
                                     //the password retrieved when you logon is already hashed...
                                     temp_user.setHashPassword(false);
                                     temp_user.setIncreaseAttempts(true);
                                     temp_user.write2DB();
-                                    getMainWindow().showNotification(getInstance().getResource().getString("password.attempt.limitReached"),
+                                    getMainWindow().showNotification(
+                                            getInstance().getResource()
+                                            .getString("password.attempt.limitReached"),
                                             Window.Notification.TYPE_WARNING_MESSAGE);
                                 } else {
-                                    getMainWindow().showNotification(getInstance().getResource().getString("password.login.fail"),
+                                    getMainWindow().showNotification(
+                                            getInstance().getResource()
+                                            .getString("password.login.fail"),
                                             Window.Notification.TYPE_WARNING_MESSAGE);
                                 }
                             } catch (Exception ex) {
@@ -1834,7 +2049,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 } else {
                     try {
                         //Update logged user
-                        loggedUser = new VMUserServer(((com.vaadin.ui.TextField) form.getField("username")).getValue().toString(),
+                        loggedUser =
+                                new VMUserServer(((com.vaadin.ui.TextField) form.getField("username")).getValue().toString(),
                                 ((PasswordField) form.getField("password")).getValue().toString());
                         if (loggedUser.getUserStatus().getId() == 3) {
                             //Password aging
@@ -1872,7 +2088,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
      * enabling/disabling menus and such
      */
     private void updateMenu() throws VMException {
-        currentProjectLabel.setCaption(getInstance().getResource().getString("general.project.current") + ": "
+        currentProjectLabel.setCaption(getInstance().getResource()
+                .getString("general.project.current") + ": "
                 + (currentProject == null
                 ? getInstance().getResource().getString("general.no.selection")
                 : currentProject.getName()));
@@ -1884,10 +2101,12 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             VMMenuItem item = items.get(it.next());
             if (!groups.containsKey(item.getGroupName())) {
                 //Group not in the menu bar yet
-                groups.put(item.getGroupName(), menuBar.addItem(item.getGroupName(), null));
+                groups.put(item.getGroupName(),
+                        menuBar.addItem(item.getGroupName(), null));
             }
             if (canAdd(item)) {
-                groups.get(item.getGroupName()).addItem(item.getName(), item.getCommand());
+                groups.get(item.getGroupName()).addItem(item.getName(),
+                        item.getCommand());
             }
         }
     }
