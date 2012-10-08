@@ -61,7 +61,7 @@ public class DataBaseManager {
     private static String PU = "VMPU";
     private static EntityManager em;
     private static boolean dbError = false;
-    private static final Logger LOG = 
+    private static final Logger LOG =
             Logger.getLogger(DataBaseManager.class.getSimpleName());
     private static DBState state;
     private static ResourceBundle settings =
@@ -207,7 +207,7 @@ public class DataBaseManager {
                 }
                 final String JNDIDB = (String) ctx.lookup("java:comp/env/validation_manager/JNDIDB");
                 emf = Persistence.createEntityManagerFactory(JNDIDB);
-                LOG.log(Level.FINE, "Using context defined database connection: {0}", JNDIDB);
+                LOG.log(Level.INFO, "Using context defined database connection: {0}", JNDIDB);
                 usingContext = true;
             } catch (MigrationException e) {
                 LOG.log(Level.SEVERE,
@@ -501,80 +501,74 @@ public class DataBaseManager {
     }
 
     public static void updateDBState() {
+        DataSource ds = null;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            DataSource ds = null;
-            Connection conn = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
+            ds = (javax.sql.DataSource) new InitialContext().lookup("java:comp/env/jdbc/VMDB");
+        } catch (NamingException ne) {
+            LOG.log(Level.FINE, null, ne);
             try {
-                ds = (javax.sql.DataSource) new InitialContext().lookup("java:comp/env/jdbc/VMDB");
-            } catch (NamingException ne) {
-                LOG.log(Level.FINE, null, ne);
-                try {
-                    //It might be the tests, use an H2 Database
-                    ds = new JdbcDataSource();
-                    ((JdbcDataSource) ds).setPassword("");
-                    ((JdbcDataSource) ds).setUser("vm_user");
-                    ((JdbcDataSource) ds).setURL(
-                            "jdbc:h2:file:data/test/validation-manager-test;AUTO_SERVER=TRUE");
-                    //Load the H2 driver
-                    Class.forName("org.h2.Driver");
-                } catch (ClassNotFoundException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                }
+                //It might be the tests, use an H2 Database
+                ds = new JdbcDataSource();
+                ((JdbcDataSource) ds).setPassword("");
+                ((JdbcDataSource) ds).setUser("vm_user");
+                ((JdbcDataSource) ds).setURL(
+                        "jdbc:h2:file:data/test/validation-manager-test;AUTO_SERVER=TRUE");
+                //Load the H2 driver
+                Class.forName("org.h2.Driver");
+            } catch (ClassNotFoundException ex) {
+                LOG.log(Level.SEVERE, null, ex);
             }
+        }
+        try {
+            conn = ds.getConnection();
+            stmt = conn.prepareStatement("select * from vm_setting");
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                //Tables there but empty? Not safe to proceed
+                setState(DBState.NEED_MANUAL_UPDATE);
+            }
+        } catch (SQLException ex) {
+            LOG.log(Level.FINE, null, ex);
+            //Need INIT, probably nothing there
+            setState(DBState.NEED_INIT);
+            //Create the database
+            getEntityManager();
+        } finally {
             try {
-                conn = ds.getConnection();
-                stmt = conn.prepareStatement("select * from vm_setting");
-                rs = stmt.executeQuery();
-                if (!rs.next()) {
-                    //Tables there but empty? Not safe to proceed
-                    setState(DBState.NEED_MANUAL_UPDATE);
+                if (conn != null) {
+                    conn.close();
                 }
             } catch (SQLException ex) {
-                LOG.log(Level.FINE, null, ex);
-                //Need INIT, probably nothing there
-                setState(DBState.NEED_INIT);
-                //Create the database
-                getEntityManager();
-                //Initialize database
-                initializeFlyway(ds);
-            } finally {
-                try {
-                    if (conn != null) {
-                        conn.close();
-                    }
-                } catch (SQLException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                }
-                try {
-                    if (stmt != null) {
-                        stmt.close();
-                    }
-                } catch (SQLException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                }
-                try {
-                    if (rs != null) {
-                        rs.close();
-                    }
-                } catch (SQLException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                }
+                LOG.log(Level.SEVERE, null, ex);
             }
-
-            if (ds != null) {
-                updateDatabase(ds);
-            } else {
-                state = DBState.ERROR;
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException ex) {
+                LOG.log(Level.SEVERE, null, ex);
             }
-
-            if (state != DBState.VALID) {
-                waitForDB();
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException ex) {
+                LOG.log(Level.SEVERE, null, ex);
             }
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+        }
+        if (ds != null) {
+            //Initialize flyway
+            initializeFlyway(ds);
+            updateDatabase(ds);
+        } else {
             state = DBState.ERROR;
+        }
+
+        if (state != DBState.VALID) {
+            waitForDB();
         }
     }
 
@@ -588,6 +582,7 @@ public class DataBaseManager {
             LOG.info("Done!");
         } catch (FlywayException fe) {
             LOG.log(Level.SEVERE, "Unable to migrate data", fe);
+
             setState(DBState.ERROR);
         }
         try {
@@ -690,6 +685,7 @@ public class DataBaseManager {
                 }
                 //Everything the same
             } catch (java.lang.NumberFormatException e) {
+                LOG.log(Level.WARNING, null, e);
                 //Is not a number
                 return false;
             }
