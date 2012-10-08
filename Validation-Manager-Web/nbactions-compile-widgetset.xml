@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>CUSTOM-Update Widgetset</actionName>
+        <displayName>Update Widgetset</displayName>
+        <goals>
+            <goal>clean:clean</goal>
+            <goal>gwt:clean</goal>
+            <goal>vaadin:update-widgetset</goal>
+            <goal>gwt:compile</goal>
+            
+            
+        </goals>
+    </action>
+    
+    
+</actions>
