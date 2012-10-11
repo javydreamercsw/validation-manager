@@ -5,19 +5,18 @@
 package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.AssigmentType;
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.UserAssigment;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -34,7 +33,7 @@ public class AssigmentTypeJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(AssigmentType assigmentType) throws PreexistingEntityException, Exception {
+    public void create(AssigmentType assigmentType) {
         if (assigmentType.getUserAssigmentList() == null) {
             assigmentType.setUserAssigmentList(new ArrayList<UserAssigment>());
         }
@@ -59,11 +58,6 @@ public class AssigmentTypeJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findAssigmentType(assigmentType.getId()) != null) {
-                throw new PreexistingEntityException("AssigmentType " + assigmentType + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

@@ -37,7 +37,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "RequirementSpecNode.findByDescription", query = "SELECT r FROM RequirementSpecNode r WHERE r.description = :description"),
     @NamedQuery(name = "RequirementSpecNode.findByScope", query = "SELECT r FROM RequirementSpecNode r WHERE r.scope = :scope")})
 public class RequirementSpecNode implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementSpecNodePK requirementSpecNodePK;
@@ -67,6 +66,14 @@ public class RequirementSpecNode implements Serializable {
         @JoinColumn(name = "parent_requirement_spec_id", referencedColumnName = "requirement_spec_id", insertable = false, updatable = false)})
     @ManyToOne
     private RequirementSpecNode requirementSpecNode;
+    @Column(name = "requirement_spec_level_id")
+    private Integer requirementSpecLevelId;
+    @Column(name = "requirement_spec_project_id")
+    private Integer requirementSpecProjectId;
+    @Column(name = "parent_requirement_spec_id")
+    private Integer parentRequirementSpecId;
+    @Column(name = "parent_id")
+    private Integer parentId;
 
     public RequirementSpecNode() {
     }
@@ -172,5 +179,37 @@ public class RequirementSpecNode implements Serializable {
 
     public void setRequirementSpecNode(RequirementSpecNode requirementSpecNode) {
         this.requirementSpecNode = requirementSpecNode;
+    }
+
+    public Integer getRequirementSpecLevelId() {
+        return requirementSpecLevelId;
+    }
+
+    public void setRequirementSpecLevelId(Integer requirementSpecLevelId) {
+        this.requirementSpecLevelId = requirementSpecLevelId;
+    }
+
+    public Integer getRequirementSpecProjectId() {
+        return requirementSpecProjectId;
+    }
+
+    public void setRequirementSpecProjectId(Integer requirementSpecProjectId) {
+        this.requirementSpecProjectId = requirementSpecProjectId;
+    }
+
+    public Integer getParentRequirementSpecId() {
+        return parentRequirementSpecId;
+    }
+
+    public void setParentRequirementSpecId(Integer parentRequirementSpecId) {
+        this.parentRequirementSpecId = parentRequirementSpecId;
+    }
+
+    public Integer getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Integer parentId) {
+        this.parentId = parentId;
     }
 }

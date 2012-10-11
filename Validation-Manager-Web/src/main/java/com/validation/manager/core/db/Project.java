@@ -40,6 +40,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findById", query = "SELECT p FROM Project p WHERE p.id = :id"),
     @NamedQuery(name = "Project.findByName", query = "SELECT p FROM Project p WHERE p.name = :name")})
 public class Project implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
+    private List<ProjectHasTestProject> projectHasTestProjectList;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -63,14 +65,12 @@ public class Project implements Serializable {
     @Column(name = "notes", length = 65535)
     private String notes;
     @JoinTable(name = "project_has_test_project", joinColumns = {
-        @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
+        @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
         @JoinColumn(name = "test_project_id", referencedColumnName = "id", nullable = false)})
     @ManyToMany
     private List<TestProject> testProjectList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
     private List<RequirementSpec> requirementSpecList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
-    private List<Requirement> requirementList;
     @OneToMany(mappedBy = "project")
     private List<Project> projectList;
     @JoinColumn(name = "parent_project_id", referencedColumnName = "id")
@@ -127,15 +127,6 @@ public class Project implements Serializable {
     }
 
     @XmlTransient
-    public List<Requirement> getRequirementList() {
-        return requirementList;
-    }
-
-    public void setRequirementList(List<Requirement> requirementList) {
-        this.requirementList = requirementList;
-    }
-
-    @XmlTransient
     public List<Project> getProjectList() {
         return projectList;
     }
@@ -175,6 +166,15 @@ public class Project implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Project[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    public List<ProjectHasTestProject> getProjectHasTestProjectList() {
+        return projectHasTestProjectList;
+    }
+
+    public void setProjectHasTestProjectList(List<ProjectHasTestProject> projectHasTestProjectList) {
+        this.projectHasTestProjectList = projectHasTestProjectList;
     }
     
 }

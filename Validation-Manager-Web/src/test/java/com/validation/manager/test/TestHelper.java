@@ -127,12 +127,17 @@ public class TestHelper {
     }
 
     public static void destroyRequirement(Requirement r) throws NonexistentEntityException {
-        RequirementServer.deleteRequirement(r);
-        assertTrue(new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).findRequirement(r.getRequirementPK()) == null);
+        try {
+            RequirementServer.deleteRequirement(r);
+            assertTrue(new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).findRequirement(r.getRequirementPK()) == null);
+        } catch (IllegalOrphanException ex) {
+            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+            fail();
+        }
     }
 
     public static TestCase addStep(TestCase tc, int sequence, String text, String note) throws PreexistingEntityException, Exception {
-        StepServer s = new StepServer(tc.getTestCasePK().getId(), tc.getTestCasePK().getTestId(), sequence, text);
+        StepServer s = new StepServer(tc, sequence, text);
         int amount = tc.getStepList().size();
         s.setNotes(note);
         s.write2DB();

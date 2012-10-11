@@ -4,24 +4,24 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.Test;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.Step;
+import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCasePK;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import com.validation.manager.core.db.fmea.RiskControl;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.fmea.RiskControl;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -42,11 +42,11 @@ public class TestCaseJpaController implements Serializable {
         if (testCase.getTestCasePK() == null) {
             testCase.setTestCasePK(new TestCasePK());
         }
-        if (testCase.getStepList() == null) {
-            testCase.setStepList(new ArrayList<Step>());
-        }
         if (testCase.getRiskControlList() == null) {
             testCase.setRiskControlList(new ArrayList<RiskControl>());
+        }
+        if (testCase.getStepList() == null) {
+            testCase.setStepList(new ArrayList<Step>());
         }
         testCase.getTestCasePK().setTestId(testCase.getTest().getId());
         EntityManager em = null;
@@ -63,18 +63,18 @@ public class TestCaseJpaController implements Serializable {
                 vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
                 testCase.setVmUser(vmUser);
             }
-            List<Step> attachedStepList = new ArrayList<Step>();
-            for (Step stepListStepToAttach : testCase.getStepList()) {
-                stepListStepToAttach = em.getReference(stepListStepToAttach.getClass(), stepListStepToAttach.getStepPK());
-                attachedStepList.add(stepListStepToAttach);
-            }
-            testCase.setStepList(attachedStepList);
             List<RiskControl> attachedRiskControlList = new ArrayList<RiskControl>();
             for (RiskControl riskControlListRiskControlToAttach : testCase.getRiskControlList()) {
                 riskControlListRiskControlToAttach = em.getReference(riskControlListRiskControlToAttach.getClass(), riskControlListRiskControlToAttach.getRiskControlPK());
                 attachedRiskControlList.add(riskControlListRiskControlToAttach);
             }
             testCase.setRiskControlList(attachedRiskControlList);
+            List<Step> attachedStepList = new ArrayList<Step>();
+            for (Step stepListStepToAttach : testCase.getStepList()) {
+                stepListStepToAttach = em.getReference(stepListStepToAttach.getClass(), stepListStepToAttach.getStepPK());
+                attachedStepList.add(stepListStepToAttach);
+            }
+            testCase.setStepList(attachedStepList);
             em.persist(testCase);
             if (test != null) {
                 test.getTestCaseList().add(testCase);
@@ -84,6 +84,10 @@ public class TestCaseJpaController implements Serializable {
                 vmUser.getTestCaseList().add(testCase);
                 vmUser = em.merge(vmUser);
             }
+            for (RiskControl riskControlListRiskControl : testCase.getRiskControlList()) {
+                riskControlListRiskControl.getTestCaseList().add(testCase);
+                riskControlListRiskControl = em.merge(riskControlListRiskControl);
+            }
             for (Step stepListStep : testCase.getStepList()) {
                 TestCase oldTestCaseOfStepListStep = stepListStep.getTestCase();
                 stepListStep.setTestCase(testCase);
@@ -92,10 +96,6 @@ public class TestCaseJpaController implements Serializable {
                     oldTestCaseOfStepListStep.getStepList().remove(stepListStep);
                     oldTestCaseOfStepListStep = em.merge(oldTestCaseOfStepListStep);
                 }
-            }
-            for (RiskControl riskControlListRiskControl : testCase.getRiskControlList()) {
-                riskControlListRiskControl.getTestCaseList().add(testCase);
-                riskControlListRiskControl = em.merge(riskControlListRiskControl);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -121,10 +121,10 @@ public class TestCaseJpaController implements Serializable {
             Test testNew = testCase.getTest();
             VmUser vmUserOld = persistentTestCase.getVmUser();
             VmUser vmUserNew = testCase.getVmUser();
-            List<Step> stepListOld = persistentTestCase.getStepList();
-            List<Step> stepListNew = testCase.getStepList();
             List<RiskControl> riskControlListOld = persistentTestCase.getRiskControlList();
             List<RiskControl> riskControlListNew = testCase.getRiskControlList();
+            List<Step> stepListOld = persistentTestCase.getStepList();
+            List<Step> stepListNew = testCase.getStepList();
             List<String> illegalOrphanMessages = null;
             for (Step stepListOldStep : stepListOld) {
                 if (!stepListNew.contains(stepListOldStep)) {
@@ -145,13 +145,6 @@ public class TestCaseJpaController implements Serializable {
                 vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
                 testCase.setVmUser(vmUserNew);
             }
-            List<Step> attachedStepListNew = new ArrayList<Step>();
-            for (Step stepListNewStepToAttach : stepListNew) {
-                stepListNewStepToAttach = em.getReference(stepListNewStepToAttach.getClass(), stepListNewStepToAttach.getStepPK());
-                attachedStepListNew.add(stepListNewStepToAttach);
-            }
-            stepListNew = attachedStepListNew;
-            testCase.setStepList(stepListNew);
             List<RiskControl> attachedRiskControlListNew = new ArrayList<RiskControl>();
             for (RiskControl riskControlListNewRiskControlToAttach : riskControlListNew) {
                 riskControlListNewRiskControlToAttach = em.getReference(riskControlListNewRiskControlToAttach.getClass(), riskControlListNewRiskControlToAttach.getRiskControlPK());
@@ -159,6 +152,13 @@ public class TestCaseJpaController implements Serializable {
             }
             riskControlListNew = attachedRiskControlListNew;
             testCase.setRiskControlList(riskControlListNew);
+            List<Step> attachedStepListNew = new ArrayList<Step>();
+            for (Step stepListNewStepToAttach : stepListNew) {
+                stepListNewStepToAttach = em.getReference(stepListNewStepToAttach.getClass(), stepListNewStepToAttach.getStepPK());
+                attachedStepListNew.add(stepListNewStepToAttach);
+            }
+            stepListNew = attachedStepListNew;
+            testCase.setStepList(stepListNew);
             testCase = em.merge(testCase);
             if (testOld != null && !testOld.equals(testNew)) {
                 testOld.getTestCaseList().remove(testCase);
@@ -176,17 +176,6 @@ public class TestCaseJpaController implements Serializable {
                 vmUserNew.getTestCaseList().add(testCase);
                 vmUserNew = em.merge(vmUserNew);
             }
-            for (Step stepListNewStep : stepListNew) {
-                if (!stepListOld.contains(stepListNewStep)) {
-                    TestCase oldTestCaseOfStepListNewStep = stepListNewStep.getTestCase();
-                    stepListNewStep.setTestCase(testCase);
-                    stepListNewStep = em.merge(stepListNewStep);
-                    if (oldTestCaseOfStepListNewStep != null && !oldTestCaseOfStepListNewStep.equals(testCase)) {
-                        oldTestCaseOfStepListNewStep.getStepList().remove(stepListNewStep);
-                        oldTestCaseOfStepListNewStep = em.merge(oldTestCaseOfStepListNewStep);
-                    }
-                }
-            }
             for (RiskControl riskControlListOldRiskControl : riskControlListOld) {
                 if (!riskControlListNew.contains(riskControlListOldRiskControl)) {
                     riskControlListOldRiskControl.getTestCaseList().remove(testCase);
@@ -197,6 +186,17 @@ public class TestCaseJpaController implements Serializable {
                 if (!riskControlListOld.contains(riskControlListNewRiskControl)) {
                     riskControlListNewRiskControl.getTestCaseList().add(testCase);
                     riskControlListNewRiskControl = em.merge(riskControlListNewRiskControl);
+                }
+            }
+            for (Step stepListNewStep : stepListNew) {
+                if (!stepListOld.contains(stepListNewStep)) {
+                    TestCase oldTestCaseOfStepListNewStep = stepListNewStep.getTestCase();
+                    stepListNewStep.setTestCase(testCase);
+                    stepListNewStep = em.merge(stepListNewStep);
+                    if (oldTestCaseOfStepListNewStep != null && !oldTestCaseOfStepListNewStep.equals(testCase)) {
+                        oldTestCaseOfStepListNewStep.getStepList().remove(stepListNewStep);
+                        oldTestCaseOfStepListNewStep = em.merge(oldTestCaseOfStepListNewStep);
+                    }
                 }
             }
             em.getTransaction().commit();

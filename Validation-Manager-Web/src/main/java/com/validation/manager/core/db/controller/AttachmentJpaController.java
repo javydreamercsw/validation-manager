@@ -6,17 +6,17 @@ package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.Attachment;
 import com.validation.manager.core.db.AttachmentPK;
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -37,7 +37,6 @@ public class AttachmentJpaController implements Serializable {
         if (attachment.getAttachmentPK() == null) {
             attachment.setAttachmentPK(new AttachmentPK());
         }
-        attachment.getAttachmentPK().setAttachmentTypeId(attachment.getAttachmentType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -66,7 +65,6 @@ public class AttachmentJpaController implements Serializable {
     }
 
     public void edit(Attachment attachment) throws NonexistentEntityException, Exception {
-        attachment.getAttachmentPK().setAttachmentTypeId(attachment.getAttachmentType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

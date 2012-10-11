@@ -4,20 +4,19 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -34,7 +33,7 @@ public class SpecLevelJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(SpecLevel specLevel) throws PreexistingEntityException, Exception {
+    public void create(SpecLevel specLevel) {
         if (specLevel.getRequirementSpecList() == null) {
             specLevel.setRequirementSpecList(new ArrayList<RequirementSpec>());
         }
@@ -59,11 +58,6 @@ public class SpecLevelJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findSpecLevel(specLevel.getId()) != null) {
-                throw new PreexistingEntityException("SpecLevel " + specLevel + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

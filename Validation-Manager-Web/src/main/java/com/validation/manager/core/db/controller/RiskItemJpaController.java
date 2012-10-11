@@ -7,23 +7,23 @@ package com.validation.manager.core.db.controller;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.fmea.Cause;
 import com.validation.manager.core.db.fmea.FMEA;
 import com.validation.manager.core.db.fmea.FailureMode;
-import java.util.ArrayList;
-import java.util.List;
-import com.validation.manager.core.db.fmea.Cause;
-import com.validation.manager.core.db.fmea.RiskControl;
 import com.validation.manager.core.db.fmea.Hazard;
+import com.validation.manager.core.db.fmea.RiskControl;
 import com.validation.manager.core.db.fmea.RiskItem;
 import com.validation.manager.core.db.fmea.RiskItemHasRiskCategory;
 import com.validation.manager.core.db.fmea.RiskItemPK;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *

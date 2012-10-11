@@ -4,21 +4,21 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.AssignmentStatus;
 import com.validation.manager.core.db.AssigmentType;
+import com.validation.manager.core.db.AssignmentStatus;
 import com.validation.manager.core.db.UserAssigment;
 import com.validation.manager.core.db.UserAssigmentPK;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -39,9 +39,9 @@ public class UserAssigmentJpaController implements Serializable {
         if (userAssigment.getUserAssigmentPK() == null) {
             userAssigment.setUserAssigmentPK(new UserAssigmentPK());
         }
+        userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
         userAssigment.getUserAssigmentPK().setAssignmentStatusId(userAssigment.getAssignmentStatus().getId());
         userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser1().getId());
-        userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -97,9 +97,9 @@ public class UserAssigmentJpaController implements Serializable {
     }
 
     public void edit(UserAssigment userAssigment) throws NonexistentEntityException, Exception {
+        userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
         userAssigment.getUserAssigmentPK().setAssignmentStatusId(userAssigment.getAssignmentStatus().getId());
         userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser1().getId());
-        userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

@@ -13,6 +13,7 @@
         <skipTests>true</skipTests>
         <widgetset.path>src/main/webapp</widgetset.path>
         <vm.version>${project.version}</vm.version>
+        <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
     </properties>
 
     <build>

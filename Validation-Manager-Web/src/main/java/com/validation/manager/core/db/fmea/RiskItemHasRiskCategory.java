@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -31,6 +32,10 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "RiskItemHasRiskCategory.findByRiskCategoryId", query = "SELECT r FROM RiskItemHasRiskCategory r WHERE r.riskItemHasRiskCategoryPK.riskCategoryId = :riskCategoryId"),
     @NamedQuery(name = "RiskItemHasRiskCategory.findByValue", query = "SELECT r FROM RiskItemHasRiskCategory r WHERE r.value = :value")})
 public class RiskItemHasRiskCategory implements Serializable {
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "FMEA_id")
+    private int fMEAid;
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
@@ -117,5 +122,13 @@ public class RiskItemHasRiskCategory implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.fmea.RiskItemHasRiskCategory[ riskItemHasRiskCategoryPK=" + riskItemHasRiskCategoryPK + " ]";
+    }
+
+    public int getFMEAid() {
+        return fMEAid;
+    }
+
+    public void setFMEAid(int fMEAid) {
+        this.fMEAid = fMEAid;
     }
 }

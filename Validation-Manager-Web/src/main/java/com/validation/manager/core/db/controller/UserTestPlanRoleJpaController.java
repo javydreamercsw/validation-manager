@@ -4,21 +4,21 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Role;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserTestPlanRolePK;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -39,8 +39,9 @@ public class UserTestPlanRoleJpaController implements Serializable {
         if (userTestPlanRole.getUserTestPlanRolePK() == null) {
             userTestPlanRole.setUserTestPlanRolePK(new UserTestPlanRolePK());
         }
-        userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
+        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
+        userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
         EntityManager em = null;
         try {
@@ -88,8 +89,9 @@ public class UserTestPlanRoleJpaController implements Serializable {
     }
 
     public void edit(UserTestPlanRole userTestPlanRole) throws NonexistentEntityException, Exception {
-        userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
+        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
+        userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
         EntityManager em = null;
         try {

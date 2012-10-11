@@ -7,9 +7,8 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -28,20 +27,17 @@ public class RequirementServer extends Requirement implements EntityServer {
                 DataBaseManager.getEntityManagerFactory()).findRequirementType(requirementType));
     }
 
-    public static void deleteRequirement(Requirement r) {
-        RequirementJpaController controller = 
+    public static void deleteRequirement(Requirement r)
+            throws IllegalOrphanException, NonexistentEntityException {
+        RequirementJpaController controller =
                 new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
         if (controller.findRequirement(r.getRequirementPK()) != null) {
-            try {
-                controller.destroy(r.getRequirementPK());
-            } catch (NonexistentEntityException ex) {
-                Logger.getLogger(RequirementServer.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            controller.destroy(r.getRequirementPK());
         }
     }
 
     public RequirementServer(Requirement r) {
-        RequirementJpaController controller = 
+        RequirementJpaController controller =
                 new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
         Requirement requirement = controller.findRequirement(r.getRequirementPK());
         if (requirement != null) {

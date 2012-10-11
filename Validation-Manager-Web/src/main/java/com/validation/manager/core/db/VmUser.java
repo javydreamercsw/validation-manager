@@ -356,5 +356,4 @@ public class VmUser extends VMAuditedObject implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmUser[ id=" + id + " ]";
     }
-    
 }

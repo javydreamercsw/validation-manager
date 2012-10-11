@@ -6,13 +6,12 @@ package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
@@ -31,18 +30,13 @@ public class TestCaseExecutionJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(TestCaseExecution testCaseExecution) throws PreexistingEntityException, Exception {
+    public void create(TestCaseExecution testCaseExecution) {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             em.persist(testCaseExecution);
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findTestCaseExecution(testCaseExecution.getId()) != null) {
-                throw new PreexistingEntityException("TestCaseExecution " + testCaseExecution + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

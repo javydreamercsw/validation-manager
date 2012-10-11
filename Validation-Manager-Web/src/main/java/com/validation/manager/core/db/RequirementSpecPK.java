@@ -101,7 +101,7 @@ public class RequirementSpecPK implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementSpecPK[ id=" + id + ", productId=" + projectId + ", specLevelId=" + specLevelId + " ]";
+        return "com.validation.manager.core.db.RequirementSpecPK[ id=" + id + ", projectId=" + projectId + ", specLevelId=" + specLevelId + " ]";
     }
     
 }

@@ -5,20 +5,21 @@
 package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.Project;
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.TestProject;
-import java.util.ArrayList;
-import java.util.List;
+import com.validation.manager.core.db.ProjectHasTestProject;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -35,59 +36,86 @@ public class ProjectJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Project product) {
-        if (product.getTestProjectList() == null) {
-            product.setTestProjectList(new ArrayList<TestProject>());
+    public void create(Project project) {
+        if (project.getTestProjectList() == null) {
+            project.setTestProjectList(new ArrayList<TestProject>());
         }
-        if (product.getRequirementList() == null) {
-            product.setRequirementList(new ArrayList<Requirement>());
+        if (project.getRequirementSpecList() == null) {
+            project.setRequirementSpecList(new ArrayList<RequirementSpec>());
         }
-        if (product.getRequirementSpecList() == null) {
-            product.setRequirementSpecList(new ArrayList<RequirementSpec>());
+        if (project.getProjectList() == null) {
+            project.setProjectList(new ArrayList<Project>());
+        }
+        if (project.getProjectHasTestProjectList() == null) {
+            project.setProjectHasTestProjectList(new ArrayList<ProjectHasTestProject>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            Project projectRel = project.getProject();
+            if (projectRel != null) {
+                projectRel = em.getReference(projectRel.getClass(), projectRel.getId());
+                project.setProject(projectRel);
+            }
             List<TestProject> attachedTestProjectList = new ArrayList<TestProject>();
-            for (TestProject testProjectListTestProjectToAttach : product.getTestProjectList()) {
+            for (TestProject testProjectListTestProjectToAttach : project.getTestProjectList()) {
                 testProjectListTestProjectToAttach = em.getReference(testProjectListTestProjectToAttach.getClass(), testProjectListTestProjectToAttach.getId());
                 attachedTestProjectList.add(testProjectListTestProjectToAttach);
             }
-            product.setTestProjectList(attachedTestProjectList);
-            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
-            for (Requirement requirementListRequirementToAttach : product.getRequirementList()) {
-                requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getRequirementPK());
-                attachedRequirementList.add(requirementListRequirementToAttach);
-            }
-            product.setRequirementList(attachedRequirementList);
+            project.setTestProjectList(attachedTestProjectList);
             List<RequirementSpec> attachedRequirementSpecList = new ArrayList<RequirementSpec>();
-            for (RequirementSpec requirementSpecListRequirementSpecToAttach : product.getRequirementSpecList()) {
+            for (RequirementSpec requirementSpecListRequirementSpecToAttach : project.getRequirementSpecList()) {
                 requirementSpecListRequirementSpecToAttach = em.getReference(requirementSpecListRequirementSpecToAttach.getClass(), requirementSpecListRequirementSpecToAttach.getRequirementSpecPK());
                 attachedRequirementSpecList.add(requirementSpecListRequirementSpecToAttach);
             }
-            product.setRequirementSpecList(attachedRequirementSpecList);
-            em.persist(product);
-            for (TestProject testProjectListTestProject : product.getTestProjectList()) {
-                testProjectListTestProject.getProjectList().add(product);
+            project.setRequirementSpecList(attachedRequirementSpecList);
+            List<Project> attachedProjectList = new ArrayList<Project>();
+            for (Project projectListProjectToAttach : project.getProjectList()) {
+                projectListProjectToAttach = em.getReference(projectListProjectToAttach.getClass(), projectListProjectToAttach.getId());
+                attachedProjectList.add(projectListProjectToAttach);
+            }
+            project.setProjectList(attachedProjectList);
+            List<ProjectHasTestProject> attachedProjectHasTestProjectList = new ArrayList<ProjectHasTestProject>();
+            for (ProjectHasTestProject projectHasTestProjectListProjectHasTestProjectToAttach : project.getProjectHasTestProjectList()) {
+                projectHasTestProjectListProjectHasTestProjectToAttach = em.getReference(projectHasTestProjectListProjectHasTestProjectToAttach.getClass(), projectHasTestProjectListProjectHasTestProjectToAttach.getProjectHasTestProjectPK());
+                attachedProjectHasTestProjectList.add(projectHasTestProjectListProjectHasTestProjectToAttach);
+            }
+            project.setProjectHasTestProjectList(attachedProjectHasTestProjectList);
+            em.persist(project);
+            if (projectRel != null) {
+                projectRel.getProjectList().add(project);
+                projectRel = em.merge(projectRel);
+            }
+            for (TestProject testProjectListTestProject : project.getTestProjectList()) {
+                testProjectListTestProject.getProjectList().add(project);
                 testProjectListTestProject = em.merge(testProjectListTestProject);
             }
-            for (Requirement requirementListRequirement : product.getRequirementList()) {
-                Project oldProjectIdOfRequirementListRequirement = requirementListRequirement.getProject();
-                requirementListRequirement.setProject(product);
-                requirementListRequirement = em.merge(requirementListRequirement);
-                if (oldProjectIdOfRequirementListRequirement != null) {
-                    oldProjectIdOfRequirementListRequirement.getRequirementList().remove(requirementListRequirement);
-                    oldProjectIdOfRequirementListRequirement = em.merge(oldProjectIdOfRequirementListRequirement);
-                }
-            }
-            for (RequirementSpec requirementSpecListRequirementSpec : product.getRequirementSpecList()) {
+            for (RequirementSpec requirementSpecListRequirementSpec : project.getRequirementSpecList()) {
                 Project oldProjectOfRequirementSpecListRequirementSpec = requirementSpecListRequirementSpec.getProject();
-                requirementSpecListRequirementSpec.setProject(product);
+                requirementSpecListRequirementSpec.setProject(project);
                 requirementSpecListRequirementSpec = em.merge(requirementSpecListRequirementSpec);
                 if (oldProjectOfRequirementSpecListRequirementSpec != null) {
                     oldProjectOfRequirementSpecListRequirementSpec.getRequirementSpecList().remove(requirementSpecListRequirementSpec);
                     oldProjectOfRequirementSpecListRequirementSpec = em.merge(oldProjectOfRequirementSpecListRequirementSpec);
+                }
+            }
+            for (Project projectListProject : project.getProjectList()) {
+                Project oldProjectOfProjectListProject = projectListProject.getProject();
+                projectListProject.setProject(project);
+                projectListProject = em.merge(projectListProject);
+                if (oldProjectOfProjectListProject != null) {
+                    oldProjectOfProjectListProject.getProjectList().remove(projectListProject);
+                    oldProjectOfProjectListProject = em.merge(oldProjectOfProjectListProject);
+                }
+            }
+            for (ProjectHasTestProject projectHasTestProjectListProjectHasTestProject : project.getProjectHasTestProjectList()) {
+                Project oldProjectOfProjectHasTestProjectListProjectHasTestProject = projectHasTestProjectListProjectHasTestProject.getProject();
+                projectHasTestProjectListProjectHasTestProject.setProject(project);
+                projectHasTestProjectListProjectHasTestProject = em.merge(projectHasTestProjectListProjectHasTestProject);
+                if (oldProjectOfProjectHasTestProjectListProjectHasTestProject != null) {
+                    oldProjectOfProjectHasTestProjectListProjectHasTestProject.getProjectHasTestProjectList().remove(projectHasTestProjectListProjectHasTestProject);
+                    oldProjectOfProjectHasTestProjectListProjectHasTestProject = em.merge(oldProjectOfProjectHasTestProjectListProjectHasTestProject);
                 }
             }
             em.getTransaction().commit();
@@ -98,37 +126,45 @@ public class ProjectJpaController implements Serializable {
         }
     }
 
-    public void edit(Project product) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(Project project) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Project persistentProject = em.find(Project.class, product.getId());
+            Project persistentProject = em.find(Project.class, project.getId());
+            Project projectRelOld = persistentProject.getProject();
+            Project projectRelNew = project.getProject();
             List<TestProject> testProjectListOld = persistentProject.getTestProjectList();
-            List<TestProject> testProjectListNew = product.getTestProjectList();
-            List<Requirement> requirementListOld = persistentProject.getRequirementList();
-            List<Requirement> requirementListNew = product.getRequirementList();
+            List<TestProject> testProjectListNew = project.getTestProjectList();
             List<RequirementSpec> requirementSpecListOld = persistentProject.getRequirementSpecList();
-            List<RequirementSpec> requirementSpecListNew = product.getRequirementSpecList();
+            List<RequirementSpec> requirementSpecListNew = project.getRequirementSpecList();
+            List<Project> projectListOld = persistentProject.getProjectList();
+            List<Project> projectListNew = project.getProjectList();
+            List<ProjectHasTestProject> projectHasTestProjectListOld = persistentProject.getProjectHasTestProjectList();
+            List<ProjectHasTestProject> projectHasTestProjectListNew = project.getProjectHasTestProjectList();
             List<String> illegalOrphanMessages = null;
-            for (Requirement requirementListOldRequirement : requirementListOld) {
-                if (!requirementListNew.contains(requirementListOldRequirement)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain Requirement " + requirementListOldRequirement + " since its productId field is not nullable.");
-                }
-            }
             for (RequirementSpec requirementSpecListOldRequirementSpec : requirementSpecListOld) {
                 if (!requirementSpecListNew.contains(requirementSpecListOldRequirementSpec)) {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain RequirementSpec " + requirementSpecListOldRequirementSpec + " since its product field is not nullable.");
+                    illegalOrphanMessages.add("You must retain RequirementSpec " + requirementSpecListOldRequirementSpec + " since its project field is not nullable.");
+                }
+            }
+            for (ProjectHasTestProject projectHasTestProjectListOldProjectHasTestProject : projectHasTestProjectListOld) {
+                if (!projectHasTestProjectListNew.contains(projectHasTestProjectListOldProjectHasTestProject)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain ProjectHasTestProject " + projectHasTestProjectListOldProjectHasTestProject + " since its project field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            if (projectRelNew != null) {
+                projectRelNew = em.getReference(projectRelNew.getClass(), projectRelNew.getId());
+                project.setProject(projectRelNew);
             }
             List<TestProject> attachedTestProjectListNew = new ArrayList<TestProject>();
             for (TestProject testProjectListNewTestProjectToAttach : testProjectListNew) {
@@ -136,53 +172,85 @@ public class ProjectJpaController implements Serializable {
                 attachedTestProjectListNew.add(testProjectListNewTestProjectToAttach);
             }
             testProjectListNew = attachedTestProjectListNew;
-            product.setTestProjectList(testProjectListNew);
-            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
-            for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
-                requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getRequirementPK());
-                attachedRequirementListNew.add(requirementListNewRequirementToAttach);
-            }
-            requirementListNew = attachedRequirementListNew;
-            product.setRequirementList(requirementListNew);
+            project.setTestProjectList(testProjectListNew);
             List<RequirementSpec> attachedRequirementSpecListNew = new ArrayList<RequirementSpec>();
             for (RequirementSpec requirementSpecListNewRequirementSpecToAttach : requirementSpecListNew) {
                 requirementSpecListNewRequirementSpecToAttach = em.getReference(requirementSpecListNewRequirementSpecToAttach.getClass(), requirementSpecListNewRequirementSpecToAttach.getRequirementSpecPK());
                 attachedRequirementSpecListNew.add(requirementSpecListNewRequirementSpecToAttach);
             }
             requirementSpecListNew = attachedRequirementSpecListNew;
-            product.setRequirementSpecList(requirementSpecListNew);
-            product = em.merge(product);
+            project.setRequirementSpecList(requirementSpecListNew);
+            List<Project> attachedProjectListNew = new ArrayList<Project>();
+            for (Project projectListNewProjectToAttach : projectListNew) {
+                projectListNewProjectToAttach = em.getReference(projectListNewProjectToAttach.getClass(), projectListNewProjectToAttach.getId());
+                attachedProjectListNew.add(projectListNewProjectToAttach);
+            }
+            projectListNew = attachedProjectListNew;
+            project.setProjectList(projectListNew);
+            List<ProjectHasTestProject> attachedProjectHasTestProjectListNew = new ArrayList<ProjectHasTestProject>();
+            for (ProjectHasTestProject projectHasTestProjectListNewProjectHasTestProjectToAttach : projectHasTestProjectListNew) {
+                projectHasTestProjectListNewProjectHasTestProjectToAttach = em.getReference(projectHasTestProjectListNewProjectHasTestProjectToAttach.getClass(), projectHasTestProjectListNewProjectHasTestProjectToAttach.getProjectHasTestProjectPK());
+                attachedProjectHasTestProjectListNew.add(projectHasTestProjectListNewProjectHasTestProjectToAttach);
+            }
+            projectHasTestProjectListNew = attachedProjectHasTestProjectListNew;
+            project.setProjectHasTestProjectList(projectHasTestProjectListNew);
+            project = em.merge(project);
+            if (projectRelOld != null && !projectRelOld.equals(projectRelNew)) {
+                projectRelOld.getProjectList().remove(project);
+                projectRelOld = em.merge(projectRelOld);
+            }
+            if (projectRelNew != null && !projectRelNew.equals(projectRelOld)) {
+                projectRelNew.getProjectList().add(project);
+                projectRelNew = em.merge(projectRelNew);
+            }
             for (TestProject testProjectListOldTestProject : testProjectListOld) {
                 if (!testProjectListNew.contains(testProjectListOldTestProject)) {
-                    testProjectListOldTestProject.getProjectList().remove(product);
+                    testProjectListOldTestProject.getProjectList().remove(project);
                     testProjectListOldTestProject = em.merge(testProjectListOldTestProject);
                 }
             }
             for (TestProject testProjectListNewTestProject : testProjectListNew) {
                 if (!testProjectListOld.contains(testProjectListNewTestProject)) {
-                    testProjectListNewTestProject.getProjectList().add(product);
+                    testProjectListNewTestProject.getProjectList().add(project);
                     testProjectListNewTestProject = em.merge(testProjectListNewTestProject);
-                }
-            }
-            for (Requirement requirementListNewRequirement : requirementListNew) {
-                if (!requirementListOld.contains(requirementListNewRequirement)) {
-                    Project oldProjectIdOfRequirementListNewRequirement = requirementListNewRequirement.getProject();
-                    requirementListNewRequirement.setProject(product);
-                    requirementListNewRequirement = em.merge(requirementListNewRequirement);
-                    if (oldProjectIdOfRequirementListNewRequirement != null && !oldProjectIdOfRequirementListNewRequirement.equals(product)) {
-                        oldProjectIdOfRequirementListNewRequirement.getRequirementList().remove(requirementListNewRequirement);
-                        oldProjectIdOfRequirementListNewRequirement = em.merge(oldProjectIdOfRequirementListNewRequirement);
-                    }
                 }
             }
             for (RequirementSpec requirementSpecListNewRequirementSpec : requirementSpecListNew) {
                 if (!requirementSpecListOld.contains(requirementSpecListNewRequirementSpec)) {
                     Project oldProjectOfRequirementSpecListNewRequirementSpec = requirementSpecListNewRequirementSpec.getProject();
-                    requirementSpecListNewRequirementSpec.setProject(product);
+                    requirementSpecListNewRequirementSpec.setProject(project);
                     requirementSpecListNewRequirementSpec = em.merge(requirementSpecListNewRequirementSpec);
-                    if (oldProjectOfRequirementSpecListNewRequirementSpec != null && !oldProjectOfRequirementSpecListNewRequirementSpec.equals(product)) {
+                    if (oldProjectOfRequirementSpecListNewRequirementSpec != null && !oldProjectOfRequirementSpecListNewRequirementSpec.equals(project)) {
                         oldProjectOfRequirementSpecListNewRequirementSpec.getRequirementSpecList().remove(requirementSpecListNewRequirementSpec);
                         oldProjectOfRequirementSpecListNewRequirementSpec = em.merge(oldProjectOfRequirementSpecListNewRequirementSpec);
+                    }
+                }
+            }
+            for (Project projectListOldProject : projectListOld) {
+                if (!projectListNew.contains(projectListOldProject)) {
+                    projectListOldProject.setProject(null);
+                    projectListOldProject = em.merge(projectListOldProject);
+                }
+            }
+            for (Project projectListNewProject : projectListNew) {
+                if (!projectListOld.contains(projectListNewProject)) {
+                    Project oldProjectOfProjectListNewProject = projectListNewProject.getProject();
+                    projectListNewProject.setProject(project);
+                    projectListNewProject = em.merge(projectListNewProject);
+                    if (oldProjectOfProjectListNewProject != null && !oldProjectOfProjectListNewProject.equals(project)) {
+                        oldProjectOfProjectListNewProject.getProjectList().remove(projectListNewProject);
+                        oldProjectOfProjectListNewProject = em.merge(oldProjectOfProjectListNewProject);
+                    }
+                }
+            }
+            for (ProjectHasTestProject projectHasTestProjectListNewProjectHasTestProject : projectHasTestProjectListNew) {
+                if (!projectHasTestProjectListOld.contains(projectHasTestProjectListNewProjectHasTestProject)) {
+                    Project oldProjectOfProjectHasTestProjectListNewProjectHasTestProject = projectHasTestProjectListNewProjectHasTestProject.getProject();
+                    projectHasTestProjectListNewProjectHasTestProject.setProject(project);
+                    projectHasTestProjectListNewProjectHasTestProject = em.merge(projectHasTestProjectListNewProjectHasTestProject);
+                    if (oldProjectOfProjectHasTestProjectListNewProjectHasTestProject != null && !oldProjectOfProjectHasTestProjectListNewProjectHasTestProject.equals(project)) {
+                        oldProjectOfProjectHasTestProjectListNewProjectHasTestProject.getProjectHasTestProjectList().remove(projectHasTestProjectListNewProjectHasTestProject);
+                        oldProjectOfProjectHasTestProjectListNewProjectHasTestProject = em.merge(oldProjectOfProjectHasTestProjectListNewProjectHasTestProject);
                     }
                 }
             }
@@ -190,9 +258,9 @@ public class ProjectJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = product.getId();
+                Integer id = project.getId();
                 if (findProject(id) == null) {
-                    throw new NonexistentEntityException("The product with id " + id + " no longer exists.");
+                    throw new NonexistentEntityException("The project with id " + id + " no longer exists.");
                 }
             }
             throw ex;
@@ -208,37 +276,47 @@ public class ProjectJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Project product;
+            Project project;
             try {
-                product = em.getReference(Project.class, id);
-                product.getId();
+                project = em.getReference(Project.class, id);
+                project.getId();
             } catch (EntityNotFoundException enfe) {
-                throw new NonexistentEntityException("The product with id " + id + " no longer exists.", enfe);
+                throw new NonexistentEntityException("The project with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
-            List<Requirement> requirementListOrphanCheck = product.getRequirementList();
-            for (Requirement requirementListOrphanCheckRequirement : requirementListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Project (" + product + ") cannot be destroyed since the Requirement " + requirementListOrphanCheckRequirement + " in its requirementList field has a non-nullable productId field.");
-            }
-            List<RequirementSpec> requirementSpecListOrphanCheck = product.getRequirementSpecList();
+            List<RequirementSpec> requirementSpecListOrphanCheck = project.getRequirementSpecList();
             for (RequirementSpec requirementSpecListOrphanCheckRequirementSpec : requirementSpecListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This Project (" + product + ") cannot be destroyed since the RequirementSpec " + requirementSpecListOrphanCheckRequirementSpec + " in its requirementSpecList field has a non-nullable product field.");
+                illegalOrphanMessages.add("This Project (" + project + ") cannot be destroyed since the RequirementSpec " + requirementSpecListOrphanCheckRequirementSpec + " in its requirementSpecList field has a non-nullable project field.");
+            }
+            List<ProjectHasTestProject> projectHasTestProjectListOrphanCheck = project.getProjectHasTestProjectList();
+            for (ProjectHasTestProject projectHasTestProjectListOrphanCheckProjectHasTestProject : projectHasTestProjectListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Project (" + project + ") cannot be destroyed since the ProjectHasTestProject " + projectHasTestProjectListOrphanCheckProjectHasTestProject + " in its projectHasTestProjectList field has a non-nullable project field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<TestProject> testProjectList = product.getTestProjectList();
+            Project projectRel = project.getProject();
+            if (projectRel != null) {
+                projectRel.getProjectList().remove(project);
+                projectRel = em.merge(projectRel);
+            }
+            List<TestProject> testProjectList = project.getTestProjectList();
             for (TestProject testProjectListTestProject : testProjectList) {
-                testProjectListTestProject.getProjectList().remove(product);
+                testProjectListTestProject.getProjectList().remove(project);
                 testProjectListTestProject = em.merge(testProjectListTestProject);
             }
-            em.remove(product);
+            List<Project> projectList = project.getProjectList();
+            for (Project projectListProject : projectList) {
+                projectListProject.setProject(null);
+                projectListProject = em.merge(projectListProject);
+            }
+            em.remove(project);
             em.getTransaction().commit();
         } finally {
             if (em != null) {
