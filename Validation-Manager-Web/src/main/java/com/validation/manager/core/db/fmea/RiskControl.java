@@ -5,9 +5,11 @@
 package com.validation.manager.core.db.fmea;
 
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RiskControlHasRequirement;
 import com.validation.manager.core.db.TestCase;
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -16,6 +18,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -32,6 +35,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "RiskControl.findById", query = "SELECT r FROM RiskControl r WHERE r.riskControlPK.id = :id"),
     @NamedQuery(name = "RiskControl.findByRiskControlTypeId", query = "SELECT r FROM RiskControl r WHERE r.riskControlPK.riskControlTypeId = :riskControlTypeId")})
 public class RiskControl implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskControl")
+    private List<RiskControlHasRequirement> riskControlHasRequirementList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RiskControlPK riskControlPK;
@@ -147,6 +152,15 @@ public class RiskControl implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.fmea.RiskControl[ riskControlPK=" + riskControlPK + " ]";
+    }
+
+    @XmlTransient
+    public List<RiskControlHasRequirement> getRiskControlHasRequirementList() {
+        return riskControlHasRequirementList;
+    }
+
+    public void setRiskControlHasRequirementList(List<RiskControlHasRequirement> riskControlHasRequirementList) {
+        this.riskControlHasRequirementList = riskControlHasRequirementList;
     }
     
 }

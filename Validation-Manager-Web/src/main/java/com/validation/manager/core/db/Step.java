@@ -38,6 +38,10 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Step.findByTestCaseTestId", query = "SELECT s FROM Step s WHERE s.stepPK.testCaseTestId = :testCaseTestId"),
     @NamedQuery(name = "Step.findByStepSequence", query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence")})
 public class Step implements Serializable {
+//    @ManyToMany(mappedBy = "stepList")
+//    private List<VmException> vmExceptionList;
+//    @ManyToMany(mappedBy = "stepList")
+//    private List<Requirement> requirementList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected StepPK stepPK;
@@ -176,5 +180,4 @@ public class Step implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
     }
-    
 }

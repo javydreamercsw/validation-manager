@@ -13,11 +13,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -30,7 +33,6 @@ import javax.persistence.TableGenerator;
     @NamedQuery(name = "AttachmentType.findById", query = "SELECT a FROM AttachmentType a WHERE a.id = :id"),
     @NamedQuery(name = "AttachmentType.findByType", query = "SELECT a FROM AttachmentType a WHERE a.type = :type")})
 public class AttachmentType implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "Attachment_Type_IDGEN")
@@ -43,6 +45,15 @@ public class AttachmentType implements Serializable {
     @Basic(optional = false)
     @Column(name = "ID", nullable = false)
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "fk_table")
+    private String fkTable;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "description")
+    private String description;
     @Basic(optional = false)
     @Column(name = "TYPE", nullable = false, length = 255)
     private String type;
@@ -103,5 +114,30 @@ public class AttachmentType implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.AttachmentType[id=" + id + "]";
+    }
+
+    public AttachmentType(Integer id) {
+        this.id = id;
+    }
+
+    public AttachmentType(Integer id, String fkTable) {
+        this.id = id;
+        this.fkTable = fkTable;
+    }
+
+    public String getFkTable() {
+        return fkTable;
+    }
+
+    public void setFkTable(String fkTable) {
+        this.fkTable = fkTable;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

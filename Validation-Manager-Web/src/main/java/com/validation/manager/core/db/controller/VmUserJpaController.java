@@ -4,29 +4,29 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.UserStatus;
-import com.validation.manager.core.db.Role;
-import java.util.ArrayList;
-import java.util.List;
 import com.validation.manager.core.db.CorrectiveAction;
-import com.validation.manager.core.db.UserModifiedRecord;
-import com.validation.manager.core.db.UserHasInvestigation;
+import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.UserAssigment;
-import com.validation.manager.core.db.VmException;
-import com.validation.manager.core.db.UserTestProjectRole;
+import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.UserHasRootCause;
+import com.validation.manager.core.db.UserModifiedRecord;
+import com.validation.manager.core.db.UserStatus;
 import com.validation.manager.core.db.UserTestPlanRole;
+import com.validation.manager.core.db.UserTestProjectRole;
+import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *

@@ -52,6 +52,9 @@
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.SpecLevel</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
+    <class>com.validation.manager.core.db.ProjectHasTestProject</class>
+    <class>com.validation.manager.core.db.RequirementHasException</class>
+    <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/validation_manager"/>
@@ -115,6 +118,9 @@
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.SpecLevel</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
+    <class>com.validation.manager.core.db.ProjectHasTestProject</class>
+    <class>com.validation.manager.core.db.RequirementHasException</class>
+    <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:data/test/validation-manager-test"/>
@@ -179,6 +185,9 @@
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.SpecLevel</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
+    <class>com.validation.manager.core.db.ProjectHasTestProject</class>
+    <class>com.validation.manager.core.db.RequirementHasException</class>
+    <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
     <properties>
       <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
       <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.DefaultSessionLog"/>

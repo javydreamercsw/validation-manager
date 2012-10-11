@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Entity
 @Table(name = "requirement_spec", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"product_id", "name"})})
+    @UniqueConstraint(columnNames = {"project_id", "name"})})
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "RequirementSpec.findAll", query = "SELECT r FROM RequirementSpec r"),
@@ -44,6 +44,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "RequirementSpec.findByVersion", query = "SELECT r FROM RequirementSpec r WHERE r.version = :version"),
     @NamedQuery(name = "RequirementSpec.findByModificationDate", query = "SELECT r FROM RequirementSpec r WHERE r.modificationDate = :modificationDate")})
 public class RequirementSpec implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementSpecPK requirementSpecPK;
@@ -88,8 +89,8 @@ public class RequirementSpec implements Serializable {
         this.modificationDate = modificationDate;
     }
 
-    public RequirementSpec(int productId, int specLevelId) {
-        this.requirementSpecPK = new RequirementSpecPK(productId, specLevelId);
+    public RequirementSpec(int projectId, int specLevelId) {
+        this.requirementSpecPK = new RequirementSpecPK(projectId, specLevelId);
     }
 
     public RequirementSpecPK getRequirementSpecPK() {
@@ -181,5 +182,4 @@ public class RequirementSpec implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RequirementSpec[ requirementSpecPK=" + requirementSpecPK + " ]";
     }
-    
 }

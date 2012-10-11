@@ -8,6 +8,7 @@ import com.validation.manager.core.db.fmea.RiskControl;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -19,6 +20,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -75,8 +77,6 @@ public class Requirement implements Serializable {
     @ManyToMany(mappedBy = "requirementList")
     private List<Requirement> requirementList1;
     @ManyToMany(mappedBy = "requirementList")
-    private List<Step> stepList;
-    @ManyToMany(mappedBy = "requirementList")
     private List<RiskControl> riskControlList;
     @JoinColumns({
         @JoinColumn(name = "requirement_spec_node_id", referencedColumnName = "id"),
@@ -92,6 +92,18 @@ public class Requirement implements Serializable {
     @JoinColumn(name = "requirement_type_id", referencedColumnName = "id", nullable = false)
     @ManyToOne(optional = false)
     private RequirementType requirementType;
+        @JoinTable(name = "step_has_requirement", joinColumns = {
+        @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
+        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "step_id", referencedColumnName = "id"),
+        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id"),
+        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id")})
+    @ManyToMany
+    private List<Step> stepList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
+    private List<RequirementHasException> requirementHasExceptionList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
+    private List<RiskControlHasRequirement> riskControlHasRequirementList;
 
     public Requirement() {
     }
@@ -243,6 +255,24 @@ public class Requirement implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Requirement[ requirementPK=" + requirementPK + " ]";
+    }
+
+    @XmlTransient
+    public List<RequirementHasException> getRequirementHasExceptionList() {
+        return requirementHasExceptionList;
+    }
+
+    public void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
+        this.requirementHasExceptionList = requirementHasExceptionList;
+    }
+
+    @XmlTransient
+    public List<RiskControlHasRequirement> getRiskControlHasRequirementList() {
+        return riskControlHasRequirementList;
+    }
+
+    public void setRiskControlHasRequirementList(List<RiskControlHasRequirement> riskControlHasRequirementList) {
+        this.riskControlHasRequirementList = riskControlHasRequirementList;
     }
     
 }

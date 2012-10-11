@@ -62,8 +62,8 @@ public class Role implements Serializable {
     @Size(max = 65535)
     @Column(name = "notes", length = 65535)
     private String notes;
-    @ManyToMany(mappedBy = "roleList")
-    private List<VmUser> vmUserList;
+//    @ManyToMany(mappedBy = "roleList")
+//    private List<VmUser> vmUserList;
     @JoinTable(name = "role_has_right", joinColumns = {
         @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
         @JoinColumn(name = "right_id", referencedColumnName = "id", nullable = false)})
@@ -73,6 +73,13 @@ public class Role implements Serializable {
     private List<UserTestProjectRole> userTestProjectRoleList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
     private List<UserTestPlanRole> userTestPlanRoleList;
+    @JoinTable(name = "user_has_role", joinColumns = {
+        @JoinColumn(name = "role_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "user_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<VmUser> vmUserList;
+//    @ManyToMany(mappedBy = "roleList")
+//    private List<UserRight> userRightList;
 
     public Role() {
     }

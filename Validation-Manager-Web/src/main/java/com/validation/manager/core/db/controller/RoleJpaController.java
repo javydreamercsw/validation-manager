@@ -5,21 +5,21 @@
 package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.Role;
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.UserRight;
-import java.util.ArrayList;
-import java.util.List;
-import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.UserTestPlanRole;
+import com.validation.manager.core.db.UserTestProjectRole;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -37,11 +37,11 @@ public class RoleJpaController implements Serializable {
     }
 
     public void create(Role role) {
-        if (role.getUserRightList() == null) {
-            role.setUserRightList(new ArrayList<UserRight>());
-        }
         if (role.getVmUserList() == null) {
             role.setVmUserList(new ArrayList<VmUser>());
+        }
+        if (role.getUserRightList() == null) {
+            role.setUserRightList(new ArrayList<UserRight>());
         }
         if (role.getUserTestProjectRoleList() == null) {
             role.setUserTestProjectRoleList(new ArrayList<UserTestProjectRole>());
@@ -53,18 +53,18 @@ public class RoleJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<UserRight> attachedUserRightList = new ArrayList<UserRight>();
-            for (UserRight userRightListUserRightToAttach : role.getUserRightList()) {
-                userRightListUserRightToAttach = em.getReference(userRightListUserRightToAttach.getClass(), userRightListUserRightToAttach.getId());
-                attachedUserRightList.add(userRightListUserRightToAttach);
-            }
-            role.setUserRightList(attachedUserRightList);
             List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
             for (VmUser vmUserListVmUserToAttach : role.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
             }
             role.setVmUserList(attachedVmUserList);
+            List<UserRight> attachedUserRightList = new ArrayList<UserRight>();
+            for (UserRight userRightListUserRightToAttach : role.getUserRightList()) {
+                userRightListUserRightToAttach = em.getReference(userRightListUserRightToAttach.getClass(), userRightListUserRightToAttach.getId());
+                attachedUserRightList.add(userRightListUserRightToAttach);
+            }
+            role.setUserRightList(attachedUserRightList);
             List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<UserTestProjectRole>();
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRoleToAttach : role.getUserTestProjectRoleList()) {
                 userTestProjectRoleListUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListUserTestProjectRoleToAttach.getUserTestProjectRolePK());
@@ -78,13 +78,13 @@ public class RoleJpaController implements Serializable {
             }
             role.setUserTestPlanRoleList(attachedUserTestPlanRoleList);
             em.persist(role);
-            for (UserRight userRightListUserRight : role.getUserRightList()) {
-                userRightListUserRight.getRoleList().add(role);
-                userRightListUserRight = em.merge(userRightListUserRight);
-            }
             for (VmUser vmUserListVmUser : role.getVmUserList()) {
                 vmUserListVmUser.getRoleList().add(role);
                 vmUserListVmUser = em.merge(vmUserListVmUser);
+            }
+            for (UserRight userRightListUserRight : role.getUserRightList()) {
+                userRightListUserRight.getRoleList().add(role);
+                userRightListUserRight = em.merge(userRightListUserRight);
             }
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRole : role.getUserTestProjectRoleList()) {
                 Role oldRoleOfUserTestProjectRoleListUserTestProjectRole = userTestProjectRoleListUserTestProjectRole.getRole();
@@ -118,10 +118,10 @@ public class RoleJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Role persistentRole = em.find(Role.class, role.getId());
-            List<UserRight> userRightListOld = persistentRole.getUserRightList();
-            List<UserRight> userRightListNew = role.getUserRightList();
             List<VmUser> vmUserListOld = persistentRole.getVmUserList();
             List<VmUser> vmUserListNew = role.getVmUserList();
+            List<UserRight> userRightListOld = persistentRole.getUserRightList();
+            List<UserRight> userRightListNew = role.getUserRightList();
             List<UserTestProjectRole> userTestProjectRoleListOld = persistentRole.getUserTestProjectRoleList();
             List<UserTestProjectRole> userTestProjectRoleListNew = role.getUserTestProjectRoleList();
             List<UserTestPlanRole> userTestPlanRoleListOld = persistentRole.getUserTestPlanRoleList();
@@ -146,13 +146,6 @@ public class RoleJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<UserRight> attachedUserRightListNew = new ArrayList<UserRight>();
-            for (UserRight userRightListNewUserRightToAttach : userRightListNew) {
-                userRightListNewUserRightToAttach = em.getReference(userRightListNewUserRightToAttach.getClass(), userRightListNewUserRightToAttach.getId());
-                attachedUserRightListNew.add(userRightListNewUserRightToAttach);
-            }
-            userRightListNew = attachedUserRightListNew;
-            role.setUserRightList(userRightListNew);
             List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
@@ -160,6 +153,13 @@ public class RoleJpaController implements Serializable {
             }
             vmUserListNew = attachedVmUserListNew;
             role.setVmUserList(vmUserListNew);
+            List<UserRight> attachedUserRightListNew = new ArrayList<UserRight>();
+            for (UserRight userRightListNewUserRightToAttach : userRightListNew) {
+                userRightListNewUserRightToAttach = em.getReference(userRightListNewUserRightToAttach.getClass(), userRightListNewUserRightToAttach.getId());
+                attachedUserRightListNew.add(userRightListNewUserRightToAttach);
+            }
+            userRightListNew = attachedUserRightListNew;
+            role.setUserRightList(userRightListNew);
             List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<UserTestProjectRole>();
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRoleToAttach : userTestProjectRoleListNew) {
                 userTestProjectRoleListNewUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListNewUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListNewUserTestProjectRoleToAttach.getUserTestProjectRolePK());
@@ -175,18 +175,6 @@ public class RoleJpaController implements Serializable {
             userTestPlanRoleListNew = attachedUserTestPlanRoleListNew;
             role.setUserTestPlanRoleList(userTestPlanRoleListNew);
             role = em.merge(role);
-            for (UserRight userRightListOldUserRight : userRightListOld) {
-                if (!userRightListNew.contains(userRightListOldUserRight)) {
-                    userRightListOldUserRight.getRoleList().remove(role);
-                    userRightListOldUserRight = em.merge(userRightListOldUserRight);
-                }
-            }
-            for (UserRight userRightListNewUserRight : userRightListNew) {
-                if (!userRightListOld.contains(userRightListNewUserRight)) {
-                    userRightListNewUserRight.getRoleList().add(role);
-                    userRightListNewUserRight = em.merge(userRightListNewUserRight);
-                }
-            }
             for (VmUser vmUserListOldVmUser : vmUserListOld) {
                 if (!vmUserListNew.contains(vmUserListOldVmUser)) {
                     vmUserListOldVmUser.getRoleList().remove(role);
@@ -197,6 +185,18 @@ public class RoleJpaController implements Serializable {
                 if (!vmUserListOld.contains(vmUserListNewVmUser)) {
                     vmUserListNewVmUser.getRoleList().add(role);
                     vmUserListNewVmUser = em.merge(vmUserListNewVmUser);
+                }
+            }
+            for (UserRight userRightListOldUserRight : userRightListOld) {
+                if (!userRightListNew.contains(userRightListOldUserRight)) {
+                    userRightListOldUserRight.getRoleList().remove(role);
+                    userRightListOldUserRight = em.merge(userRightListOldUserRight);
+                }
+            }
+            for (UserRight userRightListNewUserRight : userRightListNew) {
+                if (!userRightListOld.contains(userRightListNewUserRight)) {
+                    userRightListNewUserRight.getRoleList().add(role);
+                    userRightListNewUserRight = em.merge(userRightListNewUserRight);
                 }
             }
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRole : userTestProjectRoleListNew) {
@@ -268,15 +268,15 @@ public class RoleJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<UserRight> userRightList = role.getUserRightList();
-            for (UserRight userRightListUserRight : userRightList) {
-                userRightListUserRight.getRoleList().remove(role);
-                userRightListUserRight = em.merge(userRightListUserRight);
-            }
             List<VmUser> vmUserList = role.getVmUserList();
             for (VmUser vmUserListVmUser : vmUserList) {
                 vmUserListVmUser.getRoleList().remove(role);
                 vmUserListVmUser = em.merge(vmUserListVmUser);
+            }
+            List<UserRight> userRightList = role.getUserRightList();
+            for (UserRight userRightListUserRight : userRightList) {
+                userRightListUserRight.getRoleList().remove(role);
+                userRightListUserRight = em.merge(userRightListUserRight);
             }
             em.remove(role);
             em.getTransaction().commit();

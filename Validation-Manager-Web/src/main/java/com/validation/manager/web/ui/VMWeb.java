@@ -42,6 +42,7 @@ import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.SpecLevel;
@@ -461,7 +462,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                                 List<Object> result =
                                         DataBaseManager.createdQuery(
                                         "select r from Requirement r where "
-                                        + "r.uniqueId=:id and r.productId=:product",
+                                        + "r.uniqueId=:id and r.projectId=:product",
                                         parameters);
                                 if (result.isEmpty()) {
                                     return true;
@@ -584,11 +585,11 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 if (edit) {
                     parameters.clear();
                     parameters.put("id", form.getField("uniqueId").getValue().toString());
-                    parameters.put("productId", currentProject.getId());
+                    parameters.put("projectId", currentProject.getId());
                     result = DataBaseManager.createdQuery(
                             "SELECT r FROM Requirement r WHERE "
                             + "r.uniqueId=:id and "
-                            + "r.productId.id=:productId", parameters);
+                            + "r.projectId.id=:projectId", parameters);
                     reqs = new RequirementServer((Requirement) result.get(0));
                     reqs.setDescription(
                             form.getField("description").getValue().toString()
@@ -907,10 +908,10 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     String itemId = (String) item.getItemProperty("ID").getValue();
                     HashMap<String, Object> parameters = new HashMap<String, Object>();
                     parameters.put("uniqueId", itemId);
-                    parameters.put("productId", currentProject.getId());
+                    parameters.put("projectId", currentProject.getId());
                     List<Object> result = DataBaseManager.createdQuery(
                             "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId "
-                            + "and r.productId.id = :productId", parameters);
+                            + "and r.projectId.id = :projectId", parameters);
                     if (result.isEmpty()
                             && ((Boolean) ((CustomCheckBox) item
                             .getItemProperty(getInstance().getResource().getString(
@@ -1183,20 +1184,47 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         reqs.getItemProperty("caption").setValue(getInstance().getResource()
                 .getString("general.requirement"));
         //Populate the tree
-        List<Requirement> requirements = p.getRequirementList();
-        LOG.log(Level.INFO, "Requirements found: {0}", requirements.size());
-        for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
-            Requirement req = (Requirement) it.next();
-            Item item = tree.addItem(requirementPrefix + req.getUniqueId());
-            item.getItemProperty("caption").setValue(req.getUniqueId());
+        List<RequirementSpec> requirementSpecs = p.getRequirementSpecList();
+        for (Iterator<RequirementSpec> it = requirementSpecs.iterator(); it.hasNext();) {
+            RequirementSpec rs = it.next();
+            Item item = tree.addItem(folderPrefix + rs.getName());
+            item.getItemProperty("caption").setValue(rs.getName());
             //Make it a leaf
-            tree.setChildrenAllowed(requirementPrefix + req.getUniqueId(), false);
+            tree.setChildrenAllowed(folderPrefix + rs.getName(), true);
             //Set the parent
-            tree.setParent(requirementPrefix + req.getUniqueId(),
-                    "general.requirement");
+            tree.setParent(folderPrefix + rs.getName(),
+                    folderPrefix + "Requirements");
             //Add icon
             item.getItemProperty("icon").setValue(
-                    new ThemeResource("icons/Papermart/Text-Edit.png"));
+                    new ThemeResource("icons/Papermart/Folder.png"));
+            for (Iterator<RequirementSpecNode> it2 =
+                    rs.getRequirementSpecNodeList().iterator(); it2.hasNext();) {
+                RequirementSpecNode rsn = it2.next();
+                //Add the node
+                Item node = tree.addItem(folderPrefix + rsn.getName());
+                node.getItemProperty("caption").setValue(rsn.getName());
+                //Make it a leaf
+                tree.setChildrenAllowed(folderPrefix + rsn.getName(), true);
+                //Set the parent
+                tree.setParent(folderPrefix + rsn.getName(),
+                        folderPrefix + rs.getName());
+                //Add icon
+                node.getItemProperty("icon").setValue(
+                        new ThemeResource("icons/Papermart/Folder.png"));
+                for (Iterator<Requirement> it3 = rsn.getRequirementList().iterator(); it3.hasNext();) {
+                    Requirement req = (Requirement) it3.next();
+                    Item requirement = tree.addItem(requirementPrefix + req.getUniqueId());
+                    requirement.getItemProperty("caption").setValue(req.getUniqueId());
+                    //Make it a leaf
+                    tree.setChildrenAllowed(requirementPrefix + req.getUniqueId(), false);
+                    //Set the parent
+                    tree.setParent(requirementPrefix + req.getUniqueId(),
+                            folderPrefix + rsn.getName());
+                    //Add icon
+                    requirement.getItemProperty("icon").setValue(
+                            new ThemeResource("icons/Papermart/Text-Edit.png"));
+                }
+            }
         }
         tree.setSizeFull();
         panel.addComponent(tree);

@@ -12,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -34,6 +36,11 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "UserRight.findById", query = "SELECT u FROM UserRight u WHERE u.id = :id"),
     @NamedQuery(name = "UserRight.findByDescription", query = "SELECT u FROM UserRight u WHERE u.description = :description")})
 public class UserRight implements Serializable {
+    @JoinTable(name = "role_has_right", joinColumns = {
+        @JoinColumn(name = "right_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "role_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<Role> roleList;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -53,8 +60,8 @@ public class UserRight implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "description", nullable = false, length = 255)
     private String description;
-    @ManyToMany(mappedBy = "userRightList")
-    private List<Role> roleList;
+//    @ManyToMany(mappedBy = "userRightList")
+//    private List<Role> roleList;
 
     public UserRight() {
     }
@@ -112,5 +119,4 @@ public class UserRight implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.UserRight[ id=" + id + " ]";
     }
-    
 }

@@ -27,7 +27,6 @@ public class ProjectServer extends Project implements EntityServer{
         setNotes(product.getNotes());
         setName(product.getName());
         setId(product.getId());
-        setRequirementList(product.getRequirementList());
         setRequirementSpecList(product.getRequirementSpecList());
         setTestProjectList(product.getTestProjectList());
     }

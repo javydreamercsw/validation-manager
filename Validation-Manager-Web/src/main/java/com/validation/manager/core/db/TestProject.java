@@ -41,6 +41,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "TestProject.findByName", query = "SELECT t FROM TestProject t WHERE t.name = :name"),
     @NamedQuery(name = "TestProject.findByActive", query = "SELECT t FROM TestProject t WHERE t.active = :active")})
 public class TestProject extends VMAuditedObject implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "testProject")
+    private List<ProjectHasTestProject> projectHasTestProjectList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -166,6 +168,15 @@ public class TestProject extends VMAuditedObject implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestProject[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    public List<ProjectHasTestProject> getProjectHasTestProjectList() {
+        return projectHasTestProjectList;
+    }
+
+    public void setProjectHasTestProjectList(List<ProjectHasTestProject> projectHasTestProjectList) {
+        this.projectHasTestProjectList = projectHasTestProjectList;
     }
     
 }

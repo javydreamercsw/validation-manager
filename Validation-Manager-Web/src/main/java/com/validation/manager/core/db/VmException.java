@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -65,8 +67,8 @@ public class VmException implements Serializable {
     private List<CorrectiveAction> correctiveActionList;
     @ManyToMany(mappedBy = "vmExceptionList")
     private List<Requirement> requirementList;
-    @ManyToMany(mappedBy = "vmExceptionList")
-    private List<Step> stepList;
+//    @ManyToMany(mappedBy = "vmExceptionList")
+//    private List<Step> stepList;
     @JoinTable(name = "exception_has_root_cause", joinColumns = {
         @JoinColumn(name = "exception_id", referencedColumnName = "id", nullable = false),
         @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id", nullable = false)}, inverseJoinColumns = {
@@ -83,6 +85,16 @@ public class VmException implements Serializable {
     @JoinColumn(name = "reporter_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
+    @JoinTable(name = "step_has_exception", joinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "step_id", referencedColumnName = "id"),
+        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id"),
+        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id")})
+    @ManyToMany
+    private List<Step> stepList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmException")
+    private List<RequirementHasException> requirementHasExceptionList;
 
     public VmException() {
     }
@@ -210,5 +222,4 @@ public class VmException implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmException[ vmExceptionPK=" + vmExceptionPK + " ]";
     }
-    
 }

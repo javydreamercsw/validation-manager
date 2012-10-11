@@ -18,11 +18,11 @@ import java.util.Iterator;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestCaseServer extends TestCase implements EntityServer{
+public class TestCaseServer extends TestCase implements EntityServer {
 
     public TestCaseServer(TestCasePK pk) {
         super(pk);
-        TestCaseJpaController controller = new TestCaseJpaController( DataBaseManager.getEntityManagerFactory());
+        TestCaseJpaController controller = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
         TestCase temp = controller.findTestCase(getTestCasePK());
         setActive(temp.getActive());
         setCreationDate(temp.getCreationDate());
@@ -40,12 +40,12 @@ public class TestCaseServer extends TestCase implements EntityServer{
         super(new TestCasePK(testCaseId), version, creationDate);
         setVersion(version);
         setCreationDate(creationDate);
-        setTest(new TestJpaController( DataBaseManager.getEntityManagerFactory()).findTest(testCaseId));
+        setTest(new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(testCaseId));
     }
 
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
-        TestCaseJpaController controller = new TestCaseJpaController( DataBaseManager.getEntityManagerFactory());
+        TestCaseJpaController controller = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
         if (getTestCasePK().getId() > 0) {
             TestCase temp = controller.findTestCase(getTestCasePK());
             temp.setActive(getActive());
@@ -84,6 +84,7 @@ public class TestCaseServer extends TestCase implements EntityServer{
             temp.setTest(getTest());
             temp.setVmUser(getVmUser());
             controller.create(temp);
+            setTestCasePK(temp.getTestCasePK());
         }
         return getTestCasePK().getId();
     }
@@ -97,7 +98,7 @@ public class TestCaseServer extends TestCase implements EntityServer{
             RiskControlServer.deleteRiskControl(it.next());
         }
         tc.getRiskControlList().clear();
-        new TestCaseJpaController( DataBaseManager.getEntityManagerFactory()).edit(tc);
-        new TestCaseJpaController( DataBaseManager.getEntityManagerFactory()).destroy(tc.getTestCasePK());
+        new TestCaseJpaController(DataBaseManager.getEntityManagerFactory()).edit(tc);
+        new TestCaseJpaController(DataBaseManager.getEntityManagerFactory()).destroy(tc.getTestCasePK());
     }
 }
