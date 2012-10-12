@@ -119,6 +119,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
     private final String requirementPrefix = "REQ:";
     private final String folderPrefix = "SEC:";
     private final String specPrefix = "SPEC:";
+    private final String specNodePrefix = "SPECN:";
     private final HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
 
     @Override
@@ -976,13 +977,24 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     String id = tree.getValue().toString()
                             .substring(requirementPrefix.length(),
                             tree.getValue().toString().length());
-                    HashMap<String, Object> parameters = new HashMap<String, Object>();
+                    HashMap<String, Object> parameters = 
+                            new HashMap<String, Object>();
+                    LOG.info(id);
                     parameters.put("id", id);
-                    parameters.put("projectId", currentProject.getId());
+                    RequirementSpecNode rsn =
+                            (RequirementSpecNode) tree.getContainerProperty(
+                            tree.getValue(), "specNode").getValue();
+                    parameters.put("nodeId",
+                            rsn.getRequirementSpecNodePK().getId());
+                    parameters.put("nodeSpecId",
+                            rsn.getRequirementSpecNodePK().getRequirementSpecId());
                     List<Object> result = DataBaseManager.createdQuery(
                             "SELECT r FROM Requirement r WHERE "
                             + "r.uniqueId=:id and "
-                            + "r.project.id=:projectId", parameters);
+                            + "r.requirementSpecNode.requirementSpecNodePK.id="
+                            + ":nodeId and "
+                            + "r.requirementSpecNode.requirementSpecNodePK"
+                            + ".requirementSpecId=:nodeSpecId", parameters);
                     //Show the Values
                     Form form = getRequirementForm(result.isEmpty()
                             ? new Requirement() : (Requirement) result.get(0),
@@ -996,6 +1008,9 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         container.addContainerProperty("caption", String.class, null);
         //Add icon support
         container.addContainerProperty("icon", Resource.class, null);
+        //Add other required info
+        container.addContainerProperty("spec", RequirementSpec.class, null);
+        container.addContainerProperty("specNode", RequirementSpecNode.class, null);
         tree.setContainerDataSource(container);
         tree.setItemCaptionPropertyId("caption");
         tree.setItemCaptionMode(AbstractSelect.ITEM_CAPTION_MODE_PROPERTY);
@@ -1180,51 +1195,86 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             }
         });
         Item reqs = tree.addItem(folderPrefix + "Requirements");
-        tree.setChildrenAllowed("general.requirement", true);
         reqs.getItemProperty("caption").setValue(getInstance().getResource()
                 .getString("general.requirement"));
+        tree.setChildrenAllowed("general.requirement", true);
         //Populate the tree
         List<RequirementSpec> requirementSpecs = p.getRequirementSpecList();
-        for (Iterator<RequirementSpec> it = requirementSpecs.iterator(); it.hasNext();) {
+        LOG.log(Level.INFO, "Requirement Specs found: {0}",
+                requirementSpecs.size());
+        int totalRequirementAmount = 0;
+        for (Iterator<RequirementSpec> it =
+                requirementSpecs.iterator(); it.hasNext();) {
             RequirementSpec rs = it.next();
-            Item item = tree.addItem(folderPrefix + rs.getName());
+            Item item = tree.addItem(specPrefix
+                    + rs.getRequirementSpecPK().getId());
             item.getItemProperty("caption").setValue(rs.getName());
             //Make it a leaf
-            tree.setChildrenAllowed(folderPrefix + rs.getName(), true);
+            tree.setChildrenAllowed(specPrefix
+                    + rs.getRequirementSpecPK().getId(), true);
             //Set the parent
-            tree.setParent(folderPrefix + rs.getName(),
+            tree.setParent(specPrefix + rs.getRequirementSpecPK().getId(),
                     folderPrefix + "Requirements");
             //Add icon
             item.getItemProperty("icon").setValue(
                     new ThemeResource("icons/Papermart/Folder.png"));
+            List<RequirementSpecNode> nodes = rs.getRequirementSpecNodeList();
+            LOG.log(Level.INFO, "Requirement Specs nodes found for {1}: {0}",
+                    new Object[]{nodes.size(), rs.getName()});
+            int requirementAmount = 0;
             for (Iterator<RequirementSpecNode> it2 =
-                    rs.getRequirementSpecNodeList().iterator(); it2.hasNext();) {
+                    nodes.iterator(); it2.hasNext();) {
                 RequirementSpecNode rsn = it2.next();
                 //Add the node
-                Item node = tree.addItem(folderPrefix + rsn.getName());
+                Item node = tree.addItem(specNodePrefix
+                        + rsn.getRequirementSpecNodePK().getId());
                 node.getItemProperty("caption").setValue(rsn.getName());
                 //Make it a leaf
-                tree.setChildrenAllowed(folderPrefix + rsn.getName(), true);
+                tree.setChildrenAllowed(specNodePrefix
+                        + rsn.getRequirementSpecNodePK().getId(), true);
                 //Set the parent
-                tree.setParent(folderPrefix + rsn.getName(),
-                        folderPrefix + rs.getName());
+                tree.setParent(specNodePrefix
+                        + rsn.getRequirementSpecNodePK().getId(),
+                        specPrefix
+                        + rs.getRequirementSpecPK().getId());
                 //Add icon
                 node.getItemProperty("icon").setValue(
                         new ThemeResource("icons/Papermart/Folder.png"));
-                for (Iterator<Requirement> it3 = rsn.getRequirementList().iterator(); it3.hasNext();) {
+                //Add spec
+                node.getItemProperty("spec").setValue(rs);
+                List<Requirement> requirements = rsn.getRequirementList();
+                LOG.log(Level.INFO, "Requirements found: {0}",
+                        new Object[]{requirements.size(), rsn.getName()});
+                requirementAmount += requirements.size();
+                totalRequirementAmount += requirements.size();
+                for (Iterator<Requirement> it3 = requirements.iterator(); it3.hasNext();) {
                     Requirement req = (Requirement) it3.next();
-                    Item requirement = tree.addItem(requirementPrefix + req.getUniqueId());
+                    Item requirement =
+                            tree.addItem(requirementPrefix + req.getUniqueId());
                     requirement.getItemProperty("caption").setValue(req.getUniqueId());
                     //Make it a leaf
                     tree.setChildrenAllowed(requirementPrefix + req.getUniqueId(), false);
                     //Set the parent
                     tree.setParent(requirementPrefix + req.getUniqueId(),
-                            folderPrefix + rsn.getName());
+                            specNodePrefix
+                            + rsn.getRequirementSpecNodePK().getId());
                     //Add icon
                     requirement.getItemProperty("icon").setValue(
                             new ThemeResource("icons/Papermart/Text-Edit.png"));
+                    //Add spec
+                    requirement.getItemProperty("spec").setValue(rs);
+                    requirement.getItemProperty("specNode").setValue(rsn);
                 }
             }
+            //Display amount of requirements
+            //For each spec
+            item.getItemProperty("caption").setValue(rs.getName()
+                    + " (" + requirementAmount + ")");
+            //Overall
+            reqs.getItemProperty("caption").setValue(
+                    getInstance().getResource()
+                    .getString("general.requirement")
+                    + " (" + totalRequirementAmount + ")");
         }
         tree.setSizeFull();
         panel.addComponent(tree);
@@ -1854,8 +1904,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         if (splitPanel != null) {
             if (getRightComponent() != null) {
                 getRightComponent().setSizeFull();
+                splitPanel.setSecondComponent(getRightComponent());
             }
-            splitPanel.setSecondComponent(getRightComponent());
         }
     }
 
@@ -2032,7 +2082,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                                 Window.Notification.TYPE_WARNING_MESSAGE);
                     } else {
                         result = DataBaseManager.createdQuery(
-                                "SELECT x FROM XincoCoreUser x WHERE x.username='"
+                                "SELECT x FROM VmUser x WHERE x.username='"
                                 + username + "'");
                         if (result.size() > 0) {
                             try {

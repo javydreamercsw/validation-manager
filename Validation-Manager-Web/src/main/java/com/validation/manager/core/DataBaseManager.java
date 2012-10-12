@@ -365,7 +365,7 @@ public class DataBaseManager {
             try {
                 ArrayList<String> contents = readFileAsString(script.getAbsolutePath(), null);
                 if (!contents.isEmpty()) {
-                    //Create the init.sql file src\java\com\bluecubs\xinco\core\server\db\script
+                    //Create the init.sql file
                     File initFile = new File(System.getProperty("user.dir")
                             + System.getProperty("file.separator") + "src"
                             + System.getProperty("file.separator") + "main"
@@ -668,11 +668,12 @@ public class DataBaseManager {
      */
     public static boolean compareNumberStrings(String first, String second,
             String separator) {
+        boolean result = true;
         StringTokenizer firstST = new StringTokenizer(first, separator);
         StringTokenizer secondST = new StringTokenizer(second, separator);
         if (firstST.countTokens() != secondST.countTokens()) {
             //Different amount of fields, not equal. (i.e. 2.1 and 2.1.1
-            return false;
+            result = false;
         } else {
             try {
                 while (firstST.hasMoreTokens()) {
@@ -680,17 +681,18 @@ public class DataBaseManager {
                     int secondInt = Integer.parseInt(secondST.nextToken());
                     //Both numbers let's continue
                     if (firstInt != secondInt) {
-                        return false;
+                        result = false;
+                        break;
                     }
                 }
                 //Everything the same
             } catch (java.lang.NumberFormatException e) {
                 LOG.log(Level.WARNING, null, e);
                 //Is not a number
-                return false;
+                result = false;
             }
         }
-        return true;
+        return result;
     }
 
     /**

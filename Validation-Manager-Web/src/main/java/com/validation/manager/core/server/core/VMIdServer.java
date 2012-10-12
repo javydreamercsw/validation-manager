@@ -23,9 +23,9 @@ public class VMIdServer extends VmId implements EntityServer{
     public VMIdServer(Integer id) throws VMException {
         VmIdJpaController controller = new VmIdJpaController(
                 DataBaseManager.getEntityManagerFactory());
-        VmId xincoId = controller.findVmId(id);
-        if (xincoId != null) {
-            fill(xincoId);
+        VmId vmId = controller.findVmId(id);
+        if (vmId != null) {
+            fill(vmId);
         } else {
             throw new VMException("VMId with id: " + id + " not found!");
         }
@@ -48,19 +48,19 @@ public class VMIdServer extends VmId implements EntityServer{
         try {
             VmIdJpaController controller = new VmIdJpaController(
                     DataBaseManager.getEntityManagerFactory());
-            VmId xincoId;
+            VmId vmId;
             if (getId() > 0) {
-                xincoId = controller.findVmId(getId());
-                xincoId.setId(getId());
-                xincoId.setLastId(getLastId());
-                xincoId.setTableName(getTableName());
-                controller.edit(xincoId);
+                vmId = controller.findVmId(getId());
+                vmId.setId(getId());
+                vmId.setLastId(getLastId());
+                vmId.setTableName(getTableName());
+                controller.edit(vmId);
             } else {
-                xincoId = new VmId();
-                xincoId.setId(getId());
-                xincoId.setLastId(getLastId());
-                xincoId.setTableName(getTableName());
-                controller.create(xincoId);
+                vmId = new VmId();
+                vmId.setId(getId());
+                vmId.setLastId(getLastId());
+                vmId.setTableName(getTableName());
+                controller.create(vmId);
             }
             return getId();
         } catch (Exception ex) {
