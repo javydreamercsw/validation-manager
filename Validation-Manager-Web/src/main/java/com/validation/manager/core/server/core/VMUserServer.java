@@ -88,7 +88,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
             if (result.isEmpty()) {
                 parameters.clear();
                 parameters.put("username", attrUN);
-                result = DataBaseManager.namedQuery("XincoCoreUser.findByUsername", parameters);
+                result = DataBaseManager.namedQuery("VmUser.findByUsername", parameters);
                 //The username is valid but wrong password. Increase the login attempts.
                 if (result.size() > 0) {
                     increaseAttempts = true;
@@ -179,7 +179,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
         try {
             parameters.clear();
             parameters.put("id", attrID);
-            result = DataBaseManager.namedQuery("XincoCoreUser.findById", parameters);
+            result = DataBaseManager.namedQuery("VmUser.findById", parameters);
             //throw exception if no result found
             if (result.size() > 0) {
                 VmUser vmu = (VmUser) result.get(0);
