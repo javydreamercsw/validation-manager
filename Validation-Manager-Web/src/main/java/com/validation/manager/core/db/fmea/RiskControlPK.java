@@ -11,6 +11,7 @@ import javax.persistence.Embeddable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.TableGenerator;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -18,7 +19,6 @@ import javax.persistence.TableGenerator;
  */
 @Embeddable
 public class RiskControlPK implements Serializable {
-
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "CauseGen")
     @TableGenerator(name = "RiskControlGen", table = "vm_id",
@@ -30,6 +30,7 @@ public class RiskControlPK implements Serializable {
     @Column(name = "id")
     private int id;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "risk_control_type_id")
     private int riskControlTypeId;
 
@@ -66,6 +67,7 @@ public class RiskControlPK implements Serializable {
 
     @Override
     public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof RiskControlPK)) {
             return false;
         }
@@ -83,4 +85,5 @@ public class RiskControlPK implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.fmea.RiskControlPK[ id=" + id + ", riskControlTypeId=" + riskControlTypeId + " ]";
     }
+    
 }

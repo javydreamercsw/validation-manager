@@ -13,7 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -23,10 +22,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "requirement_type")
@@ -34,7 +34,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "RequirementType.findAll", query = "SELECT r FROM RequirementType r"),
     @NamedQuery(name = "RequirementType.findById", query = "SELECT r FROM RequirementType r WHERE r.id = :id"),
-    @NamedQuery(name = "RequirementType.findByName", query = "SELECT r FROM RequirementType r WHERE r.name = :name")})
+    @NamedQuery(name = "RequirementType.findByName", query = "SELECT r FROM RequirementType r WHERE r.name = :name"),
+    @NamedQuery(name = "RequirementType.findByDescription", query = "SELECT r FROM RequirementType r WHERE r.description = :description")})
 public class RequirementType implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -47,18 +48,17 @@ public class RequirementType implements Serializable {
     allocationSize = 1,
     initialValue = 1000)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name", nullable = false, length = 255)
+    @Size(min = 1, max = 45)
+    @Column(name = "name")
     private String name;
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "description", length = 65535)
+    @Size(max = 45)
+    @Column(name = "description")
     private String description;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementType")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementTypeId")
     private List<Requirement> requirementList;
 
     public RequirementType() {
@@ -93,6 +93,7 @@ public class RequirementType implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Requirement> getRequirementList() {
         return requirementList;
     }

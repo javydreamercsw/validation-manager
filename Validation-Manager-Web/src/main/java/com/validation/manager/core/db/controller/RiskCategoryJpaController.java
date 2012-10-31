@@ -6,18 +6,18 @@ package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.fmea.FMEA;
-import com.validation.manager.core.db.fmea.RiskCategory;
-import com.validation.manager.core.db.fmea.RiskItemHasRiskCategory;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.fmea.FMEA;
+import com.validation.manager.core.db.fmea.RiskCategory;
+import java.util.ArrayList;
+import java.util.List;
+import com.validation.manager.core.db.fmea.RiskItemHasRiskCategory;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  *

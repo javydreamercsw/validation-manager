@@ -19,6 +19,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -40,9 +41,11 @@ public class RiskItem implements Serializable {
     @EmbeddedId
     protected RiskItemPK riskItemPK;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "sequence")
     private int sequence;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "version")
     private int version;
     @JoinTable(name = "risk_item_has_failure_mode", joinColumns = {
@@ -173,11 +176,11 @@ public class RiskItem implements Serializable {
         this.riskItemHasRiskCategoryList = riskItemHasRiskCategoryList;
     }
 
-    public FMEA getFmea() {
+    public FMEA getFMEA() {
         return fmea;
     }
 
-    public void setFmea(FMEA fmea) {
+    public void setFMEA(FMEA fmea) {
         this.fmea = fmea;
     }
 

@@ -26,10 +26,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "role")
@@ -39,7 +40,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Role.findById", query = "SELECT r FROM Role r WHERE r.id = :id"),
     @NamedQuery(name = "Role.findByDescription", query = "SELECT r FROM Role r WHERE r.description = :description")})
 public class Role implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -51,35 +51,28 @@ public class Role implements Serializable {
     allocationSize = 1,
     initialValue = 1000)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "description", nullable = false, length = 255)
+    @Size(min = 1, max = 45)
+    @Column(name = "description")
     private String description;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
-//    @ManyToMany(mappedBy = "roleList")
-//    private List<VmUser> vmUserList;
-    @JoinTable(name = "role_has_right", joinColumns = {
-        @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "right_id", referencedColumnName = "id", nullable = false)})
-    @ManyToMany
-    private List<UserRight> userRightList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
-    private List<UserTestProjectRole> userTestProjectRoleList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
-    private List<UserTestPlanRole> userTestPlanRoleList;
     @JoinTable(name = "user_has_role", joinColumns = {
         @JoinColumn(name = "role_id", referencedColumnName = "id")}, inverseJoinColumns = {
         @JoinColumn(name = "user_id", referencedColumnName = "id")})
     @ManyToMany
     private List<VmUser> vmUserList;
-//    @ManyToMany(mappedBy = "roleList")
-//    private List<UserRight> userRightList;
+    @ManyToMany(mappedBy = "roleList")
+    private List<UserRight> userRightList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
+    private List<UserTestProjectRole> userTestProjectRoleList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
+    private List<UserTestPlanRole> userTestPlanRoleList;
 
     public Role() {
     }
@@ -113,6 +106,7 @@ public class Role implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<VmUser> getVmUserList() {
         return vmUserList;
     }
@@ -122,6 +116,7 @@ public class Role implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserRight> getUserRightList() {
         return userRightList;
     }
@@ -131,6 +126,7 @@ public class Role implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserTestProjectRole> getUserTestProjectRoleList() {
         return userTestProjectRoleList;
     }
@@ -140,6 +136,7 @@ public class Role implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserTestPlanRole> getUserTestPlanRoleList() {
         return userTestPlanRoleList;
     }
@@ -157,7 +154,7 @@ public class Role implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Role)) {
             return false;
         }
@@ -172,4 +169,5 @@ public class Role implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Role[ id=" + id + " ]";
     }
+    
 }

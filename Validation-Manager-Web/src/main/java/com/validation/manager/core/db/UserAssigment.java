@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "user_assigment")
@@ -44,21 +44,21 @@ public class UserAssigment implements Serializable {
     private Date deadline;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "creation_time", nullable = false)
+    @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
-    @JoinColumn(name = "assignment_status_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "assignee_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private AssignmentStatus assignmentStatus;
-    @JoinColumn(name = "assigment_type_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private AssigmentType assigmentType;
-    @JoinColumn(name = "assignee_id", referencedColumnName = "id", nullable = false)
+    private VmUser assigneeId;
+    @JoinColumn(name = "assigner_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
-    @JoinColumn(name = "assigner_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "assignment_status_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
-    private VmUser vmUser1;
+    private AssignmentStatus assignmentStatus;
+    @JoinColumn(name = "assigment_type_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private AssigmentType assigmentType;
 
     public UserAssigment() {
     }
@@ -100,6 +100,22 @@ public class UserAssigment implements Serializable {
         this.creationTime = creationTime;
     }
 
+    public VmUser getAssigneeId() {
+        return assigneeId;
+    }
+
+    public void setAssigneeId(VmUser assigneeId) {
+        this.assigneeId = assigneeId;
+    }
+
+    public VmUser getVmUser() {
+        return vmUser;
+    }
+
+    public void setVmUser(VmUser vmUser) {
+        this.vmUser = vmUser;
+    }
+
     public AssignmentStatus getAssignmentStatus() {
         return assignmentStatus;
     }
@@ -114,22 +130,6 @@ public class UserAssigment implements Serializable {
 
     public void setAssigmentType(AssigmentType assigmentType) {
         this.assigmentType = assigmentType;
-    }
-
-    public VmUser getVmUser() {
-        return vmUser;
-    }
-
-    public void setVmUser(VmUser vmUser) {
-        this.vmUser = vmUser;
-    }
-
-    public VmUser getVmUser1() {
-        return vmUser1;
-    }
-
-    public void setVmUser1(VmUser vmUser1) {
-        this.vmUser1 = vmUser1;
     }
 
     @Override

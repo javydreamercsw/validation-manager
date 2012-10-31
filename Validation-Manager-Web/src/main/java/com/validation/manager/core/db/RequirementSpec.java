@@ -21,19 +21,18 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "requirement_spec", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"project_id", "name"})})
+@Table(name = "requirement_spec")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "RequirementSpec.findAll", query = "SELECT r FROM RequirementSpec r"),
@@ -44,32 +43,31 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "RequirementSpec.findByVersion", query = "SELECT r FROM RequirementSpec r WHERE r.version = :version"),
     @NamedQuery(name = "RequirementSpec.findByModificationDate", query = "SELECT r FROM RequirementSpec r WHERE r.modificationDate = :modificationDate")})
 public class RequirementSpec implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementSpecPK requirementSpecPK;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "name", nullable = false, length = 45)
+    @Column(name = "name")
     private String name;
     @Lob
     @Size(max = 65535)
-    @Column(name = "description", length = 65535)
+    @Column(name = "description")
     private String description;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "version", nullable = false)
+    @Column(name = "version")
     private int version;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "modificationDate", nullable = false)
+    @Column(name = "modificationDate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationDate;
-    @JoinColumn(name = "spec_level_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "spec_level_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private SpecLevel specLevel;
-    @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "project_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Project project;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementSpec")
@@ -150,6 +148,7 @@ public class RequirementSpec implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<RequirementSpecNode> getRequirementSpecNodeList() {
         return requirementSpecNodeList;
     }
@@ -182,4 +181,5 @@ public class RequirementSpec implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RequirementSpec[ requirementSpecPK=" + requirementSpecPK + " ]";
     }
+    
 }

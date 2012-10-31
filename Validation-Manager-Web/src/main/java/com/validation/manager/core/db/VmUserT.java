@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "vm_user_t")
@@ -44,34 +44,34 @@ public class VmUserT implements Serializable {
     @Id
     @Basic(optional = false)
     @NotNull
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "record_id")
     private Integer recordId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "username", nullable = false, length = 45)
+    @Column(name = "username")
     private String username;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "password", nullable = false, length = 45)
+    @Column(name = "password")
     private String password;
     // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
     @Size(max = 100)
-    @Column(name = "email", length = 100)
+    @Column(name = "email")
     private String email;
     @Size(max = 45)
-    @Column(name = "first", length = 45)
+    @Column(name = "first")
     private String first;
     @Size(max = 45)
-    @Column(name = "last", length = 45)
+    @Column(name = "last")
     private String last;
     @Size(max = 10)
-    @Column(name = "locale", length = 10)
+    @Column(name = "locale")
     private String locale;
     @Column(name = "last_modifed")
     @Temporal(TemporalType.TIMESTAMP)

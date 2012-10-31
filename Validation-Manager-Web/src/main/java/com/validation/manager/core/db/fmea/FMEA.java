@@ -22,8 +22,11 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -51,8 +54,11 @@ public class FMEA implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
     @Column(name = "name")
     private String name;
+    @Size(max = 45)
     @Column(name = "description")
     private String description;
     @JoinTable(name = "fmea_has_risk_category", joinColumns = {
@@ -109,6 +115,7 @@ public class FMEA implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<FMEA> getFMEAList() {
         return fMEAList;
     }

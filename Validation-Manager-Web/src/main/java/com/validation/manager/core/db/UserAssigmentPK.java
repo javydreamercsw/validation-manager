@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class UserAssigmentPK implements Serializable {
@@ -28,19 +28,20 @@ public class UserAssigmentPK implements Serializable {
     pkColumnValue = "user_assignment",
     initialValue = 1000,
     allocationSize = 1)
-    @Column(name = "id", nullable = false)
+    @NotNull
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "assigner_id", nullable = false)
+    @Column(name = "assigner_id")
     private int assignerId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "assigment_type_id", nullable = false)
+    @Column(name = "assigment_type_id")
     private int assigmentTypeId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "assignment_status_id", nullable = false)
+    @Column(name = "assignment_status_id")
     private int assignmentStatusId;
 
     public UserAssigmentPK() {

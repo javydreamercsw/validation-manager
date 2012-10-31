@@ -27,14 +27,17 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "requirement", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"project_id", "unique_id"})})
+    @UniqueConstraint(columnNames = {"requirement_spec_node_id",
+        "requirement_spec_node_requirement_spec_project_id",
+        "requirement_spec_node_requirement_spec_spec_level_id", "unique_id"})})
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Requirement.findAll", query = "SELECT r FROM Requirement r"),
@@ -42,57 +45,44 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Requirement.findByVersion", query = "SELECT r FROM Requirement r WHERE r.requirementPK.version = :version"),
     @NamedQuery(name = "Requirement.findByUniqueId", query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId")})
 public class Requirement implements Serializable {
+
+    @JoinTable(name = "risk_control_has_requirement", joinColumns = {
+        @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
+        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
+        @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")})
+    @ManyToMany
+    private List<RiskControl> riskControlList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
+    private List<RequirementHasException> requirementHasExceptionList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementPK requirementPK;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "unique_id", nullable = false, length = 45)
+    @Column(name = "unique_id")
     private String uniqueId;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
-    @Column(name = "description", nullable = false, length = 65535)
+    @Column(name = "description")
     private String description;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
-    @JoinTable(name = "requirement_has_exception", joinColumns = {
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id", nullable = false)})
-    @ManyToMany
-    private List<VmException> vmExceptionList;
     @JoinTable(name = "requirement_has_requirement", joinColumns = {
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "parent_requirement_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "parent_requirement_version", referencedColumnName = "version", nullable = false)})
+        @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
+        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "parent_requirement_id", referencedColumnName = "id"),
+        @JoinColumn(name = "parent_requirement_version", referencedColumnName = "version")})
     @ManyToMany
     private List<Requirement> requirementList;
     @ManyToMany(mappedBy = "requirementList")
     private List<Requirement> requirementList1;
-    @ManyToMany(mappedBy = "requirementList")
-    private List<RiskControl> riskControlList;
-    @JoinColumns({
-        @JoinColumn(name = "requirement_spec_node_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", referencedColumnName = "requirement_spec_id")})
-    @ManyToOne
-    private RequirementSpecNode requirementSpecNode;
-    @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false)
-    @ManyToOne(optional = false)
-    private Project project;
-    @JoinColumn(name = "requirement_status_id", referencedColumnName = "id", nullable = false)
-    @ManyToOne(optional = false)
-    private RequirementStatus requirementStatus;
-    @JoinColumn(name = "requirement_type_id", referencedColumnName = "id", nullable = false)
-    @ManyToOne(optional = false)
-    private RequirementType requirementType;
-        @JoinTable(name = "step_has_requirement", joinColumns = {
+    @JoinTable(name = "step_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
         @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
         @JoinColumn(name = "step_id", referencedColumnName = "id"),
@@ -100,10 +90,19 @@ public class Requirement implements Serializable {
         @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id")})
     @ManyToMany
     private List<Step> stepList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
-    private List<RequirementHasException> requirementHasExceptionList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
-    private List<RiskControlHasRequirement> riskControlHasRequirementList;
+    @JoinColumn(name = "requirement_type_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private RequirementType requirementTypeId;
+    @JoinColumn(name = "requirement_status_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private RequirementStatus requirementStatusId;
+    @JoinColumns({
+        @JoinColumn(name = "requirement_spec_node_id", referencedColumnName = "id"),
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", referencedColumnName = "requirement_spec_id"),
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_project_id", referencedColumnName = "requirement_spec_project_id"),
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id", referencedColumnName = "requirement_spec_spec_level_id")})
+    @ManyToOne(optional = false)
+    private RequirementSpecNode requirementSpecNode;
 
     public Requirement() {
     }
@@ -156,15 +155,7 @@ public class Requirement implements Serializable {
     }
 
     @XmlTransient
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
-    }
-
-    @XmlTransient
+    @JsonIgnore
     public List<Requirement> getRequirementList() {
         return requirementList;
     }
@@ -174,6 +165,7 @@ public class Requirement implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Requirement> getRequirementList1() {
         return requirementList1;
     }
@@ -183,6 +175,7 @@ public class Requirement implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Step> getStepList() {
         return stepList;
     }
@@ -191,13 +184,20 @@ public class Requirement implements Serializable {
         this.stepList = stepList;
     }
 
-    @XmlTransient
-    public List<RiskControl> getRiskControlList() {
-        return riskControlList;
+    public RequirementType getRequirementTypeId() {
+        return requirementTypeId;
     }
 
-    public void setRiskControlList(List<RiskControl> riskControlList) {
-        this.riskControlList = riskControlList;
+    public void setRequirementTypeId(RequirementType requirementTypeId) {
+        this.requirementTypeId = requirementTypeId;
+    }
+
+    public RequirementStatus getRequirementStatusId() {
+        return requirementStatusId;
+    }
+
+    public void setRequirementStatusId(RequirementStatus requirementStatusId) {
+        this.requirementStatusId = requirementStatusId;
     }
 
     public RequirementSpecNode getRequirementSpecNode() {
@@ -206,30 +206,6 @@ public class Requirement implements Serializable {
 
     public void setRequirementSpecNode(RequirementSpecNode requirementSpecNode) {
         this.requirementSpecNode = requirementSpecNode;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    public RequirementStatus getRequirementStatus() {
-        return requirementStatus;
-    }
-
-    public void setRequirementStatus(RequirementStatus requirementStatus) {
-        this.requirementStatus = requirementStatus;
-    }
-
-    public RequirementType getRequirementType() {
-        return requirementType;
-    }
-
-    public void setRequirementType(RequirementType requirementType) {
-        this.requirementType = requirementType;
     }
 
     @Override
@@ -258,6 +234,7 @@ public class Requirement implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<RequirementHasException> getRequirementHasExceptionList() {
         return requirementHasExceptionList;
     }
@@ -267,12 +244,12 @@ public class Requirement implements Serializable {
     }
 
     @XmlTransient
-    public List<RiskControlHasRequirement> getRiskControlHasRequirementList() {
-        return riskControlHasRequirementList;
+    @JsonIgnore
+    public List<RiskControl> getRiskControlList() {
+        return riskControlList;
     }
 
-    public void setRiskControlHasRequirementList(List<RiskControlHasRequirement> riskControlHasRequirementList) {
-        this.riskControlHasRequirementList = riskControlHasRequirementList;
+    public void setRiskControlList(List<RiskControl> riskControlList) {
+        this.riskControlList = riskControlList;
     }
-    
 }

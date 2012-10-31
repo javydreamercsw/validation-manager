@@ -12,26 +12,26 @@ import com.validation.manager.core.db.fmea.RiskItem;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RiskItemServer extends RiskItem implements EntityServer{
+public class RiskItemServer extends RiskItem implements EntityServer {
 
     public RiskItemServer(int fMEAid, int sequence, int version) {
         super(fMEAid);
         setSequence(sequence);
         setVersion(version);
-        setFmea(new FMEAJpaController( DataBaseManager.getEntityManagerFactory()).findFMEA(fMEAid));
+        setFMEA(new FMEAJpaController(DataBaseManager.getEntityManagerFactory()).findFMEA(fMEAid));
     }
 
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
         if (getRiskItemPK() != null && getRiskItemPK().getId() > 0) {
-            RiskItem ri = new RiskItemJpaController( DataBaseManager.getEntityManagerFactory()).findRiskItem(getRiskItemPK());
+            RiskItem ri = new RiskItemJpaController(DataBaseManager.getEntityManagerFactory()).findRiskItem(getRiskItemPK());
             if (getCauseList() != null) {
                 ri.setCauseList(getCauseList());
             }
             if (getFailureModeList() != null) {
                 ri.setFailureModeList(getFailureModeList());
             }
-            ri.setFmea(new FMEAJpaController( DataBaseManager.getEntityManagerFactory()).findFMEA(getRiskItemPK().getFMEAid()));
+            ri.setFMEA(new FMEAJpaController(DataBaseManager.getEntityManagerFactory()).findFMEA(getRiskItemPK().getFMEAid()));
             if (getHazardList() != null) {
                 ri.setHazardList(getHazardList());
             }
@@ -43,18 +43,18 @@ public class RiskItemServer extends RiskItem implements EntityServer{
             }
             ri.setSequence(getSequence());
             ri.setVersion(getVersion());
-            new RiskItemJpaController( DataBaseManager.getEntityManagerFactory()).edit(ri);
+            new RiskItemJpaController(DataBaseManager.getEntityManagerFactory()).edit(ri);
         } else {
-            RiskItem ri = new RiskItem(getFmea().getId());
+            RiskItem ri = new RiskItem(getFMEA().getId());
             ri.setCauseList(getCauseList());
             ri.setFailureModeList(getFailureModeList());
-            ri.setFmea(new FMEAJpaController( DataBaseManager.getEntityManagerFactory()).findFMEA(getRiskItemPK().getFMEAid()));
+            ri.setFMEA(new FMEAJpaController(DataBaseManager.getEntityManagerFactory()).findFMEA(getRiskItemPK().getFMEAid()));
             ri.setHazardList(getHazardList());
             ri.setRiskControlList(getRiskControlList());
             ri.setRiskControlList1(getRiskControlList1());
             ri.setSequence(getSequence());
             ri.setVersion(getVersion());
-            new RiskItemJpaController( DataBaseManager.getEntityManagerFactory()).create(ri);
+            new RiskItemJpaController(DataBaseManager.getEntityManagerFactory()).create(ri);
             setRiskItemPK(ri.getRiskItemPK());
         }
         return getRiskItemPK().getId();

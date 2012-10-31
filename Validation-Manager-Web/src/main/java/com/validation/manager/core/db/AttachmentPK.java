@@ -11,15 +11,17 @@ import javax.persistence.Embeddable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.TableGenerator;
+import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class AttachmentPK implements Serializable {
 
     @Basic(optional = false)
+    @NotNull
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "AttachmentGen")
     @TableGenerator(name = "AttachmentGen", table = "vm_id",
     pkColumnName = "table_name",
@@ -27,10 +29,11 @@ public class AttachmentPK implements Serializable {
     pkColumnValue = "attachment",
     allocationSize = 1,
     initialValue = 1000)
-    @Column(name = "ID", nullable = false)
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
-    @Column(name = "ATTACHMENT_TYPE_ID", nullable = false)
+    @NotNull
+    @Column(name = "attachment_type_id")
     private int attachmentTypeId;
 
     public AttachmentPK() {
@@ -42,6 +45,10 @@ public class AttachmentPK implements Serializable {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getAttachmentTypeId() {
@@ -62,7 +69,7 @@ public class AttachmentPK implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof AttachmentPK)) {
             return false;
         }
@@ -78,6 +85,6 @@ public class AttachmentPK implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.AttachmentPK[id=" + id + ", attachmentTypeId=" + attachmentTypeId + "]";
+        return "com.validation.manager.core.db.AttachmentPK[ id=" + id + ", attachmentTypeId=" + attachmentTypeId + " ]";
     }
 }

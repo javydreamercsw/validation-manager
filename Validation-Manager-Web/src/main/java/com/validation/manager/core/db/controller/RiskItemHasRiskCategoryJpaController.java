@@ -6,18 +6,18 @@ package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import com.validation.manager.core.db.fmea.RiskCategory;
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.fmea.RiskItem;
+import com.validation.manager.core.db.fmea.RiskCategory;
 import com.validation.manager.core.db.fmea.RiskItemHasRiskCategory;
 import com.validation.manager.core.db.fmea.RiskItemHasRiskCategoryPK;
-import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -38,31 +38,31 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
         if (riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK() == null) {
             riskItemHasRiskCategory.setRiskItemHasRiskCategoryPK(new RiskItemHasRiskCategoryPK());
         }
-        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
+        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            RiskCategory riskCategory = riskItemHasRiskCategory.getRiskCategory();
-            if (riskCategory != null) {
-                riskCategory = em.getReference(riskCategory.getClass(), riskCategory.getId());
-                riskItemHasRiskCategory.setRiskCategory(riskCategory);
-            }
             RiskItem riskItem = riskItemHasRiskCategory.getRiskItem();
             if (riskItem != null) {
                 riskItem = em.getReference(riskItem.getClass(), riskItem.getRiskItemPK());
                 riskItemHasRiskCategory.setRiskItem(riskItem);
             }
-            em.persist(riskItemHasRiskCategory);
+            RiskCategory riskCategory = riskItemHasRiskCategory.getRiskCategory();
             if (riskCategory != null) {
-                riskCategory.getRiskItemHasRiskCategoryList().add(riskItemHasRiskCategory);
-                riskCategory = em.merge(riskCategory);
+                riskCategory = em.getReference(riskCategory.getClass(), riskCategory.getId());
+                riskItemHasRiskCategory.setRiskCategory(riskCategory);
             }
+            em.persist(riskItemHasRiskCategory);
             if (riskItem != null) {
                 riskItem.getRiskItemHasRiskCategoryList().add(riskItemHasRiskCategory);
                 riskItem = em.merge(riskItem);
+            }
+            if (riskCategory != null) {
+                riskCategory.getRiskItemHasRiskCategoryList().add(riskItemHasRiskCategory);
+                riskCategory = em.merge(riskCategory);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -78,35 +78,27 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
     }
 
     public void edit(RiskItemHasRiskCategory riskItemHasRiskCategory) throws NonexistentEntityException, Exception {
-        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
+        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             RiskItemHasRiskCategory persistentRiskItemHasRiskCategory = em.find(RiskItemHasRiskCategory.class, riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK());
-            RiskCategory riskCategoryOld = persistentRiskItemHasRiskCategory.getRiskCategory();
-            RiskCategory riskCategoryNew = riskItemHasRiskCategory.getRiskCategory();
             RiskItem riskItemOld = persistentRiskItemHasRiskCategory.getRiskItem();
             RiskItem riskItemNew = riskItemHasRiskCategory.getRiskItem();
-            if (riskCategoryNew != null) {
-                riskCategoryNew = em.getReference(riskCategoryNew.getClass(), riskCategoryNew.getId());
-                riskItemHasRiskCategory.setRiskCategory(riskCategoryNew);
-            }
+            RiskCategory riskCategoryOld = persistentRiskItemHasRiskCategory.getRiskCategory();
+            RiskCategory riskCategoryNew = riskItemHasRiskCategory.getRiskCategory();
             if (riskItemNew != null) {
                 riskItemNew = em.getReference(riskItemNew.getClass(), riskItemNew.getRiskItemPK());
                 riskItemHasRiskCategory.setRiskItem(riskItemNew);
             }
+            if (riskCategoryNew != null) {
+                riskCategoryNew = em.getReference(riskCategoryNew.getClass(), riskCategoryNew.getId());
+                riskItemHasRiskCategory.setRiskCategory(riskCategoryNew);
+            }
             riskItemHasRiskCategory = em.merge(riskItemHasRiskCategory);
-            if (riskCategoryOld != null && !riskCategoryOld.equals(riskCategoryNew)) {
-                riskCategoryOld.getRiskItemHasRiskCategoryList().remove(riskItemHasRiskCategory);
-                riskCategoryOld = em.merge(riskCategoryOld);
-            }
-            if (riskCategoryNew != null && !riskCategoryNew.equals(riskCategoryOld)) {
-                riskCategoryNew.getRiskItemHasRiskCategoryList().add(riskItemHasRiskCategory);
-                riskCategoryNew = em.merge(riskCategoryNew);
-            }
             if (riskItemOld != null && !riskItemOld.equals(riskItemNew)) {
                 riskItemOld.getRiskItemHasRiskCategoryList().remove(riskItemHasRiskCategory);
                 riskItemOld = em.merge(riskItemOld);
@@ -114,6 +106,14 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
             if (riskItemNew != null && !riskItemNew.equals(riskItemOld)) {
                 riskItemNew.getRiskItemHasRiskCategoryList().add(riskItemHasRiskCategory);
                 riskItemNew = em.merge(riskItemNew);
+            }
+            if (riskCategoryOld != null && !riskCategoryOld.equals(riskCategoryNew)) {
+                riskCategoryOld.getRiskItemHasRiskCategoryList().remove(riskItemHasRiskCategory);
+                riskCategoryOld = em.merge(riskCategoryOld);
+            }
+            if (riskCategoryNew != null && !riskCategoryNew.equals(riskCategoryOld)) {
+                riskCategoryNew.getRiskItemHasRiskCategoryList().add(riskItemHasRiskCategory);
+                riskCategoryNew = em.merge(riskCategoryNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -144,15 +144,15 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskItemHasRiskCategory with id " + id + " no longer exists.", enfe);
             }
-            RiskCategory riskCategory = riskItemHasRiskCategory.getRiskCategory();
-            if (riskCategory != null) {
-                riskCategory.getRiskItemHasRiskCategoryList().remove(riskItemHasRiskCategory);
-                riskCategory = em.merge(riskCategory);
-            }
             RiskItem riskItem = riskItemHasRiskCategory.getRiskItem();
             if (riskItem != null) {
                 riskItem.getRiskItemHasRiskCategoryList().remove(riskItemHasRiskCategory);
                 riskItem = em.merge(riskItem);
+            }
+            RiskCategory riskCategory = riskItemHasRiskCategory.getRiskCategory();
+            if (riskCategory != null) {
+                riskCategory.getRiskItemHasRiskCategoryList().remove(riskItemHasRiskCategory);
+                riskCategory = em.merge(riskCategory);
             }
             em.remove(riskItemHasRiskCategory);
             em.getTransaction().commit();

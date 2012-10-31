@@ -582,7 +582,6 @@ public class DataBaseManager {
             LOG.info("Done!");
         } catch (FlywayException fe) {
             LOG.log(Level.SEVERE, "Unable to migrate data", fe);
-
             setState(DBState.ERROR);
         }
         try {

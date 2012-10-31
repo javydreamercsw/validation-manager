@@ -12,13 +12,19 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -30,10 +36,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "FailureMode.findAll", query = "SELECT f FROM FailureMode f"),
     @NamedQuery(name = "FailureMode.findById", query = "SELECT f FROM FailureMode f WHERE f.id = :id"),
-    @NamedQuery(name = "FailureMode.findByName", query = "SELECT f FROM FailureMode f WHERE f.name = :name"),
-    @NamedQuery(name = "FailureMode.findByDescription", query = "SELECT f FROM FailureMode f WHERE f.description = :description")})
+    @NamedQuery(name = "FailureMode.findByName", query = "SELECT f FROM FailureMode f WHERE f.name = :name")})
 public class FailureMode implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -47,12 +51,21 @@ public class FailureMode implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
     @Column(name = "name")
     private String name;
     @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Size(min = 1, max = 65535)
     @Column(name = "description")
     private String description;
-    @ManyToMany(mappedBy = "failureModeList")
+    @JoinTable(name = "risk_item_has_failure_mode", joinColumns = {
+        @JoinColumn(name = "failure_mode_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
+        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")})
+    @ManyToMany
     private List<RiskItem> riskItemList;
 
     public FailureMode() {
@@ -88,6 +101,7 @@ public class FailureMode implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<RiskItem> getRiskItemList() {
         return riskItemList;
     }
@@ -105,6 +119,7 @@ public class FailureMode implements Serializable {
 
     @Override
     public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof FailureMode)) {
             return false;
         }
@@ -119,4 +134,5 @@ public class FailureMode implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.fmea.FailureMode[ id=" + id + " ]";
     }
+    
 }

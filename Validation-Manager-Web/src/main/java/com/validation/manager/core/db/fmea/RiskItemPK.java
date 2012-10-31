@@ -11,6 +11,7 @@ import javax.persistence.Embeddable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.TableGenerator;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -18,7 +19,6 @@ import javax.persistence.TableGenerator;
  */
 @Embeddable
 public class RiskItemPK implements Serializable {
-
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "RiskItemGen")
     @TableGenerator(name = "RiskItemGen", table = "vm_id",
@@ -30,6 +30,7 @@ public class RiskItemPK implements Serializable {
     @Column(name = "id")
     private int id;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "FMEA_id")
     private int fMEAid;
 
@@ -66,6 +67,7 @@ public class RiskItemPK implements Serializable {
 
     @Override
     public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof RiskItemPK)) {
             return false;
         }

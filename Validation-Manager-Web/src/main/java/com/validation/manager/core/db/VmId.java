@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @EntityListeners(com.validation.manager.core.VMIdGenerator.class)
@@ -39,16 +39,16 @@ public class VmId implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 100)
-    @Column(name = "table_name", nullable = false, length = 100)
+    @Column(name = "table_name")
     private String tableName;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "last_id", nullable = false)
+    @Column(name = "last_id")
     private int lastId;
 
     public VmId() {

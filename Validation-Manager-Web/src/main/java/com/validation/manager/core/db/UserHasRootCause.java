@@ -4,6 +4,7 @@
  */
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.db.fmea.RootCause;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -23,7 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "user_has_root_cause")
@@ -41,20 +42,20 @@ public class UserHasRootCause implements Serializable {
     protected UserHasRootCausePK userHasRootCausePK;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date startDate;
     @Column(name = "end_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date endDate;
-    @JoinColumns({
-        @JoinColumn(name = "root_cause_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false),
-        @JoinColumn(name = "root_cause_root_cause_type_id", referencedColumnName = "root_cause_type_id", nullable = false, insertable = false, updatable = false)})
-    @ManyToOne(optional = false)
-    private RootCause rootCause;
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
+    @JoinColumns({
+        @JoinColumn(name = "root_cause_id", referencedColumnName = "id", insertable = false, updatable = false),
+        @JoinColumn(name = "root_cause_root_cause_type_id", referencedColumnName = "root_cause_type_id", insertable = false, updatable = false)})
+    @ManyToOne(optional = false)
+    private RootCause rootCause;
 
     public UserHasRootCause() {
     }
@@ -96,20 +97,20 @@ public class UserHasRootCause implements Serializable {
         this.endDate = endDate;
     }
 
-    public RootCause getRootCause() {
-        return rootCause;
-    }
-
-    public void setRootCause(RootCause rootCause) {
-        this.rootCause = rootCause;
-    }
-
     public VmUser getVmUser() {
         return vmUser;
     }
 
     public void setVmUser(VmUser vmUser) {
         this.vmUser = vmUser;
+    }
+
+    public RootCause getRootCause() {
+        return rootCause;
+    }
+
+    public void setRootCause(RootCause rootCause) {
+        this.rootCause = rootCause;
     }
 
     @Override

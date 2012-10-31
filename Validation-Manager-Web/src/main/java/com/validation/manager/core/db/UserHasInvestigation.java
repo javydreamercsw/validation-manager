@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "user_has_investigation")
@@ -41,12 +41,12 @@ public class UserHasInvestigation implements Serializable {
     @Column(name = "close_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date closeDate;
-    @JoinColumn(name = "investigation_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Investigation investigation;
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
+    @JoinColumn(name = "investigation_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private Investigation investigation;
 
     public UserHasInvestigation() {
     }
@@ -83,20 +83,20 @@ public class UserHasInvestigation implements Serializable {
         this.closeDate = closeDate;
     }
 
-    public Investigation getInvestigation() {
-        return investigation;
-    }
-
-    public void setInvestigation(Investigation investigation) {
-        this.investigation = investigation;
-    }
-
     public VmUser getVmUser() {
         return vmUser;
     }
 
     public void setVmUser(VmUser vmUser) {
         this.vmUser = vmUser;
+    }
+
+    public Investigation getInvestigation() {
+        return investigation;
+    }
+
+    public void setInvestigation(Investigation investigation) {
+        this.investigation = investigation;
     }
 
     @Override

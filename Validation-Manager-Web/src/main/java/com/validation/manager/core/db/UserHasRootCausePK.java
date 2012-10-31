@@ -12,21 +12,21 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class UserHasRootCausePK implements Serializable {
     @Basic(optional = false)
     @NotNull
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private int userId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "root_cause_id", nullable = false)
+    @Column(name = "root_cause_id")
     private int rootCauseId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "root_cause_root_cause_type_id", nullable = false)
+    @Column(name = "root_cause_root_cause_type_id")
     private int rootCauseRootCauseTypeId;
 
     public UserHasRootCausePK() {

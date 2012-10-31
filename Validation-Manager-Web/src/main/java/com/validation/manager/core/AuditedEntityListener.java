@@ -170,8 +170,8 @@ public class AuditedEntityListener {
                                     auditedObject.getClass().getSimpleName());
                             VmUserT newUser = new VmUserT(mod.getUserModifiedRecordPK().getRecordId(),
                                     user.getId(), user.getUsername(), user.getPassword());
-                            if (user.getUserStatus() != null) {
-                                newUser.setUserStatusId(user.getUserStatus().getId());
+                            if (user.getUserStatusId() != null) {
+                                newUser.setUserStatusId(user.getUserStatusId().getId());
                             }
                             newUser.setAttempts(user.getAttempts());
                             newUser.setEmail(user.getEmail());
@@ -184,7 +184,7 @@ public class AuditedEntityListener {
                             updated = true;
                             LOG.log(Level.FINE, "Done!");
                         }
-                        if (auditedObject instanceof TestProject) {
+                        else if (auditedObject instanceof TestProject) {
                             TestProject project = (TestProject) auditedObject;
                             LOG.log(Level.FINE, "Updating audit trail for {0}",
                                     auditedObject.getClass().getSimpleName());
@@ -198,7 +198,7 @@ public class AuditedEntityListener {
                             updated = true;
                             LOG.log(Level.FINE, "Done!");
                         }
-                        if (auditedObject instanceof TestPlan) {
+                        else if (auditedObject instanceof TestPlan) {
                             TestPlan tpl = (TestPlan) auditedObject;
                             LOG.log(Level.FINE, "Updating audit trail for {0}",
                                     auditedObject.getClass().getSimpleName());

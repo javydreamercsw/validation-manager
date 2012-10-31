@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_case_execution")
@@ -29,7 +29,6 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "TestCaseExecution.findAll", query = "SELECT t FROM TestCaseExecution t"),
     @NamedQuery(name = "TestCaseExecution.findById", query = "SELECT t FROM TestCaseExecution t WHERE t.id = :id")})
 public class TestCaseExecution implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -41,7 +40,7 @@ public class TestCaseExecution implements Serializable {
     allocationSize = 1,
     initialValue = 1000)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
 
     public TestCaseExecution() {
@@ -64,7 +63,7 @@ public class TestCaseExecution implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof TestCaseExecution)) {
             return false;
         }
@@ -79,4 +78,5 @@ public class TestCaseExecution implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.TestCaseExecution[ id=" + id + " ]";
     }
+    
 }

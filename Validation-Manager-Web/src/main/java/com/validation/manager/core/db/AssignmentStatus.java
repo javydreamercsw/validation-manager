@@ -23,10 +23,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "assignment_status")
@@ -47,25 +48,25 @@ public class AssignmentStatus implements Serializable {
     initialValue = 1000,
     allocationSize = 1)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name", nullable = false, length = 255)
+    @Size(min = 1, max = 45)
+    @Column(name = "name")
     private String name;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
-    @Column(name = "description", nullable = false, length = 65535)
+    @Column(name = "description")
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignmentStatus")
     private List<UserAssigment> userAssigmentList;
 
     public AssignmentStatus() {
     }
-    
+
     public AssignmentStatus(String name, String description) {
         this.name = name;
         this.description = description;
@@ -96,6 +97,7 @@ public class AssignmentStatus implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserAssigment> getUserAssigmentList() {
         return userAssigmentList;
     }

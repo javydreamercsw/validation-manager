@@ -2,11 +2,7 @@ package com.validation.manager.core.db;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.controller.ProjectJpaController;
-import com.validation.manager.core.db.controller.StepJpaController;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
-import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
@@ -22,6 +18,8 @@ import org.junit.Test;
 public class ProjectTest extends AbstractVMTestCase {
 
     Project p;
+    private static final Logger LOG=
+            Logger.getLogger(ProjectTest.class.getName());
 
     public ProjectTest() {
     }
@@ -42,22 +40,40 @@ public class ProjectTest extends AbstractVMTestCase {
             VmUser user = TestHelper.createUser("test1",
                     "password", "first", "test@test.com", "last");
             p = TestHelper.createProject("New Project", "Notes");
-            ProjectServer ps = new ProjectServer(p);
-            ps.setNotes("Notes 2");
-            ps.write2DB();
+            ProjectServer project = new ProjectServer(p);
+            project.setNotes("Notes 2");
+            project.write2DB();
             assertTrue(new ProjectJpaController(
                     DataBaseManager.getEntityManagerFactory())
-                    .findProject(ps.getId()).getNotes().equals(ps.getNotes()));
+                    .findProject(project.getId()).getNotes().equals(project.getNotes()));
             //Create requirements
+            System.out.println("Create Requirement Spec");
+            RequirementSpec rss = null;
+            try {
+                rss = TestHelper.createRequirementSpec("Test", "Test",
+                        project, 1);
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+            System.out.println("Create Requirement Spec Node");
+            RequirementSpecNode rsns = null;
+            try {
+                rsns = TestHelper.createRequirementSpecNode(
+                        rss, "Test", "Test", "Test");
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
             Requirement r = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", p, "Notes", 1);
+                    "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             //Create Test
             com.validation.manager.core.db.Test test =
                     TestHelper.createTest("Test #1", "Testing",
                     "Test #1 scope");
             //Create Test Case
             TestCase tc = TestHelper.createTestCase(1, new Short("1"),
-                    "Expected Results", test, user, "Summary");
+                    "Expected Results", test, /*user,*/ "Summary");
             //Add steps
             for (int i = 1; i < 6; i++) {
                 tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
@@ -74,8 +90,7 @@ public class ProjectTest extends AbstractVMTestCase {
             //Add test to plan
             TestHelper.addTestToPlan(plan, test);
         } catch (Exception ex) {
-            Logger.getLogger(ProjectTest.class.getName()).log(
-                    Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
     }

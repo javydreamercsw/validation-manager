@@ -4,21 +4,22 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.RequirementSpec;
-import com.validation.manager.core.db.RequirementSpecNode;
-import com.validation.manager.core.db.RequirementSpecNodePK;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.RequirementSpec;
+import java.util.ArrayList;
+import java.util.List;
+import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementSpecNodePK;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -39,56 +40,49 @@ public class RequirementSpecNodeJpaController implements Serializable {
         if (requirementSpecNode.getRequirementSpecNodePK() == null) {
             requirementSpecNode.setRequirementSpecNodePK(new RequirementSpecNodePK());
         }
-        if (requirementSpecNode.getRequirementList() == null) {
-            requirementSpecNode.setRequirementList(new ArrayList<Requirement>());
-        }
         if (requirementSpecNode.getRequirementSpecNodeList() == null) {
             requirementSpecNode.setRequirementSpecNodeList(new ArrayList<RequirementSpecNode>());
         }
+        if (requirementSpecNode.getRequirementList() == null) {
+            requirementSpecNode.setRequirementList(new ArrayList<Requirement>());
+        }
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            RequirementSpec requirementSpec = requirementSpecNode.getRequirementSpec();
-            if (requirementSpec != null) {
-                requirementSpec = em.getReference(requirementSpec.getClass(), requirementSpec.getRequirementSpecPK());
-                requirementSpecNode.setRequirementSpec(requirementSpec);
-            }
             RequirementSpecNode requirementSpecNodeRel = requirementSpecNode.getRequirementSpecNode();
             if (requirementSpecNodeRel != null) {
                 requirementSpecNodeRel = em.getReference(requirementSpecNodeRel.getClass(), requirementSpecNodeRel.getRequirementSpecNodePK());
                 requirementSpecNode.setRequirementSpecNode(requirementSpecNodeRel);
             }
-            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
-            for (Requirement requirementListRequirementToAttach : requirementSpecNode.getRequirementList()) {
-                requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getRequirementPK());
-                attachedRequirementList.add(requirementListRequirementToAttach);
+            RequirementSpec requirementSpec = requirementSpecNode.getRequirementSpec();
+            if (requirementSpec != null) {
+                requirementSpec = em.getReference(requirementSpec.getClass(), requirementSpec.getRequirementSpecPK());
+                requirementSpecNode.setRequirementSpec(requirementSpec);
             }
-            requirementSpecNode.setRequirementList(attachedRequirementList);
             List<RequirementSpecNode> attachedRequirementSpecNodeList = new ArrayList<RequirementSpecNode>();
             for (RequirementSpecNode requirementSpecNodeListRequirementSpecNodeToAttach : requirementSpecNode.getRequirementSpecNodeList()) {
                 requirementSpecNodeListRequirementSpecNodeToAttach = em.getReference(requirementSpecNodeListRequirementSpecNodeToAttach.getClass(), requirementSpecNodeListRequirementSpecNodeToAttach.getRequirementSpecNodePK());
                 attachedRequirementSpecNodeList.add(requirementSpecNodeListRequirementSpecNodeToAttach);
             }
             requirementSpecNode.setRequirementSpecNodeList(attachedRequirementSpecNodeList);
-            em.persist(requirementSpecNode);
-            if (requirementSpec != null) {
-                requirementSpec.getRequirementSpecNodeList().add(requirementSpecNode);
-                requirementSpec = em.merge(requirementSpec);
+            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
+            for (Requirement requirementListRequirementToAttach : requirementSpecNode.getRequirementList()) {
+                requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getRequirementPK());
+                attachedRequirementList.add(requirementListRequirementToAttach);
             }
+            requirementSpecNode.setRequirementList(attachedRequirementList);
+            em.persist(requirementSpecNode);
             if (requirementSpecNodeRel != null) {
                 requirementSpecNodeRel.getRequirementSpecNodeList().add(requirementSpecNode);
                 requirementSpecNodeRel = em.merge(requirementSpecNodeRel);
             }
-            for (Requirement requirementListRequirement : requirementSpecNode.getRequirementList()) {
-                RequirementSpecNode oldRequirementSpecNodeOfRequirementListRequirement = requirementListRequirement.getRequirementSpecNode();
-                requirementListRequirement.setRequirementSpecNode(requirementSpecNode);
-                requirementListRequirement = em.merge(requirementListRequirement);
-                if (oldRequirementSpecNodeOfRequirementListRequirement != null) {
-                    oldRequirementSpecNodeOfRequirementListRequirement.getRequirementList().remove(requirementListRequirement);
-                    oldRequirementSpecNodeOfRequirementListRequirement = em.merge(oldRequirementSpecNodeOfRequirementListRequirement);
-                }
+            if (requirementSpec != null) {
+                requirementSpec.getRequirementSpecNodeList().add(requirementSpecNode);
+                requirementSpec = em.merge(requirementSpec);
             }
             for (RequirementSpecNode requirementSpecNodeListRequirementSpecNode : requirementSpecNode.getRequirementSpecNodeList()) {
                 RequirementSpecNode oldRequirementSpecNodeOfRequirementSpecNodeListRequirementSpecNode = requirementSpecNodeListRequirementSpecNode.getRequirementSpecNode();
@@ -97,6 +91,15 @@ public class RequirementSpecNodeJpaController implements Serializable {
                 if (oldRequirementSpecNodeOfRequirementSpecNodeListRequirementSpecNode != null) {
                     oldRequirementSpecNodeOfRequirementSpecNodeListRequirementSpecNode.getRequirementSpecNodeList().remove(requirementSpecNodeListRequirementSpecNode);
                     oldRequirementSpecNodeOfRequirementSpecNodeListRequirementSpecNode = em.merge(oldRequirementSpecNodeOfRequirementSpecNodeListRequirementSpecNode);
+                }
+            }
+            for (Requirement requirementListRequirement : requirementSpecNode.getRequirementList()) {
+                RequirementSpecNode oldRequirementSpecNodeOfRequirementListRequirement = requirementListRequirement.getRequirementSpecNode();
+                requirementListRequirement.setRequirementSpecNode(requirementSpecNode);
+                requirementListRequirement = em.merge(requirementListRequirement);
+                if (oldRequirementSpecNodeOfRequirementListRequirement != null) {
+                    oldRequirementSpecNodeOfRequirementListRequirement.getRequirementList().remove(requirementListRequirement);
+                    oldRequirementSpecNodeOfRequirementListRequirement = em.merge(oldRequirementSpecNodeOfRequirementListRequirement);
                 }
             }
             em.getTransaction().commit();
@@ -112,36 +115,43 @@ public class RequirementSpecNodeJpaController implements Serializable {
         }
     }
 
-    public void edit(RequirementSpecNode requirementSpecNode) throws NonexistentEntityException, Exception {
+    public void edit(RequirementSpecNode requirementSpecNode) throws IllegalOrphanException, NonexistentEntityException, Exception {
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             RequirementSpecNode persistentRequirementSpecNode = em.find(RequirementSpecNode.class, requirementSpecNode.getRequirementSpecNodePK());
-            RequirementSpec requirementSpecOld = persistentRequirementSpecNode.getRequirementSpec();
-            RequirementSpec requirementSpecNew = requirementSpecNode.getRequirementSpec();
             RequirementSpecNode requirementSpecNodeRelOld = persistentRequirementSpecNode.getRequirementSpecNode();
             RequirementSpecNode requirementSpecNodeRelNew = requirementSpecNode.getRequirementSpecNode();
-            List<Requirement> requirementListOld = persistentRequirementSpecNode.getRequirementList();
-            List<Requirement> requirementListNew = requirementSpecNode.getRequirementList();
+            RequirementSpec requirementSpecOld = persistentRequirementSpecNode.getRequirementSpec();
+            RequirementSpec requirementSpecNew = requirementSpecNode.getRequirementSpec();
             List<RequirementSpecNode> requirementSpecNodeListOld = persistentRequirementSpecNode.getRequirementSpecNodeList();
             List<RequirementSpecNode> requirementSpecNodeListNew = requirementSpecNode.getRequirementSpecNodeList();
-            if (requirementSpecNew != null) {
-                requirementSpecNew = em.getReference(requirementSpecNew.getClass(), requirementSpecNew.getRequirementSpecPK());
-                requirementSpecNode.setRequirementSpec(requirementSpecNew);
+            List<Requirement> requirementListOld = persistentRequirementSpecNode.getRequirementList();
+            List<Requirement> requirementListNew = requirementSpecNode.getRequirementList();
+            List<String> illegalOrphanMessages = null;
+            for (Requirement requirementListOldRequirement : requirementListOld) {
+                if (!requirementListNew.contains(requirementListOldRequirement)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Requirement " + requirementListOldRequirement + " since its requirementSpecNode field is not nullable.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             if (requirementSpecNodeRelNew != null) {
                 requirementSpecNodeRelNew = em.getReference(requirementSpecNodeRelNew.getClass(), requirementSpecNodeRelNew.getRequirementSpecNodePK());
                 requirementSpecNode.setRequirementSpecNode(requirementSpecNodeRelNew);
             }
-            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
-            for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
-                requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getRequirementPK());
-                attachedRequirementListNew.add(requirementListNewRequirementToAttach);
+            if (requirementSpecNew != null) {
+                requirementSpecNew = em.getReference(requirementSpecNew.getClass(), requirementSpecNew.getRequirementSpecPK());
+                requirementSpecNode.setRequirementSpec(requirementSpecNew);
             }
-            requirementListNew = attachedRequirementListNew;
-            requirementSpecNode.setRequirementList(requirementListNew);
             List<RequirementSpecNode> attachedRequirementSpecNodeListNew = new ArrayList<RequirementSpecNode>();
             for (RequirementSpecNode requirementSpecNodeListNewRequirementSpecNodeToAttach : requirementSpecNodeListNew) {
                 requirementSpecNodeListNewRequirementSpecNodeToAttach = em.getReference(requirementSpecNodeListNewRequirementSpecNodeToAttach.getClass(), requirementSpecNodeListNewRequirementSpecNodeToAttach.getRequirementSpecNodePK());
@@ -149,15 +159,14 @@ public class RequirementSpecNodeJpaController implements Serializable {
             }
             requirementSpecNodeListNew = attachedRequirementSpecNodeListNew;
             requirementSpecNode.setRequirementSpecNodeList(requirementSpecNodeListNew);
+            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
+            for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
+                requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getRequirementPK());
+                attachedRequirementListNew.add(requirementListNewRequirementToAttach);
+            }
+            requirementListNew = attachedRequirementListNew;
+            requirementSpecNode.setRequirementList(requirementListNew);
             requirementSpecNode = em.merge(requirementSpecNode);
-            if (requirementSpecOld != null && !requirementSpecOld.equals(requirementSpecNew)) {
-                requirementSpecOld.getRequirementSpecNodeList().remove(requirementSpecNode);
-                requirementSpecOld = em.merge(requirementSpecOld);
-            }
-            if (requirementSpecNew != null && !requirementSpecNew.equals(requirementSpecOld)) {
-                requirementSpecNew.getRequirementSpecNodeList().add(requirementSpecNode);
-                requirementSpecNew = em.merge(requirementSpecNew);
-            }
             if (requirementSpecNodeRelOld != null && !requirementSpecNodeRelOld.equals(requirementSpecNodeRelNew)) {
                 requirementSpecNodeRelOld.getRequirementSpecNodeList().remove(requirementSpecNode);
                 requirementSpecNodeRelOld = em.merge(requirementSpecNodeRelOld);
@@ -166,22 +175,13 @@ public class RequirementSpecNodeJpaController implements Serializable {
                 requirementSpecNodeRelNew.getRequirementSpecNodeList().add(requirementSpecNode);
                 requirementSpecNodeRelNew = em.merge(requirementSpecNodeRelNew);
             }
-            for (Requirement requirementListOldRequirement : requirementListOld) {
-                if (!requirementListNew.contains(requirementListOldRequirement)) {
-                    requirementListOldRequirement.setRequirementSpecNode(null);
-                    requirementListOldRequirement = em.merge(requirementListOldRequirement);
-                }
+            if (requirementSpecOld != null && !requirementSpecOld.equals(requirementSpecNew)) {
+                requirementSpecOld.getRequirementSpecNodeList().remove(requirementSpecNode);
+                requirementSpecOld = em.merge(requirementSpecOld);
             }
-            for (Requirement requirementListNewRequirement : requirementListNew) {
-                if (!requirementListOld.contains(requirementListNewRequirement)) {
-                    RequirementSpecNode oldRequirementSpecNodeOfRequirementListNewRequirement = requirementListNewRequirement.getRequirementSpecNode();
-                    requirementListNewRequirement.setRequirementSpecNode(requirementSpecNode);
-                    requirementListNewRequirement = em.merge(requirementListNewRequirement);
-                    if (oldRequirementSpecNodeOfRequirementListNewRequirement != null && !oldRequirementSpecNodeOfRequirementListNewRequirement.equals(requirementSpecNode)) {
-                        oldRequirementSpecNodeOfRequirementListNewRequirement.getRequirementList().remove(requirementListNewRequirement);
-                        oldRequirementSpecNodeOfRequirementListNewRequirement = em.merge(oldRequirementSpecNodeOfRequirementListNewRequirement);
-                    }
-                }
+            if (requirementSpecNew != null && !requirementSpecNew.equals(requirementSpecOld)) {
+                requirementSpecNew.getRequirementSpecNodeList().add(requirementSpecNode);
+                requirementSpecNew = em.merge(requirementSpecNew);
             }
             for (RequirementSpecNode requirementSpecNodeListOldRequirementSpecNode : requirementSpecNodeListOld) {
                 if (!requirementSpecNodeListNew.contains(requirementSpecNodeListOldRequirementSpecNode)) {
@@ -197,6 +197,17 @@ public class RequirementSpecNodeJpaController implements Serializable {
                     if (oldRequirementSpecNodeOfRequirementSpecNodeListNewRequirementSpecNode != null && !oldRequirementSpecNodeOfRequirementSpecNodeListNewRequirementSpecNode.equals(requirementSpecNode)) {
                         oldRequirementSpecNodeOfRequirementSpecNodeListNewRequirementSpecNode.getRequirementSpecNodeList().remove(requirementSpecNodeListNewRequirementSpecNode);
                         oldRequirementSpecNodeOfRequirementSpecNodeListNewRequirementSpecNode = em.merge(oldRequirementSpecNodeOfRequirementSpecNodeListNewRequirementSpecNode);
+                    }
+                }
+            }
+            for (Requirement requirementListNewRequirement : requirementListNew) {
+                if (!requirementListOld.contains(requirementListNewRequirement)) {
+                    RequirementSpecNode oldRequirementSpecNodeOfRequirementListNewRequirement = requirementListNewRequirement.getRequirementSpecNode();
+                    requirementListNewRequirement.setRequirementSpecNode(requirementSpecNode);
+                    requirementListNewRequirement = em.merge(requirementListNewRequirement);
+                    if (oldRequirementSpecNodeOfRequirementListNewRequirement != null && !oldRequirementSpecNodeOfRequirementListNewRequirement.equals(requirementSpecNode)) {
+                        oldRequirementSpecNodeOfRequirementListNewRequirement.getRequirementList().remove(requirementListNewRequirement);
+                        oldRequirementSpecNodeOfRequirementListNewRequirement = em.merge(oldRequirementSpecNodeOfRequirementListNewRequirement);
                     }
                 }
             }
@@ -217,7 +228,7 @@ public class RequirementSpecNodeJpaController implements Serializable {
         }
     }
 
-    public void destroy(RequirementSpecNodePK id) throws NonexistentEntityException {
+    public void destroy(RequirementSpecNodePK id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -229,20 +240,26 @@ public class RequirementSpecNodeJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The requirementSpecNode with id " + id + " no longer exists.", enfe);
             }
-            RequirementSpec requirementSpec = requirementSpecNode.getRequirementSpec();
-            if (requirementSpec != null) {
-                requirementSpec.getRequirementSpecNodeList().remove(requirementSpecNode);
-                requirementSpec = em.merge(requirementSpec);
+            List<String> illegalOrphanMessages = null;
+            List<Requirement> requirementListOrphanCheck = requirementSpecNode.getRequirementList();
+            for (Requirement requirementListOrphanCheckRequirement : requirementListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This RequirementSpecNode (" + requirementSpecNode + ") cannot be destroyed since the Requirement " + requirementListOrphanCheckRequirement + " in its requirementList field has a non-nullable requirementSpecNode field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             RequirementSpecNode requirementSpecNodeRel = requirementSpecNode.getRequirementSpecNode();
             if (requirementSpecNodeRel != null) {
                 requirementSpecNodeRel.getRequirementSpecNodeList().remove(requirementSpecNode);
                 requirementSpecNodeRel = em.merge(requirementSpecNodeRel);
             }
-            List<Requirement> requirementList = requirementSpecNode.getRequirementList();
-            for (Requirement requirementListRequirement : requirementList) {
-                requirementListRequirement.setRequirementSpecNode(null);
-                requirementListRequirement = em.merge(requirementListRequirement);
+            RequirementSpec requirementSpec = requirementSpecNode.getRequirementSpec();
+            if (requirementSpec != null) {
+                requirementSpec.getRequirementSpecNodeList().remove(requirementSpecNode);
+                requirementSpec = em.merge(requirementSpec);
             }
             List<RequirementSpecNode> requirementSpecNodeList = requirementSpecNode.getRequirementSpecNodeList();
             for (RequirementSpecNode requirementSpecNodeListRequirementSpecNode : requirementSpecNodeList) {

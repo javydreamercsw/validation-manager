@@ -33,23 +33,22 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "RequirementHasException.findByExceptionReporterId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.exceptionReporterId = :exceptionReporterId"),
     @NamedQuery(name = "RequirementHasException.findByRequirementHasExceptioncol", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptioncol = :requirementHasExceptioncol")})
 public class RequirementHasException implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementHasExceptionPK requirementHasExceptionPK;
     @Size(max = 45)
     @Column(name = "requirement_has_exceptioncol")
     private String requirementHasExceptioncol;
-    @JoinColumns({
-        @JoinColumn(name = "exception_id", referencedColumnName = "id", insertable = false, updatable = false),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id", insertable = false, updatable = false)})
-    @ManyToOne(optional = false)
-    private VmException vmException;
     @PrimaryKeyJoinColumns({
         @PrimaryKeyJoinColumn(name = "requirement_id", referencedColumnName = "id"),
         @PrimaryKeyJoinColumn(name = "requirement_version", referencedColumnName = "version")})
     @ManyToOne(optional = false)
     private Requirement requirement;
+    @JoinColumns({
+        @JoinColumn(name = "exception_id", referencedColumnName = "id", insertable = false, updatable = false),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id", insertable = false, updatable = false)})
+    @ManyToOne(optional = false)
+    private VmException vmException;
 
     public RequirementHasException() {
     }
@@ -78,20 +77,20 @@ public class RequirementHasException implements Serializable {
         this.requirementHasExceptioncol = requirementHasExceptioncol;
     }
 
-    public VmException getVmException() {
-        return vmException;
-    }
-
-    public void setVmException(VmException vmException) {
-        this.vmException = vmException;
-    }
-
     public Requirement getRequirement() {
         return requirement;
     }
 
     public void setRequirement(Requirement requirement) {
         this.requirement = requirement;
+    }
+
+    public VmException getVmException() {
+        return vmException;
+    }
+
+    public void setVmException(VmException vmException) {
+        this.vmException = vmException;
     }
 
     @Override
@@ -118,4 +117,5 @@ public class RequirementHasException implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RequirementHasException[ requirementHasExceptionPK=" + requirementHasExceptionPK + " ]";
     }
+    
 }

@@ -21,18 +21,24 @@ import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "attachment_type")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "AttachmentType.findAll", query = "SELECT a FROM AttachmentType a"),
     @NamedQuery(name = "AttachmentType.findById", query = "SELECT a FROM AttachmentType a WHERE a.id = :id"),
+    @NamedQuery(name = "AttachmentType.findByFkTable", query = "SELECT a FROM AttachmentType a WHERE a.fkTable = :fkTable"),
     @NamedQuery(name = "AttachmentType.findByType", query = "SELECT a FROM AttachmentType a WHERE a.type = :type")})
 public class AttachmentType implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "Attachment_Type_IDGEN")
@@ -43,7 +49,8 @@ public class AttachmentType implements Serializable {
     initialValue = 1000,
     allocationSize = 1)
     @Basic(optional = false)
-    @Column(name = "ID", nullable = false)
+    @NotNull
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
@@ -55,7 +62,9 @@ public class AttachmentType implements Serializable {
     @Column(name = "description")
     private String description;
     @Basic(optional = false)
-    @Column(name = "TYPE", nullable = false, length = 255)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "TYPE")
     private String type;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "attachmentType")
     private List<Attachment> attachmentList;
@@ -75,6 +84,22 @@ public class AttachmentType implements Serializable {
         this.id = id;
     }
 
+    public String getFkTable() {
+        return fkTable;
+    }
+
+    public void setFkTable(String fkTable) {
+        this.fkTable = fkTable;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getType() {
         return type;
     }
@@ -83,6 +108,8 @@ public class AttachmentType implements Serializable {
         this.type = type;
     }
 
+    @XmlTransient
+    @JsonIgnore
     public List<Attachment> getAttachmentList() {
         return attachmentList;
     }
@@ -100,7 +127,7 @@ public class AttachmentType implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof AttachmentType)) {
             return false;
         }
@@ -113,31 +140,6 @@ public class AttachmentType implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.AttachmentType[id=" + id + "]";
-    }
-
-    public AttachmentType(Integer id) {
-        this.id = id;
-    }
-
-    public AttachmentType(Integer id, String fkTable) {
-        this.id = id;
-        this.fkTable = fkTable;
-    }
-
-    public String getFkTable() {
-        return fkTable;
-    }
-
-    public void setFkTable(String fkTable) {
-        this.fkTable = fkTable;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+        return "com.validation.manager.core.db.AttachmentType[ id=" + id + " ]";
     }
 }

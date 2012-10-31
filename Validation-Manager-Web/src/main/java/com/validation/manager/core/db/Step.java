@@ -12,7 +12,6 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -23,10 +22,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "step")
@@ -36,48 +36,32 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Step.findById", query = "SELECT s FROM Step s WHERE s.stepPK.id = :id"),
     @NamedQuery(name = "Step.findByTestCaseId", query = "SELECT s FROM Step s WHERE s.stepPK.testCaseId = :testCaseId"),
     @NamedQuery(name = "Step.findByTestCaseTestId", query = "SELECT s FROM Step s WHERE s.stepPK.testCaseTestId = :testCaseTestId"),
-    @NamedQuery(name = "Step.findByStepSequence", query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence")})
+    @NamedQuery(name = "Step.findByStepSequence", query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence"),
+    @NamedQuery(name = "Step.findByText", query = "SELECT s FROM Step s WHERE s.text = :text")})
 public class Step implements Serializable {
-//    @ManyToMany(mappedBy = "stepList")
-//    private List<VmException> vmExceptionList;
-//    @ManyToMany(mappedBy = "stepList")
-//    private List<Requirement> requirementList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected StepPK stepPK;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "step_sequence", nullable = false)
+    @Column(name = "step_sequence")
     private int stepSequence;
     @Basic(optional = false)
     @NotNull
-    @Lob
-    @Size(min = 1, max = 65535)
-    @Column(name = "text", nullable = false, length = 65535)
+    @Size(min = 1, max = 100)
+    @Column(name = "text")
     private String text;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
-    @JoinTable(name = "step_has_exception", joinColumns = {
-        @JoinColumn(name = "step_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id", nullable = false),
-        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id", nullable = false)})
-    @ManyToMany
+    @ManyToMany(mappedBy = "stepList")
     private List<VmException> vmExceptionList;
-    @JoinTable(name = "step_has_requirement", joinColumns = {
-        @JoinColumn(name = "step_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id", nullable = false),
-        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version", nullable = false)})
-    @ManyToMany
+    @ManyToMany(mappedBy = "stepList")
     private List<Requirement> requirementList;
     @JoinColumns({
-        @JoinColumn(name = "test_case_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false),
-        @JoinColumn(name = "test_case_test_id", referencedColumnName = "test_id", nullable = false, insertable = false, updatable = false)})
+        @JoinColumn(name = "test_case_id", referencedColumnName = "id", insertable = false, updatable = false),
+        @JoinColumn(name = "test_case_test_id", referencedColumnName = "test_id", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private TestCase testCase;
 
@@ -131,6 +115,7 @@ public class Step implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<VmException> getVmExceptionList() {
         return vmExceptionList;
     }
@@ -140,6 +125,7 @@ public class Step implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Requirement> getRequirementList() {
         return requirementList;
     }
@@ -180,4 +166,5 @@ public class Step implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
     }
+    
 }

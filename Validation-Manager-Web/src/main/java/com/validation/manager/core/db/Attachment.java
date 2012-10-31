@@ -17,19 +17,26 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "attachment")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Attachment.findAll", query = "SELECT a FROM Attachment a"),
-    @NamedQuery(name = "Attachment.findByStringValue", query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue"),
     @NamedQuery(name = "Attachment.findById", query = "SELECT a FROM Attachment a WHERE a.attachmentPK.id = :id"),
-    @NamedQuery(name = "Attachment.findByAttachmentTypeId", query = "SELECT a FROM Attachment a WHERE a.attachmentPK.attachmentTypeId = :attachmentTypeId")})
+    @NamedQuery(name = "Attachment.findByAttachmentTypeId", query = "SELECT a FROM Attachment a WHERE a.attachmentPK.attachmentTypeId = :attachmentTypeId"),
+    @NamedQuery(name = "Attachment.findByStringValue", query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue"),
+    @NamedQuery(name = "Attachment.findByAttachmentcol", query = "SELECT a FROM Attachment a WHERE a.attachmentcol = :attachmentcol")})
 public class Attachment implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    @EmbeddedId
+    protected AttachmentPK attachmentPK;
     @Basic(optional = false)
     @NotNull
     @Lob
@@ -40,16 +47,16 @@ public class Attachment implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "string_value")
     private String stringValue;
+    @Lob
+    @Size(max = 2147483647)
+    @Column(name = "TEXT_VALUE")
+    private String textValue;
+    @Size(max = 45)
+    @Column(name = "attachmentcol")
+    private String attachmentcol;
     @JoinColumn(name = "attachment_type_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private AttachmentType attachmentType;
-
-    private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected AttachmentPK attachmentPK;
-    @Lob
-    @Column(name = "TEXT_VALUE", length = 2147483647)
-    private String textValue;
 
     public Attachment() {
     }
@@ -94,6 +101,14 @@ public class Attachment implements Serializable {
         this.textValue = textValue;
     }
 
+    public String getAttachmentcol() {
+        return attachmentcol;
+    }
+
+    public void setAttachmentcol(String attachmentcol) {
+        this.attachmentcol = attachmentcol;
+    }
+
     public AttachmentType getAttachmentType() {
         return attachmentType;
     }
@@ -111,7 +126,7 @@ public class Attachment implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof Attachment)) {
             return false;
         }
@@ -124,6 +139,6 @@ public class Attachment implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Attachment[attachmentPK=" + attachmentPK + "]";
+        return "com.validation.manager.core.db.Attachment[ attachmentPK=" + attachmentPK + " ]";
     }
 }

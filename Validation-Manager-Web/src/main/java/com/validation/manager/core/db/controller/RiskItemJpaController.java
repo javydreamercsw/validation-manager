@@ -7,23 +7,22 @@ package com.validation.manager.core.db.controller;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import com.validation.manager.core.db.fmea.Cause;
-import com.validation.manager.core.db.fmea.FMEA;
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.fmea.FailureMode;
-import com.validation.manager.core.db.fmea.Hazard;
+import java.util.ArrayList;
+import java.util.List;
+import com.validation.manager.core.db.fmea.Cause;
 import com.validation.manager.core.db.fmea.RiskControl;
+import com.validation.manager.core.db.fmea.Hazard;
 import com.validation.manager.core.db.fmea.RiskItem;
 import com.validation.manager.core.db.fmea.RiskItemHasRiskCategory;
 import com.validation.manager.core.db.fmea.RiskItemPK;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -62,16 +61,10 @@ public class RiskItemJpaController implements Serializable {
         if (riskItem.getRiskItemHasRiskCategoryList() == null) {
             riskItem.setRiskItemHasRiskCategoryList(new ArrayList<RiskItemHasRiskCategory>());
         }
-        riskItem.getRiskItemPK().setFMEAid(riskItem.getFmea().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            FMEA fmea = riskItem.getFmea();
-            if (fmea != null) {
-                fmea = em.getReference(fmea.getClass(), fmea.getId());
-                riskItem.setFmea(fmea);
-            }
             List<FailureMode> attachedFailureModeList = new ArrayList<FailureMode>();
             for (FailureMode failureModeListFailureModeToAttach : riskItem.getFailureModeList()) {
                 failureModeListFailureModeToAttach = em.getReference(failureModeListFailureModeToAttach.getClass(), failureModeListFailureModeToAttach.getId());
@@ -109,10 +102,6 @@ public class RiskItemJpaController implements Serializable {
             }
             riskItem.setRiskItemHasRiskCategoryList(attachedRiskItemHasRiskCategoryList);
             em.persist(riskItem);
-            if (fmea != null) {
-                fmea.getRiskItemList().add(riskItem);
-                fmea = em.merge(fmea);
-            }
             for (FailureMode failureModeListFailureMode : riskItem.getFailureModeList()) {
                 failureModeListFailureMode.getRiskItemList().add(riskItem);
                 failureModeListFailureMode = em.merge(failureModeListFailureMode);
@@ -156,14 +145,11 @@ public class RiskItemJpaController implements Serializable {
     }
 
     public void edit(RiskItem riskItem) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        riskItem.getRiskItemPK().setFMEAid(riskItem.getFmea().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             RiskItem persistentRiskItem = em.find(RiskItem.class, riskItem.getRiskItemPK());
-            FMEA fmeaOld = persistentRiskItem.getFmea();
-            FMEA fmeaNew = riskItem.getFmea();
             List<FailureMode> failureModeListOld = persistentRiskItem.getFailureModeList();
             List<FailureMode> failureModeListNew = riskItem.getFailureModeList();
             List<Cause> causeListOld = persistentRiskItem.getCauseList();
@@ -187,10 +173,6 @@ public class RiskItemJpaController implements Serializable {
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
-            }
-            if (fmeaNew != null) {
-                fmeaNew = em.getReference(fmeaNew.getClass(), fmeaNew.getId());
-                riskItem.setFmea(fmeaNew);
             }
             List<FailureMode> attachedFailureModeListNew = new ArrayList<FailureMode>();
             for (FailureMode failureModeListNewFailureModeToAttach : failureModeListNew) {
@@ -235,14 +217,6 @@ public class RiskItemJpaController implements Serializable {
             riskItemHasRiskCategoryListNew = attachedRiskItemHasRiskCategoryListNew;
             riskItem.setRiskItemHasRiskCategoryList(riskItemHasRiskCategoryListNew);
             riskItem = em.merge(riskItem);
-            if (fmeaOld != null && !fmeaOld.equals(fmeaNew)) {
-                fmeaOld.getRiskItemList().remove(riskItem);
-                fmeaOld = em.merge(fmeaOld);
-            }
-            if (fmeaNew != null && !fmeaNew.equals(fmeaOld)) {
-                fmeaNew.getRiskItemList().add(riskItem);
-                fmeaNew = em.merge(fmeaNew);
-            }
             for (FailureMode failureModeListOldFailureMode : failureModeListOld) {
                 if (!failureModeListNew.contains(failureModeListOldFailureMode)) {
                     failureModeListOldFailureMode.getRiskItemList().remove(riskItem);
@@ -353,11 +327,6 @@ public class RiskItemJpaController implements Serializable {
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
-            }
-            FMEA fmea = riskItem.getFmea();
-            if (fmea != null) {
-                fmea.getRiskItemList().remove(riskItem);
-                fmea = em.merge(fmea);
             }
             List<FailureMode> failureModeList = riskItem.getFailureModeList();
             for (FailureMode failureModeListFailureMode : failureModeList) {

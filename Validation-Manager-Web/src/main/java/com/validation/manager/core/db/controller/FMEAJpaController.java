@@ -4,20 +4,18 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.fmea.FMEA;
 import com.validation.manager.core.db.fmea.RiskCategory;
-import com.validation.manager.core.db.fmea.RiskItem;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -41,9 +39,6 @@ public class FMEAJpaController implements Serializable {
         if (FMEA.getFMEAList() == null) {
             FMEA.setFMEAList(new ArrayList<FMEA>());
         }
-        if (FMEA.getRiskItemList() == null) {
-            FMEA.setRiskItemList(new ArrayList<RiskItem>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -65,12 +60,6 @@ public class FMEAJpaController implements Serializable {
                 attachedFMEAList.add(FMEAListFMEAToAttach);
             }
             FMEA.setFMEAList(attachedFMEAList);
-            List<RiskItem> attachedRiskItemList = new ArrayList<RiskItem>();
-            for (RiskItem riskItemListRiskItemToAttach : FMEA.getRiskItemList()) {
-                riskItemListRiskItemToAttach = em.getReference(riskItemListRiskItemToAttach.getClass(), riskItemListRiskItemToAttach.getRiskItemPK());
-                attachedRiskItemList.add(riskItemListRiskItemToAttach);
-            }
-            FMEA.setRiskItemList(attachedRiskItemList);
             em.persist(FMEA);
             if (parent != null) {
                 parent.getFMEAList().add(FMEA);
@@ -89,15 +78,6 @@ public class FMEAJpaController implements Serializable {
                     oldParentOfFMEAListFMEA = em.merge(oldParentOfFMEAListFMEA);
                 }
             }
-            for (RiskItem riskItemListRiskItem : FMEA.getRiskItemList()) {
-                FMEA oldFmeaOfRiskItemListRiskItem = riskItemListRiskItem.getFmea();
-                riskItemListRiskItem.setFmea(FMEA);
-                riskItemListRiskItem = em.merge(riskItemListRiskItem);
-                if (oldFmeaOfRiskItemListRiskItem != null) {
-                    oldFmeaOfRiskItemListRiskItem.getRiskItemList().remove(riskItemListRiskItem);
-                    oldFmeaOfRiskItemListRiskItem = em.merge(oldFmeaOfRiskItemListRiskItem);
-                }
-            }
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -106,7 +86,7 @@ public class FMEAJpaController implements Serializable {
         }
     }
 
-    public void edit(FMEA FMEA) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(FMEA FMEA) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -118,20 +98,6 @@ public class FMEAJpaController implements Serializable {
             List<RiskCategory> riskCategoryListNew = FMEA.getRiskCategoryList();
             List<FMEA> FMEAListOld = persistentFMEA.getFMEAList();
             List<FMEA> FMEAListNew = FMEA.getFMEAList();
-            List<RiskItem> riskItemListOld = persistentFMEA.getRiskItemList();
-            List<RiskItem> riskItemListNew = FMEA.getRiskItemList();
-            List<String> illegalOrphanMessages = null;
-            for (RiskItem riskItemListOldRiskItem : riskItemListOld) {
-                if (!riskItemListNew.contains(riskItemListOldRiskItem)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain RiskItem " + riskItemListOldRiskItem + " since its fmea field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             if (parentNew != null) {
                 parentNew = em.getReference(parentNew.getClass(), parentNew.getId());
                 FMEA.setParent(parentNew);
@@ -150,13 +116,6 @@ public class FMEAJpaController implements Serializable {
             }
             FMEAListNew = attachedFMEAListNew;
             FMEA.setFMEAList(FMEAListNew);
-            List<RiskItem> attachedRiskItemListNew = new ArrayList<RiskItem>();
-            for (RiskItem riskItemListNewRiskItemToAttach : riskItemListNew) {
-                riskItemListNewRiskItemToAttach = em.getReference(riskItemListNewRiskItemToAttach.getClass(), riskItemListNewRiskItemToAttach.getRiskItemPK());
-                attachedRiskItemListNew.add(riskItemListNewRiskItemToAttach);
-            }
-            riskItemListNew = attachedRiskItemListNew;
-            FMEA.setRiskItemList(riskItemListNew);
             FMEA = em.merge(FMEA);
             if (parentOld != null && !parentOld.equals(parentNew)) {
                 parentOld.getFMEAList().remove(FMEA);
@@ -195,17 +154,6 @@ public class FMEAJpaController implements Serializable {
                     }
                 }
             }
-            for (RiskItem riskItemListNewRiskItem : riskItemListNew) {
-                if (!riskItemListOld.contains(riskItemListNewRiskItem)) {
-                    FMEA oldFmeaOfRiskItemListNewRiskItem = riskItemListNewRiskItem.getFmea();
-                    riskItemListNewRiskItem.setFmea(FMEA);
-                    riskItemListNewRiskItem = em.merge(riskItemListNewRiskItem);
-                    if (oldFmeaOfRiskItemListNewRiskItem != null && !oldFmeaOfRiskItemListNewRiskItem.equals(FMEA)) {
-                        oldFmeaOfRiskItemListNewRiskItem.getRiskItemList().remove(riskItemListNewRiskItem);
-                        oldFmeaOfRiskItemListNewRiskItem = em.merge(oldFmeaOfRiskItemListNewRiskItem);
-                    }
-                }
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -223,7 +171,7 @@ public class FMEAJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(Integer id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -234,17 +182,6 @@ public class FMEAJpaController implements Serializable {
                 FMEA.getId();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The FMEA with id " + id + " no longer exists.", enfe);
-            }
-            List<String> illegalOrphanMessages = null;
-            List<RiskItem> riskItemListOrphanCheck = FMEA.getRiskItemList();
-            for (RiskItem riskItemListOrphanCheckRiskItem : riskItemListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This FMEA (" + FMEA + ") cannot be destroyed since the RiskItem " + riskItemListOrphanCheckRiskItem + " in its riskItemList field has a non-nullable fmea field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             FMEA parent = FMEA.getParent();
             if (parent != null) {

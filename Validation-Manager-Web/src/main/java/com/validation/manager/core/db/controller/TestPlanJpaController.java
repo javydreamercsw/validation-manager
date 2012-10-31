@@ -4,23 +4,23 @@
  */
 package com.validation.manager.core.db.controller;
 
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.TestPlan;
+import java.util.ArrayList;
+import java.util.List;
 import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.TestPlanPK;
-import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -55,15 +55,15 @@ public class TestPlanJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            TestPlan testPlanRel = testPlan.getTestPlan();
-            if (testPlanRel != null) {
-                testPlanRel = em.getReference(testPlanRel.getClass(), testPlanRel.getTestPlanPK());
-                testPlan.setTestPlan(testPlanRel);
-            }
             TestProject testProject = testPlan.getTestProject();
             if (testProject != null) {
                 testProject = em.getReference(testProject.getClass(), testProject.getId());
                 testPlan.setTestProject(testProject);
+            }
+            TestPlan testPlanRel = testPlan.getTestPlan();
+            if (testPlanRel != null) {
+                testPlanRel = em.getReference(testPlanRel.getClass(), testPlanRel.getTestPlanPK());
+                testPlan.setTestPlan(testPlanRel);
             }
             List<TestPlan> attachedTestPlanList = new ArrayList<TestPlan>();
             for (TestPlan testPlanListTestPlanToAttach : testPlan.getTestPlanList()) {
@@ -84,13 +84,13 @@ public class TestPlanJpaController implements Serializable {
             }
             testPlan.setUserTestPlanRoleList(attachedUserTestPlanRoleList);
             em.persist(testPlan);
-            if (testPlanRel != null) {
-                testPlanRel.getTestPlanList().add(testPlan);
-                testPlanRel = em.merge(testPlanRel);
-            }
             if (testProject != null) {
                 testProject.getTestPlanList().add(testPlan);
                 testProject = em.merge(testProject);
+            }
+            if (testPlanRel != null) {
+                testPlanRel.getTestPlanList().add(testPlan);
+                testPlanRel = em.merge(testPlanRel);
             }
             for (TestPlan testPlanListTestPlan : testPlan.getTestPlanList()) {
                 TestPlan oldTestPlanOfTestPlanListTestPlan = testPlanListTestPlan.getTestPlan();
@@ -139,10 +139,10 @@ public class TestPlanJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             TestPlan persistentTestPlan = em.find(TestPlan.class, testPlan.getTestPlanPK());
-            TestPlan testPlanRelOld = persistentTestPlan.getTestPlan();
-            TestPlan testPlanRelNew = testPlan.getTestPlan();
             TestProject testProjectOld = persistentTestPlan.getTestProject();
             TestProject testProjectNew = testPlan.getTestProject();
+            TestPlan testPlanRelOld = persistentTestPlan.getTestPlan();
+            TestPlan testPlanRelNew = testPlan.getTestPlan();
             List<TestPlan> testPlanListOld = persistentTestPlan.getTestPlanList();
             List<TestPlan> testPlanListNew = testPlan.getTestPlanList();
             List<TestPlanHasTest> testPlanHasTestListOld = persistentTestPlan.getTestPlanHasTestList();
@@ -169,13 +169,13 @@ public class TestPlanJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            if (testPlanRelNew != null) {
-                testPlanRelNew = em.getReference(testPlanRelNew.getClass(), testPlanRelNew.getTestPlanPK());
-                testPlan.setTestPlan(testPlanRelNew);
-            }
             if (testProjectNew != null) {
                 testProjectNew = em.getReference(testProjectNew.getClass(), testProjectNew.getId());
                 testPlan.setTestProject(testProjectNew);
+            }
+            if (testPlanRelNew != null) {
+                testPlanRelNew = em.getReference(testPlanRelNew.getClass(), testPlanRelNew.getTestPlanPK());
+                testPlan.setTestPlan(testPlanRelNew);
             }
             List<TestPlan> attachedTestPlanListNew = new ArrayList<TestPlan>();
             for (TestPlan testPlanListNewTestPlanToAttach : testPlanListNew) {
@@ -199,14 +199,6 @@ public class TestPlanJpaController implements Serializable {
             userTestPlanRoleListNew = attachedUserTestPlanRoleListNew;
             testPlan.setUserTestPlanRoleList(userTestPlanRoleListNew);
             testPlan = em.merge(testPlan);
-            if (testPlanRelOld != null && !testPlanRelOld.equals(testPlanRelNew)) {
-                testPlanRelOld.getTestPlanList().remove(testPlan);
-                testPlanRelOld = em.merge(testPlanRelOld);
-            }
-            if (testPlanRelNew != null && !testPlanRelNew.equals(testPlanRelOld)) {
-                testPlanRelNew.getTestPlanList().add(testPlan);
-                testPlanRelNew = em.merge(testPlanRelNew);
-            }
             if (testProjectOld != null && !testProjectOld.equals(testProjectNew)) {
                 testProjectOld.getTestPlanList().remove(testPlan);
                 testProjectOld = em.merge(testProjectOld);
@@ -214,6 +206,14 @@ public class TestPlanJpaController implements Serializable {
             if (testProjectNew != null && !testProjectNew.equals(testProjectOld)) {
                 testProjectNew.getTestPlanList().add(testPlan);
                 testProjectNew = em.merge(testProjectNew);
+            }
+            if (testPlanRelOld != null && !testPlanRelOld.equals(testPlanRelNew)) {
+                testPlanRelOld.getTestPlanList().remove(testPlan);
+                testPlanRelOld = em.merge(testPlanRelOld);
+            }
+            if (testPlanRelNew != null && !testPlanRelNew.equals(testPlanRelOld)) {
+                testPlanRelNew.getTestPlanList().add(testPlan);
+                testPlanRelNew = em.merge(testPlanRelNew);
             }
             for (TestPlan testPlanListOldTestPlan : testPlanListOld) {
                 if (!testPlanListNew.contains(testPlanListOldTestPlan)) {
@@ -301,15 +301,15 @@ public class TestPlanJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            TestPlan testPlanRel = testPlan.getTestPlan();
-            if (testPlanRel != null) {
-                testPlanRel.getTestPlanList().remove(testPlan);
-                testPlanRel = em.merge(testPlanRel);
-            }
             TestProject testProject = testPlan.getTestProject();
             if (testProject != null) {
                 testProject.getTestPlanList().remove(testPlan);
                 testProject = em.merge(testProject);
+            }
+            TestPlan testPlanRel = testPlan.getTestPlan();
+            if (testPlanRel != null) {
+                testPlanRel.getTestPlanList().remove(testPlan);
+                testPlanRel = em.merge(testPlanRel);
             }
             List<TestPlan> testPlanList = testPlan.getTestPlanList();
             for (TestPlan testPlanListTestPlan : testPlanList) {

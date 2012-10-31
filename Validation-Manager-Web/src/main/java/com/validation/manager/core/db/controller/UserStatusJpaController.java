@@ -5,18 +5,18 @@
 package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.UserStatus;
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -49,12 +49,12 @@ public class UserStatusJpaController implements Serializable {
             userStatus.setVmUserList(attachedVmUserList);
             em.persist(userStatus);
             for (VmUser vmUserListVmUser : userStatus.getVmUserList()) {
-                UserStatus oldUserStatusOfVmUserListVmUser = vmUserListVmUser.getUserStatus();
-                vmUserListVmUser.setUserStatus(userStatus);
+                UserStatus oldUserStatusIdOfVmUserListVmUser = vmUserListVmUser.getUserStatusId();
+                vmUserListVmUser.setUserStatusId(userStatus);
                 vmUserListVmUser = em.merge(vmUserListVmUser);
-                if (oldUserStatusOfVmUserListVmUser != null) {
-                    oldUserStatusOfVmUserListVmUser.getVmUserList().remove(vmUserListVmUser);
-                    oldUserStatusOfVmUserListVmUser = em.merge(oldUserStatusOfVmUserListVmUser);
+                if (oldUserStatusIdOfVmUserListVmUser != null) {
+                    oldUserStatusIdOfVmUserListVmUser.getVmUserList().remove(vmUserListVmUser);
+                    oldUserStatusIdOfVmUserListVmUser = em.merge(oldUserStatusIdOfVmUserListVmUser);
                 }
             }
             em.getTransaction().commit();
@@ -79,7 +79,7 @@ public class UserStatusJpaController implements Serializable {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain VmUser " + vmUserListOldVmUser + " since its userStatus field is not nullable.");
+                    illegalOrphanMessages.add("You must retain VmUser " + vmUserListOldVmUser + " since its userStatusId field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -95,12 +95,12 @@ public class UserStatusJpaController implements Serializable {
             userStatus = em.merge(userStatus);
             for (VmUser vmUserListNewVmUser : vmUserListNew) {
                 if (!vmUserListOld.contains(vmUserListNewVmUser)) {
-                    UserStatus oldUserStatusOfVmUserListNewVmUser = vmUserListNewVmUser.getUserStatus();
-                    vmUserListNewVmUser.setUserStatus(userStatus);
+                    UserStatus oldUserStatusIdOfVmUserListNewVmUser = vmUserListNewVmUser.getUserStatusId();
+                    vmUserListNewVmUser.setUserStatusId(userStatus);
                     vmUserListNewVmUser = em.merge(vmUserListNewVmUser);
-                    if (oldUserStatusOfVmUserListNewVmUser != null && !oldUserStatusOfVmUserListNewVmUser.equals(userStatus)) {
-                        oldUserStatusOfVmUserListNewVmUser.getVmUserList().remove(vmUserListNewVmUser);
-                        oldUserStatusOfVmUserListNewVmUser = em.merge(oldUserStatusOfVmUserListNewVmUser);
+                    if (oldUserStatusIdOfVmUserListNewVmUser != null && !oldUserStatusIdOfVmUserListNewVmUser.equals(userStatus)) {
+                        oldUserStatusIdOfVmUserListNewVmUser.getVmUserList().remove(vmUserListNewVmUser);
+                        oldUserStatusIdOfVmUserListNewVmUser = em.merge(oldUserStatusIdOfVmUserListNewVmUser);
                     }
                 }
             }
@@ -139,7 +139,7 @@ public class UserStatusJpaController implements Serializable {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This UserStatus (" + userStatus + ") cannot be destroyed since the VmUser " + vmUserListOrphanCheckVmUser + " in its vmUserList field has a non-nullable userStatus field.");
+                illegalOrphanMessages.add("This UserStatus (" + userStatus + ") cannot be destroyed since the VmUser " + vmUserListOrphanCheckVmUser + " in its vmUserList field has a non-nullable userStatusId field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

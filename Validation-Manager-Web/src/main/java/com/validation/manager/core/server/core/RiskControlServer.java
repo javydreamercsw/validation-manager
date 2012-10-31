@@ -57,10 +57,7 @@ public class RiskControlServer extends RiskControl implements EntityServer {
                     DataBaseManager.getEntityManagerFactory())
                     .destroy(rc.getRiskControlPK());
             return true;
-        } catch (IllegalOrphanException ex) {
-            Logger.getLogger(RiskControlServer.class.getName()).log(
-                    Level.SEVERE, null, ex);
-        } catch (NonexistentEntityException ex) {
+        }catch (NonexistentEntityException ex) {
             Logger.getLogger(RiskControlServer.class.getName()).log(
                     Level.SEVERE, null, ex);
         }
