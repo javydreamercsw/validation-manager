@@ -13,18 +13,16 @@ import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "test_project_t", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name"})})
+@Table(name = "test_project_t")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "TestProjectT.findAll", query = "SELECT t FROM TestProjectT t"),
@@ -37,24 +35,24 @@ public class TestProjectT implements Serializable {
     @Id
     @Basic(optional = false)
     @NotNull
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "record_id")
     private Integer recordId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "name", nullable = false, length = 45)
+    @Column(name = "name")
     private String name;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "active", nullable = false)
+    @Column(name = "active")
     private boolean active;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
 
     public TestProjectT() {

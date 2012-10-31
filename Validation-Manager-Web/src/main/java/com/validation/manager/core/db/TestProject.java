@@ -26,10 +26,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_project", uniqueConstraints = {
@@ -41,14 +42,11 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "TestProject.findByName", query = "SELECT t FROM TestProject t WHERE t.name = :name"),
     @NamedQuery(name = "TestProject.findByActive", query = "SELECT t FROM TestProject t WHERE t.active = :active")})
 public class TestProject extends VMAuditedObject implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "testProject")
-    private List<ProjectHasTestProject> projectHasTestProjectList;
-
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "VMTestProject_IDGEN")
     //Reserving 10000 Test Project for regression of VM itself
     @TableGenerator(name = "VMTestProject_IDGEN", table = "vm_id",
@@ -61,15 +59,15 @@ public class TestProject extends VMAuditedObject implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "name", nullable = false, length = 45)
+    @Column(name = "name")
     private String name;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "active", nullable = false)
+    @Column(name = "active")
     private boolean active;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
     @ManyToMany(mappedBy = "testProjectList")
     private List<Project> projectList;
@@ -119,6 +117,7 @@ public class TestProject extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Project> getProjectList() {
         return projectList;
     }
@@ -128,6 +127,7 @@ public class TestProject extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserTestProjectRole> getUserTestProjectRoleList() {
         return userTestProjectRoleList;
     }
@@ -137,6 +137,7 @@ public class TestProject extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<TestPlan> getTestPlanList() {
         return testPlanList;
     }
@@ -168,15 +169,6 @@ public class TestProject extends VMAuditedObject implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestProject[ id=" + id + " ]";
-    }
-
-    @XmlTransient
-    public List<ProjectHasTestProject> getProjectHasTestProjectList() {
-        return projectHasTestProjectList;
-    }
-
-    public void setProjectHasTestProjectList(List<ProjectHasTestProject> projectHasTestProjectList) {
-        this.projectHasTestProjectList = projectHasTestProjectList;
     }
     
 }

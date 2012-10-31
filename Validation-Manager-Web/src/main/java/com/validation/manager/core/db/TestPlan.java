@@ -24,10 +24,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_plan")
@@ -45,16 +46,19 @@ public class TestPlan extends VMAuditedObject implements Serializable {
     protected TestPlanPK testPlanPK;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "active", nullable = false)
+    @Column(name = "active")
     private boolean active;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "is_open", nullable = false)
+    @Column(name = "is_open")
     private boolean isOpen;
+    @JoinColumn(name = "test_project_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private TestProject testProject;
     @OneToMany(mappedBy = "testPlan")
     private List<TestPlan> testPlanList;
     @JoinColumns({
@@ -62,9 +66,6 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         @JoinColumn(name = "regression_test_plan_test_project_id", referencedColumnName = "test_project_id")})
     @ManyToOne
     private TestPlan testPlan;
-    @JoinColumn(name = "test_project_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private TestProject testProject;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testPlan")
     private List<TestPlanHasTest> testPlanHasTestList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testPlan")
@@ -116,7 +117,16 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         this.isOpen = isOpen;
     }
 
+    public TestProject getTestProject() {
+        return testProject;
+    }
+
+    public void setTestProject(TestProject testProject) {
+        this.testProject = testProject;
+    }
+
     @XmlTransient
+    @JsonIgnore
     public List<TestPlan> getTestPlanList() {
         return testPlanList;
     }
@@ -133,15 +143,8 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         this.testPlan = testPlan;
     }
 
-    public TestProject getTestProject() {
-        return testProject;
-    }
-
-    public void setTestProject(TestProject testProject) {
-        this.testProject = testProject;
-    }
-
     @XmlTransient
+    @JsonIgnore
     public List<TestPlanHasTest> getTestPlanHasTestList() {
         return testPlanHasTestList;
     }
@@ -151,6 +154,7 @@ public class TestPlan extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserTestPlanRole> getUserTestPlanRoleList() {
         return userTestPlanRoleList;
     }

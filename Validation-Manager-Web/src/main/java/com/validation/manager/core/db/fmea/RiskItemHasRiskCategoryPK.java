@@ -8,6 +8,7 @@ import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -15,14 +16,16 @@ import javax.persistence.Embeddable;
  */
 @Embeddable
 public class RiskItemHasRiskCategoryPK implements Serializable {
-
     @Basic(optional = false)
+    @NotNull
     @Column(name = "risk_item_id")
     private int riskItemId;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "risk_item_FMEA_id")
     private int riskitemFMEAid;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "risk_category_id")
     private int riskCategoryId;
     @Basic(optional = false)
@@ -73,6 +76,7 @@ public class RiskItemHasRiskCategoryPK implements Serializable {
 
     @Override
     public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof RiskItemHasRiskCategoryPK)) {
             return false;
         }
@@ -93,4 +97,5 @@ public class RiskItemHasRiskCategoryPK implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.fmea.RiskItemHasRiskCategoryPK[ riskItemId=" + riskItemId + ", riskitemFMEAid=" + riskitemFMEAid + ", riskCategoryId=" + riskCategoryId + " ]";
     }
+    
 }

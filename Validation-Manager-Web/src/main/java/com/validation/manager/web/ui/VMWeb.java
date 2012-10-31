@@ -27,6 +27,7 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.terminal.FileResource;
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.Sizeable;
+import com.vaadin.terminal.StreamResource;
 import com.vaadin.terminal.ThemeResource;
 import com.vaadin.terminal.gwt.client.ui.dd.VerticalDropLocation;
 import com.vaadin.terminal.gwt.server.HttpServletRequestListener;
@@ -37,12 +38,15 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.MenuBar.MenuItem;
 import com.vaadin.ui.Tree.TreeDragMode;
 import com.vaadin.ui.Tree.TreeTargetDetails;
+import com.validation.manager.core.DBState;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.RequirementSpecNodePK;
+import com.validation.manager.core.db.RequirementSpecPK;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.SpecLevel;
@@ -50,6 +54,7 @@ import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
+import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -63,15 +68,22 @@ import com.validation.manager.core.tool.CustomCheckBox;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import java.awt.Dimension;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -80,8 +92,15 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperRunManager;
+import net.sf.jasperreports.engine.util.JRLoader;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuItem;
 import org.vaadin.teemu.wizards.Wizard;
@@ -111,7 +130,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
     private static TreeMap<String, MenuItem> groups = new TreeMap<String, MenuItem>();
     //Icons
     private ThemeResource smallIcon = new ThemeResource("icons/VMSmall.png");
-    private Label currentProjectLabel = new Label();
+    private Select currentProjectSelection = new Select();
     private Component rightComponent, leftComponent;
     private String fileName;
     private FileFilter reqImportFilter;
@@ -125,10 +144,28 @@ public class VMWeb extends Application implements HttpServletRequestListener {
     @Override
     public void init() {
         setInstance(this);
+        currentProjectSelection.setInvalidAllowed(false);
+        currentProjectSelection.setImmediate(true);
+        currentProjectSelection.addListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                if (currentProjectSelection.getValue() != null) {
+                    HashMap<String, Object> parameters = new HashMap<String, Object>();
+                    parameters.put("id", currentProjectSelection.getValue());
+                    List<Object> result = DataBaseManager.namedQuery(
+                            "Project.findById", parameters);
+                    if (!result.isEmpty()) {
+                        currentProject =
+                                new ProjectServer((Project) result.get(0));
+                    }
+                }
+            }
+        });
         reqImportFilter = new FileFilter() {
             @Override
             public boolean accept(File file) {
-                return file.getName().endsWith(".xls") || file.getName().endsWith(".xlsx");
+                return file.getName().endsWith(".xls")
+                        || file.getName().endsWith(".xlsx");
             }
         };
         try {
@@ -136,15 +173,21 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             setTheme("vm");
             logo = new Embedded("", new ThemeResource("icons/vm_logo.png"));
             logo.setType(Embedded.TYPE_IMAGE);
-            icon = new Embedded("Validation Manager", new ThemeResource("icons/VMSmall.png"));
+            icon = new Embedded("Validation Manager",
+                    new ThemeResource("icons/VMSmall.png"));
             icon.setType(Embedded.TYPE_IMAGE);
             setMainWindow(new com.vaadin.ui.Window(
                     "Validation Manager " + DataBaseManager.getVersion()));
             DataBaseManager.get();
-            showLanguageSelection();
-            initMenuItems();
-            //Default left component
-            setDefaultWindow();
+            if (DataBaseManager.getState().equals(DBState.VALID)) {
+                showLanguageSelection();
+                initMenuItems();
+                //Default left component
+                setDefaultWindow();
+            } else {
+                getMainWindow().addComponent(
+                        new Label(getInstance().getResource().getString("message.db.error")));
+            }
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
@@ -170,13 +213,15 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         final Form form = new Form();
         final RequirementSpec rs = new RequirementSpec();
         // Set form caption and description texts
-        form.setCaption(getInstance().getResource().getString("menu.requirement.create.spec"));
+        form.setCaption(getInstance().getResource()
+                .getString("menu.requirement.create.spec"));
         // Set the form to act immediately on user input. This is
         // necessary for the validation of the fields to occur immediately
         // when the input focus changes and not just on commit.
         form.setImmediate(true);
         final com.vaadin.ui.TextField name =
-                new com.vaadin.ui.TextField(getInstance().getResource().getString("general.name") + ":");
+                new com.vaadin.ui.TextField(getInstance().getResource()
+                .getString("general.name") + ":");
         form.addField("name", name);
         // Create a bean item that is bound to the bean.
         BeanItem item = new BeanItem(rs);
@@ -200,7 +245,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         //Set field factory to create the fields of the form
         form.setFormFieldFactory(new FormFieldFactory() {
             @Override
-            public Field createField(Item item, Object propertyId, Component uiContext) {
+            public Field createField(Item item, Object propertyId,
+                    Component uiContext) {
                 // Identify the fields by their Property ID.
                 String pid = (String) propertyId;
                 if ("name".equals(pid)) {
@@ -342,7 +388,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             public void buttonClick(ClickEvent event) {
                 try {
                     new RequirementSpecJpaController(
-                            DataBaseManager.getEntityManagerFactory()).create(rs);
+                            DataBaseManager.getEntityManagerFactory())
+                            .create(rs);
                 } catch (PreexistingEntityException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 } catch (Exception ex) {
@@ -463,7 +510,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                                 List<Object> result =
                                         DataBaseManager.createdQuery(
                                         "select r from Requirement r where "
-                                        + "r.uniqueId=:id and r.projectId=:product",
+                                        + "r.uniqueId=:id and r.projectId"
+                                        + "=:product",
                                         parameters);
                                 if (result.isEmpty()) {
                                     return true;
@@ -489,13 +537,14 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     textArea.setEnabled(true);
                     return textArea;
                 }
-                if ("requirementType".equals(pid)) {
+                if ("requirementTypeId".equals(pid)) {
                     // Wrap them in a container for binding to a Select
                     final BeanItemContainer<RequirementType> requirementTypeContainer =
                             new BeanItemContainer<RequirementType>(RequirementType.class);
                     for (Iterator<Object> it =
                             DataBaseManager.namedQuery(
-                            "RequirementType.findAll").iterator(); it.hasNext();) {
+                            "RequirementType.findAll").iterator();
+                            it.hasNext();) {
                         requirementTypeContainer.addBean(
                                 (RequirementType) it.next());
                     }
@@ -527,9 +576,9 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                             }
                         });
                     }
-                    if (edit && r.getRequirementType() != null) {
-                        LOG.info(r.getRequirementType().getName());
-                        select.setValue(r.getRequirementType());
+                    if (edit && r.getRequirementTypeId() != null) {
+                        LOG.info(r.getRequirementTypeId().getName());
+                        select.setValue(r.getRequirementTypeId());
                     }
                     return select;
                 }
@@ -545,7 +594,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         //Required fields
         fields.add("uniqueId");
         fields.add("description");
-        fields.add("requirementType");
+        fields.add("requirementTypeId");
         for (String field : fields) {
             LOG.log(Level.INFO, "Marking field {0} as required...", field);
             form.getField(field).setRequired(true);
@@ -578,14 +627,16 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     rt = new RequirementType(form.getField("requirementTypeId")
                             .getValue().toString().trim());
                     new RequirementTypeJpaController(
-                            DataBaseManager.getEntityManagerFactory()).create(rt);
+                            DataBaseManager.getEntityManagerFactory())
+                            .create(rt);
                 } else {
                     rt = (RequirementType) result.get(0);
                 }
                 RequirementServer reqs;
                 if (edit) {
                     parameters.clear();
-                    parameters.put("id", form.getField("uniqueId").getValue().toString());
+                    parameters.put("id", form.getField("uniqueId").getValue()
+                            .toString());
                     parameters.put("projectId", currentProject.getId());
                     result = DataBaseManager.createdQuery(
                             "SELECT r FROM Requirement r WHERE "
@@ -603,13 +654,11 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                             .trim(),
                             form.getField("description").getValue().toString()
                             .trim(),
-                            new ProjectJpaController(
-                            DataBaseManager.getEntityManagerFactory())
-                            .findProject(currentProject.getId()),
+                            r.getRequirementSpecNode().getRequirementSpecNodePK(),
                             form.getField("notes").getValue().toString().trim(),
                             rt.getId(), 1);
                 }
-                reqs.setRequirementType(rt);
+                reqs.setRequirementTypeId(rt);
                 if (createWindow != null) {
                     getMainWindow().removeWindow(createWindow);
                 }
@@ -648,11 +697,48 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         createWindow.center();
         createWindow.setModal(true);
         createWindow.addComponent(form);
-        createWindow.setWidth(25, Sizeable.UNITS_PERCENTAGE);
+        createWindow.setWidth(50, Sizeable.UNITS_PERCENTAGE);
         getMainWindow().addWindow(createWindow);
     }
 
-    private Component getProjectRequirementMainComponent(final ProjectServer p) {
+    private Component getProjectRequirementMainComponent() {
+        final Select specs = new Select();
+        specs.setImmediate(true);
+        specs.setInvalidAllowed(false);
+        specs.setRequired(true);
+        final Select nodes = new Select();
+        nodes.setImmediate(true);
+        nodes.setInvalidAllowed(false);
+        nodes.setRequired(true);
+        for (Iterator<RequirementSpec> it =
+                currentProject.getRequirementSpecList().iterator();
+                it.hasNext();) {
+            RequirementSpec temp = it.next();
+            specs.addItem(temp.getRequirementSpecPK());
+            specs.setItemCaption(temp.getRequirementSpecPK(), temp.getName());
+        }
+        specs.addListener(new ValueChangeListener() {
+            @Override
+            public void valueChange(ValueChangeEvent event) {
+                //Update the available nodes
+                RequirementSpec srs = new RequirementSpecJpaController(
+                        DataBaseManager.getEntityManagerFactory())
+                        .findRequirementSpec((RequirementSpecPK) specs.getValue());
+                nodes.removeAllItems();
+                for (Iterator<RequirementSpecNode> it =
+                        srs.getRequirementSpecNodeList().iterator();
+                        it.hasNext();) {
+                    RequirementSpecNode rsn = it.next();
+                    nodes.addItem(rsn.getRequirementSpecNodePK());
+                    nodes.setItemCaption(rsn.getRequirementSpecNodePK(),
+                            rsn.getName());
+                }
+                //Add the default new
+                nodes.addItem("new");
+                nodes.setItemCaption("new",
+                        getInstance().getResource().getString("general.new"));
+            }
+        });
         com.vaadin.ui.Panel panel = new com.vaadin.ui.Panel();
         panel.setContent(new VerticalLayout());
         panel.addComponent(new Label(getInstance().getResource()
@@ -694,31 +780,46 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     final Upload.SucceededListener successListener =
                             new Upload.SucceededListener() {
                                 @Override
-                                public void uploadSucceeded(Upload.SucceededEvent event) {
+                                public void uploadSucceeded(
+                                        Upload.SucceededEvent event) {
                                     if (upload != null) {
                                         upload.setEnabled(false);
                                         LOG.log(Level.FINE,
                                                 "Renaming uploaded file to: {0}",
                                                 getFileName());
                                         File toImport =
-                                                new File(um.getFile().getParentFile()
+                                                new File(um.getFile()
+                                                .getParentFile()
                                                 .getAbsolutePath()
-                                                + System.getProperty("file.separator")
+                                                + System.getProperty(
+                                                "file.separator")
                                                 + getFileName());
-                                        boolean rename = um.getFile().renameTo(toImport);
-                                        if (rename && reqImportFilter.accept(toImport)) {
+                                        boolean rename = um.getFile()
+                                                .renameTo(toImport);
+                                        if (rename && reqImportFilter
+                                                .accept(toImport)) {
                                             getMainWindow().showNotification(
                                                     getInstance().getResource()
                                                     .getString(
                                                     "message.file.upload.success"),
                                                     Window.Notification.TYPE_HUMANIZED_MESSAGE);
                                             //Import
-                                            RequirementImporter ri = new RequirementImporter(
-                                                    new ProjectJpaController(
-                                                    DataBaseManager
-                                                    .getEntityManagerFactory())
-                                                    .findProject(p.getId()),
-                                                    toImport);
+                                            RequirementSpecNode rsn;
+                                            RequirementSpec rs =
+                                                    new RequirementSpecJpaController(
+                                                    DataBaseManager.getEntityManagerFactory())
+                                                    .findRequirementSpec((RequirementSpecPK) specs.getValue());
+                                            if (nodes.getValue().equals("new")) {
+                                                //Create a new one
+                                                rsn = new RequirementSpecNode(rs.getRequirementSpecPK());
+                                            } else {
+                                                rsn = new RequirementSpecNodeJpaController(
+                                                        DataBaseManager.getEntityManagerFactory())
+                                                        .findRequirementSpecNode((RequirementSpecNodePK) nodes.getValue());
+                                            }
+                                            RequirementImporter ri =
+                                                    new RequirementImporter(
+                                                    toImport, rsn);
                                             try {
                                                 //Show import approval screen
                                                 showRequirementImportApprovalWindow(
@@ -775,13 +876,17 @@ public class VMWeb extends Application implements HttpServletRequestListener {
 
                     @Override
                     public Component getContent() {
+                        com.vaadin.ui.Panel panel = new com.vaadin.ui.Panel();
+                        panel.addComponent(specs);
+                        panel.addComponent(nodes);
                         upload.addListener((Upload.SucceededListener) um);
                         upload.addListener(
                                 (Upload.SucceededListener) successListener);
                         upload.addListener((Upload.FailedListener) um);
                         upload.addListener(
                                 (Upload.FailedListener) failureListener);
-                        return upload;
+                        panel.addComponent(upload);
+                        return panel;
                     }
 
                     @Override
@@ -845,7 +950,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             reqItem.getItemProperty("ID").setValue(req.getUniqueId());
             reqItem.getItemProperty(getInstance().getResource().getString(
                     "message.requirement.type")).setValue(
-                    req.getRequirementType().getName());
+                    req.getRequirementTypeId().getName());
             reqItem.getItemProperty(getInstance().getResource().getString(
                     "general.description")).setValue(req.getDescription());
             reqItem.getItemProperty(getInstance().getResource().getString(
@@ -977,7 +1082,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     String id = tree.getValue().toString()
                             .substring(requirementPrefix.length(),
                             tree.getValue().toString().length());
-                    HashMap<String, Object> parameters = 
+                    HashMap<String, Object> parameters =
                             new HashMap<String, Object>();
                     LOG.info(id);
                     parameters.put("id", id);
@@ -1309,6 +1414,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         });
         List<Object> result = DataBaseManager.namedQuery("Project.findAll");
         LOG.log(Level.INFO, "Projects found: {0}", result.size());
+        updateProjectSelection();
         for (Iterator<Object> it = result.iterator(); it.hasNext();) {
             Project product = (Project) it.next();
             tree.addItem(product.getName());
@@ -1317,6 +1423,16 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         }
         panel.addComponent(tree);
         return panel;
+    }
+
+    private void updateProjectSelection() {
+        List<Object> result = DataBaseManager.namedQuery("Project.findAll");
+        for (Iterator<Object> it = result.iterator(); it.hasNext();) {
+            Project project = (Project) it.next();
+            currentProjectSelection.addItem(project.getId());
+            currentProjectSelection.setItemCaption(project.getId(),
+                    project.getName());
+        }
     }
 
     private void initMenuItems() {
@@ -1380,7 +1496,6 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             @Override
             public void menuSelected(
                     com.vaadin.ui.MenuBar.MenuItem selectedItem) {
-
                 showRequirementSpecWindow();
             }
         }).setSelected(true).createVMMenuItem();
@@ -1393,6 +1508,25 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     com.vaadin.ui.MenuBar.MenuItem selectedItem) {
 
                 showRequirementSpecLevelCreationWindow();
+            }
+        })
+                .setLoggedIn(true).setSelected(true).setAdmin(true).createVMMenuItem();
+        addItem(item);
+        item = new VMMenuItemBuilder().setIndex(i += 1000)
+                .setGroupName("menu.requirement").setName("menu.requirement.coverage.report")
+                .setIcon(smallIcon).setCommand(new com.vaadin.ui.MenuBar.Command() {
+            @Override
+            public void menuSelected(
+                    com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+                HashMap<String, Object> parameters = new HashMap<String, Object>();
+                parameters.put("project_id", currentProject.getId());
+                try {
+                    printReport("Test Matrix", parameters);
+                } catch (SQLException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                } catch (NamingException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
             }
         })
                 .setLoggedIn(true).setSelected(true).setAdmin(true).createVMMenuItem();
@@ -1479,6 +1613,63 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             }
         }).setAdmin(true).createVMMenuItem();
         addItem(item);
+    }
+
+    private void printReport(final String repName, final Map paramMap)
+            throws SQLException, NamingException {
+        final Connection con;
+        DataSource ds = (javax.sql.DataSource) new InitialContext().lookup(
+                "java:comp/env/jdbc/VMDB");
+        con = ds.getConnection();
+        StreamResource.StreamSource source = new StreamResource.StreamSource() {
+            @Override
+            public InputStream getStream() {
+                byte[] b = null;
+                InputStream rep = null;
+                try {
+//                    InputStream rep =
+//                            getContext().getClass().getResourceAsStream(
+//                            repName.concat(".jasper"));
+                    WebApplicationContext context =
+                            (WebApplicationContext) getContext();
+                    File reportFolder = new File(context.getHttpSession()
+                            .getServletContext().getRealPath(
+                            "//WEB-INF//classes//"));
+                    rep = new FileInputStream(new File(reportFolder.getAbsolutePath()
+                            + repName.concat(".jasper")));
+                    //Overwrite sub report folder
+                    paramMap.put("SUBREPORT_DIR",
+                            reportFolder.getAbsolutePath());
+                    JasperReport report =
+                            (JasperReport) JRLoader.loadObject(rep);
+                    b = JasperRunManager.runReportToPdf(report, paramMap,
+                            con);
+                } catch (FileNotFoundException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                } catch (JRException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                } finally {
+                    try {
+                        if (rep != null) {
+                            rep.close();
+                        }
+                    } catch (IOException ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                    try {
+                        if (con != null) {
+                            con.close();
+                        }
+                    } catch (SQLException ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                }
+                return new ByteArrayInputStream(b);
+            }
+        };
+        StreamResource resource = new StreamResource(source, "myreport_"
+                + System.currentTimeMillis() + ".pdf", this);
+        getMainWindow().open(resource, "_new");
     }
 
     private void showRequirementSpecLevelCreationWindow() {
@@ -1613,8 +1804,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         //Recreate the ProjectServer to make sure we have the latest info from database
         setLeftComponent(getProjectRequirementTreeComponent(
                 new ProjectServer(currentProject)));
-        setRightComponent(getProjectRequirementMainComponent(
-                new ProjectServer(currentProject)));
+        setRightComponent(getProjectRequirementMainComponent());
         try {
             showMainWindow();
         } catch (VMException ex) {
@@ -1752,7 +1942,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     + "icons"
                     + System.getProperty("file.separator") + "flags");
             File tempIcon = new File(iconsFolder.getAbsolutePath()
-                    + System.getProperty("file.separator") + code.toLowerCase()
+                    + System.getProperty("file.separator")
+                    + code.toLowerCase(Locale.getDefault())
                     + ".png");
             if (tempIcon.exists()) {
                 Logger.getLogger(VMWeb.class.getSimpleName()).log(Level.FINE,
@@ -1803,6 +1994,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                             loc = Locale.getDefault();
                     }
                 } catch (Exception e) {
+                    LOG.log(Level.SEVERE, null, e);
                     loc = Locale.getDefault();
                 }
                 setLocale(loc);
@@ -1843,7 +2035,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 int width = reader.getWidth(reader.getMinIndex());
                 int height = reader.getHeight(reader.getMinIndex());
                 result = new Dimension(width, height);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 LOG.log(Level.SEVERE, null, e);
             } finally {
                 reader.dispose();
@@ -1930,25 +2122,21 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             @Override
             public void valueChange(Property.ValueChangeEvent event) {
                 Locale loc;
-                try {
-                    String list = languages.getValue().toString();
-                    String[] locales;
-                    locales = list.split("_");
-                    switch (locales.length) {
-                        case 1:
-                            loc = new Locale(locales[0]);
-                            break;
-                        case 2:
-                            loc = new Locale(locales[0], locales[1]);
-                            break;
-                        case 3:
-                            loc = new Locale(locales[0], locales[1], locales[2]);
-                            break;
-                        default:
-                            loc = Locale.getDefault();
-                    }
-                } catch (Exception e) {
-                    loc = Locale.getDefault();
+                String list = languages.getValue().toString();
+                String[] locales;
+                locales = list.split("_");
+                switch (locales.length) {
+                    case 1:
+                        loc = new Locale(locales[0]);
+                        break;
+                    case 2:
+                        loc = new Locale(locales[0], locales[1]);
+                        break;
+                    case 3:
+                        loc = new Locale(locales[0], locales[1], locales[2]);
+                        break;
+                    default:
+                        loc = Locale.getDefault();
                 }
                 setLocale(loc);
                 languages.setCaption(getInstance().getResource()
@@ -1960,7 +2148,11 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         languages.setValue(getLocale().getLanguage());
         getMainWindow().addComponent(logo);
         getMainWindow().addComponent(languages);
-        getMainWindow().addComponent(currentProjectLabel);
+        HorizontalLayout ol = new HorizontalLayout();
+        ol.addComponent(new Label(getInstance().getResource()
+                .getString("general.project.current") + ": "));
+        ol.addComponent(currentProjectSelection);
+        getMainWindow().addComponent(ol);
         getMainWindow().addComponent(menuBar);
     }
 
@@ -2130,7 +2322,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                         loggedUser =
                                 new VMUserServer(((com.vaadin.ui.TextField) form.getField("username")).getValue().toString(),
                                 ((PasswordField) form.getField("password")).getValue().toString());
-                        if (loggedUser.getUserStatus().getId() == 3) {
+                        if (loggedUser.getUserStatusId().getId() == 3) {
                             //Password aging
                             showChangePasswordDialog();
                         }
@@ -2166,11 +2358,10 @@ public class VMWeb extends Application implements HttpServletRequestListener {
      * enabling/disabling menus and such
      */
     private void updateMenu() throws VMException {
-        currentProjectLabel.setCaption(getInstance().getResource()
-                .getString("general.project.current") + ": "
-                + (currentProject == null
-                ? getInstance().getResource().getString("general.no.selection")
-                : currentProject.getName()));
+        currentProjectSelection.setValue((currentProject == null
+                ? null : currentProject.getId()));
+        currentProjectSelection.setNullSelectionItemId(
+                getInstance().getResource().getString("general.no.selection"));
         //Update menu bar
         menuBar.removeItems();
         groups.clear();

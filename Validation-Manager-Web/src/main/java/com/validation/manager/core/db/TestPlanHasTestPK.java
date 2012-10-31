@@ -12,21 +12,21 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class TestPlanHasTestPK implements Serializable {
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_plan_id", nullable = false)
+    @Column(name = "test_plan_id")
     private int testPlanId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_plan_test_project_id", nullable = false)
+    @Column(name = "test_plan_test_project_id")
     private int testPlanTestProjectId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_id", nullable = false)
+    @Column(name = "test_id")
     private int testId;
 
     public TestPlanHasTestPK() {

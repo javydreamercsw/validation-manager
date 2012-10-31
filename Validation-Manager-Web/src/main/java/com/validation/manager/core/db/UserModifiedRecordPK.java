@@ -15,13 +15,13 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class UserModifiedRecordPK implements Serializable {
     @Basic(optional = false)
     @NotNull
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private int userId;
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "UserModifiedRecordGen")
@@ -32,7 +32,7 @@ public class UserModifiedRecordPK implements Serializable {
     allocationSize = 1,
     initialValue = 1)
     @NotNull
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "record_id")
     private int recordId;
 
     public UserModifiedRecordPK() {

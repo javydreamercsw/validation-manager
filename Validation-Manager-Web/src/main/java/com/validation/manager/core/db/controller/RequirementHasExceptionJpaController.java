@@ -4,19 +4,20 @@
  */
 package com.validation.manager.core.db.controller;
 
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementHasException;
 import com.validation.manager.core.db.RequirementHasExceptionPK;
+import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -38,7 +39,6 @@ public class RequirementHasExceptionJpaController implements Serializable {
             requirementHasException.setRequirementHasExceptionPK(new RequirementHasExceptionPK());
         }
         requirementHasException.getRequirementHasExceptionPK().setExceptionReporterId(requirementHasException.getVmException().getVmExceptionPK().getReporterId());
-        requirementHasException.getRequirementHasExceptionPK().setRequirementId(requirementHasException.getRequirement().getRequirementPK().getId());
         requirementHasException.getRequirementHasExceptionPK().setExceptionId(requirementHasException.getVmException().getVmExceptionPK().getId());
         EntityManager em = null;
         try {
@@ -49,10 +49,19 @@ public class RequirementHasExceptionJpaController implements Serializable {
                 requirement = em.getReference(requirement.getClass(), requirement.getRequirementPK());
                 requirementHasException.setRequirement(requirement);
             }
+            VmException vmException = requirementHasException.getVmException();
+            if (vmException != null) {
+                vmException = em.getReference(vmException.getClass(), vmException.getVmExceptionPK());
+                requirementHasException.setVmException(vmException);
+            }
             em.persist(requirementHasException);
             if (requirement != null) {
                 requirement.getRequirementHasExceptionList().add(requirementHasException);
                 requirement = em.merge(requirement);
+            }
+            if (vmException != null) {
+                vmException.getRequirementHasExceptionList().add(requirementHasException);
+                vmException = em.merge(vmException);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -69,7 +78,6 @@ public class RequirementHasExceptionJpaController implements Serializable {
 
     public void edit(RequirementHasException requirementHasException) throws NonexistentEntityException, Exception {
         requirementHasException.getRequirementHasExceptionPK().setExceptionReporterId(requirementHasException.getVmException().getVmExceptionPK().getReporterId());
-        requirementHasException.getRequirementHasExceptionPK().setRequirementId(requirementHasException.getRequirement().getRequirementPK().getId());
         requirementHasException.getRequirementHasExceptionPK().setExceptionId(requirementHasException.getVmException().getVmExceptionPK().getId());
         EntityManager em = null;
         try {
@@ -78,9 +86,15 @@ public class RequirementHasExceptionJpaController implements Serializable {
             RequirementHasException persistentRequirementHasException = em.find(RequirementHasException.class, requirementHasException.getRequirementHasExceptionPK());
             Requirement requirementOld = persistentRequirementHasException.getRequirement();
             Requirement requirementNew = requirementHasException.getRequirement();
+            VmException vmExceptionOld = persistentRequirementHasException.getVmException();
+            VmException vmExceptionNew = requirementHasException.getVmException();
             if (requirementNew != null) {
                 requirementNew = em.getReference(requirementNew.getClass(), requirementNew.getRequirementPK());
                 requirementHasException.setRequirement(requirementNew);
+            }
+            if (vmExceptionNew != null) {
+                vmExceptionNew = em.getReference(vmExceptionNew.getClass(), vmExceptionNew.getVmExceptionPK());
+                requirementHasException.setVmException(vmExceptionNew);
             }
             requirementHasException = em.merge(requirementHasException);
             if (requirementOld != null && !requirementOld.equals(requirementNew)) {
@@ -90,6 +104,14 @@ public class RequirementHasExceptionJpaController implements Serializable {
             if (requirementNew != null && !requirementNew.equals(requirementOld)) {
                 requirementNew.getRequirementHasExceptionList().add(requirementHasException);
                 requirementNew = em.merge(requirementNew);
+            }
+            if (vmExceptionOld != null && !vmExceptionOld.equals(vmExceptionNew)) {
+                vmExceptionOld.getRequirementHasExceptionList().remove(requirementHasException);
+                vmExceptionOld = em.merge(vmExceptionOld);
+            }
+            if (vmExceptionNew != null && !vmExceptionNew.equals(vmExceptionOld)) {
+                vmExceptionNew.getRequirementHasExceptionList().add(requirementHasException);
+                vmExceptionNew = em.merge(vmExceptionNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -124,6 +146,11 @@ public class RequirementHasExceptionJpaController implements Serializable {
             if (requirement != null) {
                 requirement.getRequirementHasExceptionList().remove(requirementHasException);
                 requirement = em.merge(requirement);
+            }
+            VmException vmException = requirementHasException.getVmException();
+            if (vmException != null) {
+                vmException.getRequirementHasExceptionList().remove(requirementHasException);
+                vmException = em.merge(vmException);
             }
             em.remove(requirementHasException);
             em.getTransaction().commit();

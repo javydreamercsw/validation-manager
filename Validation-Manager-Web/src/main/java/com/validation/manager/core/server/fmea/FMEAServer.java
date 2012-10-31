@@ -48,8 +48,6 @@ public class FMEAServer extends FMEA implements EntityServer{
         try {
             new FMEAJpaController( DataBaseManager.getEntityManagerFactory()).destroy(id);
             return true;
-        } catch (IllegalOrphanException ex) {
-            Logger.getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NonexistentEntityException ex) {
             Logger.getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
         }

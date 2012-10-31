@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_case_t")
@@ -44,36 +44,36 @@ public class TestCaseT implements Serializable {
     @Id
     @Basic(optional = false)
     @NotNull
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "record_id")
     private Integer recordId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_id", nullable = false)
+    @Column(name = "test_id")
     private int testId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "version", nullable = false)
+    @Column(name = "version")
     private short version;
     @Lob
     @Size(max = 65535)
-    @Column(name = "summary", length = 65535)
+    @Column(name = "summary")
     private String summary;
     @Lob
     @Size(max = 65535)
-    @Column(name = "expected_results", length = 65535)
+    @Column(name = "expected_results")
     private String expectedResults;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "creation_date", nullable = false)
+    @Column(name = "creation_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "modification_date", nullable = false)
+    @Column(name = "modification_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationDate;
     @Column(name = "active")
@@ -82,7 +82,7 @@ public class TestCaseT implements Serializable {
     private Boolean isOpen;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "author_id", nullable = false)
+    @Column(name = "author_id")
     private int authorId;
     @Column(name = "updater_id")
     private Integer updaterId;

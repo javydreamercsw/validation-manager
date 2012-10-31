@@ -2,6 +2,9 @@ package com.validation.manager.core.tool.requirement.importer;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.test.TestHelper;
 import com.validation.manager.test.AbstractVMTestCase;
 import java.io.File;
@@ -18,6 +21,9 @@ import org.junit.Test;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RequirementImporterTest extends AbstractVMTestCase {
+
+    private static final Logger LOG =
+            Logger.getLogger(RequirementImporterTest.class.getName());
 
     public RequirementImporterTest() {
     }
@@ -41,12 +47,33 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + System.getProperty("file.separator") + "Reqs.xls");
         System.out.println(file.getAbsolutePath());
         assertTrue(DataBaseManager.namedQuery("Requirement.findAll").isEmpty());
-        RequirementImporter instance = new RequirementImporter(product, file);
+        System.out.println("Create Requirement Spec");
+        RequirementSpec rss = null;
+        try {
+            rss = TestHelper.createRequirementSpec("Test", "Test",
+                    product, 1);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        System.out.println("Create Requirement Spec Node");
+        RequirementSpecNode rsns = null;
+        try {
+            rsns = TestHelper.createRequirementSpecNode(
+                    rss, "Test", "Test", "Test");
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        RequirementImporter instance = new RequirementImporter(file, 
+                new RequirementSpecNodeJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
         try {
             instance.importFile();
             instance.processRequirements();
         } catch (Exception ex) {
-            Logger.getLogger(RequirementImporterTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
         assertFalse(DataBaseManager.namedQuery("Requirement.findAll").isEmpty());
@@ -71,12 +98,33 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + System.getProperty("file.separator") + "Reqs.xlsx");
         System.out.println(file.getAbsolutePath());
         assertTrue(DataBaseManager.namedQuery("Requirement.findAll").isEmpty());
-        RequirementImporter instance = new RequirementImporter(product, file);
+        System.out.println("Create Requirement Spec");
+        RequirementSpec rss = null;
+        try {
+            rss = TestHelper.createRequirementSpec("Test", "Test",
+                    product, 1);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        System.out.println("Create Requirement Spec Node");
+        RequirementSpecNode rsns = null;
+        try {
+            rsns = TestHelper.createRequirementSpecNode(
+                    rss, "Test", "Test", "Test");
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        RequirementImporter instance = new RequirementImporter(file, 
+                new RequirementSpecNodeJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
         try {
             instance.importFile();
             instance.processRequirements();
         } catch (Exception ex) {
-            Logger.getLogger(RequirementImporterTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
         assertFalse(DataBaseManager.namedQuery("Requirement.findAll").isEmpty());
@@ -98,7 +146,28 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + System.getProperty("file.separator") + "Failure.xls");
         System.out.println(file.getAbsolutePath());
         assertTrue(DataBaseManager.namedQuery("Requirement.findAll").isEmpty());
-        RequirementImporter instance = new RequirementImporter(product, file);
+        System.out.println("Create Requirement Spec");
+        RequirementSpec rss = null;
+        try {
+            rss = TestHelper.createRequirementSpec("Test", "Test",
+                    product, 1);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        System.out.println("Create Requirement Spec Node");
+        RequirementSpecNode rsns = null;
+        try {
+            rsns = TestHelper.createRequirementSpecNode(
+                    rss, "Test", "Test", "Test");
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        RequirementImporter instance = new RequirementImporter(file,
+                new RequirementSpecNodeJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
         boolean exception = false;
         try {
             instance.importFile();
@@ -108,6 +177,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             exception = true;
         }
         if (!exception) {
+            System.out.println("Didn't get exception as expected!");
             fail();
         }
     }
@@ -128,12 +198,33 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + System.getProperty("file.separator") + "Header.xlsx");
         System.out.println(file.getAbsolutePath());
         assertTrue(DataBaseManager.namedQuery("Requirement.findAll").isEmpty());
-        RequirementImporter instance = new RequirementImporter(product, file);
+        System.out.println("Create Requirement Spec");
+        RequirementSpec rss = null;
+        try {
+            rss = TestHelper.createRequirementSpec("Test", "Test",
+                    product, 1);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        System.out.println("Create Requirement Spec Node");
+        RequirementSpecNode rsns = null;
+        try {
+            rsns = TestHelper.createRequirementSpecNode(
+                    rss, "Test", "Test", "Test");
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        RequirementImporter instance = new RequirementImporter(file,
+                new RequirementSpecNodeJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
         try {
             assertTrue(instance.importFile(true).size() == 20);
             assertTrue(instance.processRequirements());
         } catch (Exception ex) {
-            Logger.getLogger(RequirementImporterTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
     }
@@ -146,13 +237,13 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             assertTrue(template.exists());
             template.deleteOnExit();
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(RequirementImporterTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         } catch (IOException ex) {
-            Logger.getLogger(RequirementImporterTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         } catch (InvalidFormatException ex) {
-            Logger.getLogger(RequirementImporterTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
     }

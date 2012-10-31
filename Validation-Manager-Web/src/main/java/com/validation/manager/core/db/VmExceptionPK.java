@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class VmExceptionPK implements Serializable {
@@ -29,11 +29,11 @@ public class VmExceptionPK implements Serializable {
     initialValue = 1000,
     allocationSize = 1)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "reporter_id", nullable = false)
+    @Column(name = "reporter_id")
     private int reporterId;
 
     public VmExceptionPK() {

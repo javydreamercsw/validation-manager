@@ -27,10 +27,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_case")
@@ -44,38 +45,38 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "TestCase.findByActive", query = "SELECT t FROM TestCase t WHERE t.active = :active"),
     @NamedQuery(name = "TestCase.findByIsOpen", query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
 public class TestCase implements Serializable {
+    @ManyToMany(mappedBy = "testCaseList")
+    private List<RiskControl> riskControlList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected TestCasePK testCasePK;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "version", nullable = false)
+    @Column(name = "version")
     private short version;
     @Lob
     @Size(max = 65535)
-    @Column(name = "summary", length = 65535)
+    @Column(name = "summary")
     private String summary;
     @Lob
     @Size(max = 65535)
-    @Column(name = "expected_results", length = 65535)
+    @Column(name = "expected_results")
     private String expectedResults;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "creation_date", nullable = false)
+    @Column(name = "creation_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
     @Column(name = "active")
     private Boolean active;
     @Column(name = "is_open")
     private Boolean isOpen;
-    @ManyToMany(mappedBy = "testCaseList")
-    private List<RiskControl> riskControlList;
-    @JoinColumn(name = "test_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private VmUser authorId;
+    @JoinColumn(name = "test_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Test test;
-    @JoinColumn(name = "author_id", referencedColumnName = "id", nullable = false)
-    @ManyToOne(optional = false)
-    private VmUser vmUser;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testCase")
     private List<Step> stepList;
 
@@ -152,13 +153,12 @@ public class TestCase implements Serializable {
         this.isOpen = isOpen;
     }
 
-    @XmlTransient
-    public List<RiskControl> getRiskControlList() {
-        return riskControlList;
+    public VmUser getAuthorId() {
+        return authorId;
     }
 
-    public void setRiskControlList(List<RiskControl> riskControlList) {
-        this.riskControlList = riskControlList;
+    public void setAuthorId(VmUser authorId) {
+        this.authorId = authorId;
     }
 
     public Test getTest() {
@@ -169,15 +169,8 @@ public class TestCase implements Serializable {
         this.test = test;
     }
 
-    public VmUser getVmUser() {
-        return vmUser;
-    }
-
-    public void setVmUser(VmUser vmUser) {
-        this.vmUser = vmUser;
-    }
-
     @XmlTransient
+    @JsonIgnore
     public List<Step> getStepList() {
         return stepList;
     }
@@ -209,6 +202,16 @@ public class TestCase implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCase[ testCasePK=" + testCasePK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskControl> getRiskControlList() {
+        return riskControlList;
+    }
+
+    public void setRiskControlList(List<RiskControl> riskControlList) {
+        this.riskControlList = riskControlList;
     }
     
 }

@@ -15,11 +15,10 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class StepPK implements Serializable {
-
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "StepGen")
     @TableGenerator(name = "StepGen", table = "vm_id",
@@ -29,15 +28,15 @@ public class StepPK implements Serializable {
     allocationSize = 1,
     initialValue = 1000)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_case_id", nullable = false)
+    @Column(name = "test_case_id")
     private int testCaseId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_case_test_id", nullable = false)
+    @Column(name = "test_case_test_id")
     private int testCaseTestId;
 
     public StepPK() {
@@ -83,7 +82,7 @@ public class StepPK implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof StepPK)) {
             return false;
         }

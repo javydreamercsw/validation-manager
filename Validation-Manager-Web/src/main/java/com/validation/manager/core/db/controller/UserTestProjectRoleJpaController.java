@@ -4,21 +4,21 @@
  */
 package com.validation.manager.core.db.controller;
 
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Role;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.UserTestProjectRolePK;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -39,9 +39,9 @@ public class UserTestProjectRoleJpaController implements Serializable {
         if (userTestProjectRole.getUserTestProjectRolePK() == null) {
             userTestProjectRole.setUserTestProjectRolePK(new UserTestProjectRolePK());
         }
-        userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -88,9 +88,9 @@ public class UserTestProjectRoleJpaController implements Serializable {
     }
 
     public void edit(UserTestProjectRole userTestProjectRole) throws NonexistentEntityException, Exception {
-        userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

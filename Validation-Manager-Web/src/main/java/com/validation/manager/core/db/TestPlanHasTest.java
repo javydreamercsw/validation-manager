@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_plan_has_test")
@@ -42,7 +42,7 @@ public class TestPlanHasTest implements Serializable {
     protected TestPlanHasTestPK testPlanHasTestPK;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date startDate;
     @Column(name = "end_date")
@@ -50,16 +50,16 @@ public class TestPlanHasTest implements Serializable {
     private Date endDate;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "node_order", nullable = false)
+    @Column(name = "node_order")
     private int nodeOrder;
-    @JoinColumn(name = "test_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Test test;
     @JoinColumns({
-        @JoinColumn(name = "test_plan_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false),
-        @JoinColumn(name = "test_plan_test_project_id", referencedColumnName = "test_project_id", nullable = false, insertable = false, updatable = false)})
+        @JoinColumn(name = "test_plan_id", referencedColumnName = "id", insertable = false, updatable = false),
+        @JoinColumn(name = "test_plan_test_project_id", referencedColumnName = "test_project_id", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private TestPlan testPlan;
+    @JoinColumn(name = "test_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private Test test;
 
     public TestPlanHasTest() {
     }
@@ -110,20 +110,20 @@ public class TestPlanHasTest implements Serializable {
         this.nodeOrder = nodeOrder;
     }
 
-    public Test getTest() {
-        return test;
-    }
-
-    public void setTest(Test test) {
-        this.test = test;
-    }
-
     public TestPlan getTestPlan() {
         return testPlan;
     }
 
     public void setTestPlan(TestPlan testPlan) {
         this.testPlan = testPlan;
+    }
+
+    public Test getTest() {
+        return test;
+    }
+
+    public void setTest(Test test) {
+        this.test = test;
     }
 
     @Override

@@ -27,10 +27,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "project")
@@ -40,8 +41,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Project.findById", query = "SELECT p FROM Project p WHERE p.id = :id"),
     @NamedQuery(name = "Project.findByName", query = "SELECT p FROM Project p WHERE p.name = :name")})
 public class Project implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
-    private List<ProjectHasTestProject> projectHasTestProjectList;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -53,29 +52,29 @@ public class Project implements Serializable {
     allocationSize = 1,
     initialValue=1)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "name", nullable = false, length = 45)
+    @Column(name = "name")
     private String name;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
     @JoinTable(name = "project_has_test_project", joinColumns = {
-        @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "test_project_id", referencedColumnName = "id", nullable = false)})
+        @JoinColumn(name = "project_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "test_project_id", referencedColumnName = "id")})
     @ManyToMany
     private List<TestProject> testProjectList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
     private List<RequirementSpec> requirementSpecList;
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "parentProjectId")
     private List<Project> projectList;
     @JoinColumn(name = "parent_project_id", referencedColumnName = "id")
     @ManyToOne
-    private Project project;
+    private Project parentProjectId;
 
     public Project() {
     }
@@ -109,6 +108,7 @@ public class Project implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<TestProject> getTestProjectList() {
         return testProjectList;
     }
@@ -118,6 +118,7 @@ public class Project implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<RequirementSpec> getRequirementSpecList() {
         return requirementSpecList;
     }
@@ -127,6 +128,7 @@ public class Project implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Project> getProjectList() {
         return projectList;
     }
@@ -135,12 +137,12 @@ public class Project implements Serializable {
         this.projectList = projectList;
     }
 
-    public Project getProject() {
-        return project;
+    public Project getParentProjectId() {
+        return parentProjectId;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setParentProjectId(Project parentProjectId) {
+        this.parentProjectId = parentProjectId;
     }
 
     @Override
@@ -166,15 +168,6 @@ public class Project implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Project[ id=" + id + " ]";
-    }
-
-    @XmlTransient
-    public List<ProjectHasTestProject> getProjectHasTestProjectList() {
-        return projectHasTestProjectList;
-    }
-
-    public void setProjectHasTestProjectList(List<ProjectHasTestProject> projectHasTestProjectList) {
-        this.projectHasTestProjectList = projectHasTestProjectList;
     }
     
 }

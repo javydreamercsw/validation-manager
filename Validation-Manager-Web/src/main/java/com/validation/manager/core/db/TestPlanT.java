@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_plan_t")
@@ -38,27 +38,27 @@ public class TestPlanT implements Serializable {
     @Id
     @Basic(optional = false)
     @NotNull
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "record_id")
     private Integer recordId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_project_id", nullable = false)
+    @Column(name = "test_project_id")
     private int testProjectId;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "active", nullable = false)
+    @Column(name = "active")
     private boolean active;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "is_open", nullable = false)
+    @Column(name = "is_open")
     private boolean isOpen;
     @Column(name = "regression_test_plan_id")
     private Integer regressionTestPlanId;

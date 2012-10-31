@@ -16,18 +16,16 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "vm_setting", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"setting"})})
+@Table(name = "vm_setting")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "VmSetting.findAll", query = "SELECT v FROM VmSetting v"),
@@ -48,12 +46,12 @@ public class VmSetting implements Serializable {
     initialValue = 1000,
     allocationSize = 1)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "setting", nullable = false, length = 45)
+    @Column(name = "setting")
     private String setting;
     @Column(name = "bool_val")
     private Boolean boolVal;
@@ -61,11 +59,11 @@ public class VmSetting implements Serializable {
     private Integer intVal;
     @Lob
     @Size(max = 16777215)
-    @Column(name = "long_val", length = 16777215)
+    @Column(name = "long_val")
     private String longVal;
     @Lob
     @Size(max = 65535)
-    @Column(name = "string_val", length = 65535)
+    @Column(name = "string_val")
     private String stringVal;
 
     public VmSetting() {

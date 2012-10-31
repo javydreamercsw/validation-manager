@@ -4,6 +4,7 @@
  */
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.db.fmea.RootCause;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -27,10 +28,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "vm_exception")
@@ -42,12 +44,14 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "VmException.findByReportDate", query = "SELECT v FROM VmException v WHERE v.reportDate = :reportDate"),
     @NamedQuery(name = "VmException.findByCloseDate", query = "SELECT v FROM VmException v WHERE v.closeDate = :closeDate")})
 public class VmException implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmException")
+    private List<RequirementHasException> requirementHasExceptionList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected VmExceptionPK vmExceptionPK;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "report_date", nullable = false)
+    @Column(name = "report_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date reportDate;
     @Column(name = "close_date")
@@ -57,34 +61,10 @@ public class VmException implements Serializable {
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
-    @Column(name = "description", nullable = false, length = 65535)
+    @Column(name = "description")
     private String description;
-    @JoinTable(name = "exception_has_corrective_action", joinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id", nullable = false)})
-    @ManyToMany
-    private List<CorrectiveAction> correctiveActionList;
     @ManyToMany(mappedBy = "vmExceptionList")
-    private List<Requirement> requirementList;
-//    @ManyToMany(mappedBy = "vmExceptionList")
-//    private List<Step> stepList;
-    @JoinTable(name = "exception_has_root_cause", joinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "root_cause_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "root_cause_root_cause_type_id", referencedColumnName = "root_cause_type_id", nullable = false)})
-    @ManyToMany
-    private List<RootCause> rootCauseList;
-    @JoinTable(name = "exception_has_investigation", joinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id", nullable = false),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "investigation_id", referencedColumnName = "id", nullable = false)})
-    @ManyToMany
-    private List<Investigation> investigationList;
-    @JoinColumn(name = "reporter_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private VmUser vmUser;
+    private List<CorrectiveAction> correctiveActionList;
     @JoinTable(name = "step_has_exception", joinColumns = {
         @JoinColumn(name = "exception_id", referencedColumnName = "id"),
         @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
@@ -93,8 +73,22 @@ public class VmException implements Serializable {
         @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id")})
     @ManyToMany
     private List<Step> stepList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmException")
-    private List<RequirementHasException> requirementHasExceptionList;
+    @JoinTable(name = "exception_has_root_cause", joinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "root_cause_id", referencedColumnName = "id"),
+        @JoinColumn(name = "root_cause_root_cause_type_id", referencedColumnName = "root_cause_type_id")})
+    @ManyToMany
+    private List<RootCause> rootCauseList;
+    @JoinTable(name = "exception_has_investigation", joinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "investigation_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<Investigation> investigationList;
+    @JoinColumn(name = "reporter_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private VmUser vmUser;
 
     public VmException() {
     }
@@ -146,6 +140,7 @@ public class VmException implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<CorrectiveAction> getCorrectiveActionList() {
         return correctiveActionList;
     }
@@ -155,15 +150,7 @@ public class VmException implements Serializable {
     }
 
     @XmlTransient
-    public List<Requirement> getRequirementList() {
-        return requirementList;
-    }
-
-    public void setRequirementList(List<Requirement> requirementList) {
-        this.requirementList = requirementList;
-    }
-
-    @XmlTransient
+    @JsonIgnore
     public List<Step> getStepList() {
         return stepList;
     }
@@ -173,6 +160,7 @@ public class VmException implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<RootCause> getRootCauseList() {
         return rootCauseList;
     }
@@ -182,6 +170,7 @@ public class VmException implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Investigation> getInvestigationList() {
         return investigationList;
     }
@@ -222,4 +211,15 @@ public class VmException implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmException[ vmExceptionPK=" + vmExceptionPK + " ]";
     }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RequirementHasException> getRequirementHasExceptionList() {
+        return requirementHasExceptionList;
+    }
+
+    public void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
+        this.requirementHasExceptionList = requirementHasExceptionList;
+    }
+    
 }

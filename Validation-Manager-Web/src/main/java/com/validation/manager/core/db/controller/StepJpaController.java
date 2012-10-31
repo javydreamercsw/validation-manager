@@ -4,22 +4,22 @@
  */
 package com.validation.manager.core.db.controller;
 
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.VmException;
+import java.util.ArrayList;
+import java.util.List;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.StepPK;
-import com.validation.manager.core.db.TestCase;
-import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -46,8 +46,8 @@ public class StepJpaController implements Serializable {
         if (step.getRequirementList() == null) {
             step.setRequirementList(new ArrayList<Requirement>());
         }
-        step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
+        step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -96,8 +96,8 @@ public class StepJpaController implements Serializable {
     }
 
     public void edit(Step step) throws NonexistentEntityException, Exception {
-        step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
+        step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         EntityManager em = null;
         try {
             em = getEntityManager();

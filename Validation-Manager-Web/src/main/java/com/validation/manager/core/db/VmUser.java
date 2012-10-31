@@ -12,12 +12,10 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -31,13 +29,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@EntityListeners(com.validation.manager.core.AuditedEntityListener.class)
 @Table(name = "vm_user")
 @XmlRootElement
 @NamedQueries({
@@ -64,68 +62,62 @@ public class VmUser extends VMAuditedObject implements Serializable {
     initialValue = 1000,
     allocationSize = 1)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "username", nullable = false, length = 45)
+    @Column(name = "username")
     private String username;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "password", nullable = false, length = 45)
+    @Column(name = "password")
     private String password;
     // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 100)
-    @Column(name = "email", nullable = false, length = 100)
+    @Column(name = "email")
     private String email;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "first", nullable = false, length = 45)
+    @Column(name = "first")
     private String first;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "last", nullable = false, length = 45)
+    @Column(name = "last")
     private String last;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 10)
-    @Column(name = "locale", nullable = false, length = 10)
+    @Column(name = "locale")
     private String locale;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "last_modified", nullable = false)
+    @Column(name = "last_modified")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModified;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "attempts", nullable = false)
+    @Column(name = "attempts")
     private int attempts;
-    @JoinTable(name = "user_has_role", joinColumns = {
-        @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)})
-    @ManyToMany
+    @ManyToMany(mappedBy = "vmUserList")
     private List<Role> roleList;
-    @JoinTable(name = "user_has_corrective_action", joinColumns = {
-        @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id", nullable = false)})
-    @ManyToMany
+    @ManyToMany(mappedBy = "vmUserList")
     private List<CorrectiveAction> correctiveActionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserModifiedRecord> userModifiedRecordList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserHasInvestigation> userHasInvestigationList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
-    private List<TestCase> testCaseList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "assigneeId")
     private List<UserAssigment> userAssigmentList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser1")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserAssigment> userAssigmentList1;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "authorId")
+    private List<TestCase> testCaseList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<VmException> vmExceptionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
@@ -134,9 +126,9 @@ public class VmUser extends VMAuditedObject implements Serializable {
     private List<UserHasRootCause> userHasRootCauseList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserTestPlanRole> userTestPlanRoleList;
-    @JoinColumn(name = "user_status_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_status_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private UserStatus userStatus;
+    private UserStatus userStatusId;
 
     public VmUser() {
     }
@@ -150,7 +142,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
         this.locale = locale;
         this.lastModified = lastModified;
         this.attempts = attempts;
-        this.userStatus = userStatus;
+        this.userStatusId = userStatus;
     }
 
     public Integer getId() {
@@ -226,6 +218,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Role> getRoleList() {
         return roleList;
     }
@@ -235,6 +228,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<CorrectiveAction> getCorrectiveActionList() {
         return correctiveActionList;
     }
@@ -244,6 +238,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserModifiedRecord> getUserModifiedRecordList() {
         return userModifiedRecordList;
     }
@@ -253,6 +248,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserHasInvestigation> getUserHasInvestigationList() {
         return userHasInvestigationList;
     }
@@ -262,15 +258,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
-    public List<TestCase> getTestCaseList() {
-        return testCaseList;
-    }
-
-    public void setTestCaseList(List<TestCase> testCaseList) {
-        this.testCaseList = testCaseList;
-    }
-
-    @XmlTransient
+    @JsonIgnore
     public List<UserAssigment> getUserAssigmentList() {
         return userAssigmentList;
     }
@@ -280,6 +268,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserAssigment> getUserAssigmentList1() {
         return userAssigmentList1;
     }
@@ -289,6 +278,17 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
+    public List<TestCase> getTestCaseList() {
+        return testCaseList;
+    }
+
+    public void setTestCaseList(List<TestCase> testCaseList) {
+        this.testCaseList = testCaseList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
     public List<VmException> getVmExceptionList() {
         return vmExceptionList;
     }
@@ -298,6 +298,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserTestProjectRole> getUserTestProjectRoleList() {
         return userTestProjectRoleList;
     }
@@ -307,6 +308,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserHasRootCause> getUserHasRootCauseList() {
         return userHasRootCauseList;
     }
@@ -316,6 +318,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserTestPlanRole> getUserTestPlanRoleList() {
         return userTestPlanRoleList;
     }
@@ -324,12 +327,12 @@ public class VmUser extends VMAuditedObject implements Serializable {
         this.userTestPlanRoleList = userTestPlanRoleList;
     }
 
-    public UserStatus getUserStatus() {
-        return userStatus;
+    public UserStatus getUserStatusId() {
+        return userStatusId;
     }
 
-    public void setUserStatus(UserStatus userStatus) {
-        this.userStatus = userStatus;
+    public void setUserStatusId(UserStatus userStatusId) {
+        this.userStatusId = userStatusId;
     }
 
     @Override
@@ -356,4 +359,5 @@ public class VmUser extends VMAuditedObject implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmUser[ id=" + id + " ]";
     }
+    
 }

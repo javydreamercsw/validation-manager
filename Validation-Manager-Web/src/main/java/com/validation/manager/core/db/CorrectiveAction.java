@@ -24,10 +24,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "corrective_action")
@@ -48,13 +49,13 @@ public class CorrectiveAction implements Serializable {
     allocationSize = 1,
     initialValue = 1000)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
-    @Column(name = "details", nullable = false, length = 65535)
+    @Column(name = "details")
     private String details;
     @JoinTable(name = "exception_has_corrective_action", joinColumns = {
         @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")}, inverseJoinColumns = {
@@ -92,6 +93,7 @@ public class CorrectiveAction implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<VmException> getVmExceptionList() {
         return vmExceptionList;
     }
@@ -101,6 +103,7 @@ public class CorrectiveAction implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<VmUser> getVmUserList() {
         return vmUserList;
     }

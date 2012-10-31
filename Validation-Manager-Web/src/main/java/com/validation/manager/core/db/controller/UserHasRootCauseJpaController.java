@@ -4,20 +4,19 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.RootCause;
 import com.validation.manager.core.db.UserHasRootCause;
 import com.validation.manager.core.db.UserHasRootCausePK;
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -38,28 +37,19 @@ public class UserHasRootCauseJpaController implements Serializable {
         if (userHasRootCause.getUserHasRootCausePK() == null) {
             userHasRootCause.setUserHasRootCausePK(new UserHasRootCausePK());
         }
-        userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
+        userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
         userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            RootCause rootCause = userHasRootCause.getRootCause();
-            if (rootCause != null) {
-                rootCause = em.getReference(rootCause.getClass(), rootCause.getRootCausePK());
-                userHasRootCause.setRootCause(rootCause);
-            }
             VmUser vmUser = userHasRootCause.getVmUser();
             if (vmUser != null) {
                 vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
                 userHasRootCause.setVmUser(vmUser);
             }
             em.persist(userHasRootCause);
-            if (rootCause != null) {
-                rootCause.getUserHasRootCauseList().add(userHasRootCause);
-                rootCause = em.merge(rootCause);
-            }
             if (vmUser != null) {
                 vmUser.getUserHasRootCauseList().add(userHasRootCause);
                 vmUser = em.merge(vmUser);
@@ -78,35 +68,21 @@ public class UserHasRootCauseJpaController implements Serializable {
     }
 
     public void edit(UserHasRootCause userHasRootCause) throws NonexistentEntityException, Exception {
-        userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
+        userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
         userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             UserHasRootCause persistentUserHasRootCause = em.find(UserHasRootCause.class, userHasRootCause.getUserHasRootCausePK());
-            RootCause rootCauseOld = persistentUserHasRootCause.getRootCause();
-            RootCause rootCauseNew = userHasRootCause.getRootCause();
             VmUser vmUserOld = persistentUserHasRootCause.getVmUser();
             VmUser vmUserNew = userHasRootCause.getVmUser();
-            if (rootCauseNew != null) {
-                rootCauseNew = em.getReference(rootCauseNew.getClass(), rootCauseNew.getRootCausePK());
-                userHasRootCause.setRootCause(rootCauseNew);
-            }
             if (vmUserNew != null) {
                 vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
                 userHasRootCause.setVmUser(vmUserNew);
             }
             userHasRootCause = em.merge(userHasRootCause);
-            if (rootCauseOld != null && !rootCauseOld.equals(rootCauseNew)) {
-                rootCauseOld.getUserHasRootCauseList().remove(userHasRootCause);
-                rootCauseOld = em.merge(rootCauseOld);
-            }
-            if (rootCauseNew != null && !rootCauseNew.equals(rootCauseOld)) {
-                rootCauseNew.getUserHasRootCauseList().add(userHasRootCause);
-                rootCauseNew = em.merge(rootCauseNew);
-            }
             if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
                 vmUserOld.getUserHasRootCauseList().remove(userHasRootCause);
                 vmUserOld = em.merge(vmUserOld);
@@ -143,11 +119,6 @@ public class UserHasRootCauseJpaController implements Serializable {
                 userHasRootCause.getUserHasRootCausePK();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userHasRootCause with id " + id + " no longer exists.", enfe);
-            }
-            RootCause rootCause = userHasRootCause.getRootCause();
-            if (rootCause != null) {
-                rootCause.getUserHasRootCauseList().remove(userHasRootCause);
-                rootCause = em.merge(rootCause);
             }
             VmUser vmUser = userHasRootCause.getVmUser();
             if (vmUser != null) {

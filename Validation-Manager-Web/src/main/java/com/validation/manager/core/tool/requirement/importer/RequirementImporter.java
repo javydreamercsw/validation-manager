@@ -1,8 +1,8 @@
 package com.validation.manager.core.tool.requirement.importer;
 
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementJpaController;
@@ -35,10 +35,9 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  */
 public class RequirementImporter {
 
-    private Project project;
     private File toImport;
     private ArrayList<Requirement> requirements = new ArrayList<Requirement>();
-    private int counter = 0;
+    private final RequirementSpecNode rsn;
     private static final Logger LOG =
             Logger.getLogger(RequirementImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
@@ -50,9 +49,9 @@ public class RequirementImporter {
         columns.add("Notes");
     }
 
-    public RequirementImporter(Project product, File toImport) {
-        this.project = product;
+    public RequirementImporter(File toImport, RequirementSpecNode rsn) {
         this.toImport = toImport;
+        this.rsn = rsn;
     }
 
     public List<Requirement> importFile() throws
@@ -65,11 +64,7 @@ public class RequirementImporter {
             UnsupportedOperationException, RequirementImportException,
             Exception {
         requirements.clear();
-        counter = 0;
-        if (project == null) {
-            throw new RequirementImportException(
-                    "message.requirement.import.invalid.product");
-        } else if (toImport == null) {
+        if (toImport == null) {
             throw new RequirementImportException(
                     "message.requirement.import.file.null");
         } else if (!toImport.exists()) {
@@ -154,7 +149,7 @@ public class RequirementImporter {
                                                 "RequirementType.findByName",
                                                 parameters);
                                     }
-                                    requirement.setRequirementType(
+                                    requirement.setRequirementTypeId(
                                             (RequirementType) result.get(0));
                                     break;
                                 case 3:
@@ -162,18 +157,19 @@ public class RequirementImporter {
                                     LOG.fine("Setting notes");
                                     requirement.setNotes(value);
                                     break;
+                                default:
+                                    throw new RuntimeException("Invalid column detected: " + c);
                             }
                             LOG.fine(value);
                         }
-                        requirement.setProject(project);
+                        requirement.setRequirementSpecNode(rsn);
                         parameters.clear();
                         parameters.put("status", "general.open");
                         result = DataBaseManager.namedQuery(
                                 "RequirementStatus.findByStatus", parameters);
-                        requirement.setRequirementStatus(
+                        requirement.setRequirementStatusId(
                                 (RequirementStatus) result.get(0));
                         requirements.add(requirement);
-                        counter++;
                     }
                 } catch (InvalidFormatException ex) {
                     LOG.log(Level.SEVERE, null, ex);

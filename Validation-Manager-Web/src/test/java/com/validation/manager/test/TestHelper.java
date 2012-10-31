@@ -3,6 +3,9 @@ package com.validation.manager.test;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.RequirementSpecNodePK;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
@@ -28,6 +31,8 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
+import com.validation.manager.core.server.core.RequirementSpecNodeServer;
+import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
@@ -50,7 +55,7 @@ public class TestHelper {
             String first, String last) throws Exception {
         VMUserServer temp = new VMUserServer(name,
                 pass, first, email, last);
-        temp.setUserStatus(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
+        temp.setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
         temp.write2DB();
         return new VmUserJpaController(DataBaseManager.getEntityManagerFactory()).findVmUser(temp.getId());
     }
@@ -105,11 +110,11 @@ public class TestHelper {
     }
 
     public static TestCase createTestCase(int testId, short version,
-            String expectedResults, Test test, VmUser user, String summary) throws PreexistingEntityException, Exception {
+            String expectedResults, Test test, /*VmUser user,*/ String summary) throws PreexistingEntityException, Exception {
         TestCaseServer tc = new TestCaseServer(testId, version, new Date());
         tc.setExpectedResults(expectedResults);
         tc.setTest(test);
-        tc.setVmUser(user);
+//        tc.setVmUserId(user);
         tc.setActive(true);
         tc.setExpectedResults(expectedResults);
         tc.setIsOpen(true);
@@ -120,8 +125,11 @@ public class TestHelper {
         return controller.findTestCase(tc.getTestCasePK());
     }
 
-    public static Requirement createRequirement(String id, String desc, Project p, String notes, int requirementType) throws Exception {
-        RequirementServer req = new RequirementServer(id, desc, p, notes, requirementType, 1);
+    public static Requirement createRequirement(String id, String desc, 
+            RequirementSpecNodePK p, String notes, int requirementType, 
+            int requirementStatus) throws Exception {
+        RequirementServer req = new RequirementServer(id, desc, p, notes, 
+                requirementType, requirementStatus);
         req.write2DB();
         return new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).findRequirement(req.getRequirementPK());
     }
@@ -183,5 +191,19 @@ public class TestHelper {
         tps.getTestPlanHasTestList().add(tpht);
         tps.write2DB();
         assertTrue(tps.getTestPlanHasTestList().size() > testInPlan);
+    }
+
+    public static RequirementSpec createRequirementSpec(String name, String description, Project project, int specLevelId) throws Exception {
+        RequirementSpecServer rss = new RequirementSpecServer(name, description,
+                project.getId(), specLevelId);
+        rss.write2DB();
+        return rss;
+    }
+
+    public static RequirementSpecNode createRequirementSpecNode(RequirementSpec rss, String name, String description, String scope) throws Exception {
+        RequirementSpecNodeServer rsns = new RequirementSpecNodeServer(rss,
+                name, description, scope);
+        rsns.write2DB();
+        return rsns;
     }
 }

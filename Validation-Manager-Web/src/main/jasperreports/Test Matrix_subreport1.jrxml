@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Requirement Coverage" pageWidth="555" pageHeight="802" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="420a5f1d-3b7b-4312-865d-da8ff1916260">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="req_id" class="java.lang.Integer">
+		<parameterDescription><![CDATA[Requirement ID to look covarage for]]></parameterDescription>
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+     test_case.`test_id` AS test_case_test_id
+FROM
+     `project` project INNER JOIN `project_has_test_project` project_has_test_project ON project.`id` = project_has_test_project.`project_id`
+     INNER JOIN `test_project` test_project ON project_has_test_project.`test_project_id` = test_project.`id`
+     INNER JOIN `test_plan` test_plan ON test_project.`id` = test_plan.`test_project_id`
+     INNER JOIN `test_plan_has_test` test_plan_has_test ON test_plan.`id` = test_plan_has_test.`test_plan_id`
+     AND test_plan.`test_project_id` = test_plan_has_test.`test_plan_test_project_id`
+     INNER JOIN `test` test ON test_plan_has_test.`test_id` = test.`id`
+     INNER JOIN `test_case` test_case ON test.`id` = test_case.`test_id`
+     INNER JOIN `requirement_spec` requirement_spec ON project.`id` = requirement_spec.`project_id`
+     INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement_spec.`id` = requirement_spec_node.`requirement_spec_id`
+     AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
+     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_level_id`
+     INNER JOIN `requirement` requirement ON requirement_spec_node.`id` = requirement.`requirement_spec_node_id`
+     AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
+WHERE
+     requirement.id = $P{req_id}]]>
+	</queryString>
+	<field name="test_case_test_id" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="4061b3f3-20c9-4da9-97cf-c7c2a16e75df" x="0" y="0" width="183" height="20" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true"/>
+				<textElement/>
+				<text><![CDATA[Test cases covering this Requirement:]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement uuid="5562a9ef-b8bb-4e63-8217-907d08f565ee" x="0" y="0" width="100" height="20" isRemoveLineWhenBlank="true"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{test_case_test_id}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="0fa88e2d-c51d-4226-af93-ff7086cda51f" mode="Opaque" x="0" y="0" width="183" height="20" isPrintInFirstWholeBand="true" backcolor="#FF0033">
+					<printWhenExpression><![CDATA[$V{COLUMN_COUNT}.equals( 0 )]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Uncovered!]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

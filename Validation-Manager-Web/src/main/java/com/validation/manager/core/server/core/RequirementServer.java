@@ -2,9 +2,10 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
-import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementSpecNodePK;
 import com.validation.manager.core.db.controller.RequirementJpaController;
+import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -16,14 +17,17 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  */
 public class RequirementServer extends Requirement implements EntityServer {
 
-    public RequirementServer(String id, String desc, Project p, String notes, int requirementType, int requirementStatus) {
+    public RequirementServer(String id, String desc, RequirementSpecNodePK rsn, 
+            String notes, int requirementType, int requirementStatus) {
         setNotes(notes);
-        setProject(p);
+        setRequirementSpecNode(
+                new RequirementSpecNodeJpaController(DataBaseManager
+                .getEntityManagerFactory()).findRequirementSpecNode(rsn));
         setUniqueId(id);
         setDescription(desc);
-        setRequirementStatus(new RequirementStatusJpaController(
+        setRequirementStatusId(new RequirementStatusJpaController(
                 DataBaseManager.getEntityManagerFactory()).findRequirementStatus(requirementStatus));
-        setRequirementType(new RequirementTypeJpaController(
+        setRequirementTypeId(new RequirementTypeJpaController(
                 DataBaseManager.getEntityManagerFactory()).findRequirementType(requirementType));
     }
 
@@ -44,14 +48,13 @@ public class RequirementServer extends Requirement implements EntityServer {
             setUniqueId(requirement.getUniqueId());
             setNotes(requirement.getNotes());
             setDescription(requirement.getDescription());
-            setProject(requirement.getProject());
+            setRequirementSpecNode(requirement.getRequirementSpecNode());
             setRequirementList(requirement.getRequirementList());
             setRequirementList1(requirement.getRequirementList1());
-            setRequirementStatus(requirement.getRequirementStatus());
-            setRequirementType(requirement.getRequirementType());
+            setRequirementStatusId(requirement.getRequirementStatusId());
+            setRequirementTypeId(requirement.getRequirementTypeId());
             setRiskControlList(requirement.getRiskControlList());
             setStepList(requirement.getStepList());
-            setVmExceptionList(requirement.getVmExceptionList());
             setRequirementPK(requirement.getRequirementPK());
         } else {
             throw new RuntimeException("Unable to find requirement with id: " + r.getRequirementPK());
@@ -65,28 +68,26 @@ public class RequirementServer extends Requirement implements EntityServer {
                     DataBaseManager.getEntityManagerFactory()).findRequirement(getRequirementPK());
             req.setNotes(getNotes());
             req.setDescription(getDescription());
-            req.setProject(getProject());
+            req.setRequirementSpecNode(getRequirementSpecNode());
             req.setRequirementList(getRequirementList());
             req.setRequirementList1(getRequirementList1());
-            req.setRequirementStatus(getRequirementStatus());
-            req.setRequirementType(getRequirementType());
+            req.setRequirementStatusId(getRequirementStatusId());
+            req.setRequirementTypeId(getRequirementTypeId());
             req.setRiskControlList(getRiskControlList());
             req.setStepList(getStepList());
-            req.setVmExceptionList(getVmExceptionList());
             new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(req);
         } else {
             Requirement req = new Requirement(getUniqueId(), getDescription());
             req.setNotes(getNotes());
             req.setDescription(getDescription());
-            req.setProject(getProject());
+            req.setRequirementSpecNode(getRequirementSpecNode());
             req.setRequirementList(getRequirementList());
             req.setRequirementList1(getRequirementList1());
-            req.setRequirementStatus(getRequirementStatus());
-            req.setRequirementType(getRequirementType());
+            req.setRequirementStatusId(getRequirementStatusId());
+            req.setRequirementTypeId(getRequirementTypeId());
             req.setRiskControlList(getRiskControlList());
             req.setStepList(getStepList());
-            req.setVmExceptionList(getVmExceptionList());
             new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(req);
             setRequirementPK(req.getRequirementPK());

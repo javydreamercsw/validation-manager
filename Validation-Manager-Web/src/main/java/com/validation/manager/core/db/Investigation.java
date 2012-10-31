@@ -24,10 +24,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "investigation")
@@ -47,13 +48,13 @@ public class Investigation implements Serializable {
     allocationSize = 1,
     initialValue=1)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
-    @Column(name = "description", nullable = false, length = 65535)
+    @Column(name = "description")
     private String description;
     @ManyToMany(mappedBy = "investigationList")
     private List<VmException> vmExceptionList;
@@ -84,6 +85,7 @@ public class Investigation implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<VmException> getVmExceptionList() {
         return vmExceptionList;
     }
@@ -93,6 +95,7 @@ public class Investigation implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<UserHasInvestigation> getUserHasInvestigationList() {
         return userHasInvestigationList;
     }

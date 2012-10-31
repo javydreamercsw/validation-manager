@@ -35,7 +35,7 @@ public class UserTest extends AbstractVMTestCase {
                     MD5.encrypt("password"), "test@test.com",
                     "first", "last", "en", new Date(),
                     new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1), 0);
-            u.setUserStatus(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
+            u.setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
             u.setModifierId(1);
             new VmUserJpaController(DataBaseManager.getEntityManagerFactory()).create(u);
             parameters.clear();

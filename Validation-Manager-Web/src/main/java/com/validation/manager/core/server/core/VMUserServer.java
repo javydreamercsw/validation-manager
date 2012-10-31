@@ -66,7 +66,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
         setEmail(vmu.getEmail());
         setAttempts(vmu.getAttempts());
         setLastModified(vmu.getLastModified());
-        setUserStatus(vmu.getUserStatus());
+        setUserStatusId(vmu.getUserStatusId());
         setRoleList(vmu.getRoleList());
         setCorrectiveActionList(vmu.getCorrectiveActionList());
         setTestCaseList(vmu.getTestCaseList());
@@ -107,7 +107,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
                 setFirst(vmu.getFirst());
                 setLast(vmu.getLast());
                 setEmail(vmu.getEmail());
-                int status = vmu.getUserStatus().getId();
+                int status = vmu.getUserStatusId().getId();
                 if (status != 2) {
                     Calendar cal2 = GregorianCalendar.getInstance(), now = GregorianCalendar.getInstance();
                     cal2.setTime(vmu.getLastModified());
@@ -133,7 +133,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
                 setUserTestPlanRoleList(vmu.getUserTestPlanRoleList());
                 setUserTestProjectRoleList(vmu.getUserTestProjectRoleList());
                 setVmExceptionList(vmu.getVmExceptionList());
-                setUserStatus(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(status));
+                setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(status));
                 setLastModified(vmu.getLastModified());
             }
         } catch (Exception e) {
@@ -142,7 +142,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
                 transaction.rollback();
             }
             result = DataBaseManager.createdQuery("SELECT u FROM VmUser u WHERE u.username='"
-                    + attrUN + "' AND u.userStatus.id <> 2");
+                    + attrUN + "' AND u.userStatusId.id <> 2");
             //increase number of attempts
             if (!result.isEmpty()) {
                 VmUser vmu = (VmUser) result.get(0);
@@ -154,7 +154,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
                 setFirst(vmu.getFirst());
                 setLast(vmu.getLast());
                 setEmail(vmu.getEmail());
-                setUserStatus(vmu.getUserStatus());
+                setUserStatusId(vmu.getUserStatusId());
                 //Increase attempts after a unsuccessfull login.
                 setIncreaseAttempts(true);
                 setLastModified(vmu.getLastModified());
@@ -191,7 +191,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
                 setFirst(vmu.getFirst());
                 setLast(vmu.getLast());
                 setEmail(vmu.getEmail());
-                setUserStatus(vmu.getUserStatus());
+                setUserStatusId(vmu.getUserStatusId());
                 setAttempts(vmu.getAttempts());
                 setLastModified(vmu.getLastModified());
                 setRoleList(vmu.getRoleList());
@@ -221,7 +221,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
         setLast(lastName);
         setEmail(email);
         setLocale(Locale.getDefault().toString());
-        setUserStatus(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
+        setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
         setAttempts(0);
         setLastModified(new java.sql.Timestamp(System.currentTimeMillis()));
         setHashPassword(true);
@@ -236,7 +236,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
         setFirst(firstName);
         setLast(lastName);
         setEmail(email);
-        setUserStatus(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(userStatusId));
+        setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(userStatusId));
         setAttempts(attempts);
         setLastModified(lastModified);
         setHashPassword(true);
@@ -246,9 +246,9 @@ public final class VMUserServer extends VmUser implements EntityServer{
     @Override
     public int write2DB() throws Exception {
         Date date;
-        if (getUserStatus().getId() == 4) {
+        if (getUserStatusId().getId() == 4) {
             //Changed from aged out to password changed. Clear status
-            setUserStatus(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
+            setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
             setAttempts(0);
             setModificationReason("audit.user.account.aged");
             setChange(true);
@@ -261,7 +261,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
         //Lock account if needed. Can't lock main admin.
         if (getAttempts() > VMSettingServer.getSetting("password.attempts").getIntVal()
                 && getId() > 1) {
-            setUserStatus(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(2));
+            setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(2));
         }
         VmUserJpaController controller = new VmUserJpaController( DataBaseManager.getEntityManagerFactory());
         if (getId() > 0) {
@@ -288,7 +288,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
             vmu.setLast(getLast().replaceAll("'", "\\\\'"));
             vmu.setLastModified(getLastModified());
             vmu.setFirst(getFirst().replaceAll("'", "\\\\'"));
-            vmu.setUserStatus(getUserStatus());
+            vmu.setUserStatusId(getUserStatusId());
             vmu.setUsername(getUsername().replaceAll("'", "\\\\'"));
             vmu.setPassword(password);
             vmu.setModificationReason(getModificationReason() == null ? "audit.general.modified" : getModificationReason());
@@ -310,7 +310,7 @@ public final class VMUserServer extends VmUser implements EntityServer{
                     getUsername().replaceAll("'", "\\\\'"), getPassword(), getEmail().replaceAll("'", "\\\\'"),
                     getFirst().replaceAll("'", "\\\\'"), getLast().replaceAll("'", "\\\\'"), getLocale(),
                     getLastModified(), new UserStatusJpaController( DataBaseManager.getEntityManagerFactory()).findUserStatus(1), getAttempts());
-            vmu.setUserStatus(getUserStatus());
+            vmu.setUserStatusId(getUserStatusId());
             vmu.setModificationReason(getModificationReason());
             vmu.setModifierId(getModifierId());
             vmu.setModificationTime(new Timestamp(new Date().getTime()));

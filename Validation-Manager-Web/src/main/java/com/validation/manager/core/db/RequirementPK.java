@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class RequirementPK implements Serializable {
@@ -28,11 +28,11 @@ public class RequirementPK implements Serializable {
     allocationSize = 1,
     initialValue = 1000)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "version", nullable = false)
+    @Column(name = "version")
     private int version;
 
     public RequirementPK() {

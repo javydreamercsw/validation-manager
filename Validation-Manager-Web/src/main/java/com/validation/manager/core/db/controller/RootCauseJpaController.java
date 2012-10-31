@@ -4,23 +4,19 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.RootCause;
-import com.validation.manager.core.db.RootCausePK;
-import com.validation.manager.core.db.RootCauseType;
-import com.validation.manager.core.db.UserHasRootCause;
-import com.validation.manager.core.db.VmException;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import com.validation.manager.core.db.fmea.RootCause;
+import com.validation.manager.core.db.fmea.RootCausePK;
 import java.io.Serializable;
-import java.util.ArrayList;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.fmea.RootCauseType;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -41,12 +37,6 @@ public class RootCauseJpaController implements Serializable {
         if (rootCause.getRootCausePK() == null) {
             rootCause.setRootCausePK(new RootCausePK());
         }
-        if (rootCause.getVmExceptionList() == null) {
-            rootCause.setVmExceptionList(new ArrayList<VmException>());
-        }
-        if (rootCause.getUserHasRootCauseList() == null) {
-            rootCause.setUserHasRootCauseList(new ArrayList<UserHasRootCause>());
-        }
         rootCause.getRootCausePK().setRootCauseTypeId(rootCause.getRootCauseType().getId());
         EntityManager em = null;
         try {
@@ -57,35 +47,10 @@ public class RootCauseJpaController implements Serializable {
                 rootCauseType = em.getReference(rootCauseType.getClass(), rootCauseType.getId());
                 rootCause.setRootCauseType(rootCauseType);
             }
-            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
-            for (VmException vmExceptionListVmExceptionToAttach : rootCause.getVmExceptionList()) {
-                vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
-            }
-            rootCause.setVmExceptionList(attachedVmExceptionList);
-            List<UserHasRootCause> attachedUserHasRootCauseList = new ArrayList<UserHasRootCause>();
-            for (UserHasRootCause userHasRootCauseListUserHasRootCauseToAttach : rootCause.getUserHasRootCauseList()) {
-                userHasRootCauseListUserHasRootCauseToAttach = em.getReference(userHasRootCauseListUserHasRootCauseToAttach.getClass(), userHasRootCauseListUserHasRootCauseToAttach.getUserHasRootCausePK());
-                attachedUserHasRootCauseList.add(userHasRootCauseListUserHasRootCauseToAttach);
-            }
-            rootCause.setUserHasRootCauseList(attachedUserHasRootCauseList);
             em.persist(rootCause);
             if (rootCauseType != null) {
                 rootCauseType.getRootCauseList().add(rootCause);
                 rootCauseType = em.merge(rootCauseType);
-            }
-            for (VmException vmExceptionListVmException : rootCause.getVmExceptionList()) {
-                vmExceptionListVmException.getRootCauseList().add(rootCause);
-                vmExceptionListVmException = em.merge(vmExceptionListVmException);
-            }
-            for (UserHasRootCause userHasRootCauseListUserHasRootCause : rootCause.getUserHasRootCauseList()) {
-                RootCause oldRootCauseOfUserHasRootCauseListUserHasRootCause = userHasRootCauseListUserHasRootCause.getRootCause();
-                userHasRootCauseListUserHasRootCause.setRootCause(rootCause);
-                userHasRootCauseListUserHasRootCause = em.merge(userHasRootCauseListUserHasRootCause);
-                if (oldRootCauseOfUserHasRootCauseListUserHasRootCause != null) {
-                    oldRootCauseOfUserHasRootCauseListUserHasRootCause.getUserHasRootCauseList().remove(userHasRootCauseListUserHasRootCause);
-                    oldRootCauseOfUserHasRootCauseListUserHasRootCause = em.merge(oldRootCauseOfUserHasRootCauseListUserHasRootCause);
-                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -100,7 +65,7 @@ public class RootCauseJpaController implements Serializable {
         }
     }
 
-    public void edit(RootCause rootCause) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(RootCause rootCause) throws NonexistentEntityException, Exception {
         rootCause.getRootCausePK().setRootCauseTypeId(rootCause.getRootCauseType().getId());
         EntityManager em = null;
         try {
@@ -109,40 +74,10 @@ public class RootCauseJpaController implements Serializable {
             RootCause persistentRootCause = em.find(RootCause.class, rootCause.getRootCausePK());
             RootCauseType rootCauseTypeOld = persistentRootCause.getRootCauseType();
             RootCauseType rootCauseTypeNew = rootCause.getRootCauseType();
-            List<VmException> vmExceptionListOld = persistentRootCause.getVmExceptionList();
-            List<VmException> vmExceptionListNew = rootCause.getVmExceptionList();
-            List<UserHasRootCause> userHasRootCauseListOld = persistentRootCause.getUserHasRootCauseList();
-            List<UserHasRootCause> userHasRootCauseListNew = rootCause.getUserHasRootCauseList();
-            List<String> illegalOrphanMessages = null;
-            for (UserHasRootCause userHasRootCauseListOldUserHasRootCause : userHasRootCauseListOld) {
-                if (!userHasRootCauseListNew.contains(userHasRootCauseListOldUserHasRootCause)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain UserHasRootCause " + userHasRootCauseListOldUserHasRootCause + " since its rootCause field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             if (rootCauseTypeNew != null) {
                 rootCauseTypeNew = em.getReference(rootCauseTypeNew.getClass(), rootCauseTypeNew.getId());
                 rootCause.setRootCauseType(rootCauseTypeNew);
             }
-            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
-            for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
-                vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
-            }
-            vmExceptionListNew = attachedVmExceptionListNew;
-            rootCause.setVmExceptionList(vmExceptionListNew);
-            List<UserHasRootCause> attachedUserHasRootCauseListNew = new ArrayList<UserHasRootCause>();
-            for (UserHasRootCause userHasRootCauseListNewUserHasRootCauseToAttach : userHasRootCauseListNew) {
-                userHasRootCauseListNewUserHasRootCauseToAttach = em.getReference(userHasRootCauseListNewUserHasRootCauseToAttach.getClass(), userHasRootCauseListNewUserHasRootCauseToAttach.getUserHasRootCausePK());
-                attachedUserHasRootCauseListNew.add(userHasRootCauseListNewUserHasRootCauseToAttach);
-            }
-            userHasRootCauseListNew = attachedUserHasRootCauseListNew;
-            rootCause.setUserHasRootCauseList(userHasRootCauseListNew);
             rootCause = em.merge(rootCause);
             if (rootCauseTypeOld != null && !rootCauseTypeOld.equals(rootCauseTypeNew)) {
                 rootCauseTypeOld.getRootCauseList().remove(rootCause);
@@ -151,29 +86,6 @@ public class RootCauseJpaController implements Serializable {
             if (rootCauseTypeNew != null && !rootCauseTypeNew.equals(rootCauseTypeOld)) {
                 rootCauseTypeNew.getRootCauseList().add(rootCause);
                 rootCauseTypeNew = em.merge(rootCauseTypeNew);
-            }
-            for (VmException vmExceptionListOldVmException : vmExceptionListOld) {
-                if (!vmExceptionListNew.contains(vmExceptionListOldVmException)) {
-                    vmExceptionListOldVmException.getRootCauseList().remove(rootCause);
-                    vmExceptionListOldVmException = em.merge(vmExceptionListOldVmException);
-                }
-            }
-            for (VmException vmExceptionListNewVmException : vmExceptionListNew) {
-                if (!vmExceptionListOld.contains(vmExceptionListNewVmException)) {
-                    vmExceptionListNewVmException.getRootCauseList().add(rootCause);
-                    vmExceptionListNewVmException = em.merge(vmExceptionListNewVmException);
-                }
-            }
-            for (UserHasRootCause userHasRootCauseListNewUserHasRootCause : userHasRootCauseListNew) {
-                if (!userHasRootCauseListOld.contains(userHasRootCauseListNewUserHasRootCause)) {
-                    RootCause oldRootCauseOfUserHasRootCauseListNewUserHasRootCause = userHasRootCauseListNewUserHasRootCause.getRootCause();
-                    userHasRootCauseListNewUserHasRootCause.setRootCause(rootCause);
-                    userHasRootCauseListNewUserHasRootCause = em.merge(userHasRootCauseListNewUserHasRootCause);
-                    if (oldRootCauseOfUserHasRootCauseListNewUserHasRootCause != null && !oldRootCauseOfUserHasRootCauseListNewUserHasRootCause.equals(rootCause)) {
-                        oldRootCauseOfUserHasRootCauseListNewUserHasRootCause.getUserHasRootCauseList().remove(userHasRootCauseListNewUserHasRootCause);
-                        oldRootCauseOfUserHasRootCauseListNewUserHasRootCause = em.merge(oldRootCauseOfUserHasRootCauseListNewUserHasRootCause);
-                    }
-                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -192,7 +104,7 @@ public class RootCauseJpaController implements Serializable {
         }
     }
 
-    public void destroy(RootCausePK id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(RootCausePK id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -204,26 +116,10 @@ public class RootCauseJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The rootCause with id " + id + " no longer exists.", enfe);
             }
-            List<String> illegalOrphanMessages = null;
-            List<UserHasRootCause> userHasRootCauseListOrphanCheck = rootCause.getUserHasRootCauseList();
-            for (UserHasRootCause userHasRootCauseListOrphanCheckUserHasRootCause : userHasRootCauseListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This RootCause (" + rootCause + ") cannot be destroyed since the UserHasRootCause " + userHasRootCauseListOrphanCheckUserHasRootCause + " in its userHasRootCauseList field has a non-nullable rootCause field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             RootCauseType rootCauseType = rootCause.getRootCauseType();
             if (rootCauseType != null) {
                 rootCauseType.getRootCauseList().remove(rootCause);
                 rootCauseType = em.merge(rootCauseType);
-            }
-            List<VmException> vmExceptionList = rootCause.getVmExceptionList();
-            for (VmException vmExceptionListVmException : vmExceptionList) {
-                vmExceptionListVmException.getRootCauseList().remove(rootCause);
-                vmExceptionListVmException = em.merge(vmExceptionListVmException);
             }
             em.remove(rootCause);
             em.getTransaction().commit();

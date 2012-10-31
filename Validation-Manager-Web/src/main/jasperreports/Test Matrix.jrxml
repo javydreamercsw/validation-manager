@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Test matrix" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3c03af66-4181-4ecf-85ab-5687460d3206">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["Z:\\NetBeans\\validation-manager\\Reports\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="project_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+     project.`id` AS project_id,
+     project.`name` AS project_name,
+     project.`notes` AS project_notes,
+     project.`parent_project_id` AS project_parent_project_id
+FROM
+     `project` project
+WHERE
+     project.`id` = $P{project_id}]]>
+	</queryString>
+	<field name="project_id" class="java.lang.Integer"/>
+	<field name="project_name" class="java.lang.String"/>
+	<field name="project_notes" class="java.lang.String"/>
+	<field name="project_parent_project_id" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<textField>
+				<reportElement uuid="7d6d7c82-c729-4199-a878-50854e11c295" x="0" y="0" width="802" height="79"/>
+				<textElement markup="none">
+					<font size="20"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Trace Matrix for project: "+$F{project_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="1" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="38" splitType="Stretch">
+			<subreport>
+				<reportElement uuid="3e3b1b47-4ee0-4124-9b73-687ff35879d0" x="0" y="0" width="802" height="38"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="parent_id">
+					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Project Coverage Report.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

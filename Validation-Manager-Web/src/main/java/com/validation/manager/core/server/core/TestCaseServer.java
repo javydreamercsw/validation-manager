@@ -33,7 +33,6 @@ public class TestCaseServer extends TestCase implements EntityServer {
         setSummary(temp.getSummary());
         setTest(temp.getTest());
         setVersion(temp.getVersion());
-        setVmUser(temp.getVmUser());
     }
 
     public TestCaseServer(int testCaseId, short version, Date creationDate) {
@@ -64,7 +63,6 @@ public class TestCaseServer extends TestCase implements EntityServer {
             temp.setSummary(getSummary());
             temp.setTest(getTest());
             temp.setVersion(getVersion());
-            temp.setVmUser(getVmUser());
             controller.edit(temp);
         } else {
             TestCase temp = new TestCase(getTestCasePK(), getVersion(), getCreationDate());
@@ -82,7 +80,6 @@ public class TestCaseServer extends TestCase implements EntityServer {
             }
             temp.setSummary(getSummary());
             temp.setTest(getTest());
-            temp.setVmUser(getVmUser());
             controller.create(temp);
             setTestCasePK(temp.getTestCasePK());
         }

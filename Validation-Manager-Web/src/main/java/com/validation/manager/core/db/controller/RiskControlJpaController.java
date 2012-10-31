@@ -4,25 +4,23 @@
  */
 package com.validation.manager.core.db.controller;
 
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.fmea.RiskControlType;
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.RiskControlHasRequirement;
+import java.util.ArrayList;
+import java.util.List;
+import com.validation.manager.core.db.fmea.RiskItem;
 import com.validation.manager.core.db.TestCase;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.db.fmea.RiskControl;
 import com.validation.manager.core.db.fmea.RiskControlPK;
-import com.validation.manager.core.db.fmea.RiskControlType;
-import com.validation.manager.core.db.fmea.RiskItem;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -54,9 +52,6 @@ public class RiskControlJpaController implements Serializable {
         }
         if (riskControl.getTestCaseList() == null) {
             riskControl.setTestCaseList(new ArrayList<TestCase>());
-        }
-        if (riskControl.getRiskControlHasRequirementList() == null) {
-            riskControl.setRiskControlHasRequirementList(new ArrayList<RiskControlHasRequirement>());
         }
         riskControl.getRiskControlPK().setRiskControlTypeId(riskControl.getRiskControlType().getId());
         EntityManager em = null;
@@ -92,12 +87,6 @@ public class RiskControlJpaController implements Serializable {
                 attachedTestCaseList.add(testCaseListTestCaseToAttach);
             }
             riskControl.setTestCaseList(attachedTestCaseList);
-            List<RiskControlHasRequirement> attachedRiskControlHasRequirementList = new ArrayList<RiskControlHasRequirement>();
-            for (RiskControlHasRequirement riskControlHasRequirementListRiskControlHasRequirementToAttach : riskControl.getRiskControlHasRequirementList()) {
-                riskControlHasRequirementListRiskControlHasRequirementToAttach = em.getReference(riskControlHasRequirementListRiskControlHasRequirementToAttach.getClass(), riskControlHasRequirementListRiskControlHasRequirementToAttach.getRiskControlHasRequirementPK());
-                attachedRiskControlHasRequirementList.add(riskControlHasRequirementListRiskControlHasRequirementToAttach);
-            }
-            riskControl.setRiskControlHasRequirementList(attachedRiskControlHasRequirementList);
             em.persist(riskControl);
             if (riskControlType != null) {
                 riskControlType.getRiskControlList().add(riskControl);
@@ -112,21 +101,12 @@ public class RiskControlJpaController implements Serializable {
                 riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
             for (RiskItem riskItemList1RiskItem : riskControl.getRiskItemList1()) {
-                riskItemList1RiskItem.getRiskControlList1().add(riskControl);
+                riskItemList1RiskItem.getRiskControlList().add(riskControl);
                 riskItemList1RiskItem = em.merge(riskItemList1RiskItem);
             }
             for (TestCase testCaseListTestCase : riskControl.getTestCaseList()) {
                 testCaseListTestCase.getRiskControlList().add(riskControl);
                 testCaseListTestCase = em.merge(testCaseListTestCase);
-            }
-            for (RiskControlHasRequirement riskControlHasRequirementListRiskControlHasRequirement : riskControl.getRiskControlHasRequirementList()) {
-                RiskControl oldRiskControlOfRiskControlHasRequirementListRiskControlHasRequirement = riskControlHasRequirementListRiskControlHasRequirement.getRiskControl();
-                riskControlHasRequirementListRiskControlHasRequirement.setRiskControl(riskControl);
-                riskControlHasRequirementListRiskControlHasRequirement = em.merge(riskControlHasRequirementListRiskControlHasRequirement);
-                if (oldRiskControlOfRiskControlHasRequirementListRiskControlHasRequirement != null) {
-                    oldRiskControlOfRiskControlHasRequirementListRiskControlHasRequirement.getRiskControlHasRequirementList().remove(riskControlHasRequirementListRiskControlHasRequirement);
-                    oldRiskControlOfRiskControlHasRequirementListRiskControlHasRequirement = em.merge(oldRiskControlOfRiskControlHasRequirementListRiskControlHasRequirement);
-                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -141,7 +121,7 @@ public class RiskControlJpaController implements Serializable {
         }
     }
 
-    public void edit(RiskControl riskControl) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(RiskControl riskControl) throws NonexistentEntityException, Exception {
         riskControl.getRiskControlPK().setRiskControlTypeId(riskControl.getRiskControlType().getId());
         EntityManager em = null;
         try {
@@ -158,20 +138,6 @@ public class RiskControlJpaController implements Serializable {
             List<RiskItem> riskItemList1New = riskControl.getRiskItemList1();
             List<TestCase> testCaseListOld = persistentRiskControl.getTestCaseList();
             List<TestCase> testCaseListNew = riskControl.getTestCaseList();
-            List<RiskControlHasRequirement> riskControlHasRequirementListOld = persistentRiskControl.getRiskControlHasRequirementList();
-            List<RiskControlHasRequirement> riskControlHasRequirementListNew = riskControl.getRiskControlHasRequirementList();
-            List<String> illegalOrphanMessages = null;
-            for (RiskControlHasRequirement riskControlHasRequirementListOldRiskControlHasRequirement : riskControlHasRequirementListOld) {
-                if (!riskControlHasRequirementListNew.contains(riskControlHasRequirementListOldRiskControlHasRequirement)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain RiskControlHasRequirement " + riskControlHasRequirementListOldRiskControlHasRequirement + " since its riskControl field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             if (riskControlTypeNew != null) {
                 riskControlTypeNew = em.getReference(riskControlTypeNew.getClass(), riskControlTypeNew.getId());
                 riskControl.setRiskControlType(riskControlTypeNew);
@@ -204,13 +170,6 @@ public class RiskControlJpaController implements Serializable {
             }
             testCaseListNew = attachedTestCaseListNew;
             riskControl.setTestCaseList(testCaseListNew);
-            List<RiskControlHasRequirement> attachedRiskControlHasRequirementListNew = new ArrayList<RiskControlHasRequirement>();
-            for (RiskControlHasRequirement riskControlHasRequirementListNewRiskControlHasRequirementToAttach : riskControlHasRequirementListNew) {
-                riskControlHasRequirementListNewRiskControlHasRequirementToAttach = em.getReference(riskControlHasRequirementListNewRiskControlHasRequirementToAttach.getClass(), riskControlHasRequirementListNewRiskControlHasRequirementToAttach.getRiskControlHasRequirementPK());
-                attachedRiskControlHasRequirementListNew.add(riskControlHasRequirementListNewRiskControlHasRequirementToAttach);
-            }
-            riskControlHasRequirementListNew = attachedRiskControlHasRequirementListNew;
-            riskControl.setRiskControlHasRequirementList(riskControlHasRequirementListNew);
             riskControl = em.merge(riskControl);
             if (riskControlTypeOld != null && !riskControlTypeOld.equals(riskControlTypeNew)) {
                 riskControlTypeOld.getRiskControlList().remove(riskControl);
@@ -246,13 +205,13 @@ public class RiskControlJpaController implements Serializable {
             }
             for (RiskItem riskItemList1OldRiskItem : riskItemList1Old) {
                 if (!riskItemList1New.contains(riskItemList1OldRiskItem)) {
-                    riskItemList1OldRiskItem.getRiskControlList1().remove(riskControl);
+                    riskItemList1OldRiskItem.getRiskControlList().remove(riskControl);
                     riskItemList1OldRiskItem = em.merge(riskItemList1OldRiskItem);
                 }
             }
             for (RiskItem riskItemList1NewRiskItem : riskItemList1New) {
                 if (!riskItemList1Old.contains(riskItemList1NewRiskItem)) {
-                    riskItemList1NewRiskItem.getRiskControlList1().add(riskControl);
+                    riskItemList1NewRiskItem.getRiskControlList().add(riskControl);
                     riskItemList1NewRiskItem = em.merge(riskItemList1NewRiskItem);
                 }
             }
@@ -266,17 +225,6 @@ public class RiskControlJpaController implements Serializable {
                 if (!testCaseListOld.contains(testCaseListNewTestCase)) {
                     testCaseListNewTestCase.getRiskControlList().add(riskControl);
                     testCaseListNewTestCase = em.merge(testCaseListNewTestCase);
-                }
-            }
-            for (RiskControlHasRequirement riskControlHasRequirementListNewRiskControlHasRequirement : riskControlHasRequirementListNew) {
-                if (!riskControlHasRequirementListOld.contains(riskControlHasRequirementListNewRiskControlHasRequirement)) {
-                    RiskControl oldRiskControlOfRiskControlHasRequirementListNewRiskControlHasRequirement = riskControlHasRequirementListNewRiskControlHasRequirement.getRiskControl();
-                    riskControlHasRequirementListNewRiskControlHasRequirement.setRiskControl(riskControl);
-                    riskControlHasRequirementListNewRiskControlHasRequirement = em.merge(riskControlHasRequirementListNewRiskControlHasRequirement);
-                    if (oldRiskControlOfRiskControlHasRequirementListNewRiskControlHasRequirement != null && !oldRiskControlOfRiskControlHasRequirementListNewRiskControlHasRequirement.equals(riskControl)) {
-                        oldRiskControlOfRiskControlHasRequirementListNewRiskControlHasRequirement.getRiskControlHasRequirementList().remove(riskControlHasRequirementListNewRiskControlHasRequirement);
-                        oldRiskControlOfRiskControlHasRequirementListNewRiskControlHasRequirement = em.merge(oldRiskControlOfRiskControlHasRequirementListNewRiskControlHasRequirement);
-                    }
                 }
             }
             em.getTransaction().commit();
@@ -296,7 +244,7 @@ public class RiskControlJpaController implements Serializable {
         }
     }
 
-    public void destroy(RiskControlPK id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(RiskControlPK id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -307,17 +255,6 @@ public class RiskControlJpaController implements Serializable {
                 riskControl.getRiskControlPK();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskControl with id " + id + " no longer exists.", enfe);
-            }
-            List<String> illegalOrphanMessages = null;
-            List<RiskControlHasRequirement> riskControlHasRequirementListOrphanCheck = riskControl.getRiskControlHasRequirementList();
-            for (RiskControlHasRequirement riskControlHasRequirementListOrphanCheckRiskControlHasRequirement : riskControlHasRequirementListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This RiskControl (" + riskControl + ") cannot be destroyed since the RiskControlHasRequirement " + riskControlHasRequirementListOrphanCheckRiskControlHasRequirement + " in its riskControlHasRequirementList field has a non-nullable riskControl field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             RiskControlType riskControlType = riskControl.getRiskControlType();
             if (riskControlType != null) {
@@ -336,7 +273,7 @@ public class RiskControlJpaController implements Serializable {
             }
             List<RiskItem> riskItemList1 = riskControl.getRiskItemList1();
             for (RiskItem riskItemList1RiskItem : riskItemList1) {
-                riskItemList1RiskItem.getRiskControlList1().remove(riskControl);
+                riskItemList1RiskItem.getRiskControlList().remove(riskControl);
                 riskItemList1RiskItem = em.merge(riskItemList1RiskItem);
             }
             List<TestCase> testCaseList = riskControl.getTestCaseList();

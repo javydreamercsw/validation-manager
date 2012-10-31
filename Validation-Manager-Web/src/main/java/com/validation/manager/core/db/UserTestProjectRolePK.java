@@ -12,21 +12,21 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class UserTestProjectRolePK implements Serializable {
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_project_id", nullable = false)
+    @Column(name = "test_project_id")
     private int testProjectId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private int userId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "role_id", nullable = false)
+    @Column(name = "role_id")
     private int roleId;
 
     public UserTestProjectRolePK() {

@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "step_t")
@@ -37,32 +37,32 @@ public class StepT implements Serializable {
     @Id
     @Basic(optional = false)
     @NotNull
-    @Column(name = "record_id", nullable = false)
+    @Column(name = "record_id")
     private Integer recordId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_case_id", nullable = false)
+    @Column(name = "test_case_id")
     private int testCaseId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "test_case_test_id", nullable = false)
+    @Column(name = "test_case_test_id")
     private int testCaseTestId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "step_sequence", nullable = false)
+    @Column(name = "step_sequence")
     private int stepSequence;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 100)
-    @Column(name = "text", nullable = false, length = 100)
+    @Column(name = "text")
     private String text;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
 
     public StepT() {
@@ -72,12 +72,12 @@ public class StepT implements Serializable {
         this.recordId = recordId;
     }
 
-    public StepT(Integer recordId, int id, int testCaseId, int testCaseTestId, int order, String text) {
+    public StepT(Integer recordId, int id, int testCaseId, int testCaseTestId, int stepSequence, String text) {
         this.recordId = recordId;
         this.id = id;
         this.testCaseId = testCaseId;
         this.testCaseTestId = testCaseTestId;
-        this.stepSequence = order;
+        this.stepSequence = stepSequence;
         this.text = text;
     }
 

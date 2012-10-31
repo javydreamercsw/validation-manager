@@ -23,10 +23,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test")
@@ -47,28 +48,28 @@ public class Test implements Serializable {
     allocationSize = 1,
     initialValue = 1000)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes", length = 65535)
+    @Column(name = "notes")
     private String notes;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "name", nullable = false, length = 45)
+    @Column(name = "name")
     private String name;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
-    @Column(name = "purpose", nullable = false, length = 65535)
+    @Column(name = "purpose")
     private String purpose;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
-    @Column(name = "scope", nullable = false, length = 65535)
+    @Column(name = "scope")
     private String scope;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "test")
     private List<TestCase> testCaseList;
@@ -125,6 +126,7 @@ public class Test implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<TestCase> getTestCaseList() {
         return testCaseList;
     }
@@ -134,6 +136,7 @@ public class Test implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<TestPlanHasTest> getTestPlanHasTestList() {
         return testPlanHasTestList;
     }

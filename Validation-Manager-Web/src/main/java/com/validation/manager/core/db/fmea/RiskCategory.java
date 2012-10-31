@@ -19,6 +19,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -36,7 +38,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "RiskCategory.findByMinimum", query = "SELECT r FROM RiskCategory r WHERE r.minimum = :minimum"),
     @NamedQuery(name = "RiskCategory.findByMaximum", query = "SELECT r FROM RiskCategory r WHERE r.maximum = :maximum")})
 public class RiskCategory implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -50,12 +51,16 @@ public class RiskCategory implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
     @Column(name = "name")
     private String name;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "minimum")
     private int minimum;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "maximum")
     private int maximum;
     @ManyToMany(mappedBy = "riskCategoryList")

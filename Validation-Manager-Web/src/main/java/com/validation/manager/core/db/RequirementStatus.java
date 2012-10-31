@@ -22,10 +22,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "requirement_status")
@@ -45,14 +46,14 @@ public class RequirementStatus implements Serializable {
     allocationSize = 1,
     initialValue = 1000)
     @Basic(optional = false)
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "status", nullable = false, length = 255)
+    @Size(min = 1, max = 45)
+    @Column(name = "status")
     private String status;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementStatus")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementStatusId")
     private List<Requirement> requirementList;
 
     public RequirementStatus() {
@@ -79,6 +80,7 @@ public class RequirementStatus implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Requirement> getRequirementList() {
         return requirementList;
     }

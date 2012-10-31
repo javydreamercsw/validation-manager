@@ -18,19 +18,18 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "user_status", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"status"})})
+@Table(name = "user_status")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "UserStatus.findAll", query = "SELECT u FROM UserStatus u"),
@@ -50,17 +49,17 @@ public class UserStatus implements Serializable {
     initialValue = 1000,
     allocationSize = 1)
     @NotNull
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45)
-    @Column(name = "status", nullable = false, length = 45)
+    @Column(name = "status")
     private String status;
-    @Size(max = 255)
-    @Column(name = "description", length = 255)
+    @Size(max = 45)
+    @Column(name = "description")
     private String description;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userStatus")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userStatusId")
     private List<VmUser> vmUserList;
 
     public UserStatus() {
@@ -95,6 +94,7 @@ public class UserStatus implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<VmUser> getVmUserList() {
         return vmUserList;
     }

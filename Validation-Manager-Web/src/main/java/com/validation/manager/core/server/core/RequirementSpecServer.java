@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
@@ -50,17 +46,23 @@ public class RequirementSpecServer extends RequirementSpec implements EntityServ
      * @param requirements List of requirements for this node
      * @throws Exception if errors creating the node occur 
      */
-    public void addSpecNode(String name, String description, String scope, List<Requirement> requirements) throws Exception {
+    public void addSpecNode(String name, String description, String scope, 
+            List<Requirement> requirements) throws Exception {
         RequirementSpecNodeServer sns = new RequirementSpecNodeServer(
-                new RequirementSpecJpaController(DataBaseManager.getEntityManagerFactory()).findRequirementSpec(getRequirementSpecPK()), 
+                new RequirementSpecJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirementSpec(getRequirementSpecPK()), 
                 name, description, scope);
-        for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
+        sns.write2DB();
+        for (Iterator<Requirement> it = requirements.iterator(); 
+                it.hasNext();) {
             Requirement req = it.next();
             req.setRequirementSpecNode(sns);
-            sns.getRequirementList().add(req);
         }
-        sns.write2DB();
-        getRequirementSpecNodeList().add(new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).findRequirementSpecNode(sns.getRequirementSpecNodePK()));
+        getRequirementSpecNodeList().add(
+                new RequirementSpecNodeJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirementSpecNode(sns.getRequirementSpecNodePK()));
         write2DB();
     }
 
@@ -69,8 +71,11 @@ public class RequirementSpecServer extends RequirementSpec implements EntityServ
         if (getRequirementSpecNodeList() == null) {
             setRequirementSpecNodeList(new ArrayList<RequirementSpecNode>());
         }
-        if (getRequirementSpecPK() != null && getRequirementSpecPK().getId() > 0) {
-            RequirementSpec rs = new RequirementSpecJpaController(DataBaseManager.getEntityManagerFactory()).findRequirementSpec(getRequirementSpecPK());
+        if (getRequirementSpecPK() != null 
+                && getRequirementSpecPK().getId() > 0) {
+            RequirementSpec rs = new RequirementSpecJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRequirementSpec(getRequirementSpecPK());
             rs.setDescription(getDescription());
             rs.setName(getName());
             rs.setModificationDate(getModificationDate());
@@ -78,7 +83,8 @@ public class RequirementSpecServer extends RequirementSpec implements EntityServ
             rs.setRequirementSpecNodeList(getRequirementSpecNodeList());
             rs.setSpecLevel(getSpecLevel());
             rs.setVersion(getVersion());
-            new RequirementSpecJpaController(DataBaseManager.getEntityManagerFactory()).edit(rs);
+            new RequirementSpecJpaController(
+                    DataBaseManager.getEntityManagerFactory()).edit(rs);
         } else {
             RequirementSpec rs = new RequirementSpec();
             rs.setDescription(getDescription());
@@ -88,13 +94,17 @@ public class RequirementSpecServer extends RequirementSpec implements EntityServ
             rs.setRequirementSpecNodeList(getRequirementSpecNodeList());
             rs.setSpecLevel(getSpecLevel());
             rs.setVersion(getVersion());
-            new RequirementSpecJpaController(DataBaseManager.getEntityManagerFactory()).create(rs);
+            new RequirementSpecJpaController(
+                    DataBaseManager.getEntityManagerFactory()).create(rs);
             setRequirementSpecPK(rs.getRequirementSpecPK());
         }
         return getRequirementSpecPK().getId();
     }
 
-    public static void deleteRequirementSpec(RequirementSpec rs) throws IllegalOrphanException, NonexistentEntityException {
-        new RequirementSpecJpaController(DataBaseManager.getEntityManagerFactory()).destroy(rs.getRequirementSpecPK());
+    public static void deleteRequirementSpec(RequirementSpec rs) 
+            throws IllegalOrphanException, NonexistentEntityException {
+        new RequirementSpecJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .destroy(rs.getRequirementSpecPK());
     }
 }

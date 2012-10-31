@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultrón <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "user_test_project_role")
@@ -30,13 +30,13 @@ public class UserTestProjectRole implements Serializable {
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserTestProjectRolePK userTestProjectRolePK;
-    @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Role role;
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
-    @JoinColumn(name = "test_project_id", referencedColumnName = "id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "test_project_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private TestProject testProject;
 

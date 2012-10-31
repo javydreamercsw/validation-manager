@@ -10,7 +10,6 @@
     <class>com.validation.manager.core.db.RequirementType</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
     <class>com.validation.manager.core.db.Step</class>
-    <class>com.validation.manager.core.db.RootCause</class>
     <class>com.validation.manager.core.db.StepT</class>
     <class>com.validation.manager.core.db.Test</class>
     <class>com.validation.manager.core.db.VmUser</class>
@@ -18,7 +17,6 @@
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.VmUserT</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
-    <class>com.validation.manager.core.db.RootCauseType</class>
     <class>com.validation.manager.core.db.TestCaseT</class>
     <class>com.validation.manager.core.db.VmException</class>
     <class>com.validation.manager.core.db.AttachmentType</class>
@@ -55,6 +53,8 @@
     <class>com.validation.manager.core.db.ProjectHasTestProject</class>
     <class>com.validation.manager.core.db.RequirementHasException</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
+    <class>com.validation.manager.core.db.fmea.RootCause</class>
+    <class>com.validation.manager.core.db.fmea.RootCauseType</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/validation_manager"/>
@@ -76,7 +76,6 @@
     <class>com.validation.manager.core.db.RequirementType</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
     <class>com.validation.manager.core.db.Step</class>
-    <class>com.validation.manager.core.db.RootCause</class>
     <class>com.validation.manager.core.db.StepT</class>
     <class>com.validation.manager.core.db.Test</class>
     <class>com.validation.manager.core.db.VmUser</class>
@@ -84,7 +83,6 @@
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.VmUserT</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
-    <class>com.validation.manager.core.db.RootCauseType</class>
     <class>com.validation.manager.core.db.TestCaseT</class>
     <class>com.validation.manager.core.db.VmException</class>
     <class>com.validation.manager.core.db.AttachmentType</class>
@@ -121,6 +119,8 @@
     <class>com.validation.manager.core.db.ProjectHasTestProject</class>
     <class>com.validation.manager.core.db.RequirementHasException</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
+    <class>com.validation.manager.core.db.fmea.RootCause</class>
+    <class>com.validation.manager.core.db.fmea.RootCauseType</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:data/test/validation-manager-test"/>
@@ -147,8 +147,6 @@
     <class>com.validation.manager.core.db.RequirementStatus</class>
     <class>com.validation.manager.core.db.RequirementType</class>
     <class>com.validation.manager.core.db.Role</class>
-    <class>com.validation.manager.core.db.RootCause</class>
-    <class>com.validation.manager.core.db.RootCauseType</class>
     <class>com.validation.manager.core.db.Step</class>
     <class>com.validation.manager.core.db.StepT</class>
     <class>com.validation.manager.core.db.Test</class>
@@ -188,6 +186,8 @@
     <class>com.validation.manager.core.db.ProjectHasTestProject</class>
     <class>com.validation.manager.core.db.RequirementHasException</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
+    <class>com.validation.manager.core.db.fmea.RootCause</class>
+    <class>com.validation.manager.core.db.fmea.RootCauseType</class>
     <properties>
       <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
       <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.DefaultSessionLog"/>

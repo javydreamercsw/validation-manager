@@ -5,11 +5,9 @@
 package com.validation.manager.core.db.fmea;
 
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.RiskControlHasRequirement;
 import com.validation.manager.core.db.TestCase;
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -18,10 +16,10 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -35,17 +33,10 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "RiskControl.findById", query = "SELECT r FROM RiskControl r WHERE r.riskControlPK.id = :id"),
     @NamedQuery(name = "RiskControl.findByRiskControlTypeId", query = "SELECT r FROM RiskControl r WHERE r.riskControlPK.riskControlTypeId = :riskControlTypeId")})
 public class RiskControl implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskControl")
-    private List<RiskControlHasRequirement> riskControlHasRequirementList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RiskControlPK riskControlPK;
-    @JoinTable(name = "risk_control_has_requirement", joinColumns = {
-        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version")})
-    @ManyToMany
+    @ManyToMany(mappedBy = "riskControlList")
     private List<Requirement> requirementList;
     @JoinTable(name = "risk_control_has_residual_risk_item", joinColumns = {
         @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
@@ -54,7 +45,12 @@ public class RiskControl implements Serializable {
         @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")})
     @ManyToMany
     private List<RiskItem> riskItemList;
-    @ManyToMany(mappedBy = "riskControlList1")
+    @JoinTable(name = "risk_item_has_risk_control", joinColumns = {
+        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
+        @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
+        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")})
+    @ManyToMany
     private List<RiskItem> riskItemList1;
     @JoinTable(name = "risk_control_has_test_case", joinColumns = {
         @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
@@ -87,6 +83,7 @@ public class RiskControl implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<Requirement> getRequirementList() {
         return requirementList;
     }
@@ -96,6 +93,7 @@ public class RiskControl implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<RiskItem> getRiskItemList() {
         return riskItemList;
     }
@@ -105,6 +103,7 @@ public class RiskControl implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<RiskItem> getRiskItemList1() {
         return riskItemList1;
     }
@@ -114,6 +113,7 @@ public class RiskControl implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<TestCase> getTestCaseList() {
         return testCaseList;
     }
@@ -139,6 +139,7 @@ public class RiskControl implements Serializable {
 
     @Override
     public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof RiskControl)) {
             return false;
         }
@@ -152,15 +153,6 @@ public class RiskControl implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.fmea.RiskControl[ riskControlPK=" + riskControlPK + " ]";
-    }
-
-    @XmlTransient
-    public List<RiskControlHasRequirement> getRiskControlHasRequirementList() {
-        return riskControlHasRequirementList;
-    }
-
-    public void setRiskControlHasRequirementList(List<RiskControlHasRequirement> riskControlHasRequirementList) {
-        this.riskControlHasRequirementList = riskControlHasRequirementList;
     }
     
 }
