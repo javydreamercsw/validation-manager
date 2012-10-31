@@ -140,10 +140,13 @@ public class VMWeb extends Application implements HttpServletRequestListener {
     private final String specPrefix = "SPEC:";
     private final String specNodePrefix = "SPECN:";
     private final HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
+    private Tree projectTree;
 
     @Override
     public void init() {
         setInstance(this);
+        projectTree = new Tree(getInstance().getResource()
+                .getString("general.project.plural"));
         currentProjectSelection.setInvalidAllowed(false);
         currentProjectSelection.setImmediate(true);
         currentProjectSelection.addListener(new ValueChangeListener() {
@@ -151,12 +154,18 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             public void valueChange(ValueChangeEvent event) {
                 if (currentProjectSelection.getValue() != null) {
                     HashMap<String, Object> parameters = new HashMap<String, Object>();
-                    parameters.put("id", currentProjectSelection.getValue());
+                    parameters.put("id", 
+                            Integer.valueOf(currentProjectSelection.getValue().toString()));
                     List<Object> result = DataBaseManager.namedQuery(
                             "Project.findById", parameters);
                     if (!result.isEmpty()) {
                         currentProject =
                                 new ProjectServer((Project) result.get(0));
+                        try {
+                            updateMenu();
+                        } catch (VMException ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
             }
@@ -1389,18 +1398,17 @@ public class VMWeb extends Application implements HttpServletRequestListener {
 
     private Component getProjectTreeComponent() {
         com.vaadin.ui.Panel panel = new com.vaadin.ui.Panel();
-        final Tree tree = new Tree(getInstance().getResource()
-                .getString("general.project.plural"));
-        tree.setImmediate(true);
-        tree.addListener(new ValueChangeListener() {
+        projectTree.setImmediate(true);
+        projectTree.addListener(new ValueChangeListener() {
             @Override
             public void valueChange(ValueChangeEvent event) {
-                if (tree.getValue() != null && !tree.getValue()
+                if (projectTree.getValue() != null && !projectTree.getValue()
                         .toString().isEmpty()) {
                     HashMap<String, Object> parameters = new HashMap<String, Object>();
-                    parameters.put("name", tree.getValue());
+                    parameters.put("id", 
+                            Integer.valueOf(projectTree.getValue().toString()));
                     List<Object> result = DataBaseManager.namedQuery(
-                            "Project.findByName", parameters);
+                            "Project.findById", parameters);
                     if (!result.isEmpty()) {
                         currentProject = new ProjectServer((Project) result.get(0));
                         try {
@@ -1416,12 +1424,13 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         LOG.log(Level.INFO, "Projects found: {0}", result.size());
         updateProjectSelection();
         for (Iterator<Object> it = result.iterator(); it.hasNext();) {
-            Project product = (Project) it.next();
-            tree.addItem(product.getName());
+            Project project = (Project) it.next();
+            projectTree.addItem("" + project.getId());
+            projectTree.setItemCaption("" + project.getId(), project.getName());
             //Make it a leaf
-            tree.setChildrenAllowed(product.getName(), false);
+            projectTree.setChildrenAllowed(project.getName(), false);
         }
-        panel.addComponent(tree);
+        panel.addComponent(projectTree);
         return panel;
     }
 
@@ -1429,8 +1438,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         List<Object> result = DataBaseManager.namedQuery("Project.findAll");
         for (Iterator<Object> it = result.iterator(); it.hasNext();) {
             Project project = (Project) it.next();
-            currentProjectSelection.addItem(project.getId());
-            currentProjectSelection.setItemCaption(project.getId(),
+            currentProjectSelection.addItem("" + project.getId());
+            currentProjectSelection.setItemCaption("" + project.getId(),
                     project.getName());
         }
     }
@@ -2359,9 +2368,11 @@ public class VMWeb extends Application implements HttpServletRequestListener {
      */
     private void updateMenu() throws VMException {
         currentProjectSelection.setValue((currentProject == null
-                ? null : currentProject.getId()));
+                ? null : "" + currentProject.getId()));
         currentProjectSelection.setNullSelectionItemId(
                 getInstance().getResource().getString("general.no.selection"));
+        projectTree.setValue((currentProject == null
+                ? null : "" + currentProject.getId()));
         //Update menu bar
         menuBar.removeItems();
         groups.clear();
