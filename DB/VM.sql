@@ -1,9 +1,9 @@
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
 DROP SCHEMA IF EXISTS `validation_manager` ;
-CREATE SCHEMA IF NOT EXISTS `validation_manager` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci ;
+CREATE SCHEMA IF NOT EXISTS `validation_manager` DEFAULT CHARACTER SET latin1 ;
 USE `validation_manager` ;
 
 -- -----------------------------------------------------
@@ -32,8 +32,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`test_plan` (
   `regression_test_plan_id` INT UNSIGNED NULL ,
   `regression_test_plan_test_project_id` INT NULL ,
   PRIMARY KEY (`id`, `test_project_id`) ,
-  INDEX `fk_test_plan_test_project` (`test_project_id` ASC) ,
-  INDEX `fk_test_plan_test_plan1` (`regression_test_plan_id` ASC, `regression_test_plan_test_project_id` ASC) ,
+  INDEX `fk_test_plan_test_project_idx` (`test_project_id` ASC) ,
+  INDEX `fk_test_plan_test_plan1_idx` (`regression_test_plan_id` ASC, `regression_test_plan_test_project_id` ASC) ,
   CONSTRAINT `fk_test_plan_test_project`
     FOREIGN KEY (`test_project_id` )
     REFERENCES `validation_manager`.`test_project` (`id` )
@@ -75,7 +75,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`vm_user` (
   `attempts` INT NOT NULL DEFAULT 0 ,
   `user_status_id` INT NOT NULL ,
   PRIMARY KEY (`id`) ,
-  INDEX `fk_vm_user_user_status1` (`user_status_id` ASC) ,
+  INDEX `fk_vm_user_user_status1_idx` (`user_status_id` ASC) ,
   CONSTRAINT `fk_vm_user_user_status1`
     FOREIGN KEY (`user_status_id` )
     REFERENCES `validation_manager`.`user_status` (`id` )
@@ -112,8 +112,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`test_case` (
   `is_open` TINYINT(1) NULL DEFAULT 1 ,
   `author_id` INT NOT NULL ,
   PRIMARY KEY (`id`, `test_id`) ,
-  INDEX `fk_test_case_user1` (`author_id` ASC) ,
-  INDEX `fk_test_case_Test1` (`test_id` ASC) ,
+  INDEX `fk_test_case_user1_idx` (`author_id` ASC) ,
+  INDEX `fk_test_case_Test1_idx` (`test_id` ASC) ,
   CONSTRAINT `fk_test_case_user1`
     FOREIGN KEY (`author_id` )
     REFERENCES `validation_manager`.`vm_user` (`id` )
@@ -138,8 +138,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`test_plan_has_test` (
   `end_date` DATETIME NULL ,
   `node_order` INT UNSIGNED NOT NULL DEFAULT 1 ,
   PRIMARY KEY (`test_plan_id`, `test_plan_test_project_id`, `test_id`) ,
-  INDEX `fk_test_plan_has_Test_test_plan1` (`test_plan_id` ASC, `test_plan_test_project_id` ASC) ,
-  INDEX `fk_test_plan_has_Test_Test1` (`test_id` ASC) ,
+  INDEX `fk_test_plan_has_Test_test_plan1_idx` (`test_plan_id` ASC, `test_plan_test_project_id` ASC) ,
+  INDEX `fk_test_plan_has_Test_Test1_idx` (`test_id` ASC) ,
   CONSTRAINT `fk_test_plan_has_Test_test_plan1`
     FOREIGN KEY (`test_plan_id` , `test_plan_test_project_id` )
     REFERENCES `validation_manager`.`test_plan` (`id` , `test_project_id` )
@@ -181,8 +181,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`role_has_right` (
   `role_id` INT NOT NULL ,
   `right_id` INT NOT NULL ,
   PRIMARY KEY (`role_id`, `right_id`) ,
-  INDEX `fk_role_has_right_role1` (`role_id` ASC) ,
-  INDEX `fk_role_has_right_right1` (`right_id` ASC) ,
+  INDEX `fk_role_has_right_role1_idx` (`role_id` ASC) ,
+  INDEX `fk_role_has_right_right1_idx` (`right_id` ASC) ,
   CONSTRAINT `fk_role_has_right_role1`
     FOREIGN KEY (`role_id` )
     REFERENCES `validation_manager`.`role` (`id` )
@@ -203,8 +203,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_has_role` (
   `user_id` INT NOT NULL ,
   `role_id` INT NOT NULL ,
   PRIMARY KEY (`user_id`, `role_id`) ,
-  INDEX `fk_user_has_role_user1` (`user_id` ASC) ,
-  INDEX `fk_user_has_role_role1` (`role_id` ASC) ,
+  INDEX `fk_user_has_role_user1_idx` (`user_id` ASC) ,
+  INDEX `fk_user_has_role_role1_idx` (`role_id` ASC) ,
   CONSTRAINT `fk_user_has_role_user1`
     FOREIGN KEY (`user_id` )
     REFERENCES `validation_manager`.`vm_user` (`id` )
@@ -227,9 +227,9 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_test_plan_role` (
   `user_id` INT NOT NULL ,
   `role_id` INT NOT NULL ,
   PRIMARY KEY (`test_plan_id`, `test_plan_test_project_id`, `user_id`, `role_id`) ,
-  INDEX `fk_test_plan_has_user_test_plan1` (`test_plan_id` ASC, `test_plan_test_project_id` ASC) ,
-  INDEX `fk_test_plan_has_user_user1` (`user_id` ASC) ,
-  INDEX `fk_user_test_plan_role_role1` (`role_id` ASC) ,
+  INDEX `fk_test_plan_has_user_test_plan1_idx` (`test_plan_id` ASC, `test_plan_test_project_id` ASC) ,
+  INDEX `fk_test_plan_has_user_user1_idx` (`user_id` ASC) ,
+  INDEX `fk_user_test_plan_role_role1_idx` (`role_id` ASC) ,
   CONSTRAINT `fk_test_plan_has_user_test_plan1`
     FOREIGN KEY (`test_plan_id` , `test_plan_test_project_id` )
     REFERENCES `validation_manager`.`test_plan` (`id` , `test_project_id` )
@@ -256,9 +256,9 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_test_project_role` (
   `user_id` INT NOT NULL ,
   `role_id` INT NOT NULL ,
   PRIMARY KEY (`test_project_id`, `user_id`, `role_id`) ,
-  INDEX `fk_test_project_has_user_test_project1` (`test_project_id` ASC) ,
-  INDEX `fk_test_project_has_user_user1` (`user_id` ASC) ,
-  INDEX `fk_user_test_project_role_role1` (`role_id` ASC) ,
+  INDEX `fk_test_project_has_user_test_project1_idx` (`test_project_id` ASC) ,
+  INDEX `fk_test_project_has_user_user1_idx` (`user_id` ASC) ,
+  INDEX `fk_user_test_project_role_role1_idx` (`role_id` ASC) ,
   CONSTRAINT `fk_test_project_has_user_test_project1`
     FOREIGN KEY (`test_project_id` )
     REFERENCES `validation_manager`.`test_project` (`id` )
@@ -282,8 +282,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`assigment_type` (
   `id` INT NOT NULL ,
-  `fk_table` VARCHAR(45) NOT NULL DEFAULT '' ,
-  `description` VARCHAR(100) NULL DEFAULT 'N/A' ,
+  `fk_table` VARCHAR(45) NOT NULL ,
+  `description` TEXT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -294,7 +294,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`assignment_status` (
   `id` INT NOT NULL ,
   `name` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(100) NOT NULL ,
+  `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -311,10 +311,10 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_assigment` (
   `deadline` DATETIME NULL ,
   `creation_time` DATETIME NOT NULL ,
   PRIMARY KEY (`id`, `assigner_id`, `assigment_type_id`, `assignment_status_id`) ,
-  INDEX `fk_user_assigment_user1` (`assigner_id` ASC) ,
-  INDEX `fk_user_assigment_user2` (`assignee_id` ASC) ,
-  INDEX `fk_user_assigment_assigment_type1` (`assigment_type_id` ASC) ,
-  INDEX `fk_user_assigment_assignment_status1` (`assignment_status_id` ASC) ,
+  INDEX `fk_user_assigment_user1_idx` (`assigner_id` ASC) ,
+  INDEX `fk_user_assigment_user2_idx` (`assignee_id` ASC) ,
+  INDEX `fk_user_assigment_assigment_type1_idx` (`assigment_type_id` ASC) ,
+  INDEX `fk_user_assigment_assignment_status1_idx` (`assignment_status_id` ASC) ,
   CONSTRAINT `fk_user_assigment_user1`
     FOREIGN KEY (`assigner_id` )
     REFERENCES `validation_manager`.`vm_user` (`id` )
@@ -349,23 +349,12 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`step` (
   `text` VARCHAR(100) NOT NULL ,
   `notes` TEXT NULL ,
   PRIMARY KEY (`id`, `test_case_id`, `test_case_test_id`) ,
-  INDEX `fk_step_test_case1` (`test_case_id` ASC, `test_case_test_id` ASC) ,
+  INDEX `fk_step_test_case1_idx` (`test_case_id` ASC, `test_case_test_id` ASC) ,
   CONSTRAINT `fk_step_test_case1`
     FOREIGN KEY (`test_case_id` , `test_case_test_id` )
     REFERENCES `validation_manager`.`test_case` (`id` , `test_id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `validation_manager`.`product`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `validation_manager`.`product` (
-  `id` INT NOT NULL ,
-  `name` VARCHAR(45) NOT NULL ,
-  `notes` TEXT NULL ,
-  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
@@ -391,12 +380,30 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `validation_manager`.`project`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `validation_manager`.`project` (
+  `id` INT NOT NULL ,
+  `name` VARCHAR(45) NOT NULL ,
+  `notes` TEXT NULL ,
+  `parent_project_id` INT NULL ,
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_project_project1_idx` (`parent_project_id` ASC) ,
+  CONSTRAINT `fk_project_project1`
+    FOREIGN KEY (`parent_project_id` )
+    REFERENCES `validation_manager`.`project` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `validation_manager`.`spec_level`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`spec_level` (
   `id` INT NOT NULL ,
   `name` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(265) NOT NULL ,
+  `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `name_UNIQUE` (`name` ASC) )
 ENGINE = InnoDB;
@@ -407,19 +414,19 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_spec` (
   `id` INT NOT NULL ,
-  `product_id` INT NOT NULL ,
+  `project_id` INT NOT NULL ,
   `spec_level_id` INT NOT NULL ,
   `name` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(265) NULL ,
+  `description` TEXT NULL ,
   `version` INT NOT NULL DEFAULT 1 ,
   `modificationDate` DATETIME NOT NULL ,
-  PRIMARY KEY (`id`, `product_id`, `spec_level_id`) ,
-  INDEX `fk_requirement_spec_product1` (`product_id` ASC) ,
-  UNIQUE INDEX `product-spec` (`product_id` ASC, `name` ASC) ,
-  INDEX `fk_requirement_spec_spec_level1` (`spec_level_id` ASC) ,
+  PRIMARY KEY (`id`, `project_id`, `spec_level_id`) ,
+  INDEX `fk_requirement_spec_product1_idx` (`project_id` ASC) ,
+  UNIQUE INDEX `product-spec` (`project_id` ASC, `name` ASC) ,
+  INDEX `fk_requirement_spec_spec_level1_idx` (`spec_level_id` ASC) ,
   CONSTRAINT `fk_requirement_spec_product1`
-    FOREIGN KEY (`product_id` )
-    REFERENCES `validation_manager`.`product` (`id` )
+    FOREIGN KEY (`project_id` )
+    REFERENCES `validation_manager`.`project` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_requirement_spec_spec_level1`
@@ -436,14 +443,27 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_spec_node` (
   `id` INT NOT NULL ,
   `requirement_spec_id` INT NOT NULL ,
+  `requirement_spec_project_id` INT NOT NULL ,
+  `requirement_spec_spec_level_id` INT NOT NULL ,
   `name` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(265) NULL ,
-  `scope` VARCHAR(265) NULL ,
-  PRIMARY KEY (`id`, `requirement_spec_id`) ,
-  INDEX `fk_requirement_spec_node_requirement_spec1` (`requirement_spec_id` ASC) ,
+  `description` TEXT NULL ,
+  `scope` TEXT NULL ,
+  `parent_requirement_spec_node_requirement_spec_id` INT NULL ,
+  `requirement_spec_node_id` INT NULL ,
+  `requirement_spec_node_requirement_spec_id` INT NULL ,
+  `requirement_spec_node_requirement_spec_project_id` INT NULL ,
+  `requirement_spec_node_requirement_spec_spec_level_id` INT NULL ,
+  PRIMARY KEY (`id`, `requirement_spec_id`, `requirement_spec_project_id`, `requirement_spec_spec_level_id`) ,
+  INDEX `fk_requirement_spec_node_requirement_spec1_idx` (`requirement_spec_id` ASC, `requirement_spec_project_id` ASC, `requirement_spec_spec_level_id` ASC) ,
+  INDEX `fk_requirement_spec_node_requirement_spec_node1_idx` (`requirement_spec_node_id` ASC, `requirement_spec_node_requirement_spec_id` ASC, `requirement_spec_node_requirement_spec_project_id` ASC, `requirement_spec_node_requirement_spec_spec_level_id` ASC) ,
   CONSTRAINT `fk_requirement_spec_node_requirement_spec1`
-    FOREIGN KEY (`requirement_spec_id` )
-    REFERENCES `validation_manager`.`requirement_spec` (`id` )
+    FOREIGN KEY (`requirement_spec_id` , `requirement_spec_project_id` , `requirement_spec_spec_level_id` )
+    REFERENCES `validation_manager`.`requirement_spec` (`id` , `project_id` , `spec_level_id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_requirement_spec_node_requirement_spec_node1`
+    FOREIGN KEY (`requirement_spec_node_id` , `requirement_spec_node_requirement_spec_id` , `requirement_spec_node_requirement_spec_project_id` , `requirement_spec_node_requirement_spec_spec_level_id` )
+    REFERENCES `validation_manager`.`requirement_spec_node` (`id` , `requirement_spec_id` , `requirement_spec_project_id` , `requirement_spec_spec_level_id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -455,25 +475,20 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement` (
   `id` INT NOT NULL ,
   `version` INT NOT NULL DEFAULT 1 ,
-  `product_id` INT NOT NULL ,
   `requirement_type_id` INT NOT NULL ,
   `unique_id` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(100) NOT NULL ,
+  `description` TEXT NOT NULL ,
   `notes` TEXT NULL ,
   `requirement_status_id` INT NOT NULL ,
-  `requirement_spec_node_id` INT NULL ,
-  `requirement_spec_node_requirement_spec_id` INT NULL ,
-  INDEX `fk_requirement_product1` (`product_id` ASC) ,
-  UNIQUE INDEX `unique_id` (`product_id` ASC, `unique_id` ASC) ,
-  INDEX `fk_requirement_requirement_type1` (`requirement_type_id` ASC) ,
+  `requirement_spec_node_id` INT NOT NULL ,
+  `requirement_spec_node_requirement_spec_id` INT NOT NULL ,
+  `requirement_spec_node_requirement_spec_project_id` INT NOT NULL ,
+  `requirement_spec_node_requirement_spec_spec_level_id` INT NOT NULL ,
+  UNIQUE INDEX `unique_id` (`unique_id` ASC) ,
+  INDEX `fk_requirement_requirement_type1_idx` (`requirement_type_id` ASC) ,
   PRIMARY KEY (`id`, `version`) ,
-  INDEX `fk_requirement_requirement_status1` (`requirement_status_id` ASC) ,
-  INDEX `fk_requirement_requirement_spec_node1` (`requirement_spec_node_id` ASC, `requirement_spec_node_requirement_spec_id` ASC) ,
-  CONSTRAINT `fk_requirement_product1`
-    FOREIGN KEY (`product_id` )
-    REFERENCES `validation_manager`.`product` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `fk_requirement_requirement_status1_idx` (`requirement_status_id` ASC) ,
+  INDEX `fk_requirement_requirement_spec_node1_idx` (`requirement_spec_node_id` ASC, `requirement_spec_node_requirement_spec_id` ASC, `requirement_spec_node_requirement_spec_project_id` ASC, `requirement_spec_node_requirement_spec_spec_level_id` ASC) ,
   CONSTRAINT `fk_requirement_requirement_type1`
     FOREIGN KEY (`requirement_type_id` )
     REFERENCES `validation_manager`.`requirement_type` (`id` )
@@ -485,25 +500,25 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_requirement_requirement_spec_node1`
-    FOREIGN KEY (`requirement_spec_node_id` , `requirement_spec_node_requirement_spec_id` )
-    REFERENCES `validation_manager`.`requirement_spec_node` (`id` , `requirement_spec_id` )
+    FOREIGN KEY (`requirement_spec_node_id` , `requirement_spec_node_requirement_spec_id` , `requirement_spec_node_requirement_spec_project_id` , `requirement_spec_node_requirement_spec_spec_level_id` )
+    REFERENCES `validation_manager`.`requirement_spec_node` (`id` , `requirement_spec_id` , `requirement_spec_project_id` , `requirement_spec_spec_level_id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `validation_manager`.`product_has_test_project`
+-- Table `validation_manager`.`project_has_test_project`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `validation_manager`.`product_has_test_project` (
-  `product_id` INT NOT NULL ,
+CREATE  TABLE IF NOT EXISTS `validation_manager`.`project_has_test_project` (
+  `project_id` INT NOT NULL ,
   `test_project_id` INT NOT NULL ,
-  PRIMARY KEY (`product_id`, `test_project_id`) ,
-  INDEX `fk_product_has_test_project_product1` (`product_id` ASC) ,
-  INDEX `fk_product_has_test_project_test_project1` (`test_project_id` ASC) ,
+  PRIMARY KEY (`project_id`, `test_project_id`) ,
+  INDEX `fk_product_has_test_project_product1_idx` (`project_id` ASC) ,
+  INDEX `fk_product_has_test_project_test_project1_idx` (`test_project_id` ASC) ,
   CONSTRAINT `fk_product_has_test_project_product1`
-    FOREIGN KEY (`product_id` )
-    REFERENCES `validation_manager`.`product` (`id` )
+    FOREIGN KEY (`project_id` )
+    REFERENCES `validation_manager`.`project` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_product_has_test_project_test_project1`
@@ -524,8 +539,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`step_has_requirement` (
   `requirement_id` INT NOT NULL ,
   `requirement_version` INT NOT NULL ,
   PRIMARY KEY (`step_id`, `step_test_case_id`, `step_test_case_test_id`, `requirement_id`, `requirement_version`) ,
-  INDEX `fk_step_has_requirement_step1` (`step_id` ASC, `step_test_case_id` ASC, `step_test_case_test_id` ASC) ,
-  INDEX `fk_step_has_requirement_requirement1` (`requirement_id` ASC, `requirement_version` ASC) ,
+  INDEX `fk_step_has_requirement_step1_idx` (`step_id` ASC, `step_test_case_id` ASC, `step_test_case_test_id` ASC) ,
+  INDEX `fk_step_has_requirement_requirement1_idx` (`requirement_id` ASC, `requirement_version` ASC) ,
   CONSTRAINT `fk_step_has_requirement_step1`
     FOREIGN KEY (`step_id` , `step_test_case_id` , `step_test_case_test_id` )
     REFERENCES `validation_manager`.`step` (`id` , `test_case_id` , `test_case_test_id` )
@@ -568,7 +583,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_modified_record` (
   `modified_date` DATETIME NOT NULL ,
   `reason` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`record_id`, `user_id`) ,
-  INDEX `fk_user_modified_record_user1` (`user_id` ASC) ,
+  INDEX `fk_user_modified_record_user1_idx` (`user_id` ASC) ,
   CONSTRAINT `fk_user_modified_record_user1`
     FOREIGN KEY (`user_id` )
     REFERENCES `validation_manager`.`vm_user` (`id` )
@@ -611,7 +626,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`vm_exception` (
   `close_date` DATETIME NULL ,
   `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`, `reporter_id`) ,
-  INDEX `fk_exception_user1` (`reporter_id` ASC) ,
+  INDEX `fk_exception_user1_idx` (`reporter_id` ASC) ,
   CONSTRAINT `fk_exception_user1`
     FOREIGN KEY (`reporter_id` )
     REFERENCES `validation_manager`.`vm_user` (`id` )
@@ -639,8 +654,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_has_investigation` (
   `start_date` DATETIME NULL ,
   `close_date` DATETIME NULL ,
   PRIMARY KEY (`user_id`, `investigation_id`) ,
-  INDEX `fk_user_has_investigation_user1` (`user_id` ASC) ,
-  INDEX `fk_user_has_investigation_investigation1` (`investigation_id` ASC) ,
+  INDEX `fk_user_has_investigation_user1_idx` (`user_id` ASC) ,
+  INDEX `fk_user_has_investigation_investigation1_idx` (`investigation_id` ASC) ,
   CONSTRAINT `fk_user_has_investigation_user1`
     FOREIGN KEY (`user_id` )
     REFERENCES `validation_manager`.`vm_user` (`id` )
@@ -673,7 +688,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`root_cause` (
   `root_cause_type_id` INT NOT NULL ,
   `details` TEXT NOT NULL ,
   PRIMARY KEY (`id`, `root_cause_type_id`) ,
-  INDEX `fk_root_cause_root_cause_type1` (`root_cause_type_id` ASC) ,
+  INDEX `fk_root_cause_root_cause_type1_idx` (`root_cause_type_id` ASC) ,
   CONSTRAINT `fk_root_cause_root_cause_type1`
     FOREIGN KEY (`root_cause_type_id` )
     REFERENCES `validation_manager`.`root_cause_type` (`id` )
@@ -692,8 +707,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_has_root_cause` (
   `start_date` DATETIME NOT NULL ,
   `end_date` DATETIME NULL ,
   PRIMARY KEY (`user_id`, `root_cause_id`, `root_cause_root_cause_type_id`) ,
-  INDEX `fk_user_has_root_cause_user1` (`user_id` ASC) ,
-  INDEX `fk_user_has_root_cause_root_cause1` (`root_cause_id` ASC, `root_cause_root_cause_type_id` ASC) ,
+  INDEX `fk_user_has_root_cause_user1_idx` (`user_id` ASC) ,
+  INDEX `fk_user_has_root_cause_root_cause1_idx` (`root_cause_id` ASC, `root_cause_root_cause_type_id` ASC) ,
   CONSTRAINT `fk_user_has_root_cause_user1`
     FOREIGN KEY (`user_id` )
     REFERENCES `validation_manager`.`vm_user` (`id` )
@@ -724,8 +739,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_has_corrective_action` (
   `user_id` INT NOT NULL ,
   `corrective_action_id` INT NOT NULL ,
   PRIMARY KEY (`user_id`, `corrective_action_id`) ,
-  INDEX `fk_user_has_corrective_action_user1` (`user_id` ASC) ,
-  INDEX `fk_user_has_corrective_action_corrective_action1` (`corrective_action_id` ASC) ,
+  INDEX `fk_user_has_corrective_action_user1_idx` (`user_id` ASC) ,
+  INDEX `fk_user_has_corrective_action_corrective_action1_idx` (`corrective_action_id` ASC) ,
   CONSTRAINT `fk_user_has_corrective_action_user1`
     FOREIGN KEY (`user_id` )
     REFERENCES `validation_manager`.`vm_user` (`id` )
@@ -749,8 +764,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`step_has_exception` (
   `exception_id` INT NOT NULL ,
   `exception_reporter_id` INT NOT NULL ,
   PRIMARY KEY (`step_id`, `step_test_case_id`, `step_test_case_test_id`, `exception_id`, `exception_reporter_id`) ,
-  INDEX `fk_step_has_exception_step1` (`step_id` ASC, `step_test_case_id` ASC, `step_test_case_test_id` ASC) ,
-  INDEX `fk_step_has_exception_exception1` (`exception_id` ASC, `exception_reporter_id` ASC) ,
+  INDEX `fk_step_has_exception_step1_idx` (`step_id` ASC, `step_test_case_id` ASC, `step_test_case_test_id` ASC) ,
+  INDEX `fk_step_has_exception_exception1_idx` (`exception_id` ASC, `exception_reporter_id` ASC) ,
   CONSTRAINT `fk_step_has_exception_step1`
     FOREIGN KEY (`step_id` , `step_test_case_id` , `step_test_case_test_id` )
     REFERENCES `validation_manager`.`step` (`id` , `test_case_id` , `test_case_test_id` )
@@ -773,8 +788,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`exception_has_root_cause` (
   `root_cause_id` INT NOT NULL ,
   `root_cause_root_cause_type_id` INT NOT NULL ,
   PRIMARY KEY (`exception_id`, `exception_reporter_id`, `root_cause_id`, `root_cause_root_cause_type_id`) ,
-  INDEX `fk_exception_has_root_cause_exception1` (`exception_id` ASC, `exception_reporter_id` ASC) ,
-  INDEX `fk_exception_has_root_cause_root_cause1` (`root_cause_id` ASC, `root_cause_root_cause_type_id` ASC) ,
+  INDEX `fk_exception_has_root_cause_exception1_idx` (`exception_id` ASC, `exception_reporter_id` ASC) ,
+  INDEX `fk_exception_has_root_cause_root_cause1_idx` (`root_cause_id` ASC, `root_cause_root_cause_type_id` ASC) ,
   CONSTRAINT `fk_exception_has_root_cause_exception1`
     FOREIGN KEY (`exception_id` , `exception_reporter_id` )
     REFERENCES `validation_manager`.`vm_exception` (`id` , `reporter_id` )
@@ -796,8 +811,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`exception_has_investigation` (
   `exception_reporter_id` INT NOT NULL ,
   `investigation_id` INT NOT NULL ,
   PRIMARY KEY (`exception_id`, `exception_reporter_id`, `investigation_id`) ,
-  INDEX `fk_exception_has_investigation_exception1` (`exception_id` ASC, `exception_reporter_id` ASC) ,
-  INDEX `fk_exception_has_investigation_investigation1` (`investigation_id` ASC) ,
+  INDEX `fk_exception_has_investigation_exception1_idx` (`exception_id` ASC, `exception_reporter_id` ASC) ,
+  INDEX `fk_exception_has_investigation_investigation1_idx` (`investigation_id` ASC) ,
   CONSTRAINT `fk_exception_has_investigation_exception1`
     FOREIGN KEY (`exception_id` , `exception_reporter_id` )
     REFERENCES `validation_manager`.`vm_exception` (`id` , `reporter_id` )
@@ -819,8 +834,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`exception_has_corrective_actio
   `exception_reporter_id` INT NOT NULL ,
   `corrective_action_id` INT NOT NULL ,
   PRIMARY KEY (`exception_id`, `exception_reporter_id`, `corrective_action_id`) ,
-  INDEX `fk_exception_has_corrective_action_exception1` (`exception_id` ASC, `exception_reporter_id` ASC) ,
-  INDEX `fk_exception_has_corrective_action_corrective_action1` (`corrective_action_id` ASC) ,
+  INDEX `fk_exception_has_corrective_action_exception1_idx` (`exception_id` ASC, `exception_reporter_id` ASC) ,
+  INDEX `fk_exception_has_corrective_action_corrective_action1_idx` (`corrective_action_id` ASC) ,
   CONSTRAINT `fk_exception_has_corrective_action_exception1`
     FOREIGN KEY (`exception_id` , `exception_reporter_id` )
     REFERENCES `validation_manager`.`vm_exception` (`id` , `reporter_id` )
@@ -841,9 +856,10 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_has_exception` (
   `requirement_id` INT NOT NULL ,
   `exception_id` INT NOT NULL ,
   `exception_reporter_id` INT NOT NULL ,
+  `requirement_has_exceptioncol` VARCHAR(45) NULL ,
   PRIMARY KEY (`requirement_id`, `exception_id`, `exception_reporter_id`) ,
-  INDEX `fk_requirement_has_exception_requirement1` (`requirement_id` ASC) ,
-  INDEX `fk_requirement_has_exception_exception1` (`exception_id` ASC, `exception_reporter_id` ASC) ,
+  INDEX `fk_requirement_has_exception_requirement1_idx` (`requirement_id` ASC) ,
+  INDEX `fk_requirement_has_exception_exception1_idx` (`exception_id` ASC, `exception_reporter_id` ASC) ,
   CONSTRAINT `fk_requirement_has_exception_requirement1`
     FOREIGN KEY (`requirement_id` )
     REFERENCES `validation_manager`.`requirement` (`id` )
@@ -945,7 +961,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`FMEA` (
   `description` VARCHAR(45) NULL ,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `name_UNIQUE` (`name` ASC) ,
-  INDEX `fk_FMEA_FMEA1` (`parent` ASC) ,
+  INDEX `fk_FMEA_FMEA1_idx` (`parent` ASC) ,
   CONSTRAINT `fk_FMEA_FMEA1`
     FOREIGN KEY (`parent` )
     REFERENCES `validation_manager`.`FMEA` (`id` )
@@ -963,7 +979,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_item` (
   `sequence` INT NOT NULL ,
   `version` INT NOT NULL DEFAULT 1 ,
   PRIMARY KEY (`id`, `FMEA_id`) ,
-  INDEX `fk_risk_item_FMEA1` (`FMEA_id` ASC) ,
+  INDEX `fk_risk_item_FMEA1_idx` (`FMEA_id` ASC) ,
   CONSTRAINT `fk_risk_item_FMEA1`
     FOREIGN KEY (`FMEA_id` )
     REFERENCES `validation_manager`.`FMEA` (`id` )
@@ -991,7 +1007,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`hazard` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(255) NOT NULL ,
+  `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -1002,7 +1018,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`failure_mode` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(255) NOT NULL ,
+  `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -1013,7 +1029,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`cause` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(255) NOT NULL ,
+  `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -1026,8 +1042,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_item_has_hazard` (
   `risk_item_FMEA_id` INT NOT NULL ,
   `hazard_id` INT NOT NULL ,
   PRIMARY KEY (`risk_item_id`, `risk_item_FMEA_id`, `hazard_id`) ,
-  INDEX `fk_risk_item_has_hazard_hazard1` (`hazard_id` ASC) ,
-  INDEX `fk_risk_item_has_hazard_risk_item1` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
+  INDEX `fk_risk_item_has_hazard_hazard1_idx` (`hazard_id` ASC) ,
+  INDEX `fk_risk_item_has_hazard_risk_item1_idx` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
   CONSTRAINT `fk_risk_item_has_hazard_risk_item1`
     FOREIGN KEY (`risk_item_id` , `risk_item_FMEA_id` )
     REFERENCES `validation_manager`.`risk_item` (`id` , `FMEA_id` )
@@ -1049,8 +1065,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_item_has_failure_mode` (
   `risk_item_FMEA_id` INT NOT NULL ,
   `failure_mode_id` INT NOT NULL ,
   PRIMARY KEY (`risk_item_id`, `risk_item_FMEA_id`, `failure_mode_id`) ,
-  INDEX `fk_risk_item_has_failure_mode_failure_mode1` (`failure_mode_id` ASC) ,
-  INDEX `fk_risk_item_has_failure_mode_risk_item1` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
+  INDEX `fk_risk_item_has_failure_mode_failure_mode1_idx` (`failure_mode_id` ASC) ,
+  INDEX `fk_risk_item_has_failure_mode_risk_item1_idx` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
   CONSTRAINT `fk_risk_item_has_failure_mode_risk_item1`
     FOREIGN KEY (`risk_item_id` , `risk_item_FMEA_id` )
     REFERENCES `validation_manager`.`risk_item` (`id` , `FMEA_id` )
@@ -1072,8 +1088,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_item_has_cause` (
   `risk_item_FMEA_id` INT NOT NULL ,
   `cause_id` INT NOT NULL ,
   PRIMARY KEY (`risk_item_id`, `risk_item_FMEA_id`, `cause_id`) ,
-  INDEX `fk_risk_item_has_cause_cause1` (`cause_id` ASC) ,
-  INDEX `fk_risk_item_has_cause_risk_item1` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
+  INDEX `fk_risk_item_has_cause_cause1_idx` (`cause_id` ASC) ,
+  INDEX `fk_risk_item_has_cause_risk_item1_idx` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
   CONSTRAINT `fk_risk_item_has_cause_risk_item1`
     FOREIGN KEY (`risk_item_id` , `risk_item_FMEA_id` )
     REFERENCES `validation_manager`.`risk_item` (`id` , `FMEA_id` )
@@ -1093,7 +1109,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control_type` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(255) NOT NULL ,
+  `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -1105,7 +1121,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `risk_control_type_id` INT NOT NULL ,
   PRIMARY KEY (`id`, `risk_control_type_id`) ,
-  INDEX `fk_risk_control_risk_control_type1` (`risk_control_type_id` ASC) ,
+  INDEX `fk_risk_control_risk_control_type1_idx` (`risk_control_type_id` ASC) ,
   CONSTRAINT `fk_risk_control_risk_control_type1`
     FOREIGN KEY (`risk_control_type_id` )
     REFERENCES `validation_manager`.`risk_control_type` (`id` )
@@ -1122,8 +1138,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_item_has_risk_control` (
   `risk_item_FMEA_id` INT NOT NULL ,
   `risk_control_id` INT NOT NULL ,
   PRIMARY KEY (`risk_item_id`, `risk_item_FMEA_id`, `risk_control_id`) ,
-  INDEX `fk_risk_item_has_risk_control_risk_control1` (`risk_control_id` ASC) ,
-  INDEX `fk_risk_item_has_risk_control_risk_item1` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
+  INDEX `fk_risk_item_has_risk_control_risk_control1_idx` (`risk_control_id` ASC) ,
+  INDEX `fk_risk_item_has_risk_control_risk_item1_idx` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
   CONSTRAINT `fk_risk_item_has_risk_control_risk_item1`
     FOREIGN KEY (`risk_item_id` , `risk_item_FMEA_id` )
     REFERENCES `validation_manager`.`risk_item` (`id` , `FMEA_id` )
@@ -1138,29 +1154,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `validation_manager`.`risk_control_has_requirement`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control_has_requirement` (
-  `risk_control_id` INT NOT NULL ,
-  `risk_control_risk_control_type_id` INT NOT NULL ,
-  `requirement_id` INT NOT NULL ,
-  PRIMARY KEY (`risk_control_id`, `risk_control_risk_control_type_id`, `requirement_id`) ,
-  INDEX `fk_risk_control_has_requirement_requirement1` (`requirement_id` ASC) ,
-  INDEX `fk_risk_control_has_requirement_risk_control1` (`risk_control_id` ASC, `risk_control_risk_control_type_id` ASC) ,
-  CONSTRAINT `fk_risk_control_has_requirement_risk_control1`
-    FOREIGN KEY (`risk_control_id` , `risk_control_risk_control_type_id` )
-    REFERENCES `validation_manager`.`risk_control` (`id` , `risk_control_type_id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_risk_control_has_requirement_requirement1`
-    FOREIGN KEY (`requirement_id` )
-    REFERENCES `validation_manager`.`requirement` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `validation_manager`.`risk_control_has_test_case`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control_has_test_case` (
@@ -1169,8 +1162,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control_has_test_case` (
   `test_case_id` INT UNSIGNED NOT NULL ,
   `test_case_test_id` INT NOT NULL ,
   PRIMARY KEY (`risk_control_id`, `risk_control_risk_control_type_id`, `test_case_id`, `test_case_test_id`) ,
-  INDEX `fk_risk_control_has_test_case_test_case1` (`test_case_id` ASC, `test_case_test_id` ASC) ,
-  INDEX `fk_risk_control_has_test_case_risk_control1` (`risk_control_id` ASC, `risk_control_risk_control_type_id` ASC) ,
+  INDEX `fk_risk_control_has_test_case_test_case1_idx` (`test_case_id` ASC, `test_case_test_id` ASC) ,
+  INDEX `fk_risk_control_has_test_case_risk_control1_idx` (`risk_control_id` ASC, `risk_control_risk_control_type_id` ASC) ,
   CONSTRAINT `fk_risk_control_has_test_case_risk_control1`
     FOREIGN KEY (`risk_control_id` , `risk_control_risk_control_type_id` )
     REFERENCES `validation_manager`.`risk_control` (`id` , `risk_control_type_id` )
@@ -1193,8 +1186,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control_has_residual_risk
   `risk_item_id` INT NOT NULL ,
   `risk_item_FMEA_id` INT NOT NULL ,
   PRIMARY KEY (`risk_control_id`, `risk_control_risk_control_type_id`, `risk_item_id`, `risk_item_FMEA_id`) ,
-  INDEX `fk_risk_control_has_risk_item_risk_item1` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
-  INDEX `fk_risk_control_has_risk_item_risk_control1` (`risk_control_id` ASC, `risk_control_risk_control_type_id` ASC) ,
+  INDEX `fk_risk_control_has_risk_item_risk_item1_idx` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
+  INDEX `fk_risk_control_has_risk_item_risk_control1_idx` (`risk_control_id` ASC, `risk_control_risk_control_type_id` ASC) ,
   CONSTRAINT `fk_risk_control_has_risk_item_risk_control1`
     FOREIGN KEY (`risk_control_id` , `risk_control_risk_control_type_id` )
     REFERENCES `validation_manager`.`risk_control` (`id` , `risk_control_type_id` )
@@ -1215,8 +1208,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`FMEA_has_risk_category` (
   `FMEA_id` INT NOT NULL ,
   `risk_category_id` INT NOT NULL ,
   PRIMARY KEY (`FMEA_id`, `risk_category_id`) ,
-  INDEX `fk_FMEA_has_risk_category_risk_category1` (`risk_category_id` ASC) ,
-  INDEX `fk_FMEA_has_risk_category_FMEA1` (`FMEA_id` ASC) ,
+  INDEX `fk_FMEA_has_risk_category_risk_category1_idx` (`risk_category_id` ASC) ,
+  INDEX `fk_FMEA_has_risk_category_FMEA1_idx` (`FMEA_id` ASC) ,
   CONSTRAINT `fk_FMEA_has_risk_category_FMEA1`
     FOREIGN KEY (`FMEA_id` )
     REFERENCES `validation_manager`.`FMEA` (`id` )
@@ -1239,8 +1232,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_item_has_risk_category` (
   `risk_category_id` INT NOT NULL ,
   `value` INT NOT NULL DEFAULT 0 ,
   PRIMARY KEY (`risk_item_id`, `risk_item_FMEA_id`, `risk_category_id`) ,
-  INDEX `fk_risk_item_has_risk_category_risk_category1` (`risk_category_id` ASC) ,
-  INDEX `fk_risk_item_has_risk_category_risk_item1` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
+  INDEX `fk_risk_item_has_risk_category_risk_category1_idx` (`risk_category_id` ASC) ,
+  INDEX `fk_risk_item_has_risk_category_risk_item1_idx` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
   CONSTRAINT `fk_risk_item_has_risk_category_risk_item1`
     FOREIGN KEY (`risk_item_id` , `risk_item_FMEA_id` )
     REFERENCES `validation_manager`.`risk_item` (`id` , `FMEA_id` )
@@ -1263,8 +1256,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_has_requirement` (
   `parent_requirement_id` INT NOT NULL ,
   `parent_requirement_version` INT NOT NULL ,
   PRIMARY KEY (`requirement_id`, `requirement_version`, `parent_requirement_id`, `parent_requirement_version`) ,
-  INDEX `fk_requirement_has_requirement_requirement2` (`parent_requirement_id` ASC, `parent_requirement_version` ASC) ,
-  INDEX `fk_requirement_has_requirement_requirement1` (`requirement_id` ASC, `requirement_version` ASC) ,
+  INDEX `fk_requirement_has_requirement_requirement2_idx` (`parent_requirement_id` ASC, `parent_requirement_version` ASC) ,
+  INDEX `fk_requirement_has_requirement_requirement1_idx` (`requirement_id` ASC, `requirement_version` ASC) ,
   CONSTRAINT `fk_requirement_has_requirement_requirement1`
     FOREIGN KEY (`requirement_id` , `requirement_version` )
     REFERENCES `validation_manager`.`requirement` (`id` , `version` )
@@ -1272,6 +1265,67 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_has_requirement` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_requirement_has_requirement_requirement2`
     FOREIGN KEY (`parent_requirement_id` , `parent_requirement_version` )
+    REFERENCES `validation_manager`.`requirement` (`id` , `version` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `validation_manager`.`attachment_type`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `validation_manager`.`attachment_type` (
+  `id` INT(11) NOT NULL ,
+  `fk_table` VARCHAR(255) NOT NULL ,
+  `description` TEXT NULL ,
+  `TYPE` VARCHAR(255) NOT NULL ,
+  PRIMARY KEY (`id`) )
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = latin1;
+
+
+-- -----------------------------------------------------
+-- Table `validation_manager`.`attachment`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `validation_manager`.`attachment` (
+  `id` INT(11) NOT NULL ,
+  `attachment_type_id` INT(11) NOT NULL ,
+  `file` LONGBLOB NOT NULL ,
+  `string_value` VARCHAR(255) NOT NULL ,
+  `TEXT_VALUE` LONGTEXT NULL DEFAULT NULL ,
+  `attachmentcol` VARCHAR(45) NULL ,
+  PRIMARY KEY (`id`, `attachment_type_id`) ,
+  INDEX `fk_attachment_attachment_type1_idx` (`attachment_type_id` ASC) ,
+  CONSTRAINT `fk_attachment_attachment_type1`
+    FOREIGN KEY (`attachment_type_id` )
+    REFERENCES `validation_manager`.`attachment_type` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `FK_attachment_ATTACHMENT_TYPE_ID`
+    FOREIGN KEY (`attachment_type_id` )
+    REFERENCES `validation_manager`.`attachment_type` (`id` ))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = latin1;
+
+
+-- -----------------------------------------------------
+-- Table `validation_manager`.`risk_control_has_requirement`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control_has_requirement` (
+  `risk_control_id` INT NOT NULL ,
+  `risk_control_risk_control_type_id` INT NOT NULL ,
+  `requirement_id` INT NOT NULL ,
+  `requirement_version` INT NOT NULL ,
+  PRIMARY KEY (`risk_control_id`, `risk_control_risk_control_type_id`, `requirement_id`, `requirement_version`) ,
+  INDEX `fk_risk_control_has_requirement_requirement1_idx` (`requirement_id` ASC, `requirement_version` ASC) ,
+  INDEX `fk_risk_control_has_requirement_risk_control1_idx` (`risk_control_id` ASC, `risk_control_risk_control_type_id` ASC) ,
+  CONSTRAINT `fk_risk_control_has_requirement_risk_control1`
+    FOREIGN KEY (`risk_control_id` , `risk_control_risk_control_type_id` )
+    REFERENCES `validation_manager`.`risk_control` (`id` , `risk_control_type_id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_risk_control_has_requirement_requirement1`
+    FOREIGN KEY (`requirement_id` , `requirement_version` )
     REFERENCES `validation_manager`.`requirement` (`id` , `version` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
@@ -1432,6 +1486,8 @@ START TRANSACTION;
 USE `validation_manager`;
 INSERT INTO `validation_manager`.`requirement_type` (`id`, `name`, `description`) VALUES (1, 'HW', 'Hardware');
 INSERT INTO `validation_manager`.`requirement_type` (`id`, `name`, `description`) VALUES (2, 'SW', 'Software');
+INSERT INTO `validation_manager`.`requirement_type` (`id`, `name`, `description`) VALUES (3, 'Labeling', 'Labeling requirements');
+INSERT INTO `validation_manager`.`requirement_type` (`id`, `name`, `description`) VALUES (4, 'Standards', 'Testing related to applicable standards');
 
 COMMIT;
 
