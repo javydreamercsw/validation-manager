@@ -698,31 +698,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `validation_manager`.`user_has_root_cause`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_has_root_cause` (
-  `user_id` INT NOT NULL ,
-  `root_cause_id` INT NOT NULL ,
-  `root_cause_root_cause_type_id` INT NOT NULL ,
-  `start_date` DATETIME NOT NULL ,
-  `end_date` DATETIME NULL ,
-  PRIMARY KEY (`user_id`, `root_cause_id`, `root_cause_root_cause_type_id`) ,
-  INDEX `fk_user_has_root_cause_user1_idx` (`user_id` ASC) ,
-  INDEX `fk_user_has_root_cause_root_cause1_idx` (`root_cause_id` ASC, `root_cause_root_cause_type_id` ASC) ,
-  CONSTRAINT `fk_user_has_root_cause_user1`
-    FOREIGN KEY (`user_id` )
-    REFERENCES `validation_manager`.`vm_user` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_user_has_root_cause_root_cause1`
-    FOREIGN KEY (`root_cause_id` , `root_cause_root_cause_type_id` )
-    REFERENCES `validation_manager`.`root_cause` (`id` , `root_cause_type_id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `validation_manager`.`corrective_action`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`corrective_action` (
@@ -844,30 +819,6 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`exception_has_corrective_actio
   CONSTRAINT `fk_exception_has_corrective_action_corrective_action1`
     FOREIGN KEY (`corrective_action_id` )
     REFERENCES `validation_manager`.`corrective_action` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `validation_manager`.`requirement_has_exception`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_has_exception` (
-  `requirement_id` INT NOT NULL ,
-  `exception_id` INT NOT NULL ,
-  `exception_reporter_id` INT NOT NULL ,
-  `requirement_has_exceptioncol` VARCHAR(45) NULL ,
-  PRIMARY KEY (`requirement_id`, `exception_id`, `exception_reporter_id`) ,
-  INDEX `fk_requirement_has_exception_requirement1_idx` (`requirement_id` ASC) ,
-  INDEX `fk_requirement_has_exception_exception1_idx` (`exception_id` ASC, `exception_reporter_id` ASC) ,
-  CONSTRAINT `fk_requirement_has_exception_requirement1`
-    FOREIGN KEY (`requirement_id` )
-    REFERENCES `validation_manager`.`requirement` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_requirement_has_exception_exception1`
-    FOREIGN KEY (`exception_id` , `exception_reporter_id` )
-    REFERENCES `validation_manager`.`vm_exception` (`id` , `reporter_id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -1131,29 +1082,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `validation_manager`.`risk_item_has_risk_control`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_item_has_risk_control` (
-  `risk_item_id` INT NOT NULL ,
-  `risk_item_FMEA_id` INT NOT NULL ,
-  `risk_control_id` INT NOT NULL ,
-  PRIMARY KEY (`risk_item_id`, `risk_item_FMEA_id`, `risk_control_id`) ,
-  INDEX `fk_risk_item_has_risk_control_risk_control1_idx` (`risk_control_id` ASC) ,
-  INDEX `fk_risk_item_has_risk_control_risk_item1_idx` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
-  CONSTRAINT `fk_risk_item_has_risk_control_risk_item1`
-    FOREIGN KEY (`risk_item_id` , `risk_item_FMEA_id` )
-    REFERENCES `validation_manager`.`risk_item` (`id` , `FMEA_id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_risk_item_has_risk_control_risk_control1`
-    FOREIGN KEY (`risk_control_id` )
-    REFERENCES `validation_manager`.`risk_control` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `validation_manager`.`risk_control_has_test_case`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control_has_test_case` (
@@ -1327,6 +1255,77 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control_has_requirement` 
   CONSTRAINT `fk_risk_control_has_requirement_requirement1`
     FOREIGN KEY (`requirement_id` , `requirement_version` )
     REFERENCES `validation_manager`.`requirement` (`id` , `version` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `validation_manager`.`risk_item_has_risk_control`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_item_has_risk_control` (
+  `risk_item_id` INT NOT NULL ,
+  `risk_item_FMEA_id` INT NOT NULL ,
+  `risk_control_id` INT NOT NULL ,
+  `risk_control_risk_control_type_id` INT NOT NULL ,
+  PRIMARY KEY (`risk_item_id`, `risk_item_FMEA_id`, `risk_control_id`, `risk_control_risk_control_type_id`) ,
+  INDEX `fk_risk_item_has_risk_control_risk_control1_idx` (`risk_control_id` ASC, `risk_control_risk_control_type_id` ASC) ,
+  INDEX `fk_risk_item_has_risk_control_risk_item1_idx` (`risk_item_id` ASC, `risk_item_FMEA_id` ASC) ,
+  CONSTRAINT `fk_risk_item_has_risk_control_risk_item1`
+    FOREIGN KEY (`risk_item_id` , `risk_item_FMEA_id` )
+    REFERENCES `validation_manager`.`risk_item` (`id` , `FMEA_id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_risk_item_has_risk_control_risk_control1`
+    FOREIGN KEY (`risk_control_id` , `risk_control_risk_control_type_id` )
+    REFERENCES `validation_manager`.`risk_control` (`id` , `risk_control_type_id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `validation_manager`.`requirement_has_exception`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_has_exception` (
+  `requirement_id` INT NOT NULL ,
+  `requirement_version` INT NOT NULL ,
+  `vm_exception_id` INT NOT NULL ,
+  `vm_exception_reporter_id` INT NOT NULL ,
+  PRIMARY KEY (`requirement_id`, `requirement_version`, `vm_exception_id`, `vm_exception_reporter_id`) ,
+  INDEX `fk_requirement_has_vm_exception_vm_exception1_idx` (`vm_exception_id` ASC, `vm_exception_reporter_id` ASC) ,
+  INDEX `fk_requirement_has_vm_exception_requirement1_idx` (`requirement_id` ASC, `requirement_version` ASC) ,
+  CONSTRAINT `fk_requirement_has_vm_exception_requirement1`
+    FOREIGN KEY (`requirement_id` , `requirement_version` )
+    REFERENCES `validation_manager`.`requirement` (`id` , `version` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_requirement_has_vm_exception_vm_exception1`
+    FOREIGN KEY (`vm_exception_id` , `vm_exception_reporter_id` )
+    REFERENCES `validation_manager`.`vm_exception` (`id` , `reporter_id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `validation_manager`.`root_cause_has_user`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `validation_manager`.`root_cause_has_user` (
+  `root_cause_id` INT NOT NULL ,
+  `root_cause_root_cause_type_id` INT NOT NULL ,
+  `vm_user_id` INT NOT NULL ,
+  PRIMARY KEY (`root_cause_id`, `root_cause_root_cause_type_id`, `vm_user_id`) ,
+  INDEX `fk_root_cause_has_vm_user_vm_user1_idx` (`vm_user_id` ASC) ,
+  INDEX `fk_root_cause_has_vm_user_root_cause1_idx` (`root_cause_id` ASC, `root_cause_root_cause_type_id` ASC) ,
+  CONSTRAINT `fk_root_cause_has_vm_user_root_cause1`
+    FOREIGN KEY (`root_cause_id` , `root_cause_root_cause_type_id` )
+    REFERENCES `validation_manager`.`root_cause` (`id` , `root_cause_type_id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_root_cause_has_vm_user_vm_user1`
+    FOREIGN KEY (`vm_user_id` )
+    REFERENCES `validation_manager`.`vm_user` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
