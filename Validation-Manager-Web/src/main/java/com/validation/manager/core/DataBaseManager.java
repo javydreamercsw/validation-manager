@@ -1,10 +1,9 @@
 package com.validation.manager.core;
 
 import com.googlecode.flyway.core.Flyway;
-import com.googlecode.flyway.core.exception.FlywayException;
-import com.googlecode.flyway.core.metadatatable.MetaDataTableRow;
-import com.googlecode.flyway.core.migration.MigrationException;
-import com.googlecode.flyway.core.migration.MigrationState;
+import com.googlecode.flyway.core.api.FlywayException;
+import com.googlecode.flyway.core.api.MigrationInfo;
+import com.googlecode.flyway.core.api.MigrationState;
 import com.validation.manager.core.db.VmId;
 import com.validation.manager.core.db.controller.VmIdJpaController;
 import com.validation.manager.core.server.core.VMIdServer;
@@ -209,10 +208,6 @@ public class DataBaseManager {
                 emf = Persistence.createEntityManagerFactory(JNDIDB);
                 LOG.log(Level.INFO, "Using context defined database connection: {0}", JNDIDB);
                 usingContext = true;
-            } catch (MigrationException e) {
-                LOG.log(Level.SEVERE,
-                        "Unable to migrate database!", e);
-                dbError = true;
             } catch (NamingException e) {
                 LOG.log(Level.FINE, null, e);
                 demo = false;
@@ -588,7 +583,7 @@ public class DataBaseManager {
             LOG.info("Validating migration...");
             flyway.validate();
             LOG.info("Done!");
-            setState(flyway.status().getState() == MigrationState.SUCCESS ? DBState.VALID : DBState.ERROR);
+            setState(flyway.info().current().getState() == MigrationState.SUCCESS ? DBState.VALID : DBState.ERROR);
         } catch (FlywayException fe) {
             LOG.log(Level.SEVERE, "Unable to validate", fe);
             setState(DBState.ERROR);
@@ -706,7 +701,7 @@ public class DataBaseManager {
         setState(DBState.START_UP);
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);
-        MetaDataTableRow status = flyway.status();
+        MigrationInfo status = flyway.info().current();
         if (status == null) {
             setState(DBState.NEED_INIT);
             LOG.info("Initialize the metadata...");
@@ -723,7 +718,7 @@ public class DataBaseManager {
         }
     }
 
-    private static void displayDBStatus(MetaDataTableRow status) {
+    private static void displayDBStatus(MigrationInfo status) {
         LOG.log(Level.INFO, "Description: {0}\nState: {1}\nVersion: {2}",
                 new Object[]{status.getDescription(), status.getState(), status.getVersion()});
     }
