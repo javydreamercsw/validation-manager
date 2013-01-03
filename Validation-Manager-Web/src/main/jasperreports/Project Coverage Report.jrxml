@@ -4,7 +4,7 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["Z:\\NetBeans\\validation-manager\\Reports\\"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="parent_id" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
@@ -28,8 +28,8 @@ FROM
      INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement.`requirement_spec_node_id` = requirement_spec_node.`id`
      AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
      INNER JOIN `requirement_spec` requirement_spec ON requirement_spec_node.`requirement_spec_id` = requirement_spec.`id`
+     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
      AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
-     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_level_id`
      INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
      INNER JOIN `spec_level` spec_level ON requirement_spec.`spec_level_id` = spec_level.`id`
 WHERE
