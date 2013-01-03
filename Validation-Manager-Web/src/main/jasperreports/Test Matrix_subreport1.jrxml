@@ -21,7 +21,7 @@ FROM
      INNER JOIN `requirement_spec` requirement_spec ON project.`id` = requirement_spec.`project_id`
      INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement_spec.`id` = requirement_spec_node.`requirement_spec_id`
      AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
-     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_level_id`
+     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
      INNER JOIN `requirement` requirement ON requirement_spec_node.`id` = requirement.`requirement_spec_node_id`
      AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
 WHERE
