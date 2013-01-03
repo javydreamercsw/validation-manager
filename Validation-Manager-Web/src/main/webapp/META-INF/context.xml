@@ -25,7 +25,7 @@
     <!-- ### web.xml file to prevent memory leaks                                     ###-->
     <!-- #################################################################################-->
     <Resource auth="Container" 
-              driverClassName="com.mysql.jdbc.Driver" 
+              driverClassName="org.h2.Driver" 
               maxActive="100" maxIdle="30" maxWait="10000" 
               name="jdbc/VMDB" password="" 
               type="javax.sql.DataSource" 
