@@ -198,11 +198,6 @@
             that will set the lookupType on the JNDI connector to STRING_LOOKUP
             instead of Composite-->
       <property name="eclipselink.session.customizer" value="com.validation.manager.server.JPAEclipseLinkSessionCustomizer"/>
-      <!-- Properties for create and drop sql file generation-->
-      <property name="eclipselink.create-ddl-jdbc-file-name" value="create.sql"/>
-      <property name="eclipselink.drop-ddl-jdbc-file-name" value="drop.sql"/>
-      <property name="eclipselink.application-location" value="./"/>
-      <property name="eclipselink.ddl-generation.output-mode" value="both"/>
     </properties>
   </persistence-unit>
 </persistence>
