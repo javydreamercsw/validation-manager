@@ -16,7 +16,7 @@
     <!-- ### driverClassName: oracle.jdbc.driver.OracleDriver                         ###-->
     <!-- ################################################################################-->
     <!-- ### H2:                                                                      ###-->
-    <!-- ### url: jdbc:h2:file:~/VM/data/validation_manager;CREATE=TRUE;              ###-->
+    <!-- ### url: jdbc:h2:file:VM/data/validation_manager;CREATE=TRUE;                ###-->
     <!-- ### AUTO_SERVER=TRUE;LOCK_TIMEOUT=10000                                      ###-->
     <!-- ### driverClassName: org.h2.Driver                                           ###-->
     <!-- ### Note: For H2, make sure this values match the contents of                ###-->
@@ -27,9 +27,9 @@
     <Resource auth="Container" 
               driverClassName="com.mysql.jdbc.Driver" 
               maxActive="100" maxIdle="30" maxWait="10000" 
-              name="jdbc/VMDB" password="arthrocare" 
+              name="jdbc/VMDB" password="" 
               type="javax.sql.DataSource" 
-              url="jdbc:mysql://localhost:3306/validation_manager?autoReconnect=true" 
+              url="jdbc:h2:file:VM/data/validation_manager;CREATE=TRUE;AUTO_SERVER=TRUE;LOCK_TIMEOUT=10000" 
               username="root"/>
     <!-- Turn off session serialization -->
     <Manager pathname=""/>
