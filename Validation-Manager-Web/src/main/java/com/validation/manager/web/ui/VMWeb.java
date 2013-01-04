@@ -154,7 +154,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             public void valueChange(ValueChangeEvent event) {
                 if (currentProjectSelection.getValue() != null) {
                     HashMap<String, Object> parameters = new HashMap<String, Object>();
-                    parameters.put("id", 
+                    parameters.put("id",
                             Integer.valueOf(currentProjectSelection.getValue().toString()));
                     List<Object> result = DataBaseManager.namedQuery(
                             "Project.findById", parameters);
@@ -200,11 +200,6 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
-    }
-
-    private void showRequirementForm(Requirement r) {
-        //Show edit by default
-        showRequirementForm(r, true);
     }
 
     private void showRequirementForm() {
@@ -536,14 +531,14 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     TextArea textArea =
                             new TextArea(getInstance().getResource()
                             .getString("general.description") + ":");
-                    textArea.setEnabled(true);
+                    textArea.setEnabled(!edit);
                     return textArea;
                 }
                 if ("notes".equals(pid)) {
                     TextArea textArea =
                             new TextArea(getInstance().getResource()
                             .getString("general.notes") + ":");
-                    textArea.setEnabled(true);
+                    textArea.setEnabled(!edit);
                     return textArea;
                 }
                 if ("requirementTypeId".equals(pid)) {
@@ -589,6 +584,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                         LOG.info(r.getRequirementTypeId().getName());
                         select.setValue(r.getRequirementTypeId());
                     }
+                    select.setEnabled(!edit);
                     return select;
                 }
                 return null;//Invalid field
@@ -788,94 +784,94 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                             "message.import.requirement.select.file"), um);
                     final Upload.SucceededListener successListener =
                             new Upload.SucceededListener() {
-                                @Override
-                                public void uploadSucceeded(
-                                        Upload.SucceededEvent event) {
-                                    if (upload != null) {
-                                        upload.setEnabled(false);
-                                        LOG.log(Level.FINE,
-                                                "Renaming uploaded file to: {0}",
-                                                getFileName());
-                                        File toImport =
-                                                new File(um.getFile()
-                                                .getParentFile()
-                                                .getAbsolutePath()
-                                                + System.getProperty(
-                                                "file.separator")
-                                                + getFileName());
-                                        boolean rename = um.getFile()
-                                                .renameTo(toImport);
-                                        if (rename && reqImportFilter
-                                                .accept(toImport)) {
-                                            getMainWindow().showNotification(
-                                                    getInstance().getResource()
-                                                    .getString(
-                                                    "message.file.upload.success"),
-                                                    Window.Notification.TYPE_HUMANIZED_MESSAGE);
-                                            //Import
-                                            RequirementSpecNode rsn;
-                                            RequirementSpec rs =
-                                                    new RequirementSpecJpaController(
-                                                    DataBaseManager.getEntityManagerFactory())
-                                                    .findRequirementSpec((RequirementSpecPK) specs.getValue());
-                                            if (nodes.getValue().equals("new")) {
-                                                //Create a new one
-                                                rsn = new RequirementSpecNode(rs.getRequirementSpecPK());
-                                            } else {
-                                                rsn = new RequirementSpecNodeJpaController(
-                                                        DataBaseManager.getEntityManagerFactory())
-                                                        .findRequirementSpecNode((RequirementSpecNodePK) nodes.getValue());
-                                            }
-                                            RequirementImporter ri =
-                                                    new RequirementImporter(
-                                                    toImport, rsn);
-                                            try {
-                                                //Show import approval screen
-                                                showRequirementImportApprovalWindow(
-                                                        ri.importFile());
-                                            } catch (UnsupportedOperationException ex) {
-                                                LOG.log(Level.SEVERE, null, ex);
-                                                getMainWindow().showNotification(
-                                                        ex.getLocalizedMessage(),
-                                                        Window.Notification.TYPE_HUMANIZED_MESSAGE);
-                                            } catch (RequirementImportException ex) {
-                                                LOG.log(Level.SEVERE, null, ex);
-                                                getMainWindow().showNotification(
-                                                        ex.getLocalizedMessage(),
-                                                        Window.Notification.TYPE_HUMANIZED_MESSAGE);
-                                            } catch (Exception ex) {
-                                                LOG.log(Level.SEVERE, null, ex);
-                                                getMainWindow().showNotification(
-                                                        ex.getLocalizedMessage(),
-                                                        Window.Notification.TYPE_HUMANIZED_MESSAGE);
-                                            }
-                                            //Cleanup
-                                            toImport.delete();
-                                            //Update view
-                                            showRequirementSpecWindow();
-                                        } else {
-                                            getMainWindow().showNotification(
-                                                    getInstance().getResource()
-                                                    .getString(
-                                                    "message.file.upload.unsupportedformat"),
-                                                    Window.Notification.TYPE_HUMANIZED_MESSAGE);
-                                        }
+                        @Override
+                        public void uploadSucceeded(
+                                Upload.SucceededEvent event) {
+                            if (upload != null) {
+                                upload.setEnabled(false);
+                                LOG.log(Level.FINE,
+                                        "Renaming uploaded file to: {0}",
+                                        getFileName());
+                                File toImport =
+                                        new File(um.getFile()
+                                        .getParentFile()
+                                        .getAbsolutePath()
+                                        + System.getProperty(
+                                        "file.separator")
+                                        + getFileName());
+                                boolean rename = um.getFile()
+                                        .renameTo(toImport);
+                                if (rename && reqImportFilter
+                                        .accept(toImport)) {
+                                    getMainWindow().showNotification(
+                                            getInstance().getResource()
+                                            .getString(
+                                            "message.file.upload.success"),
+                                            Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                    //Import
+                                    RequirementSpecNode rsn;
+                                    RequirementSpec rs =
+                                            new RequirementSpecJpaController(
+                                            DataBaseManager.getEntityManagerFactory())
+                                            .findRequirementSpec((RequirementSpecPK) specs.getValue());
+                                    if (nodes.getValue().equals("new")) {
+                                        //Create a new one
+                                        rsn = new RequirementSpecNode(rs.getRequirementSpecPK());
+                                    } else {
+                                        rsn = new RequirementSpecNodeJpaController(
+                                                DataBaseManager.getEntityManagerFactory())
+                                                .findRequirementSpecNode((RequirementSpecNodePK) nodes.getValue());
                                     }
-                                    getMainWindow().removeWindow(wizardWindow);
-                                    LOG.log(Level.FINE, "Imported file:{0}",
-                                            um.getFile().getAbsolutePath());
+                                    RequirementImporter ri =
+                                            new RequirementImporter(
+                                            toImport, rsn);
+                                    try {
+                                        //Show import approval screen
+                                        showRequirementImportApprovalWindow(
+                                                ri.importFile());
+                                    } catch (UnsupportedOperationException ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                        getMainWindow().showNotification(
+                                                ex.getLocalizedMessage(),
+                                                Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                    } catch (RequirementImportException ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                        getMainWindow().showNotification(
+                                                ex.getLocalizedMessage(),
+                                                Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                    } catch (Exception ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                        getMainWindow().showNotification(
+                                                ex.getLocalizedMessage(),
+                                                Window.Notification.TYPE_HUMANIZED_MESSAGE);
+                                    }
+                                    //Cleanup
+                                    toImport.delete();
+                                    //Update view
+                                    showRequirementSpecWindow();
+                                } else {
+                                    getMainWindow().showNotification(
+                                            getInstance().getResource()
+                                            .getString(
+                                            "message.file.upload.unsupportedformat"),
+                                            Window.Notification.TYPE_HUMANIZED_MESSAGE);
                                 }
-                            };
+                            }
+                            getMainWindow().removeWindow(wizardWindow);
+                            LOG.log(Level.FINE, "Imported file:{0}",
+                                    um.getFile().getAbsolutePath());
+                        }
+                    };
                     final Upload.FailedListener failureListener =
                             new Upload.FailedListener() {
-                                @Override
-                                public void uploadFailed(Upload.FailedEvent event) {
-                                    getMainWindow().showNotification(
-                                            VMWeb.getInstance().getResource().getString(
-                                            "message.unable.to.load.file"),
-                                            Window.Notification.TYPE_ERROR_MESSAGE);
-                                }
-                            };
+                        @Override
+                        public void uploadFailed(Upload.FailedEvent event) {
+                            getMainWindow().showNotification(
+                                    VMWeb.getInstance().getResource().getString(
+                                    "message.unable.to.load.file"),
+                                    Window.Notification.TYPE_ERROR_MESSAGE);
+                        }
+                    };
 
                     @Override
                     public String getCaption() {
@@ -1405,7 +1401,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 if (projectTree.getValue() != null && !projectTree.getValue()
                         .toString().isEmpty()) {
                     HashMap<String, Object> parameters = new HashMap<String, Object>();
-                    parameters.put("id", 
+                    parameters.put("id",
                             Integer.valueOf(projectTree.getValue().toString()));
                     List<Object> result = DataBaseManager.namedQuery(
                             "Project.findById", parameters);
@@ -1427,8 +1423,15 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             Project project = (Project) it.next();
             projectTree.addItem("" + project.getId());
             projectTree.setItemCaption("" + project.getId(), project.getName());
-            //Make it a leaf
-            projectTree.setChildrenAllowed(project.getName(), false);
+            projectTree.setChildrenAllowed(project.getName(),
+                    project.getProjectList().isEmpty());
+            if (!project.getProjectList().isEmpty()) {
+                //Populate children
+                for (Project p : project.getProjectList()) {
+                    projectTree.addItem("" + p.getId());
+                    projectTree.setParent("" + p.getId(), "" + project.getId());
+                }
+            }
         }
         panel.addComponent(projectTree);
         return panel;
@@ -1554,11 +1557,11 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 .setGroupName("menu.test.execution").setName("menu.test.execution")
                 .setIcon(smallIcon).setCommand(
                 new com.vaadin.ui.MenuBar.Command() {
-                    @Override
-                    public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
-                        //TODO
-                    }
-                }).setSelected(true).createVMMenuItem();
+            @Override
+            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+                //TODO
+            }
+        }).setSelected(true).createVMMenuItem();
         addItem(item);
         item = new VMMenuItemBuilder().setIndex(i += 1000)
                 .setGroupName("menu.test.report").setName("menu.test.report")
@@ -1574,21 +1577,21 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 .setGroupName("menu.user").setName("menu.user")
                 .setIcon(smallIcon).setCommand(
                 new com.vaadin.ui.MenuBar.Command() {
-                    @Override
-                    public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
-                        //TODO
-                    }
-                }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
+            @Override
+            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+                //TODO
+            }
+        }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
         addItem(item);
         item = new VMMenuItemBuilder().setIndex(i += 1000)
                 .setGroupName("menu.admin").setName("message.admin.userAdmin")
                 .setIcon(smallIcon).setCommand(
                 new com.vaadin.ui.MenuBar.Command() {
-                    @Override
-                    public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
-                        showUserAdminWindow(true);
-                    }
-                }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
+            @Override
+            public void menuSelected(com.vaadin.ui.MenuBar.MenuItem selectedItem) {
+                showUserAdminWindow(true);
+            }
+        }).setLoggedIn(true).setAdmin(true).createVMMenuItem();
         addItem(item);
         item = new VMMenuItemBuilder().setIndex(i += 1000)
                 .setGroupName("menu.admin").setName("message.admin.groupAdmin")
@@ -2239,14 +2242,14 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         final com.vaadin.ui.Button cancel = new com.vaadin.ui.Button(
                 getInstance().getResource().getString("general.cancel"),
                 new com.vaadin.ui.Button.ClickListener() {
-                    private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 1L;
 
-                    @Override
-                    public void buttonClick(com.vaadin.ui.Button.ClickEvent event) {
-                        //TODO: Do something when canceled?
-                        getMainWindow().removeWindow(loginWindow);
-                    }
-                });
+            @Override
+            public void buttonClick(com.vaadin.ui.Button.ClickEvent event) {
+                //TODO: Do something when canceled?
+                getMainWindow().removeWindow(loginWindow);
+            }
+        });
         commit.addListener(new com.vaadin.ui.Button.ClickListener() {
             private static final long serialVersionUID = 1L;
 
