@@ -25,11 +25,11 @@
     <!-- ### web.xml file to prevent memory leaks                                     ###-->
     <!-- #################################################################################-->
     <Resource auth="Container" 
-              driverClassName="org.h2.Driver" 
+              driverClassName="com.mysql.jdbc.Driver" 
               maxActive="100" maxIdle="30" maxWait="10000" 
-              name="jdbc/VMDB" password="" 
+              name="jdbc/VMDB" password="arthrocare" 
               type="javax.sql.DataSource" 
-              url="jdbc:h2:file:VM/data/validation_manager;CREATE=TRUE;AUTO_SERVER=TRUE;LOCK_TIMEOUT=10000" 
+              url="jdbc:mysql://localhost:3306/validation_manager?autoReconnect=true" 
               username="root"/>
     <!-- Turn off session serialization -->
     <Manager pathname=""/>

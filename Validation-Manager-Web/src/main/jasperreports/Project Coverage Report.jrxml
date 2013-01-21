@@ -33,7 +33,7 @@ FROM
      INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
      INNER JOIN `spec_level` spec_level ON requirement_spec.`spec_level_id` = spec_level.`id`
 WHERE
-     project.id = $P{parent_id}
+     project.id = $P{parent_id} and requirement_status.status='general.approved'
 ORDER BY
      requirement_spec.`spec_level_id` ASC]]>
 	</queryString>

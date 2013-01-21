@@ -1,8 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.validation.manager.core.tool;
+package com.validation.manager.web.ui;
 
 import com.vaadin.ui.CheckBox;
 

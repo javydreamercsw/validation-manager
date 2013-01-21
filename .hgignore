@@ -1,2 +1,4 @@
 syntax: glob
 target/*
+m2/*
+*.jasper
