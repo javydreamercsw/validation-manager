@@ -47,6 +47,7 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecNodePK;
 import com.validation.manager.core.db.RequirementSpecPK;
+import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.SpecLevel;
@@ -62,9 +63,9 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
+import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import com.validation.manager.core.server.core.VMUserServer;
-import com.validation.manager.core.tool.CustomCheckBox;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import java.awt.Dimension;
@@ -79,6 +80,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -124,6 +126,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             ResourceBundle.getBundle("com.validation.manager.resources.VMMessages", Locale.getDefault());
     private VMUserServer loggedUser;
     private ProjectServer currentProject;
+    private RequirementSpecServer currentRequirementSpec;
     //Dynamic Menu
     private static TreeMap<Integer, VMMenuItem> items =
             new TreeMap<Integer, VMMenuItem>();
@@ -231,21 +234,6 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         BeanItem item = new BeanItem(rs);
         // Bind the bean item as the data source for the form.
         form.setItemDataSource(item);
-        //Set the order of fields to display as well as which fields to hide
-        ArrayList<String> fields = new ArrayList<String>();
-        //Required fields
-        fields.add("name");
-        fields.add("product");
-        fields.add("specLevel");
-        fields.add("version");
-        for (String field : fields) {
-            form.getField(field).setRequired(true);
-            form.getField(field).setRequiredError(
-                    getInstance().getResource().getString(
-                    "message.required.field.missing").replaceAll("%f", field));
-        }
-        //Non required fields
-        fields.add("description");
         //Set field factory to create the fields of the form
         form.setFormFieldFactory(new FormFieldFactory() {
             @Override
@@ -284,86 +272,6 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                     });
                     textField.setEnabled(true);
                     return textField;
-                } else if ("product".equals(pid)) {
-                    // Wrap them in a container for binding to a Select
-                    final BeanItemContainer<Project> productContainer =
-                            new BeanItemContainer<Project>(Project.class);
-                    for (Iterator<Object> it =
-                            DataBaseManager.namedQuery("Project.findAll")
-                            .iterator(); it.hasNext();) {
-                        productContainer.addBean((Project) it.next());
-                    }
-                    Select select = new Select(
-                            getInstance().getResource()
-                            .getString("general.project") + ":",
-                            productContainer);
-                    // Show the Project names in the select list
-                    select.setItemCaptionPropertyId("name");
-                    //Allow to create new ones
-                    select.setNewItemsAllowed(true);
-                    //Make sure something is selected
-                    select.setNullSelectionAllowed(false);
-                    select.addValidator(new Validator() {
-                        @Override
-                        public void validate(Object value)
-                                throws InvalidValueException {
-                            if (!isValid(value)) {
-                                throw new InvalidValueException(
-                                        "Invalid value: " + value);
-                            }
-                        }
-
-                        @Override
-                        public boolean isValid(Object value) {
-                            return value != null
-                                    && !value.toString().trim().isEmpty();
-                        }
-                    });
-                    if (rs.getProject() != null) {
-                        select.setValue(rs.getProject());
-                    } else {
-                        select.setValue(currentProject);
-                    }
-                    return select;
-                } else if ("specLevel".equals(pid)) {
-                    // Wrap them in a container for binding to a Select
-                    final BeanItemContainer<SpecLevel> specLevelContainer =
-                            new BeanItemContainer<SpecLevel>(SpecLevel.class);
-                    for (Iterator<Object> it =
-                            DataBaseManager.namedQuery("SpecLevel.findAll")
-                            .iterator(); it.hasNext();) {
-                        specLevelContainer.addBean((SpecLevel) it.next());
-                    }
-                    Select select = new Select(
-                            getInstance().getResource()
-                            .getString("general.requirement.level") + ":",
-                            specLevelContainer);
-                    // Show the Project names in the select list
-                    select.setItemCaptionPropertyId("name");
-                    //Allow to create new ones
-                    select.setNewItemsAllowed(true);
-                    //Make sure something is selected
-                    select.setNullSelectionAllowed(false);
-                    select.addValidator(new Validator() {
-                        @Override
-                        public void validate(Object value)
-                                throws InvalidValueException {
-                            if (!isValid(value)) {
-                                throw new InvalidValueException(
-                                        "Invalid value: " + value);
-                            }
-                        }
-
-                        @Override
-                        public boolean isValid(Object value) {
-                            return value != null
-                                    && !value.toString().trim().isEmpty();
-                        }
-                    });
-                    if (rs.getSpecLevel() != null) {
-                        select.setValue(rs.getSpecLevel());
-                    }
-                    return select;
                 } else if ("description".equals(pid)) {
                     TextArea textArea =
                             new TextArea(getInstance().getResource()
@@ -376,11 +284,70 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                             .getString("general.version") + ":");
                     textField.setEnabled(false);
                     return textField;
+                } else if ("specLevelId".equals(pid)) {
+                    // Wrap them in a container for binding to a Select
+                    final BeanItemContainer<SpecLevel> specLevelContainer =
+                            new BeanItemContainer<SpecLevel>(SpecLevel.class);
+                    for (Iterator<Object> it =
+                            DataBaseManager.namedQuery(
+                            "SpecLevel.findAll").iterator();
+                            it.hasNext();) {
+                        specLevelContainer.addBean(
+                                (SpecLevel) it.next());
+                    }
+                    Select select = new Select(
+                            getInstance().getResource()
+                            .getString("message.spec.level") + ":",
+                            specLevelContainer);
+                    // Show the SpecLevel names in the select list
+                    select.setItemCaptionPropertyId("name");
+                    //Allow to create new ones
+                    select.setNewItemsAllowed(true);
+                    //Make sure something is selected
+                    select.setNullSelectionAllowed(false);
+                    return select;
+                } else if ("requirementStatusId".equals(pid)) {
+                    // Wrap them in a container for binding to a Select
+                    final BeanItemContainer<RequirementStatus> requirementStatusContainer =
+                            new BeanItemContainer<RequirementStatus>(RequirementStatus.class);
+                    for (Iterator<Object> it =
+                            DataBaseManager.namedQuery(
+                            "RequirementStatus.findAll").iterator();
+                            it.hasNext();) {
+                        BeanItem<RequirementStatus> newBean = requirementStatusContainer.addBean(
+                                (RequirementStatus) it.next());
+                        newBean.getBean().setStatus(getResource().getString(newBean.getBean().getStatus()));
+                    }
+                    Select select = new Select(
+                            getInstance().getResource()
+                            .getString("message.requirement.status") + ":",
+                            requirementStatusContainer);
+                    // Show the RequirementStatus names in the select list
+                    select.setItemCaptionPropertyId("name");
+                    //Allow to create new ones
+                    select.setNewItemsAllowed(true);
+                    //Make sure something is selected
+                    select.setNullSelectionAllowed(false);
+                    return select;
                 } else {
                     return null;//Invalid field
                 }
             }
         });
+        //Set the order of fields to display as well as which fields to hide
+        ArrayList<String> fields = new ArrayList<String>();
+        //Required fields
+        fields.add("name");
+        fields.add("specLevelId");
+        fields.add("requirementStatusId");
+        for (String field : fields) {
+            form.getField(field).setRequired(true);
+            form.getField(field).setRequiredError(
+                    getInstance().getResource().getString(
+                    "message.required.field.missing").replaceAll("%f", field));
+        }
+        //Non required fields
+        fields.add("description");
         form.setVisibleItemProperties(fields);
         form.setFooter(new HorizontalLayout());
         // The Commit button calls form.commit().
@@ -391,6 +358,13 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             @Override
             public void buttonClick(ClickEvent event) {
                 try {
+                    //Populate from the form
+                    rs.setProject(currentProject);
+                    rs.setDescription(form.getField("description").getValue().toString());
+                    rs.setName(form.getField("name").getValue().toString());
+                    rs.setModificationDate(new Date());
+                    rs.setSpecLevel((SpecLevel) form.getField("specLevelId").getValue());
+                    rs.setVersion(1);
                     new RequirementSpecJpaController(
                             DataBaseManager.getEntityManagerFactory())
                             .create(rs);
@@ -430,7 +404,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         final Form form = new Form();
         // Set form caption and description texts
         form.setCaption(getInstance().getResource().getString(
-                "message.requirement.create"));
+                "menu.requirement.create.section"));
         // Set the form to act immediately on user input. This is
         // necessary for the validation of the fields to occur immediately
         // when the input focus changes and not just on commit.
@@ -514,7 +488,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                                 List<Object> result =
                                         DataBaseManager.createdQuery(
                                         "select r from Requirement r where "
-                                        + "r.uniqueId=:id and r.projectId"
+                                        + "r.uniqueId=:id and r.requirement_spec_node_requirement_spec_project_id"
                                         + "=:product",
                                         parameters);
                                 if (result.isEmpty()) {
@@ -525,12 +499,14 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                         });
                     }
                     textField.setEnabled(!edit);
+                    textField.setSizeFull();
                     return textField;
                 }
                 if ("description".equals(pid)) {
                     TextArea textArea =
                             new TextArea(getInstance().getResource()
                             .getString("general.description") + ":");
+                    textArea.setSizeFull();
                     textArea.setEnabled(!edit);
                     return textArea;
                 }
@@ -539,6 +515,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                             new TextArea(getInstance().getResource()
                             .getString("general.notes") + ":");
                     textArea.setEnabled(!edit);
+                    textArea.setSizeFull();
                     return textArea;
                 }
                 if ("requirementTypeId".equals(pid)) {
@@ -1104,7 +1081,8 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                             + "r.requirementSpecNode.requirementSpecNodePK.id="
                             + ":nodeId and "
                             + "r.requirementSpecNode.requirementSpecNodePK"
-                            + ".requirementSpecId=:nodeSpecId", parameters);
+                            + ".requirementSpecId=:nodeSpecId"
+                            + "and r.requirementStatusId.id=2", parameters);
                     //Show the Values
                     Form form = getRequirementForm(result.isEmpty()
                             ? new Requirement() : (Requirement) result.get(0),
@@ -1639,9 +1617,6 @@ public class VMWeb extends Application implements HttpServletRequestListener {
                 byte[] b = null;
                 InputStream rep = null;
                 try {
-//                    InputStream rep =
-//                            getContext().getClass().getResourceAsStream(
-//                            repName.concat(".jasper"));
                     WebApplicationContext context =
                             (WebApplicationContext) getContext();
                     File reportFolder = new File(context.getHttpSession()
@@ -1681,7 +1656,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         };
         StreamResource resource = new StreamResource(source, "myreport_"
                 + System.currentTimeMillis() + ".pdf", this);
-        getMainWindow().open(resource, "_new");
+        getMainWindow().open(resource, "_blank");
     }
 
     private void showRequirementSpecLevelCreationWindow() {
