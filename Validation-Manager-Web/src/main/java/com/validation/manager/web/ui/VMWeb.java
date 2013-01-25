@@ -126,7 +126,6 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             ResourceBundle.getBundle("com.validation.manager.resources.VMMessages", Locale.getDefault());
     private VMUserServer loggedUser;
     private ProjectServer currentProject;
-    private RequirementSpecServer currentRequirementSpec;
     //Dynamic Menu
     private static TreeMap<Integer, VMMenuItem> items =
             new TreeMap<Integer, VMMenuItem>();
