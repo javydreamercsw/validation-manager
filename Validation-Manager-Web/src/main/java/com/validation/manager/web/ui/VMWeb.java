@@ -63,7 +63,6 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
-import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
