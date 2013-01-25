@@ -115,6 +115,5 @@
     <modules>
         <module>Validation-Manager-Web</module>
         <module>VM-Core</module>
-        <module>Desktop-Client</module>
     </modules>
 </project>
