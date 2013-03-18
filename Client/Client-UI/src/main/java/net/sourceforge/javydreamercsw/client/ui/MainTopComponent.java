@@ -4,9 +4,15 @@
  */
 package net.sourceforge.javydreamercsw.client.ui;
 
+import java.awt.BorderLayout;
+import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectChildFactory;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.explorer.ExplorerManager;
+import org.openide.explorer.view.BeanTreeView;
+import org.openide.nodes.AbstractNode;
+import org.openide.nodes.Children;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 
@@ -20,7 +26,7 @@ import org.openide.util.NbBundle.Messages;
         preferredID = "MainTopComponent",
         //iconBase="SET/PATH/TO/ICON/HERE", 
         persistenceType = TopComponent.PERSISTENCE_ALWAYS)
-@TopComponent.Registration(mode = "editor", openAtStartup = false)
+@TopComponent.Registration(mode = "explorer", openAtStartup = true)
 @ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.MainTopComponent")
 @ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(
@@ -31,13 +37,18 @@ import org.openide.util.NbBundle.Messages;
     "CTL_MainTopComponent=Main Window",
     "HINT_MainTopComponent=This is a Main window"
 })
-public final class MainTopComponent extends TopComponent {
+public final class MainTopComponent extends TopComponent 
+implements ExplorerManager.Provider{
 
+    private final ExplorerManager mgr = new ExplorerManager();
     public MainTopComponent() {
         initComponents();
         setName(Bundle.CTL_MainTopComponent());
         setToolTipText(Bundle.HINT_MainTopComponent());
-
+        setLayout(new BorderLayout());
+        add(new BeanTreeView(), BorderLayout.CENTER);
+        getExplorerManager().setRootContext(new AbstractNode(
+                Children.create(new ProjectChildFactory(), true)));
     }
 
     /**
@@ -48,19 +59,28 @@ public final class MainTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        treePane = new javax.swing.JScrollPane();
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(treePane, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(treePane, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane treePane;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
@@ -82,5 +102,10 @@ public final class MainTopComponent extends TopComponent {
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
+    }
+
+    @Override
+    public ExplorerManager getExplorerManager() {
+        return mgr;
     }
 }

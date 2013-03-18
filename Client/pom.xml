@@ -64,6 +64,7 @@
         <module>application</module>
     <module>Core</module>
     <module>Client-UI</module>
+    <module>MySQL-Driver</module>
   </modules>
 
     <properties>
