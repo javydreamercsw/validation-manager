@@ -8,26 +8,31 @@
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[SELECT
-     test_case.`test_id` AS test_case_test_id
+		<![CDATA[SELECT DISTINCT
+     step.`test_case_test_id` AS test_case_test_id,
+     test.`name` AS name
 FROM
-     `project` project INNER JOIN `project_has_test_project` project_has_test_project ON project.`id` = project_has_test_project.`project_id`
-     INNER JOIN `test_project` test_project ON project_has_test_project.`test_project_id` = test_project.`id`
-     INNER JOIN `test_plan` test_plan ON test_project.`id` = test_plan.`test_project_id`
-     INNER JOIN `test_plan_has_test` test_plan_has_test ON test_plan.`id` = test_plan_has_test.`test_plan_id`
+     `requirement` requirement INNER JOIN `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
+     AND requirement.`version` = step_has_requirement.`requirement_version`
+     INNER JOIN `step` step ON step_has_requirement.`step_id` = step.`id`
+     AND step.`test_case_id` = step_has_requirement.`step_test_case_id`
+     AND step.`test_case_test_id` = step_has_requirement.`step_test_case_test_id`
+     INNER JOIN `test_case` test_case ON step.`test_case_id` = test_case.`id`
+     AND test_case.`test_id` = step.`test_case_test_id`
+     INNER JOIN `test` test ON test_case.`test_id` = test.`id`
+     INNER JOIN `test_plan_has_test` test_plan_has_test ON test.`id` = test_plan_has_test.`test_id`
+     INNER JOIN `test_plan` test_plan ON test_plan_has_test.`test_plan_id` = test_plan.`id`
      AND test_plan.`test_project_id` = test_plan_has_test.`test_plan_test_project_id`
-     INNER JOIN `test` test ON test_plan_has_test.`test_id` = test.`id`
-     INNER JOIN `test_case` test_case ON test.`id` = test_case.`test_id`
-     INNER JOIN `requirement_spec` requirement_spec ON project.`id` = requirement_spec.`project_id`
-     INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement_spec.`id` = requirement_spec_node.`requirement_spec_id`
-     AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
-     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
-     INNER JOIN `requirement` requirement ON requirement_spec_node.`id` = requirement.`requirement_spec_node_id`
-     AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
+     INNER JOIN `test_project` test_project ON test_plan.`test_project_id` = test_project.`id`
 WHERE
      requirement.id = $P{req_id}]]>
 	</queryString>
-	<field name="test_case_test_id" class="java.lang.Integer"/>
+	<field name="test_case_test_id" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="name" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -38,21 +43,52 @@ WHERE
 		<band splitType="Stretch"/>
 	</pageHeader>
 	<columnHeader>
-		<band height="20" splitType="Stretch">
+		<band height="41" splitType="Stretch">
 			<staticText>
 				<reportElement uuid="4061b3f3-20c9-4da9-97cf-c7c2a16e75df" x="0" y="0" width="183" height="20" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true"/>
 				<textElement/>
 				<text><![CDATA[Test cases covering this Requirement:]]></text>
 			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ae35f314-f69e-425b-89af-99f98c7303ee" x="0" y="21" width="100" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Test Name"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="ab18c955-9480-48fa-89fd-c4df3130b19b" x="100" y="21" width="100" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Test Case ID"]]></textFieldExpression>
+			</textField>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement uuid="5562a9ef-b8bb-4e63-8217-907d08f565ee" x="0" y="0" width="100" height="20" isRemoveLineWhenBlank="true"/>
-				<textElement/>
+				<reportElement uuid="5562a9ef-b8bb-4e63-8217-907d08f565ee" x="100" y="0" width="100" height="20" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true"/>
+				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{test_case_test_id}]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement uuid="d78e934b-ce45-4ea7-ba6d-b5fad8a07842" x="0" y="0" width="100" height="20" isPrintInFirstWholeBand="true"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="fe6d5094-2f44-4915-ac0c-7860a4ffcdb6" stretchType="RelativeToBandHeight" x="100" y="2" width="1" height="18"/>
+			</line>
+			<line>
+				<reportElement uuid="bbc549c7-9203-4a95-a6dd-60c3eb4c32db" positionType="FixRelativeToBottom" x="0" y="19" width="200" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="5fe84a32-46d7-4e35-90e7-b8c7ff3ef006" isPrintRepeatedValues="false" x="0" y="0" width="200" height="1" isPrintInFirstWholeBand="true"/>
+			</line>
+			<line>
+				<reportElement uuid="c54ddaca-be85-42ee-87af-bcd95d8aa2ff" stretchType="RelativeToBandHeight" x="199" y="2" width="1" height="18"/>
+			</line>
 		</band>
 	</detail>
 	<columnFooter>
@@ -64,7 +100,7 @@ WHERE
 	<summary>
 		<band height="20" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="0fa88e2d-c51d-4226-af93-ff7086cda51f" mode="Opaque" x="0" y="0" width="183" height="20" isPrintInFirstWholeBand="true" backcolor="#FF0033">
+				<reportElement uuid="0fa88e2d-c51d-4226-af93-ff7086cda51f" isPrintRepeatedValues="false" mode="Opaque" x="0" y="0" width="200" height="20" backcolor="#FF0033">
 					<printWhenExpression><![CDATA[$V{COLUMN_COUNT}.equals( 0 )]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">

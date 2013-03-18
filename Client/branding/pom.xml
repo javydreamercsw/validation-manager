@@ -8,10 +8,10 @@
       <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>Client-branding</artifactId>
+  <artifactId>vm-client-branding</artifactId>
   <packaging>nbm</packaging>
 
-  <name>Client-branding</name>
+  <name>Client Branding</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

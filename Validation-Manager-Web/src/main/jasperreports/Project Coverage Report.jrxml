@@ -35,7 +35,7 @@ FROM
 WHERE
      project.id = $P{parent_id} and requirement_status.status='general.approved'
 ORDER BY
-     requirement_spec.`spec_level_id` ASC]]>
+     requirement_spec.`spec_level_id` ASC, requirement_unique_id]]>
 	</queryString>
 	<field name="project_name" class="java.lang.String"/>
 	<field name="requirement_version" class="java.lang.Integer"/>
@@ -121,7 +121,7 @@ ORDER BY
 				<textFieldExpression><![CDATA[$F{requirement_description}]]></textFieldExpression>
 			</textField>
 			<subreport>
-				<reportElement uuid="803822ea-e2d1-4d87-89dc-6a142ca79924" x="283" y="0" width="519" height="20"/>
+				<reportElement uuid="803822ea-e2d1-4d87-89dc-6a142ca79924" x="283" y="0" width="519" height="20" isPrintInFirstWholeBand="true"/>
 				<subreportParameter name="req_id">
 					<subreportParameterExpression><![CDATA[$F{requirement_id}]]></subreportParameterExpression>
 				</subreportParameter>
