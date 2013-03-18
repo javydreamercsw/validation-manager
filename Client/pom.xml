@@ -12,7 +12,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Client-parent</name>
+    <name>Validation Manager Admin Client parent</name>
 
     <repositories>
         <!--
