@@ -56,7 +56,7 @@ WHERE
 					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Project Coverage Report.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Test Matrix.jasper"]]></subreportExpression>
 			</subreport>
 			<textField>
 				<reportElement uuid="63cba083-b0e8-4b6b-ae8f-ceb76bf19954" x="0" y="0" width="100" height="20"/>
