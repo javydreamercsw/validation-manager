@@ -28,18 +28,18 @@ WHERE
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="79" splitType="Stretch">
+		<band height="38" splitType="Stretch">
 			<textField>
-				<reportElement uuid="7d6d7c82-c729-4199-a878-50854e11c295" x="0" y="0" width="802" height="79"/>
-				<textElement markup="none">
-					<font size="20"/>
+				<reportElement uuid="7d6d7c82-c729-4199-a878-50854e11c295" x="0" y="0" width="802" height="36" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center" markup="none">
+					<font size="20" isBold="true" isUnderline="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Trace Matrix for project: "+$F{project_name}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
 	<pageHeader>
-		<band height="1" splitType="Stretch"/>
+		<band splitType="Stretch"/>
 	</pageHeader>
 	<columnHeader>
 		<band splitType="Stretch"/>
@@ -47,7 +47,7 @@ WHERE
 	<detail>
 		<band height="38" splitType="Stretch">
 			<subreport>
-				<reportElement uuid="3e3b1b47-4ee0-4124-9b73-687ff35879d0" x="0" y="0" width="802" height="38"/>
+				<reportElement uuid="3e3b1b47-4ee0-4124-9b73-687ff35879d0" stretchType="RelativeToBandHeight" x="0" y="0" width="802" height="38" isPrintInFirstWholeBand="true"/>
 				<subreportParameter name="SUBREPORT_DIR">
 					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -66,6 +66,15 @@ WHERE
 		<band splitType="Stretch"/>
 	</pageFooter>
 	<summary>
-		<band splitType="Stretch"/>
+		<band height="24" splitType="Stretch">
+			<subreport>
+				<reportElement uuid="ba4b1792-bce2-4150-a40e-034cf7659513" x="1" y="0" width="801" height="24" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Sub Project Coverage Report.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
 	</summary>
 </jasperReport>
