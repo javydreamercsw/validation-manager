@@ -2,6 +2,7 @@ package net.sourceforge.javydreamercsw.client.ui;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.swing.UnsupportedLookAndFeelException;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.db.explorer.DatabaseException;
@@ -12,10 +13,27 @@ import org.openide.util.Exceptions;
 
 public class Installer extends ModuleInstall {
 
-    private final String mysqlDriverClass = "com.mysql.jdbc.Driver";
+    public static final String mysqlDriverClass = "com.mysql.jdbc.Driver";
 
     @Override
     public void restored() {
+        //Start Look and Feel
+        for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            if ("Nimbus".equals(info.getName())) {
+                try {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                } catch (ClassNotFoundException ex) {
+                    Exceptions.printStackTrace(ex);
+                } catch (InstantiationException ex) {
+                    Exceptions.printStackTrace(ex);
+                } catch (IllegalAccessException ex) {
+                    Exceptions.printStackTrace(ex);
+                } catch (UnsupportedLookAndFeelException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
         //Check drivers
         if (JDBCDriverManager.getDefault().getDrivers(mysqlDriverClass).length == 0) {
             try {
@@ -37,8 +55,8 @@ public class Installer extends ModuleInstall {
                 try {
                     ConnectionManager.getDefault().addConnection(DatabaseConnection.create(
                             JDBCDriverManager.getDefault().getDrivers(mysqlDriverClass)[0],
-                            "jdbc:mysql://localhost:3306",
-                            "user", "validation_manager", "password", false,
+                            "jdbc:mysql://localhost:3306/validation_manager",
+                            "user", "", "password", false,
                             "Default Validation Manager"));
                 } catch (DatabaseException ex) {
                     Exceptions.printStackTrace(ex);

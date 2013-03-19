@@ -12,7 +12,12 @@ import org.openide.util.lookup.Lookups;
 public class ProjectNode extends BeanNode{
     public ProjectNode(Project project) throws IntrospectionException{
         super(project,
-                null/*Children.create(new RPZoneChildFactory(application), true)*/,
+                null/*Children.create(new SubProjectChildFactory(project), true)*/,
                 Lookups.singleton(project));
+    }
+
+    @Override
+    public String getName() {
+        return getLookup().lookup(Project.class).getName();
     }
 }

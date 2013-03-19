@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.sourceforge.javydreamercsw.client.ui;
 
 import java.awt.BorderLayout;
 import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectChildFactory;
+import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -28,19 +25,21 @@ import org.openide.util.NbBundle.Messages;
         persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
 @ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.MainTopComponent")
-@ActionReference(path = "Menu/Window" /*, position = 333 */)
+@ActionReference(path = "Menu/Window", position = 333)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_MainAction",
         preferredID = "MainTopComponent")
 @Messages({
     "CTL_MainAction=Main",
-    "CTL_MainTopComponent=Main Window",
-    "HINT_MainTopComponent=This is a Main window"
+    "CTL_MainTopComponent=Project Explorer",
+    "HINT_MainTopComponent=Project Explorer Window"
 })
-public final class MainTopComponent extends TopComponent 
-implements ExplorerManager.Provider{
+public final class MainTopComponent extends TopComponent
+        implements ExplorerManager.Provider {
 
     private final ExplorerManager mgr = new ExplorerManager();
+    private static DatabaseConnection conn;
+
     public MainTopComponent() {
         initComponents();
         setName(Bundle.CTL_MainTopComponent());
@@ -78,10 +77,10 @@ implements ExplorerManager.Provider{
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane treePane;
     // End of variables declaration//GEN-END:variables
+
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
@@ -107,5 +106,19 @@ implements ExplorerManager.Provider{
     @Override
     public ExplorerManager getExplorerManager() {
         return mgr;
+    }
+
+    /**
+     * @return the conn
+     */
+    public static DatabaseConnection getConnection() {
+        return conn;
+    }
+
+    /**
+     * @param conn the conn to set
+     */
+    protected static void setConnection(DatabaseConnection connection) {
+        conn = connection;
     }
 }
