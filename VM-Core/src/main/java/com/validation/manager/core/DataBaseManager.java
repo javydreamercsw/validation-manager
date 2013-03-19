@@ -118,7 +118,7 @@ public class DataBaseManager {
                         .iterator(); it.hasNext();) {
                     VmId next = it.next();
                     LOG.log(Level.CONFIG, "{0}, {1}, {2}", new Object[]{next.getId(),
-                                next.getTableName(), next.getLastId()});
+                        next.getTableName(), next.getLastId()});
                 }
             }
         }
@@ -173,6 +173,10 @@ public class DataBaseManager {
         } catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
+    }
+
+    public static void setEntityManagerFactory(EntityManagerFactory newEMF) {
+        emf = newEMF;
     }
 
     /**
