@@ -60,11 +60,8 @@ ORDER BY
 	</background>
 	<title>
 		<band height="24" splitType="Stretch">
-			<rectangle>
-				<reportElement uuid="892b413f-bcff-4414-a175-d3929be1e9f3" mode="Opaque" x="0" y="0" width="36" height="24" forecolor="#CCCCCC" backcolor="#CCCCCC"/>
-			</rectangle>
 			<textField>
-				<reportElement uuid="905b1011-c6f2-424f-aca6-b41ee542f08b" x="36" y="0" width="766" height="24"/>
+				<reportElement uuid="905b1011-c6f2-424f-aca6-b41ee542f08b" x="4" y="0" width="798" height="24"/>
 				<textElement verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
