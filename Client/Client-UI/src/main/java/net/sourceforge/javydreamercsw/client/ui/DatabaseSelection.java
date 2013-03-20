@@ -49,9 +49,15 @@ public class DatabaseSelection extends javax.swing.JDialog {
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
+        connectionList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                connectionListValueChanged(evt);
+            }
+        });
         jScrollPane1.setViewportView(connectionList);
 
         org.openide.awt.Mnemonics.setLocalizedText(selectButton, org.openide.util.NbBundle.getMessage(DatabaseSelection.class, "DatabaseSelection.selectButton.text")); // NOI18N
+        selectButton.setEnabled(false);
         selectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectButtonActionPerformed(evt);
@@ -126,6 +132,11 @@ public class DatabaseSelection extends javax.swing.JDialog {
             dispose();
         }
     }//GEN-LAST:event_selectButtonActionPerformed
+
+    private void connectionListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_connectionListValueChanged
+            selectButton.setEnabled(connectionList.getSelectedIndex()>=0);
+    }//GEN-LAST:event_connectionListValueChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
     private javax.swing.JList connectionList;
