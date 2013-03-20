@@ -30,19 +30,21 @@ public class DataBaseTool {
                 }
             }
             DatabaseConnection conn = MainTopComponent.getConnection();
-            Map addedOrOverridenProperties = new HashMap();
-            addedOrOverridenProperties.put("javax.persistence.jdbc.url",
-                    conn.getDatabaseURL());
-            addedOrOverridenProperties.put("javax.persistence.jdbc.password",
-                    conn.getPassword());
-            addedOrOverridenProperties.put("javax.persistence.jdbc.driver",
-                    conn.getDriverClass());
-            addedOrOverridenProperties.put("javax.persistence.jdbc.user",
-                    conn.getUser());
-            emf = Persistence.createEntityManagerFactory(
-                    DataBaseManager.getPersistenceUnitName(),
-                    addedOrOverridenProperties);
-            DataBaseManager.setEntityManagerFactory(emf);
+            if (conn != null) {
+                Map addedOrOverridenProperties = new HashMap();
+                addedOrOverridenProperties.put("javax.persistence.jdbc.url",
+                        conn.getDatabaseURL());
+                addedOrOverridenProperties.put("javax.persistence.jdbc.password",
+                        conn.getPassword());
+                addedOrOverridenProperties.put("javax.persistence.jdbc.driver",
+                        conn.getDriverClass());
+                addedOrOverridenProperties.put("javax.persistence.jdbc.user",
+                        conn.getUser());
+                emf = Persistence.createEntityManagerFactory(
+                        DataBaseManager.getPersistenceUnitName(),
+                        addedOrOverridenProperties);
+                DataBaseManager.setEntityManagerFactory(emf);
+            }
         }
     }
 }
