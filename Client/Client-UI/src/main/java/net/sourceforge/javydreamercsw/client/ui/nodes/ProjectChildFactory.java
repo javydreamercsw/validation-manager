@@ -22,7 +22,7 @@ public class ProjectChildFactory extends ChildFactory<Project> {
         DataBaseTool.connect();
         list.clear();
         List<Object> projects = DataBaseManager.createdQuery(
-                "select p from Project p");// where p.parentProjectId is null
+                "select p from Project p where p.parentProjectId is null");
         for (Iterator<Object> it = projects.iterator(); it.hasNext();) {
             list.add((Project) it.next());
         }
@@ -31,9 +31,7 @@ public class ProjectChildFactory extends ChildFactory<Project> {
 
     @Override
     protected Node[] createNodesForKey(Project key) {
-        //TODO: show sub projects 
-        //return super.createNodesForKey(key); //To change body of generated methods, choose Tools | Templates.
-        return new Node[]{};
+        return new Node[]{createNodeForKey(key)};
     }
 
     @Override
