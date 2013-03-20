@@ -310,7 +310,7 @@ public class DataBaseManager {
      * @param query query to execute
      * @param parameters query parameters
      */
-    public static void namedUpdateQuery(String query, HashMap<String, Object> parameters) {
+    public static void namedUpdateQuery(String query, Map<String, Object> parameters) {
         namedQuery(query, parameters, true);
     }
 
@@ -326,7 +326,7 @@ public class DataBaseManager {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Object> namedQuery(String query, HashMap<String, Object> parameters, boolean change) {
+    private static List<Object> namedQuery(String query, Map<String, Object> parameters, boolean change) {
         if (change) {
             getEntityManager().getTransaction().begin();
         }
