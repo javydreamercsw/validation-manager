@@ -17,7 +17,7 @@ public class DataBaseTool {
     private static EntityManagerFactory emf;
 
     public static void connect() {
-        if (emf == null) {
+        if (getEmf() == null) {
             final DatabaseSelection dialog = new DatabaseSelection(new javax.swing.JFrame(), true);
             if (MainTopComponent.getConnection() == null) {
                 dialog.setVisible(true);
@@ -43,8 +43,15 @@ public class DataBaseTool {
                 emf = Persistence.createEntityManagerFactory(
                         DataBaseManager.getPersistenceUnitName(),
                         addedOrOverridenProperties);
-                DataBaseManager.setEntityManagerFactory(emf);
+                DataBaseManager.setEntityManagerFactory(getEmf());
             }
         }
+    }
+
+    /**
+     * @return the emf
+     */
+    public static EntityManagerFactory getEmf() {
+        return emf;
     }
 }
