@@ -2,6 +2,7 @@ package net.sourceforge.javydreamercsw.client.ui;
 
 import java.awt.BorderLayout;
 import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectChildFactory;
+import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
@@ -46,8 +47,7 @@ public final class MainTopComponent extends TopComponent
         setToolTipText(Bundle.HINT_MainTopComponent());
         setLayout(new BorderLayout());
         add(new BeanTreeView(), BorderLayout.CENTER);
-        getExplorerManager().setRootContext(new AbstractNode(
-                Children.create(new ProjectChildFactory(), true)));
+        getExplorerManager().setRootContext(new RootNode());
     }
 
     /**
