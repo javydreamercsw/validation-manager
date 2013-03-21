@@ -1,7 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui;
 
 import java.awt.BorderLayout;
-import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectChildFactory;
 import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -9,8 +8,6 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.view.BeanTreeView;
-import org.openide.nodes.AbstractNode;
-import org.openide.nodes.Children;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 
