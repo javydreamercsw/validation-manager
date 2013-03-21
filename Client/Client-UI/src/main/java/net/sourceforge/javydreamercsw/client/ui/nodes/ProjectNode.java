@@ -1,7 +1,12 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.Project;
+import java.awt.event.ActionEvent;
 import java.beans.IntrospectionException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import org.openide.nodes.BeanNode;
 import org.openide.nodes.Children;
 import org.openide.util.lookup.Lookups;
@@ -22,5 +27,18 @@ public class ProjectNode extends BeanNode {
     @Override
     public String getName() {
         return getLookup().lookup(Project.class).getName();
+    }
+
+    @Override
+    public Action[] getActions(boolean b) {
+        List<Action> actions = new ArrayList<Action>();
+        actions.add(new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+            }
+        });
+        return actions.toArray(new Action[actions.size()]);
     }
 }

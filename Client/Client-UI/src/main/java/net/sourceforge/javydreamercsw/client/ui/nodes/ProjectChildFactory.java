@@ -20,8 +20,6 @@ public class ProjectChildFactory extends ChildFactory<Object> {
 
     @Override
     protected boolean createKeys(List<Object> list) {
-        //Connect to database
-        DataBaseTool.connect();
         if (DataBaseTool.getEmf() != null) {
             List<Object> projects = DataBaseManager.createdQuery(
                     "select p from Project p where p.parentProjectId is null");
@@ -46,10 +44,9 @@ public class ProjectChildFactory extends ChildFactory<Object> {
             } else if (key instanceof RequirementSpec) {
                 RequirementSpec rs = (RequirementSpec) key;
                 return new UIRequirementSpecNode(rs);
-                //TODO: Enable test projects
-//            } else if (key instanceof TestProject) {
-//                TestProject tp = (TestProject) key;
-//                return null;//new UITestProjectNode(tp);
+            } else if (key instanceof TestProject) {
+                TestProject tp = (TestProject) key;
+                return new UITestProjectNode(tp);
             } else {
                 return null;
             }
@@ -57,5 +54,9 @@ public class ProjectChildFactory extends ChildFactory<Object> {
             Exceptions.printStackTrace(ex);
             return null;
         }
+    }
+
+    protected void refresh() {
+        refresh(true);
     }
 }

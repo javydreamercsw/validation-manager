@@ -9,9 +9,15 @@ import org.openide.nodes.Children;
  */
 public class RootNode extends AbstractNode {
 
+    private static ProjectChildFactory factory = new ProjectChildFactory();
+
     public RootNode() {
-        super(Children.create(new ProjectChildFactory(), true));
+        super(Children.create(factory, true));
         setDisplayName("Projects");
         setIconBaseWithExtension("com/validation/manager/resources/icons/Papermart/Folder.png");
+    }
+    
+    public static void refresh(){
+        factory.refresh();
     }
 }
