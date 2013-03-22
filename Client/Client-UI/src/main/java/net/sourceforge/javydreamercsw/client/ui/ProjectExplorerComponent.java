@@ -18,30 +18,30 @@ import org.openide.util.NbBundle.Messages;
         dtd = "-//net.sourceforge.javydreamercsw.client.ui//Main//EN",
         autostore = false)
 @TopComponent.Description(
-        preferredID = "MainTopComponent",
-        //iconBase="SET/PATH/TO/ICON/HERE", 
+        preferredID = "ProjectExplorerTopComponent",
+        iconBase="net/sourceforge/javydreamercsw/client/ui/VSmall.png", 
         persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
-@ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.MainTopComponent")
+@ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.ProjectExplorerTopComponent")
 @ActionReference(path = "Menu/Window", position = 333)
 @TopComponent.OpenActionRegistration(
-        displayName = "#CTL_MainAction",
-        preferredID = "MainTopComponent")
+        displayName = "#CTL_ProjectExplorerAction",
+        preferredID = "ProjectExplorerTopComponent")
 @Messages({
-    "CTL_MainAction=Main",
-    "CTL_MainTopComponent=Project Explorer",
-    "HINT_MainTopComponent=Project Explorer Window"
+    "CTL_ProjectExplorerAction=Project Explorer",
+    "CTL_ProjectExplorerTopComponent=Project Explorer",
+    "HINT_ProjectExplorerTopComponent=Project Explorer Window"
 })
-public final class MainTopComponent extends TopComponent
+public final class ProjectExplorerComponent extends TopComponent
         implements ExplorerManager.Provider {
 
     private final ExplorerManager mgr = new ExplorerManager();
     private static DatabaseConnection conn;
 
-    public MainTopComponent() {
+    public ProjectExplorerComponent() {
         initComponents();
-        setName(Bundle.CTL_MainTopComponent());
-        setToolTipText(Bundle.HINT_MainTopComponent());
+        setName(Bundle.CTL_ProjectExplorerTopComponent());
+        setToolTipText(Bundle.HINT_ProjectExplorerTopComponent());
         setLayout(new BorderLayout());
         add(new BeanTreeView(), BorderLayout.CENTER);
         getExplorerManager().setRootContext(new RootNode());
