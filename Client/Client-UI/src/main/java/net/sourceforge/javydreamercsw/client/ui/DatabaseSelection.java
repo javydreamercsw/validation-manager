@@ -129,7 +129,7 @@ public class DatabaseSelection extends javax.swing.JDialog {
                         JDBCDriverManager.getDefault().getDrivers(Installer.mysqlDriverClass)[0]);
             }
             //Now, set this as the connection
-            MainTopComponent.setConnection(selected);
+            ProjectExplorerComponent.setConnection(selected);
             dispose();
         }
     }//GEN-LAST:event_selectButtonActionPerformed

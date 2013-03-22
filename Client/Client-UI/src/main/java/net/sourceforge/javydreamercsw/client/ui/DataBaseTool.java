@@ -19,7 +19,7 @@ public class DataBaseTool {
     public static void connect() {
         if (getEmf() == null) {
             final DatabaseSelection dialog = new DatabaseSelection(new javax.swing.JFrame(), true);
-            if (MainTopComponent.getConnection() == null) {
+            if (ProjectExplorerComponent.getConnection() == null) {
                 dialog.setVisible(true);
             }
             while (dialog.isVisible()) {
@@ -29,7 +29,7 @@ public class DataBaseTool {
                     Exceptions.printStackTrace(ex);
                 }
             }
-            DatabaseConnection conn = MainTopComponent.getConnection();
+            DatabaseConnection conn = ProjectExplorerComponent.getConnection();
             if (conn != null) {
                 Map addedOrOverridenProperties = new HashMap();
                 addedOrOverridenProperties.put("javax.persistence.jdbc.url",
