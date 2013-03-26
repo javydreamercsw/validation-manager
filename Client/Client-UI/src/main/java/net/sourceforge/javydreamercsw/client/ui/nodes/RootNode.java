@@ -1,5 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
+import javax.swing.SwingUtilities;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 
@@ -18,6 +19,12 @@ public class RootNode extends AbstractNode {
     }
     
     public static void refresh(){
-        factory.refresh();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                factory.refresh();
+            }
+        });
     }
 }
