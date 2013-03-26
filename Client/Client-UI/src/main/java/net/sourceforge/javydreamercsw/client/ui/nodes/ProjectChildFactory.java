@@ -16,7 +16,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class ProjectChildFactory extends ChildFactory<Object> {
+public class ProjectChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> list) {
@@ -28,35 +28,5 @@ public class ProjectChildFactory extends ChildFactory<Object> {
             }
         }
         return true;
-    }
-
-    @Override
-    protected Node[] createNodesForKey(Object key) {
-        return new Node[]{createNodeForKey(key)};
-    }
-
-    @Override
-    protected Node createNodeForKey(Object key) {
-        try {
-            if (key instanceof Project) {
-                Project project = (Project) key;
-                return new ProjectNode(project);
-            } else if (key instanceof RequirementSpec) {
-                RequirementSpec rs = (RequirementSpec) key;
-                return new UIRequirementSpecNode(rs);
-            } else if (key instanceof TestProject) {
-                TestProject tp = (TestProject) key;
-                return new UITestProjectNode(tp);
-            } else {
-                return null;
-            }
-        } catch (IntrospectionException ex) {
-            Exceptions.printStackTrace(ex);
-            return null;
-        }
-    }
-
-    protected void refresh() {
-        refresh(true);
     }
 }
