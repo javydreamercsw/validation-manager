@@ -21,6 +21,6 @@ class TestCaseNode extends BeanNode {
 
     @Override
     public String getName() {
-        return "Test Case #" + getLookup().lookup(TestCase.class).getTestCasePK().getTestId();
+        return "Test Case #" + getLookup().lookup(TestCase.class).getTestCasePK().getId();
     }
 }
