@@ -2,15 +2,9 @@ package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
-import com.validation.manager.core.db.RequirementSpec;
-import com.validation.manager.core.db.TestProject;
-import java.beans.IntrospectionException;
 import java.util.Iterator;
 import java.util.List;
 import net.sourceforge.javydreamercsw.client.ui.DataBaseTool;
-import org.openide.nodes.ChildFactory;
-import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 
 /**
  *
