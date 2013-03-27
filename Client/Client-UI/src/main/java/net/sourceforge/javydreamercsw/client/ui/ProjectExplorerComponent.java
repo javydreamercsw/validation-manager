@@ -7,6 +7,7 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
+import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
@@ -22,7 +23,8 @@ import org.openide.util.NbBundle.Messages;
         iconBase="net/sourceforge/javydreamercsw/client/ui/VSmall.png", 
         persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
-@ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.ProjectExplorerTopComponent")
+@ActionID(category = "Window", id = 
+        "net.sourceforge.javydreamercsw.client.ui.ProjectExplorerTopComponent")
 @ActionReference(path = "Menu/Window", position = 333)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_ProjectExplorerAction",
@@ -44,6 +46,8 @@ public final class ProjectExplorerComponent extends TopComponent
         setToolTipText(Bundle.HINT_ProjectExplorerTopComponent());
         setLayout(new BorderLayout());
         add(new BeanTreeView(), BorderLayout.CENTER);
+        associateLookup(ExplorerUtils.createLookup(getExplorerManager(), 
+                getActionMap()));
         getExplorerManager().setRootContext(new RootNode());
     }
 
@@ -80,12 +84,12 @@ public final class ProjectExplorerComponent extends TopComponent
 
     @Override
     public void componentOpened() {
-        // TODO add custom code on component opening
+        ExplorerUtils.activateActions(getExplorerManager(), true);
     }
 
     @Override
     public void componentClosed() {
-        // TODO add custom code on component closing
+        ExplorerUtils.activateActions(getExplorerManager(), false);
     }
 
     void writeProperties(java.util.Properties p) {
