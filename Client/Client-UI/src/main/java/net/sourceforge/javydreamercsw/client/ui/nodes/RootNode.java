@@ -1,5 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
+import com.dreamer.outputhandler.OutputHandler;
 import javax.swing.SwingUtilities;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
@@ -23,6 +24,7 @@ public class RootNode extends AbstractNode {
 
             @Override
             public void run() {
+                OutputHandler.setStatus("Updating project explorer, please wait...");
                 factory.refresh();
             }
         });

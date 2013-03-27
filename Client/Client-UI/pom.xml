@@ -82,6 +82,11 @@
             <artifactId>MySQL-Driver</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>Output-Handler</artifactId>
+            <version>1.6-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -103,6 +108,7 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                    <showDeprecation>true</showDeprecation>
                 </configuration>
             </plugin>
 
