@@ -27,6 +27,7 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.terminal.FileResource;
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.Sizeable;
+import com.vaadin.terminal.Sizeable.Unit;
 import com.vaadin.terminal.StreamResource;
 import com.vaadin.terminal.ThemeResource;
 import com.vaadin.terminal.gwt.client.ui.dd.VerticalDropLocation;
@@ -47,7 +48,6 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecNodePK;
 import com.validation.manager.core.db.RequirementSpecPK;
-import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.SpecLevel;
@@ -382,11 +382,13 @@ public class VMWeb extends Application implements HttpServletRequestListener {
             }
         });
         form.getFooter().addComponent(cancel);
+        if(createWindow!=null){
         createWindow.center();
         createWindow.setModal(true);
         createWindow.addComponent(form);
-        createWindow.setWidth(25, Sizeable.UNITS_PERCENTAGE);
+        createWindow.setWidth(25, Unit.PERCENTAGE);
         getMainWindow().addWindow(createWindow);
+        }
     }
 
     private void showCreateRequirementSectionWindow() {

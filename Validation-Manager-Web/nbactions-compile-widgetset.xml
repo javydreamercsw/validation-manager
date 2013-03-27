@@ -4,6 +4,7 @@
         <actionName>CUSTOM-Update Widgetset</actionName>
         <displayName>Update Widgetset</displayName>
         <goals>
+            <goal>-U</goal>
             <goal>clean:clean</goal>
             <goal>gwt:clean</goal>
             <goal>vaadin:update-widgetset</goal>

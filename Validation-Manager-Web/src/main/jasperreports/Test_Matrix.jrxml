@@ -2,7 +2,9 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Test matrix" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3c03af66-4181-4ecf-85ab-5687460d3206">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="48"/>
+	<property name="ireport.y" value="30"/>
+	<property name="ireport.jasperserver.reportUnit" value="/Reports/Quality_Reports/Test_Matrix"/>
+	<property name="ireport.jasperserver.url" value="http://10.6.10.114:5050/jasperserver/services/repository"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
@@ -46,15 +48,15 @@ WHERE
 					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Req Status Distribution.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["repo:Req_Status_Distribution.jrxml"]]></subreportExpression>
 			</subreport>
 			<subreport isUsingCache="false">
-				<reportElement uuid="2aa9fa63-d358-4f0f-8d0d-6090fb433d19" stretchType="RelativeToTallestObject" x="399" y="0" width="402" height="297"/>
+				<reportElement uuid="2aa9fa63-d358-4f0f-8d0d-6090fb433d19" stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="399" y="0" width="402" height="297"/>
 				<subreportParameter name="project_id">
 					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Test Coverage.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["repo:Test_Coverage.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 	</pageHeader>
@@ -72,7 +74,7 @@ WHERE
 					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Project Coverage Report.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["repo:Project_Coverage_Report.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 	</detail>
@@ -109,7 +111,7 @@ WHERE
 					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Sub Project Coverage Report.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["repo:Sub_Project_Coverage_Report.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 	</summary>

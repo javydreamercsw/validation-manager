@@ -3,6 +3,8 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/Reports/Quality_Reports/Test_Matrix"/>
+	<property name="ireport.jasperserver.url" value="http://10.6.10.114:5050/jasperserver/services/repository"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
@@ -123,7 +125,7 @@ ORDER BY
 					<subreportParameterExpression><![CDATA[$F{requirement_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Test Matrix_subreport1.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["repo:Test_Matrix_subreport1.jrxml"]]></subreportExpression>
 			</subreport>
 			<line>
 				<reportElement uuid="46801e22-5e2b-4b0c-be17-8349fb86b0da" stretchType="RelativeToTallestObject" x="89" y="0" width="1" height="21" isPrintWhenDetailOverflows="true"/>
@@ -162,7 +164,7 @@ ORDER BY
 					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Sub Project Coverage Report.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["repo:Sub_Project_Coverage_Report.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 	</summary>

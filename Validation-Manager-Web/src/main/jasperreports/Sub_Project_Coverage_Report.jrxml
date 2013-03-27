@@ -3,6 +3,8 @@
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/Reports/Quality_Reports/Test_Matrix"/>
+	<property name="ireport.jasperserver.url" value="http://10.6.10.114:5050/jasperserver/services/repository"/>
 	<parameter name="project_id" class="java.lang.Integer" isForPrompting="false">
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
@@ -47,13 +49,8 @@ WHERE
 	</columnHeader>
 	<detail>
 		<band height="42" splitType="Stretch">
-			<textField>
-				<reportElement uuid="63cba083-b0e8-4b6b-ae8f-ceb76bf19954" x="0" y="0" width="100" height="20"/>
-				<textElement/>
-				<textFieldExpression><![CDATA[$F{project_name}]]></textFieldExpression>
-			</textField>
 			<subreport>
-				<reportElement uuid="7724d8cf-af0e-42d2-8c47-19c12db35e1d" x="0" y="18" width="802" height="24"/>
+				<reportElement uuid="7724d8cf-af0e-42d2-8c47-19c12db35e1d" x="0" y="0" width="802" height="42"/>
 				<subreportParameter name="SUBREPORT_DIR">
 					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -61,7 +58,7 @@ WHERE
 					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Project Coverage Report.jasper"]]></subreportExpression>
+				<subreportExpression><![CDATA["repo:Project_Coverage_Report.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 	</detail>
