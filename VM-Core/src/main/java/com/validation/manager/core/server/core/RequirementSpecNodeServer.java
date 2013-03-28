@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
