@@ -27,7 +27,6 @@ import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.terminal.FileResource;
 import com.vaadin.terminal.Resource;
 import com.vaadin.terminal.Sizeable;
-import com.vaadin.terminal.Sizeable.Unit;
 import com.vaadin.terminal.StreamResource;
 import com.vaadin.terminal.ThemeResource;
 import com.vaadin.terminal.gwt.client.ui.dd.VerticalDropLocation;
@@ -386,7 +385,7 @@ public class VMWeb extends Application implements HttpServletRequestListener {
         createWindow.center();
         createWindow.setModal(true);
         createWindow.addComponent(form);
-        createWindow.setWidth(25, Unit.PERCENTAGE);
+        createWindow.setWidth(25, Sizeable.UNITS_PERCENTAGE);
         getMainWindow().addWindow(createWindow);
         }
     }
