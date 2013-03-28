@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateProjectAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateRequirementSpecAction;
 import org.openide.nodes.BeanNode;
 import org.openide.nodes.Children;
 import org.openide.util.lookup.Lookups;
@@ -32,6 +33,7 @@ public class ProjectNode extends BeanNode {
     public Action[] getActions(boolean b) {
         List<Action> actions = new ArrayList<Action>();
         actions.add(new CreateProjectAction());
+        actions.add(new CreateRequirementSpecAction());
         return actions.toArray(new Action[actions.size()]);
     }
 }
