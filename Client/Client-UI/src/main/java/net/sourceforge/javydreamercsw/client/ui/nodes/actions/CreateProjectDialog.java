@@ -5,7 +5,6 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import net.sourceforge.javydreamercsw.client.ui.DataBaseTool;
@@ -16,7 +15,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class CreateProjectDialog extends javax.swing.JDialog {
+public class CreateProjectDialog extends CreationDialog {
 
     /**
      * Creates new form CreateProjectDialog
@@ -24,7 +23,7 @@ public class CreateProjectDialog extends javax.swing.JDialog {
     public CreateProjectDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        populateProjectList();
+        populateProjectList(this.parent);
     }
 
     /**
@@ -130,20 +129,7 @@ public class CreateProjectDialog extends javax.swing.JDialog {
         //First we update the project
         ProjectServer ps = new ProjectServer(name.getText().trim(), notes.getText().trim());
         Project parentProject = null;
-        if (parent.getSelectedIndex() > 0) {
-            if (DataBaseTool.getEmf() != null) {
-                List<Object> projectList = DataBaseManager.createdQuery(
-                        "select p from Project p where p.name='" + 
-                        parent.getSelectedItem()+"'");
-                for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
-                    Project temp = ((Project) it2.next());
-                    if (temp.getName().equals(parent.getSelectedItem().toString())) {
-                        parentProject = temp;
-                        break;
-                    }
-                }
-            }
-        }
+        getSelectedProject(parent);
         if (parentProject != null) {
             ps.setParentProjectId(parentProject);
         }
@@ -176,23 +162,4 @@ public class CreateProjectDialog extends javax.swing.JDialog {
     private javax.swing.JComboBox parent;
     private javax.swing.JButton save;
     // End of variables declaration//GEN-END:variables
-
-    private void populateProjectList() {
-        List<Project> projects = new ArrayList<Project>();
-        if (DataBaseTool.getEmf() != null) {
-            List<Object> projectList = DataBaseManager.createdQuery(
-                    "select p from Project p order by p.id");
-            for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
-                Project temp = ((Project) it2.next());
-                projects.add(temp);
-            }
-        }
-        List<String> names = new ArrayList<String>();
-        names.add("None");
-        for (Iterator<Project> it3 = projects.iterator(); it3.hasNext();) {
-            Project proj = it3.next();
-            names.add(proj.getName());
-        }
-        parent.setModel(new javax.swing.DefaultComboBoxModel(names.toArray(new String[projects.size() + 1])));
-    }
 }
