@@ -81,7 +81,7 @@ public class DatabaseSelection extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 238, Short.MAX_VALUE)
+                        .addGap(0, 551, Short.MAX_VALUE)
                         .addComponent(selectButton)
                         .addGap(16, 16, 16)
                         .addComponent(cancelButton)))
