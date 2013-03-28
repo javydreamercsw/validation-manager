@@ -20,10 +20,10 @@ import org.openide.util.NbBundle.Messages;
         autostore = false)
 @TopComponent.Description(
         preferredID = "ProjectExplorerTopComponent",
-        iconBase="net/sourceforge/javydreamercsw/client/ui/VSmall.png", 
+        iconBase = "net/sourceforge/javydreamercsw/client/ui/VSmall.png",
         persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
-@ActionID(category = "Window", id = 
+@ActionID(category = "Window", id =
         "net.sourceforge.javydreamercsw.client.ui.ProjectExplorerTopComponent")
 @ActionReference(path = "Menu/Window", position = 333)
 @TopComponent.OpenActionRegistration(
@@ -46,7 +46,7 @@ public final class ProjectExplorerComponent extends TopComponent
         setToolTipText(Bundle.HINT_ProjectExplorerTopComponent());
         setLayout(new BorderLayout());
         add(new BeanTreeView(), BorderLayout.CENTER);
-        associateLookup(ExplorerUtils.createLookup(getExplorerManager(), 
+        associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
                 getActionMap()));
         getExplorerManager().setRootContext(new RootNode());
     }

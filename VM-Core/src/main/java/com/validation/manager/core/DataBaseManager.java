@@ -506,56 +506,69 @@ public class DataBaseManager {
         ResultSet rs = null;
         try {
             ds = (javax.sql.DataSource) new InitialContext().lookup("java:comp/env/jdbc/VMDB");
+            conn = ds.getConnection();
         } catch (NamingException ne) {
             LOG.log(Level.FINE, null, ne);
-            try {
-                //It might be the tests, use an H2 Database
-                ds = new JdbcDataSource();
-                ((JdbcDataSource) ds).setPassword("");
-                ((JdbcDataSource) ds).setUser("vm_user");
-                ((JdbcDataSource) ds).setURL(
-                        "jdbc:h2:file:data/test/validation-manager-test;AUTO_SERVER=TRUE");
-                //Load the H2 driver
-                Class.forName("org.h2.Driver");
-            } catch (ClassNotFoundException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-        }
-        try {
-            conn = ds.getConnection();
-            stmt = conn.prepareStatement("select * from vm_setting");
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                //Tables there but empty? Not safe to proceed
-                setState(DBState.NEED_MANUAL_UPDATE);
+            if (emf == null) {
+                try {
+                    //It might be the tests, use an H2 Database
+                    ds = new JdbcDataSource();
+                    ((JdbcDataSource) ds).setPassword("");
+                    ((JdbcDataSource) ds).setUser("vm_user");
+                    ((JdbcDataSource) ds).setURL(
+                            "jdbc:h2:file:data/test/validation-manager-test;AUTO_SERVER=TRUE");
+                    //Load the H2 driver
+                    Class.forName("org.h2.Driver");
+                    conn = ds.getConnection();
+                } catch (ClassNotFoundException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                } catch (SQLException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            } else {
+                getEntityManager().getTransaction().begin();
+                conn = getEntityManager().unwrap(java.sql.Connection.class);
+                getEntityManager().getTransaction().commit();
             }
         } catch (SQLException ex) {
-            LOG.log(Level.FINE, null, ex);
-            //Need INIT, probably nothing there
-            setState(DBState.NEED_INIT);
-            //Create the database
-            getEntityManager();
-        } finally {
+            LOG.log(Level.SEVERE, null, ex);
+        }
+        if (conn != null) {
             try {
-                if (conn != null) {
-                    conn.close();
+                stmt = conn.prepareStatement("select * from vm_setting");
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    //Tables there but empty? Not safe to proceed
+                    setState(DBState.NEED_MANUAL_UPDATE);
                 }
             } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-            try {
-                if (stmt != null) {
-                    stmt.close();
+                LOG.log(Level.FINE, null, ex);
+                //Need INIT, probably nothing there
+                setState(DBState.NEED_INIT);
+                //Create the database
+                getEntityManager();
+            } finally {
+                try {
+                    if (conn != null) {
+                        conn.close();
+                    }
+                } catch (SQLException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
                 }
-            } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-            try {
-                if (rs != null) {
-                    rs.close();
+                try {
+                    if (stmt != null) {
+                        stmt.close();
+                    }
+                } catch (SQLException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
                 }
-            } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                try {
+                    if (rs != null) {
+                        rs.close();
+                    }
+                } catch (SQLException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
             }
         }
         if (ds != null) {

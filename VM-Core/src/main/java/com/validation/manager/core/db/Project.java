@@ -50,7 +50,7 @@ public class Project implements Serializable {
     valueColumnName = "last_id",
     pkColumnValue = "project",
     allocationSize = 1,
-    initialValue=1)
+    initialValue=1000)
     @NotNull
     @Column(name = "id")
     private Integer id;
