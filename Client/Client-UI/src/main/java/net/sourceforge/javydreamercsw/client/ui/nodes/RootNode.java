@@ -47,12 +47,12 @@ public class RootNode extends AbstractNode {
 
         public RefreshAction() {
             super("Refresh",
-                new ImageIcon("com/validation/manager/resources/icons/Signage/Add Square.png"));
+                new ImageIcon("com/validation/manager/resources/icons/refresh.png"));
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            RootNode.refresh();
         }
         
     }
