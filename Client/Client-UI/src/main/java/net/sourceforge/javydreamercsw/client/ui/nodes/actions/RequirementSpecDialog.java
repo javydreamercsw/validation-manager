@@ -166,7 +166,6 @@ public class RequirementSpecDialog extends CreationDialog {
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
-        RootNode.refresh();
         dispose();
     }//GEN-LAST:event_saveActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

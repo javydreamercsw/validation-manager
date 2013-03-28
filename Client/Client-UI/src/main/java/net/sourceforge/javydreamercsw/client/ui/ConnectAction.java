@@ -2,7 +2,6 @@ package net.sourceforge.javydreamercsw.client.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -26,6 +25,6 @@ public final class ConnectAction implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         //Connect to database
         DataBaseTool.connect();
-        RootNode.refresh();
+        ProjectExplorerComponent.refresh();
     }
 }

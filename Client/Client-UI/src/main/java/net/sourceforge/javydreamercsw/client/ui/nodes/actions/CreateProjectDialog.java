@@ -1,13 +1,9 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
-import java.util.Iterator;
-import java.util.List;
-import net.sourceforge.javydreamercsw.client.ui.DataBaseTool;
 import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
 import org.openide.util.Exceptions;
 
@@ -136,7 +132,6 @@ public class CreateProjectDialog extends CreationDialog {
         try {
             //Now we save it
             ps.write2DB();
-            RootNode.refresh();
         } catch (IllegalOrphanException ex) {
             Exceptions.printStackTrace(ex);
         } catch (NonexistentEntityException ex) {

@@ -1,6 +1,12 @@
 package net.sourceforge.javydreamercsw.client.ui;
 
+import com.validation.manager.core.db.Project;
 import java.awt.BorderLayout;
+import java.beans.PropertyVetoException;
+import java.util.Collection;
+import java.util.Iterator;
+import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectChildFactory;
+import net.sourceforge.javydreamercsw.client.ui.nodes.RefreshableNode;
 import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -9,8 +15,14 @@ import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
+import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
+import org.openide.util.LookupEvent;
+import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.Utilities;
 
 /**
  * Top component which displays something.
@@ -35,10 +47,12 @@ import org.openide.util.NbBundle.Messages;
     "HINT_ProjectExplorerTopComponent=Project Explorer Window"
 })
 public final class ProjectExplorerComponent extends TopComponent
-        implements ExplorerManager.Provider {
+        implements ExplorerManager.Provider, LookupListener {
 
     private final ExplorerManager mgr = new ExplorerManager();
     private static DatabaseConnection conn;
+    private Lookup.Result<RefreshableNode> result = null;
+    private static RefreshableNode currentNode;
 
     public ProjectExplorerComponent() {
         initComponents();
@@ -48,7 +62,13 @@ public final class ProjectExplorerComponent extends TopComponent
         add(new BeanTreeView(), BorderLayout.CENTER);
         associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
                 getActionMap()));
-        getExplorerManager().setRootContext(new RootNode());
+        RootNode root = new RootNode(new ProjectChildFactory());
+        getExplorerManager().setRootContext(root);
+        try {
+            getExplorerManager().setSelectedNodes(new Node[]{root});
+        } catch (PropertyVetoException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     /**
@@ -85,11 +105,16 @@ public final class ProjectExplorerComponent extends TopComponent
     @Override
     public void componentOpened() {
         ExplorerUtils.activateActions(getExplorerManager(), true);
+        result = Utilities.actionsGlobalContext().lookupResult(RefreshableNode.class);
+        result.allItems();
+        result.addLookupListener(this);
     }
 
     @Override
     public void componentClosed() {
         ExplorerUtils.activateActions(getExplorerManager(), false);
+        result.removeLookupListener(this);
+        result = null;
     }
 
     void writeProperties(java.util.Properties p) {
@@ -121,5 +146,27 @@ public final class ProjectExplorerComponent extends TopComponent
      */
     protected static void setConnection(DatabaseConnection connection) {
         conn = connection;
+    }
+    
+    public static void refresh(){
+        if(currentNode!=null)
+            currentNode.refresh();
+    }
+
+    @Override
+    public void resultChanged(LookupEvent le) {
+        Lookup.Result res = (Lookup.Result) le.getSource();
+        Collection instances = res.allInstances();
+
+        if (!instances.isEmpty()) {
+            Iterator it = instances.iterator();
+            while (it.hasNext()) {
+                Object item = it.next();
+                if (item instanceof RefreshableNode) {
+                    RefreshableNode p = (RefreshableNode) item;
+                    currentNode = p;
+                }
+            }
+        }
     }
 }
