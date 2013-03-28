@@ -6,14 +6,14 @@ import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.server.core.RequirementSpecServer;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
+import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementSpecDialog extends CreationDialog {
+public class RequirementSpecDialog extends AbstractCreationDialog {
 
     /**
      * Creates new form RequirementSpecDialog
@@ -167,6 +167,7 @@ public class RequirementSpecDialog extends CreationDialog {
             Exceptions.printStackTrace(ex);
         }
         dispose();
+        ProjectExplorerComponent.refresh();
     }//GEN-LAST:event_saveActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancel;

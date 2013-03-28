@@ -5,7 +5,6 @@ import com.validation.manager.core.db.TestProject;
 import java.beans.IntrospectionException;
 import java.util.Iterator;
 import java.util.List;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
@@ -13,7 +12,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class TestProjectChildFactory extends ChildFactory<Object> {
+class TestProjectChildFactory extends AbstractChildFactory {
 
     private final TestProject tp;
 

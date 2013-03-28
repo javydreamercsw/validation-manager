@@ -4,14 +4,14 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
-import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
+import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class CreateProjectDialog extends CreationDialog {
+public class CreateProjectDialog extends AbstractCreationDialog {
 
     /**
      * Creates new form CreateProjectDialog
@@ -140,6 +140,7 @@ public class CreateProjectDialog extends CreationDialog {
             Exceptions.printStackTrace(ex);
         }
         dispose();
+        ProjectExplorerComponent.refresh();
     }//GEN-LAST:event_saveActionPerformed
 
     private void cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelActionPerformed

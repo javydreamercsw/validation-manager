@@ -8,8 +8,6 @@ import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateProjectAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateRequirementSpecAction;
-import org.openide.nodes.BeanNode;
-import org.openide.nodes.Children;
 import org.openide.util.lookup.Lookups;
 
 /**
@@ -20,10 +18,8 @@ public class ProjectNode extends AbstractRefreshableNode {
 
     public ProjectNode(Project project) throws IntrospectionException {
         super(project,
-                null,
+                new SubProjectChildFactory(project),
                 Lookups.singleton(project));
-        factory = new SubProjectChildFactory(project);
-        setChildren(Children.create(factory, true));
         setIconBaseWithExtension("com/validation/manager/resources/icons/Papermart/Folder.png");
     }
 

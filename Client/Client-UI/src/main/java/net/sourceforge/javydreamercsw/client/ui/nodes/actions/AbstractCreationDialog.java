@@ -16,9 +16,9 @@ import net.sourceforge.javydreamercsw.client.ui.DataBaseTool;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class CreationDialog extends JDialog {
+public abstract class AbstractCreationDialog extends JDialog {
 
-    public CreationDialog(Frame owner, boolean modal) {
+    public AbstractCreationDialog(Frame owner, boolean modal) {
         super(owner, modal);
     }
 
