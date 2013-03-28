@@ -37,10 +37,18 @@ public class ProjectServer extends Project implements EntityServer{
             Project p = new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(getId());
             p.setNotes(getNotes());
             p.setName(getName());
+            p.setParentProjectId(getParentProjectId());
+            p.setProjectList(getProjectList());
+            p.setRequirementSpecList(getRequirementSpecList());
+            p.setTestProjectList(getTestProjectList());
             new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).edit(p);
         } else {
             Project p = new Project(getName());
             p.setNotes(getNotes());
+            p.setParentProjectId(getParentProjectId());
+            p.setProjectList(getProjectList());
+            p.setRequirementSpecList(getRequirementSpecList());
+            p.setTestProjectList(getTestProjectList());
             new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(p);
             setId(p.getId());
         }
