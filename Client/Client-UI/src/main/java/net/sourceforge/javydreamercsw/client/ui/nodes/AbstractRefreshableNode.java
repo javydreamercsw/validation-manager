@@ -14,10 +14,11 @@ import org.openide.util.Lookup;
  */
 public abstract class AbstractRefreshableNode extends BeanNode implements RefreshableNode {
 
-    protected AbstractChildFactory factory;
+    private AbstractChildFactory factory;
 
-    public AbstractRefreshableNode(Object bean, Children children, Lookup lkp) throws IntrospectionException {
-        super(bean, children, lkp);
+    public AbstractRefreshableNode(Object bean, AbstractChildFactory factory, Lookup lkp) throws IntrospectionException {
+        super(bean, factory == null ? Children.LEAF : Children.create(factory, true), lkp);
+        this.factory = factory;
     }
 
     @Override

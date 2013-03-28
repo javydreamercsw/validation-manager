@@ -2,17 +2,17 @@ package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.Project;
 import java.beans.IntrospectionException;
-import org.openide.nodes.BeanNode;
-import org.openide.nodes.Children;
+import org.openide.util.lookup.Lookups;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class ProjectRequirementsNode extends BeanNode{
+public class ProjectRequirementsNode extends AbstractRefreshableNode{
      public ProjectRequirementsNode(Project parent) throws IntrospectionException {
         super(parent,
-                Children.create(new RequirementNodeChildFactory(parent), true));
+                new RequirementNodeChildFactory(parent),
+                Lookups.singleton(parent));
         setIconBaseWithExtension("com/validation/manager/resources/icons/Papermart/Contacts-alt.png");
     }
 

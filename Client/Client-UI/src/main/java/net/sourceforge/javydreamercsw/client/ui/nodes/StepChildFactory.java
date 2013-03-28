@@ -4,7 +4,6 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import java.beans.IntrospectionException;
 import java.util.List;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
@@ -12,7 +11,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class StepChildFactory extends ChildFactory<Requirement> {
+class StepChildFactory extends AbstractChildFactory {
 
     private final Step step;
 
@@ -21,7 +20,7 @@ class StepChildFactory extends ChildFactory<Requirement> {
     }
 
     @Override
-    protected boolean createKeys(List<Requirement> toPopulate) {
+    protected boolean createKeys(List<Object> toPopulate) {
         for (Requirement r : step.getRequirementList()) {
             toPopulate.add(r);
         }
@@ -29,14 +28,19 @@ class StepChildFactory extends ChildFactory<Requirement> {
     }
 
     @Override
-    protected Node[] createNodesForKey(Requirement key) {
+    protected Node[] createNodesForKey(Object key) {
         return new Node[]{createNodeForKey(key)};
     }
 
     @Override
-    protected Node createNodeForKey(Requirement key) {
+    protected Node createNodeForKey(Object key) {
         try {
-            return new UIRequirementNode(key);
+            if (key instanceof Requirement) {
+                Requirement req = (Requirement) key;
+                return new UIRequirementNode(req);
+            } else {
+                return null;
+            }
         } catch (IntrospectionException ex) {
             Exceptions.printStackTrace(ex);
             return null;

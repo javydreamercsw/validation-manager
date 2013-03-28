@@ -1,10 +1,10 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.RequirementSpecNode;
 import java.beans.IntrospectionException;
 import java.util.Iterator;
 import java.util.List;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
@@ -12,7 +12,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class SpecNodeChildFactory extends ChildFactory<com.validation.manager.core.db.RequirementSpecNode> {
+public class SpecNodeChildFactory extends AbstractChildFactory {
 
     private final RequirementSpec spec;
 
@@ -21,23 +21,28 @@ public class SpecNodeChildFactory extends ChildFactory<com.validation.manager.co
     }
 
     @Override
-    protected boolean createKeys(List<com.validation.manager.core.db.RequirementSpecNode> toPopulate) {
+    protected boolean createKeys(List<Object> toPopulate) {
         for (Iterator<com.validation.manager.core.db.RequirementSpecNode> it =
                 spec.getRequirementSpecNodeList().iterator(); it.hasNext();) {
             toPopulate.add(it.next());
         }
         return true;
     }
-    
-    @Override
-    protected Node[] createNodesForKey(com.validation.manager.core.db.RequirementSpecNode key) {
-        return new Node[]{createNodeForKey(key)};
-        }
 
     @Override
-    protected Node createNodeForKey(com.validation.manager.core.db.RequirementSpecNode key) {
+    protected Node[] createNodesForKey(Object key) {
+        return new Node[]{createNodeForKey(key)};
+    }
+
+    @Override
+    protected Node createNodeForKey(Object key) {
         try {
-            return new UIRequirementSpecNodeNode(key);
+            if (key instanceof RequirementSpecNode) {
+                RequirementSpecNode rsn = (RequirementSpecNode) key;
+                return new UIRequirementSpecNodeNode(rsn);
+            } else {
+                return null;
+            }
         } catch (IntrospectionException ex) {
             Exceptions.printStackTrace(ex);
             return null;

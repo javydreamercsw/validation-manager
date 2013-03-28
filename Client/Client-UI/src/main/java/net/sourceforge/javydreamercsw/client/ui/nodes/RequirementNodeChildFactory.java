@@ -7,7 +7,6 @@ import java.beans.IntrospectionException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
@@ -15,7 +14,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class RequirementNodeChildFactory extends ChildFactory<RequirementSpecNode> {
+class RequirementNodeChildFactory extends AbstractChildFactory {
 
     private final Project parent;
 
@@ -24,7 +23,7 @@ class RequirementNodeChildFactory extends ChildFactory<RequirementSpecNode> {
     }
 
     @Override
-    protected boolean createKeys(List<RequirementSpecNode> toPopulate) {
+    protected boolean createKeys(List<Object> toPopulate) {
         HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("requirementSpecProjectId", parent.getId());
         List<Object> projects = DataBaseManager.namedQuery(
@@ -36,14 +35,19 @@ class RequirementNodeChildFactory extends ChildFactory<RequirementSpecNode> {
     }
 
     @Override
-    protected Node[] createNodesForKey(RequirementSpecNode key) {
+    protected Node[] createNodesForKey(Object key) {
         return new Node[]{createNodeForKey(key)};
     }
 
     @Override
-    protected Node createNodeForKey(RequirementSpecNode key) {
+    protected Node createNodeForKey(Object key) {
         try {
-            return new UIRequirementSpecNodeNode(key);
+            if (key instanceof RequirementSpecNode) {
+                RequirementSpecNode req = (RequirementSpecNode) key;
+                return new UIRequirementSpecNodeNode(req);
+            } else {
+                return null;
+            }
         } catch (IntrospectionException ex) {
             Exceptions.printStackTrace(ex);
             return null;

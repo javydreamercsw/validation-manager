@@ -1,13 +1,10 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
-import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import java.beans.IntrospectionException;
 import java.util.Iterator;
 import java.util.List;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
@@ -15,7 +12,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementChildFactory extends ChildFactory<Object> {
+public class RequirementChildFactory extends AbstractChildFactory {
 
     private final RequirementSpecNode node;
 

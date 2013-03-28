@@ -5,7 +5,6 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.fmea.RiskControl;
 import java.beans.IntrospectionException;
 import java.util.List;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
@@ -13,7 +12,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class TestCaseChildFactory extends ChildFactory<Object> {
+class TestCaseChildFactory extends AbstractChildFactory {
 
     private final TestCase tc;
 

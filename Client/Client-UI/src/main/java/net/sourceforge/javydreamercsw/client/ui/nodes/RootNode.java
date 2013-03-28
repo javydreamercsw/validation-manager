@@ -1,7 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateProjectAction;

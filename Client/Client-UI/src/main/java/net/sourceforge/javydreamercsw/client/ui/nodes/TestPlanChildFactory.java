@@ -1,15 +1,11 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
-import com.validation.manager.core.db.Project;
-import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestPlanHasTest;
-import com.validation.manager.core.db.TestProject;
 import java.beans.IntrospectionException;
 import java.util.Iterator;
 import java.util.List;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
@@ -17,7 +13,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class TestPlanChildFactory extends ChildFactory<Test> {
+class TestPlanChildFactory extends AbstractChildFactory {
 
     private final TestPlan tp;
 
@@ -26,24 +22,29 @@ class TestPlanChildFactory extends ChildFactory<Test> {
     }
 
     @Override
-    protected boolean createKeys(List<Test> toPopulate) {
-        for (Iterator<TestPlanHasTest> it = 
+    protected boolean createKeys(List<Object> toPopulate) {
+        for (Iterator<TestPlanHasTest> it =
                 tp.getTestPlanHasTestList().iterator(); it.hasNext();) {
             TestPlanHasTest tpht = it.next();
             toPopulate.add(tpht.getTest());
         }
         return true;
     }
-    
+
     @Override
-    protected Node[] createNodesForKey(Test key) {
+    protected Node[] createNodesForKey(Object key) {
         return new Node[]{createNodeForKey(key)};
     }
 
     @Override
-    protected Node createNodeForKey(Test key) {
+    protected Node createNodeForKey(Object key) {
         try {
-            return new TestNode(key);
+            if (key instanceof Test) {
+                Test test = (Test) key;
+                return new TestNode(test);
+            } else {
+                return null;
+            }
         } catch (IntrospectionException ex) {
             Exceptions.printStackTrace(ex);
             return null;

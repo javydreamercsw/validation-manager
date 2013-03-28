@@ -1,10 +1,11 @@
 package net.sourceforge.javydreamercsw.client.ui;
 
-import com.validation.manager.core.db.Project;
 import java.awt.BorderLayout;
 import java.beans.PropertyVetoException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectChildFactory;
 import net.sourceforge.javydreamercsw.client.ui.nodes.RefreshableNode;
 import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
@@ -53,6 +54,8 @@ public final class ProjectExplorerComponent extends TopComponent
     private static DatabaseConnection conn;
     private Lookup.Result<RefreshableNode> result = null;
     private static RefreshableNode currentNode;
+    private static Logger LOG =
+            Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
 
     public ProjectExplorerComponent() {
         initComponents();
@@ -147,10 +150,12 @@ public final class ProjectExplorerComponent extends TopComponent
     protected static void setConnection(DatabaseConnection connection) {
         conn = connection;
     }
-    
-    public static void refresh(){
-        if(currentNode!=null)
+
+    public static void refresh() {
+        if (currentNode != null) {
+            LOG.log(Level.FINE, "Refreshing: {0}", currentNode);
             currentNode.refresh();
+        }
     }
 
     @Override

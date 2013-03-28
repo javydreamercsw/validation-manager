@@ -5,7 +5,6 @@ import com.validation.manager.core.db.TestCase;
 import java.beans.IntrospectionException;
 import java.util.Iterator;
 import java.util.List;
-import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 
@@ -13,7 +12,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class TestChildFactory extends ChildFactory<TestCase> {
+class TestChildFactory extends AbstractChildFactory {
 
     private final Test test;
 
@@ -22,7 +21,7 @@ class TestChildFactory extends ChildFactory<TestCase> {
     }
 
     @Override
-    protected boolean createKeys(List<TestCase> toPopulate) {
+    protected boolean createKeys(List<Object> toPopulate) {
         for (Iterator<TestCase> it =
                 test.getTestCaseList().iterator(); it.hasNext();) {
             TestCase tc = it.next();
@@ -30,16 +29,21 @@ class TestChildFactory extends ChildFactory<TestCase> {
         }
         return true;
     }
-    
+
     @Override
-    protected Node[] createNodesForKey(TestCase key) {
+    protected Node[] createNodesForKey(Object key) {
         return new Node[]{createNodeForKey(key)};
     }
 
     @Override
-    protected Node createNodeForKey(TestCase key) {
+    protected Node createNodeForKey(Object key) {
         try {
-            return new TestCaseNode(key);
+            if (key instanceof TestCase) {
+                TestCase tc = (TestCase) key;
+                return new TestCaseNode(tc);
+            } else {
+                return null;
+            }
         } catch (IntrospectionException ex) {
             Exceptions.printStackTrace(ex);
             return null;
