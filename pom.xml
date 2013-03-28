@@ -110,6 +110,10 @@
             <name>project</name>
             <url>file:${project.basedir}/repo</url>
         </repository>
+        <repository>
+            <id>jasper-reports</id>
+            <url>http://jasperreports.sourceforge.net/maven2</url>
+        </repository>
     </repositories>
     
     <modules>
