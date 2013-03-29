@@ -204,6 +204,7 @@ public class RequirementImporter {
         if (requirements.isEmpty()) {
             return false;
         } else {
+            //TODO: If requirement exists, create a new version?
             for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
                 Requirement requirement = it.next();
                 new RequirementJpaController(
