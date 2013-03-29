@@ -134,5 +134,4 @@ public class FailureMode implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.fmea.FailureMode[ id=" + id + " ]";
     }
-    
 }

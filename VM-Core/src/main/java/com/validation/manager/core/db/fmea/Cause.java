@@ -133,5 +133,4 @@ public class Cause implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.fmea.Cause[ id=" + id + " ]";
     }
-    
 }

@@ -33,15 +33,15 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Attachment.findByStringValue", query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue"),
     @NamedQuery(name = "Attachment.findByAttachmentcol", query = "SELECT a FROM Attachment a WHERE a.attachmentcol = :attachmentcol")})
 public class Attachment implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected AttachmentPK attachmentPK;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Column(name = "file")
     private byte[] file;
+
+    private static final long serialVersionUID = 1L;
+    @EmbeddedId
+    protected AttachmentPK attachmentPK;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -75,14 +75,6 @@ public class Attachment implements Serializable {
 
     public void setAttachmentPK(AttachmentPK attachmentPK) {
         this.attachmentPK = attachmentPK;
-    }
-
-    public byte[] getFile() {
-        return file;
-    }
-
-    public void setFile(byte[] file) {
-        this.file = file;
     }
 
     public String getStringValue() {
@@ -140,5 +132,13 @@ public class Attachment implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Attachment[ attachmentPK=" + attachmentPK + " ]";
+    }
+
+    public byte[] getFile() {
+        return file;
+    }
+
+    public void setFile(byte[] file) {
+        this.file = file;
     }
 }

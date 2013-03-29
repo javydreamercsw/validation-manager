@@ -44,6 +44,14 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "VmException.findByReportDate", query = "SELECT v FROM VmException v WHERE v.reportDate = :reportDate"),
     @NamedQuery(name = "VmException.findByCloseDate", query = "SELECT v FROM VmException v WHERE v.closeDate = :closeDate")})
 public class VmException implements Serializable {
+    @JoinTable(name = "exception_has_corrective_action", joinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<CorrectiveAction> correctiveActionList;
+    @ManyToMany(mappedBy = "vmExceptionList")
+    private List<Step> stepList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmException")
     private List<RequirementHasException> requirementHasExceptionList;
     private static final long serialVersionUID = 1L;
@@ -63,16 +71,6 @@ public class VmException implements Serializable {
     @Size(min = 1, max = 65535)
     @Column(name = "description")
     private String description;
-    @ManyToMany(mappedBy = "vmExceptionList")
-    private List<CorrectiveAction> correctiveActionList;
-    @JoinTable(name = "step_has_exception", joinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "step_id", referencedColumnName = "id"),
-        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id"),
-        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id")})
-    @ManyToMany
-    private List<Step> stepList;
     @JoinTable(name = "exception_has_root_cause", joinColumns = {
         @JoinColumn(name = "exception_id", referencedColumnName = "id"),
         @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
@@ -221,5 +219,4 @@ public class VmException implements Serializable {
     public void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
         this.requirementHasExceptionList = requirementHasExceptionList;
     }
-    
 }

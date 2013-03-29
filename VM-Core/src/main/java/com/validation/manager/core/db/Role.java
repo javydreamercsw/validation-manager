@@ -169,5 +169,4 @@ public class Role implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Role[ id=" + id + " ]";
     }
-    
 }

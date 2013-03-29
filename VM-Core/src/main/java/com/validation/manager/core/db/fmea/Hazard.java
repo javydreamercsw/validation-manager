@@ -134,5 +134,5 @@ public class Hazard implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.fmea.Hazard[ id=" + id + " ]";
     }
-    
+
 }

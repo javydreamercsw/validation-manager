@@ -33,7 +33,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "fmea")
+@Table(name = "FMEA")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "FMEA.findAll", query = "SELECT f FROM FMEA f"),
@@ -61,7 +61,7 @@ public class FMEA implements Serializable {
     @Size(max = 255)
     @Column(name = "description")
     private String description;
-    @JoinTable(name = "fmea_has_risk_category", joinColumns = {
+    @JoinTable(name = "FMEA_has_risk_category", joinColumns = {
         @JoinColumn(name = "FMEA_id", referencedColumnName = "id")}, inverseJoinColumns = {
         @JoinColumn(name = "risk_category_id", referencedColumnName = "id")})
     @ManyToMany
@@ -106,6 +106,7 @@ public class FMEA implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<RiskCategory> getRiskCategoryList() {
         return riskCategoryList;
     }
@@ -133,6 +134,7 @@ public class FMEA implements Serializable {
     }
 
     @XmlTransient
+    @JsonIgnore
     public List<RiskItem> getRiskItemList() {
         return riskItemList;
     }
@@ -150,6 +152,7 @@ public class FMEA implements Serializable {
 
     @Override
     public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof FMEA)) {
             return false;
         }
@@ -162,7 +165,7 @@ public class FMEA implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.fmea.FMEA[ id=" + id + " ]";
+        return "com.validation.manager.core.db.FMEA[ id=" + id + " ]";
     }
     
 }

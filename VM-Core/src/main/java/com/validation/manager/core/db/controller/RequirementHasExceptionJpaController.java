@@ -38,8 +38,8 @@ public class RequirementHasExceptionJpaController implements Serializable {
         if (requirementHasException.getRequirementHasExceptionPK() == null) {
             requirementHasException.setRequirementHasExceptionPK(new RequirementHasExceptionPK());
         }
-        requirementHasException.getRequirementHasExceptionPK().setExceptionReporterId(requirementHasException.getVmException().getVmExceptionPK().getReporterId());
         requirementHasException.getRequirementHasExceptionPK().setExceptionId(requirementHasException.getVmException().getVmExceptionPK().getId());
+        requirementHasException.getRequirementHasExceptionPK().setExceptionReporterId(requirementHasException.getVmException().getVmExceptionPK().getReporterId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -77,8 +77,8 @@ public class RequirementHasExceptionJpaController implements Serializable {
     }
 
     public void edit(RequirementHasException requirementHasException) throws NonexistentEntityException, Exception {
-        requirementHasException.getRequirementHasExceptionPK().setExceptionReporterId(requirementHasException.getVmException().getVmExceptionPK().getReporterId());
         requirementHasException.getRequirementHasExceptionPK().setExceptionId(requirementHasException.getVmException().getVmExceptionPK().getId());
+        requirementHasException.getRequirementHasExceptionPK().setExceptionReporterId(requirementHasException.getVmException().getVmExceptionPK().getReporterId());
         EntityManager em = null;
         try {
             em = getEntityManager();

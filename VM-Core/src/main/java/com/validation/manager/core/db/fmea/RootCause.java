@@ -4,20 +4,30 @@
  */
 package com.validation.manager.core.db.fmea;
 
+import com.validation.manager.core.db.UserHasRootCause;
+import com.validation.manager.core.db.VmException;
+import com.validation.manager.core.db.VmUser;
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -31,6 +41,16 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "RootCause.findById", query = "SELECT r FROM RootCause r WHERE r.rootCausePK.id = :id"),
     @NamedQuery(name = "RootCause.findByRootCauseTypeId", query = "SELECT r FROM RootCause r WHERE r.rootCausePK.rootCauseTypeId = :rootCauseTypeId")})
 public class RootCause implements Serializable {
+    @ManyToMany(mappedBy = "rootCauseList")
+    private List<VmException> vmExceptionList;
+    @JoinTable(name = "root_cause_has_user", joinColumns = {
+        @JoinColumn(name = "root_cause_id", referencedColumnName = "id"),
+        @JoinColumn(name = "root_cause_root_cause_type_id", referencedColumnName = "root_cause_type_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "vm_user_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<VmUser> vmUserList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "rootCause")
+    private List<UserHasRootCause> userHasRootCauseList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RootCausePK rootCausePK;
@@ -107,6 +127,36 @@ public class RootCause implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.fmea.RootCause[ rootCausePK=" + rootCausePK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<VmException> getVmExceptionList() {
+        return vmExceptionList;
+    }
+
+    public void setVmExceptionList(List<VmException> vmExceptionList) {
+        this.vmExceptionList = vmExceptionList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<VmUser> getVmUserList() {
+        return vmUserList;
+    }
+
+    public void setVmUserList(List<VmUser> vmUserList) {
+        this.vmUserList = vmUserList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<UserHasRootCause> getUserHasRootCauseList() {
+        return userHasRootCauseList;
+    }
+
+    public void setUserHasRootCauseList(List<UserHasRootCause> userHasRootCauseList) {
+        this.userHasRootCauseList = userHasRootCauseList;
     }
     
 }

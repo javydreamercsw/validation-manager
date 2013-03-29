@@ -14,6 +14,7 @@ import com.validation.manager.core.db.CorrectiveAction;
 import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.Step;
+import com.validation.manager.core.db.fmea.RootCause;
 import com.validation.manager.core.db.Investigation;
 import com.validation.manager.core.db.RequirementHasException;
 import com.validation.manager.core.db.VmException;
@@ -49,6 +50,9 @@ public class VmExceptionJpaController implements Serializable {
         if (vmException.getStepList() == null) {
             vmException.setStepList(new ArrayList<Step>());
         }
+        if (vmException.getRootCauseList() == null) {
+            vmException.setRootCauseList(new ArrayList<RootCause>());
+        }
         if (vmException.getInvestigationList() == null) {
             vmException.setInvestigationList(new ArrayList<Investigation>());
         }
@@ -77,6 +81,12 @@ public class VmExceptionJpaController implements Serializable {
                 attachedStepList.add(stepListStepToAttach);
             }
             vmException.setStepList(attachedStepList);
+            List<RootCause> attachedRootCauseList = new ArrayList<RootCause>();
+            for (RootCause rootCauseListRootCauseToAttach : vmException.getRootCauseList()) {
+                rootCauseListRootCauseToAttach = em.getReference(rootCauseListRootCauseToAttach.getClass(), rootCauseListRootCauseToAttach.getRootCausePK());
+                attachedRootCauseList.add(rootCauseListRootCauseToAttach);
+            }
+            vmException.setRootCauseList(attachedRootCauseList);
             List<Investigation> attachedInvestigationList = new ArrayList<Investigation>();
             for (Investigation investigationListInvestigationToAttach : vmException.getInvestigationList()) {
                 investigationListInvestigationToAttach = em.getReference(investigationListInvestigationToAttach.getClass(), investigationListInvestigationToAttach.getId());
@@ -101,6 +111,10 @@ public class VmExceptionJpaController implements Serializable {
             for (Step stepListStep : vmException.getStepList()) {
                 stepListStep.getVmExceptionList().add(vmException);
                 stepListStep = em.merge(stepListStep);
+            }
+            for (RootCause rootCauseListRootCause : vmException.getRootCauseList()) {
+                rootCauseListRootCause.getVmExceptionList().add(vmException);
+                rootCauseListRootCause = em.merge(rootCauseListRootCause);
             }
             for (Investigation investigationListInvestigation : vmException.getInvestigationList()) {
                 investigationListInvestigation.getVmExceptionList().add(vmException);
@@ -141,6 +155,8 @@ public class VmExceptionJpaController implements Serializable {
             List<CorrectiveAction> correctiveActionListNew = vmException.getCorrectiveActionList();
             List<Step> stepListOld = persistentVmException.getStepList();
             List<Step> stepListNew = vmException.getStepList();
+            List<RootCause> rootCauseListOld = persistentVmException.getRootCauseList();
+            List<RootCause> rootCauseListNew = vmException.getRootCauseList();
             List<Investigation> investigationListOld = persistentVmException.getInvestigationList();
             List<Investigation> investigationListNew = vmException.getInvestigationList();
             List<RequirementHasException> requirementHasExceptionListOld = persistentVmException.getRequirementHasExceptionList();
@@ -175,6 +191,13 @@ public class VmExceptionJpaController implements Serializable {
             }
             stepListNew = attachedStepListNew;
             vmException.setStepList(stepListNew);
+            List<RootCause> attachedRootCauseListNew = new ArrayList<RootCause>();
+            for (RootCause rootCauseListNewRootCauseToAttach : rootCauseListNew) {
+                rootCauseListNewRootCauseToAttach = em.getReference(rootCauseListNewRootCauseToAttach.getClass(), rootCauseListNewRootCauseToAttach.getRootCausePK());
+                attachedRootCauseListNew.add(rootCauseListNewRootCauseToAttach);
+            }
+            rootCauseListNew = attachedRootCauseListNew;
+            vmException.setRootCauseList(rootCauseListNew);
             List<Investigation> attachedInvestigationListNew = new ArrayList<Investigation>();
             for (Investigation investigationListNewInvestigationToAttach : investigationListNew) {
                 investigationListNewInvestigationToAttach = em.getReference(investigationListNewInvestigationToAttach.getClass(), investigationListNewInvestigationToAttach.getId());
@@ -220,6 +243,18 @@ public class VmExceptionJpaController implements Serializable {
                 if (!stepListOld.contains(stepListNewStep)) {
                     stepListNewStep.getVmExceptionList().add(vmException);
                     stepListNewStep = em.merge(stepListNewStep);
+                }
+            }
+            for (RootCause rootCauseListOldRootCause : rootCauseListOld) {
+                if (!rootCauseListNew.contains(rootCauseListOldRootCause)) {
+                    rootCauseListOldRootCause.getVmExceptionList().remove(vmException);
+                    rootCauseListOldRootCause = em.merge(rootCauseListOldRootCause);
+                }
+            }
+            for (RootCause rootCauseListNewRootCause : rootCauseListNew) {
+                if (!rootCauseListOld.contains(rootCauseListNewRootCause)) {
+                    rootCauseListNewRootCause.getVmExceptionList().add(vmException);
+                    rootCauseListNewRootCause = em.merge(rootCauseListNewRootCause);
                 }
             }
             for (Investigation investigationListOldInvestigation : investigationListOld) {
@@ -299,6 +334,11 @@ public class VmExceptionJpaController implements Serializable {
             for (Step stepListStep : stepList) {
                 stepListStep.getVmExceptionList().remove(vmException);
                 stepListStep = em.merge(stepListStep);
+            }
+            List<RootCause> rootCauseList = vmException.getRootCauseList();
+            for (RootCause rootCauseListRootCause : rootCauseList) {
+                rootCauseListRootCause.getVmExceptionList().remove(vmException);
+                rootCauseListRootCause = em.merge(rootCauseListRootCause);
             }
             List<Investigation> investigationList = vmException.getInvestigationList();
             for (Investigation investigationListInvestigation : investigationList) {

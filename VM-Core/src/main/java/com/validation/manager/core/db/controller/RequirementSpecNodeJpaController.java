@@ -46,8 +46,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
         if (requirementSpecNode.getRequirementList() == null) {
             requirementSpecNode.setRequirementList(new ArrayList<Requirement>());
         }
-        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         EntityManager em = null;
         try {
@@ -116,8 +116,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
     }
 
     public void edit(RequirementSpecNode requirementSpecNode) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         EntityManager em = null;
         try {
