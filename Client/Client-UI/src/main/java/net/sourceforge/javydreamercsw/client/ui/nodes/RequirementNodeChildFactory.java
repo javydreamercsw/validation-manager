@@ -53,4 +53,9 @@ class RequirementNodeChildFactory extends AbstractChildFactory {
             return null;
         }
     }
+
+    @Override
+    protected void updateBean() {
+        //Nothing to do, createKeys already does.
+    }
 }

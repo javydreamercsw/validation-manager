@@ -1,7 +1,9 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import java.beans.IntrospectionException;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +16,7 @@ import org.openide.util.Exceptions;
  */
 public class SpecNodeChildFactory extends AbstractChildFactory {
 
-    private final RequirementSpec spec;
+    private RequirementSpec spec;
 
     public SpecNodeChildFactory(RequirementSpec spec) {
         this.spec = spec;
@@ -47,5 +49,13 @@ public class SpecNodeChildFactory extends AbstractChildFactory {
             Exceptions.printStackTrace(ex);
             return null;
         }
+    }
+
+    @Override
+    protected void updateBean() {
+        RequirementSpecJpaController controller = 
+                new RequirementSpecJpaController(
+                DataBaseManager.getEntityManagerFactory());
+        spec = controller.findRequirementSpec(spec.getRequirementSpecPK());
     }
 }

@@ -72,6 +72,12 @@ public abstract class AbstractChildFactory extends ChildFactory<Object> {
     }
 
     protected void refresh() {
+        updateBean();
         refresh(true);
     }
+
+    /**
+     * This makes sure the bean is up to date.
+     */
+    protected abstract void updateBean();
 }
