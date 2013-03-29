@@ -118,7 +118,7 @@ public class TestHelper {
         tc.setActive(true);
         tc.setExpectedResults(expectedResults);
         tc.setIsOpen(true);
-        tc.setSummary(summary);
+        tc.setSummary(summary.getBytes());
         TestCaseJpaController controller = new TestCaseJpaController(
                 DataBaseManager.getEntityManagerFactory());
         tc.write2DB();

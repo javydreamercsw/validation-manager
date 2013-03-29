@@ -5,6 +5,7 @@
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.VMAuditedObject;
+import com.validation.manager.core.db.fmea.RootCause;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -50,6 +52,18 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "VmUser.findByLastModified", query = "SELECT v FROM VmUser v WHERE v.lastModified = :lastModified"),
     @NamedQuery(name = "VmUser.findByAttempts", query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts")})
 public class VmUser extends VMAuditedObject implements Serializable {
+    @JoinTable(name = "user_has_role", joinColumns = {
+        @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "role_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<Role> roleList;
+    @JoinTable(name = "user_has_corrective_action", joinColumns = {
+        @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<CorrectiveAction> correctiveActionList;
+    @ManyToMany(mappedBy = "vmUserList")
+    private List<RootCause> rootCauseList;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -104,10 +118,6 @@ public class VmUser extends VMAuditedObject implements Serializable {
     @NotNull
     @Column(name = "attempts")
     private int attempts;
-    @ManyToMany(mappedBy = "vmUserList")
-    private List<Role> roleList;
-    @ManyToMany(mappedBy = "vmUserList")
-    private List<CorrectiveAction> correctiveActionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserModifiedRecord> userModifiedRecordList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
@@ -358,6 +368,16 @@ public class VmUser extends VMAuditedObject implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.VmUser[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RootCause> getRootCauseList() {
+        return rootCauseList;
+    }
+
+    public void setRootCauseList(List<RootCause> rootCauseList) {
+        this.rootCauseList = rootCauseList;
     }
     
 }

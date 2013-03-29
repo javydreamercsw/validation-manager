@@ -119,5 +119,4 @@ public class UserRight implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.UserRight[ id=" + id + " ]";
     }
-    
 }

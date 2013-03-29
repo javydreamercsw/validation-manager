@@ -12,6 +12,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -39,6 +40,23 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Step.findByStepSequence", query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence"),
     @NamedQuery(name = "Step.findByText", query = "SELECT s FROM Step s WHERE s.text = :text")})
 public class Step implements Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Column(name = "text")
+    private byte[] text;
+    @Lob
+    @Column(name = "expected_result")
+    private byte[] expectedResult;
+    @JoinTable(name = "step_has_exception", joinColumns = {
+        @JoinColumn(name = "step_id", referencedColumnName = "id"),
+        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id"),
+        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")})
+    @ManyToMany
+    private List<VmException> vmExceptionList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected StepPK stepPK;
@@ -46,17 +64,10 @@ public class Step implements Serializable {
     @NotNull
     @Column(name = "step_sequence")
     private int stepSequence;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 100)
-    @Column(name = "text")
-    private String text;
     @Lob
     @Size(max = 65535)
     @Column(name = "notes")
     private String notes;
-    @ManyToMany(mappedBy = "stepList")
-    private List<VmException> vmExceptionList;
     @ManyToMany(mappedBy = "stepList")
     private List<Requirement> requirementList;
     @JoinColumns({
@@ -72,7 +83,7 @@ public class Step implements Serializable {
         this.stepPK = stepPK;
     }
 
-    public Step(StepPK stepPK, int stepSequence, String text) {
+    public Step(StepPK stepPK, int stepSequence, byte[] text) {
         this.stepPK = stepPK;
         this.stepSequence = stepSequence;
         this.text = text;
@@ -96,14 +107,6 @@ public class Step implements Serializable {
 
     public void setStepSequence(int stepSequence) {
         this.stepSequence = stepSequence;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
     }
 
     public String getNotes() {
@@ -166,5 +169,20 @@ public class Step implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
     }
-    
+
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
+    }
+
+    public byte[] getExpectedResult() {
+        return expectedResult;
+    }
+
+    public void setExpectedResult(byte[] expectedResult) {
+        this.expectedResult = expectedResult;
+    }
 }

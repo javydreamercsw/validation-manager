@@ -57,7 +57,7 @@ public class TestCase implements Serializable {
     @Lob
     @Size(max = 65535)
     @Column(name = "summary")
-    private String summary;
+    private byte[] summary;
     @Lob
     @Size(max = 65535)
     @Column(name = "expected_results")
@@ -111,14 +111,6 @@ public class TestCase implements Serializable {
 
     public void setVersion(short version) {
         this.version = version;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-    public void setSummary(String summary) {
-        this.summary = summary;
     }
 
     public String getExpectedResults() {
@@ -212,6 +204,14 @@ public class TestCase implements Serializable {
 
     public void setRiskControlList(List<RiskControl> riskControlList) {
         this.riskControlList = riskControlList;
+    }
+
+    public byte[] getSummary() {
+        return summary;
+    }
+
+    public void setSummary(byte[] summary) {
+        this.summary = summary;
     }
     
 }

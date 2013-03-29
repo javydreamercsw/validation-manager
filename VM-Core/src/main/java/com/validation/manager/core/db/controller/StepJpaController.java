@@ -46,8 +46,8 @@ public class StepJpaController implements Serializable {
         if (step.getRequirementList() == null) {
             step.setRequirementList(new ArrayList<Requirement>());
         }
-        step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
         step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
+        step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -96,8 +96,8 @@ public class StepJpaController implements Serializable {
     }
 
     public void edit(Step step) throws NonexistentEntityException, Exception {
-        step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
         step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
+        step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

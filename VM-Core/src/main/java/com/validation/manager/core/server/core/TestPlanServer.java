@@ -12,6 +12,7 @@ import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class TestPlanServer extends TestPlan implements EntityServer{
-
+    
     public TestPlanServer(TestPlan plan) {
         TestPlanJpaController controller = new TestPlanJpaController( DataBaseManager.getEntityManagerFactory());
         TestPlan temp = controller.findTestPlan(plan.getTestPlanPK());
