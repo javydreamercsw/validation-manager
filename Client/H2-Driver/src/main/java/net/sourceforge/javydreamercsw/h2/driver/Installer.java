@@ -49,7 +49,7 @@ public class Installer extends ModuleInstall {
                                     "jdbc:h2:file:~/VM/data/validation-manager",
                                     "user", "", "password", false,
                                     defaultConnection));
-                        } catch (DatabaseException ex) {
+                        } catch (Exception ex) {
                             LOG.log(Level.WARNING, "Error adding connection: "
                                     + defaultConnection, ex);
                         }
