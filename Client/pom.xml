@@ -62,10 +62,11 @@
     <modules>
         <module>branding</module>
         <module>application</module>
-    <module>Core</module>
-    <module>Client-UI</module>
-    <module>MySQL-Driver</module>
-  </modules>
+        <module>Core</module>
+        <module>Client-UI</module>
+        <module>MySQL-Driver</module>
+        <module>H2-Driver</module>
+    </modules>
 
     <properties>
         <netbeans.version>RELEASE73</netbeans.version>
