@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.mysql.driver;
+package net.sourceforge.javydreamercsw.h2.driver;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,8 +15,8 @@ import org.openide.windows.WindowManager;
 
 public class Installer extends ModuleInstall {
 
-    public static final String mysqlDriverClass = "com.mysql.jdbc.Driver";
-    private static final String defaultConnection = "MySQL Template";
+    public static final String h2DriverClass = "org.h2.Driver";
+    private static final String defaultConnection = "Default Validation Manager";
     private static final Logger LOG =
             Logger.getLogger(Installer.class.getCanonicalName());
 
@@ -26,13 +26,13 @@ public class Installer extends ModuleInstall {
             @Override
             public void run() {
                 //Check drivers
-                if (JDBCDriverManager.getDefault().getDrivers(mysqlDriverClass).length == 0) {
+                if (JDBCDriverManager.getDefault().getDrivers(h2DriverClass).length == 0) {
                     try {
                         JDBCDriverManager.getDefault().addDriver(
-                                JDBCDriver.create("mysql", "MySQL",
-                                mysqlDriverClass,
+                                JDBCDriver.create("h2", "H2",
+                                h2DriverClass,
                                 new URL[]{new URL(
-                            "nbinst:/modules/ext/mysql/mysql-connector-java-5.1.23.jar")}));
+                            "nbinst:/modules/ext/com.h2database/h2-1.3.171.jar")}));
                     } catch (DatabaseException ex) {
                         Exceptions.printStackTrace(ex);
                     } catch (MalformedURLException ex) {
@@ -42,15 +42,15 @@ public class Installer extends ModuleInstall {
                 //Check defined database location
                 if (ConnectionManager.getDefault().getConnection(defaultConnection) == null) {
                     //None there, create the default
-                    if (JDBCDriverManager.getDefault().getDrivers(mysqlDriverClass).length > 0) {
+                    if (JDBCDriverManager.getDefault().getDrivers(h2DriverClass).length > 0) {
                         try {
                             ConnectionManager.getDefault().addConnection(DatabaseConnection.create(
-                                    JDBCDriverManager.getDefault().getDrivers(mysqlDriverClass)[0],
-                                    "jdbc:mysql://localhost:3306/validation_manager",
+                                    JDBCDriverManager.getDefault().getDrivers(h2DriverClass)[0],
+                                    "jdbc:h2:file:~/VM/data/validation-manager",
                                     "user", "", "password", false,
                                     defaultConnection));
                         } catch (DatabaseException ex) {
-                            LOG.log(Level.WARNING, "Error adding connection: " 
+                            LOG.log(Level.WARNING, "Error adding connection: "
                                     + defaultConnection, ex);
                         }
                     }
