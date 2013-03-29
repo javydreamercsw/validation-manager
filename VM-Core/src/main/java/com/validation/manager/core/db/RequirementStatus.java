@@ -50,7 +50,7 @@ public class RequirementStatus implements Serializable {
     private Integer id;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 45)
+    @Size(min = 1, max = 255)
     @Column(name = "status")
     private String status;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementStatusId")

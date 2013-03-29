@@ -56,7 +56,7 @@ public class Test implements Serializable {
     private String notes;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 45)
+    @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
     @Basic(optional = false)

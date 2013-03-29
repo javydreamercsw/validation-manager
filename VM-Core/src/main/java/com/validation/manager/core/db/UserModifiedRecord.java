@@ -45,7 +45,7 @@ public class UserModifiedRecord implements Serializable {
     private Date modifiedDate;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 45)
+    @Size(min = 1, max = 255)
     @Column(name = "reason")
     private String reason;
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
