@@ -8,6 +8,7 @@ import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateProjectAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateRequirementSpecAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestProjectAction;
 import org.openide.util.lookup.InstanceContent;
 
 /**
@@ -32,6 +33,7 @@ public class ProjectNode extends AbstractRefreshableBeanNode {
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateProjectAction());
         actions.add(new CreateRequirementSpecAction());
+        actions.add(new CreateTestProjectAction());
         return actions.toArray(new Action[actions.size()]);
     }
 }

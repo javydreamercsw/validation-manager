@@ -4,6 +4,7 @@ import java.beans.IntrospectionException;
 import javax.swing.Action;
 import javax.swing.SwingUtilities;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.RefreshAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.capability.RefreshableCapability;
 import org.openide.nodes.BeanNode;
 import org.openide.nodes.Children;
 import org.openide.util.Lookup;

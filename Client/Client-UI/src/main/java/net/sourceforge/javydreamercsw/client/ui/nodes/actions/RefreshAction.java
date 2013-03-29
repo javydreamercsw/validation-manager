@@ -4,7 +4,8 @@ import java.awt.event.ActionEvent;
 import java.util.Iterator;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import net.sourceforge.javydreamercsw.client.ui.nodes.RefreshableCapability;
+import javax.swing.SwingUtilities;
+import net.sourceforge.javydreamercsw.client.ui.nodes.capability.RefreshableCapability;
 import org.openide.nodes.Node;
 
 /**
@@ -13,18 +14,18 @@ import org.openide.nodes.Node;
  */
 public class RefreshAction extends AbstractAction {
 
-    private final Node outer;
+    private final Node node;
 
-    public RefreshAction(final Node outer) {
+    public RefreshAction(final Node node) {
         super("Refresh",
                 new ImageIcon("com/validation/manager/resources/icons/refresh.png"));
-        this.outer = outer;
+        this.node = node;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        for (Iterator<? extends RefreshableCapability> it = 
-                outer.getLookup().lookupAll(RefreshableCapability.class).iterator(); it.hasNext();) {
+        for (Iterator<? extends RefreshableCapability> it =
+                node.getLookup().lookupAll(RefreshableCapability.class).iterator(); it.hasNext();) {
             RefreshableCapability rc = it.next();
             rc.refresh();
         }
