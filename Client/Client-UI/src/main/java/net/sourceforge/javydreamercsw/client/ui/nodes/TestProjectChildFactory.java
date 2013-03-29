@@ -1,7 +1,9 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.controller.TestProjectJpaController;
 import java.beans.IntrospectionException;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +16,7 @@ import org.openide.util.Exceptions;
  */
 class TestProjectChildFactory extends AbstractChildFactory {
 
-    private final TestProject tp;
+    private TestProject tp;
 
     public TestProjectChildFactory(TestProject tp) {
         this.tp = tp;
@@ -49,5 +51,12 @@ class TestProjectChildFactory extends AbstractChildFactory {
             Exceptions.printStackTrace(ex);
             return null;
         }
+    }
+
+    @Override
+    protected void updateBean() {
+        TestProjectJpaController controller =
+                new TestProjectJpaController(DataBaseManager.getEntityManagerFactory());
+        tp = controller.findTestProject(tp.getId());
     }
 }

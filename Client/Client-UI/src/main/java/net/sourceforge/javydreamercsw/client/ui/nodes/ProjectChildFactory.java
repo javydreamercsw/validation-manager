@@ -23,4 +23,9 @@ public class ProjectChildFactory extends AbstractChildFactory {
         }
         return true;
     }
+
+    @Override
+    protected void updateBean() {
+        //Nothing to do, createKeys already does.
+    }
 }

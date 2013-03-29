@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectChildFactory;
-import net.sourceforge.javydreamercsw.client.ui.nodes.RefreshableNode;
+import net.sourceforge.javydreamercsw.client.ui.nodes.RefreshableCapability;
 import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -52,8 +52,8 @@ public final class ProjectExplorerComponent extends TopComponent
 
     private final ExplorerManager mgr = new ExplorerManager();
     private static DatabaseConnection conn;
-    private Lookup.Result<RefreshableNode> result = null;
-    private static RefreshableNode currentNode;
+    private Lookup.Result<RefreshableCapability> result = null;
+    private static RefreshableCapability currentNode;
     private static Logger LOG =
             Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
 
@@ -108,7 +108,7 @@ public final class ProjectExplorerComponent extends TopComponent
     @Override
     public void componentOpened() {
         ExplorerUtils.activateActions(getExplorerManager(), true);
-        result = Utilities.actionsGlobalContext().lookupResult(RefreshableNode.class);
+        result = Utilities.actionsGlobalContext().lookupResult(RefreshableCapability.class);
         result.allItems();
         result.addLookupListener(this);
     }
@@ -167,8 +167,8 @@ public final class ProjectExplorerComponent extends TopComponent
             Iterator it = instances.iterator();
             while (it.hasNext()) {
                 Object item = it.next();
-                if (item instanceof RefreshableNode) {
-                    RefreshableNode p = (RefreshableNode) item;
+                if (item instanceof RefreshableCapability) {
+                    RefreshableCapability p = (RefreshableCapability) item;
                     currentNode = p;
                 }
             }

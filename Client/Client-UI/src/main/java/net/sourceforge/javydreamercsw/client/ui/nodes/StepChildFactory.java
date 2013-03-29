@@ -1,7 +1,9 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
+import com.validation.manager.core.db.controller.StepJpaController;
 import java.beans.IntrospectionException;
 import java.util.List;
 import org.openide.nodes.Node;
@@ -13,7 +15,7 @@ import org.openide.util.Exceptions;
  */
 class StepChildFactory extends AbstractChildFactory {
 
-    private final Step step;
+    private Step step;
 
     public StepChildFactory(Step step) {
         this.step = step;
@@ -45,5 +47,12 @@ class StepChildFactory extends AbstractChildFactory {
             Exceptions.printStackTrace(ex);
             return null;
         }
+    }
+
+    @Override
+    protected void updateBean() {
+        StepJpaController controller = 
+                new StepJpaController(DataBaseManager.getEntityManagerFactory());
+        step = controller.findStep(step.getStepPK());
     }
 }

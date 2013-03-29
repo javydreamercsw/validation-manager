@@ -29,11 +29,14 @@ public class SubProjectChildFactory extends ProjectChildFactory {
                 list.add(project);
             }
         }
+        
+        //Add requirement specs
         for (Iterator<RequirementSpec> it =
                 parent.getRequirementSpecList().iterator(); it.hasNext();) {
             RequirementSpec rs = it.next();
             list.add(rs);
         }
+        //Add test projects
         for (Iterator<TestProject> it = 
                 parent.getTestProjectList().iterator(); it.hasNext();) {
             TestProject tp = it.next();
