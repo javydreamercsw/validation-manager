@@ -49,7 +49,7 @@ public class Installer extends ModuleInstall {
                                     "jdbc:mysql://localhost:3306/validation_manager",
                                     "user", "", "password", false,
                                     defaultConnection));
-                        } catch (DatabaseException ex) {
+                        } catch (Exception ex) {
                             LOG.log(Level.WARNING, "Error adding connection: " 
                                     + defaultConnection, ex);
                         }
