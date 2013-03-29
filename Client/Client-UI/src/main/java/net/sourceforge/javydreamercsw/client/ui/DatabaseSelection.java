@@ -2,10 +2,8 @@ package net.sourceforge.javydreamercsw.client.ui;
 
 import java.util.Arrays;
 import java.util.List;
-import org.netbeans.api.db.explorer.ConnectionListener;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
-import org.netbeans.api.db.explorer.JDBCDriverManager;
 
 /**
  * Allows to select connection to use with application.
@@ -109,25 +107,7 @@ public class DatabaseSelection extends javax.swing.JDialog {
     private void selectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectButtonActionPerformed
         if (connectionList.getSelectedIndex() == -1) {
         } else {
-            if (connectionList.getSelectedIndex() < connections.size()) {
-                selected = connections.get(connectionList.getSelectedIndex());
-            } else {
-                //Create new one
-                ConnectionManager.getDefault().addConnectionListener(new ConnectionListener() {
-                    @Override
-                    public void connectionsChanged() {
-                        //Something was added
-                        for (DatabaseConnection conn : ConnectionManager.getDefault().getConnections()) {
-                            if (!connections.contains(conn)) {
-                                selected = conn;
-                                break;
-                            }
-                        }
-                    }
-                });
-                ConnectionManager.getDefault().showAddConnectionDialog(
-                        JDBCDriverManager.getDefault().getDrivers(Installer.mysqlDriverClass)[0]);
-            }
+            selected = connections.get(connectionList.getSelectedIndex());
             //Now, set this as the connection
             ProjectExplorerComponent.setConnection(selected);
             dispose();
@@ -135,9 +115,8 @@ public class DatabaseSelection extends javax.swing.JDialog {
     }//GEN-LAST:event_selectButtonActionPerformed
 
     private void connectionListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_connectionListValueChanged
-            selectButton.setEnabled(connectionList.getSelectedIndex()>=0);
+        selectButton.setEnabled(connectionList.getSelectedIndex() >= 0);
     }//GEN-LAST:event_connectionListValueChanged
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
     private javax.swing.JList connectionList;
@@ -149,17 +128,15 @@ public class DatabaseSelection extends javax.swing.JDialog {
         connectionList.setModel(new javax.swing.AbstractListModel() {
             @Override
             public int getSize() {
-                return connections.size() + 1;
+                return connections.size();
             }
 
             @Override
             public Object getElementAt(int i) {
-                String result;
+                String result = "Invalid index!";
                 if (i < connections.size()) {
                     DatabaseConnection connection = connections.get(i);
                     result = connection.getDisplayName() + ": " + connection.getDatabaseURL();
-                } else {
-                    result = "Create new connection";
                 }
                 return result;
             }

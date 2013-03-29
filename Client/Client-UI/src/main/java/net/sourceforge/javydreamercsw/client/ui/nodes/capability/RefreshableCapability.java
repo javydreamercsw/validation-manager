@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.nodes;
+package net.sourceforge.javydreamercsw.client.ui.nodes.capability;
 
 import org.netbeans.spi.project.LookupProvider;
 

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateProjectAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.RefreshAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.capability.RefreshableCapability;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.util.Lookup;
