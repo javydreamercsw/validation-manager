@@ -61,15 +61,10 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        RequirementImporter instance = new RequirementImporter(file, 
-                new RequirementSpecNodeJpaController(
-                DataBaseManager.getEntityManagerFactory())
-                .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
-        try {
+            RequirementImporter instance = new RequirementImporter(file,
+                    new RequirementSpecNodeJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
             instance.importFile();
             instance.processRequirements();
         } catch (Exception ex) {
@@ -112,15 +107,10 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        RequirementImporter instance = new RequirementImporter(file, 
-                new RequirementSpecNodeJpaController(
-                DataBaseManager.getEntityManagerFactory())
-                .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
-        try {
+            RequirementImporter instance = new RequirementImporter(file,
+                    new RequirementSpecNodeJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
             instance.importFile();
             instance.processRequirements();
         } catch (Exception ex) {
@@ -160,6 +150,10 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
+            RequirementImporter instance = new RequirementImporter(file,
+                    new RequirementSpecNodeJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -212,15 +206,10 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        RequirementImporter instance = new RequirementImporter(file,
-                new RequirementSpecNodeJpaController(
-                DataBaseManager.getEntityManagerFactory())
-                .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
-        try {
+            RequirementImporter instance = new RequirementImporter(file,
+                    new RequirementSpecNodeJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
             assertTrue(instance.importFile(true).size() == 20);
             assertTrue(instance.processRequirements());
         } catch (Exception ex) {
