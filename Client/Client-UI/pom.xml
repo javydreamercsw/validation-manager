@@ -84,8 +84,8 @@
         </dependency>
         <dependency>
             <groupId>net.sourceforge.javydreamercsw</groupId>
-            <artifactId>Output-Handler</artifactId>
-            <version>1.6-SNAPSHOT</version>
+            <artifactId>Ouput-Handler</artifactId>
+            <version>1.5.1</version>
             <type>jar</type>
         </dependency>
     </dependencies>
