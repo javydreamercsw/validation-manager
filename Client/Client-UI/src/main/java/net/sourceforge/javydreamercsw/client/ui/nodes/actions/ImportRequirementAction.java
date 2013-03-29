@@ -1,5 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
+import com.dreamer.outputhandler.OutputHandler;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
@@ -12,7 +13,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
+import org.openide.util.Utilities;
 
 /**
  *
@@ -59,13 +60,16 @@ public class ImportRequirementAction extends AbstractAction {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     try {
                         File file = fc.getSelectedFile();
-                        RequirementSpecNode rsns = Lookup.getDefault().lookup(RequirementSpecNode.class);
+                        RequirementSpecNode rsns = 
+                                Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class);
                         RequirementImporter instance = new RequirementImporter(file,
                                 new RequirementSpecNodeJpaController(
                                 DataBaseManager.getEntityManagerFactory())
                                 .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
-                        instance.importFile();
+                        instance.importFile(true);
+                        OutputHandler.setStatus("Importing, please wait!");
                         instance.processRequirements();
+                        OutputHandler.setStatus("Importing done! Please refresh node to see results.");
                     } catch (UnsupportedOperationException ex) {
                         Exceptions.printStackTrace(ex);
                     } catch (RequirementImportException ex) {

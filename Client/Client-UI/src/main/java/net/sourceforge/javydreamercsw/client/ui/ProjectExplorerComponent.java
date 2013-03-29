@@ -54,7 +54,7 @@ public final class ProjectExplorerComponent extends TopComponent
     private static DatabaseConnection conn;
     private Lookup.Result<RefreshableCapability> result = null;
     private static RefreshableCapability currentNode;
-    private static Logger LOG =
+    private static final Logger LOG =
             Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
 
     public ProjectExplorerComponent() {
@@ -84,6 +84,8 @@ public final class ProjectExplorerComponent extends TopComponent
 
         treePane = new javax.swing.JScrollPane();
 
+        treePane.setEnabled(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -102,7 +104,7 @@ public final class ProjectExplorerComponent extends TopComponent
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane treePane;
+    private static javax.swing.JScrollPane treePane;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -141,6 +143,7 @@ public final class ProjectExplorerComponent extends TopComponent
      * @return the conn
      */
     public static DatabaseConnection getConnection() {
+        treePane.setEnabled(conn!=null);
         return conn;
     }
 

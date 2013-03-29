@@ -82,6 +82,12 @@
             <artifactId>MySQL-Driver</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.sourceforge.javydreamercsw</groupId>
+            <artifactId>Output-Handler</artifactId>
+            <version>1.6-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>
