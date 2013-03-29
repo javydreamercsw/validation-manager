@@ -48,7 +48,7 @@ public class RequirementSpec implements Serializable {
     protected RequirementSpecPK requirementSpecPK;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 45)
+    @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
     @Lob

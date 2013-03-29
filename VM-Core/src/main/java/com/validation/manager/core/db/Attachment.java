@@ -51,7 +51,7 @@ public class Attachment implements Serializable {
     @Size(max = 2147483647)
     @Column(name = "TEXT_VALUE")
     private String textValue;
-    @Size(max = 45)
+    @Size(max = 255)
     @Column(name = "attachmentcol")
     private String attachmentcol;
     @JoinColumn(name = "attachment_type_id", referencedColumnName = "id", insertable = false, updatable = false)

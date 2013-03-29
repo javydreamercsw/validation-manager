@@ -60,7 +60,7 @@ public class Requirement implements Serializable {
     protected RequirementPK requirementPK;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 45)
+    @Size(min = 1, max = 255)
     @Column(name = "unique_id")
     private String uniqueId;
     @Basic(optional = false)

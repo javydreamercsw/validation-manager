@@ -36,7 +36,7 @@ public class RequirementHasException implements Serializable {
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementHasExceptionPK requirementHasExceptionPK;
-    @Size(max = 45)
+    @Size(max = 255)
     @Column(name = "requirement_has_exceptioncol")
     private String requirementHasExceptioncol;
     @PrimaryKeyJoinColumns({
