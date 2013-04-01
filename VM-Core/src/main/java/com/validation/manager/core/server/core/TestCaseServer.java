@@ -98,4 +98,10 @@ public class TestCaseServer extends TestCase implements EntityServer {
         new TestCaseJpaController(DataBaseManager.getEntityManagerFactory()).edit(tc);
         new TestCaseJpaController(DataBaseManager.getEntityManagerFactory()).destroy(tc.getTestCasePK());
     }
+
+    public TestCase getEntity() {
+        return new TestCaseJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findTestCase(getTestCasePK());
+    }
 }

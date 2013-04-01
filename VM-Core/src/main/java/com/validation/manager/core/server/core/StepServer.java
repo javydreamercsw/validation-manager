@@ -57,4 +57,9 @@ public class StepServer extends Step implements EntityServer {
         new StepJpaController(DataBaseManager.getEntityManagerFactory()).edit(s);
         new StepJpaController(DataBaseManager.getEntityManagerFactory()).destroy(s.getStepPK());
     }
+
+    public Step getEntity() {
+        return new StepJpaController(DataBaseManager.getEntityManagerFactory())
+                .findStep(getStepPK());
+    }
 }

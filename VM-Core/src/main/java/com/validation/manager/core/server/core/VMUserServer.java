@@ -46,13 +46,14 @@ import javax.persistence.EntityTransaction;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public final class VMUserServer extends VmUser implements EntityServer{
+public final class VMUserServer extends VmUser implements EntityServer {
 
     private static final long serialVersionUID = 1L;
     private boolean hashPassword = true;
     private boolean increaseAttempts = false;
     private static List<Object> result;
-    private static HashMap<String, Object> parameters = new HashMap<String, Object>();
+    private static HashMap<String, Object> parameters = 
+            new HashMap<String, Object>();
     private boolean change;
 
     public VMUserServer(VmUser vmu) {
@@ -82,13 +83,17 @@ public final class VMUserServer extends VmUser implements EntityServer{
     //create user object and login
     public VMUserServer(String attrUN, String attrUPW) throws Exception {
         try {
-            result = DataBaseManager.createdQuery("SELECT u FROM VmUser uu WHERE u.username='" // NOI18N
-                    + attrUN + "' AND u.password='" + MD5.encrypt(attrUPW) + "' AND u.userStatusId.id <> 2");
+            result = DataBaseManager.createdQuery(
+                    "SELECT u FROM VmUser uu WHERE u.username='" // NOI18N
+                    + attrUN + "' AND u.password='" + MD5.encrypt(attrUPW)
+                    + "' AND u.userStatusId.id <> 2");
             //throw exception if no result found
             if (result.isEmpty()) {
                 parameters.clear();
                 parameters.put("username", attrUN);
-                result = DataBaseManager.namedQuery("VmUser.findByUsername", parameters);
+                result = 
+                        DataBaseManager.namedQuery("VmUser.findByUsername",
+                        parameters);
                 //The username is valid but wrong password. Increase the login attempts.
                 if (result.size() > 0) {
                     increaseAttempts = true;
@@ -109,11 +114,14 @@ public final class VMUserServer extends VmUser implements EntityServer{
                 setEmail(vmu.getEmail());
                 int status = vmu.getUserStatusId().getId();
                 if (status != 2) {
-                    Calendar cal2 = GregorianCalendar.getInstance(), now = GregorianCalendar.getInstance();
+                    Calendar cal2 = GregorianCalendar.getInstance(), 
+                            now = GregorianCalendar.getInstance();
                     cal2.setTime(vmu.getLastModified());
-                    long diffMillis = now.getTimeInMillis() - cal2.getTimeInMillis();
+                    long diffMillis = now.getTimeInMillis() 
+                            - cal2.getTimeInMillis();
                     long diffDays = diffMillis / (24 * 60 * 60 * 1000);
-                    long age = VMSettingServer.getSetting("password.aging").getIntVal();
+                    long age = VMSettingServer.getSetting("password.aging")
+                            .getIntVal();
                     if (diffDays >= age) {
                         status = 4;
                     } else {
@@ -133,11 +141,14 @@ public final class VMUserServer extends VmUser implements EntityServer{
                 setUserTestPlanRoleList(vmu.getUserTestPlanRoleList());
                 setUserTestProjectRoleList(vmu.getUserTestProjectRoleList());
                 setVmExceptionList(vmu.getVmExceptionList());
-                setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(status));
+                setUserStatusId(new UserStatusJpaController(
+                        DataBaseManager.getEntityManagerFactory())
+                        .findUserStatus(status));
                 setLastModified(vmu.getLastModified());
             }
         } catch (Exception e) {
-            EntityTransaction transaction = DataBaseManager.getEntityManager().getTransaction();
+            EntityTransaction transaction = 
+                    DataBaseManager.getEntityManager().getTransaction();
             if (transaction.isActive()) {
                 transaction.rollback();
             }
@@ -221,7 +232,8 @@ public final class VMUserServer extends VmUser implements EntityServer{
         setLast(lastName);
         setEmail(email);
         setLocale(Locale.getDefault().toString());
-        setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
+        setUserStatusId(new UserStatusJpaController(
+                DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
         setAttempts(0);
         setLastModified(new java.sql.Timestamp(System.currentTimeMillis()));
         setHashPassword(true);
@@ -236,7 +248,9 @@ public final class VMUserServer extends VmUser implements EntityServer{
         setFirst(firstName);
         setLast(lastName);
         setEmail(email);
-        setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(userStatusId));
+        setUserStatusId(new UserStatusJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findUserStatus(userStatusId));
         setAttempts(attempts);
         setLastModified(lastModified);
         setHashPassword(true);
@@ -248,7 +262,9 @@ public final class VMUserServer extends VmUser implements EntityServer{
         Date date;
         if (getUserStatusId().getId() == 4) {
             //Changed from aged out to password changed. Clear status
-            setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
+            setUserStatusId(new UserStatusJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findUserStatus(1));
             setAttempts(0);
             setModificationReason("audit.user.account.aged");
             setChange(true);
@@ -259,11 +275,15 @@ public final class VMUserServer extends VmUser implements EntityServer{
             increaseAttempts = false;
         }
         //Lock account if needed. Can't lock main admin.
-        if (getAttempts() > VMSettingServer.getSetting("password.attempts").getIntVal()
+        if (getAttempts() > 
+                VMSettingServer.getSetting("password.attempts").getIntVal()
                 && getId() > 1) {
-            setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(2));
+            setUserStatusId(
+                    new UserStatusJpaController(
+                    DataBaseManager.getEntityManagerFactory()).findUserStatus(2));
         }
-        VmUserJpaController controller = new VmUserJpaController( DataBaseManager.getEntityManagerFactory());
+        VmUserJpaController controller = 
+                new VmUserJpaController(DataBaseManager.getEntityManagerFactory());
         if (getId() > 0) {
             if (isChange()) {
                 setModifierId(getId());
@@ -291,7 +311,8 @@ public final class VMUserServer extends VmUser implements EntityServer{
             vmu.setUserStatusId(getUserStatusId());
             vmu.setUsername(getUsername().replaceAll("'", "\\\\'"));
             vmu.setPassword(password);
-            vmu.setModificationReason(getModificationReason() == null ? "audit.general.modified" : getModificationReason());
+            vmu.setModificationReason(getModificationReason() == null ? 
+                    "audit.general.modified" : getModificationReason());
             vmu.setModifierId(getModifierId());
             vmu.setModificationTime(new Timestamp(new Date().getTime()));
             vmu.setRoleList(getRoleList());
@@ -307,9 +328,13 @@ public final class VMUserServer extends VmUser implements EntityServer{
             controller.edit(vmu);
         } else {
             VmUser vmu = new VmUser(
-                    getUsername().replaceAll("'", "\\\\'"), getPassword(), getEmail().replaceAll("'", "\\\\'"),
-                    getFirst().replaceAll("'", "\\\\'"), getLast().replaceAll("'", "\\\\'"), getLocale(),
-                    getLastModified(), new UserStatusJpaController( DataBaseManager.getEntityManagerFactory()).findUserStatus(1), getAttempts());
+                    getUsername().replaceAll("'", "\\\\'"), getPassword(), 
+                    getEmail().replaceAll("'", "\\\\'"),
+                    getFirst().replaceAll("'", "\\\\'"), 
+                    getLast().replaceAll("'", "\\\\'"), getLocale(),
+                    getLastModified(), new UserStatusJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findUserStatus(1), getAttempts());
             vmu.setUserStatusId(getUserStatusId());
             vmu.setModificationReason(getModificationReason());
             vmu.setModifierId(getModifierId());
@@ -327,7 +352,8 @@ public final class VMUserServer extends VmUser implements EntityServer{
     public static ArrayList<VMUserServer> getVMUsers() {
         ArrayList<VMUserServer> coreUsers = new ArrayList<VMUserServer>();
         try {
-            result = DataBaseManager.createdQuery("Select x from VMUser x order by x.username");
+            result = DataBaseManager.createdQuery(
+                    "Select x from VMUser x order by x.username");
             for (Object o : result) {
                 coreUsers.add(new VMUserServer((VmUser) o));
             }
@@ -358,21 +384,30 @@ public final class VMUserServer extends VmUser implements EntityServer{
         boolean passwordIsUsable = true;
         try {
             //Now check if password is not the same as the current password
-            result = DataBaseManager.createdQuery("Select x from VmUser x where x.id=" + getId()
-                    + " and x.password='" + (hash ? MD5.encrypt(newPass) : newPass) + "'");
+            result = DataBaseManager.createdQuery(
+                    "Select x from VmUser x where x.id=" + getId()
+                    + " and x.password='" 
+                    + (hash ? MD5.encrypt(newPass) : newPass) + "'");
             if (result.size() > 0) {
                 passwordIsUsable = false;
             } else {
-                //Here we'll catch if the password have been used in the unusable period (use id in case the username was modified)
-                result = DataBaseManager.createdQuery("Select x from VmUser x where x.id=" + getId());
+                //Here we'll catch if the password have been used in the 
+                //unusable period (use id in case the username was modified)
+                result = DataBaseManager.createdQuery(
+                        "Select x from VmUser x where x.id=" + getId());
                 id = ((VmUser) result.get(0)).getId();
-                result = DataBaseManager.createdQuery("Select x from VmUserT x where x.id=" + id
-                        + " and x.password='" + (hash ? MD5.encrypt(newPass) : newPass) + "'");
+                result = DataBaseManager.createdQuery(
+                        "Select x from VmUserT x where x.id=" + id
+                        + " and x.password='" 
+                        + (hash ? MD5.encrypt(newPass) : newPass) + "'");
                 for (Object o : result) {
                     //Now check the aging
                     VmUserT user = (VmUserT) o;
-                    long diff = System.currentTimeMillis() - user.getLastModifed().getTime();
-                    if (diff / (1000 * 60 * 60 * 24) > VMSettingServer.getSetting("password.unusable_period").getIntVal()) {
+                    long diff = System.currentTimeMillis() 
+                            - user.getLastModifed().getTime();
+                    if (diff / (1000 * 60 * 60 * 24) > 
+                            VMSettingServer.getSetting("password.unusable_period")
+                            .getIntVal()) {
                         passwordIsUsable = false;
                     }
                 }
@@ -400,45 +435,59 @@ public final class VMUserServer extends VmUser implements EntityServer{
         if (user != null) {
             parameters.clear();
             parameters.put("id", user.getId());
-            user = (VmUser) DataBaseManager.namedQuery("VmUser.findById", parameters).get(0);
+            user = (VmUser) DataBaseManager.namedQuery("VmUser.findById", 
+                    parameters).get(0);
             try {
                 for (CorrectiveAction ca : user.getCorrectiveActionList()) {
-                    new CorrectiveActionJpaController( DataBaseManager.getEntityManagerFactory()).destroy(ca.getId());
+                    new CorrectiveActionJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(ca.getId());
                 }
                 for (Role r : user.getRoleList()) {
-                    new RoleJpaController( DataBaseManager.getEntityManagerFactory()).destroy(r.getId());
+                    new RoleJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(r.getId());
                 }
                 for (TestCase tc : user.getTestCaseList()) {
-                    new TestCaseJpaController( DataBaseManager.getEntityManagerFactory()).destroy(tc.getTestCasePK());
+                    new TestCaseJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(tc.getTestCasePK());
                 }
                 for (UserAssigment ua : user.getUserAssigmentList()) {
-                    new UserAssigmentJpaController( DataBaseManager.getEntityManagerFactory()).destroy(ua.getUserAssigmentPK());
+                    new UserAssigmentJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(ua.getUserAssigmentPK());
                 }
                 for (UserAssigment ua : user.getUserAssigmentList1()) {
-                    new UserAssigmentJpaController( DataBaseManager.getEntityManagerFactory()).destroy(ua.getUserAssigmentPK());
+                    new UserAssigmentJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(ua.getUserAssigmentPK());
                 }
                 for (UserHasInvestigation i : user.getUserHasInvestigationList()) {
-                    new UserHasInvestigationJpaController( DataBaseManager.getEntityManagerFactory()).destroy(i.getUserHasInvestigationPK());
+                    new UserHasInvestigationJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(i.getUserHasInvestigationPK());
                 }
                 for (UserHasRootCause rc : user.getUserHasRootCauseList()) {
-                    new UserHasRootCauseJpaController( DataBaseManager.getEntityManagerFactory()).destroy(rc.getUserHasRootCausePK());
+                    new UserHasRootCauseJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(rc.getUserHasRootCausePK());
                 }
                 for (UserModifiedRecord rc : user.getUserModifiedRecordList()) {
-                    new UserModifiedRecordJpaController( DataBaseManager.getEntityManagerFactory()).destroy(rc.getUserModifiedRecordPK());
+                    new UserModifiedRecordJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(rc.getUserModifiedRecordPK());
                 }
                 for (UserTestPlanRole rc : user.getUserTestPlanRoleList()) {
-                    new UserTestPlanRoleJpaController( DataBaseManager.getEntityManagerFactory()).destroy(rc.getUserTestPlanRolePK());
+                    new UserTestPlanRoleJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(rc.getUserTestPlanRolePK());
                 }
                 for (UserTestProjectRole rc : user.getUserTestProjectRoleList()) {
-                    new UserTestProjectRoleJpaController( DataBaseManager.getEntityManagerFactory()).destroy(rc.getUserTestProjectRolePK());
+                    new UserTestProjectRoleJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(rc.getUserTestProjectRolePK());
                 }
                 for (VmException rc : user.getVmExceptionList()) {
-                    new VmExceptionJpaController( DataBaseManager.getEntityManagerFactory()).destroy(rc.getVmExceptionPK());
+                    new VmExceptionJpaController(
+                            DataBaseManager.getEntityManagerFactory()).destroy(rc.getVmExceptionPK());
                 }
                 parameters.clear();
                 parameters.put("id", user.getId());
-                user = (VmUser) DataBaseManager.namedQuery("VmUser.findById", parameters).get(0);
-                new VmUserJpaController( DataBaseManager.getEntityManagerFactory()).destroy(user.getId());
+                user = (VmUser) DataBaseManager.namedQuery("VmUser.findById", 
+                        parameters).get(0);
+                new VmUserJpaController(
+                        DataBaseManager.getEntityManagerFactory()).destroy(user.getId());
             } catch (NonexistentEntityException ex) {
                 Logger.getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IllegalOrphanException ex) {
@@ -458,13 +507,16 @@ public final class VMUserServer extends VmUser implements EntityServer{
      * @param encrypt Password needs encrypting?
      * @return true if valid
      */
-    public static boolean validCredentials(String username, String password, boolean encrypt) {
+    public static boolean validCredentials(String username, 
+            String password, boolean encrypt) {
         try {
             parameters.clear();
             parameters.put("username", username);
-            parameters.put("password", encrypt ? MD5.encrypt(password.replaceAll("'", "\\\\'")) : password);
+            parameters.put("password", encrypt ? 
+                    MD5.encrypt(password.replaceAll("'", "\\\\'")) : password);
             return !DataBaseManager.createdQuery("SELECT x FROM VmUser x "
-                    + "WHERE x.username = :username and x.password = :password", parameters).isEmpty();
+                    + "WHERE x.username = :username and x.password = :password", 
+                    parameters).isEmpty();
         } catch (VMException e) {
             Logger.getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, e);
             return false;
@@ -472,5 +524,11 @@ public final class VMUserServer extends VmUser implements EntityServer{
             Logger.getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
+    }
+
+    public VmUser getEntity() {
+        return new VmUserJpaController(
+                        DataBaseManager.getEntityManagerFactory())
+                .findVmUser(getId());
     }
 }

@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestServer extends Test implements EntityServer{
+public class TestServer extends Test implements EntityServer {
 
     public TestServer(String name, String purpose, String scope) {
         super(name, purpose, scope);
@@ -24,7 +24,7 @@ public class TestServer extends Test implements EntityServer{
 
     public TestServer(Integer id) {
         setId(id);
-        TestJpaController controller = new TestJpaController( DataBaseManager.getEntityManagerFactory());
+        TestJpaController controller = new TestJpaController(DataBaseManager.getEntityManagerFactory());
         Test temp = controller.findTest(getId());
         setName(temp.getName());
         setNotes(temp.getNotes());
@@ -43,7 +43,7 @@ public class TestServer extends Test implements EntityServer{
             setTestPlanHasTestList(new ArrayList<TestPlanHasTest>());
         }
         if (getId() != null && getId() > 0) {
-            Test temp = new TestJpaController( DataBaseManager.getEntityManagerFactory()).findTest(getId());
+            Test temp = new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(getId());
             temp.setName(getName());
             temp.setNotes(getNotes());
             temp.setPurpose(getPurpose());
@@ -54,13 +54,13 @@ public class TestServer extends Test implements EntityServer{
             if (getTestPlanHasTestList() != null) {
                 temp.setTestPlanHasTestList(getTestPlanHasTestList());
             }
-            new TestJpaController( DataBaseManager.getEntityManagerFactory()).edit(temp);
+            new TestJpaController(DataBaseManager.getEntityManagerFactory()).edit(temp);
         } else {
             Test temp = new Test(getName(), getPurpose(), getScope());
             temp.setNotes(getNotes());
             temp.setTestCaseList(getTestCaseList());
             temp.setTestPlanHasTestList(getTestPlanHasTestList());
-            new TestJpaController( DataBaseManager.getEntityManagerFactory()).create(temp);
+            new TestJpaController(DataBaseManager.getEntityManagerFactory()).create(temp);
             setId(temp.getId());
         }
         return getId();
@@ -68,7 +68,7 @@ public class TestServer extends Test implements EntityServer{
 
     public static boolean deleteTest(Test t) {
         try {
-            new TestJpaController( DataBaseManager.getEntityManagerFactory()).destroy(t.getId());
+            new TestJpaController(DataBaseManager.getEntityManagerFactory()).destroy(t.getId());
             return true;
         } catch (IllegalOrphanException ex) {
             Logger.getLogger(TestServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -76,5 +76,9 @@ public class TestServer extends Test implements EntityServer{
             Logger.getLogger(TestServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+
+    public Test getEntity() {
+        return new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(getId());
     }
 }

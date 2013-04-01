@@ -10,7 +10,7 @@ import com.validation.manager.core.db.fmea.Hazard;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class HazardServer extends Hazard implements EntityServer{
+public class HazardServer extends Hazard implements EntityServer<Hazard> {
 
     public HazardServer(String name, String description) {
         super(name, description);
@@ -20,24 +20,35 @@ public class HazardServer extends Hazard implements EntityServer{
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
         if (getId() > 0) {
-            Hazard h = new HazardJpaController( DataBaseManager.getEntityManagerFactory()).findHazard(getId());
+            Hazard h = new HazardJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findHazard(getId());
             h.setDescription(getDescription());
             h.setName(getName());
             h.setRiskItemList(getRiskItemList());
-            new HazardJpaController( DataBaseManager.getEntityManagerFactory()).edit(h);
+            new HazardJpaController(
+                    DataBaseManager.getEntityManagerFactory()).edit(h);
         } else {
             Hazard h = new Hazard();
             h.setDescription(getDescription());
             h.setName(getName());
             h.setRiskItemList(getRiskItemList());
-            new HazardJpaController( DataBaseManager.getEntityManagerFactory()).create(h);
+            new HazardJpaController(
+                    DataBaseManager.getEntityManagerFactory()).create(h);
             setId(h.getId());
         }
         return getId();
     }
-    
-    public static boolean deleteHazard(Hazard h) throws NonexistentEntityException{
-        new HazardJpaController( DataBaseManager.getEntityManagerFactory()).destroy(h.getId());
+
+    public static boolean deleteHazard(Hazard h) 
+            throws NonexistentEntityException {
+        new HazardJpaController(
+                DataBaseManager.getEntityManagerFactory()).destroy(h.getId());
         return true;
+    }
+
+    public Hazard getEntity() {
+        return new HazardJpaController(
+                DataBaseManager.getEntityManagerFactory()).findHazard(getId());
     }
 }

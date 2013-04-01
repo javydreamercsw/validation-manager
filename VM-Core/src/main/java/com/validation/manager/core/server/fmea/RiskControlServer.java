@@ -12,17 +12,22 @@ import com.validation.manager.core.db.fmea.RiskControl;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RiskControlServer extends RiskControl implements EntityServer {
+public class RiskControlServer extends RiskControl
+        implements EntityServer<RiskControl> {
 
     public RiskControlServer(int riskControlTypeId) {
         super(riskControlTypeId);
-        setRiskControlType(new RiskControlTypeJpaController(DataBaseManager.getEntityManagerFactory()).findRiskControlType(riskControlTypeId));
+        setRiskControlType(new RiskControlTypeJpaController(
+                DataBaseManager.getEntityManagerFactory()).
+                findRiskControlType(riskControlTypeId));
     }
 
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
         if (getRiskControlPK() != null && getRiskControlPK().getId() > 0) {
-            RiskControl rc = new RiskControlJpaController(DataBaseManager.getEntityManagerFactory()).findRiskControl(getRiskControlPK());
+            RiskControl rc = new RiskControlJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRiskControl(getRiskControlPK());
             if (getRequirementList() != null) {
                 rc.setRequirementList(getRequirementList());
             }
@@ -36,7 +41,8 @@ public class RiskControlServer extends RiskControl implements EntityServer {
             if (getTestCaseList() != null) {
                 rc.setTestCaseList(getTestCaseList());
             }
-            new RiskControlJpaController(DataBaseManager.getEntityManagerFactory()).edit(rc);
+            new RiskControlJpaController(
+                    DataBaseManager.getEntityManagerFactory()).edit(rc);
         } else {
             RiskControl rc = new RiskControl();
             rc.setRequirementList(getRequirementList());
@@ -44,7 +50,8 @@ public class RiskControlServer extends RiskControl implements EntityServer {
             rc.setRiskItemList(getRiskItemList());
             rc.setRiskItemList1(getRiskItemList1());
             rc.setTestCaseList(getTestCaseList());
-            new RiskControlJpaController(DataBaseManager.getEntityManagerFactory()).create(rc);
+            new RiskControlJpaController(
+                    DataBaseManager.getEntityManagerFactory()).create(rc);
             setRiskControlPK(rc.getRiskControlPK());
         }
         return getRiskControlPK().getId();
@@ -56,5 +63,11 @@ public class RiskControlServer extends RiskControl implements EntityServer {
                 DataBaseManager.getEntityManagerFactory())
                 .destroy(rc.getRiskControlPK());
         return true;
+    }
+
+    public RiskControl getEntity() {
+        return new RiskControlJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                .findRiskControl(getRiskControlPK());
     }
 }

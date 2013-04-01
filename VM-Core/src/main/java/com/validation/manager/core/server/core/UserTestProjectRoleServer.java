@@ -71,4 +71,10 @@ public class UserTestProjectRoleServer extends UserTestProjectRole implements En
         }
         return true;
     }
+
+    public UserTestProjectRole getEntity() {
+        return new UserTestProjectRoleJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findUserTestProjectRole(getUserTestProjectRolePK());
+    }
 }

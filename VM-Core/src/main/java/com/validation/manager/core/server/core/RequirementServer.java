@@ -17,7 +17,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  */
 public class RequirementServer extends Requirement implements EntityServer {
 
-    public RequirementServer(String id, String desc, RequirementSpecNodePK rsn, 
+    public RequirementServer(String id, String desc, RequirementSpecNodePK rsn,
             String notes, int requirementType, int requirementStatus) {
         setNotes(notes);
         setRequirementSpecNode(
@@ -93,5 +93,11 @@ public class RequirementServer extends Requirement implements EntityServer {
             setRequirementPK(req.getRequirementPK());
         }
         return getRequirementPK().getId();
+    }
+
+    public Requirement getEntity() {
+        return new RequirementJpaController(
+                DataBaseManager.getEntityManagerFactory()).findRequirement(
+                getRequirementPK());
     }
 }

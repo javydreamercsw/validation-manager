@@ -12,7 +12,6 @@ import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,10 +20,10 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestPlanServer extends TestPlan implements EntityServer{
-    
+public class TestPlanServer extends TestPlan implements EntityServer {
+
     public TestPlanServer(TestPlan plan) {
-        TestPlanJpaController controller = new TestPlanJpaController( DataBaseManager.getEntityManagerFactory());
+        TestPlanJpaController controller = new TestPlanJpaController(DataBaseManager.getEntityManagerFactory());
         TestPlan temp = controller.findTestPlan(plan.getTestPlanPK());
         setActive(temp.getActive());
         setIsOpen(temp.getIsOpen());
@@ -42,7 +41,7 @@ public class TestPlanServer extends TestPlan implements EntityServer{
 
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
-        TestPlanJpaController controller = new TestPlanJpaController( DataBaseManager.getEntityManagerFactory());
+        TestPlanJpaController controller = new TestPlanJpaController(DataBaseManager.getEntityManagerFactory());
         if (getTestPlanPK().getId() > 0) {
             TestPlan temp = controller.findTestPlan(getTestPlanPK());
             temp.setActive(getActive());
@@ -68,7 +67,7 @@ public class TestPlanServer extends TestPlan implements EntityServer{
 
     public static boolean deleteTestPlan(TestPlan tp) {
         try {
-            new TestPlanJpaController( DataBaseManager.getEntityManagerFactory()).destroy(tp.getTestPlanPK());
+            new TestPlanJpaController(DataBaseManager.getEntityManagerFactory()).destroy(tp.getTestPlanPK());
         } catch (IllegalOrphanException ex) {
             Logger.getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
             return false;
@@ -85,8 +84,8 @@ public class TestPlanServer extends TestPlan implements EntityServer{
                     new TestPlanHasTestPK(getTestPlanPK().getId(), getTestPlanPK().getTestProjectId(), test.getId()),
                     new Date(), 1);
             tpht.setTest(test);
-            tpht.setTestPlan(new TestPlanJpaController( DataBaseManager.getEntityManagerFactory()).findTestPlan(getTestPlanPK()));
-            new TestPlanHasTestJpaController( DataBaseManager.getEntityManagerFactory()).create(tpht);
+            tpht.setTestPlan(new TestPlanJpaController(DataBaseManager.getEntityManagerFactory()).findTestPlan(getTestPlanPK()));
+            new TestPlanHasTestJpaController(DataBaseManager.getEntityManagerFactory()).create(tpht);
             getTestPlanHasTestList().add(tpht);
             write2DB();
             return true;
@@ -96,5 +95,11 @@ public class TestPlanServer extends TestPlan implements EntityServer{
             Logger.getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+
+    public TestPlan getEntity() {
+        return new TestPlanJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findTestPlan(getTestPlanPK());
     }
 }
