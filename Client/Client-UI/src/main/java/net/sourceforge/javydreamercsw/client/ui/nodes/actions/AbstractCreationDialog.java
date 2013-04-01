@@ -60,7 +60,7 @@ public abstract class AbstractCreationDialog extends JDialog {
         return parentProject;
     }
 
-    protected void populateProjectList(JComboBox parent) {
+    protected void populateProjectList(JComboBox parent, boolean addNull) {
         List<Project> projects = new ArrayList<Project>();
         if (DataBaseTool.getEmf() != null) {
             List<Object> projectList = DataBaseManager.createdQuery("select p from Project p order by p.id");
@@ -70,12 +70,14 @@ public abstract class AbstractCreationDialog extends JDialog {
             }
         }
         List<String> names = new ArrayList<String>();
-        names.add("None");
+        if (addNull) {
+            names.add("None");
+        }
         for (Iterator<Project> it3 = projects.iterator(); it3.hasNext();) {
             Project proj = it3.next();
             names.add(proj.getName());
         }
-        parent.setModel(new DefaultComboBoxModel(names.toArray(new String[projects.size() + 1])));
+        parent.setModel(new DefaultComboBoxModel(names.toArray(new String[projects.size() + (addNull ? 1 : 0)])));
     }
 
     protected void populateSpecLevelList(JComboBox level) {
