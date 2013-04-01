@@ -21,7 +21,7 @@ public class RequirementSpecDialog extends AbstractCreationDialog {
     public RequirementSpecDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        populateProjectList(project);
+        populateProjectList(project, true);
         populateSpecLevelList(level);
     }
 

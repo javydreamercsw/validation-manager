@@ -1,8 +1,10 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.TestProjectServer;
+import java.util.Arrays;
 import javax.swing.JOptionPane;
 import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
@@ -19,6 +21,7 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
     public CreateTestProjectDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        populateProjectList(project, false);
     }
 
     /**
@@ -37,6 +40,8 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
         notes = new javax.swing.JTextArea();
         save = new javax.swing.JButton();
         cancel = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        project = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -64,6 +69,10 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
             }
         });
 
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(CreateTestProjectDialog.class, "CreateTestProjectDialog.jLabel3.text")); // NOI18N
+
+        project.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -82,7 +91,11 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(save)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancel)))
+                        .addComponent(cancel))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(project, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -93,14 +106,18 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
                     .addComponent(jLabel1)
                     .addComponent(name, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(project, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(save)
                     .addComponent(cancel))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -114,8 +131,12 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
                     JOptionPane.WARNING_MESSAGE);
         } else {
             TestProjectServer tps = new TestProjectServer(name.getText().trim(), true);
+            Project selectedProject = getSelectedProject(project);
             if (!notes.getText().isEmpty()) {
                 tps.setNotes(notes.getText());
+            }
+            if (selectedProject != null) {
+                tps.setProjectList(Arrays.asList(new Project[]{selectedProject}));
             }
             try {
                 tps.write2DB();
@@ -138,9 +159,11 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
     private javax.swing.JButton cancel;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField name;
     private javax.swing.JTextArea notes;
+    private javax.swing.JComboBox project;
     private javax.swing.JButton save;
     // End of variables declaration//GEN-END:variables
 }

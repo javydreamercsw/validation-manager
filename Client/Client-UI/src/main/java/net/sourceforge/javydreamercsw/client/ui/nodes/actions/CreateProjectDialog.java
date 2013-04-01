@@ -20,7 +20,7 @@ public class CreateProjectDialog extends AbstractCreationDialog {
     public CreateProjectDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        populateProjectList(this.parent);
+        populateProjectList(this.parent, true);
     }
 
     /**
