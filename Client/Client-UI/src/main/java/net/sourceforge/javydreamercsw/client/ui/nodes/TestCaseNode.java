@@ -2,6 +2,11 @@ package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.TestCase;
 import java.beans.IntrospectionException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.swing.Action;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestStepAction;
 import org.openide.util.lookup.InstanceContent;
 
 /**
@@ -19,5 +24,13 @@ class TestCaseNode extends AbstractRefreshableBeanNode {
     @Override
     public String getName() {
         return "Test Case #" + getLookup().lookup(TestCase.class).getTestCasePK().getId();
+    }
+    
+    @Override
+    public Action[] getActions(boolean b) {
+        List<Action> actions = new ArrayList<Action>();
+        actions.addAll(Arrays.asList(super.getActions(b)));
+        actions.add(new CreateTestStepAction());
+        return actions.toArray(new Action[actions.size()]);
     }
 }
