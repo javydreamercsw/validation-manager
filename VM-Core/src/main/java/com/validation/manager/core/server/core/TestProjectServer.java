@@ -11,7 +11,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestProjectServer extends TestProject implements EntityServer{
+public class TestProjectServer extends TestProject implements EntityServer {
 
     public TestProjectServer(String name, boolean active) {
         super(name, active);
@@ -21,16 +21,22 @@ public class TestProjectServer extends TestProject implements EntityServer{
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
         if (getId() > 0) {
-            TestProject tp = new TestProjectJpaController( DataBaseManager.getEntityManagerFactory()).findTestProject(getId());
+            TestProject tp = new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).findTestProject(getId());
             tp.setActive(getActive());
             tp.setName(getName());
             tp.setNotes(getNotes());
-            new TestProjectJpaController( DataBaseManager.getEntityManagerFactory()).edit(tp);
+            new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).edit(tp);
         } else {
             TestProject tp = new TestProject(getName(), getActive());
-            new TestProjectJpaController( DataBaseManager.getEntityManagerFactory()).create(tp);
+            new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(tp);
             setId(tp.getId());
         }
         return getId();
+    }
+
+    public TestProject getEntity() {
+        return new TestProjectJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findTestProject(getId());
     }
 }

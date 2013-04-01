@@ -15,7 +15,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class SpecLevelServer extends SpecLevel implements EntityServer{
+public class SpecLevelServer extends SpecLevel implements EntityServer {
 
     public SpecLevelServer(String name, String description) {
         super(name, description);
@@ -23,15 +23,18 @@ public class SpecLevelServer extends SpecLevel implements EntityServer{
     }
 
     @Override
-    public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public int write2DB() throws IllegalOrphanException,
+            NonexistentEntityException, Exception {
         if (getId() > 0) {
-            SpecLevel sl = new SpecLevelJpaController( DataBaseManager.getEntityManagerFactory()).findSpecLevel(getId());
+            SpecLevel sl = new SpecLevelJpaController(
+                    DataBaseManager.getEntityManagerFactory()).findSpecLevel(getId());
             sl.setDescription(getDescription());
             sl.setName(getName());
             if (getRequirementSpecList() != null) {
                 sl.setRequirementSpecList(getRequirementSpecList());
             }
-            new SpecLevelJpaController( DataBaseManager.getEntityManagerFactory()).edit(sl);
+            new SpecLevelJpaController(
+                    DataBaseManager.getEntityManagerFactory()).edit(sl);
         } else {
             SpecLevel sl = new SpecLevel();
             sl.setDescription(getDescription());
@@ -39,13 +42,21 @@ public class SpecLevelServer extends SpecLevel implements EntityServer{
             if (getRequirementSpecList() != null) {
                 sl.setRequirementSpecList(getRequirementSpecList());
             }
-            new SpecLevelJpaController( DataBaseManager.getEntityManagerFactory()).create(sl);
+            new SpecLevelJpaController(
+                    DataBaseManager.getEntityManagerFactory()).create(sl);
             setId(sl.getId());
         }
         return getId();
     }
 
-    public static void deleteSpecLevel(SpecLevel sl) throws IllegalOrphanException, NonexistentEntityException {
-        new SpecLevelJpaController( DataBaseManager.getEntityManagerFactory()).destroy(sl.getId());
+    public static void deleteSpecLevel(SpecLevel sl)
+            throws IllegalOrphanException, NonexistentEntityException {
+        new SpecLevelJpaController(
+                DataBaseManager.getEntityManagerFactory()).destroy(sl.getId());
+    }
+
+    public SpecLevel getEntity() {
+        return new SpecLevelJpaController(
+                DataBaseManager.getEntityManagerFactory()).findSpecLevel(getId());
     }
 }

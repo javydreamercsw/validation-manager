@@ -13,14 +13,14 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class ProjectServer extends Project implements EntityServer{
-
+public class ProjectServer extends Project implements EntityServer {
+    
     public ProjectServer(String name, String notes) {
         super(name);
         setNotes(notes);
         setId(0);
     }
-
+    
     public ProjectServer(Project p) {
         Project product = new ProjectJpaController(
                 DataBaseManager.getEntityManagerFactory()).findProject(p.getId());
@@ -30,7 +30,7 @@ public class ProjectServer extends Project implements EntityServer{
         setRequirementSpecList(product.getRequirementSpecList());
         setTestProjectList(product.getTestProjectList());
     }
-
+    
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
         if (getId() > 0) {
@@ -54,7 +54,7 @@ public class ProjectServer extends Project implements EntityServer{
         }
         return getId();
     }
-
+    
     public static void deleteProject(Project p) {
         try {
             new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).destroy(p.getId());
@@ -63,5 +63,9 @@ public class ProjectServer extends Project implements EntityServer{
         } catch (NonexistentEntityException ex) {
             Logger.getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public Project getEntity() {
+        return new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(getId());
     }
 }

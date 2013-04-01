@@ -14,10 +14,10 @@ import java.util.ArrayList;
  */
 public class RequirementSpecNodeServer extends RequirementSpecNode implements EntityServer {
 
-    public RequirementSpecNodeServer(RequirementSpec rs, String name, 
+    public RequirementSpecNodeServer(RequirementSpec rs, String name,
             String description, String scope) {
-        super(rs.getRequirementSpecPK().getId(), 
-                rs.getRequirementSpecPK().getProjectId(), 
+        super(rs.getRequirementSpecPK().getId(),
+                rs.getRequirementSpecPK().getProjectId(),
                 rs.getRequirementSpecPK().getSpecLevelId());
         setDescription(description);
         setScope(scope);
@@ -44,7 +44,7 @@ public class RequirementSpecNodeServer extends RequirementSpecNode implements En
             rsn.setRequirementSpec(getRequirementSpec());
             rsn.setRequirementSpecNode(getRequirementSpecNode());
             rsn.setRequirementSpecNodeList(getRequirementSpecNodeList());
-            new RequirementSpecNodeJpaController( DataBaseManager.getEntityManagerFactory()).edit(rsn);
+            new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).edit(rsn);
         } else {
             RequirementSpecNode rsn = new RequirementSpecNode();
             rsn.setDescription(getDescription());
@@ -54,9 +54,15 @@ public class RequirementSpecNodeServer extends RequirementSpecNode implements En
             rsn.setRequirementSpec(getRequirementSpec());
             rsn.setRequirementSpecNode(getRequirementSpecNode());
             rsn.setRequirementSpecNodeList(getRequirementSpecNodeList());
-            new RequirementSpecNodeJpaController( DataBaseManager.getEntityManagerFactory()).create(rsn);
+            new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).create(rsn);
             setRequirementSpecNodePK(rsn.getRequirementSpecNodePK());
         }
         return getRequirementSpecNodePK().getId();
+    }
+    
+    public RequirementSpecNode getEntity(){
+        return new RequirementSpecNodeJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirementSpecNode(getRequirementSpecNodePK());
     }
 }

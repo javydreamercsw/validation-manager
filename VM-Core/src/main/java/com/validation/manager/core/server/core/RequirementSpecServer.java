@@ -107,4 +107,10 @@ public class RequirementSpecServer extends RequirementSpec implements EntityServ
                 DataBaseManager.getEntityManagerFactory())
                 .destroy(rs.getRequirementSpecPK());
     }
+    
+    public RequirementSpec getEntity(){
+        return new RequirementSpecJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                .findRequirementSpec(getRequirementSpecPK());
+    }
 }

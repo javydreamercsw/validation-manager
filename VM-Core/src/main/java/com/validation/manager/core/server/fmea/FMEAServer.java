@@ -13,18 +13,19 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class FMEAServer extends FMEA implements EntityServer{
-
+public class FMEAServer extends FMEA implements EntityServer<FMEA> {
+    
     public FMEAServer(String name) {
         super(name);
         setId(0);
     }
-
+    
     @Override
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         if (getId() > 0) {
-            FMEA fmea = new FMEAJpaController( DataBaseManager.getEntityManagerFactory()).findFMEA(getId());
+            FMEA fmea = new FMEAJpaController(
+                    DataBaseManager.getEntityManagerFactory()).findFMEA(getId());
             if (getFMEAList() != null) {
                 fmea.setFMEAList(getFMEAList());
             }
@@ -32,25 +33,33 @@ public class FMEAServer extends FMEA implements EntityServer{
             if (getRiskItemList() != null) {
                 fmea.setRiskItemList(getRiskItemList());
             }
-            new FMEAJpaController( DataBaseManager.getEntityManagerFactory()).edit(fmea);
+            new FMEAJpaController(
+                    DataBaseManager.getEntityManagerFactory()).edit(fmea);
         } else {
             FMEA fmea = new FMEA(getName());
             fmea.setFMEAList(getFMEAList());
             fmea.setParent(getParent());
             fmea.setRiskItemList(getRiskItemList());
-            new FMEAJpaController( DataBaseManager.getEntityManagerFactory()).create(fmea);
+            new FMEAJpaController(
+                    DataBaseManager.getEntityManagerFactory()).create(fmea);
             setId(fmea.getId());
         }
         return getId();
     }
-
+    
     public static boolean deleteFMEA(int id) {
         try {
-            new FMEAJpaController( DataBaseManager.getEntityManagerFactory()).destroy(id);
+            new FMEAJpaController(
+                    DataBaseManager.getEntityManagerFactory()).destroy(id);
             return true;
         } catch (NonexistentEntityException ex) {
             Logger.getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
+    }
+    
+    public FMEA getEntity() {
+        return new FMEAJpaController(
+                DataBaseManager.getEntityManagerFactory()).findFMEA(getId());
     }
 }

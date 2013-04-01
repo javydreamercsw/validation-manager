@@ -112,4 +112,9 @@ public class VMIdServer extends VmId implements EntityServer{
         }
         return ids;
     }
+
+    public VmId getEntity() {
+        return new VmIdJpaController(
+                DataBaseManager.getEntityManagerFactory()).findVmId(getId());
+    }
 }

@@ -11,30 +11,44 @@ import com.validation.manager.core.db.fmea.RiskCategory;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RiskCategoryServer extends RiskCategory implements EntityServer{
-
+public class RiskCategoryServer extends RiskCategory
+        implements EntityServer<RiskCategory> {
+    
     public RiskCategoryServer(String name, int min, int max) {
         super(name, min, max);
         setId(0);
     }
-
+    
     @Override
-    public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public int write2DB() throws IllegalOrphanException,
+            NonexistentEntityException, Exception {
         if (getId() > 0) {
-            RiskCategory rc = new RiskCategoryJpaController( DataBaseManager.getEntityManagerFactory()).findRiskCategory(getId());
+            RiskCategory rc = new RiskCategoryJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRiskCategory(getId());
             rc.setMaximum(getMaximum());
             rc.setMinimum(getMinimum());
-            new RiskCategoryJpaController( DataBaseManager.getEntityManagerFactory()).edit(rc);
+            new RiskCategoryJpaController(
+                    DataBaseManager.getEntityManagerFactory()).edit(rc);
         } else {
-            RiskCategory rc = new RiskCategory(getName(), getMinimum(), getMaximum());
-            new RiskCategoryJpaController( DataBaseManager.getEntityManagerFactory()).create(rc);
+            RiskCategory rc = new RiskCategory(getName(), getMinimum(),
+                    getMaximum());
+            new RiskCategoryJpaController(
+                    DataBaseManager.getEntityManagerFactory()).create(rc);
             setId(rc.getId());
         }
         return getId();
     }
-
-    public static boolean deleteRiskCategory(RiskCategory rc) throws IllegalOrphanException, NonexistentEntityException {
-        new RiskCategoryJpaController( DataBaseManager.getEntityManagerFactory()).destroy(rc.getId());
+    
+    public static boolean deleteRiskCategory(RiskCategory rc)
+            throws IllegalOrphanException, NonexistentEntityException {
+        new RiskCategoryJpaController(
+                DataBaseManager.getEntityManagerFactory()).destroy(rc.getId());
         return true;
+    }
+    
+    public RiskCategory getEntity() {
+        return new RiskCategoryJpaController(
+                DataBaseManager.getEntityManagerFactory()).findRiskCategory(getId());
     }
 }
