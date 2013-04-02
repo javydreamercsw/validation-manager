@@ -186,11 +186,11 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
 
     private void selectionValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_selectionValueChanged
         // Enable remove button when item is selected
-        remove.setEnabled(selection.getSelectedValuesList().size() > 0);
+        remove.setEnabled(selection.getSelectedValues().length > 0);
     }//GEN-LAST:event_selectionValueChanged
 
     private void removeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeActionPerformed
-        for (Object value : selection.getSelectedValuesList()) {
+        for (Object value : selection.getSelectedValues()) {
             Requirement req = (Requirement) ((DefaultMutableTreeNode) value).getUserObject();
             ((DefaultListModel) selection.getModel()).removeElement(req);
         }
