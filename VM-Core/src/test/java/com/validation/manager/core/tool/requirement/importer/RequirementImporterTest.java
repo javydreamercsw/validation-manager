@@ -66,7 +66,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                     DataBaseManager.getEntityManagerFactory())
                     .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
             instance.importFile();
-            instance.processRequirements();
+            instance.processImport();
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -112,7 +112,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                     DataBaseManager.getEntityManagerFactory())
                     .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
             instance.importFile();
-            instance.processRequirements();
+            instance.processImport();
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -165,7 +165,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         boolean exception = false;
         try {
             instance.importFile();
-            instance.processRequirements();
+            instance.processImport();
         } catch (Exception e) {
             System.out.println("Failed as expected!");
             exception = true;
@@ -211,7 +211,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                     DataBaseManager.getEntityManagerFactory())
                     .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
             assertTrue(instance.importFile(true).size() == 20);
-            assertTrue(instance.processRequirements());
+            assertTrue(instance.processImport());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();

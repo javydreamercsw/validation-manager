@@ -1,13 +1,14 @@
-package com.validation.manager.core.tool.requirement.importer;
+package com.validation.manager.core.tool.step;
 
-import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.ImporterInterface;
+import com.validation.manager.core.tool.requirement.importer.*;
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.Step;
-import com.validation.manager.core.db.controller.RequirementJpaController;
+import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,13 +36,13 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementImporter implements ImporterInterface<Requirement>{
+public class StepImporter implements ImporterInterface<Step> {
 
     private File toImport;
-    private ArrayList<Requirement> requirements = new ArrayList<Requirement>();
+    private List<Step> steps = new ArrayList<Step>();
     private final RequirementSpecNode rsn;
     private static final Logger LOG =
-            Logger.getLogger(RequirementImporter.class.getName());
+            Logger.getLogger(StepImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
 
     static {
@@ -51,25 +52,26 @@ public class RequirementImporter implements ImporterInterface<Requirement>{
         columns.add("Notes");
     }
 
-    public RequirementImporter(File toImport, RequirementSpecNode rsn) {
+    public StepImporter(File toImport, RequirementSpecNode rsn) {
         this.toImport = toImport;
         this.rsn = rsn;
     }
 
-    public List<Requirement> importFile() throws RequirementImportException{
+    @Override
+    public List<Step> importFile() throws
+            RequirementImportException {
         try {
             return importFile(false);
-        } catch (UnsupportedOperationException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(StepImporter.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
 
-    public List<Requirement> importFile(boolean header) throws
+    @Override
+    public List<Step> importFile(boolean header) throws
             RequirementImportException {
-        requirements.clear();
+        steps.clear();
         if (toImport == null) {
             throw new RequirementImportException(
                     "message.requirement.import.file.null");
@@ -175,7 +177,7 @@ public class RequirementImporter implements ImporterInterface<Requirement>{
                                 "RequirementStatus.findByStatus", parameters);
                         requirement.setRequirementStatusId(
                                 (RequirementStatus) result.get(0));
-                        requirements.add(requirement);
+//                        steps.add(requirement);
                     }
                 } catch (InvalidFormatException ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -197,25 +199,25 @@ public class RequirementImporter implements ImporterInterface<Requirement>{
                 throw new RequirementImportException("Unsupported file format: "
                         + toImport.getName());
             }
-            for (Requirement r : requirements) {
+            for (Step s : steps) {
                 LOG.log(Level.FINE, "{0}: {1}",
-                        new Object[]{r.getUniqueId(), r.getDescription()});
+                        new Object[]{s.getStepPK().getId(), s.getStepSequence()});
             }
-            return requirements;
+            return steps;
         }
     }
 
+    @Override
     public boolean processImport() throws PreexistingEntityException{
-        if (requirements.isEmpty()) {
+        if (steps.isEmpty()) {
             return false;
         } else {
-            //TODO: If requirement exists, create a new version?
-            for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
+            for (Iterator<Step> it = steps.iterator(); it.hasNext();) {
+                Step step = it.next();
                 try {
-                    Requirement requirement = it.next();
-                    new RequirementJpaController(
+                    new StepJpaController(
                             DataBaseManager.getEntityManagerFactory())
-                            .create(requirement);
+                            .create(step);
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
