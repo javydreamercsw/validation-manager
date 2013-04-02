@@ -4,10 +4,10 @@ import com.validation.manager.core.ImporterInterface;
 import com.validation.manager.core.tool.requirement.importer.*;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.Step;
+import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.io.File;
@@ -40,21 +40,21 @@ public class StepImporter implements ImporterInterface<Step> {
 
     private File toImport;
     private List<Step> steps = new ArrayList<Step>();
-    private final RequirementSpecNode rsn;
+    private final TestCase tc;
     private static final Logger LOG =
             Logger.getLogger(StepImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
 
     static {
-        columns.add("Unique ID");
-        columns.add("Description");
-        columns.add("Requirement Type");
-        columns.add("Notes");
+        columns.add("Sequence");
+        columns.add("Text");
+        columns.add("Related Requirements (Optional)");
+        columns.add("Notes (Optional)");
     }
 
-    public StepImporter(File toImport, RequirementSpecNode rsn) {
+    public StepImporter(File toImport, TestCase tc) {
         this.toImport = toImport;
-        this.rsn = rsn;
+        this.tc = tc;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class StepImporter implements ImporterInterface<Step> {
         try {
             return importFile(false);
         } catch (Exception ex) {
-            Logger.getLogger(StepImporter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
         return null;
     }
@@ -74,10 +74,10 @@ public class StepImporter implements ImporterInterface<Step> {
         steps.clear();
         if (toImport == null) {
             throw new RequirementImportException(
-                    "message.requirement.import.file.null");
+                    "message.step.import.file.null");
         } else if (!toImport.exists()) {
             throw new RequirementImportException(
-                    "message.requirement.import.file.invalid");
+                    "message.step.import.file.invalid");
         } else {
             //Excel support
             if (toImport.getName().endsWith(".xls")
@@ -103,9 +103,9 @@ public class StepImporter implements ImporterInterface<Step> {
                         int cells = row.getPhysicalNumberOfCells();
                         if (cells < 3) {
                             throw new RequirementImportException(
-                                    "message.requirement.import.missing.column");
+                                    "message.step.import.missing.column");
                         }
-                        Requirement requirement = new Requirement();
+                        Step step = new Step();
                         HashMap<String, Object> parameters = new HashMap<String, Object>();
                         List<Object> result;
                         LOG.log(Level.FINE, "Row: {0}", r);
@@ -132,52 +132,41 @@ public class StepImporter implements ImporterInterface<Step> {
                             }
                             switch (c) {
                                 case 0:
-                                    //Unique ID
-                                    LOG.fine("Setting id");
-                                    requirement.setUniqueId(value);
+                                    //Sequence
+                                    LOG.fine("Setting sequence");
+                                    step.setStepSequence(Integer.valueOf(value));
                                     break;
                                 case 1:
-                                    //Description
-                                    LOG.fine("Setting desc");
-                                    requirement.setDescription(value);
+                                    //Text
+                                    LOG.fine("Setting text");
+                                    step.setText(value.getBytes("UTF-8"));
                                     break;
                                 case 2:
-                                    //Requirement type
-                                    LOG.fine("Setting requirement type");
+                                    //Optional Related requirements
+                                    LOG.fine("Setting related requirements");
                                     parameters.clear();
-                                    parameters.put("name", value);
+                                    parameters.put("uniqueId", value);
                                     result = DataBaseManager.namedQuery(
-                                            "RequirementType.findByName",
+                                            "Requirement.findByUniqueId",
                                             parameters);
-                                    if (result.isEmpty()) {
-                                        //Assume a default
-                                        parameters.clear();
-                                        parameters.put("name", "HW");
-                                        result = DataBaseManager.namedQuery(
-                                                "RequirementType.findByName",
-                                                parameters);
+                                    if (!result.isEmpty()) {
+                                        for(Object o:result){
+                                            step.getRequirementList().add((Requirement)o);
+                                        }
                                     }
-                                    requirement.setRequirementTypeId(
-                                            (RequirementType) result.get(0));
                                     break;
                                 case 3:
                                     //Optional notes
                                     LOG.fine("Setting notes");
-                                    requirement.setNotes(value);
+                                    step.setNotes(value);
                                     break;
                                 default:
                                     throw new RuntimeException("Invalid column detected: " + c);
                             }
                             LOG.fine(value);
                         }
-                        requirement.setRequirementSpecNode(rsn);
-                        parameters.clear();
-                        parameters.put("status", "general.open");
-                        result = DataBaseManager.namedQuery(
-                                "RequirementStatus.findByStatus", parameters);
-                        requirement.setRequirementStatusId(
-                                (RequirementStatus) result.get(0));
-//                        steps.add(requirement);
+                        step.setTestCase(tc);
+                        steps.add(step);
                     }
                 } catch (InvalidFormatException ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -208,7 +197,7 @@ public class StepImporter implements ImporterInterface<Step> {
     }
 
     @Override
-    public boolean processImport() throws PreexistingEntityException{
+    public boolean processImport() throws PreexistingEntityException {
         if (steps.isEmpty()) {
             return false;
         } else {
@@ -231,7 +220,7 @@ public class StepImporter implements ImporterInterface<Step> {
         template.createNewFile();
         org.apache.poi.ss.usermodel.Workbook wb = new HSSFWorkbook();
         org.apache.poi.ss.usermodel.Sheet sheet = wb.createSheet();
-        wb.setSheetName(0, "Requirements");
+        wb.setSheetName(0, "Steps");
         int column = 0;
         CellStyle cs = wb.createCellStyle();
         cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("text"));
