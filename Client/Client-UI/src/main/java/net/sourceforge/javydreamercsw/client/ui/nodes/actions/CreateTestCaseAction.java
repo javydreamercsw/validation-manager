@@ -32,6 +32,9 @@ public class CreateTestCaseAction extends AbstractAction {
                     new Short("1"), new Date());
             //TODO: Use logged user instead
             tcs.setAuthorId(new VMUserServer(1).getEntity());
+            tcs.setActive(true);
+            tcs.setIsOpen(true);
+            tcs.setTest(t);
             tcs.write2DB();
             ProjectExplorerComponent.refresh();
         } catch (IllegalOrphanException ex) {
