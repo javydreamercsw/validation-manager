@@ -49,6 +49,9 @@ public class TestCaseServer extends TestCase implements EntityServer {
             TestCase temp = controller.findTestCase(getTestCasePK());
             temp.setActive(getActive());
             temp.setCreationDate(getCreationDate());
+            if(getAuthorId()!=null){
+                temp.setAuthorId(getAuthorId());
+            }
             if (getExpectedResults() != null) {
                 temp.setExpectedResults(getExpectedResults());
             }
@@ -68,6 +71,9 @@ public class TestCaseServer extends TestCase implements EntityServer {
             TestCase temp = new TestCase(getTestCasePK(), getVersion(), getCreationDate());
             temp.setActive(getActive());
             temp.setIsOpen(getIsOpen());
+            if(getAuthorId()!=null){
+                temp.setAuthorId(getAuthorId());
+            }
             if (getExpectedResults() != null) {
                 temp.setExpectedResults(getExpectedResults());
             }
