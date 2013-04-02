@@ -33,7 +33,8 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
     /**
      * Creates new form RequirementSelectionDialog
      */
-    public RequirementSelectionDialog(java.awt.Frame parent, boolean modal) {
+    public RequirementSelectionDialog(java.awt.Frame parent, boolean modal,
+            List<Requirement> initial) {
         super(parent, modal);
         initComponents();
         ToolTipManager.sharedInstance().registerComponent(source);
@@ -66,6 +67,9 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                 return new JLabel(((Requirement) ((DefaultListModel) selection.getModel()).getElementAt(index)).getUniqueId());
             }
         });
+        for (Requirement requirement : initial) {
+            ((DefaultListModel) selection.getModel()).addElement(requirement);
+        }
     }
 
     /**
