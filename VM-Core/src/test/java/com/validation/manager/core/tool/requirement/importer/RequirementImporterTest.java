@@ -34,7 +34,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
     @Test
     public void testImportFileXLS() {
         System.out.println("importFile (xls)");
-        Project product = TestHelper.createProject("Test Project", "Notes");
+        Project project = TestHelper.createProject("Test Project", "Notes");
         String name = RequirementImporterTest.class.getCanonicalName();
         name = name.substring(0, name.lastIndexOf("."));
         name = name.replace(".", System.getProperty("file.separator"));
@@ -51,7 +51,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         RequirementSpec rss = null;
         try {
             rss = TestHelper.createRequirementSpec("Test", "Test",
-                    product, 1);
+                    project, 1);
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();

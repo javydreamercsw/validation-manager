@@ -22,19 +22,21 @@ public class ProjectServer extends Project implements EntityServer {
     }
     
     public ProjectServer(Project p) {
-        Project product = new ProjectJpaController(
+        Project project = new ProjectJpaController(
                 DataBaseManager.getEntityManagerFactory()).findProject(p.getId());
-        setNotes(product.getNotes());
-        setName(product.getName());
-        setId(product.getId());
-        setRequirementSpecList(product.getRequirementSpecList());
-        setTestProjectList(product.getTestProjectList());
+        setNotes(project.getNotes());
+        setName(project.getName());
+        setId(project.getId());
+        setProjectList(project.getProjectList());
+        setRequirementSpecList(project.getRequirementSpecList());
+        setTestProjectList(project.getTestProjectList());
     }
     
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
+        Project p;
         if (getId() > 0) {
-            Project p = new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(getId());
+            p = new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(getId());
             p.setNotes(getNotes());
             p.setName(getName());
             p.setParentProjectId(getParentProjectId());
@@ -43,7 +45,7 @@ public class ProjectServer extends Project implements EntityServer {
             p.setTestProjectList(getTestProjectList());
             new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).edit(p);
         } else {
-            Project p = new Project(getName());
+            p = new Project(getName());
             p.setNotes(getNotes());
             p.setParentProjectId(getParentProjectId());
             p.setProjectList(getProjectList());
@@ -52,6 +54,9 @@ public class ProjectServer extends Project implements EntityServer {
             new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(p);
             setId(p.getId());
         }
+        setProjectList(p.getProjectList());
+        setRequirementSpecList(p.getRequirementSpecList());
+        setTestProjectList(p.getTestProjectList());
         return getId();
     }
     

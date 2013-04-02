@@ -20,17 +20,21 @@ public class TestProjectServer extends TestProject implements EntityServer {
 
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
+        TestProject tp;
         if (getId() > 0) {
-            TestProject tp = new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).findTestProject(getId());
+            tp = new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).findTestProject(getId());
             tp.setActive(getActive());
             tp.setName(getName());
             tp.setNotes(getNotes());
             new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).edit(tp);
         } else {
-            TestProject tp = new TestProject(getName(), getActive());
+            tp = new TestProject(getName(), getActive());
             new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(tp);
             setId(tp.getId());
         }
+        setProjectList(tp.getProjectList());
+        setTestPlanList(tp.getTestPlanList());
+        setUserTestProjectRoleList(tp.getUserTestProjectRoleList());
         return getId();
     }
 

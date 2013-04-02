@@ -4,8 +4,6 @@ import com.validation.manager.core.ImporterInterface;
 import com.validation.manager.core.tool.requirement.importer.*;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.RequirementStatus;
-import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.StepJpaController;
@@ -20,6 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
@@ -44,6 +44,9 @@ public class StepImporter implements ImporterInterface<Step> {
     private static final Logger LOG =
             Logger.getLogger(StepImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
+    private static ResourceBundle rb =
+            ResourceBundle.getBundle(
+            "com.validation.manager.resources.VMMessages", Locale.getDefault());
 
     static {
         columns.add("Sequence");
@@ -101,11 +104,13 @@ public class StepImporter implements ImporterInterface<Step> {
                         }
 
                         int cells = row.getPhysicalNumberOfCells();
-                        if (cells < 3) {
+                        if (cells < 2) {
                             throw new RequirementImportException(
-                                    "message.step.import.missing.column");
+                                    rb.getString("message.step.import.missing.column")
+                                    .replaceAll("%c", "" + cells));
                         }
                         Step step = new Step();
+                        step.setRequirementList(new ArrayList<Requirement>());
                         HashMap<String, Object> parameters = new HashMap<String, Object>();
                         List<Object> result;
                         LOG.log(Level.FINE, "Row: {0}", r);
@@ -134,7 +139,8 @@ public class StepImporter implements ImporterInterface<Step> {
                                 case 0:
                                     //Sequence
                                     LOG.fine("Setting sequence");
-                                    step.setStepSequence(Integer.valueOf(value));
+                                    step.setStepSequence(
+                                            Integer.valueOf(value.substring(0, value.indexOf("."))));
                                     break;
                                 case 1:
                                     //Text
@@ -150,8 +156,8 @@ public class StepImporter implements ImporterInterface<Step> {
                                             "Requirement.findByUniqueId",
                                             parameters);
                                     if (!result.isEmpty()) {
-                                        for(Object o:result){
-                                            step.getRequirementList().add((Requirement)o);
+                                        for (Object o : result) {
+                                            step.getRequirementList().add((Requirement) o);
                                         }
                                     }
                                     break;
@@ -187,10 +193,6 @@ public class StepImporter implements ImporterInterface<Step> {
             } else {
                 throw new RequirementImportException("Unsupported file format: "
                         + toImport.getName());
-            }
-            for (Step s : steps) {
-                LOG.log(Level.FINE, "{0}: {1}",
-                        new Object[]{s.getStepPK().getId(), s.getStepSequence()});
             }
             return steps;
         }
