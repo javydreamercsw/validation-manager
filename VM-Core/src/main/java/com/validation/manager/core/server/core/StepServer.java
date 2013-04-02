@@ -2,6 +2,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.StepPK;
 import com.validation.manager.core.db.TestCase;
@@ -9,6 +10,7 @@ import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.VmExceptionJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.ArrayList;
 
 /**
  *
@@ -20,6 +22,8 @@ public class StepServer extends Step implements EntityServer {
         super(new StepPK(tc.getTestCasePK().getId(), 
                 tc.getTestCasePK().getTestId()), stepSequence, text.getBytes());
         setTestCase(tc);
+        setRequirementList(new ArrayList<Requirement>());
+        setVmExceptionList(new ArrayList<VmException>());
         if (getTestCase() == null) {
             throw new RuntimeException("Provided TestCase that doesn't exist in the database yet!");
         }
