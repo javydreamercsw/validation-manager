@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestCaseAction;
-import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestStepAction;
 import org.openide.util.lookup.InstanceContent;
 
 /**
