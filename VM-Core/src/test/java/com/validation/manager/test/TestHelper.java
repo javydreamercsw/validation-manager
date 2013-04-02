@@ -55,25 +55,35 @@ public class TestHelper {
             String first, String last) throws Exception {
         VMUserServer temp = new VMUserServer(name,
                 pass, first, email, last);
-        temp.setUserStatusId(new UserStatusJpaController(DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
+        temp.setUserStatusId(new UserStatusJpaController(
+                DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
         temp.write2DB();
-        return new VmUserJpaController(DataBaseManager.getEntityManagerFactory()).findVmUser(temp.getId());
+        return new VmUserJpaController(
+                DataBaseManager.getEntityManagerFactory()).findVmUser(temp.getId());
     }
 
-    public static void deleteUser(VmUser user) throws NonexistentEntityException, IllegalOrphanException {
+    public static void deleteUser(VmUser user) throws NonexistentEntityException, 
+            IllegalOrphanException {
         if (user != null) {
             VMUserServer.deleteUser(user);
         }
     }
 
-    public static void addUserTestPlanRole(TestPlan tpl, VmUser user, Role role) throws PreexistingEntityException, Exception {
+    public static void addUserTestPlanRole(TestPlan tpl, VmUser user, Role role)
+            throws PreexistingEntityException, Exception {
         UserTestPlanRoleServer temp = new UserTestPlanRoleServer(tpl, user, role);
         temp.write2DB();
-        UserTestPlanRole utpr = new UserTestPlanRoleJpaController(DataBaseManager.getEntityManagerFactory()).findUserTestPlanRole(temp.getUserTestPlanRolePK());
-        assertTrue(utpr.getUserTestPlanRolePK().getTestPlanTestProjectId() == temp.getUserTestPlanRolePK().getTestPlanTestProjectId());
-        assertTrue(utpr.getUserTestPlanRolePK().getRoleId() == temp.getUserTestPlanRolePK().getRoleId());
-        assertTrue(utpr.getUserTestPlanRolePK().getTestPlanId() == temp.getUserTestPlanRolePK().getTestPlanId());
-        assertTrue(utpr.getUserTestPlanRolePK().getUserId() == temp.getUserTestPlanRolePK().getUserId());
+        UserTestPlanRole utpr = new UserTestPlanRoleJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findUserTestPlanRole(temp.getUserTestPlanRolePK());
+        assertTrue(utpr.getUserTestPlanRolePK().getTestPlanTestProjectId() == 
+                temp.getUserTestPlanRolePK().getTestPlanTestProjectId());
+        assertTrue(utpr.getUserTestPlanRolePK().getRoleId() == 
+                temp.getUserTestPlanRolePK().getRoleId());
+        assertTrue(utpr.getUserTestPlanRolePK().getTestPlanId() == 
+                temp.getUserTestPlanRolePK().getTestPlanId());
+        assertTrue(utpr.getUserTestPlanRolePK().getUserId() == 
+                temp.getUserTestPlanRolePK().getUserId());
     }
 
     public static Project createProject(String name, String notes) {
@@ -90,28 +100,37 @@ public class TestHelper {
             Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
-        Project p = new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(ps.getId());
-        assertTrue(new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(p.getId()) != null);
-        assertTrue(new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(p.getId()).getNotes().equals(p.getNotes()));
+        Project p = new ProjectJpaController(
+                DataBaseManager.getEntityManagerFactory()).findProject(ps.getId());
+        assertTrue(new ProjectJpaController(
+                DataBaseManager.getEntityManagerFactory()).findProject(p.getId()) != null);
+        assertTrue(new ProjectJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findProject(p.getId()).getNotes().equals(p.getNotes()));
         return p;
     }
 
     public static void destroyProject(Project p) throws IllegalOrphanException, NonexistentEntityException {
         ProjectServer.deleteProject(p);
-        assertTrue(new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(p.getId()) == null);
+        assertTrue(new ProjectJpaController(
+                DataBaseManager.getEntityManagerFactory()).findProject(p.getId()) == null);
     }
 
-    public static Test createTest(String name, String purpose, String scope) throws PreexistingEntityException, Exception {
+    public static Test createTest(String name, String purpose, 
+            String scope) throws PreexistingEntityException, Exception {
         TestServer t = new TestServer(name, purpose, scope);
         t.setNotes("Notes");
         t.write2DB();
-        assertTrue(new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(t.getId()) != null);
-        return new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(t.getId());
+        assertTrue(new TestJpaController(
+                DataBaseManager.getEntityManagerFactory()).findTest(t.getId()) != null);
+        return new TestJpaController(
+                DataBaseManager.getEntityManagerFactory()).findTest(t.getId());
     }
 
-    public static TestCase createTestCase(int testId, short version,
-            String expectedResults, Test test, /*VmUser user,*/ String summary) throws PreexistingEntityException, Exception {
-        TestCaseServer tc = new TestCaseServer(testId, version, new Date());
+    public static TestCase createTestCase(short version,
+            String expectedResults, Test test, /*VmUser user,*/ String summary) 
+            throws PreexistingEntityException, Exception {
+        TestCaseServer tc = new TestCaseServer(test.getId(), version, new Date());
         tc.setExpectedResults(expectedResults);
         tc.setTest(test);
 //        tc.setVmUserId(user);
@@ -125,52 +144,69 @@ public class TestHelper {
         return controller.findTestCase(tc.getTestCasePK());
     }
 
-    public static Requirement createRequirement(String id, String desc, 
-            RequirementSpecNodePK p, String notes, int requirementType, 
+    public static Requirement createRequirement(String id, String desc,
+            RequirementSpecNodePK p, String notes, int requirementType,
             int requirementStatus) throws Exception {
-        RequirementServer req = new RequirementServer(id, desc, p, notes, 
+        RequirementServer req = new RequirementServer(id, desc, p, notes,
                 requirementType, requirementStatus);
         req.write2DB();
-        return new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).findRequirement(req.getRequirementPK());
+        return new RequirementJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirement(req.getRequirementPK());
     }
 
-    public static void destroyRequirement(Requirement r) throws NonexistentEntityException {
+    public static void destroyRequirement(Requirement r)
+            throws NonexistentEntityException {
         try {
             RequirementServer.deleteRequirement(r);
-            assertTrue(new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).findRequirement(r.getRequirementPK()) == null);
+            assertTrue(new RequirementJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRequirement(r.getRequirementPK()) == null);
         } catch (IllegalOrphanException ex) {
             Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
     }
 
-    public static TestCase addStep(TestCase tc, int sequence, String text, String note) throws PreexistingEntityException, Exception {
+    public static TestCase addStep(TestCase tc, int sequence, 
+            String text, String note) throws PreexistingEntityException, Exception {
         StepServer s = new StepServer(tc, sequence, text);
         int amount = tc.getStepList().size();
         s.setNotes(note);
         s.write2DB();
         TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
-        tcs.getStepList().add(new StepJpaController(DataBaseManager.getEntityManagerFactory()).findStep(s.getStepPK()));
+        tcs.getStepList().add(new StepJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findStep(s.getStepPK()));
         tcs.write2DB();
         assertTrue(tcs.getStepList().size() > amount);
-        return new TestCaseJpaController(DataBaseManager.getEntityManagerFactory()).findTestCase(tc.getTestCasePK());
+        return new TestCaseJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findTestCase(tc.getTestCasePK());
     }
 
-    public static TestProject createTestProject(String name) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public static TestProject createTestProject(String name) 
+            throws IllegalOrphanException, NonexistentEntityException, Exception {
         TestProjectServer tps = new TestProjectServer("Test Project", true);
         tps.write2DB();
-        return new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).findTestProject(tps.getId());
+        return new TestProjectJpaController(
+                DataBaseManager.getEntityManagerFactory()).findTestProject(tps.getId());
     }
 
-    public static TestPlan createTestPlan(TestProject tp, String notes, boolean active, boolean open) throws PreexistingEntityException, Exception {
+    public static TestPlan createTestPlan(TestProject tp, String notes, 
+            boolean active, boolean open) throws PreexistingEntityException,
+            Exception {
         TestPlanServer plan = new TestPlanServer(tp, active, open);
         plan.setNotes(notes);
         plan.setTestProject(tp);
         plan.write2DB();
-        return new TestPlanJpaController(DataBaseManager.getEntityManagerFactory()).findTestPlan(plan.getTestPlanPK());
+        return new TestPlanJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findTestPlan(plan.getTestPlanPK());
     }
 
-    public static void addTestCaseToTest(Test test, TestCase tc) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public static void addTestCaseToTest(Test test, TestCase tc) 
+            throws IllegalOrphanException, NonexistentEntityException, Exception {
         TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
         tcs.setTest(test);
         tcs.write2DB();
@@ -179,31 +215,46 @@ public class TestHelper {
         t.write2DB();
     }
 
-    public static void addTestToPlan(TestPlan plan, Test test) throws PreexistingEntityException, Exception {
+    public static void addTestToPlan(TestPlan plan, Test test) 
+            throws PreexistingEntityException, Exception {
         int testInPlan = plan.getTestPlanHasTestList().size();
         TestPlanServer tps = new TestPlanServer(plan);
         TestPlanHasTest tpht = new TestPlanHasTest(
-                new TestPlanHasTestPK(plan.getTestPlanPK().getId(), plan.getTestPlanPK().getTestProjectId(), test.getId()),
+                new TestPlanHasTestPK(plan.getTestPlanPK().getId(), 
+                plan.getTestPlanPK().getTestProjectId(), test.getId()),
                 new Date(), 1);
         tpht.setTest(test);
         tpht.setTestPlan(plan);
-        new TestPlanHasTestJpaController(DataBaseManager.getEntityManagerFactory()).create(tpht);
+        new TestPlanHasTestJpaController(
+                DataBaseManager.getEntityManagerFactory()).create(tpht);
         tps.getTestPlanHasTestList().add(tpht);
         tps.write2DB();
         assertTrue(tps.getTestPlanHasTestList().size() > testInPlan);
     }
 
-    public static RequirementSpec createRequirementSpec(String name, String description, Project project, int specLevelId) throws Exception {
+    public static RequirementSpec createRequirementSpec(String name, 
+            String description, Project project, int specLevelId) throws Exception {
         RequirementSpecServer rss = new RequirementSpecServer(name, description,
                 project.getId(), specLevelId);
         rss.write2DB();
         return rss;
     }
 
-    public static RequirementSpecNode createRequirementSpecNode(RequirementSpec rss, String name, String description, String scope) throws Exception {
+    public static RequirementSpecNode createRequirementSpecNode(
+            RequirementSpec rss, String name, String description, String scope) 
+            throws Exception {
         RequirementSpecNodeServer rsns = new RequirementSpecNodeServer(rss,
                 name, description, scope);
         rsns.write2DB();
         return rsns;
+    }
+
+    public static void addTestProjectToProject(TestProject tp, Project project)
+            throws IllegalOrphanException, NonexistentEntityException, Exception {
+        ProjectServer ps = new ProjectServer(project);
+        int current = ps.getTestProjectList().size();
+        ps.getTestProjectList().add(tp);
+        ps.write2DB();
+        assertTrue(ps.getTestProjectList().size() > current);
     }
 }

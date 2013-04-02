@@ -80,7 +80,7 @@ public abstract class AbstractVMTestCase extends TestCase {
         }
         DataBaseManager.close();
         //Restore to default to make it atomic.
-        deleteDatabase=true;
+        deleteDatabase = true;
     }
 
     protected void createTestUsers() {
