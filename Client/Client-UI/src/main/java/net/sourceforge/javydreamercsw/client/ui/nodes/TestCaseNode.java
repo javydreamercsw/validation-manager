@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestStepAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportTestStepAction;
 import org.openide.util.lookup.InstanceContent;
 
 /**
@@ -31,6 +32,7 @@ class TestCaseNode extends AbstractRefreshableBeanNode {
         List<Action> actions = new ArrayList<Action>();
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateTestStepAction());
+        actions.add(new ImportTestStepAction());
         return actions.toArray(new Action[actions.size()]);
     }
 }
