@@ -1,6 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -23,15 +24,18 @@ import org.openide.util.Utilities;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class CreateTestStepDialog extends javax.swing.JDialog {
+public class EditTestStepDialog extends javax.swing.JDialog {
 
     private final List<Requirement> linkedRequirements = new ArrayList<Requirement>();
+    private final boolean edit;
+    private Step step;
 
     /**
-     * Creates new form CreateTestStepDialog
+     * Creates new form EditTestStepDialog
      */
-    public CreateTestStepDialog(java.awt.Frame parent, boolean modal) {
+    public EditTestStepDialog(java.awt.Frame parent, boolean modal, boolean edit) {
         super(parent, modal);
+        this.edit = edit;
         initComponents();
         requirements.setModel(new DefaultListModel() {
             @Override
@@ -58,6 +62,25 @@ public class CreateTestStepDialog extends javax.swing.JDialog {
                 return new JLabel(((Requirement) ((DefaultListModel) requirements.getModel()).getElementAt(index)).getUniqueId());
             }
         });
+        if (edit) {
+            //Get the selected Step
+            step = Utilities.actionsGlobalContext().lookup(Step.class);
+            //Update the linked requirements
+            for (Requirement req : step.getRequirementList()) {
+                ((DefaultListModel) requirements.getModel()).addElement(req);
+            }
+            //Update other fields
+            if (step.getNotes() != null && !step.getNotes().trim().isEmpty()) {
+                notes.setText(step.getNotes());
+            }
+            if (step.getText() != null && step.getText().length > 0) {
+                text.setText(new String(step.getText()));
+            }
+            if (step.getExpectedResult() != null
+                    && step.getExpectedResult().length > 0) {
+                text.setText(new String(step.getExpectedResult()));
+            }
+        }
     }
 
     /**
@@ -87,26 +110,26 @@ public class CreateTestStepDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(CreateTestStepDialog.class, "CreateTestStepDialog.jLabel1.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(EditTestStepDialog.class, "EditTestStepDialog.jLabel1.text")); // NOI18N
 
         text.setColumns(20);
         text.setRows(5);
         jScrollPane1.setViewportView(text);
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(CreateTestStepDialog.class, "CreateTestStepDialog.jLabel2.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(EditTestStepDialog.class, "EditTestStepDialog.jLabel2.text")); // NOI18N
 
         result.setColumns(20);
         result.setRows(5);
         jScrollPane2.setViewportView(result);
 
-        org.openide.awt.Mnemonics.setLocalizedText(save, org.openide.util.NbBundle.getMessage(CreateTestStepDialog.class, "CreateTestStepDialog.save.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(save, org.openide.util.NbBundle.getMessage(EditTestStepDialog.class, "EditTestStepDialog.save.text")); // NOI18N
         save.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(cancel, org.openide.util.NbBundle.getMessage(CreateTestStepDialog.class, "CreateTestStepDialog.cancel.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(cancel, org.openide.util.NbBundle.getMessage(EditTestStepDialog.class, "EditTestStepDialog.cancel.text")); // NOI18N
         cancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelActionPerformed(evt);
@@ -120,15 +143,15 @@ public class CreateTestStepDialog extends javax.swing.JDialog {
         });
         jScrollPane3.setViewportView(requirements);
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(CreateTestStepDialog.class, "CreateTestStepDialog.jLabel3.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel3, org.openide.util.NbBundle.getMessage(EditTestStepDialog.class, "EditTestStepDialog.jLabel3.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel4, org.openide.util.NbBundle.getMessage(CreateTestStepDialog.class, "CreateTestStepDialog.jLabel4.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel4, org.openide.util.NbBundle.getMessage(EditTestStepDialog.class, "EditTestStepDialog.jLabel4.text")); // NOI18N
 
         notes.setColumns(20);
         notes.setRows(5);
         jScrollPane4.setViewportView(notes);
 
-        org.openide.awt.Mnemonics.setLocalizedText(chooseRequirements, org.openide.util.NbBundle.getMessage(CreateTestStepDialog.class, "CreateTestStepDialog.chooseRequirements.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(chooseRequirements, org.openide.util.NbBundle.getMessage(EditTestStepDialog.class, "EditTestStepDialog.chooseRequirements.text")); // NOI18N
         chooseRequirements.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chooseRequirementsActionPerformed(evt);
@@ -231,6 +254,7 @@ public class CreateTestStepDialog extends javax.swing.JDialog {
                 Exceptions.printStackTrace(ex);
             }
             //Add linked requirements
+            ss.getRequirementList().clear();
             for (Iterator<Requirement> it = linkedRequirements.iterator(); it.hasNext();) {
                 ss.getRequirementList().add(it.next());
             }

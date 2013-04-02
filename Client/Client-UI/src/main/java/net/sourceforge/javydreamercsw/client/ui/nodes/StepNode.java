@@ -2,6 +2,11 @@ package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.Step;
 import java.beans.IntrospectionException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.swing.Action;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestStepAction;
 import org.openide.util.lookup.InstanceContent;
 
 /**
@@ -20,5 +25,13 @@ class StepNode extends AbstractRefreshableBeanNode {
     public String getName() {
         Step step = getLookup().lookup(Step.class);
         return "Step # " + step.getStepSequence();
+    }
+    
+    @Override
+    public Action[] getActions(boolean b) {
+        List<Action> actions = new ArrayList<Action>();
+        actions.addAll(Arrays.asList(super.getActions(b)));
+        actions.add(new EditTestStepAction());
+        return actions.toArray(new Action[actions.size()]);
     }
 }

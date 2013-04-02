@@ -8,10 +8,10 @@ import javax.swing.ImageIcon;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class CreateTestStepAction extends AbstractAction {
+public class EditTestStepAction extends AbstractAction {
 
-    public CreateTestStepAction() {
-        super("Create Test Step",
+    public EditTestStepAction() {
+        super("Edit Test Step",
                 new ImageIcon("com/validation/manager/resources/icons/Signage/Add Square.png"));
     }
 
@@ -22,7 +22,7 @@ public class CreateTestStepAction extends AbstractAction {
             @Override
             public void run() {
                 final EditTestStepDialog dialog =
-                        new EditTestStepDialog(new javax.swing.JFrame(), true, false);
+                        new EditTestStepDialog(new javax.swing.JFrame(), true, true);
                 dialog.setLocationRelativeTo(null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
