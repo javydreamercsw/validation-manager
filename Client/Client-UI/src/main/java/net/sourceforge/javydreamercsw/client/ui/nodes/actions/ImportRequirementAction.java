@@ -36,7 +36,7 @@ public class ImportRequirementAction extends AbstractAction {
                 fc.addChoosableFileFilter(new FileFilter() {
                     @Override
                     public boolean accept(File file) {
-                        return file.getName().endsWith(".xls")
+                        return file.isDirectory() || file.getName().endsWith(".xls")
                                 || file.getName().endsWith(".xlsx");
                     }
 
@@ -60,7 +60,7 @@ public class ImportRequirementAction extends AbstractAction {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     try {
                         File file = fc.getSelectedFile();
-                        RequirementSpecNode rsns = 
+                        RequirementSpecNode rsns =
                                 Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class);
                         RequirementImporter instance = new RequirementImporter(file,
                                 new RequirementSpecNodeJpaController(

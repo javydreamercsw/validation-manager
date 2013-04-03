@@ -58,6 +58,26 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
             public Object getElementAt(int i) {
                 return requirements.get(i);
             }
+
+            @Override
+            public void removeElementAt(int index) {
+                requirements.remove(index);
+                super.removeElementAt(index); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public boolean removeElement(Object obj) {
+                requirements.remove((Requirement) obj);
+                return super.removeElement(obj); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void removeRange(int fromIndex, int toIndex) {
+                for (int i = fromIndex; i <= toIndex; i++) {
+                    requirements.remove(i);
+                }
+                super.removeRange(fromIndex, toIndex); //To change body of generated methods, choose Tools | Templates.
+            }
         });
         selection.setCellRenderer(new ListCellRenderer() {
             @Override
@@ -195,7 +215,7 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
 
     private void removeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeActionPerformed
         for (Object value : selection.getSelectedValues()) {
-            Requirement req = (Requirement) ((DefaultMutableTreeNode) value).getUserObject();
+            Requirement req = (Requirement) value;
             ((DefaultListModel) selection.getModel()).removeElement(req);
         }
     }//GEN-LAST:event_removeActionPerformed

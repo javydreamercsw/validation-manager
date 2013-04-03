@@ -36,7 +36,7 @@ public class ImportTestStepAction extends AbstractAction {
                 fc.addChoosableFileFilter(new FileFilter() {
                     @Override
                     public boolean accept(File file) {
-                        return file.getName().endsWith(".xls")
+                        return file.isDirectory() || file.getName().endsWith(".xls")
                                 || file.getName().endsWith(".xlsx");
                     }
 
