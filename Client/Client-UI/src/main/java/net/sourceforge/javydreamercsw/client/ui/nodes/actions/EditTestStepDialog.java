@@ -302,6 +302,9 @@ public class EditTestStepDialog extends javax.swing.JDialog {
                     }
                 }
                 linkedRequirements.clear();
+                //Clear the model to catch any removals
+                ((DefaultListModel) requirements.getModel()).removeAllElements();
+                //Add the ones selected on the selection dialog.
                 for (Requirement req : dialog.getRequirements()) {
                     ((DefaultListModel) requirements.getModel()).addElement(req);
                 }
