@@ -138,38 +138,46 @@ public class StepImporter implements ImporterInterface<Step> {
                             }
                             switch (c) {
                                 case 0:
-                                    //Sequence
-                                    LOG.fine("Setting sequence");
-                                    step.setStepSequence(
-                                            Integer.valueOf(value.substring(0, value.indexOf("."))));
+                                    if (value != null) {
+                                        //Sequence
+                                        LOG.fine("Setting sequence");
+                                        step.setStepSequence(
+                                                Integer.valueOf(value.substring(0, value.indexOf("."))));
+                                    }
                                     break;
                                 case 1:
-                                    //Text
-                                    LOG.fine("Setting text");
-                                    step.setText(value.getBytes("UTF-8"));
+                                    if (value != null) {
+                                        //Text
+                                        LOG.fine("Setting text");
+                                        step.setText(value.getBytes("UTF-8"));
+                                    }
                                     break;
                                 case 2:
                                     //Optional Related requirements
-                                    LOG.fine("Setting related requirements");
-                                    StringTokenizer st = new StringTokenizer(value, ",");
-                                    while (st.hasMoreTokens()) {
-                                        String token = st.nextToken().trim();
-                                        parameters.clear();
-                                        parameters.put("uniqueId", token);
-                                        result = DataBaseManager.namedQuery(
-                                                "Requirement.findByUniqueId",
-                                                parameters);
-                                        if (!result.isEmpty()) {
-                                            for (Object o : result) {
-                                                step.getRequirementList().add((Requirement) o);
+                                    if (value != null && !value.trim().isEmpty()) {
+                                        LOG.fine("Setting related requirements");
+                                        StringTokenizer st = new StringTokenizer(value, ",");
+                                        while (st.hasMoreTokens()) {
+                                            String token = st.nextToken().trim();
+                                            parameters.clear();
+                                            parameters.put("uniqueId", token);
+                                            result = DataBaseManager.namedQuery(
+                                                    "Requirement.findByUniqueId",
+                                                    parameters);
+                                            if (!result.isEmpty()) {
+                                                for (Object o : result) {
+                                                    step.getRequirementList().add((Requirement) o);
+                                                }
                                             }
                                         }
                                     }
                                     break;
                                 case 3:
-                                    //Optional notes
-                                    LOG.fine("Setting notes");
-                                    step.setNotes(value);
+                                    if (value != null) {
+                                        //Optional notes
+                                        LOG.fine("Setting notes");
+                                        step.setNotes(value);
+                                    }
                                     break;
                                 default:
                                     throw new RuntimeException("Invalid column detected: " + c);
