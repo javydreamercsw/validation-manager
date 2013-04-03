@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
@@ -150,14 +151,18 @@ public class StepImporter implements ImporterInterface<Step> {
                                 case 2:
                                     //Optional Related requirements
                                     LOG.fine("Setting related requirements");
-                                    parameters.clear();
-                                    parameters.put("uniqueId", value);
-                                    result = DataBaseManager.namedQuery(
-                                            "Requirement.findByUniqueId",
-                                            parameters);
-                                    if (!result.isEmpty()) {
-                                        for (Object o : result) {
-                                            step.getRequirementList().add((Requirement) o);
+                                    StringTokenizer st = new StringTokenizer(value, ",");
+                                    while (st.hasMoreTokens()) {
+                                        String token = st.nextToken().trim();
+                                        parameters.clear();
+                                        parameters.put("uniqueId", token);
+                                        result = DataBaseManager.namedQuery(
+                                                "Requirement.findByUniqueId",
+                                                parameters);
+                                        if (!result.isEmpty()) {
+                                            for (Object o : result) {
+                                                step.getRequirementList().add((Requirement) o);
+                                            }
                                         }
                                     }
                                     break;
@@ -199,7 +204,7 @@ public class StepImporter implements ImporterInterface<Step> {
     }
 
     @Override
-    public boolean processImport() throws VMException{
+    public boolean processImport() throws VMException {
         if (steps.isEmpty()) {
             return false;
         } else {
