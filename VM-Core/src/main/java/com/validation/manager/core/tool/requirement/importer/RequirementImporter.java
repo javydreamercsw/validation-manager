@@ -2,13 +2,12 @@ package com.validation.manager.core.tool.requirement.importer;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.ImporterInterface;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
-import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.controller.RequirementJpaController;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -68,7 +67,7 @@ public class RequirementImporter implements ImporterInterface<Requirement>{
     }
 
     public List<Requirement> importFile(boolean header) throws
-            RequirementImportException {
+            VMException {
         requirements.clear();
         if (toImport == null) {
             throw new RequirementImportException(
@@ -205,7 +204,7 @@ public class RequirementImporter implements ImporterInterface<Requirement>{
         }
     }
 
-    public boolean processImport() throws PreexistingEntityException{
+    public boolean processImport() throws VMException{
         if (requirements.isEmpty()) {
             return false;
         } else {
@@ -218,6 +217,7 @@ public class RequirementImporter implements ImporterInterface<Requirement>{
                             .create(requirement);
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
+                    throw new VMException(ex);
                 }
             }
             return true;

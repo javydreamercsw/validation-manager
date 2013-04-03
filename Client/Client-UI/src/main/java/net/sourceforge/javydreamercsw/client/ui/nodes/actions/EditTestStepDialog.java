@@ -243,7 +243,8 @@ public class EditTestStepDialog extends javax.swing.JDialog {
                 tc = ss.getTestCase();
             } else {
                 tc = Utilities.actionsGlobalContext().lookup(TestCase.class);
-                ss = new StepServer(tc, tc.getStepList().size() + 1, //Add at the end by default
+                TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
+                ss = new StepServer(tc, tcs.getStepList().size() + 1, //Add at the end by default
                         text.getText().trim());
             }
             try {
@@ -267,17 +268,6 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             }
             try {
                 ss.write2DB();
-            } catch (NonexistentEntityException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
-            TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
-            tcs.getStepList().add(ss.getEntity());
-            try {
-                tcs.write2DB();
-            } catch (IllegalOrphanException ex) {
-                Exceptions.printStackTrace(ex);
             } catch (NonexistentEntityException ex) {
                 Exceptions.printStackTrace(ex);
             } catch (Exception ex) {

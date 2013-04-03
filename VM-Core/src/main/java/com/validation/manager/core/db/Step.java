@@ -19,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -30,7 +31,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "step")
+@Table(name = "step",uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"testCaseId", "testCaseTestId", "sequence"})})
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Step.findAll", query = "SELECT s FROM Step s"),

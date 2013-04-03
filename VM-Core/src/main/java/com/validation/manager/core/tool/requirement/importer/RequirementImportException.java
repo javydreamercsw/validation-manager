@@ -1,20 +1,14 @@
 package com.validation.manager.core.tool.requirement.importer;
 
-import com.validation.manager.core.ImportException;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import com.validation.manager.core.VMException;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementImportException extends ImportException {
-
-    private static ResourceBundle rb =
-            ResourceBundle.getBundle(
-            "com.validation.manager.resources.VMMessages", Locale.getDefault());
+public class RequirementImportException extends VMException {
 
     public RequirementImportException(String message) {
-        super(rb.containsKey(message) ? rb.getString(message) : message);
+        super(message);
     }
 }

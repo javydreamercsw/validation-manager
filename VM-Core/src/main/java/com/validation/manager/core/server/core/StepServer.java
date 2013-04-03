@@ -38,7 +38,8 @@ public class StepServer extends Step implements EntityServer {
 
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
-        StepJpaController controller = new StepJpaController(DataBaseManager.getEntityManagerFactory());
+        StepJpaController controller = new StepJpaController(
+                DataBaseManager.getEntityManagerFactory());
         if (getStepPK().getId() > 0) {
             Step temp = controller.findStep(getStepPK());
             temp.setNotes(getNotes());
