@@ -1,6 +1,8 @@
 package com.validation.manager.core;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  *
@@ -8,16 +10,17 @@ import java.util.List;
  */
 public class VMException extends Exception {
 
-    String vm_message = "";
+    private String vm_message = "";
+    private static ResourceBundle rb =
+            ResourceBundle.getBundle(
+            "com.validation.manager.resources.VMMessages", Locale.getDefault());
 
     public VMException() {
         super();
-        vm_message = "";
     }
 
-    public VMException(String s) {
-        super(s);
-        vm_message = s;
+    public VMException(String message) {
+        super(rb.containsKey(message) ? rb.getString(message) : message);
     }
 
     public VMException(List<String> messages) {
@@ -28,11 +31,10 @@ public class VMException extends Exception {
 
     public VMException(Throwable cause) {
         super(cause);
-        vm_message = cause.getLocalizedMessage();
     }
 
     @Override
     public String toString() {
-        return vm_message;
+        return vm_message.isEmpty() ? super.getLocalizedMessage() : vm_message;
     }
 }

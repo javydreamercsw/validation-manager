@@ -1,7 +1,5 @@
 package com.validation.manager.core;
 
-import com.validation.manager.core.ImportException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.List;
 
 /**
@@ -16,9 +14,9 @@ public interface ImporterInterface<T> {
      * @return List of imported entities
      * @throws ImportException If something goes wrong in the importing process.
      */
-    List<T> importFile() throws ImportException;
+    List<T> importFile() throws VMException;
 
-    List<T> importFile(boolean header) throws ImportException;
+    List<T> importFile(boolean header) throws VMException;
 
-    boolean processImport() throws PreexistingEntityException;
+    boolean processImport() throws VMException;
 }

@@ -3,11 +3,11 @@ package com.validation.manager.core.tool.step;
 import com.validation.manager.core.ImporterInterface;
 import com.validation.manager.core.tool.requirement.importer.*;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.StepJpaController;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -199,7 +199,7 @@ public class StepImporter implements ImporterInterface<Step> {
     }
 
     @Override
-    public boolean processImport() throws PreexistingEntityException {
+    public boolean processImport() throws VMException{
         if (steps.isEmpty()) {
             return false;
         } else {
@@ -211,6 +211,7 @@ public class StepImporter implements ImporterInterface<Step> {
                             .create(step);
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
+                    throw new VMException(ex);
                 }
             }
             return true;
