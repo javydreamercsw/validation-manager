@@ -3,7 +3,6 @@ package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
@@ -57,9 +56,12 @@ public class EditTestStepDialog extends javax.swing.JDialog {
         requirements.setCellRenderer(new ListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList list,
-                    Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                    Object value, int index, boolean isSelected, 
+                    boolean cellHasFocus) {
 
-                return new JLabel(((Requirement) ((DefaultListModel) requirements.getModel()).getElementAt(index)).getUniqueId());
+                return new JLabel(
+                        ((Requirement) ((DefaultListModel) requirements.getModel())
+                        .getElementAt(index)).getUniqueId());
             }
         });
         if (edit) {
@@ -78,7 +80,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             }
             if (step.getExpectedResult() != null
                     && step.getExpectedResult().length > 0) {
-                text.setText(new String(step.getExpectedResult()));
+                result.setText(new String(step.getExpectedResult()));
             }
         }
     }
@@ -240,7 +242,6 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             TestCase tc;
             if (edit) {
                 ss = new StepServer(Utilities.actionsGlobalContext().lookup(Step.class));
-                tc = ss.getTestCase();
             } else {
                 tc = Utilities.actionsGlobalContext().lookup(TestCase.class);
                 TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
