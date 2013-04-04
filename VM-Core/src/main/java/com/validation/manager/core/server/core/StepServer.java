@@ -48,13 +48,17 @@ public class StepServer extends Step implements EntityServer {
             temp.setTestCase(getTestCase());
             temp.setText(getText());
             temp.setVmExceptionList(getVmExceptionList());
+            temp.setExpectedResult(getExpectedResult());
             controller.edit(temp);
         } else {
             Step temp = new Step(getStepPK(), getStepSequence(), getText());
             temp.setNotes(getNotes());
             temp.setRequirementList(getRequirementList());
+            temp.setStepSequence(getStepSequence());
             temp.setTestCase(getTestCase());
+            temp.setText(getText());
             temp.setVmExceptionList(getVmExceptionList());
+            temp.setExpectedResult(getExpectedResult());
             controller.create(temp);
             setStepPK(temp.getStepPK());
             setRequirementList(temp.getRequirementList());
