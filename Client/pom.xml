@@ -6,6 +6,10 @@
         <groupId>net.sourceforge.javydreamercsw</groupId>
         <version>0.1-SNAPSHOT</version>
     </parent>
+    
+    <prerequisites>
+        <maven>3.0.4</maven>
+    </prerequisites>
 
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>Client-parent</artifactId>
@@ -55,8 +59,19 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>2.4</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
     <modules>

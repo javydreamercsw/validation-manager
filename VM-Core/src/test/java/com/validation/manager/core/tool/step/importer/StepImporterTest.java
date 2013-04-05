@@ -13,7 +13,6 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.server.core.RequirementServer;
-import com.validation.manager.core.tool.step.StepImporter;
 import com.validation.manager.test.TestHelper;
 import com.validation.manager.test.AbstractVMTestCase;
 import java.io.File;

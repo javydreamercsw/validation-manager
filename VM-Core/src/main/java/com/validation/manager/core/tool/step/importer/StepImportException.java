@@ -1,4 +1,4 @@
-package com.validation.manager.core.tool.step;
+package com.validation.manager.core.tool.step.importer;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
