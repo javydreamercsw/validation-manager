@@ -1,4 +1,4 @@
-package com.validation.manager.core.tool.step;
+package com.validation.manager.core.tool.step.importer;
 
 import com.validation.manager.core.ImporterInterface;
 import com.validation.manager.core.tool.requirement.importer.*;
@@ -53,6 +53,7 @@ public class StepImporter implements ImporterInterface<Step> {
         columns.add("Sequence");
         columns.add("Text");
         columns.add("Related Requirements (Optional)");
+        columns.add("Expected Result (Optional)");
         columns.add("Notes (Optional)");
     }
 
@@ -174,11 +175,19 @@ public class StepImporter implements ImporterInterface<Step> {
                                     break;
                                 case 3:
                                     if (value != null) {
+                                        //Optional Expected result
+                                        LOG.fine("Setting expected result");
+                                        step.setExpectedResult(value.getBytes("UTF-8"));
+                                    }
+                                    break;
+                                case 4:
+                                    if (value != null) {
                                         //Optional notes
                                         LOG.fine("Setting notes");
                                         step.setNotes(value);
                                     }
                                     break;
+
                                 default:
                                     throw new RuntimeException("Invalid column detected: " + c);
                             }

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Uncovered_Requirements" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a78ff522-e96e-4b25-aa6b-89e7a645cbeb">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="project_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select unique_id, project_name,description from(
+SELECT
+     requirement.`unique_id`, project.name as project_name, requirement.description
+FROM
+     `requirement_status` requirement_status INNER JOIN `requirement` requirement ON requirement_status.`id` = requirement.`requirement_status_id`
+     INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement.`requirement_spec_node_id` = requirement_spec_node.`id`
+     AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
+     INNER JOIN `requirement_spec` requirement_spec ON requirement_spec_node.`requirement_spec_id` = requirement_spec.`id`
+     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
+     AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
+     INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
+     INNER JOIN `spec_level` spec_level ON requirement_spec.`spec_level_id` = spec_level.`id`
+WHERE
+     project.id = $P{project_id}  or parent_project_id=$P{project_id} and requirement_status.status='general.approved'
+ORDER BY
+     requirement_spec.`spec_level_id` ASC, unique_id
+)c
+where unique_id not in (
+SELECT
+     requirement.`unique_id`
+FROM
+     `requirement` requirement INNER JOIN `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
+     AND requirement.`version` = step_has_requirement.`requirement_version`
+     INNER JOIN `step` step ON step_has_requirement.`step_id` = step.`id`
+     AND step.`test_case_test_id` = step_has_requirement.`step_test_case_test_id`
+     AND step.`test_case_id` = step_has_requirement.`step_test_case_id`
+     INNER JOIN `test_case` test_case ON step.`test_case_id` = test_case.`id`
+     AND test_case.`test_id` = step.`test_case_test_id`
+     INNER JOIN `test_case` test_case_A ON step.`test_case_id` = test_case_A.`id`
+     AND test_case_A.`test_id` = step.`test_case_test_id`
+     INNER JOIN `test` test ON test_case_A.`test_id` = test.`id`
+     AND test.`id` = test_case.`test_id`
+     INNER JOIN `test_plan_has_test` test_plan_has_test ON test.`id` = test_plan_has_test.`test_id`
+     INNER JOIN `test_plan` test_plan ON test_plan_has_test.`test_plan_id` = test_plan.`id`
+     AND test_plan.`test_project_id` = test_plan_has_test.`test_plan_test_project_id`
+     INNER JOIN `test_project` test_project ON test_plan.`test_project_id` = test_project.`id`
+     INNER JOIN `project_has_test_project` project_has_test_project ON test_project.`id` = project_has_test_project.`test_project_id`
+     INNER JOIN `project` project ON project_has_test_project.`project_id` = project.`id`
+	where project_id=$P{project_id} or parent_project_id=$P{project_id})]]>
+	</queryString>
+	<field name="unique_id" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="project_name" class="java.lang.String"/>
+	<field name="description" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<variable name="counter" class="java.lang.Integer" calculation="Count">
+		<variableExpression><![CDATA[$F{unique_id}]]></variableExpression>
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="46" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="770ecef1-125f-413f-9259-1cdace211581" x="0" y="0" width="555" height="46"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Uncovered Requirements for Project: "+$F{project_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="1c367f4e-398c-40fe-8fed-c1fa51dcf712" x="155" y="0" width="400" height="25"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Description]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5fb35713-d8ff-46bc-969c-311640fc924e" x="55" y="0" width="100" height="25"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Requirement]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement uuid="06a1b8a5-a956-4fa7-93b0-a9980ee528fa" stretchType="RelativeToBandHeight" x="55" y="0" width="100" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{unique_id}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="ecc6aef1-4ac7-439b-b6b1-ed721688ce7b" x="155" y="0" width="400" height="22"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="ea9e3f0d-f5d4-4a5b-8758-d723fa50f134" x="0" y="2" width="555" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="e9541ed5-3886-4db4-8691-1bc6421b363a" positionType="FixRelativeToBottom" x="0" y="21" width="555" height="1"/>
+			</line>
+			<textField>
+				<reportElement uuid="747d57b7-e277-4e4e-92cd-6564c476d1f0" x="0" y="0" width="55" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$V{counter}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>
