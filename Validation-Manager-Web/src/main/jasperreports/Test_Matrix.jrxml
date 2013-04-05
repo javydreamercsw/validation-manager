@@ -43,20 +43,24 @@ WHERE
 	<pageHeader>
 		<band height="297" splitType="Stretch">
 			<subreport isUsingCache="false">
-				<reportElement uuid="3141904c-a773-4cf6-9552-b66608e38f07" stretchType="RelativeToTallestObject" x="1" y="0" width="398" height="297"/>
-				<subreportParameter name="project_id">
-					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
-				</subreportParameter>
-				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
-				<subreportExpression><![CDATA["repo:Req_Status_Distribution.jrxml"]]></subreportExpression>
-			</subreport>
-			<subreport isUsingCache="false">
-				<reportElement uuid="2aa9fa63-d358-4f0f-8d0d-6090fb433d19" stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="399" y="0" width="402" height="297"/>
-				<subreportParameter name="project_id">
-					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
+				<reportElement uuid="2aa9fa63-d358-4f0f-8d0d-6090fb433d19" stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="399" y="0" width="402" height="297" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$V{PAGE_NUMBER}.equals( 1 )]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="target_project_id">
+					<subreportParameterExpression><![CDATA[$P{project_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["repo:Test_Coverage.jrxml"]]></subreportExpression>
+			</subreport>
+			<subreport isUsingCache="false">
+				<reportElement uuid="3141904c-a773-4cf6-9552-b66608e38f07" stretchType="RelativeToTallestObject" isPrintRepeatedValues="false" x="0" y="0" width="398" height="297" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$V{PAGE_NUMBER}.equals( 1 )]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="project_id">
+					<subreportParameterExpression><![CDATA[$P{project_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["repo:Req_Status_Distribution.jrxml"]]></subreportExpression>
 			</subreport>
 		</band>
 	</pageHeader>
@@ -71,7 +75,7 @@ WHERE
 					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="parent_id">
-					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
+					<subreportParameterExpression><![CDATA[$P{project_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["repo:Project_Coverage_Report.jrxml"]]></subreportExpression>
@@ -108,7 +112,7 @@ WHERE
 					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
 				</subreportParameter>
 				<subreportParameter name="project_id">
-					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
+					<subreportParameterExpression><![CDATA[$P{project_id}]]></subreportParameterExpression>
 				</subreportParameter>
 				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
 				<subreportExpression><![CDATA["repo:Sub_Project_Coverage_Report.jrxml"]]></subreportExpression>

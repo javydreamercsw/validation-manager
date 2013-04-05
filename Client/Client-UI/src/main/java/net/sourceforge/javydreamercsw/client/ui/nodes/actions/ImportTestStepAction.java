@@ -5,7 +5,7 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
-import com.validation.manager.core.tool.step.StepImporter;
+import com.validation.manager.core.tool.step.importer.StepImporter;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import javax.swing.AbstractAction;
