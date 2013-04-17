@@ -20,10 +20,10 @@ public abstract class AbstractRefreshableBeanNode extends BeanNode
 
     private AbstractChildFactory factory;
 
-    public AbstractRefreshableBeanNode(Object bean, 
+    public AbstractRefreshableBeanNode(Object bean,
             AbstractChildFactory factory, InstanceContent content) throws IntrospectionException {
-        super(bean, factory == null ? Children.LEAF : 
-                Children.create(factory, true), new AbstractLookup(content));
+        super(bean, factory == null ? Children.LEAF
+                : Children.create(factory, true), new AbstractLookup(content));
         this.factory = factory;
         //Add abilities
         content.add(new RefreshableCapability() {
@@ -45,7 +45,9 @@ public abstract class AbstractRefreshableBeanNode extends BeanNode
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                factory.refresh();
+                if (factory != null) {
+                    factory.refresh();
+                }
             }
         });
     }

@@ -30,6 +30,7 @@ public class UIRequirementSpecNodeNode extends AbstractRefreshableBeanNode {
     public Action[] getActions(boolean context) {
         List<Action> actions = new ArrayList<Action>();
         actions.addAll(Arrays.asList(super.getActions(context)));
+//        actions.add(new CreateRequirementAction());
         actions.add(new ImportRequirementAction());
         return actions.toArray(new Action[actions.size()]);
     }
