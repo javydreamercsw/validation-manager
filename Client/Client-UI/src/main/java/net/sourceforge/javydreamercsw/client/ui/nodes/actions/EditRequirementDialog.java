@@ -79,9 +79,16 @@ public class EditRequirementDialog extends javax.swing.JDialog {
             public Component getListCellRendererComponent(JList list,
                     Object value, int index, boolean isSelected,
                     boolean cellHasFocus) {
-                return index >= 0 ? new JLabel(
-                        ((RequirementStatus) value).getStatus())
-                        : new JLabel(((RequirementStatus) list.getSelectedValue()).getStatus());
+                String label;
+                if (index >= 0) {
+                    label = ((RequirementStatus) value).getStatus();
+                } else {
+                    label = ((RequirementStatus) list.getSelectedValue()).getStatus();
+                }
+                if (rb.containsKey(label)) {
+                    label = rb.getString(label);
+                }
+                return new JLabel(label);
             }
         });
         type.setRenderer(new ListCellRenderer() {
