@@ -27,40 +27,12 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
             NonexistentEntityException, Exception {
         if (getRiskItemPK() != null && getRiskItemPK().getId() > 0) {
             RiskItem ri = getEntity();
-            if (getCauseList() != null) {
-                ri.setCauseList(getCauseList());
-            }
-            if (getFailureModeList() != null) {
-                ri.setFailureModeList(getFailureModeList());
-            }
-            ri.setFMEA(new FMEAJpaController(
-                    DataBaseManager.getEntityManagerFactory())
-                    .findFMEA(getRiskItemPK().getFMEAid()));
-            if (getHazardList() != null) {
-                ri.setHazardList(getHazardList());
-            }
-            if (getRiskControlList() != null) {
-                ri.setRiskControlList(getRiskControlList());
-            }
-            if (getRiskControlList1() != null) {
-                ri.setRiskControlList1(getRiskControlList1());
-            }
-            ri.setSequence(getSequence());
-            ri.setVersion(getVersion());
+            update(ri, this);
             new RiskItemJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(ri);
         } else {
             RiskItem ri = new RiskItem(getFMEA().getId());
-            ri.setCauseList(getCauseList());
-            ri.setFailureModeList(getFailureModeList());
-            ri.setFMEA(new FMEAJpaController(
-                    DataBaseManager.getEntityManagerFactory())
-                    .findFMEA(getRiskItemPK().getFMEAid()));
-            ri.setHazardList(getHazardList());
-            ri.setRiskControlList(getRiskControlList());
-            ri.setRiskControlList1(getRiskControlList1());
-            ri.setSequence(getSequence());
-            ri.setVersion(getVersion());
+            update(ri, this);
             new RiskItemJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(ri);
             setRiskItemPK(ri.getRiskItemPK());
@@ -72,5 +44,28 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
         return new RiskItemJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findRiskItem(getRiskItemPK());
+    }
+
+    public void update(RiskItem target, RiskItem source) {
+        if (source.getCauseList() != null) {
+            target.setCauseList(source.getCauseList());
+        }
+        if (source.getFailureModeList() != null) {
+            target.setFailureModeList(source.getFailureModeList());
+        }
+        target.setFMEA(new FMEAJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findFMEA(source.getRiskItemPK().getFMEAid()));
+        if (source.getHazardList() != null) {
+            target.setHazardList(source.getHazardList());
+        }
+        if (source.getRiskControlList() != null) {
+            target.setRiskControlList(source.getRiskControlList());
+        }
+        if (source.getRiskControlList1() != null) {
+            target.setRiskControlList1(source.getRiskControlList1());
+        }
+        target.setSequence(source.getSequence());
+        target.setVersion(source.getVersion());
     }
 }

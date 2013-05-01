@@ -15,7 +15,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementServer extends Requirement implements EntityServer {
+public class RequirementServer extends Requirement implements EntityServer<Requirement> {
 
     public RequirementServer(String id, String desc, RequirementSpecNodePK rsn,
             String notes, int requirementType, int requirementStatus) {
@@ -45,17 +45,7 @@ public class RequirementServer extends Requirement implements EntityServer {
                 new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
         Requirement requirement = controller.findRequirement(r.getRequirementPK());
         if (requirement != null) {
-            setUniqueId(requirement.getUniqueId());
-            setNotes(requirement.getNotes());
-            setDescription(requirement.getDescription());
-            setRequirementSpecNode(requirement.getRequirementSpecNode());
-            setRequirementList(requirement.getRequirementList());
-            setRequirementList1(requirement.getRequirementList1());
-            setRequirementStatusId(requirement.getRequirementStatusId());
-            setRequirementTypeId(requirement.getRequirementTypeId());
-            setRiskControlList(requirement.getRiskControlList());
-            setStepList(requirement.getStepList());
-            setRequirementPK(requirement.getRequirementPK());
+            update(this, requirement);
         } else {
             throw new RuntimeException("Unable to find requirement with id: " + r.getRequirementPK());
         }
@@ -66,28 +56,12 @@ public class RequirementServer extends Requirement implements EntityServer {
         if (getRequirementPK() != null && getRequirementPK().getId() > 0) {
             Requirement req = new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).findRequirement(getRequirementPK());
-            req.setNotes(getNotes());
-            req.setDescription(getDescription());
-            req.setRequirementSpecNode(getRequirementSpecNode());
-            req.setRequirementList(getRequirementList());
-            req.setRequirementList1(getRequirementList1());
-            req.setRequirementStatusId(getRequirementStatusId());
-            req.setRequirementTypeId(getRequirementTypeId());
-            req.setRiskControlList(getRiskControlList());
-            req.setStepList(getStepList());
+            update(req, this);
             new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(req);
         } else {
             Requirement req = new Requirement(getUniqueId(), getDescription());
-            req.setNotes(getNotes());
-            req.setDescription(getDescription());
-            req.setRequirementSpecNode(getRequirementSpecNode());
-            req.setRequirementList(getRequirementList());
-            req.setRequirementList1(getRequirementList1());
-            req.setRequirementStatusId(getRequirementStatusId());
-            req.setRequirementTypeId(getRequirementTypeId());
-            req.setRiskControlList(getRiskControlList());
-            req.setStepList(getStepList());
+            update(req, this);
             new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(req);
             setRequirementPK(req.getRequirementPK());
@@ -99,5 +73,17 @@ public class RequirementServer extends Requirement implements EntityServer {
         return new RequirementJpaController(
                 DataBaseManager.getEntityManagerFactory()).findRequirement(
                 getRequirementPK());
+    }
+
+    public void update(Requirement target, Requirement source) {
+        target.setNotes(source.getNotes());
+        target.setDescription(source.getDescription());
+        target.setRequirementSpecNode(source.getRequirementSpecNode());
+        target.setRequirementList(source.getRequirementList());
+        target.setRequirementList1(source.getRequirementList1());
+        target.setRequirementStatusId(source.getRequirementStatusId());
+        target.setRequirementTypeId(source.getRequirementTypeId());
+        target.setRiskControlList(source.getRiskControlList());
+        target.setStepList(source.getStepList());
     }
 }

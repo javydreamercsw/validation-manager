@@ -13,7 +13,8 @@ import java.util.List;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class VMSettingServer extends VmSetting implements EntityServer {
+public class VMSettingServer extends VmSetting
+        implements EntityServer<VmSetting> {
 
     private static List<Object> result;
     private static HashMap parameters = new HashMap();
@@ -21,19 +22,14 @@ public class VMSettingServer extends VmSetting implements EntityServer {
     public VMSettingServer(String setting) {
         VmSetting s = getSetting(setting);
         if (s != null) {
-            setBoolVal(s.getBoolVal());
-            setIntVal(s.getIntVal());
-            setLongVal(s.getLongVal());
-            setSetting(s.getSetting());
-            setStringVal(s.getStringVal());
-            setId(s.getId());
+            update(this, s);
         } else {
-            throw new RuntimeException("Setting: " + setting 
+            throw new RuntimeException("Setting: " + setting
                     + " doesn't exist!");
         }
     }
 
-    public VMSettingServer(String setting, boolean boolVal, int intVal, 
+    public VMSettingServer(String setting, boolean boolVal, int intVal,
             long longVal, String stringVal) {
         super(setting);
         setId(0);
@@ -54,7 +50,7 @@ public class VMSettingServer extends VmSetting implements EntityServer {
     public static VmSetting getSetting(String s) {
         parameters.clear();
         parameters.put("setting", s);
-        result = DataBaseManager.namedQuery("VmSetting.findBySetting", 
+        result = DataBaseManager.namedQuery("VmSetting.findBySetting",
                 parameters);
         if (result.isEmpty()) {
             return null;
@@ -79,20 +75,12 @@ public class VMSettingServer extends VmSetting implements EntityServer {
             VmSetting s = new VmSettingJpaController(
                     DataBaseManager.getEntityManagerFactory())
                     .findVmSetting(getId());
-            s.setBoolVal(getBoolVal());
-            s.setIntVal(getIntVal());
-            s.setLongVal(getLongVal());
-            s.setSetting(getSetting());
-            s.setStringVal(getStringVal());
+            update(s, this);
             new VmSettingJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(s);
         } else {
             VmSetting s = new VmSetting();
-            s.setBoolVal(getBoolVal());
-            s.setIntVal(getIntVal());
-            s.setLongVal(getLongVal());
-            s.setSetting(getSetting());
-            s.setStringVal(getStringVal());
+            update(s, this);
             new VmSettingJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(s);
             setId(s.getId());
@@ -104,5 +92,14 @@ public class VMSettingServer extends VmSetting implements EntityServer {
         return new VmSettingJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findVmSetting(getId());
+    }
+
+    public void update(VmSetting target, VmSetting source) {
+        target.setBoolVal(source.getBoolVal());
+        target.setIntVal(source.getIntVal());
+        target.setLongVal(source.getLongVal());
+        target.setSetting(source.getSetting());
+        target.setStringVal(source.getStringVal());
+        target.setId(source.getId());
     }
 }

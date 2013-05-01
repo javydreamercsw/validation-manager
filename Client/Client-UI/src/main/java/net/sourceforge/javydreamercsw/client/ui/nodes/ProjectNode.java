@@ -1,6 +1,9 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.RequirementServer;
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,5 +38,11 @@ public class ProjectNode extends AbstractRefreshableBeanNode {
         actions.add(new CreateRequirementSpecAction());
         actions.add(new CreateTestProjectAction());
         return actions.toArray(new Action[actions.size()]);
+    }
+
+    @Override
+    public void refreshMyself() {
+        ProjectServer rs = new ProjectServer(getLookup().lookup(Project.class));
+        rs.update((Project) getBean(), rs.getEntity());
     }
 }

@@ -18,21 +18,13 @@ import java.util.Iterator;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestCaseServer extends TestCase implements EntityServer {
+public class TestCaseServer extends TestCase implements EntityServer<TestCase> {
 
     public TestCaseServer(TestCasePK pk) {
         super(pk);
         TestCaseJpaController controller = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
         TestCase temp = controller.findTestCase(getTestCasePK());
-        setActive(temp.getActive());
-        setCreationDate(temp.getCreationDate());
-        setExpectedResults(temp.getExpectedResults());
-        setIsOpen(temp.getIsOpen());
-        setRiskControlList(temp.getRiskControlList());
-        setStepList(temp.getStepList());
-        setSummary(temp.getSummary());
-        setTest(temp.getTest());
-        setVersion(temp.getVersion());
+        update(temp, this);
     }
 
     public TestCaseServer(int testCaseId, short version, Date creationDate) {
@@ -47,47 +39,12 @@ public class TestCaseServer extends TestCase implements EntityServer {
         TestCaseJpaController controller = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
         if (getTestCasePK().getId() > 0) {
             TestCase temp = controller.findTestCase(getTestCasePK());
-            temp.setActive(getActive());
-            temp.setCreationDate(getCreationDate());
-            if(getAuthorId()!=null){
-                temp.setAuthorId(getAuthorId());
-            }
-            if (getExpectedResults() != null) {
-                temp.setExpectedResults(getExpectedResults());
-            }
-
-            if (getRiskControlList() != null) {
-                temp.setRiskControlList(getRiskControlList());
-            }
-            if (getStepList() != null) {
-                temp.setStepList(getStepList());
-            }
-            temp.setIsOpen(getIsOpen());
-            temp.setSummary(getSummary());
-            temp.setTest(getTest());
-            temp.setVersion(getVersion());
+             update(temp, this);
             controller.edit(temp);
         } else {
             TestCase temp = new TestCase(getTestCasePK(), getVersion(), getCreationDate());
-            temp.setActive(getActive());
-            temp.setIsOpen(getIsOpen());
-            if(getAuthorId()!=null){
-                temp.setAuthorId(getAuthorId());
-            }
-            if (getExpectedResults() != null) {
-                temp.setExpectedResults(getExpectedResults());
-            }
-
-            if (getRiskControlList() != null) {
-                temp.setRiskControlList(getRiskControlList());
-            }
-            if (getStepList() != null) {
-                temp.setStepList(getStepList());
-            }
-            temp.setSummary(getSummary());
-            temp.setTest(getTest());
-            controller.create(temp);
-            setTestCasePK(temp.getTestCasePK());
+            update(temp, this);
+            update(this, temp);
         }
         return getTestCasePK().getId();
     }
@@ -109,5 +66,18 @@ public class TestCaseServer extends TestCase implements EntityServer {
         return new TestCaseJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findTestCase(getTestCasePK());
+    }
+
+    public void update(TestCase target, TestCase source) {
+        target.setActive(source.getActive());
+        target.setCreationDate(source.getCreationDate());
+        target.setAuthorId(source.getAuthorId());
+        target.setExpectedResults(source.getExpectedResults());
+        target.setRiskControlList(source.getRiskControlList());
+        target.setStepList(source.getStepList());
+        target.setIsOpen(source.getIsOpen());
+        target.setSummary(source.getSummary());
+        target.setTest(source.getTest());
+        target.setVersion(source.getVersion());
     }
 }

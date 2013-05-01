@@ -45,12 +45,20 @@ public abstract class AbstractRefreshableBeanNode extends BeanNode
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                //Refresh children
                 if (factory != null) {
                     factory.refresh();
                 }
+                //Refresh bean
+                refreshMyself();
             }
         });
     }
+
+    /**
+     * Refresh the node itself.
+     */
+    public abstract void refreshMyself();
 
     @Override
     public Action[] getActions(boolean context) {
