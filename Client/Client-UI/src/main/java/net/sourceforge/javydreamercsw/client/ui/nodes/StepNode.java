@@ -1,6 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.Step;
+import com.validation.manager.core.server.core.StepServer;
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,5 +34,11 @@ class StepNode extends AbstractRefreshableBeanNode {
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new EditTestStepAction());
         return actions.toArray(new Action[actions.size()]);
+    }
+
+    @Override
+    public void refreshMyself() {
+        StepServer rs = new StepServer(getLookup().lookup(Step.class));
+        rs.update((Step) getBean(), rs.getEntity());
     }
 }

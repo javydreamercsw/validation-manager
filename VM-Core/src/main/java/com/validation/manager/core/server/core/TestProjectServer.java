@@ -11,11 +11,16 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestProjectServer extends TestProject implements EntityServer {
+public class TestProjectServer extends TestProject
+        implements EntityServer<TestProject> {
 
     public TestProjectServer(String name, boolean active) {
         super(name, active);
         setId(0);
+    }
+    
+    public TestProjectServer(TestProject tp){
+        update(this, tp);
     }
 
     @Override
@@ -23,18 +28,14 @@ public class TestProjectServer extends TestProject implements EntityServer {
         TestProject tp;
         if (getId() > 0) {
             tp = new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).findTestProject(getId());
-            tp.setActive(getActive());
-            tp.setName(getName());
-            tp.setNotes(getNotes());
+            update(tp, this);
             new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).edit(tp);
         } else {
             tp = new TestProject(getName(), getActive());
+            update(tp, this);
             new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(tp);
-            setId(tp.getId());
         }
-        setProjectList(tp.getProjectList());
-        setTestPlanList(tp.getTestPlanList());
-        setUserTestProjectRoleList(tp.getUserTestProjectRoleList());
+        update(this, tp);
         return getId();
     }
 
@@ -42,5 +43,11 @@ public class TestProjectServer extends TestProject implements EntityServer {
         return new TestProjectJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findTestProject(getId());
+    }
+
+    public void update(TestProject target, TestProject source) {
+        target.setActive(source.getActive());
+        target.setName(source.getName());
+        target.setNotes(source.getNotes());
     }
 }

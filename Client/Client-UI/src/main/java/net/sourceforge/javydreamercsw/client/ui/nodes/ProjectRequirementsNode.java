@@ -20,4 +20,9 @@ public class ProjectRequirementsNode extends AbstractRefreshableBeanNode {
     public String getName() {
         return "Requirements";
     }
+
+    @Override
+    public void refreshMyself() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

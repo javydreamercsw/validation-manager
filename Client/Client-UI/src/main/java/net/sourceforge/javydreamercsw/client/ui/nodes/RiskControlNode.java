@@ -1,6 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.fmea.RiskControl;
+import com.validation.manager.core.server.core.RiskControlServer;
 import java.beans.IntrospectionException;
 import org.openide.util.lookup.InstanceContent;
 
@@ -20,5 +21,11 @@ class RiskControlNode extends AbstractRefreshableBeanNode {
     @Override
     public String getName() {
         return "" + getLookup().lookup(RiskControl.class).getRiskControlPK().getId();
+    }
+
+    @Override
+    public void refreshMyself() {
+        RiskControlServer rs = new RiskControlServer(getLookup().lookup(RiskControl.class).getRiskControlPK());
+        rs.update((RiskControl) getBean(), rs.getEntity());
     }
 }

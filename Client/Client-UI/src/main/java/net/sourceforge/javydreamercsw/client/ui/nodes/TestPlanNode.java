@@ -1,6 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.server.core.TestPlanServer;
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,12 +26,18 @@ class TestPlanNode extends AbstractRefreshableBeanNode {
     public String getName() {
         return "Test Plan #" + getLookup().lookup(TestPlan.class).getTestPlanPK().getId();
     }
-    
+
     @Override
     public Action[] getActions(boolean b) {
         List<Action> actions = new ArrayList<Action>();
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateTestAction());
         return actions.toArray(new Action[actions.size()]);
+    }
+
+    @Override
+    public void refreshMyself() {
+        TestPlanServer rs = new TestPlanServer(getLookup().lookup(TestPlan.class));
+        rs.update((TestPlan) getBean(), rs.getEntity());
     }
 }
