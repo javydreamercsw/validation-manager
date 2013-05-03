@@ -14,7 +14,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class StepServer extends Step implements EntityServer<Step> {
+public class StepServer extends Step implements EntityServer {
 
     public StepServer(TestCase tc, int stepSequence, String text) {
         super(new StepPK(tc.getTestCasePK().getId(),
@@ -27,22 +27,34 @@ public class StepServer extends Step implements EntityServer<Step> {
 
     public StepServer(Step step) {
         super(step.getStepPK());
-        update(this, step);
+        setNotes(step.getNotes());
+        setRequirementList(step.getRequirementList());
+        setStepSequence(step.getStepSequence());
+        setTestCase(step.getTestCase());
+        setText(step.getText());
+        setVmExceptionList(step.getVmExceptionList());
     }
 
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
-        StepJpaController controller = new StepJpaController(
-                DataBaseManager.getEntityManagerFactory());
+        StepJpaController controller = new StepJpaController(DataBaseManager.getEntityManagerFactory());
         if (getStepPK().getId() > 0) {
             Step temp = controller.findStep(getStepPK());
-            update(temp, this);
+            temp.setNotes(getNotes());
+            temp.setRequirementList(getRequirementList());
+            temp.setStepSequence(getStepSequence());
+            temp.setTestCase(getTestCase());
+            temp.setText(getText());
+            temp.setVmExceptionList(getVmExceptionList());
             controller.edit(temp);
         } else {
             Step temp = new Step(getStepPK(), getStepSequence(), getText());
-            update(temp, this);
+            temp.setNotes(getNotes());
+            temp.setRequirementList(getRequirementList());
+            temp.setTestCase(getTestCase());
+            temp.setVmExceptionList(getVmExceptionList());
             controller.create(temp);
-            update(this, temp);
+            setStepPK(temp.getStepPK());
         }
         return getStepPK().getId();
     }
@@ -59,15 +71,5 @@ public class StepServer extends Step implements EntityServer<Step> {
     public Step getEntity() {
         return new StepJpaController(DataBaseManager.getEntityManagerFactory())
                 .findStep(getStepPK());
-    }
-
-    public void update(Step target, Step source) {
-        target.setExpectedResult(source.getExpectedResult());
-        target.setNotes(source.getNotes());
-        target.setRequirementList(source.getRequirementList());
-        target.setStepSequence(source.getStepSequence());
-        target.setTestCase(source.getTestCase());
-        target.setText(source.getText());
-        target.setVmExceptionList(source.getVmExceptionList());
     }
 }

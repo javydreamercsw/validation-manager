@@ -10,48 +10,46 @@ import com.validation.manager.core.db.fmea.Cause;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class CauseServer extends Cause implements EntityServer<Cause> {
-
+public class CauseServer extends Cause implements EntityServer {
+    
     public CauseServer(String name, String description) {
         super(name, description);
         setId(0);
     }
-
+    
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
         if (getId() > 0) {
             Cause c = new CauseJpaController(
                     DataBaseManager.getEntityManagerFactory())
                     .findCause(getId());
-            update(c, this);
+            c.setDescription(getDescription());
+            c.setName(getName());
+            if (getRiskItemList() != null) {
+                c.setRiskItemList(getRiskItemList());
+            }
             new CauseJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(c);
         } else {
             Cause c = new Cause();
-            update(c, this);
+            c.setDescription(getDescription());
+            c.setName(getName());
+            c.setRiskItemList(getRiskItemList());
             new CauseJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(c);
             setId(c.getId());
         }
         return getId();
     }
-
+    
     public static boolean deleteCause(Cause c) throws NonexistentEntityException {
         new CauseJpaController(
                 DataBaseManager.getEntityManagerFactory()).destroy(c.getId());
         return true;
     }
-
+    
     public Cause getEntity() {
         return new CauseJpaController(
                 DataBaseManager.getEntityManagerFactory()).findCause(getId());
-    }
-
-    public void update(Cause target, Cause source) {
-        target.setDescription(source.getDescription());
-        target.setName(source.getName());
-        if (source.getRiskItemList() != null) {
-            target.setRiskItemList(source.getRiskItemList());
-        }
     }
 }

@@ -21,12 +21,4 @@ public interface EntityServer<T> {
      * @return
      */
     public T getEntity();
-
-    /**
-     * Update the target with the source object.
-     *
-     * @param target object to update.
-     * @param source object to update from.
-     */
-    public void update(T target, T source);
 }

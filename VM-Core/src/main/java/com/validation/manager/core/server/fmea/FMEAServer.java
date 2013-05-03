@@ -14,31 +14,39 @@ import java.util.logging.Logger;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class FMEAServer extends FMEA implements EntityServer<FMEA> {
-
+    
     public FMEAServer(String name) {
         super(name);
         setId(0);
     }
-
+    
     @Override
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         if (getId() > 0) {
             FMEA fmea = new FMEAJpaController(
                     DataBaseManager.getEntityManagerFactory()).findFMEA(getId());
-            update(fmea, this);
+            if (getFMEAList() != null) {
+                fmea.setFMEAList(getFMEAList());
+            }
+            fmea.setParent(getParent());
+            if (getRiskItemList() != null) {
+                fmea.setRiskItemList(getRiskItemList());
+            }
             new FMEAJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(fmea);
         } else {
             FMEA fmea = new FMEA(getName());
-            update(fmea, this);
+            fmea.setFMEAList(getFMEAList());
+            fmea.setParent(getParent());
+            fmea.setRiskItemList(getRiskItemList());
             new FMEAJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(fmea);
             setId(fmea.getId());
         }
         return getId();
     }
-
+    
     public static boolean deleteFMEA(int id) {
         try {
             new FMEAJpaController(
@@ -49,15 +57,9 @@ public class FMEAServer extends FMEA implements EntityServer<FMEA> {
         }
         return false;
     }
-
+    
     public FMEA getEntity() {
         return new FMEAJpaController(
                 DataBaseManager.getEntityManagerFactory()).findFMEA(getId());
-    }
-
-    public void update(FMEA target, FMEA source) {
-        target.setFMEAList(source.getFMEAList());
-        target.setParent(source.getParent());
-        target.setRiskItemList(source.getRiskItemList());
     }
 }

@@ -23,12 +23,16 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
             Hazard h = new HazardJpaController(
                     DataBaseManager.getEntityManagerFactory())
                     .findHazard(getId());
-            update(h, this);
+            h.setDescription(getDescription());
+            h.setName(getName());
+            h.setRiskItemList(getRiskItemList());
             new HazardJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(h);
         } else {
             Hazard h = new Hazard();
-            update(h, this);
+            h.setDescription(getDescription());
+            h.setName(getName());
+            h.setRiskItemList(getRiskItemList());
             new HazardJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(h);
             setId(h.getId());
@@ -36,7 +40,7 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
         return getId();
     }
 
-    public static boolean deleteHazard(Hazard h)
+    public static boolean deleteHazard(Hazard h) 
             throws NonexistentEntityException {
         new HazardJpaController(
                 DataBaseManager.getEntityManagerFactory()).destroy(h.getId());
@@ -46,11 +50,5 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
     public Hazard getEntity() {
         return new HazardJpaController(
                 DataBaseManager.getEntityManagerFactory()).findHazard(getId());
-    }
-
-    public void update(Hazard target, Hazard source) {
-        target.setDescription(source.getDescription());
-        target.setName(source.getName());
-        target.setRiskItemList(source.getRiskItemList());
     }
 }

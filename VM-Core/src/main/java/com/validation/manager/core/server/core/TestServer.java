@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestServer extends Test implements EntityServer<Test> {
+public class TestServer extends Test implements EntityServer {
 
     public TestServer(String name, String purpose, String scope) {
         super(name, purpose, scope);
@@ -80,9 +80,5 @@ public class TestServer extends Test implements EntityServer<Test> {
 
     public Test getEntity() {
         return new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(getId());
-    }
-
-    public void update(Test target, Test source) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
