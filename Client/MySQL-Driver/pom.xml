@@ -9,7 +9,6 @@
 
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>MySQL-Driver</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
     <name>MySQL Driver</name>
@@ -39,12 +38,10 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-db</artifactId>
             <version>${netbeans.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <artifactId>org-openide-windows</artifactId>
             <groupId>org.netbeans.api</groupId>
-            <type>jar</type>
             <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
