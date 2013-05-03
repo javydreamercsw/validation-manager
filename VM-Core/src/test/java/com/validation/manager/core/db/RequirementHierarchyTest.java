@@ -5,6 +5,7 @@ import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.SpecLevelServer;
 import com.validation.manager.test.AbstractVMTestCase;
@@ -108,6 +109,20 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
+        }
+        System.out.println("Done!");
+        System.out.println("Adding requirements to requirements");
+        int count = 0;
+        for (Requirement req : requirements) {
+            try {
+                req.getRequirementList().add(requirements.get(requirementAmount - count - 1));
+                req.getRequirementList1().add(requirements.get(count));
+                new RequirementServer(req).write2DB();
+                count++;
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
         }
         System.out.println("Done!");
     }
