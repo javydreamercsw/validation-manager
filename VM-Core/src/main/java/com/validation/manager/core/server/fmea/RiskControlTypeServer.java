@@ -24,12 +24,18 @@ public class RiskControlTypeServer extends RiskControlType
             NonexistentEntityException, Exception {
         if (getId() > 0) {
             RiskControlType rct = getEntity();
-            update(rct, this);
+            rct.setName(getName());
+            rct.setDescription(getDescription());
+            if (getRiskControlList() != null) {
+                rct.setRiskControlList(getRiskControlList());
+            }
             new RiskControlTypeJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(rct);
         } else {
             RiskControlType rct = new RiskControlType();
-            update(rct, this);
+            rct.setName(getName());
+            rct.setDescription(getDescription());
+            rct.setRiskControlList(getRiskControlList());
             new RiskControlTypeJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(rct);
             setId(rct.getId());
@@ -45,16 +51,8 @@ public class RiskControlTypeServer extends RiskControlType
     }
 
     public RiskControlType getEntity() {
-        return new RiskControlTypeJpaController(
+        return new RiskControlTypeJpaController( 
                 DataBaseManager.getEntityManagerFactory())
                 .findRiskControlType(getId());
-    }
-
-    public void update(RiskControlType target, RiskControlType source) {
-        target.setName(source.getName());
-        target.setDescription(source.getDescription());
-        if (source.getRiskControlList() != null) {
-            target.setRiskControlList(source.getRiskControlList());
-        }
     }
 }

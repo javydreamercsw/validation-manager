@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron<javier.ortiz.78@gmail.com>
  */
-public class VMIdServer extends VmId implements EntityServer<VmId> {
+public class VMIdServer extends VmId implements EntityServer{
 
     private static final long serialVersionUID = 1L;
 
@@ -25,7 +25,7 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
                 DataBaseManager.getEntityManagerFactory());
         VmId vmId = controller.findVmId(id);
         if (vmId != null) {
-            update(this, vmId);
+            fill(vmId);
         } else {
             throw new VMException("VMId with id: " + id + " not found!");
         }
@@ -34,6 +34,12 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
     public VMIdServer(String tablename, int lastId) {
         super(tablename, lastId);
         setId(0);
+    }
+
+    private void fill(VmId vmId) {
+        setId(vmId.getId());
+        setLastId(vmId.getLastId());
+        setTableName(vmId.getTableName());
     }
 
     //write to db
@@ -110,11 +116,5 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
     public VmId getEntity() {
         return new VmIdJpaController(
                 DataBaseManager.getEntityManagerFactory()).findVmId(getId());
-    }
-
-    public void update(VmId target, VmId source) {
-        target.setId(source.getId());
-        target.setLastId(source.getLastId());
-        target.setTableName(source.getTableName());
     }
 }

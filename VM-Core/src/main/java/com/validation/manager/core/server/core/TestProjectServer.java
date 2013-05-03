@@ -11,31 +11,26 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestProjectServer extends TestProject
-        implements EntityServer<TestProject> {
+public class TestProjectServer extends TestProject implements EntityServer {
 
     public TestProjectServer(String name, boolean active) {
         super(name, active);
         setId(0);
     }
-    
-    public TestProjectServer(TestProject tp){
-        update(this, tp);
-    }
 
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
-        TestProject tp;
         if (getId() > 0) {
-            tp = new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).findTestProject(getId());
-            update(tp, this);
+            TestProject tp = new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).findTestProject(getId());
+            tp.setActive(getActive());
+            tp.setName(getName());
+            tp.setNotes(getNotes());
             new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).edit(tp);
         } else {
-            tp = new TestProject(getName(), getActive());
-            update(tp, this);
+            TestProject tp = new TestProject(getName(), getActive());
             new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(tp);
+            setId(tp.getId());
         }
-        update(this, tp);
         return getId();
     }
 
@@ -43,11 +38,5 @@ public class TestProjectServer extends TestProject
         return new TestProjectJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findTestProject(getId());
-    }
-
-    public void update(TestProject target, TestProject source) {
-        target.setActive(source.getActive());
-        target.setName(source.getName());
-        target.setNotes(source.getNotes());
     }
 }

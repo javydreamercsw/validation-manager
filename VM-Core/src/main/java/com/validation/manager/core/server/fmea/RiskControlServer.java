@@ -28,12 +28,28 @@ public class RiskControlServer extends RiskControl
             RiskControl rc = new RiskControlJpaController(
                     DataBaseManager.getEntityManagerFactory())
                     .findRiskControl(getRiskControlPK());
-            update(rc, this);
+            if (getRequirementList() != null) {
+                rc.setRequirementList(getRequirementList());
+            }
+            rc.setRiskControlType(getRiskControlType());
+            if (getRiskItemList() != null) {
+                rc.setRiskItemList(getRiskItemList());
+            }
+            if (getRiskItemList1() != null) {
+                rc.setRiskItemList1(getRiskItemList1());
+            }
+            if (getTestCaseList() != null) {
+                rc.setTestCaseList(getTestCaseList());
+            }
             new RiskControlJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(rc);
         } else {
             RiskControl rc = new RiskControl();
-            update(rc, this);
+            rc.setRequirementList(getRequirementList());
+            rc.setRiskControlType(getRiskControlType());
+            rc.setRiskItemList(getRiskItemList());
+            rc.setRiskItemList1(getRiskItemList1());
+            rc.setTestCaseList(getTestCaseList());
             new RiskControlJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(rc);
             setRiskControlPK(rc.getRiskControlPK());
@@ -51,15 +67,7 @@ public class RiskControlServer extends RiskControl
 
     public RiskControl getEntity() {
         return new RiskControlJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                    DataBaseManager.getEntityManagerFactory())
                 .findRiskControl(getRiskControlPK());
-    }
-
-    public void update(RiskControl target, RiskControl source) {
-        target.setRequirementList(source.getRequirementList());
-        target.setRiskControlType(source.getRiskControlType());
-        target.setRiskItemList(source.getRiskItemList());
-        target.setRiskItemList1(source.getRiskItemList1());
-        target.setTestCaseList(source.getTestCaseList());
     }
 }

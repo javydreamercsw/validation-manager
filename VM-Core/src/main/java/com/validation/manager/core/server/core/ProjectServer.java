@@ -3,9 +3,12 @@ package com.validation.manager.core.server.core;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,7 +16,7 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class ProjectServer extends Project implements EntityServer<Project> {
+public class ProjectServer extends Project implements EntityServer {
 
     public ProjectServer(String name, String notes) {
         super(name);
@@ -22,27 +25,42 @@ public class ProjectServer extends Project implements EntityServer<Project> {
     }
 
     public ProjectServer(Project p) {
-        Project project = new ProjectJpaController(
+        Project product = new ProjectJpaController(
                 DataBaseManager.getEntityManagerFactory()).findProject(p.getId());
-        update(this, project);
+        setNotes(product.getNotes());
+        setName(product.getName());
+        setId(product.getId());
+        setRequirementSpecList(product.getRequirementSpecList());
+        setTestProjectList(product.getTestProjectList());
     }
 
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
-        Project p;
         if (getId() > 0) {
-            p = new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(getId());
-            update(p, this);
+            Project p = new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(getId());
+            p.setNotes(getNotes());
+            p.setName(getName());
+            p.setParentProjectId(getParentProjectId());
+            p.setProjectList(getProjectList() == null
+                    ? new ArrayList<Project>() : getProjectList());
+            p.setRequirementSpecList(getRequirementSpecList() == null
+                    ? new ArrayList<RequirementSpec>() : getRequirementSpecList());
+            p.setTestProjectList(getTestProjectList() == null
+                    ? new ArrayList<TestProject>() : getTestProjectList());
             new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).edit(p);
         } else {
-            p = new Project(getName());
-            update(p, this);
+            Project p = new Project(getName());
+            p.setNotes(getNotes());
+            p.setParentProjectId(getParentProjectId());
+            p.setProjectList(getProjectList() == null
+                    ? new ArrayList<Project>() : getProjectList());
+            p.setRequirementSpecList(getRequirementSpecList() == null
+                    ? new ArrayList<RequirementSpec>() : getRequirementSpecList());
+            p.setTestProjectList(getTestProjectList() == null
+                    ? new ArrayList<TestProject>() : getTestProjectList());
             new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(p);
             setId(p.getId());
         }
-        setProjectList(p.getProjectList());
-        setRequirementSpecList(p.getRequirementSpecList());
-        setTestProjectList(p.getTestProjectList());
         return getId();
     }
 
@@ -58,14 +76,5 @@ public class ProjectServer extends Project implements EntityServer<Project> {
 
     public Project getEntity() {
         return new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(getId());
-    }
-
-    public void update(Project target, Project source) {
-        target.setNotes(source.getNotes());
-        target.setName(source.getName());
-        target.setParentProjectId(source.getParentProjectId());
-        target.setProjectList(source.getProjectList());
-        target.setRequirementSpecList(source.getRequirementSpecList());
-        target.setTestProjectList(source.getTestProjectList());
     }
 }

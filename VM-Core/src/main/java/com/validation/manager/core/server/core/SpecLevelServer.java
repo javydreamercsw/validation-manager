@@ -1,3 +1,7 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
@@ -11,7 +15,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel> {
+public class SpecLevelServer extends SpecLevel implements EntityServer {
 
     public SpecLevelServer(String name, String description) {
         super(name, description);
@@ -24,12 +28,20 @@ public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel
         if (getId() > 0) {
             SpecLevel sl = new SpecLevelJpaController(
                     DataBaseManager.getEntityManagerFactory()).findSpecLevel(getId());
-            update(sl, this);
+            sl.setDescription(getDescription());
+            sl.setName(getName());
+            if (getRequirementSpecList() != null) {
+                sl.setRequirementSpecList(getRequirementSpecList());
+            }
             new SpecLevelJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(sl);
         } else {
             SpecLevel sl = new SpecLevel();
-            update(sl, this);
+            sl.setDescription(getDescription());
+            sl.setName(getName());
+            if (getRequirementSpecList() != null) {
+                sl.setRequirementSpecList(getRequirementSpecList());
+            }
             new SpecLevelJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(sl);
             setId(sl.getId());
@@ -46,13 +58,5 @@ public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel
     public SpecLevel getEntity() {
         return new SpecLevelJpaController(
                 DataBaseManager.getEntityManagerFactory()).findSpecLevel(getId());
-    }
-
-    public void update(SpecLevel target, SpecLevel source) {
-        target.setDescription(source.getDescription());
-        target.setName(source.getName());
-        if (source.getRequirementSpecList() != null) {
-            target.setRequirementSpecList(source.getRequirementSpecList());
-        }
     }
 }
