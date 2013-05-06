@@ -5,13 +5,20 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.SpecLevel;
+import java.awt.Component;
 import java.awt.Frame;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
 import net.sourceforge.javydreamercsw.client.ui.DataBaseTool;
 
 /**
@@ -20,8 +27,15 @@ import net.sourceforge.javydreamercsw.client.ui.DataBaseTool;
  */
 public abstract class AbstractCreationDialog extends JDialog {
 
+    private static ResourceBundle rb =
+            ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
+
     public AbstractCreationDialog(Frame owner, boolean modal) {
         super(owner, modal);
+    }
+
+    protected String internationalize(String string) {
+        return rb.containsKey(string) ? rb.getString(string) : string;
     }
 
     protected SpecLevel getSelectedSpecLevel(JComboBox level) {
@@ -61,21 +75,16 @@ public abstract class AbstractCreationDialog extends JDialog {
         }
         return rt;
     }
-    
+
     protected RequirementStatus getSelectedRequirementStatus(JComboBox status) {
         RequirementStatus rs = null;
         if (status.getSelectedIndex() > -1) {
             if (DataBaseTool.getEmf() != null) {
-                List<Object> requirementTypeList = DataBaseManager.createdQuery(
-                        "select rt from RequirementStatus rt where rt.status='"
-                        + status.getSelectedItem() + "'");
-                for (Iterator<Object> it2 = requirementTypeList.iterator(); it2.hasNext();) {
-                    RequirementStatus temp = ((RequirementStatus) it2.next());
-                    if (temp.getStatus().equals(status.getSelectedItem().toString())) {
-                        rs = temp;
-                        break;
-                    }
-                }
+                Map<String, Object> parameters = new HashMap<String, Object>();
+                parameters.put("id",
+                        ((RequirementStatus) status.getSelectedItem()).getId());
+                rs = (RequirementStatus) DataBaseManager.namedQuery(
+                        "RequirementStatus.findById", parameters).get(0);
             }
         }
         return rs;
@@ -115,7 +124,7 @@ public abstract class AbstractCreationDialog extends JDialog {
         }
         for (Iterator<Project> it3 = projects.iterator(); it3.hasNext();) {
             Project proj = it3.next();
-            names.add(proj.getName());
+            names.add(internationalize(proj.getName()));
         }
         parent.setModel(new DefaultComboBoxModel(names.toArray(new String[projects.size() + (addNull ? 1 : 0)])));
     }
@@ -133,7 +142,7 @@ public abstract class AbstractCreationDialog extends JDialog {
         List<String> names = new ArrayList<String>();
         for (Iterator<SpecLevel> it3 = levels.iterator(); it3.hasNext();) {
             SpecLevel lvl = it3.next();
-            names.add(lvl.getName());
+            names.add(internationalize(lvl.getName()));
         }
         level.setModel(new DefaultComboBoxModel(names.toArray(new String[levels.size()])));
     }
@@ -151,12 +160,21 @@ public abstract class AbstractCreationDialog extends JDialog {
         List<String> names = new ArrayList<String>();
         for (Iterator<RequirementType> it3 = types.iterator(); it3.hasNext();) {
             RequirementType lvl = it3.next();
-            names.add(lvl.getName());
+            names.add(internationalize(lvl.getName()));
         }
         type.setModel(new DefaultComboBoxModel(names.toArray(new String[types.size()])));
     }
 
     protected void populateRequirementStatusList(JComboBox status) {
+        status.setRenderer(new ListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList list,
+                    Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                RequirementStatus rs = (RequirementStatus) value;
+                return new JLabel(rb.containsKey(rs.getStatus())
+                        ? rb.getString(rs.getStatus()) : rs.getStatus());
+            }
+        });
         List<RequirementStatus> statusses = new ArrayList<RequirementStatus>();
         if (DataBaseTool.getEmf() != null) {
             List<Object> projectList = DataBaseManager.createdQuery(
@@ -166,11 +184,6 @@ public abstract class AbstractCreationDialog extends JDialog {
                 statusses.add(temp);
             }
         }
-        List<String> names = new ArrayList<String>();
-        for (Iterator<RequirementStatus> it3 = statusses.iterator(); it3.hasNext();) {
-            RequirementStatus lvl = it3.next();
-            names.add(lvl.getStatus());
-        }
-        status.setModel(new DefaultComboBoxModel(names.toArray(new String[statusses.size()])));
+        status.setModel(new DefaultComboBoxModel(statusses.toArray(new RequirementStatus[statusses.size()])));
     }
 }

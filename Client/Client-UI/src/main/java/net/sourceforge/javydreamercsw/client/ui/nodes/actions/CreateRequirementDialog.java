@@ -4,6 +4,7 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.server.core.RequirementServer;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
+import org.openide.util.Utilities;
 
 /**
  *
@@ -150,7 +151,7 @@ public class CreateRequirementDialog extends AbstractCreationDialog {
     private void saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveActionPerformed
         RequirementServer rs = new RequirementServer(uniqueId.getText(),
                 description.getText(),
-                Lookup.getDefault().lookup(RequirementSpecNode.class).getRequirementSpecNodePK(),
+                Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class).getRequirementSpecNodePK(),
                 notes.getText(),
                 getSelectedRequirementType(type).getId(),
                 getSelectedRequirementStatus(status).getId());

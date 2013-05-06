@@ -62,13 +62,13 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
             @Override
             public void removeElementAt(int index) {
                 requirements.remove(index);
-                super.removeElementAt(index); //To change body of generated methods, choose Tools | Templates.
+                super.removeElementAt(index);
             }
 
             @Override
             public boolean removeElement(Object obj) {
                 requirements.remove((Requirement) obj);
-                return super.removeElement(obj); //To change body of generated methods, choose Tools | Templates.
+                return super.removeElement(obj);
             }
 
             @Override
@@ -76,7 +76,7 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                 for (int i = fromIndex; i <= toIndex; i++) {
                     requirements.remove(i);
                 }
-                super.removeRange(fromIndex, toIndex); //To change body of generated methods, choose Tools | Templates.
+                super.removeRange(fromIndex, toIndex);
             }
         });
         selection.setCellRenderer(new ListCellRenderer() {
