@@ -128,7 +128,7 @@
     </repositories>
     
     <modules>
-        <module>Validation-Manager-Web</module>
+        <!--<module>Validation-Manager-Web</module>-->
         <module>VM-Core</module>
         <module>Client</module>
     </modules>
