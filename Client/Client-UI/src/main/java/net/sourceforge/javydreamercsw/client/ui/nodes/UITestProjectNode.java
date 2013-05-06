@@ -38,7 +38,7 @@ class UITestProjectNode extends AbstractRefreshableBeanNode {
     @Override
     public void refreshMyself() {
         
-        TestProjectServer rs = new TestProjectServer(getLookup().lookup(TestProject.class));
-        rs.update((TestProject) getBean(), rs.getEntity());
+//        TestProjectServer rs = new TestProjectServer(getLookup().lookup(TestProject.class));
+//        rs.update((TestProject) getBean(), rs.getEntity());
     }
 }

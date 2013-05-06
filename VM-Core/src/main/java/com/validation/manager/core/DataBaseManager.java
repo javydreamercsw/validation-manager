@@ -95,7 +95,7 @@ public class DataBaseManager {
                     field.setAccessible(true);
                     TableGenerator annotation = field.getAnnotation(TableGenerator.class);
                     field.setAccessible(false);
-                    HashMap<String, Object> parameters = new HashMap<String, Object>();
+                    Map<String, Object> parameters = new HashMap<String, Object>();
                     String tableName = annotation.pkColumnValue();
                     parameters.put("tableName", tableName);
                     if (DataBaseManager.namedQuery("VmId.findByTableName", parameters, false).isEmpty()) {
@@ -252,7 +252,7 @@ public class DataBaseManager {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<Object> createdQuery(String query, HashMap<String, Object> parameters) {
+    public static List<Object> createdQuery(String query, Map<String, Object> parameters) {
         getEntityManager().getTransaction().begin();
         Query q = getEntityManager().createQuery(query);
         if (parameters != null) {
@@ -321,7 +321,7 @@ public class DataBaseManager {
      * @param parameters query parameters
      * @return query result
      */
-    public static List<Object> namedQuery(String query, HashMap<String, Object> parameters) {
+    public static List<Object> namedQuery(String query, Map<String, Object> parameters) {
         return namedQuery(query, parameters, false);
     }
 
