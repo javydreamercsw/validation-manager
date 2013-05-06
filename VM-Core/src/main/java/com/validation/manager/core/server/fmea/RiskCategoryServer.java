@@ -13,12 +13,12 @@ import com.validation.manager.core.db.fmea.RiskCategory;
  */
 public class RiskCategoryServer extends RiskCategory
         implements EntityServer<RiskCategory> {
-    
+
     public RiskCategoryServer(String name, int min, int max) {
         super(name, min, max);
         setId(0);
     }
-    
+
     @Override
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
@@ -26,8 +26,7 @@ public class RiskCategoryServer extends RiskCategory
             RiskCategory rc = new RiskCategoryJpaController(
                     DataBaseManager.getEntityManagerFactory())
                     .findRiskCategory(getId());
-            rc.setMaximum(getMaximum());
-            rc.setMinimum(getMinimum());
+            update(rc, this);
             new RiskCategoryJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(rc);
         } else {
@@ -39,16 +38,21 @@ public class RiskCategoryServer extends RiskCategory
         }
         return getId();
     }
-    
+
     public static boolean deleteRiskCategory(RiskCategory rc)
             throws IllegalOrphanException, NonexistentEntityException {
         new RiskCategoryJpaController(
                 DataBaseManager.getEntityManagerFactory()).destroy(rc.getId());
         return true;
     }
-    
+
     public RiskCategory getEntity() {
         return new RiskCategoryJpaController(
                 DataBaseManager.getEntityManagerFactory()).findRiskCategory(getId());
+    }
+
+    public void update(RiskCategory target, RiskCategory source) {
+        target.setMaximum(source.getMaximum());
+        target.setMinimum(source.getMinimum());
     }
 }

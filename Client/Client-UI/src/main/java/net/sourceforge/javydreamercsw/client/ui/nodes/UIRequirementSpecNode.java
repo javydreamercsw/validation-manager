@@ -24,7 +24,7 @@ public class UIRequirementSpecNode extends AbstractRefreshableBeanNode {
 
     @Override
     public void refreshMyself() {
-//        RequirementSpecServer rs = new RequirementSpecServer(getLookup().lookup(RequirementSpec.class));
-//        rs.update((RequirementSpec) getBean(), rs.getEntity());
+        RequirementSpecServer rs = new RequirementSpecServer(getLookup().lookup(RequirementSpec.class));
+        rs.update((RequirementSpec) getBean(), rs.getEntity());
     }
 }

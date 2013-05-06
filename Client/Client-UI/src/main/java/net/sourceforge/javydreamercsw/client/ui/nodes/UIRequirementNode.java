@@ -1,6 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.server.core.RequirementServer;
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +37,7 @@ public class UIRequirementNode extends AbstractRefreshableBeanNode {
 
     @Override
     public void refreshMyself() {
-//        RequirementServer rs = new RequirementServer(getLookup().lookup(Requirement.class));
-//        rs.update((Requirement) getBean(), rs.getEntity());
+        RequirementServer rs = new RequirementServer(getLookup().lookup(Requirement.class));
+        rs.update((Requirement) getBean(), rs.getEntity());
     }
 }

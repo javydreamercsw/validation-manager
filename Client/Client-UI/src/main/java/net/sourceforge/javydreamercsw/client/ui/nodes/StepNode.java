@@ -38,7 +38,7 @@ class StepNode extends AbstractRefreshableBeanNode {
 
     @Override
     public void refreshMyself() {
-//        StepServer rs = new StepServer(getLookup().lookup(Step.class));
-//        rs.update((Step) getBean(), rs.getEntity());
+        StepServer rs = new StepServer(getLookup().lookup(Step.class));
+        rs.update((Step) getBean(), rs.getEntity());
     }
 }

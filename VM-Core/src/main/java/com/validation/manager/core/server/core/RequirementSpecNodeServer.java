@@ -12,7 +12,8 @@ import java.util.ArrayList;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementSpecNodeServer extends RequirementSpecNode implements EntityServer {
+public class RequirementSpecNodeServer extends RequirementSpecNode
+        implements EntityServer<RequirementSpecNode> {
 
     public RequirementSpecNodeServer(RequirementSpec rs, String name,
             String description, String scope) {
@@ -31,38 +32,41 @@ public class RequirementSpecNodeServer extends RequirementSpecNode implements En
                 .findRequirementSpec(rs.getRequirementSpecPK()));
     }
 
+    public RequirementSpecNodeServer(RequirementSpecNode rsn) {
+        super(rsn.getRequirementSpecNodePK());
+        update(this, rsn);
+    }
+
     @Override
     public int write2DB() throws Exception {
         if (getRequirementSpecNodePK() != null && getRequirementSpecNodePK().getId() > 0) {
             RequirementSpecNode rsn = new RequirementSpecNodeJpaController(
                     DataBaseManager.getEntityManagerFactory()).findRequirementSpecNode(
                     getRequirementSpecNodePK());
-            rsn.setDescription(getDescription());
-            rsn.setName(getName());
-            rsn.setRequirementSpec(getRequirementSpec());
-            rsn.setScope(getScope());
-            rsn.setRequirementSpec(getRequirementSpec());
-            rsn.setRequirementSpecNode(getRequirementSpecNode());
-            rsn.setRequirementSpecNodeList(getRequirementSpecNodeList());
+            update(rsn, this);
             new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).edit(rsn);
         } else {
             RequirementSpecNode rsn = new RequirementSpecNode();
-            rsn.setDescription(getDescription());
-            rsn.setName(getName());
-            rsn.setRequirementSpec(getRequirementSpec());
-            rsn.setScope(getScope());
-            rsn.setRequirementSpec(getRequirementSpec());
-            rsn.setRequirementSpecNode(getRequirementSpecNode());
-            rsn.setRequirementSpecNodeList(getRequirementSpecNodeList());
+            update(rsn, this);
             new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).create(rsn);
-            setRequirementSpecNodePK(rsn.getRequirementSpecNodePK());
+            update(this, rsn);
         }
         return getRequirementSpecNodePK().getId();
     }
-    
-    public RequirementSpecNode getEntity(){
+
+    public RequirementSpecNode getEntity() {
         return new RequirementSpecNodeJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findRequirementSpecNode(getRequirementSpecNodePK());
+    }
+
+    public void update(RequirementSpecNode target, RequirementSpecNode source) {
+        target.setDescription(source.getDescription());
+        target.setName(source.getName());
+        target.setRequirementSpec(source.getRequirementSpec());
+        target.setScope(source.getScope());
+        target.setRequirementSpec(source.getRequirementSpec());
+        target.setRequirementSpecNode(source.getRequirementSpecNode());
+        target.setRequirementSpecNodeList(source.getRequirementSpecNodeList());
     }
 }

@@ -20,18 +20,12 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestPlanServer extends TestPlan implements EntityServer {
+public class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
 
     public TestPlanServer(TestPlan plan) {
         TestPlanJpaController controller = new TestPlanJpaController(DataBaseManager.getEntityManagerFactory());
         TestPlan temp = controller.findTestPlan(plan.getTestPlanPK());
-        setActive(temp.getActive());
-        setIsOpen(temp.getIsOpen());
-        setNotes(temp.getNotes());
-        setTestPlanHasTestList(temp.getTestPlanHasTestList());
-        setTestPlanList(temp.getTestPlanList());
-        setUserTestPlanRoleList(temp.getUserTestPlanRoleList());
-        setTestPlanPK(temp.getTestPlanPK());
+        update(this, temp);
     }
 
     public TestPlanServer(TestProject testProject, boolean active, boolean isOpen) {
@@ -44,21 +38,11 @@ public class TestPlanServer extends TestPlan implements EntityServer {
         TestPlanJpaController controller = new TestPlanJpaController(DataBaseManager.getEntityManagerFactory());
         if (getTestPlanPK().getId() > 0) {
             TestPlan temp = controller.findTestPlan(getTestPlanPK());
-            temp.setActive(getActive());
-            temp.setIsOpen(getIsOpen());
-            temp.setNotes(getNotes());
-            temp.setTestPlanHasTestList(getTestPlanHasTestList());
-            temp.setTestPlanList(getTestPlanList());
-            temp.setUserTestPlanRoleList(getUserTestPlanRoleList());
+            update(temp, this);
             controller.edit(temp);
         } else {
             TestPlan temp = new TestPlan(getTestProject(), getActive(), getIsOpen());
-            temp.setActive(getActive());
-            temp.setIsOpen(getIsOpen());
-            temp.setNotes(getNotes());
-            temp.setTestPlanHasTestList(getTestPlanHasTestList());
-            temp.setTestPlanList(getTestPlanList());
-            temp.setUserTestPlanRoleList(getUserTestPlanRoleList());
+            update(temp, this);
             controller.create(temp);
             setTestPlanPK(temp.getTestPlanPK());
         }
@@ -101,5 +85,15 @@ public class TestPlanServer extends TestPlan implements EntityServer {
         return new TestPlanJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findTestPlan(getTestPlanPK());
+    }
+
+    public void update(TestPlan target, TestPlan source) {
+        target.setActive(source.getActive());
+        target.setIsOpen(source.getIsOpen());
+        target.setNotes(source.getNotes());
+        target.setTestPlanHasTestList(source.getTestPlanHasTestList());
+        target.setTestPlanList(source.getTestPlanList());
+        target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
+        target.setTestPlanPK(source.getTestPlanPK());
     }
 }
