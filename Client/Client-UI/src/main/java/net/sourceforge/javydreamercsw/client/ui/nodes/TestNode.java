@@ -37,7 +37,7 @@ class TestNode extends AbstractRefreshableBeanNode {
 
     @Override
     public void refreshMyself() {
-//        TestServer rs = new TestServer(getLookup().lookup(Test.class).getId());
-//        rs.update((Test) getBean(), rs.getEntity());
+        TestServer rs = new TestServer(getLookup().lookup(Test.class).getId());
+        rs.update((Test) getBean(), rs.getEntity());
     }
 }
