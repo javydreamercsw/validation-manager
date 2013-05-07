@@ -337,12 +337,12 @@ public class EditRequirementDialog extends javax.swing.JDialog {
                     "Please enter a valid description",
                     "Invalid Value",
                     JOptionPane.WARNING_MESSAGE);
-        } else if (type.getSelectedIndex() == 0) {
+        } else if (type.getSelectedIndex() < 0) {
             JOptionPane.showMessageDialog(this,
                     "Please select a valid Requirement Type",
                     "Invalid Value",
                     JOptionPane.WARNING_MESSAGE);
-        } else if (status.getSelectedIndex() == 0) {
+        } else if (status.getSelectedIndex() < 0) {
             JOptionPane.showMessageDialog(this,
                     "Please select a valid Requirement Status",
                     "Invalid Value",
