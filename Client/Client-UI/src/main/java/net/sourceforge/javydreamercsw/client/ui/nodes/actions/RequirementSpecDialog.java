@@ -5,6 +5,7 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.server.core.RequirementSpecServer;
 import java.util.ArrayList;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
@@ -23,6 +24,7 @@ public class RequirementSpecDialog extends AbstractCreationDialog {
         initComponents();
         populateProjectList(project, true);
         populateSpecLevelList(level);
+        setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
     }
 
     /**

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -29,8 +30,6 @@ import org.openide.util.Utilities;
 public class EditRequirementDialog extends javax.swing.JDialog {
 
     private final List<Requirement> linkedRequirements = new ArrayList<Requirement>();
-    private final List<RequirementStatus> statusList = new ArrayList<RequirementStatus>();
-    private final List<RequirementType> reqTypeList = new ArrayList<RequirementType>();
     private final boolean edit;
     private Requirement requirement;
     private static ResourceBundle rb =
@@ -42,6 +41,7 @@ public class EditRequirementDialog extends javax.swing.JDialog {
     public EditRequirementDialog(java.awt.Frame parent, boolean modal, boolean edit) {
         super(parent, modal);
         initComponents();
+        setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
         this.edit = edit;
         //Populate lists
         //Get types

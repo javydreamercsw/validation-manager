@@ -4,6 +4,7 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
@@ -21,6 +22,7 @@ public class CreateProjectDialog extends AbstractCreationDialog {
         super(parent, modal);
         initComponents();
         populateProjectList(this.parent, true);
+        setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
     }
 
     /**
@@ -43,6 +45,7 @@ public class CreateProjectDialog extends AbstractCreationDialog {
         cancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setIconImage(null);
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(CreateProjectDialog.class, "CreateProjectDialog.jLabel1.text")); // NOI18N
 

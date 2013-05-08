@@ -5,6 +5,7 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.TestProjectServer;
 import java.util.Arrays;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
@@ -22,6 +23,7 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
         super(parent, modal);
         initComponents();
         populateProjectList(project, false);
+        setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
     }
 
     /**
