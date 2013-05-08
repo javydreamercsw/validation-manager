@@ -44,11 +44,6 @@
         -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>Client-UI</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>vm-client-branding</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -56,6 +51,16 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>H2-Driver</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.javydreamercsw.vm.client.hierarchy</groupId>
+            <artifactId>HierarchyVisualizer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.javydreamercsw.vm.client.hierarchy</groupId>
+            <artifactId>UserInterface</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
