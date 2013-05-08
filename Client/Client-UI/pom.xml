@@ -9,7 +9,6 @@
 
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>Client-UI</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
     <name>Validation Manager Admin Client User Interface</name>
