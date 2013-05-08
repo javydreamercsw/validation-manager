@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Localizing-Bundle: net/sourceforge/javydreamercsw/vm/client/hierarchy/userinterface/Bundle.properties
