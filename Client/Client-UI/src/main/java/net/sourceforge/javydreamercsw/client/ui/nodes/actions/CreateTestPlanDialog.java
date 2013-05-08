@@ -4,6 +4,7 @@ import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.TestPlanServer;
+import javax.swing.ImageIcon;
 import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
@@ -20,6 +21,7 @@ public class CreateTestPlanDialog extends AbstractCreationDialog {
     public CreateTestPlanDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
     }
 
     /**

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -36,6 +37,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
         super(parent, modal);
         this.edit = edit;
         initComponents();
+        setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
         requirements.setModel(new DefaultListModel() {
             @Override
             public void addElement(Object obj) {

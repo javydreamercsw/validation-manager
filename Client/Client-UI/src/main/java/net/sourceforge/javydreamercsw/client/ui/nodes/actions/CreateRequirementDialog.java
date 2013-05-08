@@ -2,8 +2,8 @@ package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.server.core.RequirementServer;
+import javax.swing.ImageIcon;
 import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
 import org.openide.util.Utilities;
 
 /**
@@ -20,6 +20,7 @@ public class CreateRequirementDialog extends AbstractCreationDialog {
         initComponents();
         populateRequirementTypeList(type);
         populateRequirementStatusList(status);
+        setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
     }
 
     /**
