@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.awt.Point;
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 import javax.swing.ImageIcon;
 import org.netbeans.api.visual.widget.Scene;
 import org.netbeans.api.visual.widget.general.IconNodeWidget;
@@ -51,11 +52,14 @@ public abstract class AbstractHierarchyNode extends IconNodeWidget {
         if (currentLabel != null) {
             setLabel(currentLabel);
         }
-        //Update children
-        updateChildren();
     }
 
-    protected abstract void updateChildren();
+    /**
+     * Get the immediate child of this node.
+     *
+     * @return
+     */
+    protected abstract List<AbstractHierarchyNode> getNodeChildren();
 
     public AbstractHierarchyNode(Object object, Scene scene) {
         super(scene);

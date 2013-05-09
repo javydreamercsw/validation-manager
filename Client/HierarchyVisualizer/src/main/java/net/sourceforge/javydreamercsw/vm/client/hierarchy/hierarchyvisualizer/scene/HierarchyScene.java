@@ -2,6 +2,8 @@ package net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.s
 
 import com.validation.manager.core.db.Requirement;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,11 +31,17 @@ public class HierarchyScene extends GraphScene<Object, Object> {
     private Map<Object, Widget> widgets = new HashMap<Object, Widget>();
     private static final Logger LOG =
             Logger.getLogger(HierarchyScene.class.getSimpleName());
+    private final int horizontalGap = 100;
+    private final int verticalGap = 25;
+    private ArrayList<LayerWidget> layersToClear = new ArrayList<LayerWidget>();
 
     public HierarchyScene() {
         mainLayer = new LayerWidget(this);
+        layersToClear.add(mainLayer);
         connectionLayer = new LayerWidget(this);
+        layersToClear.add(connectionLayer);
         interactionLayer = new LayerWidget(this);
+        layersToClear.add(interactionLayer);
         addChild(mainLayer);
         addChild(connectionLayer);
         addChild(interactionLayer);
@@ -47,9 +55,12 @@ public class HierarchyScene extends GraphScene<Object, Object> {
         AbstractHierarchyNode widget = createWidget(n);
         if (widget != null) {
             mainLayer.addChild(widget);
+            
             validate();
-            for (Widget child : widget.getChildren()) {
-//               TODO: addChildWidget(widget, child);
+            for (AbstractHierarchyNode child : widget.getNodeChildren()) {
+                if (!hasWidget(child.getID())) {
+                    addChildWidget(widget, child);
+                }
             }
             addWidgetActions(mainLayer, connectionLayer);
         } else {
@@ -60,15 +71,14 @@ public class HierarchyScene extends GraphScene<Object, Object> {
 
     private void addChildWidget(Widget parent, Widget child) {
         mainLayer.addChild(child);
-        LOG.log(Level.INFO,
-                "Parent has now {0} children.", parent.getChildren().size());
         //Now link them
         ConnectionWidget conw = new ConnectionWidget(this);
         setSource(conw, parent, ANCHOR_TYPE.RECTANGULAR);
-        setTarget(conw, child, ANCHOR_TYPE.CENTER);
+        setTarget(conw, child, ANCHOR_TYPE.DIRECTIONAL);
         conw.setSourceAnchorShape(AnchorShape.NONE);
         conw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED);
         connectionLayer.addChild(conw);
+        placeChild(parent, child);
         validate();
     }
 
@@ -85,12 +95,47 @@ public class HierarchyScene extends GraphScene<Object, Object> {
         validate();
     }
 
+    /**
+     * Organize the children.
+     *
+     * @param child
+     */
+    private void placeChild(Widget parent, Widget child) {
+        Point point = new Point(getChildX(parent, child), getChildY(parent, child));
+        LOG.log(Level.FINE, "Children location: {0}", point);
+        child.setPreferredLocation(point);
+    }
+
+    private int getChildY(Widget parent, Widget child) {
+        //Get parent location
+        Rectangle bounds = parent.getBounds();
+        return bounds == null ? 0 : (verticalGap
+                + (child.getBounds() == null ? bounds.height
+                : child.getBounds().height))
+                * (mainLayer.getChildren().size() - 1);
+    }
+
+    private int getChildX(Widget parent, Widget child) {
+        //Get parent location
+        Rectangle bounds = parent.getBounds();
+        parent.getChildren().size();
+        return bounds == null ? 0 : bounds.x + bounds.width + horizontalGap;
+    }
+
+    public void clear() {
+        for (LayerWidget lw : layersToClear) {
+            lw.removeChildren();
+        }
+        widgets.clear();
+        validate();
+    }
+
     private static class SelProvider implements SelectProvider {
 
         @Override
         public boolean isAimingAllowed(Widget widget, Point localLocation,
                 boolean invertSelection) {
-            LOG.log(Level.INFO,
+            LOG.log(Level.FINE,
                     "sel.isAimingAllowed {0}", localLocation);
             return false;
         }
@@ -98,7 +143,7 @@ public class HierarchyScene extends GraphScene<Object, Object> {
         @Override
         public boolean isSelectionAllowed(Widget widget, Point localLocation,
                 boolean invertSelection) {
-            LOG.log(Level.INFO,
+            LOG.log(Level.FINE,
                     "sel.isSelectionAllowed {0}", localLocation);
             return true;
         }
@@ -107,7 +152,7 @@ public class HierarchyScene extends GraphScene<Object, Object> {
         public void select(Widget widget, Point localLocation,
                 boolean invertSelection) {
 
-            LOG.log(Level.INFO,
+            LOG.log(Level.FINE,
                     "sel.select {0}", localLocation);
             widget.getScene().setFocusedWidget(widget);
         }
@@ -179,5 +224,9 @@ public class HierarchyScene extends GraphScene<Object, Object> {
         } else {
             return null;
         }
+    }
+
+    public boolean hasWidget(Object key) {
+        return widgets.containsKey(key);
     }
 }
