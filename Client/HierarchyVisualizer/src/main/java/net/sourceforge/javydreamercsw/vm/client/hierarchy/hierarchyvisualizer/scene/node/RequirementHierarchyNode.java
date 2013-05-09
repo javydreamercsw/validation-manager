@@ -3,8 +3,13 @@ package net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.s
 import com.validation.manager.core.db.Requirement;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.scene.AbstractHierarchyNode;
+import net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.scene.HierarchyScene;
 import org.netbeans.api.visual.widget.Scene;
 import org.openide.util.Exceptions;
 
@@ -13,6 +18,9 @@ import org.openide.util.Exceptions;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RequirementHierarchyNode extends AbstractHierarchyNode {
+
+    private static final Logger LOG =
+            Logger.getLogger(RequirementHierarchyNode.class.getSimpleName());
 
     public RequirementHierarchyNode(Object object, Scene scene) {
         super(object, scene);
@@ -45,12 +53,15 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
     }
 
     @Override
-    protected void updateChildren() {
+    protected List<AbstractHierarchyNode> getNodeChildren() {
+        ArrayList<AbstractHierarchyNode> children =
+                new ArrayList<AbstractHierarchyNode>();
         //Clear and recreate
-        getChildren().clear();
         Requirement req = (Requirement) object;
+        LOG.log(Level.INFO, "Updating children for {0}", req.getUniqueId());
         for (Requirement r : req.getRequirementList()) {
-            getChildren().add(new RequirementHierarchyNode(r, getScene()));
+            children.add(new RequirementHierarchyNode(r, getScene()));
         }
+        return children;
     }
 }

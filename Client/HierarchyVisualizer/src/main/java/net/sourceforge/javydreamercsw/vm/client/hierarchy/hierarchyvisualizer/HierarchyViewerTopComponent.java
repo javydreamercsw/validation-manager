@@ -113,9 +113,10 @@ public final class HierarchyViewerTopComponent extends TopComponent implements L
     public void resultChanged(LookupEvent le) {
         Collection<? extends Requirement> results = result.allInstances();
         if (results.isEmpty()) {
-            LOG.info("No requirements selected.");
+            LOG.fine("No requirements selected.");
         } else {
-            LOG.info("Selected the following requirements:");
+            LOG.fine("Selected the following requirements:");
+            scene.clear();
             for (Requirement req : results) {
                 LOG.info(req.getUniqueId());
                 scene.addRequirement(req);
