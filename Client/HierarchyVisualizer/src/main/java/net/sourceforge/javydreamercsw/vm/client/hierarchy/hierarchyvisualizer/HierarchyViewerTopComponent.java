@@ -2,22 +2,21 @@ package net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer;
 
 import com.validation.manager.core.db.Requirement;
 import java.awt.BorderLayout;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Logger;
-import javax.swing.JScrollPane;
-import net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.scene.RequirementScene;
+import javax.swing.JComponent;
+import net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.scene.HierarchyScene;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.netbeans.api.visual.widget.Widget;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.explorer.view.BeanTreeView;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import org.openide.util.lookup.Lookups;
 
 /**
  * Top component which displays something.
@@ -46,24 +45,29 @@ public final class HierarchyViewerTopComponent extends TopComponent implements L
             Utilities.actionsGlobalContext().lookupResult(Requirement.class);
     private static final Logger LOG =
             Logger.getLogger(HierarchyViewerTopComponent.class.getSimpleName());
-    private RequirementScene scene;
-    private List<Widget> widgets= new ArrayList<Widget>();
+    private HierarchyScene scene;
+    private final JComponent myView;
 
     public HierarchyViewerTopComponent() {
         initComponents();
         setName(Bundle.CTL_HierarchyViewerTopComponent());
         setToolTipText(Bundle.HINT_HierarchyViewerTopComponent());
-        setLayout(new BorderLayout());
-
-        scene = new RequirementScene();
-
-        JScrollPane hierarchyPane = new JScrollPane();
-
-        hierarchyPane.setViewportView(scene.createView());
-
-        add(hierarchyPane, BorderLayout.CENTER);
-        add(scene.createSatelliteView(), BorderLayout.WEST);
         result.addLookupListener((HierarchyViewerTopComponent) this);
+
+        scene = new HierarchyScene();
+        myView = scene.createView();
+
+        hierarchyPane.setViewportView(myView);
+        
+        add(scene.createSatelliteView(), BorderLayout.WEST);
+        
+        associateLookup(Lookups.fixed(
+                // exposed TopComponent, 
+                //   and SatelliteViewProvider, BirdViewProvider interfaces, too
+                (HierarchyViewerTopComponent) this, 
+                getActionMap() // do not forget expose ActionMap
+                , scene // if some object needs it and if it is final
+                ));
     }
 
     /**
@@ -74,19 +78,14 @@ public final class HierarchyViewerTopComponent extends TopComponent implements L
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
+        hierarchyPane = new BeanTreeView();
+
+        setLayout(new java.awt.BorderLayout());
+        add(hierarchyPane, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane hierarchyPane;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
@@ -119,7 +118,7 @@ public final class HierarchyViewerTopComponent extends TopComponent implements L
             LOG.info("Selected the following requirements:");
             for (Requirement req : results) {
                 LOG.info(req.getUniqueId());
-                scene.removeChildren(widgets);
+                scene.addRequirement(req);
             }
         }
     }
