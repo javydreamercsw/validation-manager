@@ -55,11 +55,11 @@ public class HierarchyScene extends GraphScene<Object, Object> {
         AbstractHierarchyNode widget = createWidget(n);
         if (widget != null) {
             mainLayer.addChild(widget);
-            
+
             validate();
             for (AbstractHierarchyNode child : widget.getNodeChildren()) {
                 if (!hasWidget(child.getID())) {
-                    addChildWidget(widget, child);
+                    addChildWidget(widget, child, true);
                 }
             }
             addWidgetActions(mainLayer, connectionLayer);
@@ -70,15 +70,27 @@ public class HierarchyScene extends GraphScene<Object, Object> {
     }
 
     private void addChildWidget(Widget parent, Widget child) {
+        addChildWidget(parent, child, false);
+    }
+
+    /**
+     * Connect parent with child.
+     *
+     * @param parent
+     * @param child
+     * @param invert Normally arrow goes from parent to child, set to true to
+     * invert direction.
+     */
+    private void addChildWidget(Widget parent, Widget child, boolean invert) {
         mainLayer.addChild(child);
         //Now link them
         ConnectionWidget conw = new ConnectionWidget(this);
-        setSource(conw, parent, ANCHOR_TYPE.RECTANGULAR);
-        setTarget(conw, child, ANCHOR_TYPE.DIRECTIONAL);
+        setSource(conw, invert ? child : parent, ANCHOR_TYPE.RECTANGULAR);
+        setTarget(conw, invert ? parent : child, ANCHOR_TYPE.DIRECTIONAL);
         conw.setSourceAnchorShape(AnchorShape.NONE);
         conw.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED);
         connectionLayer.addChild(conw);
-        placeChild(parent, child);
+        placeChild(parent, child, invert);
         validate();
     }
 
@@ -100,13 +112,14 @@ public class HierarchyScene extends GraphScene<Object, Object> {
      *
      * @param child
      */
-    private void placeChild(Widget parent, Widget child) {
-        Point point = new Point(getChildX(parent, child), getChildY(parent, child));
+    private void placeChild(Widget parent, Widget child, boolean invert) {
+        Point point = new Point(getChildX(parent, invert),
+                getChildY(parent, child, invert));
         LOG.log(Level.FINE, "Children location: {0}", point);
         child.setPreferredLocation(point);
     }
 
-    private int getChildY(Widget parent, Widget child) {
+    private int getChildY(Widget parent, Widget child, boolean invert) {
         //Get parent location
         Rectangle bounds = parent.getBounds();
         return bounds == null ? 0 : (verticalGap
@@ -115,11 +128,12 @@ public class HierarchyScene extends GraphScene<Object, Object> {
                 * (mainLayer.getChildren().size() - 1);
     }
 
-    private int getChildX(Widget parent, Widget child) {
+    private int getChildX(Widget parent, boolean invert) {
         //Get parent location
         Rectangle bounds = parent.getBounds();
         parent.getChildren().size();
-        return bounds == null ? 0 : bounds.x + bounds.width + horizontalGap;
+        return invert ? 0 : bounds == null ? 0 : 
+                bounds.x + bounds.width + horizontalGap;
     }
 
     public void clear() {
