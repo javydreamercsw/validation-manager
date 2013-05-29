@@ -44,7 +44,7 @@ public class TestCaseServer extends TestCase implements EntityServer<TestCase> {
         } else {
             TestCase temp = new TestCase(getTestCasePK(), getVersion(), getCreationDate());
             update(temp, this);
-            update(this, temp);
+            controller.create(temp);
         }
         return getTestCasePK().getId();
     }
