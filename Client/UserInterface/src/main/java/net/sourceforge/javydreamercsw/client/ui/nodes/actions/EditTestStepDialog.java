@@ -59,7 +59,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
         requirements.setCellRenderer(new ListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList list,
-                    Object value, int index, boolean isSelected, 
+                    Object value, int index, boolean isSelected,
                     boolean cellHasFocus) {
 
                 return new JLabel(
@@ -248,7 +248,8 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             } else {
                 tc = Utilities.actionsGlobalContext().lookup(TestCase.class);
                 TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
-                ss = new StepServer(tc, tcs.getStepList().size() + 1, //Add at the end by default
+                ss = new StepServer(tc, tcs.getStepList() == null ? 1
+                        : tcs.getStepList().size() + 1, //Add at the end by default
                         text.getText().trim());
             }
             try {
