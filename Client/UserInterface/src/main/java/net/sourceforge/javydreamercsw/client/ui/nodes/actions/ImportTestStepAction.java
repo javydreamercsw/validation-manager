@@ -12,6 +12,7 @@ import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
+import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
 
@@ -69,7 +70,8 @@ public class ImportTestStepAction extends AbstractAction {
                         instance.importFile(true);
                         OutputHandler.setStatus("Importing, please wait!");
                         instance.processImport();
-                        OutputHandler.setStatus("Importing done! Please refresh node to see results.");
+                        OutputHandler.setStatus("Importing done!");
+                        ProjectExplorerComponent.refresh();
                     } catch (UnsupportedOperationException ex) {
                         Exceptions.printStackTrace(ex);
                     } catch (RequirementImportException ex) {

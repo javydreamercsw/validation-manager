@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.ListCellRenderer;
+import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
 
@@ -277,6 +278,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
                 Exceptions.printStackTrace(ex);
             }
             dispose();
+            ProjectExplorerComponent.refresh();
         }
     }//GEN-LAST:event_saveActionPerformed
 
