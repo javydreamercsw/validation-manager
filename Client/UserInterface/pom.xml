@@ -100,6 +100,11 @@
             <type>jar</type>
             <version>${netbeans.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.sourceforge.javydreamercsw</groupId>
+            <artifactId>JasperReportViewer</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
