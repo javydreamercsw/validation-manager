@@ -22,7 +22,7 @@ import org.openide.util.Utilities;
         autostore = false)
 @TopComponent.Description(
         preferredID = "JasperReportViewerTopComponent",
-        iconBase = "com/validation/manager/resources/icons/VMSmall.png",
+//        iconBase = "com/validation/manager/resources/icons/VMSmall.png",
         persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
 @ActionID(category = "Window", 
