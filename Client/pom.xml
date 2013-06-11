@@ -81,6 +81,9 @@
         <module>Client-UI</module>
         <module>MySQL-Driver</module>
         <module>H2-Driver</module>
+        <module>HierarchyVisualizer</module>
+        <module>JasperReport</module>
+        <module>JasperReportViewer</module>
     </modules>
 
     <properties>
