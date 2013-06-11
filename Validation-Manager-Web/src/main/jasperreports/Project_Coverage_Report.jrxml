@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Project Coverage Report" pageWidth="802" pageHeight="555" orientation="Landscape" columnWidth="802" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="04da3b0c-2104-4042-a438-f68c91d6ad75">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="ireport.jasperserver.reportUnit" value="/Reports/Quality_Reports/Test_Matrix"/>
+	<property name="ireport.jasperserver.url" value="http://10.6.10.114:5050/jasperserver/services/repository"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="parent_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+     project.`name` AS project_name,
+     requirement.`version` AS requirement_version,
+     requirement.`unique_id` AS requirement_unique_id,
+     requirement.`description` AS requirement_description,
+     requirement_status.`status` AS requirement_status_status,
+     requirement_spec.`name` AS requirement_spec_name,
+     requirement_spec.`version` AS requirement_spec_version,
+     requirement_spec_node.`name` AS requirement_spec_node_name,
+     requirement_spec.`spec_level_id` AS requirement_spec_spec_level_id,
+     requirement.`id` AS requirement_id,
+     project.`id` AS project_id,
+     spec_level.`name` AS spec_level_name
+FROM
+     `requirement_status` requirement_status INNER JOIN `requirement` requirement ON requirement_status.`id` = requirement.`requirement_status_id`
+     INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement.`requirement_spec_node_id` = requirement_spec_node.`id`
+     AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
+     INNER JOIN `requirement_spec` requirement_spec ON requirement_spec_node.`requirement_spec_id` = requirement_spec.`id`
+     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
+     AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
+     INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
+     INNER JOIN `spec_level` spec_level ON requirement_spec.`spec_level_id` = spec_level.`id`
+WHERE
+     project.id = $P{parent_id} and requirement_status.status='general.approved'
+ORDER BY
+     requirement_spec.`spec_level_id` ASC, requirement_unique_id]]>
+	</queryString>
+	<field name="project_name" class="java.lang.String"/>
+	<field name="requirement_version" class="java.lang.Integer"/>
+	<field name="requirement_unique_id" class="java.lang.String"/>
+	<field name="requirement_description" class="java.lang.String"/>
+	<field name="requirement_status_status" class="java.lang.String"/>
+	<field name="requirement_spec_name" class="java.lang.String"/>
+	<field name="requirement_spec_version" class="java.lang.Integer"/>
+	<field name="requirement_spec_node_name" class="java.lang.String"/>
+	<field name="requirement_spec_spec_level_id" class="java.lang.Integer"/>
+	<field name="requirement_id" class="java.lang.Integer"/>
+	<field name="project_id" class="java.lang.Integer"/>
+	<field name="spec_level_name" class="java.lang.String"/>
+	<group name="requirement_spec_name">
+		<groupExpression><![CDATA[$F{requirement_spec_name}]]></groupExpression>
+	</group>
+	<group name="requirement_spec_node_name">
+		<groupExpression><![CDATA[$F{requirement_spec_node_name}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="24" splitType="Stretch">
+			<textField>
+				<reportElement uuid="905b1011-c6f2-424f-aca6-b41ee542f08b" x="4" y="0" width="798" height="24"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{project_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="1" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="50" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="37b34ebc-9ff1-4453-b378-4f23363eff6a" x="283" y="35" width="519" height="15"/>
+				<textElement/>
+				<text><![CDATA[Coverage]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="37b34ebc-9ff1-4453-b378-4f23363eff6a" x="89" y="35" width="194" height="15"/>
+				<textElement/>
+				<text><![CDATA[Description]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="37b34ebc-9ff1-4453-b378-4f23363eff6a" x="4" y="35" width="85" height="15"/>
+				<textElement/>
+				<text><![CDATA[Requirement]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="bdbca3da-4056-4e4c-bcf3-6d8830e007a0" x="0" y="0" width="802" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Requirement Specification: "+$F{requirement_spec_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="7e61b572-9aa3-48b6-b9e1-65f1821fd04e" x="0" y="20" width="802" height="15"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Level: "+$F{spec_level_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="25528063-5f79-4c2c-9d8e-c7e127be3822" x="0" y="0" width="89" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{requirement_unique_id}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="6cfdaed7-d446-42db-a84f-7b2658f33b51" x="89" y="0" width="194" height="20"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{requirement_description}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement uuid="803822ea-e2d1-4d87-89dc-6a142ca79924" x="283" y="0" width="519" height="20" isPrintInFirstWholeBand="true"/>
+				<subreportParameter name="req_id">
+					<subreportParameterExpression><![CDATA[$F{requirement_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["repo:Test_Matrix_subreport1.jrxml"]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement uuid="46801e22-5e2b-4b0c-be17-8349fb86b0da" stretchType="RelativeToTallestObject" x="89" y="0" width="1" height="21" isPrintWhenDetailOverflows="true"/>
+			</line>
+			<line>
+				<reportElement uuid="46801e22-5e2b-4b0c-be17-8349fb86b0da" stretchType="RelativeToTallestObject" x="283" y="0" width="1" height="21" isPrintWhenDetailOverflows="true"/>
+			</line>
+			<line>
+				<reportElement uuid="46801e22-5e2b-4b0c-be17-8349fb86b0da" stretchType="RelativeToTallestObject" x="-1" y="0" width="1" height="21" isPrintWhenDetailOverflows="true"/>
+			</line>
+			<line>
+				<reportElement uuid="f5ac9ffa-c843-4cad-b4ef-421008f02695" positionType="FixRelativeToBottom" x="4" y="19" width="801" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="46801e22-5e2b-4b0c-be17-8349fb86b0da" stretchType="RelativeToTallestObject" x="801" y="0" width="1" height="21" isPrintWhenDetailOverflows="true"/>
+			</line>
+			<line>
+				<reportElement uuid="f5ac9ffa-c843-4cad-b4ef-421008f02695" x="4" y="0" width="801" height="1"/>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="22" splitType="Stretch">
+			<subreport>
+				<reportElement uuid="99522d84-82bd-48b4-87af-f0e150decf95" x="0" y="0" width="801" height="22" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true"/>
+				<subreportParameter name="project_id">
+					<subreportParameterExpression><![CDATA[$F{project_id}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA["repo:Sub_Project_Coverage_Report.jrxml"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>
