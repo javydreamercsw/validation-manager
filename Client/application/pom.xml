@@ -19,7 +19,7 @@
     </ciManagement>
     
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <brandingToken>validation-manager-client</brandingToken>
         <netbeans.run.params.ide/>
         <netbeans.run.params>${netbeans.run.params.ide}</netbeans.run.params>
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
