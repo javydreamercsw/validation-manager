@@ -12,7 +12,12 @@
     <packaging>nbm-application</packaging>
 
     <name>Validation Manager Admin Client</name>
-
+    
+    <ciManagement>
+        <system>hudson</system>
+        <url>https://xinco.ci.cloudbees.com/job/Validation%20Manager/</url>
+    </ciManagement>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.run.params.ide/>
