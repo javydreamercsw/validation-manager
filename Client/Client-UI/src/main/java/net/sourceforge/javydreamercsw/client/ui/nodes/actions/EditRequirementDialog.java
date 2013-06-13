@@ -360,6 +360,11 @@ public class EditRequirementDialog extends javax.swing.JDialog {
                         ((RequirementType) type.getSelectedItem()).getId(),
                         ((RequirementStatus) status.getSelectedItem()).getId());
             }
+            req.setRequirementStatusId((RequirementStatus) status.getSelectedItem());
+            req.setRequirementTypeId(((RequirementType) type.getSelectedItem()));
+            req.setDescription(description.getText().trim());
+            req.setNotes(notes.getText().trim());
+            req.setRequirementList(linkedRequirements);
             try {
                 req.write2DB();
             } catch (Exception ex) {
