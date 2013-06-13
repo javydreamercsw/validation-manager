@@ -19,7 +19,6 @@
     </ciManagement>
     
     <properties>
-        <brandingToken>validation_manager_client</brandingToken>
         <netbeans.run.params.ide/>
         <netbeans.run.params>${netbeans.run.params.ide}</netbeans.run.params>
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
