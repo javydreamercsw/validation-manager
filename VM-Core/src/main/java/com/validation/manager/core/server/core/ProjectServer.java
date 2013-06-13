@@ -6,6 +6,9 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,5 +67,20 @@ public class ProjectServer extends Project implements EntityServer<Project> {
         target.setProjectList(source.getProjectList());
         target.setRequirementSpecList(source.getRequirementSpecList());
         target.setTestProjectList(source.getTestProjectList());
+    }
+
+    public static List<Project> getProjects() {
+        return new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProjectEntities();
+    }
+
+    public List<Project> getChildren() {
+        ArrayList<Project> children = new ArrayList<Project>();
+        for (Iterator<Project> it = getProjects().iterator(); it.hasNext();) {
+            Project p = it.next();
+            if (p.getParentProjectId().getId() == getId()) {
+                children.add(p);
+            }
+        }
+        return children;
     }
 }
