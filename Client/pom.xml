@@ -87,7 +87,7 @@
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE73</netbeans.version>
-        <brandingToken>client</brandingToken>
+        <netbeans.version>RELEASE731</netbeans.version>
+        <brandingToken>validation_manager_client</brandingToken>
     </properties>
 </project>
