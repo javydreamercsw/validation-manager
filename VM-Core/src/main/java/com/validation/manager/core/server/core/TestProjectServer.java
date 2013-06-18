@@ -49,5 +49,6 @@ public class TestProjectServer extends TestProject
         target.setActive(source.getActive());
         target.setName(source.getName());
         target.setNotes(source.getNotes());
+        target.setId(source.getId());
     }
 }
