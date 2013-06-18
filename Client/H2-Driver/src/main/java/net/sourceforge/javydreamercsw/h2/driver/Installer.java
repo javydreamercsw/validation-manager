@@ -32,7 +32,7 @@ public class Installer extends ModuleInstall {
                                 JDBCDriver.create("h2", "H2",
                                 h2DriverClass,
                                 new URL[]{new URL(
-                            "nbinst:/modules/ext/com.h2database/h2-1.3.171.jar")}));
+                            "nbinst:/modules/ext/com.h2database/h2-1.3.172.jar")}));
                     } catch (DatabaseException ex) {
                         Exceptions.printStackTrace(ex);
                     } catch (MalformedURLException ex) {
