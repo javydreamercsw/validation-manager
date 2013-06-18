@@ -67,6 +67,7 @@ public class ProjectServer extends Project implements EntityServer<Project> {
         target.setProjectList(source.getProjectList());
         target.setRequirementSpecList(source.getRequirementSpecList());
         target.setTestProjectList(source.getTestProjectList());
+        target.setId(source.getId());
     }
 
     public static List<Project> getProjects() {
