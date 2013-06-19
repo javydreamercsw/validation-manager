@@ -1,6 +1,8 @@
 package com.validation.manager.core;
 
+import com.validation.manager.core.adapter.TimestampAdapter;
 import java.sql.Timestamp;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  *
@@ -12,6 +14,7 @@ public class VMAuditedObject implements AuditedObject {
     private String reason;
     /**Default to Admin*/
     private int modifierId = 1;
+    @XmlJavaTypeAdapter(TimestampAdapter.class)
     private Timestamp modDate;
 
     @Override
@@ -35,6 +38,7 @@ public class VMAuditedObject implements AuditedObject {
     }
 
     @Override
+    @XmlJavaTypeAdapter(TimestampAdapter.class)
     public Timestamp getModificationTime() {
         return modDate;
     }

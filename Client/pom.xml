@@ -37,7 +37,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>3.10</version>
+                    <version>3.10.1</version>
                     <extensions>true</extensions>
                     <configuration>
                         <brandingToken>${brandingToken}</brandingToken>
@@ -84,10 +84,10 @@
         <module>HierarchyVisualizer</module>
         <module>JasperReport</module>
         <module>JasperReportViewer</module>
-    </modules>
+  </modules>
 
     <properties>
-        <netbeans.version>RELEASE73</netbeans.version>
-        <brandingToken>client</brandingToken>
+        <netbeans.version>RELEASE731</netbeans.version>
+        <brandingToken>validation_manager_client</brandingToken>
     </properties>
 </project>
