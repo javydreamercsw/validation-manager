@@ -19,6 +19,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vm.version>${project.version}</vm.version>
+        <vaadin.version>7.0.7</vaadin.version>
     </properties>
     
     <build>
@@ -37,7 +38,7 @@
                 <plugin>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-maven-plugin</artifactId>
-                    <version>7.0.7</version>
+                    <version>${vaadin.version}</version>
                 </plugin>
                 <!-- Compiles your custom GWT components with the GWT compiler -->
                 <plugin>
@@ -131,5 +132,7 @@
         <!--<module>Validation-Manager-Web</module>-->
         <module>VM-Core</module>
         <module>Client</module>
-    </modules>
+    <module>ValidationManager</module>
+    <module>WebServiceClient</module>
+  </modules>
 </project>

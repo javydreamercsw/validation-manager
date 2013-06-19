@@ -1,6 +1,5 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import com.dreamer.outputhandler.OutputHandler;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
@@ -67,9 +66,7 @@ public class ImportRequirementAction extends AbstractAction {
                                 DataBaseManager.getEntityManagerFactory())
                                 .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
                         instance.importFile(true);
-                        OutputHandler.setStatus("Importing, please wait!");
                         instance.processImport();
-                        OutputHandler.setStatus("Importing done! Please refresh node to see results.");
                     } catch (UnsupportedOperationException ex) {
                         Exceptions.printStackTrace(ex);
                     } catch (RequirementImportException ex) {

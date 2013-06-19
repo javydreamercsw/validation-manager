@@ -1,6 +1,5 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import com.dreamer.outputhandler.OutputHandler;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -175,14 +174,12 @@ public class CreateTestDialog extends AbstractCreationDialog {
                         scope.getText().trim());
                 //Create the test
                 ts.write2DB();
-                OutputHandler.setStatus("Test: " + ts.getName() + " created!");
                 TestPlanServer tps = 
                         new TestPlanServer(
                         Utilities.actionsGlobalContext().lookup(TestPlan.class));
                 tps.addTest(ts.getEntity());
                 //Add it to the test plan
                 tps.write2DB();
-                OutputHandler.setStatus("Added to the test plan!");
                 ProjectExplorerComponent.refresh();
             } catch (IllegalOrphanException ex) {
                 Exceptions.printStackTrace(ex);

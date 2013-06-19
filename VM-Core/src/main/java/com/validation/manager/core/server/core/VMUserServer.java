@@ -471,6 +471,27 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         }
     }
 
+    public static VmUser getUser(String username,
+            String password, boolean encrypt) {
+        try {
+            parameters.clear();
+            parameters.put("username", username);
+            parameters.put("password", encrypt
+                    ? MD5.encrypt(password.replaceAll("'", "\\\\'")) : password);
+            if (validCredentials(username, password, encrypt)) {
+                return (VmUser) DataBaseManager.createdQuery("SELECT x FROM VmUser x "
+                        + "WHERE x.username = :username and x.password = :password",
+                        parameters).get(0);
+            } else {
+                return null;
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+
+        }
+    }
+
     public VmUser getEntity() {
         return new VmUserJpaController(
                 DataBaseManager.getEntityManagerFactory())
