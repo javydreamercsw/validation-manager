@@ -254,6 +254,7 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
             }
             top.add(node);
         }
+        source.setModel(new javax.swing.tree.DefaultTreeModel(top));
     }
 
     private class InternalRenderer extends DefaultTreeCellRenderer {
