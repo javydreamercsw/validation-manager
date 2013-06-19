@@ -3,6 +3,7 @@ package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestProjectServer;
 import java.util.Arrays;
 import javax.swing.ImageIcon;
@@ -137,11 +138,13 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
             if (!notes.getText().isEmpty()) {
                 tps.setNotes(notes.getText());
             }
-            if (selectedProject != null) {
-                tps.setProjectList(Arrays.asList(new Project[]{selectedProject}));
-            }
             try {
                 tps.write2DB();
+                if (selectedProject != null) {
+                    ProjectServer ps = new ProjectServer(selectedProject);
+                    ps.getTestProjectList().add(tps.getEntity());
+                    ps.write2DB();
+                }
             } catch (IllegalOrphanException ex) {
                 Exceptions.printStackTrace(ex);
             } catch (NonexistentEntityException ex) {
