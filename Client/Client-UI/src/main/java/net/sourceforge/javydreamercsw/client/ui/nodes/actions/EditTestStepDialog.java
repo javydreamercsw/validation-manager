@@ -247,11 +247,17 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             } else {
                 tc = Utilities.actionsGlobalContext().lookup(TestCase.class);
                 TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
-                ss = new StepServer(tc, 
+                ss = new StepServer(tc,
                         tcs.getStepList() == null ? 1 : tcs.getStepList().size() + 1, //Add at the end by default
                         text.getText().trim());
             }
             try {
+                if (!text.getText().trim().isEmpty()) {
+                    ss.setText(text.getText().trim().getBytes("UTF-8"));
+                }
+                if (!notes.getText().trim().isEmpty()) {
+                    ss.setNotes(notes.getText().trim());
+                }
                 if (!result.getText().trim().isEmpty()) {
                     ss.setExpectedResult(result.getText().getBytes("UTF-8"));
                 }
@@ -286,8 +292,8 @@ public class EditTestStepDialog extends javax.swing.JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                final RequirementSelectionDialog dialog =
-                        new RequirementSelectionDialog(new javax.swing.JFrame(),
+                final RequirementSelectionDialog dialog
+                        = new RequirementSelectionDialog(new javax.swing.JFrame(),
                         true, linkedRequirements);
                 dialog.setLocationRelativeTo(null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
