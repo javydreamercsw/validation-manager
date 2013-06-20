@@ -39,13 +39,13 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  */
 public class StepImporter implements ImporterInterface<Step> {
 
-    private File toImport;
-    private List<Step> steps = new ArrayList<Step>();
+    private final File toImport;
+    private final List<Step> steps = new ArrayList<Step>();
     private final TestCase tc;
     private static final Logger LOG =
             Logger.getLogger(StepImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
-    private static ResourceBundle rb =
+    private static final ResourceBundle rb =
             ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages", Locale.getDefault());
 
