@@ -36,8 +36,8 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  */
 public class RequirementImporter implements ImporterInterface<Requirement>{
 
-    private File toImport;
-    private ArrayList<Requirement> requirements = new ArrayList<Requirement>();
+    private final File toImport;
+    private final ArrayList<Requirement> requirements = new ArrayList<Requirement>();
     private final RequirementSpecNode rsn;
     private static final Logger LOG =
             Logger.getLogger(RequirementImporter.class.getName());
