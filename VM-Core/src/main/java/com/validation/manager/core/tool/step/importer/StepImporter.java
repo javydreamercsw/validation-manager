@@ -204,7 +204,9 @@ public class StepImporter implements ImporterInterface<Step> {
                     LOG.log(Level.SEVERE, null, ex);
                 } finally {
                     try {
-                        inp.close();
+                        if (inp != null) {
+                            inp.close();
+                        }
                     } catch (IOException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }

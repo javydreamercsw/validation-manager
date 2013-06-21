@@ -132,7 +132,7 @@
         <!--<module>Validation-Manager-Web</module>-->
         <module>VM-Core</module>
         <module>Client</module>
-    <module>ValidationManager</module>
-    <module>WebServiceClient</module>
-  </modules>
+        <module>ValidationManager</module>
+        <module>WebServiceClient</module>
+    </modules>
 </project>
