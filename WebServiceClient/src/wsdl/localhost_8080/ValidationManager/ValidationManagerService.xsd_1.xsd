@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is JAX-WS RI 2.1.5-hudson-$BUILD_NUMBER-. --><xs:schema xmlns:tns="http://service.manager.validation.com/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://service.manager.validation.com/">
+
+<xs:element name="getProjects" type="tns:getProjects" />
+
+<xs:element name="getProjectsResponse" type="tns:getProjectsResponse" />
+
+<xs:element name="login" type="tns:login" />
+
+<xs:element name="loginResponse" type="tns:loginResponse" />
+
+<xs:element name="project" type="tns:project" />
+
+<xs:element name="userStatus" type="tns:userStatus" />
+
+<xs:element name="vmUser" type="tns:vmUser" />
+
+<xs:complexType name="getProjects">
+<xs:sequence>
+<xs:element name="user" type="tns:vmUser" minOccurs="0" />
+<xs:element name="project" type="tns:project" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="vmUser">
+<xs:complexContent>
+<xs:extension base="tns:vmAuditedObject">
+<xs:sequence>
+<xs:element name="attempts" type="xs:int" />
+<xs:element name="email" type="xs:string" minOccurs="0" />
+<xs:element name="first" type="xs:string" minOccurs="0" />
+<xs:element name="id" type="xs:int" minOccurs="0" />
+<xs:element name="last" type="xs:string" minOccurs="0" />
+<xs:element name="lastModified" type="xs:dateTime" minOccurs="0" />
+<xs:element name="locale" type="xs:string" minOccurs="0" />
+<xs:element name="password" type="xs:string" minOccurs="0" />
+<xs:element name="userStatusId" type="tns:userStatus" minOccurs="0" />
+<xs:element name="username" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:extension>
+</xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="vmAuditedObject">
+<xs:sequence>
+<xs:element name="modDate" type="xs:dateTime" minOccurs="0" />
+<xs:element name="auditable" type="xs:boolean" />
+<xs:element name="modificationReason" type="xs:string" minOccurs="0" />
+<xs:element name="modificationTime" type="xs:dateTime" minOccurs="0" />
+<xs:element name="modifierId" type="xs:int" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="userStatus">
+<xs:sequence>
+<xs:element name="description" type="xs:string" minOccurs="0" />
+<xs:element name="id" type="xs:int" minOccurs="0" />
+<xs:element name="status" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="project">
+<xs:sequence>
+<xs:element name="id" type="xs:int" minOccurs="0" />
+<xs:element name="name" type="xs:string" minOccurs="0" />
+<xs:element name="notes" type="xs:string" minOccurs="0" />
+<xs:element name="parentProjectId" type="tns:project" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="getProjectsResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:project" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="login">
+<xs:sequence>
+<xs:element name="name" type="xs:string" minOccurs="0" />
+<xs:element name="password" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="loginResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:vmUser" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+</xs:schema>
