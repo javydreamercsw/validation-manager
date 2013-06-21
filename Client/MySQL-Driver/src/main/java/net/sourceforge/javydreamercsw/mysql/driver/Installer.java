@@ -32,7 +32,7 @@ public class Installer extends ModuleInstall {
                                 JDBCDriver.create("mysql", "MySQL",
                                 mysqlDriverClass,
                                 new URL[]{new URL(
-                            "nbinst:/modules/ext/mysql/mysql-connector-java-5.1.25.jar")}));
+                            "nbinst:/modules/ext/com.validation.manager.mysql/1/mysql/mysql-connector-java.jar")}));
                     } catch (DatabaseException ex) {
                         Exceptions.printStackTrace(ex);
                     } catch (MalformedURLException ex) {
