@@ -43,6 +43,7 @@ public class StepServer extends Step implements EntityServer<Step> {
             update(temp, this);
             controller.create(temp);
             update(this, temp);
+            setStepPK(temp.getStepPK());
         }
         return getStepPK().getId();
     }
