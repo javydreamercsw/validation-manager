@@ -1,6 +1,7 @@
 package com.validation.manager.core.tool.requirement.importer;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
@@ -150,10 +151,6 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
-            RequirementImporter instance = new RequirementImporter(file,
-                    new RequirementSpecNodeJpaController(
-                    DataBaseManager.getEntityManagerFactory())
-                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -166,7 +163,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         try {
             instance.importFile();
             instance.processImport();
-        } catch (Exception e) {
+        } catch (VMException e) {
             System.out.println("Failed as expected!");
             exception = true;
         }

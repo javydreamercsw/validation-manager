@@ -2,6 +2,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNodePK;
 import com.validation.manager.core.db.controller.RequirementJpaController;
@@ -10,6 +11,7 @@ import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.List;
 
 /**
  *
@@ -87,5 +89,20 @@ public class RequirementServer extends Requirement implements EntityServer<Requi
         target.setStepList(source.getStepList());
         target.setUniqueId(source.getUniqueId());
         target.setRequirementPK(source.getRequirementPK());
+    }
+
+    public static boolean isDuplicate(Requirement req) {
+        //Must be unique within a project.
+        boolean result = true;
+        Project project =
+                req.getRequirementSpecNode().getRequirementSpec().getProject();
+        List<Requirement> requirements = ProjectServer.getRequirements(project);
+        for (Requirement r : requirements) {
+            if (r.getUniqueId().equals(req.getUniqueId())) {
+                result = false;
+                break;
+            }
+        }
+        return result;
     }
 }

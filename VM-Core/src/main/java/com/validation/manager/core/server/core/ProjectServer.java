@@ -3,6 +3,8 @@ package com.validation.manager.core.server.core;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -83,5 +85,17 @@ public class ProjectServer extends Project implements EntityServer<Project> {
             }
         }
         return children;
+    }
+
+    public static List<Requirement> getRequirements(Project project) {
+        List<Requirement> result = new ArrayList<Requirement>();
+        //Get requirements from sub projects.
+        for (Project sub : project.getProjectList()) {
+            result.addAll(ProjectServer.getRequirements(sub));
+        }
+        for(RequirementSpec rs:project.getRequirementSpecList()){
+            result.addAll(RequirementSpecServer.getRequirements(rs));
+        }
+        return result;
     }
 }

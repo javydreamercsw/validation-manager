@@ -11,6 +11,7 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.fmea.RiskControl;
 import com.validation.manager.core.server.fmea.RiskControlServer;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -39,7 +40,7 @@ public class TestCaseServer extends TestCase implements EntityServer<TestCase> {
         TestCaseJpaController controller = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
         if (getTestCasePK().getId() > 0) {
             TestCase temp = controller.findTestCase(getTestCasePK());
-             update(temp, this);
+            update(temp, this);
             controller.edit(temp);
         } else {
             TestCase temp = new TestCase(getTestCasePK(), getVersion(), getCreationDate());
@@ -73,8 +74,10 @@ public class TestCaseServer extends TestCase implements EntityServer<TestCase> {
         target.setCreationDate(source.getCreationDate());
         target.setAuthorId(source.getAuthorId());
         target.setExpectedResults(source.getExpectedResults());
-        target.setRiskControlList(source.getRiskControlList());
-        target.setStepList(source.getStepList());
+        target.setRiskControlList(source.getRiskControlList() == null
+                ? new ArrayList<RiskControl>() : source.getRiskControlList());
+        target.setStepList(source.getStepList() == null
+                ? new ArrayList<Step>() : source.getStepList());
         target.setIsOpen(source.getIsOpen());
         target.setSummary(source.getSummary());
         target.setTest(source.getTest());
