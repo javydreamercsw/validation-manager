@@ -588,7 +588,7 @@ public class DataBaseManager {
         Flyway flyway = new Flyway();
         try {
             flyway.setDataSource(dataSource);
-            flyway.setLocations("com.validation.manager.core.db.script");
+            flyway.setLocations("db.migration");
             LOG.info("Starting migration...");
             flyway.migrate();
             LOG.info("Done!");
