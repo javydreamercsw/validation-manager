@@ -2,11 +2,14 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -49,7 +52,7 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
             RequirementSpecNode rsn = new RequirementSpecNode();
             update(rsn, this);
             new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).create(rsn);
-            update(this, rsn);
+            setRequirementSpecNodePK(rsn.getRequirementSpecNodePK());
         }
         return getRequirementSpecNodePK().getId();
     }
@@ -68,5 +71,16 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         target.setRequirementSpec(source.getRequirementSpec());
         target.setRequirementSpecNode(source.getRequirementSpecNode());
         target.setRequirementSpecNodeList(source.getRequirementSpecNodeList());
+    }
+
+    public static List<Requirement> getRequirements(RequirementSpecNode rsn) {
+        List<Requirement> result = new ArrayList<Requirement>();
+        //Add the ones on this node
+        result.addAll(rsn.getRequirementList());
+        //And all the ones in the sub nodes
+        for (RequirementSpecNode srsn : rsn.getRequirementSpecNodeList()) {
+            result.addAll(RequirementSpecNodeServer.getRequirements(srsn));
+        }
+        return result;
     }
 }

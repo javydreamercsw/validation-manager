@@ -8,6 +8,7 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementJpaController;
+import com.validation.manager.core.server.core.RequirementServer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -34,7 +35,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementImporter implements ImporterInterface<Requirement>{
+public class RequirementImporter implements ImporterInterface<Requirement> {
 
     private File toImport;
     private ArrayList<Requirement> requirements = new ArrayList<Requirement>();
@@ -55,7 +56,7 @@ public class RequirementImporter implements ImporterInterface<Requirement>{
         this.rsn = rsn;
     }
 
-    public List<Requirement> importFile() throws RequirementImportException{
+    public List<Requirement> importFile() throws RequirementImportException {
         try {
             return importFile(false);
         } catch (UnsupportedOperationException ex) {
@@ -204,17 +205,22 @@ public class RequirementImporter implements ImporterInterface<Requirement>{
         }
     }
 
-    public boolean processImport() throws VMException{
+    public boolean processImport() throws VMException {
         if (requirements.isEmpty()) {
             return false;
         } else {
-            //TODO: If requirement exists, create a new version?
+            RequirementJpaController controller = new RequirementJpaController(
+                    DataBaseManager.getEntityManagerFactory());
             for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
                 try {
                     Requirement requirement = it.next();
-                    new RequirementJpaController(
-                            DataBaseManager.getEntityManagerFactory())
-                            .create(requirement);
+                    if (RequirementServer.isDuplicate(requirement)) {
+                        //TODO: If requirement exists, create a new version?
+                        throw new VMException("Detected duplicate requirement: " 
+                                + requirement.getUniqueId());
+                    } else {
+                        controller.create(requirement);
+                    }
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                     throw new VMException(ex);

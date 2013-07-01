@@ -12,6 +12,7 @@ import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -115,5 +116,13 @@ public class RequirementSpecServer extends RequirementSpec
         target.setName(source.getName());
         target.setVersion(source.getVersion());
         target.setModificationDate(source.getModificationDate());
+    }
+    
+    public static List<Requirement> getRequirements(RequirementSpec rs) {
+        List<Requirement> result = new ArrayList<Requirement>();
+        for(RequirementSpecNode rsn:rs.getRequirementSpecNodeList()){
+            result.addAll(RequirementSpecNodeServer.getRequirements(rsn));
+        }
+        return result;
     }
 }
