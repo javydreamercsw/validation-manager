@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Install: net/sourceforge/javydreamercsw/mysql/driver/Installer.class
+OpenIDE-Module-Localizing-Bundle: net/sourceforge/javydreamercsw/mysql/driver/Bundle.properties
