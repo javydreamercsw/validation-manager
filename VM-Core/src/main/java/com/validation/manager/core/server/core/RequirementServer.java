@@ -93,13 +93,13 @@ public class RequirementServer extends Requirement implements EntityServer<Requi
 
     public static boolean isDuplicate(Requirement req) {
         //Must be unique within a project.
-        boolean result = true;
+        boolean result = false;
         Project project =
                 req.getRequirementSpecNode().getRequirementSpec().getProject();
         List<Requirement> requirements = ProjectServer.getRequirements(project);
         for (Requirement r : requirements) {
             if (r.getUniqueId().equals(req.getUniqueId())) {
-                result = false;
+                result = true;
                 break;
             }
         }

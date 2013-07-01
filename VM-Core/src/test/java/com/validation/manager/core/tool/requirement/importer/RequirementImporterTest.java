@@ -58,7 +58,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             fail();
         }
         System.out.println("Create Requirement Spec Node");
-        RequirementSpecNode rsns = null;
+        RequirementSpecNode rsns;
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
@@ -66,7 +66,8 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                     new RequirementSpecNodeJpaController(
                     DataBaseManager.getEntityManagerFactory())
                     .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
-            instance.importFile();
+            //It has headers
+            instance.importFile(true);
             instance.processImport();
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -104,7 +105,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             fail();
         }
         System.out.println("Create Requirement Spec Node");
-        RequirementSpecNode rsns = null;
+        RequirementSpecNode rsns;
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
@@ -141,7 +142,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         RequirementSpec rss = null;
         try {
             rss = TestHelper.createRequirementSpec("Test", "Test",
-                    product, 1);
+                product, 1);
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -199,7 +200,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             fail();
         }
         System.out.println("Create Requirement Spec Node");
-        RequirementSpecNode rsns = null;
+        RequirementSpecNode rsns;
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
