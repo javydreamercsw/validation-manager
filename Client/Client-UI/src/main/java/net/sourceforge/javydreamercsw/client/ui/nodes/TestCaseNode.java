@@ -34,6 +34,7 @@ class TestCaseNode extends AbstractRefreshableBeanNode {
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateTestStepAction());
         actions.add(new ImportTestStepAction());
+        //TODO: actions.add(new DeleteTestStepAction());
         return actions.toArray(new Action[actions.size()]);
     }
 
