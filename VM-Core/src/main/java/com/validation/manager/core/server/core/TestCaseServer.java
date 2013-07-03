@@ -24,7 +24,7 @@ public class TestCaseServer extends TestCase implements EntityServer<TestCase> {
         super(pk);
         TestCaseJpaController controller = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
         TestCase temp = controller.findTestCase(getTestCasePK());
-        update(temp, this);
+        update(this, temp);
     }
 
     public TestCaseServer(int testCaseId, short version, Date creationDate) {

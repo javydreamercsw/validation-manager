@@ -35,9 +35,10 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  */
 @Entity
 @Table(name = "requirement", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"requirement_spec_node_id",
+    @UniqueConstraint(columnNames = {
         "requirement_spec_node_requirement_spec_project_id",
-        "requirement_spec_node_requirement_spec_spec_level_id", "unique_id"})})
+        "requirementPK.version",
+        "unique_id"})})
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Requirement.findAll", query = "SELECT r FROM Requirement r"),

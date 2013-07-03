@@ -116,4 +116,13 @@ public class RequirementSpecServer extends RequirementSpec
         target.setVersion(source.getVersion());
         target.setModificationDate(source.getModificationDate());
     }
+    
+    public static List<Requirement> getRequirements(RequirementSpec spec) {
+        List<Requirement> requirements = new ArrayList<Requirement>();
+        RequirementSpecServer rs = new RequirementSpecServer(spec);
+        for (RequirementSpecNode rsn:rs.getRequirementSpecNodeList()) {
+            requirements.addAll(RequirementSpecNodeServer.getRequirements(rsn));
+        }
+        return requirements;
+    }
 }
