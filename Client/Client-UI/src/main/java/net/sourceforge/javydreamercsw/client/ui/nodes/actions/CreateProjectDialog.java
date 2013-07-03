@@ -149,8 +149,8 @@ public class CreateProjectDialog extends AbstractCreationDialog {
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
-            dispose();
             ProjectExplorerComponent.refresh();
+            dispose();
         }
     }//GEN-LAST:event_saveActionPerformed
 
