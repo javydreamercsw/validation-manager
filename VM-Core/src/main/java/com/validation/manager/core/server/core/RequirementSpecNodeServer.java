@@ -42,18 +42,19 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
 
     @Override
     public int write2DB() throws Exception {
+        RequirementSpecNode rsn;
         if (getRequirementSpecNodePK() != null && getRequirementSpecNodePK().getId() > 0) {
-            RequirementSpecNode rsn = new RequirementSpecNodeJpaController(
+            rsn = new RequirementSpecNodeJpaController(
                     DataBaseManager.getEntityManagerFactory()).findRequirementSpecNode(
                     getRequirementSpecNodePK());
             update(rsn, this);
             new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).edit(rsn);
         } else {
-            RequirementSpecNode rsn = new RequirementSpecNode();
+            rsn = new RequirementSpecNode();
             update(rsn, this);
             new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).create(rsn);
-            setRequirementSpecNodePK(rsn.getRequirementSpecNodePK());
         }
+        update(this, rsn);
         return getRequirementSpecNodePK().getId();
     }
 
@@ -71,16 +72,18 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         target.setRequirementSpec(source.getRequirementSpec());
         target.setRequirementSpecNode(source.getRequirementSpecNode());
         target.setRequirementSpecNodeList(source.getRequirementSpecNodeList());
+        target.setRequirementSpecNodePK(source.getRequirementSpecNodePK());
     }
 
-    public static List<Requirement> getRequirements(RequirementSpecNode rsn) {
-        List<Requirement> result = new ArrayList<Requirement>();
-        //Add the ones on this node
-        result.addAll(rsn.getRequirementList());
-        //And all the ones in the sub nodes
-        for (RequirementSpecNode srsn : rsn.getRequirementSpecNodeList()) {
-            result.addAll(RequirementSpecNodeServer.getRequirements(srsn));
+    public static Collection<? extends Requirement> getRequirements(RequirementSpecNode rsn) {
+        List<Requirement> requirements = new ArrayList<Requirement>();
+        RequirementSpecNodeServer rsns = new RequirementSpecNodeServer(rsn);
+        for (Requirement rs : rsns.getRequirementList()) {
+            requirements.add(rs);
         }
-        return result;
+        for (RequirementSpecNode sub : rsns.getRequirementSpecNodeList()) {
+            requirements.addAll(getRequirements(sub));
+        }
+        return requirements;
     }
 }

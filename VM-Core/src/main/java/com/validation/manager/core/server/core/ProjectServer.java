@@ -87,15 +87,15 @@ public class ProjectServer extends Project implements EntityServer<Project> {
         return children;
     }
 
-    public static List<Requirement> getRequirements(Project project) {
-        List<Requirement> result = new ArrayList<Requirement>();
-        //Get requirements from sub projects.
-        for (Project sub : project.getProjectList()) {
-            result.addAll(ProjectServer.getRequirements(sub));
+    public static List<Requirement> getRequirements(Project p) {
+        ProjectServer project = new ProjectServer(p);
+        List<Requirement> requirements = new ArrayList<Requirement>();
+        for (RequirementSpec rs : project.getRequirementSpecList()) {
+            requirements.addAll(RequirementSpecServer.getRequirements(rs));
         }
-        for(RequirementSpec rs:project.getRequirementSpecList()){
-            result.addAll(RequirementSpecServer.getRequirements(rs));
+        for (Project sp : project.getProjectList()) {
+            requirements.addAll(getRequirements(sp));
         }
-        return result;
+        return requirements;
     }
 }
