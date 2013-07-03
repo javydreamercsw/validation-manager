@@ -65,7 +65,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                     new RequirementSpecNodeJpaController(
                     DataBaseManager.getEntityManagerFactory())
                     .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
-            instance.importFile();
+            instance.importFile(true);
             instance.processImport();
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -92,7 +92,6 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + name
                 + System.getProperty("file.separator") + "Reqs.xlsx");
         System.out.println(file.getAbsolutePath());
-        assertTrue(DataBaseManager.namedQuery("Requirement.findAll").isEmpty());
         System.out.println("Create Requirement Spec");
         RequirementSpec rss = null;
         try {
@@ -103,7 +102,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             fail();
         }
         System.out.println("Create Requirement Spec Node");
-        RequirementSpecNode rsns = null;
+        RequirementSpecNode rsns;
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
@@ -150,10 +149,6 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
-            RequirementImporter instance = new RequirementImporter(file,
-                    new RequirementSpecNodeJpaController(
-                    DataBaseManager.getEntityManagerFactory())
-                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
