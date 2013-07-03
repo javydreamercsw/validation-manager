@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static junit.framework.TestCase.assertEquals;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class StepImporterTest extends AbstractVMTestCase {
     public StepImporterTest() {
     }
 
-    private void testImportFile(String fileName) {
+    private int testImportFile(String fileName) {
         String name = StepImporterTest.class.getCanonicalName();
         Project project = TestHelper.createProject("Test Project", "Notes");
         name = name.substring(0, name.lastIndexOf("."));
@@ -49,7 +50,6 @@ public class StepImporterTest extends AbstractVMTestCase {
                 + name
                 + System.getProperty("file.separator") + fileName);
         System.out.println(file.getAbsolutePath());
-        assertTrue(DataBaseManager.namedQuery("Step.findAll").isEmpty());
         System.out.println("Create Test Project");
         TestProject tp = null;
         try {
@@ -145,9 +145,8 @@ public class StepImporterTest extends AbstractVMTestCase {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
-        assertFalse(DataBaseManager.namedQuery("Step.findAll").isEmpty());
         RequirementServer rs = new RequirementServer(r);
-        assertTrue(rs.getStepList().size() > 0);
+        return rs.getStepList().size();
     }
 
     /**
@@ -156,7 +155,18 @@ public class StepImporterTest extends AbstractVMTestCase {
     @Test
     public void testImportFilesXLS() {
         System.out.println("importFile (xls)");
-        testImportFile("Reqs.xls");
+        int initial = DataBaseManager.namedQuery("Requirement.findAll").size();
+        assertTrue(testImportFile("Reqs.xls") > 0);
+        assertTrue(initial < DataBaseManager.namedQuery("Requirement.findAll").size());
+    }
+
+    @Test
+    public void testImportInvalidFile() {
+        System.out.println("importFile (invalid)");
+        int initial = DataBaseManager.namedQuery("Requirement.findAll").size();
+        assertEquals(0, testImportFile("Fail_Columns.xls"));
+        assertEquals(initial + 1,
+                DataBaseManager.namedQuery("Requirement.findAll").size());//One created by test
     }
 
     /**
@@ -165,7 +175,8 @@ public class StepImporterTest extends AbstractVMTestCase {
     @Test
     public void testImportFileXLSX() {
         System.out.println("importFile (xlsx)");
-        testImportFile("Reqs.xlsx");
+        assertTrue(testImportFile("Reqs.xlsx") > 0);
+        assertFalse(DataBaseManager.namedQuery("Step.findAll").isEmpty());
     }
 
     @Test
