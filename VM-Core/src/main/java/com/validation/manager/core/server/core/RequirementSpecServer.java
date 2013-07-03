@@ -125,4 +125,13 @@ public class RequirementSpecServer extends RequirementSpec
         }
         return result;
     }
+    
+    public static List<Requirement> getRequirements(RequirementSpec spec) {
+        List<Requirement> requirements = new ArrayList<Requirement>();
+        RequirementSpecServer rs = new RequirementSpecServer(spec);
+        for (RequirementSpecNode rsn:rs.getRequirementSpecNodeList()) {
+            requirements.addAll(RequirementSpecNodeServer.getRequirements(rsn));
+        }
+        return requirements;
+    }
 }

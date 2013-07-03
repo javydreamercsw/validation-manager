@@ -32,7 +32,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  */
 @Entity
 @Table(name = "step",uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"testCaseId", "testCaseTestId", "sequence"})})
+    @UniqueConstraint(columnNames = {"testCaseId", "testCaseTestId", "stepSequence"})})
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Step.findAll", query = "SELECT s FROM Step s"),

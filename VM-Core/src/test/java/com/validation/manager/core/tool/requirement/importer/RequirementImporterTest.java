@@ -94,7 +94,6 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + name
                 + System.getProperty("file.separator") + "Reqs.xlsx");
         System.out.println(file.getAbsolutePath());
-        assertTrue(DataBaseManager.namedQuery("Requirement.findAll").isEmpty());
         System.out.println("Create Requirement Spec");
         RequirementSpec rss = null;
         try {

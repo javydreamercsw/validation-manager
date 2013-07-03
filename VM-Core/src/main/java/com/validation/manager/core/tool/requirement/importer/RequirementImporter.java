@@ -3,12 +3,13 @@ package com.validation.manager.core.tool.requirement.importer;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.ImporterInterface;
 import com.validation.manager.core.VMException;
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementJpaController;
-import com.validation.manager.core.server.core.RequirementServer;
+import com.validation.manager.core.server.core.ProjectServer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,11 +38,11 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  */
 public class RequirementImporter implements ImporterInterface<Requirement> {
 
-    private File toImport;
-    private ArrayList<Requirement> requirements = new ArrayList<Requirement>();
+    private final File toImport;
+    private final ArrayList<Requirement> requirements = new ArrayList<Requirement>();
     private final RequirementSpecNode rsn;
-    private static final Logger LOG =
-            Logger.getLogger(RequirementImporter.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(RequirementImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
 
     static {
@@ -52,19 +53,21 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     }
 
     public RequirementImporter(File toImport, RequirementSpecNode rsn) {
+        assert rsn != null : "Requirement Spec Node is null?";
         this.toImport = toImport;
         this.rsn = rsn;
     }
 
     public List<Requirement> importFile() throws RequirementImportException {
+        List<Requirement> importedRequirements = null;
         try {
-            return importFile(false);
+            importedRequirements = importFile(false);
         } catch (UnsupportedOperationException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
+        } catch (VMException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
-        return null;
+        return importedRequirements;
     }
 
     public List<Requirement> importFile(boolean header) throws
@@ -83,8 +86,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                 InputStream inp = null;
                 try {
                     inp = new FileInputStream(toImport);
-                    org.apache.poi.ss.usermodel.Workbook wb =
-                            WorkbookFactory.create(inp);
+                    org.apache.poi.ss.usermodel.Workbook wb
+                            = WorkbookFactory.create(inp);
                     org.apache.poi.ss.usermodel.Sheet sheet = wb.getSheetAt(0);
                     int rows = sheet.getPhysicalNumberOfRows();
                     int r = 0;
@@ -168,6 +171,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                             }
                             LOG.fine(value);
                         }
+                        //This shouldn't be null
+                        assert rsn != null : "Requirement Spec Node is null?";
                         requirement.setRequirementSpecNode(rsn);
                         parameters.clear();
                         parameters.put("status", "general.open");
@@ -206,28 +211,42 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     }
 
     public boolean processImport() throws VMException {
+        boolean result;
         if (requirements.isEmpty()) {
-            return false;
+            result = false;
         } else {
             RequirementJpaController controller = new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory());
             for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
                 try {
                     Requirement requirement = it.next();
-                    if (RequirementServer.isDuplicate(requirement)) {
-                        //TODO: If requirement exists, create a new version?
-                        throw new VMException("Detected duplicate requirement: " 
-                                + requirement.getUniqueId());
+                    boolean exists = false;
+                    Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
+                    List<Requirement> existing = ProjectServer.getRequirements(project);
+                    for (Requirement r : existing) {
+                        if (r.getUniqueId().equals(requirement.getUniqueId())) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (exists) {
+                        throw new Exception("Requirement "
+                                + requirement.getUniqueId()
+                                + " already exists on project "
+                                + project.getName());
                     } else {
-                        controller.create(requirement);
+                        new RequirementJpaController(
+                                DataBaseManager.getEntityManagerFactory())
+                                .create(requirement);
                     }
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                     throw new VMException(ex);
                 }
             }
-            return true;
+            result = true;
         }
+        return result;
     }
 
     public static File exportTemplate() throws FileNotFoundException, IOException, InvalidFormatException {
