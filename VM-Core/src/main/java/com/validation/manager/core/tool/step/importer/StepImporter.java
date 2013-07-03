@@ -39,14 +39,14 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  */
 public class StepImporter implements ImporterInterface<Step> {
 
-    private File toImport;
-    private List<Step> steps = new ArrayList<Step>();
+    private final File toImport;
+    private final List<Step> steps = new ArrayList<Step>();
     private final TestCase tc;
-    private static final Logger LOG =
-            Logger.getLogger(StepImporter.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(StepImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
-    private static ResourceBundle rb =
-            ResourceBundle.getBundle(
+    private static final ResourceBundle rb
+            = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages", Locale.getDefault());
 
     static {
@@ -65,12 +65,13 @@ public class StepImporter implements ImporterInterface<Step> {
     @Override
     public List<Step> importFile() throws
             RequirementImportException {
+        List<Step> importedSteps = null;
         try {
-            return importFile(false);
-        } catch (Exception ex) {
+            importedSteps = importFile(false);
+        } catch (RequirementImportException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
-        return null;
+        return importedSteps;
     }
 
     @Override
@@ -90,8 +91,8 @@ public class StepImporter implements ImporterInterface<Step> {
                 InputStream inp = null;
                 try {
                     inp = new FileInputStream(toImport);
-                    org.apache.poi.ss.usermodel.Workbook wb =
-                            WorkbookFactory.create(inp);
+                    org.apache.poi.ss.usermodel.Workbook wb
+                            = WorkbookFactory.create(inp);
                     org.apache.poi.ss.usermodel.Sheet sheet = wb.getSheetAt(0);
                     int rows = sheet.getPhysicalNumberOfRows();
                     int r = 0;
@@ -140,52 +141,52 @@ public class StepImporter implements ImporterInterface<Step> {
                             switch (c) {
                                 case 0:
                                     if (value != null) {
-                                        //Sequence
-                                        LOG.fine("Setting sequence");
-                                        step.setStepSequence(
-                                                Integer.valueOf(value.substring(0, value.indexOf("."))));
-                                    }
+                                    //Sequence
+                                    LOG.fine("Setting sequence");
+                                    step.setStepSequence(
+                                            Integer.valueOf(value.substring(0, value.indexOf("."))));
+                                }
                                     break;
                                 case 1:
                                     if (value != null) {
-                                        //Text
-                                        LOG.fine("Setting text");
-                                        step.setText(value.getBytes("UTF-8"));
-                                    }
+                                    //Text
+                                    LOG.fine("Setting text");
+                                    step.setText(value.getBytes("UTF-8"));
+                                }
                                     break;
                                 case 2:
                                     //Optional Related requirements
                                     if (value != null && !value.trim().isEmpty()) {
-                                        LOG.fine("Setting related requirements");
-                                        StringTokenizer st = new StringTokenizer(value, ",");
-                                        while (st.hasMoreTokens()) {
-                                            String token = st.nextToken().trim();
-                                            parameters.clear();
-                                            parameters.put("uniqueId", token);
-                                            result = DataBaseManager.namedQuery(
-                                                    "Requirement.findByUniqueId",
-                                                    parameters);
-                                            if (!result.isEmpty()) {
-                                                for (Object o : result) {
-                                                    step.getRequirementList().add((Requirement) o);
-                                                }
+                                    LOG.fine("Setting related requirements");
+                                    StringTokenizer st = new StringTokenizer(value, ",");
+                                    while (st.hasMoreTokens()) {
+                                        String token = st.nextToken().trim();
+                                        parameters.clear();
+                                        parameters.put("uniqueId", token);
+                                        result = DataBaseManager.namedQuery(
+                                                "Requirement.findByUniqueId",
+                                                parameters);
+                                        if (!result.isEmpty()) {
+                                            for (Object o : result) {
+                                                step.getRequirementList().add((Requirement) o);
                                             }
                                         }
                                     }
+                                }
                                     break;
                                 case 3:
                                     if (value != null) {
-                                        //Optional Expected result
-                                        LOG.fine("Setting expected result");
-                                        step.setExpectedResult(value.getBytes("UTF-8"));
-                                    }
+                                    //Optional Expected result
+                                    LOG.fine("Setting expected result");
+                                    step.setExpectedResult(value.getBytes("UTF-8"));
+                                }
                                     break;
                                 case 4:
                                     if (value != null) {
-                                        //Optional notes
-                                        LOG.fine("Setting notes");
-                                        step.setNotes(value);
-                                    }
+                                    //Optional notes
+                                    LOG.fine("Setting notes");
+                                    step.setNotes(value);
+                                }
                                     break;
 
                                 default:
@@ -224,22 +225,19 @@ public class StepImporter implements ImporterInterface<Step> {
 
     @Override
     public boolean processImport() throws VMException {
-        if (steps.isEmpty()) {
-            return false;
-        } else {
-            for (Iterator<Step> it = steps.iterator(); it.hasNext();) {
-                Step step = it.next();
-                try {
-                    new StepJpaController(
-                            DataBaseManager.getEntityManagerFactory())
-                            .create(step);
-                } catch (Exception ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                    throw new VMException(ex);
-                }
+        boolean result = false;
+        for (Iterator<Step> it = steps.iterator(); it.hasNext();) {
+            Step step = it.next();
+            try {
+                new StepJpaController(
+                        DataBaseManager.getEntityManagerFactory())
+                        .create(step);
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                throw new VMException(ex);
             }
-            return true;
         }
+        return result;
     }
 
     public static File exportTemplate() throws FileNotFoundException, IOException, InvalidFormatException {
