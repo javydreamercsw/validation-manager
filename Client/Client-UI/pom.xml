@@ -11,7 +11,7 @@
     <artifactId>Client-UI</artifactId>
     <packaging>nbm</packaging>
 
-    <name>Validation Manager Admin Client User Interface</name>
+    <name>User Interface</name>
 
     <dependencies>
         <dependency>

@@ -2,8 +2,10 @@ package net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.s
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.server.core.RequirementServer;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,7 +16,6 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.scene.AbstractHierarchyNode;
 import org.netbeans.api.visual.widget.Scene;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -22,8 +23,8 @@ import org.openide.util.Exceptions;
  */
 public class RequirementHierarchyNode extends AbstractHierarchyNode {
 
-    private static final Logger LOG =
-            Logger.getLogger(RequirementHierarchyNode.class.getSimpleName());
+    private static final Logger LOG
+            = Logger.getLogger(RequirementHierarchyNode.class.getSimpleName());
 
     public RequirementHierarchyNode(Object object, Scene scene) {
         super(object, scene);
@@ -40,10 +41,10 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
 
     @Override
     public Image getCurrentImage() {
+        BufferedImage image = null;
         try {
-            BufferedImage image;
-            //TODO: Handle partial coverage
-            int coverage = getCoverage();
+            int coverage = 
+                    new RequirementServer(((Requirement) object)).getTestCoverage();
             if (coverage == 100) {
                 image = ImageIO.read(getClass().getResource(
                         "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_green.png"));
@@ -57,29 +58,11 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
                 image = ImageIO.read(getClass().getResource(
                         "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_red.png"));
             }
-            return image;
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        return null;
-    }
 
-    private int getCoverage() {
-        int result = 0;
-        Requirement req = (Requirement) object;
-        //Has test cases and no related requirements
-        if (req.getStepList().size() > 0 && req.getRequirementList().isEmpty()) {
-            result = 100;
-        }//Has nothing
-        else if (req.getStepList().isEmpty() && req.getRequirementList().isEmpty()) {
-            result = 0;
-        } else {
-            //TODO: Need to calculate amount of related requirements
-            
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
-        LOG.log(Level.INFO, "{0} Coverage: {1}",
-                new Object[]{req.getUniqueId(), result});
-        return result;
+        return image;
     }
 
     private List<Requirement> getChildRequirements() {
@@ -101,8 +84,8 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
 
     @Override
     protected List<AbstractHierarchyNode> getNodeChildren() {
-        ArrayList<AbstractHierarchyNode> children =
-                new ArrayList<AbstractHierarchyNode>();
+        ArrayList<AbstractHierarchyNode> children
+                = new ArrayList<AbstractHierarchyNode>();
         //Clear and recreate
         Requirement req = (Requirement) object;
         LOG.log(Level.INFO, "Updating children for {0}", req.getUniqueId());

@@ -11,7 +11,7 @@
     <artifactId>VM-Core-Wrapper</artifactId>
     <packaging>nbm</packaging>
 
-    <name>Validation Manager Core Wrapper</name>
+    <name>Core Wrapper</name>
 
     <dependencies>
         <dependency>

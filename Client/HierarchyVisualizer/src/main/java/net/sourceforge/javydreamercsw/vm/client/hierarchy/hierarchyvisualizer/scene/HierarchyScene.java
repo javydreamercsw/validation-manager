@@ -27,13 +27,13 @@ import org.netbeans.api.visual.widget.Widget;
  */
 public class HierarchyScene extends GraphScene<Object, Object> {
 
-    private LayerWidget mainLayer, connectionLayer, interactionLayer;
-    private Map<Object, Widget> widgets = new HashMap<Object, Widget>();
+    private final LayerWidget mainLayer, connectionLayer, interactionLayer;
+    private final Map<Object, Widget> widgets = new HashMap<Object, Widget>();
     private static final Logger LOG =
             Logger.getLogger(HierarchyScene.class.getSimpleName());
     private final int horizontalGap = 100;
     private final int verticalGap = 25;
-    private ArrayList<LayerWidget> layersToClear = new ArrayList<LayerWidget>();
+    private final ArrayList<LayerWidget> layersToClear = new ArrayList<LayerWidget>();
 
     public HierarchyScene() {
         mainLayer = new LayerWidget(this);

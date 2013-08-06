@@ -41,11 +41,11 @@ import org.openide.util.lookup.Lookups;
 })
 public final class HierarchyViewerTopComponent extends TopComponent implements LookupListener {
 
-    private Lookup.Result<Requirement> result =
+    private final Lookup.Result<Requirement> result =
             Utilities.actionsGlobalContext().lookupResult(Requirement.class);
     private static final Logger LOG =
             Logger.getLogger(HierarchyViewerTopComponent.class.getSimpleName());
-    private HierarchyScene scene;
+    private final HierarchyScene scene;
     private final JComponent myView;
 
     public HierarchyViewerTopComponent() {
