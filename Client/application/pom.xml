@@ -11,7 +11,7 @@
     <artifactId>Client-app</artifactId>
     <packaging>nbm-application</packaging>
 
-    <name>Validation Manager Admin Client</name>
+    <name>Admin Client</name>
     
     <ciManagement>
         <system>hudson</system>

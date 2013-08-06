@@ -17,34 +17,33 @@ public class DataBaseTool {
     private static EntityManagerFactory emf;
 
     public static void connect() {
-        if (getEmf() == null) {
-            final DatabaseSelection dialog = new DatabaseSelection(new javax.swing.JFrame(), true);
-            if (ProjectExplorerComponent.getConnection() == null) {
-                dialog.setVisible(true);
+        final DatabaseSelection dialog = 
+                new DatabaseSelection(new javax.swing.JFrame(), true);
+        if (ProjectExplorerComponent.getConnection() == null) {
+            dialog.setVisible(true);
+        }
+        while (dialog.isVisible()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Exceptions.printStackTrace(ex);
             }
-            while (dialog.isVisible()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            }
-            DatabaseConnection conn = ProjectExplorerComponent.getConnection();
-            if (conn != null) {
-                Map addedOrOverridenProperties = new HashMap();
-                addedOrOverridenProperties.put("javax.persistence.jdbc.url",
-                        conn.getDatabaseURL());
-                addedOrOverridenProperties.put("javax.persistence.jdbc.password",
-                        conn.getPassword());
-                addedOrOverridenProperties.put("javax.persistence.jdbc.driver",
-                        conn.getDriverClass());
-                addedOrOverridenProperties.put("javax.persistence.jdbc.user",
-                        conn.getUser());
-                emf = Persistence.createEntityManagerFactory(
-                        DataBaseManager.getPersistenceUnitName(),
-                        addedOrOverridenProperties);
-                DataBaseManager.setEntityManagerFactory(getEmf());
-            }
+        }
+        DatabaseConnection conn = ProjectExplorerComponent.getConnection();
+        if (conn != null) {
+            Map addedOrOverridenProperties = new HashMap();
+            addedOrOverridenProperties.put("javax.persistence.jdbc.url",
+                    conn.getDatabaseURL());
+            addedOrOverridenProperties.put("javax.persistence.jdbc.password",
+                    conn.getPassword());
+            addedOrOverridenProperties.put("javax.persistence.jdbc.driver",
+                    conn.getDriverClass());
+            addedOrOverridenProperties.put("javax.persistence.jdbc.user",
+                    conn.getUser());
+            emf = Persistence.createEntityManagerFactory(
+                    DataBaseManager.getPersistenceUnitName(),
+                    addedOrOverridenProperties);
+            DataBaseManager.setEntityManagerFactory(getEmf());
         }
     }
 

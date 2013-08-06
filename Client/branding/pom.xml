@@ -11,11 +11,7 @@
   <artifactId>vm-client-branding</artifactId>
   <packaging>nbm</packaging>
 
-  <name>Validation Manager Client Branding</name>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  <name>Branding</name>
 
   <dependencies>
     <dependency>
