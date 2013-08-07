@@ -52,7 +52,6 @@ public final class HierarchyViewerTopComponent extends TopComponent implements L
         initComponents();
         setName(Bundle.CTL_HierarchyViewerTopComponent());
         setToolTipText(Bundle.HINT_HierarchyViewerTopComponent());
-        result.addLookupListener((HierarchyViewerTopComponent) this);
 
         scene = new HierarchyScene();
         myView = scene.createView();
@@ -89,12 +88,12 @@ public final class HierarchyViewerTopComponent extends TopComponent implements L
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
-        // TODO add custom code on component opening
+        result.addLookupListener((HierarchyViewerTopComponent) this);
     }
 
     @Override
     public void componentClosed() {
-        // TODO add custom code on component closing
+        result.removeLookupListener((HierarchyViewerTopComponent) this);
     }
 
     void writeProperties(java.util.Properties p) {
