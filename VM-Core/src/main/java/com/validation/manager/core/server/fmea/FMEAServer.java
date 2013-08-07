@@ -60,4 +60,8 @@ public class FMEAServer extends FMEA implements EntityServer<FMEA> {
         target.setParent(source.getParent());
         target.setRiskItemList(source.getRiskItemList());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

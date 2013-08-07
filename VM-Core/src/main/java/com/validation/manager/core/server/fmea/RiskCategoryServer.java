@@ -55,4 +55,8 @@ public class RiskCategoryServer extends RiskCategory
         target.setMaximum(source.getMaximum());
         target.setMinimum(source.getMinimum());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

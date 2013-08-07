@@ -19,13 +19,18 @@ import java.util.Iterator;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestCaseServer extends TestCase implements EntityServer<TestCase> {
+public final class TestCaseServer extends TestCase implements EntityServer<TestCase> {
 
     public TestCaseServer(TestCasePK pk) {
         super(pk);
-        TestCaseJpaController controller = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
+        TestCaseJpaController controller 
+                = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
         TestCase temp = controller.findTestCase(getTestCasePK());
         update(this, temp);
+    }
+    
+    public TestCaseServer(TestCase tc) {
+        update(this, tc);
     }
 
     public TestCaseServer(int testCaseId, short version, Date creationDate) {
@@ -82,5 +87,10 @@ public class TestCaseServer extends TestCase implements EntityServer<TestCase> {
         target.setSummary(source.getSummary());
         target.setTest(source.getTest());
         target.setVersion(source.getVersion());
+        target.setTestCasePK(source.getTestCasePK());
+    }
+    
+    public void update() {
+        update(this, getEntity());
     }
 }

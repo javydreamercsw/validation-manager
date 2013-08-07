@@ -55,4 +55,8 @@ public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel
             target.setRequirementSpecList(source.getRequirementSpecList());
         }
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

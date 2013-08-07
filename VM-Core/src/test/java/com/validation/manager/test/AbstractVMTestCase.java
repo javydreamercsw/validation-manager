@@ -17,8 +17,6 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 import junit.framework.TestCase;
 import org.h2.jdbcx.JdbcDataSource;
-import org.junit.After;
-import org.junit.Before;
 
 /**
  *
@@ -42,10 +40,11 @@ public abstract class AbstractVMTestCase extends TestCase {
         DataBaseManager.setPersistenceUnitName("TestVMPU");
         assertTrue(DataBaseManager.getState().equals(DBState.VALID));
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         if (deleteDatabase) {
+            deleteDatabase = false;
             Connection conn = null;
             Statement stmt = null;
             try {

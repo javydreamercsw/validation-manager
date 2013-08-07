@@ -93,4 +93,8 @@ public class UserTestProjectRoleServer extends UserTestProjectRole
         target.setTestProject(source.getTestProject());
         target.setVmUser(source.getVmUser());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

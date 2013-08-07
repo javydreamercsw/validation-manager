@@ -79,10 +79,7 @@ public class Requirement implements Serializable {
         @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
         @JoinColumn(name = "parent_requirement_id", referencedColumnName = "id"),
         @JoinColumn(name = "parent_requirement_version", referencedColumnName = "version")})
-    @ManyToMany
     private List<Requirement> requirementList;
-    @ManyToMany(mappedBy = "requirementList")
-    private List<Requirement> requirementList1;
     @JoinTable(name = "step_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
         @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
@@ -163,16 +160,6 @@ public class Requirement implements Serializable {
 
     public void setRequirementList(List<Requirement> requirementList) {
         this.requirementList = requirementList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<Requirement> getRequirementList1() {
-        return requirementList1;
-    }
-
-    public void setRequirementList1(List<Requirement> requirementList1) {
-        this.requirementList1 = requirementList1;
     }
 
     @XmlTransient

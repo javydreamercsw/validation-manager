@@ -21,9 +21,6 @@ public class ProjectTest extends AbstractVMTestCase {
     private static final Logger LOG=
             Logger.getLogger(ProjectTest.class.getName());
 
-    public ProjectTest() {
-    }
-
     @After
     public void clear() {
         if (p != null) {
@@ -77,7 +74,7 @@ public class ProjectTest extends AbstractVMTestCase {
             //Add steps
             for (int i = 1; i < 6; i++) {
                 tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
-                tc.getStepList().get(0).getRequirementList().add(r);
+                TestHelper.addRequirementToStep(tc.getStepList().get(0), r);
                 new TestCaseServer(tc.getTestCasePK()).write2DB();
                 assertTrue(tc.getStepList().get(0).getRequirementList().size() == 1);
             }

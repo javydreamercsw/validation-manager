@@ -23,6 +23,8 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -105,8 +107,8 @@ public class StepImporter implements ImporterInterface<Step> {
                         if (row == null) {
                             continue;
                         }
-
                         int cells = row.getPhysicalNumberOfCells();
+
                         if (cells < 2) {
                             throw new RequirementImportException(
                                     rb.getString("message.step.import.missing.column")
@@ -126,16 +128,14 @@ public class StepImporter implements ImporterInterface<Step> {
                                     case Cell.CELL_TYPE_FORMULA:
                                         value = cell.getCellFormula();
                                         break;
-
                                     case Cell.CELL_TYPE_NUMERIC:
                                         value = "" + cell.getNumericCellValue();
                                         break;
-
                                     case Cell.CELL_TYPE_STRING:
                                         value = cell.getStringCellValue();
                                         break;
-
                                     default:
+                                        //Do nothing.
                                 }
                             }
                             switch (c) {
@@ -281,15 +281,16 @@ public class StepImporter implements ImporterInterface<Step> {
     }
 
     public static void main(String[] args) {
-        try {
-            File file = exportTemplate();
-            System.out.println(file.getAbsolutePath());
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidFormatException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+        JFileChooser fc = new JFileChooser();
+        int returnVal = fc.showOpenDialog(new JFrame());
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            StepImporter si = new StepImporter(file, null);
+            try {
+                si.importFile(true);
+            } catch (RequirementImportException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
         }
     }
 }

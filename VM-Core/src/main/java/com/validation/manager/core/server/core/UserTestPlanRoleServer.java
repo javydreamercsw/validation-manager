@@ -59,4 +59,8 @@ public class UserTestPlanRoleServer extends UserTestPlanRole
         target.setTestPlan(source.getTestPlan());
         target.setVmUser(source.getVmUser());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

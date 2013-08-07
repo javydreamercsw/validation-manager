@@ -53,4 +53,8 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
         target.setName(source.getName());
         target.setRiskItemList(source.getRiskItemList());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

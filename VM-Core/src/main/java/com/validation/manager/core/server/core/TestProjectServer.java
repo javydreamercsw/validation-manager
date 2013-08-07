@@ -51,4 +51,8 @@ public class TestProjectServer extends TestProject
         target.setNotes(source.getNotes());
         target.setId(source.getId());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

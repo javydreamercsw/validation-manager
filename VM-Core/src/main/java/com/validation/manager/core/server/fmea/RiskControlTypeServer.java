@@ -57,4 +57,8 @@ public class RiskControlTypeServer extends RiskControlType
             target.setRiskControlList(source.getRiskControlList());
         }
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

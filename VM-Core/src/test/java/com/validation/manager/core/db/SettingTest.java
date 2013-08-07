@@ -13,12 +13,6 @@ import org.junit.Test;
  */
 public class SettingTest extends AbstractVMTestCase {
 
-    /**
-     * Default constructor.
-     */
-    public SettingTest() {
-    }
-
     @Test
     @SuppressWarnings({"unchecked"})
     public void testSettings() {

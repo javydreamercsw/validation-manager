@@ -63,7 +63,7 @@ public class DataBaseManager {
     private static final Logger LOG =
             Logger.getLogger(DataBaseManager.class.getSimpleName());
     private static DBState state;
-    private static ResourceBundle settings =
+    private static final ResourceBundle settings =
             ResourceBundle.getBundle("com.validation.manager.resources.settings");
     private static boolean locked = false;
     private static boolean usingContext;

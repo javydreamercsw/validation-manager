@@ -13,7 +13,6 @@
     <packaging>jar</packaging>
 
     <name>VM-Core</name>
-    <url>http://maven.apache.org</url>
     
     <dependencies>
         <!--Flyway, Database update-->
@@ -71,6 +70,12 @@
             <artifactId>jackson-core-asl</artifactId>
             <version>1.9.12</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.25</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 </project>

@@ -115,6 +115,8 @@ public class RequirementSpecServer extends RequirementSpec
         target.setName(source.getName());
         target.setVersion(source.getVersion());
         target.setModificationDate(source.getModificationDate());
+        target.setRequirementSpecNodeList(source.getRequirementSpecNodeList());
+        target.setRequirementSpecPK(source.getRequirementSpecPK());
     }
 
     public static List<Requirement> getRequirements(RequirementSpec spec) {
@@ -124,5 +126,9 @@ public class RequirementSpecServer extends RequirementSpec
             requirements.addAll(RequirementSpecNodeServer.getRequirements(rsn));
         }
         return requirements;
+    }
+    
+    public void update() {
+        update(this, getEntity());
     }
 }

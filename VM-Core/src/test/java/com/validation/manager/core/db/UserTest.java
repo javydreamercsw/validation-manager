@@ -17,12 +17,6 @@ import org.junit.Test;
  */
 public class UserTest extends AbstractVMTestCase {
 
-    /**
-     * Default constructor.
-     */
-    public UserTest() {
-    }
-
     @Test
     @SuppressWarnings({"unchecked"})
     public void testCreateAndDeleteUser() {

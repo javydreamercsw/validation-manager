@@ -54,4 +54,8 @@ public class CauseServer extends Cause implements EntityServer<Cause> {
             target.setRiskItemList(source.getRiskItemList());
         }
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }
