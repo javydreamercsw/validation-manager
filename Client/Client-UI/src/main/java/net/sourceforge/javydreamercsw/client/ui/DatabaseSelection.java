@@ -12,8 +12,8 @@ import org.netbeans.api.db.explorer.DatabaseConnection;
  */
 public class DatabaseSelection extends javax.swing.JDialog {
 
-    private final List<DatabaseConnection> connections =
-            Arrays.asList(ConnectionManager.getDefault().getConnections());
+    private final List<DatabaseConnection> connections
+            = Arrays.asList(ConnectionManager.getDefault().getConnections());
     private DatabaseConnection selected = null;
 
     /**
@@ -105,8 +105,7 @@ public class DatabaseSelection extends javax.swing.JDialog {
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void selectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectButtonActionPerformed
-        if (connectionList.getSelectedIndex() == -1) {
-        } else {
+        if (connectionList.getSelectedIndex() != -1) {
             selected = connections.get(connectionList.getSelectedIndex());
             //Now, set this as the connection
             ProjectExplorerComponent.setConnection(selected);
