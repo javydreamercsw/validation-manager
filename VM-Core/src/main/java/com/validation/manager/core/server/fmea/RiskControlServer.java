@@ -62,4 +62,8 @@ public class RiskControlServer extends RiskControl
         target.setRiskItemList1(source.getRiskItemList1());
         target.setTestCaseList(source.getTestCaseList());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

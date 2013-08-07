@@ -73,6 +73,7 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         target.setRequirementSpecNode(source.getRequirementSpecNode());
         target.setRequirementSpecNodeList(source.getRequirementSpecNodeList());
         target.setRequirementSpecNodePK(source.getRequirementSpecNodePK());
+        target.setRequirementList(source.getRequirementList());
     }
 
     public static Collection<? extends Requirement> getRequirements(RequirementSpecNode rsn) {
@@ -85,5 +86,9 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
             requirements.addAll(getRequirements(sub));
         }
         return requirements;
+    }
+    
+    public void update() {
+        update(this, getEntity());
     }
 }

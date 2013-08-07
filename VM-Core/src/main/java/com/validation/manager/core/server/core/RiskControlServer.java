@@ -70,4 +70,8 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
         target.setRequirementList(source.getRequirementList());
         target.setRiskControlType(source.getRiskControlType());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

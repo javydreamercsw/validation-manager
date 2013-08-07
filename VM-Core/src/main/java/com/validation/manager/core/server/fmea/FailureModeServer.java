@@ -55,4 +55,8 @@ public class FailureModeServer extends FailureMode
             target.setRiskItemList(source.getRiskItemList());
         }
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

@@ -68,4 +68,8 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
         target.setSequence(source.getSequence());
         target.setVersion(source.getVersion());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

@@ -98,4 +98,8 @@ public class ProjectServer extends Project implements EntityServer<Project> {
         }
         return requirements;
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

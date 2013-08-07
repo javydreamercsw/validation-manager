@@ -47,9 +47,6 @@ public class RequirementJpaController implements Serializable {
         if (requirement.getRequirementList() == null) {
             requirement.setRequirementList(new ArrayList<Requirement>());
         }
-        if (requirement.getRequirementList1() == null) {
-            requirement.setRequirementList1(new ArrayList<Requirement>());
-        }
         if (requirement.getStepList() == null) {
             requirement.setStepList(new ArrayList<Step>());
         }
@@ -84,12 +81,6 @@ public class RequirementJpaController implements Serializable {
                 attachedRequirementList.add(requirementListRequirementToAttach);
             }
             requirement.setRequirementList(attachedRequirementList);
-            List<Requirement> attachedRequirementList1 = new ArrayList<Requirement>();
-            for (Requirement requirementList1RequirementToAttach : requirement.getRequirementList1()) {
-                requirementList1RequirementToAttach = em.getReference(requirementList1RequirementToAttach.getClass(), requirementList1RequirementToAttach.getRequirementPK());
-                attachedRequirementList1.add(requirementList1RequirementToAttach);
-            }
-            requirement.setRequirementList1(attachedRequirementList1);
             List<Step> attachedStepList = new ArrayList<Step>();
             for (Step stepListStepToAttach : requirement.getStepList()) {
                 stepListStepToAttach = em.getReference(stepListStepToAttach.getClass(), stepListStepToAttach.getStepPK());
@@ -124,10 +115,6 @@ public class RequirementJpaController implements Serializable {
             for (Requirement requirementListRequirement : requirement.getRequirementList()) {
                 requirementListRequirement.getRequirementList().add(requirement);
                 requirementListRequirement = em.merge(requirementListRequirement);
-            }
-            for (Requirement requirementList1Requirement : requirement.getRequirementList1()) {
-                requirementList1Requirement.getRequirementList().add(requirement);
-                requirementList1Requirement = em.merge(requirementList1Requirement);
             }
             for (Step stepListStep : requirement.getStepList()) {
                 stepListStep.getRequirementList().add(requirement);
@@ -173,8 +160,6 @@ public class RequirementJpaController implements Serializable {
             RequirementSpecNode requirementSpecNodeNew = requirement.getRequirementSpecNode();
             List<Requirement> requirementListOld = persistentRequirement.getRequirementList();
             List<Requirement> requirementListNew = requirement.getRequirementList();
-            List<Requirement> requirementList1Old = persistentRequirement.getRequirementList1();
-            List<Requirement> requirementList1New = requirement.getRequirementList1();
             List<Step> stepListOld = persistentRequirement.getStepList();
             List<Step> stepListNew = requirement.getStepList();
             List<RequirementHasException> requirementHasExceptionListOld = persistentRequirement.getRequirementHasExceptionList();
@@ -212,13 +197,6 @@ public class RequirementJpaController implements Serializable {
             }
             requirementListNew = attachedRequirementListNew;
             requirement.setRequirementList(requirementListNew);
-            List<Requirement> attachedRequirementList1New = new ArrayList<Requirement>();
-            for (Requirement requirementList1NewRequirementToAttach : requirementList1New) {
-                requirementList1NewRequirementToAttach = em.getReference(requirementList1NewRequirementToAttach.getClass(), requirementList1NewRequirementToAttach.getRequirementPK());
-                attachedRequirementList1New.add(requirementList1NewRequirementToAttach);
-            }
-            requirementList1New = attachedRequirementList1New;
-            requirement.setRequirementList1(requirementList1New);
             List<Step> attachedStepListNew = new ArrayList<Step>();
             for (Step stepListNewStepToAttach : stepListNew) {
                 stepListNewStepToAttach = em.getReference(stepListNewStepToAttach.getClass(), stepListNewStepToAttach.getStepPK());
@@ -275,18 +253,6 @@ public class RequirementJpaController implements Serializable {
                 if (!requirementListOld.contains(requirementListNewRequirement)) {
                     requirementListNewRequirement.getRequirementList().add(requirement);
                     requirementListNewRequirement = em.merge(requirementListNewRequirement);
-                }
-            }
-            for (Requirement requirementList1OldRequirement : requirementList1Old) {
-                if (!requirementList1New.contains(requirementList1OldRequirement)) {
-                    requirementList1OldRequirement.getRequirementList().remove(requirement);
-                    requirementList1OldRequirement = em.merge(requirementList1OldRequirement);
-                }
-            }
-            for (Requirement requirementList1NewRequirement : requirementList1New) {
-                if (!requirementList1Old.contains(requirementList1NewRequirement)) {
-                    requirementList1NewRequirement.getRequirementList().add(requirement);
-                    requirementList1NewRequirement = em.merge(requirementList1NewRequirement);
                 }
             }
             for (Step stepListOldStep : stepListOld) {
@@ -383,11 +349,6 @@ public class RequirementJpaController implements Serializable {
             for (Requirement requirementListRequirement : requirementList) {
                 requirementListRequirement.getRequirementList().remove(requirement);
                 requirementListRequirement = em.merge(requirementListRequirement);
-            }
-            List<Requirement> requirementList1 = requirement.getRequirementList1();
-            for (Requirement requirementList1Requirement : requirementList1) {
-                requirementList1Requirement.getRequirementList().remove(requirement);
-                requirementList1Requirement = em.merge(requirementList1Requirement);
             }
             List<Step> stepList = requirement.getStepList();
             for (Step stepListStep : stepList) {

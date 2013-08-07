@@ -78,4 +78,8 @@ public class TestServer extends Test implements EntityServer<Test> {
             target.setTestPlanHasTestList(source.getTestPlanHasTestList());
         }
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

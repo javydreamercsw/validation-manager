@@ -71,4 +71,8 @@ public class StepServer extends Step implements EntityServer<Step> {
         target.setText(source.getText());
         target.setVmExceptionList(source.getVmExceptionList());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }
