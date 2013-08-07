@@ -10,6 +10,9 @@ import javax.swing.ImageIcon;
  */
 public class EditRequirementAction extends AbstractAction {
 
+    private final EditRequirementWindowTopComponent component = 
+            new EditRequirementWindowTopComponent();
+
     public EditRequirementAction() {
         super("Edit Requirement",
                 new ImageIcon("com/validation/manager/resources/icons/Papermart/Text-Edit.png"));
@@ -18,20 +21,8 @@ public class EditRequirementAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                final EditRequirementDialog dialog =
-                        new EditRequirementDialog(new javax.swing.JFrame(), true, true);
-                dialog.setLocationRelativeTo(null);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        dialog.dispose();
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
+        component.setEdit(true);
+        component.open();
+        component.requestActive();
     }
 }

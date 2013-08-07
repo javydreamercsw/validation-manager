@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.util.Iterator;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.SwingUtilities;
 import net.sourceforge.javydreamercsw.client.ui.nodes.capability.RefreshableCapability;
 import org.openide.nodes.Node;
 
