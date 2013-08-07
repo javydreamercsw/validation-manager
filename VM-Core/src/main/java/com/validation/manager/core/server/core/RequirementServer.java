@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementServer extends Requirement implements EntityServer<Requirement> {
+public final class RequirementServer extends Requirement implements EntityServer<Requirement> {
 
     private static final Logger LOG
             = Logger.getLogger(RequirementServer.class.getSimpleName());
@@ -136,7 +136,7 @@ public class RequirementServer extends Requirement implements EntityServer<Requi
             }
             //Remove requirement itself.
             children.remove(index);
-            LOG.log(Level.INFO, "Found: {0} related requirements.",
+            LOG.log(Level.FINE, "Found: {0} related requirements.",
                     children.size());
             //Check coverage for children
             for (Requirement r : children) {
@@ -144,7 +144,7 @@ public class RequirementServer extends Requirement implements EntityServer<Requi
             }
             coverage /= children.size();
         }
-        LOG.log(Level.INFO, "{0} Coverage: {1}",
+        LOG.log(Level.FINE, "{0} Coverage: {1}",
                 new Object[]{getUniqueId(), coverage});
         return coverage;
     }
