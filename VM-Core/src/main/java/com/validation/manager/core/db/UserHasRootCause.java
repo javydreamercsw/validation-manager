@@ -1,13 +1,12 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.db.fmea.RootCause;
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -19,7 +18,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -31,23 +29,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "UserHasRootCause.findAll", query = "SELECT u FROM UserHasRootCause u"),
-    @NamedQuery(name = "UserHasRootCause.findByUserId", query = "SELECT u FROM UserHasRootCause u WHERE u.userHasRootCausePK.userId = :userId"),
+    @NamedQuery(name = "UserHasRootCause.findByEndDate", query = "SELECT u FROM UserHasRootCause u WHERE u.endDate = :endDate"),
+    @NamedQuery(name = "UserHasRootCause.findByStartDate", query = "SELECT u FROM UserHasRootCause u WHERE u.startDate = :startDate"),
     @NamedQuery(name = "UserHasRootCause.findByRootCauseId", query = "SELECT u FROM UserHasRootCause u WHERE u.userHasRootCausePK.rootCauseId = :rootCauseId"),
     @NamedQuery(name = "UserHasRootCause.findByRootCauseRootCauseTypeId", query = "SELECT u FROM UserHasRootCause u WHERE u.userHasRootCausePK.rootCauseRootCauseTypeId = :rootCauseRootCauseTypeId"),
-    @NamedQuery(name = "UserHasRootCause.findByStartDate", query = "SELECT u FROM UserHasRootCause u WHERE u.startDate = :startDate"),
-    @NamedQuery(name = "UserHasRootCause.findByEndDate", query = "SELECT u FROM UserHasRootCause u WHERE u.endDate = :endDate")})
+    @NamedQuery(name = "UserHasRootCause.findByUserId", query = "SELECT u FROM UserHasRootCause u WHERE u.userHasRootCausePK.userId = :userId")})
 public class UserHasRootCause implements Serializable {
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserHasRootCausePK userHasRootCausePK;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "start_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startDate;
     @Column(name = "end_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date endDate;
+    @Column(name = "start_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date startDate;
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
@@ -81,20 +77,20 @@ public class UserHasRootCause implements Serializable {
         this.userHasRootCausePK = userHasRootCausePK;
     }
 
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
     public Date getEndDate() {
         return endDate;
     }
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public VmUser getVmUser() {

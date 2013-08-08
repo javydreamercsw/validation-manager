@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -37,17 +38,18 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "UserStatus.findByStatus", query = "SELECT u FROM UserStatus u WHERE u.status = :status"),
     @NamedQuery(name = "UserStatus.findByDescription", query = "SELECT u FROM UserStatus u WHERE u.description = :description")})
 public class UserStatus implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "UserStatusGEN")
     @TableGenerator(name = "UserStatusGEN",
-    table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "user_status",
-    initialValue = 1000,
-    allocationSize = 1)
+            table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "user_status",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -127,5 +129,5 @@ public class UserStatus implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.UserStatus[ id=" + id + " ]";
     }
-    
+
 }

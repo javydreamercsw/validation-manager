@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -19,15 +20,16 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class UserAssigmentPK implements Serializable {
+
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "UserAssignmentGEN")
     @TableGenerator(name = "UserAssignmentGEN",
-    table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "user_assignment",
-    initialValue = 1000,
-    allocationSize = 1)
+            table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "user_assignment",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private int id;
@@ -121,5 +123,5 @@ public class UserAssigmentPK implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.UserAssigmentPK[ id=" + id + ", assignerId=" + assignerId + ", assigmentTypeId=" + assigmentTypeId + ", assignmentStatusId=" + assignmentStatusId + " ]";
     }
-    
+
 }

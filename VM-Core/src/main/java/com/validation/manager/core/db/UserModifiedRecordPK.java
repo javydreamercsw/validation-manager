@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -19,6 +20,7 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class UserModifiedRecordPK implements Serializable {
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "user_id")
@@ -26,11 +28,11 @@ public class UserModifiedRecordPK implements Serializable {
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "UserModifiedRecordGen")
     @TableGenerator(name = "UserModifiedRecordGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "user_modified_record",
-    allocationSize = 1,
-    initialValue = 1)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "user_modified_record",
+            allocationSize = 1,
+            initialValue = 1)
     @NotNull
     @Column(name = "record_id")
     private int recordId;
@@ -86,5 +88,5 @@ public class UserModifiedRecordPK implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.UserModifiedRecordPK[ userId=" + userId + ", recordId=" + recordId + " ]";
     }
-    
+
 }

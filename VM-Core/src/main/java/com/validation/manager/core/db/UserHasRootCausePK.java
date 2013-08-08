@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -65,9 +66,9 @@ public class UserHasRootCausePK implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (int) userId;
         hash += (int) rootCauseId;
         hash += (int) rootCauseRootCauseTypeId;
+        hash += (int) userId;
         return hash;
     }
 
@@ -78,13 +79,13 @@ public class UserHasRootCausePK implements Serializable {
             return false;
         }
         UserHasRootCausePK other = (UserHasRootCausePK) object;
-        if (this.userId != other.userId) {
-            return false;
-        }
         if (this.rootCauseId != other.rootCauseId) {
             return false;
         }
         if (this.rootCauseRootCauseTypeId != other.rootCauseRootCauseTypeId) {
+            return false;
+        }
+        if (this.userId != other.userId) {
             return false;
         }
         return true;
@@ -92,7 +93,7 @@ public class UserHasRootCausePK implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.UserHasRootCausePK[ userId=" + userId + ", rootCauseId=" + rootCauseId + ", rootCauseRootCauseTypeId=" + rootCauseRootCauseTypeId + " ]";
+        return "com.validation.manager.core.db.UserHasRootCausePK[ rootCauseId=" + rootCauseId + ", rootCauseRootCauseTypeId=" + rootCauseRootCauseTypeId + ", userId=" + userId + " ]";
     }
     
 }

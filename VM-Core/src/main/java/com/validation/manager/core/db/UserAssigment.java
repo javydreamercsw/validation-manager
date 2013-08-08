@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -47,18 +48,18 @@ public class UserAssigment implements Serializable {
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
-    @JoinColumn(name = "assignee_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private VmUser assigneeId;
-    @JoinColumn(name = "assigner_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private VmUser vmUser;
     @JoinColumn(name = "assignment_status_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private AssignmentStatus assignmentStatus;
     @JoinColumn(name = "assigment_type_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private AssigmentType assigmentType;
+    @JoinColumn(name = "assignee_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private VmUser assigneeId;
+    @JoinColumn(name = "assigner_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private VmUser vmUser;
 
     public UserAssigment() {
     }
@@ -100,22 +101,6 @@ public class UserAssigment implements Serializable {
         this.creationTime = creationTime;
     }
 
-    public VmUser getAssigneeId() {
-        return assigneeId;
-    }
-
-    public void setAssigneeId(VmUser assigneeId) {
-        this.assigneeId = assigneeId;
-    }
-
-    public VmUser getVmUser() {
-        return vmUser;
-    }
-
-    public void setVmUser(VmUser vmUser) {
-        this.vmUser = vmUser;
-    }
-
     public AssignmentStatus getAssignmentStatus() {
         return assignmentStatus;
     }
@@ -130,6 +115,22 @@ public class UserAssigment implements Serializable {
 
     public void setAssigmentType(AssigmentType assigmentType) {
         this.assigmentType = assigmentType;
+    }
+
+    public VmUser getAssigneeId() {
+        return assigneeId;
+    }
+
+    public void setAssigneeId(VmUser assigneeId) {
+        this.assigneeId = assigneeId;
+    }
+
+    public VmUser getVmUser() {
+        return vmUser;
+    }
+
+    public void setVmUser(VmUser vmUser) {
+        this.vmUser = vmUser;
     }
 
     @Override

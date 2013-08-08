@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -13,8 +14,6 @@ import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.PrimaryKeyJoinColumns;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -29,8 +28,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "RequirementHasException.findAll", query = "SELECT r FROM RequirementHasException r"),
     @NamedQuery(name = "RequirementHasException.findByRequirementId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.requirementId = :requirementId"),
-    @NamedQuery(name = "RequirementHasException.findByExceptionId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.exceptionId = :exceptionId"),
-    @NamedQuery(name = "RequirementHasException.findByExceptionReporterId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.exceptionReporterId = :exceptionReporterId"),
+    @NamedQuery(name = "RequirementHasException.findByRequirementVersion", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.requirementVersion = :requirementVersion"),
+    @NamedQuery(name = "RequirementHasException.findByVmExceptionId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.vmExceptionId = :vmExceptionId"),
+    @NamedQuery(name = "RequirementHasException.findByVmExceptionReporterId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.vmExceptionReporterId = :vmExceptionReporterId"),
     @NamedQuery(name = "RequirementHasException.findByRequirementHasExceptioncol", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptioncol = :requirementHasExceptioncol")})
 public class RequirementHasException implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -39,16 +39,21 @@ public class RequirementHasException implements Serializable {
     @Size(max = 255)
     @Column(name = "requirement_has_exceptioncol")
     private String requirementHasExceptioncol;
-    @PrimaryKeyJoinColumns({
-        @PrimaryKeyJoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @PrimaryKeyJoinColumn(name = "requirement_version", referencedColumnName = "version")})
+    @JoinColumns({
+        @JoinColumn(name = "vm_exception_id", referencedColumnName = "id", insertable = false, updatable = false),
+        @JoinColumn(name = "vm_exception_reporter_id", referencedColumnName = "reporter_id", insertable = false, updatable = false)})
+    @ManyToOne(optional = false)
+    private VmException vmException;
+    @JoinColumns({
+        @JoinColumn(name = "requirement_id", referencedColumnName = "id", insertable = false, updatable = false),
+        @JoinColumn(name = "requirement_version", referencedColumnName = "version", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private Requirement requirement;
     @JoinColumns({
-        @JoinColumn(name = "exception_id", referencedColumnName = "id", insertable = false, updatable = false),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id", insertable = false, updatable = false)})
+        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")})
     @ManyToOne(optional = false)
-    private VmException vmException;
+    private VmException vmException1;
 
     public RequirementHasException() {
     }
@@ -77,6 +82,14 @@ public class RequirementHasException implements Serializable {
         this.requirementHasExceptioncol = requirementHasExceptioncol;
     }
 
+    public VmException getVmException() {
+        return vmException;
+    }
+
+    public void setVmException(VmException vmException) {
+        this.vmException = vmException;
+    }
+
     public Requirement getRequirement() {
         return requirement;
     }
@@ -85,12 +98,12 @@ public class RequirementHasException implements Serializable {
         this.requirement = requirement;
     }
 
-    public VmException getVmException() {
-        return vmException;
+    public VmException getVmException1() {
+        return vmException1;
     }
 
-    public void setVmException(VmException vmException) {
-        this.vmException = vmException;
+    public void setVmException1(VmException vmException1) {
+        this.vmException1 = vmException1;
     }
 
     @Override
@@ -117,4 +130,5 @@ public class RequirementHasException implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RequirementHasException[ requirementHasExceptionPK=" + requirementHasExceptionPK + " ]";
     }
+    
 }

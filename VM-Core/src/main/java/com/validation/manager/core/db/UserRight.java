@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -7,18 +8,14 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
@@ -39,19 +36,18 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "UserRight.findById", query = "SELECT u FROM UserRight u WHERE u.id = :id"),
     @NamedQuery(name = "UserRight.findByDescription", query = "SELECT u FROM UserRight u WHERE u.description = :description")})
 public class UserRight implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userRight")
-    private List<RoleHasRight> roleHasRightList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "UserRightGEN")
     @TableGenerator(name = "UserRightGEN",
-    table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "user_right",
-    initialValue = 1000,
-    allocationSize = 1)
+            table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "user_right",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -60,10 +56,7 @@ public class UserRight implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "description")
     private String description;
-    @JoinTable(name = "role_has_right", joinColumns = {
-        @JoinColumn(name = "right_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "role_id", referencedColumnName = "id")})
-    @ManyToMany
+    @ManyToMany(mappedBy = "userRightList")
     private List<Role> roleList;
 
     public UserRight() {
@@ -124,13 +117,4 @@ public class UserRight implements Serializable {
         return "com.validation.manager.core.db.UserRight[ id=" + id + " ]";
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<RoleHasRight> getRoleHasRightList() {
-        return roleHasRightList;
-    }
-
-    public void setRoleHasRightList(List<RoleHasRight> roleHasRightList) {
-        this.roleHasRightList = roleHasRightList;
-    }
 }

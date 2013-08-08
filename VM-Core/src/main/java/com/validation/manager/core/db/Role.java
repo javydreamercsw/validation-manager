@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -40,20 +41,17 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Role.findById", query = "SELECT r FROM Role r WHERE r.id = :id"),
     @NamedQuery(name = "Role.findByDescription", query = "SELECT r FROM Role r WHERE r.description = :description")})
 public class Role implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
-    private List<UserHasRole> userHasRoleList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
-    private List<RoleHasRight> roleHasRightList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "RoleGen")
     @TableGenerator(name = "RoleGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "role",
-    allocationSize = 1,
-    initialValue = 1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "role",
+            allocationSize = 1,
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -66,12 +64,12 @@ public class Role implements Serializable {
     @Size(max = 65535)
     @Column(name = "notes")
     private String notes;
-    @JoinTable(name = "user_has_role", joinColumns = {
-        @JoinColumn(name = "role_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "user_id", referencedColumnName = "id")})
-    @ManyToMany
-    private List<VmUser> vmUserList;
     @ManyToMany(mappedBy = "roleList")
+    private List<VmUser> vmUserList;
+    @JoinTable(name = "role_has_right", joinColumns = {
+        @JoinColumn(name = "role_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "right_id", referencedColumnName = "id")})
+    @ManyToMany
     private List<UserRight> userRightList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
     private List<UserTestProjectRole> userTestProjectRoleList;
@@ -174,23 +172,4 @@ public class Role implements Serializable {
         return "com.validation.manager.core.db.Role[ id=" + id + " ]";
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<UserHasRole> getUserHasRoleList() {
-        return userHasRoleList;
-    }
-
-    public void setUserHasRoleList(List<UserHasRole> userHasRoleList) {
-        this.userHasRoleList = userHasRoleList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RoleHasRight> getRoleHasRightList() {
-        return roleHasRightList;
-    }
-
-    public void setRoleHasRightList(List<RoleHasRight> roleHasRightList) {
-        this.roleHasRightList = roleHasRightList;
-    }
 }

@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -41,12 +42,12 @@ public class UserHasInvestigation implements Serializable {
     @Column(name = "close_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date closeDate;
-    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private VmUser vmUser;
     @JoinColumn(name = "investigation_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Investigation investigation;
+    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private VmUser vmUser;
 
     public UserHasInvestigation() {
     }
@@ -83,20 +84,20 @@ public class UserHasInvestigation implements Serializable {
         this.closeDate = closeDate;
     }
 
-    public VmUser getVmUser() {
-        return vmUser;
-    }
-
-    public void setVmUser(VmUser vmUser) {
-        this.vmUser = vmUser;
-    }
-
     public Investigation getInvestigation() {
         return investigation;
     }
 
     public void setInvestigation(Investigation investigation) {
         this.investigation = investigation;
+    }
+
+    public VmUser getVmUser() {
+        return vmUser;
+    }
+
+    public void setVmUser(VmUser vmUser) {
+        this.vmUser = vmUser;
     }
 
     @Override

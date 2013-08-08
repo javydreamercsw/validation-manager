@@ -14,6 +14,7 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -34,7 +35,7 @@ public class RequirementTypeJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(RequirementType requirementType) {
+    public void create(RequirementType requirementType) throws PreexistingEntityException, Exception {
         if (requirementType.getRequirementList() == null) {
             requirementType.setRequirementList(new ArrayList<Requirement>());
         }
@@ -59,6 +60,11 @@ public class RequirementTypeJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findRequirementType(requirementType.getId()) != null) {
+                throw new PreexistingEntityException("RequirementType " + requirementType + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();

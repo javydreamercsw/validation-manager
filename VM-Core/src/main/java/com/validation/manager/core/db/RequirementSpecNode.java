@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -41,7 +42,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "RequirementSpecNode.findByName", query = "SELECT r FROM RequirementSpecNode r WHERE r.name = :name"),
     @NamedQuery(name = "RequirementSpecNode.findByParentRequirementSpecNodeRequirementSpecId", query = "SELECT r FROM RequirementSpecNode r WHERE r.parentRequirementSpecNodeRequirementSpecId = :parentRequirementSpecNodeRequirementSpecId")})
 public class RequirementSpecNode implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementSpecNodePK requirementSpecNodePK;
@@ -89,7 +89,7 @@ public class RequirementSpecNode implements Serializable {
         this.requirementSpecNodePK = requirementSpecNodePK;
         this.name = name;
     }
-    
+
     public RequirementSpecNode(RequirementSpecPK pk){
         this.requirementSpecNodePK = new RequirementSpecNodePK(pk.getId(), 
                 pk.getProjectId(), pk.getSpecLevelId());
@@ -202,4 +202,5 @@ public class RequirementSpecNode implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RequirementSpecNode[ requirementSpecNodePK=" + requirementSpecNodePK + " ]";
     }
+    
 }

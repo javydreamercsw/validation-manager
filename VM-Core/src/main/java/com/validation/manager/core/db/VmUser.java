@@ -1,11 +1,11 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.VMAuditedObject;
-import com.validation.manager.core.db.fmea.RootCause;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -52,31 +52,18 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "VmUser.findByLastModified", query = "SELECT v FROM VmUser v WHERE v.lastModified = :lastModified"),
     @NamedQuery(name = "VmUser.findByAttempts", query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts")})
 public class VmUser extends VMAuditedObject implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
-    private List<UserHasRole> userHasRoleList;
-    @JoinTable(name = "user_has_role", joinColumns = {
-        @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "role_id", referencedColumnName = "id")})
-    @ManyToMany
-    private List<Role> roleList;
-    @JoinTable(name = "user_has_corrective_action", joinColumns = {
-        @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")})
-    @ManyToMany
-    private List<CorrectiveAction> correctiveActionList;
-    @ManyToMany(mappedBy = "vmUserList")
-    private List<RootCause> rootCauseList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "VM_UserGEN")
     @TableGenerator(name = "VM_UserGEN",
-    table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "vm_user",
-    initialValue = 1000,
-    allocationSize = 1)
+            table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "vm_user",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -108,7 +95,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     private String last;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 10)
+    @Size(min = 1, max = 255)
     @Column(name = "locale")
     private String locale;
     @Basic(optional = false)
@@ -120,16 +107,26 @@ public class VmUser extends VMAuditedObject implements Serializable {
     @NotNull
     @Column(name = "attempts")
     private int attempts;
+    @JoinTable(name = "user_has_role", joinColumns = {
+        @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "role_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<Role> roleList;
+    @JoinTable(name = "user_has_corrective_action", joinColumns = {
+        @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<CorrectiveAction> correctiveActionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserModifiedRecord> userModifiedRecordList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserHasInvestigation> userHasInvestigationList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "authorId")
+    private List<TestCase> testCaseList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assigneeId")
     private List<UserAssigment> userAssigmentList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserAssigment> userAssigmentList1;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "authorId")
-    private List<TestCase> testCaseList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<VmException> vmExceptionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
@@ -271,6 +268,16 @@ public class VmUser extends VMAuditedObject implements Serializable {
 
     @XmlTransient
     @JsonIgnore
+    public List<TestCase> getTestCaseList() {
+        return testCaseList;
+    }
+
+    public void setTestCaseList(List<TestCase> testCaseList) {
+        this.testCaseList = testCaseList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
     public List<UserAssigment> getUserAssigmentList() {
         return userAssigmentList;
     }
@@ -287,16 +294,6 @@ public class VmUser extends VMAuditedObject implements Serializable {
 
     public void setUserAssigmentList1(List<UserAssigment> userAssigmentList1) {
         this.userAssigmentList1 = userAssigmentList1;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<TestCase> getTestCaseList() {
-        return testCaseList;
-    }
-
-    public void setTestCaseList(List<TestCase> testCaseList) {
-        this.testCaseList = testCaseList;
     }
 
     @XmlTransient
@@ -371,25 +368,4 @@ public class VmUser extends VMAuditedObject implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmUser[ id=" + id + " ]";
     }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RootCause> getRootCauseList() {
-        return rootCauseList;
-    }
-
-    public void setRootCauseList(List<RootCause> rootCauseList) {
-        this.rootCauseList = rootCauseList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<UserHasRole> getUserHasRoleList() {
-        return userHasRoleList;
-    }
-
-    public void setUserHasRoleList(List<UserHasRole> userHasRoleList) {
-        this.userHasRoleList = userHasRoleList;
-    }
-    
 }

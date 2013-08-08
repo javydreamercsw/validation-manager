@@ -16,10 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
-import com.validation.manager.core.db.StepHasRequirement;
-import com.validation.manager.core.db.StepHasException;
 import com.validation.manager.core.db.StepPK;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
@@ -50,12 +47,6 @@ public class StepJpaController implements Serializable {
         if (step.getRequirementList() == null) {
             step.setRequirementList(new ArrayList<Requirement>());
         }
-        if (step.getStepHasRequirementList() == null) {
-            step.setStepHasRequirementList(new ArrayList<StepHasRequirement>());
-        }
-        if (step.getStepHasExceptionList() == null) {
-            step.setStepHasExceptionList(new ArrayList<StepHasException>());
-        }
         step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
         EntityManager em = null;
@@ -79,18 +70,6 @@ public class StepJpaController implements Serializable {
                 attachedRequirementList.add(requirementListRequirementToAttach);
             }
             step.setRequirementList(attachedRequirementList);
-            List<StepHasRequirement> attachedStepHasRequirementList = new ArrayList<StepHasRequirement>();
-            for (StepHasRequirement stepHasRequirementListStepHasRequirementToAttach : step.getStepHasRequirementList()) {
-                stepHasRequirementListStepHasRequirementToAttach = em.getReference(stepHasRequirementListStepHasRequirementToAttach.getClass(), stepHasRequirementListStepHasRequirementToAttach.getStepHasRequirementPK());
-                attachedStepHasRequirementList.add(stepHasRequirementListStepHasRequirementToAttach);
-            }
-            step.setStepHasRequirementList(attachedStepHasRequirementList);
-            List<StepHasException> attachedStepHasExceptionList = new ArrayList<StepHasException>();
-            for (StepHasException stepHasExceptionListStepHasExceptionToAttach : step.getStepHasExceptionList()) {
-                stepHasExceptionListStepHasExceptionToAttach = em.getReference(stepHasExceptionListStepHasExceptionToAttach.getClass(), stepHasExceptionListStepHasExceptionToAttach.getStepHasExceptionPK());
-                attachedStepHasExceptionList.add(stepHasExceptionListStepHasExceptionToAttach);
-            }
-            step.setStepHasExceptionList(attachedStepHasExceptionList);
             em.persist(step);
             if (testCase != null) {
                 testCase.getStepList().add(step);
@@ -103,24 +82,6 @@ public class StepJpaController implements Serializable {
             for (Requirement requirementListRequirement : step.getRequirementList()) {
                 requirementListRequirement.getStepList().add(step);
                 requirementListRequirement = em.merge(requirementListRequirement);
-            }
-            for (StepHasRequirement stepHasRequirementListStepHasRequirement : step.getStepHasRequirementList()) {
-                Step oldStepOfStepHasRequirementListStepHasRequirement = stepHasRequirementListStepHasRequirement.getStep();
-                stepHasRequirementListStepHasRequirement.setStep(step);
-                stepHasRequirementListStepHasRequirement = em.merge(stepHasRequirementListStepHasRequirement);
-                if (oldStepOfStepHasRequirementListStepHasRequirement != null) {
-                    oldStepOfStepHasRequirementListStepHasRequirement.getStepHasRequirementList().remove(stepHasRequirementListStepHasRequirement);
-                    oldStepOfStepHasRequirementListStepHasRequirement = em.merge(oldStepOfStepHasRequirementListStepHasRequirement);
-                }
-            }
-            for (StepHasException stepHasExceptionListStepHasException : step.getStepHasExceptionList()) {
-                Step oldStepOfStepHasExceptionListStepHasException = stepHasExceptionListStepHasException.getStep();
-                stepHasExceptionListStepHasException.setStep(step);
-                stepHasExceptionListStepHasException = em.merge(stepHasExceptionListStepHasException);
-                if (oldStepOfStepHasExceptionListStepHasException != null) {
-                    oldStepOfStepHasExceptionListStepHasException.getStepHasExceptionList().remove(stepHasExceptionListStepHasException);
-                    oldStepOfStepHasExceptionListStepHasException = em.merge(oldStepOfStepHasExceptionListStepHasException);
-                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -135,7 +96,7 @@ public class StepJpaController implements Serializable {
         }
     }
 
-    public void edit(Step step) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(Step step) throws NonexistentEntityException, Exception {
         step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
         EntityManager em = null;
@@ -149,30 +110,6 @@ public class StepJpaController implements Serializable {
             List<VmException> vmExceptionListNew = step.getVmExceptionList();
             List<Requirement> requirementListOld = persistentStep.getRequirementList();
             List<Requirement> requirementListNew = step.getRequirementList();
-            List<StepHasRequirement> stepHasRequirementListOld = persistentStep.getStepHasRequirementList();
-            List<StepHasRequirement> stepHasRequirementListNew = step.getStepHasRequirementList();
-            List<StepHasException> stepHasExceptionListOld = persistentStep.getStepHasExceptionList();
-            List<StepHasException> stepHasExceptionListNew = step.getStepHasExceptionList();
-            List<String> illegalOrphanMessages = null;
-            for (StepHasRequirement stepHasRequirementListOldStepHasRequirement : stepHasRequirementListOld) {
-                if (!stepHasRequirementListNew.contains(stepHasRequirementListOldStepHasRequirement)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain StepHasRequirement " + stepHasRequirementListOldStepHasRequirement + " since its step field is not nullable.");
-                }
-            }
-            for (StepHasException stepHasExceptionListOldStepHasException : stepHasExceptionListOld) {
-                if (!stepHasExceptionListNew.contains(stepHasExceptionListOldStepHasException)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain StepHasException " + stepHasExceptionListOldStepHasException + " since its step field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             if (testCaseNew != null) {
                 testCaseNew = em.getReference(testCaseNew.getClass(), testCaseNew.getTestCasePK());
                 step.setTestCase(testCaseNew);
@@ -191,20 +128,6 @@ public class StepJpaController implements Serializable {
             }
             requirementListNew = attachedRequirementListNew;
             step.setRequirementList(requirementListNew);
-            List<StepHasRequirement> attachedStepHasRequirementListNew = new ArrayList<StepHasRequirement>();
-            for (StepHasRequirement stepHasRequirementListNewStepHasRequirementToAttach : stepHasRequirementListNew) {
-                stepHasRequirementListNewStepHasRequirementToAttach = em.getReference(stepHasRequirementListNewStepHasRequirementToAttach.getClass(), stepHasRequirementListNewStepHasRequirementToAttach.getStepHasRequirementPK());
-                attachedStepHasRequirementListNew.add(stepHasRequirementListNewStepHasRequirementToAttach);
-            }
-            stepHasRequirementListNew = attachedStepHasRequirementListNew;
-            step.setStepHasRequirementList(stepHasRequirementListNew);
-            List<StepHasException> attachedStepHasExceptionListNew = new ArrayList<StepHasException>();
-            for (StepHasException stepHasExceptionListNewStepHasExceptionToAttach : stepHasExceptionListNew) {
-                stepHasExceptionListNewStepHasExceptionToAttach = em.getReference(stepHasExceptionListNewStepHasExceptionToAttach.getClass(), stepHasExceptionListNewStepHasExceptionToAttach.getStepHasExceptionPK());
-                attachedStepHasExceptionListNew.add(stepHasExceptionListNewStepHasExceptionToAttach);
-            }
-            stepHasExceptionListNew = attachedStepHasExceptionListNew;
-            step.setStepHasExceptionList(stepHasExceptionListNew);
             step = em.merge(step);
             if (testCaseOld != null && !testCaseOld.equals(testCaseNew)) {
                 testCaseOld.getStepList().remove(step);
@@ -238,28 +161,6 @@ public class StepJpaController implements Serializable {
                     requirementListNewRequirement = em.merge(requirementListNewRequirement);
                 }
             }
-            for (StepHasRequirement stepHasRequirementListNewStepHasRequirement : stepHasRequirementListNew) {
-                if (!stepHasRequirementListOld.contains(stepHasRequirementListNewStepHasRequirement)) {
-                    Step oldStepOfStepHasRequirementListNewStepHasRequirement = stepHasRequirementListNewStepHasRequirement.getStep();
-                    stepHasRequirementListNewStepHasRequirement.setStep(step);
-                    stepHasRequirementListNewStepHasRequirement = em.merge(stepHasRequirementListNewStepHasRequirement);
-                    if (oldStepOfStepHasRequirementListNewStepHasRequirement != null && !oldStepOfStepHasRequirementListNewStepHasRequirement.equals(step)) {
-                        oldStepOfStepHasRequirementListNewStepHasRequirement.getStepHasRequirementList().remove(stepHasRequirementListNewStepHasRequirement);
-                        oldStepOfStepHasRequirementListNewStepHasRequirement = em.merge(oldStepOfStepHasRequirementListNewStepHasRequirement);
-                    }
-                }
-            }
-            for (StepHasException stepHasExceptionListNewStepHasException : stepHasExceptionListNew) {
-                if (!stepHasExceptionListOld.contains(stepHasExceptionListNewStepHasException)) {
-                    Step oldStepOfStepHasExceptionListNewStepHasException = stepHasExceptionListNewStepHasException.getStep();
-                    stepHasExceptionListNewStepHasException.setStep(step);
-                    stepHasExceptionListNewStepHasException = em.merge(stepHasExceptionListNewStepHasException);
-                    if (oldStepOfStepHasExceptionListNewStepHasException != null && !oldStepOfStepHasExceptionListNewStepHasException.equals(step)) {
-                        oldStepOfStepHasExceptionListNewStepHasException.getStepHasExceptionList().remove(stepHasExceptionListNewStepHasException);
-                        oldStepOfStepHasExceptionListNewStepHasException = em.merge(oldStepOfStepHasExceptionListNewStepHasException);
-                    }
-                }
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -277,7 +178,7 @@ public class StepJpaController implements Serializable {
         }
     }
 
-    public void destroy(StepPK id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(StepPK id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -288,24 +189,6 @@ public class StepJpaController implements Serializable {
                 step.getStepPK();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The step with id " + id + " no longer exists.", enfe);
-            }
-            List<String> illegalOrphanMessages = null;
-            List<StepHasRequirement> stepHasRequirementListOrphanCheck = step.getStepHasRequirementList();
-            for (StepHasRequirement stepHasRequirementListOrphanCheckStepHasRequirement : stepHasRequirementListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Step (" + step + ") cannot be destroyed since the StepHasRequirement " + stepHasRequirementListOrphanCheckStepHasRequirement + " in its stepHasRequirementList field has a non-nullable step field.");
-            }
-            List<StepHasException> stepHasExceptionListOrphanCheck = step.getStepHasExceptionList();
-            for (StepHasException stepHasExceptionListOrphanCheckStepHasException : stepHasExceptionListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Step (" + step + ") cannot be destroyed since the StepHasException " + stepHasExceptionListOrphanCheckStepHasException + " in its stepHasExceptionList field has a non-nullable step field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             TestCase testCase = step.getTestCase();
             if (testCase != null) {

@@ -5,19 +5,18 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementHasRequirement;
 import com.validation.manager.core.db.RequirementHasRequirementPK;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -40,31 +39,13 @@ public class RequirementHasRequirementJpaController implements Serializable {
         }
         requirementHasRequirement.getRequirementHasRequirementPK().setRequirementVersion(requirementHasRequirement.getChildRequirement().getRequirementPK().getVersion());
         requirementHasRequirement.getRequirementHasRequirementPK().setParentRequirementVersion(requirementHasRequirement.getParentRequirement().getRequirementPK().getVersion());
-        requirementHasRequirement.getRequirementHasRequirementPK().setRequirementId(requirementHasRequirement.getChildRequirement().getRequirementPK().getId());
         requirementHasRequirement.getRequirementHasRequirementPK().setParentRequirementId(requirementHasRequirement.getParentRequirement().getRequirementPK().getId());
+        requirementHasRequirement.getRequirementHasRequirementPK().setRequirementId(requirementHasRequirement.getChildRequirement().getRequirementPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Requirement requirement = requirementHasRequirement.getParentRequirement();
-            if (requirement != null) {
-                requirement = em.getReference(requirement.getClass(), requirement.getRequirementPK());
-                requirementHasRequirement.setParentRequirement(requirement);
-            }
-            Requirement requirement1 = requirementHasRequirement.getChildRequirement();
-            if (requirement1 != null) {
-                requirement1 = em.getReference(requirement1.getClass(), requirement1.getRequirementPK());
-                requirementHasRequirement.setChildRequirement(requirement1);
-            }
             em.persist(requirementHasRequirement);
-            if (requirement != null) {
-                requirement.getRequirementHasRequirementList().add(requirementHasRequirement);
-                requirement = em.merge(requirement);
-            }
-            if (requirement1 != null) {
-                requirement1.getRequirementHasRequirementList().add(requirementHasRequirement);
-                requirement1 = em.merge(requirement1);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             if (findRequirementHasRequirement(requirementHasRequirement.getRequirementHasRequirementPK()) != null) {
@@ -81,42 +62,13 @@ public class RequirementHasRequirementJpaController implements Serializable {
     public void edit(RequirementHasRequirement requirementHasRequirement) throws NonexistentEntityException, Exception {
         requirementHasRequirement.getRequirementHasRequirementPK().setRequirementVersion(requirementHasRequirement.getChildRequirement().getRequirementPK().getVersion());
         requirementHasRequirement.getRequirementHasRequirementPK().setParentRequirementVersion(requirementHasRequirement.getParentRequirement().getRequirementPK().getVersion());
-        requirementHasRequirement.getRequirementHasRequirementPK().setRequirementId(requirementHasRequirement.getChildRequirement().getRequirementPK().getId());
         requirementHasRequirement.getRequirementHasRequirementPK().setParentRequirementId(requirementHasRequirement.getParentRequirement().getRequirementPK().getId());
+        requirementHasRequirement.getRequirementHasRequirementPK().setRequirementId(requirementHasRequirement.getChildRequirement().getRequirementPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            RequirementHasRequirement persistentRequirementHasRequirement = em.find(RequirementHasRequirement.class, requirementHasRequirement.getRequirementHasRequirementPK());
-            Requirement requirementOld = persistentRequirementHasRequirement.getParentRequirement();
-            Requirement requirementNew = requirementHasRequirement.getParentRequirement();
-            Requirement requirement1Old = persistentRequirementHasRequirement.getChildRequirement();
-            Requirement requirement1New = requirementHasRequirement.getChildRequirement();
-            if (requirementNew != null) {
-                requirementNew = em.getReference(requirementNew.getClass(), requirementNew.getRequirementPK());
-                requirementHasRequirement.setParentRequirement(requirementNew);
-            }
-            if (requirement1New != null) {
-                requirement1New = em.getReference(requirement1New.getClass(), requirement1New.getRequirementPK());
-                requirementHasRequirement.setChildRequirement(requirement1New);
-            }
             requirementHasRequirement = em.merge(requirementHasRequirement);
-            if (requirementOld != null && !requirementOld.equals(requirementNew)) {
-                requirementOld.getRequirementHasRequirementList().remove(requirementHasRequirement);
-                requirementOld = em.merge(requirementOld);
-            }
-            if (requirementNew != null && !requirementNew.equals(requirementOld)) {
-                requirementNew.getRequirementHasRequirementList().add(requirementHasRequirement);
-                requirementNew = em.merge(requirementNew);
-            }
-            if (requirement1Old != null && !requirement1Old.equals(requirement1New)) {
-                requirement1Old.getRequirementHasRequirementList().remove(requirementHasRequirement);
-                requirement1Old = em.merge(requirement1Old);
-            }
-            if (requirement1New != null && !requirement1New.equals(requirement1Old)) {
-                requirement1New.getRequirementHasRequirementList().add(requirementHasRequirement);
-                requirement1New = em.merge(requirement1New);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -145,16 +97,6 @@ public class RequirementHasRequirementJpaController implements Serializable {
                 requirementHasRequirement.getRequirementHasRequirementPK();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The requirementHasRequirement with id " + id + " no longer exists.", enfe);
-            }
-            Requirement requirement = requirementHasRequirement.getParentRequirement();
-            if (requirement != null) {
-                requirement.getRequirementHasRequirementList().remove(requirementHasRequirement);
-                requirement = em.merge(requirement);
-            }
-            Requirement requirement1 = requirementHasRequirement.getChildRequirement();
-            if (requirement1 != null) {
-                requirement1.getRequirementHasRequirementList().remove(requirementHasRequirement);
-                requirement1 = em.merge(requirement1);
             }
             em.remove(requirementHasRequirement);
             em.getTransaction().commit();
