@@ -42,8 +42,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
         }
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
-        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
         userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
+        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -92,8 +92,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
     public void edit(UserTestPlanRole userTestPlanRole) throws NonexistentEntityException, Exception {
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
-        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
         userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
+        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

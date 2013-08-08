@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -19,14 +20,15 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class TestCasePK implements Serializable {
+
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "TestCaseGen")
     @TableGenerator(name = "TestCaseGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "test_case",
-    allocationSize = 1,
-    initialValue = 1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "test_case",
+            allocationSize = 1,
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private int id;
@@ -86,5 +88,5 @@ public class TestCasePK implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.TestCasePK[ id=" + id + ", testId=" + testId + " ]";
     }
-    
+
 }

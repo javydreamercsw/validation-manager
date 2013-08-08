@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -56,9 +57,6 @@ public class TestPlan extends VMAuditedObject implements Serializable {
     @NotNull
     @Column(name = "is_open")
     private boolean isOpen;
-    @JoinColumn(name = "test_project_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private TestProject testProject;
     @OneToMany(mappedBy = "testPlan")
     private List<TestPlan> testPlanList;
     @JoinColumns({
@@ -66,6 +64,9 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         @JoinColumn(name = "regression_test_plan_test_project_id", referencedColumnName = "test_project_id")})
     @ManyToOne
     private TestPlan testPlan;
+    @JoinColumn(name = "test_project_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private TestProject testProject;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testPlan")
     private List<TestPlanHasTest> testPlanHasTestList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testPlan")
@@ -117,14 +118,6 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         this.isOpen = isOpen;
     }
 
-    public TestProject getTestProject() {
-        return testProject;
-    }
-
-    public void setTestProject(TestProject testProject) {
-        this.testProject = testProject;
-    }
-
     @XmlTransient
     @JsonIgnore
     public List<TestPlan> getTestPlanList() {
@@ -141,6 +134,14 @@ public class TestPlan extends VMAuditedObject implements Serializable {
 
     public void setTestPlan(TestPlan testPlan) {
         this.testPlan = testPlan;
+    }
+
+    public TestProject getTestProject() {
+        return testProject;
+    }
+
+    public void setTestProject(TestProject testProject) {
+        this.testProject = testProject;
     }
 
     @XmlTransient

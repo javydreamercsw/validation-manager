@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -19,15 +20,16 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class VmExceptionPK implements Serializable {
+
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "VM_ExceptionGEN")
     @TableGenerator(name = "VM_ExceptionGEN",
-    table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "vm_exception",
-    initialValue = 1000,
-    allocationSize = 1)
+            table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "vm_exception",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private int id;
@@ -87,5 +89,5 @@ public class VmExceptionPK implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmExceptionPK[ id=" + id + ", reporterId=" + reporterId + " ]";
     }
-    
+
 }

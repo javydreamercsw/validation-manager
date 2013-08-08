@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -34,17 +35,18 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "VmSetting.findByBoolVal", query = "SELECT v FROM VmSetting v WHERE v.boolVal = :boolVal"),
     @NamedQuery(name = "VmSetting.findByIntVal", query = "SELECT v FROM VmSetting v WHERE v.intVal = :intVal")})
 public class VmSetting implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "VM_SettingGEN")
     @TableGenerator(name = "VM_SettingGEN",
-    table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "vm_setting",
-    initialValue = 1000,
-    allocationSize = 1)
+            table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "vm_setting",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -145,5 +147,5 @@ public class VmSetting implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmSetting[ id=" + id + " ]";
     }
-    
+
 }

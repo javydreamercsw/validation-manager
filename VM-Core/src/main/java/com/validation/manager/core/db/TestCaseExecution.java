@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -29,16 +30,17 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "TestCaseExecution.findAll", query = "SELECT t FROM TestCaseExecution t"),
     @NamedQuery(name = "TestCaseExecution.findById", query = "SELECT t FROM TestCaseExecution t WHERE t.id = :id")})
 public class TestCaseExecution implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "TestCaseExecGen")
     @TableGenerator(name = "TestCaseExecGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "test_case_execution",
-    allocationSize = 1,
-    initialValue = 1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "test_case_execution",
+            allocationSize = 1,
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -78,5 +80,5 @@ public class TestCaseExecution implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.TestCaseExecution[ id=" + id + " ]";
     }
-    
+
 }

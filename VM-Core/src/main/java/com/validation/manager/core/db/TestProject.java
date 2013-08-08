@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -15,7 +16,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -42,6 +42,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "TestProject.findByName", query = "SELECT t FROM TestProject t WHERE t.name = :name"),
     @NamedQuery(name = "TestProject.findByActive", query = "SELECT t FROM TestProject t WHERE t.active = :active")})
 public class TestProject extends VMAuditedObject implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -50,11 +51,11 @@ public class TestProject extends VMAuditedObject implements Serializable {
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "VMTestProject_IDGEN")
     //Reserving 10000 Test Project for regression of VM itself
     @TableGenerator(name = "VMTestProject_IDGEN", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "test_project",
-    allocationSize = 1,
-    initialValue = 1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "test_project",
+            allocationSize = 1,
+            initialValue = 1000)
     private Integer id;
     @Basic(optional = false)
     @NotNull
@@ -69,8 +70,6 @@ public class TestProject extends VMAuditedObject implements Serializable {
     @Size(max = 65535)
     @Column(name = "notes")
     private String notes;
-    @ManyToMany(mappedBy = "testProjectList")
-    private List<Project> projectList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testProject")
     private List<UserTestProjectRole> userTestProjectRoleList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testProject")
@@ -118,16 +117,6 @@ public class TestProject extends VMAuditedObject implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<Project> getProjectList() {
-        return projectList;
-    }
-
-    public void setProjectList(List<Project> projectList) {
-        this.projectList = projectList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
     public List<UserTestProjectRole> getUserTestProjectRoleList() {
         return userTestProjectRoleList;
     }
@@ -170,5 +159,5 @@ public class TestProject extends VMAuditedObject implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.TestProject[ id=" + id + " ]";
     }
-    
+
 }

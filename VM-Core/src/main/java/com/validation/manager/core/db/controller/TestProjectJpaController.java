@@ -10,14 +10,14 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.UserTestProjectRole;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -36,10 +36,7 @@ public class TestProjectJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(TestProject testProject) {
-        if (testProject.getProjectList() == null) {
-            testProject.setProjectList(new ArrayList<Project>());
-        }
+    public void create(TestProject testProject) throws PreexistingEntityException, Exception {
         if (testProject.getUserTestProjectRoleList() == null) {
             testProject.setUserTestProjectRoleList(new ArrayList<UserTestProjectRole>());
         }
@@ -50,12 +47,6 @@ public class TestProjectJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Project> attachedProjectList = new ArrayList<Project>();
-            for (Project projectListProjectToAttach : testProject.getProjectList()) {
-                projectListProjectToAttach = em.getReference(projectListProjectToAttach.getClass(), projectListProjectToAttach.getId());
-                attachedProjectList.add(projectListProjectToAttach);
-            }
-            testProject.setProjectList(attachedProjectList);
             List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<UserTestProjectRole>();
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRoleToAttach : testProject.getUserTestProjectRoleList()) {
                 userTestProjectRoleListUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListUserTestProjectRoleToAttach.getUserTestProjectRolePK());
@@ -69,10 +60,6 @@ public class TestProjectJpaController implements Serializable {
             }
             testProject.setTestPlanList(attachedTestPlanList);
             em.persist(testProject);
-            for (Project projectListProject : testProject.getProjectList()) {
-                projectListProject.getTestProjectList().add(testProject);
-                projectListProject = em.merge(projectListProject);
-            }
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRole : testProject.getUserTestProjectRoleList()) {
                 TestProject oldTestProjectOfUserTestProjectRoleListUserTestProjectRole = userTestProjectRoleListUserTestProjectRole.getTestProject();
                 userTestProjectRoleListUserTestProjectRole.setTestProject(testProject);
@@ -92,6 +79,11 @@ public class TestProjectJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findTestProject(testProject.getId()) != null) {
+                throw new PreexistingEntityException("TestProject " + testProject + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -105,8 +97,6 @@ public class TestProjectJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             TestProject persistentTestProject = em.find(TestProject.class, testProject.getId());
-            List<Project> projectListOld = persistentTestProject.getProjectList();
-            List<Project> projectListNew = testProject.getProjectList();
             List<UserTestProjectRole> userTestProjectRoleListOld = persistentTestProject.getUserTestProjectRoleList();
             List<UserTestProjectRole> userTestProjectRoleListNew = testProject.getUserTestProjectRoleList();
             List<TestPlan> testPlanListOld = persistentTestProject.getTestPlanList();
@@ -131,13 +121,6 @@ public class TestProjectJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Project> attachedProjectListNew = new ArrayList<Project>();
-            for (Project projectListNewProjectToAttach : projectListNew) {
-                projectListNewProjectToAttach = em.getReference(projectListNewProjectToAttach.getClass(), projectListNewProjectToAttach.getId());
-                attachedProjectListNew.add(projectListNewProjectToAttach);
-            }
-            projectListNew = attachedProjectListNew;
-            testProject.setProjectList(projectListNew);
             List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<UserTestProjectRole>();
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRoleToAttach : userTestProjectRoleListNew) {
                 userTestProjectRoleListNewUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListNewUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListNewUserTestProjectRoleToAttach.getUserTestProjectRolePK());
@@ -153,18 +136,6 @@ public class TestProjectJpaController implements Serializable {
             testPlanListNew = attachedTestPlanListNew;
             testProject.setTestPlanList(testPlanListNew);
             testProject = em.merge(testProject);
-            for (Project projectListOldProject : projectListOld) {
-                if (!projectListNew.contains(projectListOldProject)) {
-                    projectListOldProject.getTestProjectList().remove(testProject);
-                    projectListOldProject = em.merge(projectListOldProject);
-                }
-            }
-            for (Project projectListNewProject : projectListNew) {
-                if (!projectListOld.contains(projectListNewProject)) {
-                    projectListNewProject.getTestProjectList().add(testProject);
-                    projectListNewProject = em.merge(projectListNewProject);
-                }
-            }
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRole : userTestProjectRoleListNew) {
                 if (!userTestProjectRoleListOld.contains(userTestProjectRoleListNewUserTestProjectRole)) {
                     TestProject oldTestProjectOfUserTestProjectRoleListNewUserTestProjectRole = userTestProjectRoleListNewUserTestProjectRole.getTestProject();
@@ -233,11 +204,6 @@ public class TestProjectJpaController implements Serializable {
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
-            }
-            List<Project> projectList = testProject.getProjectList();
-            for (Project projectListProject : projectList) {
-                projectListProject.getTestProjectList().remove(testProject);
-                projectListProject = em.merge(projectListProject);
             }
             em.remove(testProject);
             em.getTransaction().commit();

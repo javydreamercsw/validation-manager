@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -52,14 +53,14 @@ public class TestPlanHasTest implements Serializable {
     @NotNull
     @Column(name = "node_order")
     private int nodeOrder;
+    @JoinColumn(name = "test_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private Test test;
     @JoinColumns({
         @JoinColumn(name = "test_plan_id", referencedColumnName = "id", insertable = false, updatable = false),
         @JoinColumn(name = "test_plan_test_project_id", referencedColumnName = "test_project_id", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private TestPlan testPlan;
-    @JoinColumn(name = "test_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Test test;
 
     public TestPlanHasTest() {
     }
@@ -110,20 +111,20 @@ public class TestPlanHasTest implements Serializable {
         this.nodeOrder = nodeOrder;
     }
 
-    public TestPlan getTestPlan() {
-        return testPlan;
-    }
-
-    public void setTestPlan(TestPlan testPlan) {
-        this.testPlan = testPlan;
-    }
-
     public Test getTest() {
         return test;
     }
 
     public void setTest(Test test) {
         this.test = test;
+    }
+
+    public TestPlan getTestPlan() {
+        return testPlan;
+    }
+
+    public void setTestPlan(TestPlan testPlan) {
+        this.testPlan = testPlan;
     }
 
     @Override

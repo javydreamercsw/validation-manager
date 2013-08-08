@@ -2,6 +2,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCasePK;
@@ -9,7 +10,6 @@ import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.fmea.RiskControl;
 import com.validation.manager.core.server.fmea.RiskControlServer;
 import java.util.ArrayList;
 import java.util.Date;

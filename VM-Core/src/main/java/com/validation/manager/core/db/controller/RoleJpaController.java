@@ -17,10 +17,9 @@ import java.util.List;
 import com.validation.manager.core.db.UserRight;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.UserTestPlanRole;
-import com.validation.manager.core.db.UserHasRole;
-import com.validation.manager.core.db.RoleHasRight;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -39,7 +38,7 @@ public class RoleJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Role role) {
+    public void create(Role role) throws PreexistingEntityException, Exception {
         if (role.getVmUserList() == null) {
             role.setVmUserList(new ArrayList<VmUser>());
         }
@@ -51,12 +50,6 @@ public class RoleJpaController implements Serializable {
         }
         if (role.getUserTestPlanRoleList() == null) {
             role.setUserTestPlanRoleList(new ArrayList<UserTestPlanRole>());
-        }
-        if (role.getUserHasRoleList() == null) {
-            role.setUserHasRoleList(new ArrayList<UserHasRole>());
-        }
-        if (role.getRoleHasRightList() == null) {
-            role.setRoleHasRightList(new ArrayList<RoleHasRight>());
         }
         EntityManager em = null;
         try {
@@ -86,18 +79,6 @@ public class RoleJpaController implements Serializable {
                 attachedUserTestPlanRoleList.add(userTestPlanRoleListUserTestPlanRoleToAttach);
             }
             role.setUserTestPlanRoleList(attachedUserTestPlanRoleList);
-            List<UserHasRole> attachedUserHasRoleList = new ArrayList<UserHasRole>();
-            for (UserHasRole userHasRoleListUserHasRoleToAttach : role.getUserHasRoleList()) {
-                userHasRoleListUserHasRoleToAttach = em.getReference(userHasRoleListUserHasRoleToAttach.getClass(), userHasRoleListUserHasRoleToAttach.getUserHasRolePK());
-                attachedUserHasRoleList.add(userHasRoleListUserHasRoleToAttach);
-            }
-            role.setUserHasRoleList(attachedUserHasRoleList);
-            List<RoleHasRight> attachedRoleHasRightList = new ArrayList<RoleHasRight>();
-            for (RoleHasRight roleHasRightListRoleHasRightToAttach : role.getRoleHasRightList()) {
-                roleHasRightListRoleHasRightToAttach = em.getReference(roleHasRightListRoleHasRightToAttach.getClass(), roleHasRightListRoleHasRightToAttach.getRoleHasRightPK());
-                attachedRoleHasRightList.add(roleHasRightListRoleHasRightToAttach);
-            }
-            role.setRoleHasRightList(attachedRoleHasRightList);
             em.persist(role);
             for (VmUser vmUserListVmUser : role.getVmUserList()) {
                 vmUserListVmUser.getRoleList().add(role);
@@ -125,25 +106,12 @@ public class RoleJpaController implements Serializable {
                     oldRoleOfUserTestPlanRoleListUserTestPlanRole = em.merge(oldRoleOfUserTestPlanRoleListUserTestPlanRole);
                 }
             }
-            for (UserHasRole userHasRoleListUserHasRole : role.getUserHasRoleList()) {
-                Role oldRoleOfUserHasRoleListUserHasRole = userHasRoleListUserHasRole.getRole();
-                userHasRoleListUserHasRole.setRole(role);
-                userHasRoleListUserHasRole = em.merge(userHasRoleListUserHasRole);
-                if (oldRoleOfUserHasRoleListUserHasRole != null) {
-                    oldRoleOfUserHasRoleListUserHasRole.getUserHasRoleList().remove(userHasRoleListUserHasRole);
-                    oldRoleOfUserHasRoleListUserHasRole = em.merge(oldRoleOfUserHasRoleListUserHasRole);
-                }
-            }
-            for (RoleHasRight roleHasRightListRoleHasRight : role.getRoleHasRightList()) {
-                Role oldRoleOfRoleHasRightListRoleHasRight = roleHasRightListRoleHasRight.getRole();
-                roleHasRightListRoleHasRight.setRole(role);
-                roleHasRightListRoleHasRight = em.merge(roleHasRightListRoleHasRight);
-                if (oldRoleOfRoleHasRightListRoleHasRight != null) {
-                    oldRoleOfRoleHasRightListRoleHasRight.getRoleHasRightList().remove(roleHasRightListRoleHasRight);
-                    oldRoleOfRoleHasRightListRoleHasRight = em.merge(oldRoleOfRoleHasRightListRoleHasRight);
-                }
-            }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findRole(role.getId()) != null) {
+                throw new PreexistingEntityException("Role " + role + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -165,10 +133,6 @@ public class RoleJpaController implements Serializable {
             List<UserTestProjectRole> userTestProjectRoleListNew = role.getUserTestProjectRoleList();
             List<UserTestPlanRole> userTestPlanRoleListOld = persistentRole.getUserTestPlanRoleList();
             List<UserTestPlanRole> userTestPlanRoleListNew = role.getUserTestPlanRoleList();
-            List<UserHasRole> userHasRoleListOld = persistentRole.getUserHasRoleList();
-            List<UserHasRole> userHasRoleListNew = role.getUserHasRoleList();
-            List<RoleHasRight> roleHasRightListOld = persistentRole.getRoleHasRightList();
-            List<RoleHasRight> roleHasRightListNew = role.getRoleHasRightList();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
@@ -184,22 +148,6 @@ public class RoleJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestPlanRole " + userTestPlanRoleListOldUserTestPlanRole + " since its role field is not nullable.");
-                }
-            }
-            for (UserHasRole userHasRoleListOldUserHasRole : userHasRoleListOld) {
-                if (!userHasRoleListNew.contains(userHasRoleListOldUserHasRole)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain UserHasRole " + userHasRoleListOldUserHasRole + " since its role field is not nullable.");
-                }
-            }
-            for (RoleHasRight roleHasRightListOldRoleHasRight : roleHasRightListOld) {
-                if (!roleHasRightListNew.contains(roleHasRightListOldRoleHasRight)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain RoleHasRight " + roleHasRightListOldRoleHasRight + " since its role field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -233,20 +181,6 @@ public class RoleJpaController implements Serializable {
             }
             userTestPlanRoleListNew = attachedUserTestPlanRoleListNew;
             role.setUserTestPlanRoleList(userTestPlanRoleListNew);
-            List<UserHasRole> attachedUserHasRoleListNew = new ArrayList<UserHasRole>();
-            for (UserHasRole userHasRoleListNewUserHasRoleToAttach : userHasRoleListNew) {
-                userHasRoleListNewUserHasRoleToAttach = em.getReference(userHasRoleListNewUserHasRoleToAttach.getClass(), userHasRoleListNewUserHasRoleToAttach.getUserHasRolePK());
-                attachedUserHasRoleListNew.add(userHasRoleListNewUserHasRoleToAttach);
-            }
-            userHasRoleListNew = attachedUserHasRoleListNew;
-            role.setUserHasRoleList(userHasRoleListNew);
-            List<RoleHasRight> attachedRoleHasRightListNew = new ArrayList<RoleHasRight>();
-            for (RoleHasRight roleHasRightListNewRoleHasRightToAttach : roleHasRightListNew) {
-                roleHasRightListNewRoleHasRightToAttach = em.getReference(roleHasRightListNewRoleHasRightToAttach.getClass(), roleHasRightListNewRoleHasRightToAttach.getRoleHasRightPK());
-                attachedRoleHasRightListNew.add(roleHasRightListNewRoleHasRightToAttach);
-            }
-            roleHasRightListNew = attachedRoleHasRightListNew;
-            role.setRoleHasRightList(roleHasRightListNew);
             role = em.merge(role);
             for (VmUser vmUserListOldVmUser : vmUserListOld) {
                 if (!vmUserListNew.contains(vmUserListOldVmUser)) {
@@ -294,28 +228,6 @@ public class RoleJpaController implements Serializable {
                     }
                 }
             }
-            for (UserHasRole userHasRoleListNewUserHasRole : userHasRoleListNew) {
-                if (!userHasRoleListOld.contains(userHasRoleListNewUserHasRole)) {
-                    Role oldRoleOfUserHasRoleListNewUserHasRole = userHasRoleListNewUserHasRole.getRole();
-                    userHasRoleListNewUserHasRole.setRole(role);
-                    userHasRoleListNewUserHasRole = em.merge(userHasRoleListNewUserHasRole);
-                    if (oldRoleOfUserHasRoleListNewUserHasRole != null && !oldRoleOfUserHasRoleListNewUserHasRole.equals(role)) {
-                        oldRoleOfUserHasRoleListNewUserHasRole.getUserHasRoleList().remove(userHasRoleListNewUserHasRole);
-                        oldRoleOfUserHasRoleListNewUserHasRole = em.merge(oldRoleOfUserHasRoleListNewUserHasRole);
-                    }
-                }
-            }
-            for (RoleHasRight roleHasRightListNewRoleHasRight : roleHasRightListNew) {
-                if (!roleHasRightListOld.contains(roleHasRightListNewRoleHasRight)) {
-                    Role oldRoleOfRoleHasRightListNewRoleHasRight = roleHasRightListNewRoleHasRight.getRole();
-                    roleHasRightListNewRoleHasRight.setRole(role);
-                    roleHasRightListNewRoleHasRight = em.merge(roleHasRightListNewRoleHasRight);
-                    if (oldRoleOfRoleHasRightListNewRoleHasRight != null && !oldRoleOfRoleHasRightListNewRoleHasRight.equals(role)) {
-                        oldRoleOfRoleHasRightListNewRoleHasRight.getRoleHasRightList().remove(roleHasRightListNewRoleHasRight);
-                        oldRoleOfRoleHasRightListNewRoleHasRight = em.merge(oldRoleOfRoleHasRightListNewRoleHasRight);
-                    }
-                }
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -359,20 +271,6 @@ public class RoleJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the UserTestPlanRole " + userTestPlanRoleListOrphanCheckUserTestPlanRole + " in its userTestPlanRoleList field has a non-nullable role field.");
-            }
-            List<UserHasRole> userHasRoleListOrphanCheck = role.getUserHasRoleList();
-            for (UserHasRole userHasRoleListOrphanCheckUserHasRole : userHasRoleListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the UserHasRole " + userHasRoleListOrphanCheckUserHasRole + " in its userHasRoleList field has a non-nullable role field.");
-            }
-            List<RoleHasRight> roleHasRightListOrphanCheck = role.getRoleHasRightList();
-            for (RoleHasRight roleHasRightListOrphanCheckRoleHasRight : roleHasRightListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the RoleHasRight " + roleHasRightListOrphanCheckRoleHasRight + " in its roleHasRightList field has a non-nullable role field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

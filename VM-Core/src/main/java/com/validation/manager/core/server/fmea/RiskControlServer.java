@@ -2,11 +2,11 @@ package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.controller.RiskControlJpaController;
 import com.validation.manager.core.db.controller.RiskControlTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.fmea.RiskControl;
 
 /**
  *

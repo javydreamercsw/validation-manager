@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -22,20 +23,24 @@ public class RequirementHasExceptionPK implements Serializable {
     private int requirementId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "exception_id")
-    private int exceptionId;
+    @Column(name = "requirement_version")
+    private int requirementVersion;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "exception_reporter_id")
-    private int exceptionReporterId;
+    @Column(name = "vm_exception_id")
+    private int vmExceptionId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "vm_exception_reporter_id")
+    private int vmExceptionReporterId;
 
     public RequirementHasExceptionPK() {
     }
 
     public RequirementHasExceptionPK(int requirementId, int exceptionId, int exceptionReporterId) {
         this.requirementId = requirementId;
-        this.exceptionId = exceptionId;
-        this.exceptionReporterId = exceptionReporterId;
+        this.vmExceptionId = exceptionId;
+        this.vmExceptionReporterId = exceptionReporterId;
     }
 
     public int getRequirementId() {
@@ -46,28 +51,37 @@ public class RequirementHasExceptionPK implements Serializable {
         this.requirementId = requirementId;
     }
 
-    public int getExceptionId() {
-        return exceptionId;
+    public int getRequirementVersion() {
+        return requirementVersion;
     }
 
-    public void setExceptionId(int exceptionId) {
-        this.exceptionId = exceptionId;
+    public void setRequirementVersion(int requirementVersion) {
+        this.requirementVersion = requirementVersion;
     }
 
-    public int getExceptionReporterId() {
-        return exceptionReporterId;
+    public int getVmExceptionId() {
+        return vmExceptionId;
     }
 
-    public void setExceptionReporterId(int exceptionReporterId) {
-        this.exceptionReporterId = exceptionReporterId;
+    public void setVmExceptionId(int vmExceptionId) {
+        this.vmExceptionId = vmExceptionId;
+    }
+
+    public int getVmExceptionReporterId() {
+        return vmExceptionReporterId;
+    }
+
+    public void setVmExceptionReporterId(int vmExceptionReporterId) {
+        this.vmExceptionReporterId = vmExceptionReporterId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
         hash += (int) requirementId;
-        hash += (int) exceptionId;
-        hash += (int) exceptionReporterId;
+        hash += (int) requirementVersion;
+        hash += (int) vmExceptionId;
+        hash += (int) vmExceptionReporterId;
         return hash;
     }
 
@@ -81,10 +95,13 @@ public class RequirementHasExceptionPK implements Serializable {
         if (this.requirementId != other.requirementId) {
             return false;
         }
-        if (this.exceptionId != other.exceptionId) {
+        if (this.requirementVersion != other.requirementVersion) {
             return false;
         }
-        if (this.exceptionReporterId != other.exceptionReporterId) {
+        if (this.vmExceptionId != other.vmExceptionId) {
+            return false;
+        }
+        if (this.vmExceptionReporterId != other.vmExceptionReporterId) {
             return false;
         }
         return true;
@@ -92,7 +109,7 @@ public class RequirementHasExceptionPK implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementHasExceptionPK[ requirementId=" + requirementId + ", exceptionId=" + exceptionId + ", exceptionReporterId=" + exceptionReporterId + " ]";
+        return "com.validation.manager.core.db.RequirementHasExceptionPK[ requirementId=" + requirementId + ", requirementVersion=" + requirementVersion + ", vmExceptionId=" + vmExceptionId + ", vmExceptionReporterId=" + vmExceptionReporterId + " ]";
     }
     
 }

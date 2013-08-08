@@ -5,18 +5,18 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.fmea.FMEA;
-import com.validation.manager.core.db.fmea.RiskCategory;
+import com.validation.manager.core.db.Fmea;
+import com.validation.manager.core.db.RiskCategory;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.fmea.RiskItemHasRiskCategory;
+import com.validation.manager.core.db.RiskItemHasRiskCategory;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -36,8 +36,8 @@ public class RiskCategoryJpaController implements Serializable {
     }
 
     public void create(RiskCategory riskCategory) {
-        if (riskCategory.getFMEAList() == null) {
-            riskCategory.setFMEAList(new ArrayList<FMEA>());
+        if (riskCategory.getFmeaList() == null) {
+            riskCategory.setFmeaList(new ArrayList<Fmea>());
         }
         if (riskCategory.getRiskItemHasRiskCategoryList() == null) {
             riskCategory.setRiskItemHasRiskCategoryList(new ArrayList<RiskItemHasRiskCategory>());
@@ -46,12 +46,12 @@ public class RiskCategoryJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<FMEA> attachedFMEAList = new ArrayList<FMEA>();
-            for (FMEA FMEAListFMEAToAttach : riskCategory.getFMEAList()) {
-                FMEAListFMEAToAttach = em.getReference(FMEAListFMEAToAttach.getClass(), FMEAListFMEAToAttach.getId());
-                attachedFMEAList.add(FMEAListFMEAToAttach);
+            List<Fmea> attachedFmeaList = new ArrayList<Fmea>();
+            for (Fmea fmeaListFmeaToAttach : riskCategory.getFmeaList()) {
+                fmeaListFmeaToAttach = em.getReference(fmeaListFmeaToAttach.getClass(), fmeaListFmeaToAttach.getId());
+                attachedFmeaList.add(fmeaListFmeaToAttach);
             }
-            riskCategory.setFMEAList(attachedFMEAList);
+            riskCategory.setFmeaList(attachedFmeaList);
             List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryList = new ArrayList<RiskItemHasRiskCategory>();
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach : riskCategory.getRiskItemHasRiskCategoryList()) {
                 riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach = em.getReference(riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach.getClass(), riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach.getRiskItemHasRiskCategoryPK());
@@ -59,9 +59,9 @@ public class RiskCategoryJpaController implements Serializable {
             }
             riskCategory.setRiskItemHasRiskCategoryList(attachedRiskItemHasRiskCategoryList);
             em.persist(riskCategory);
-            for (FMEA FMEAListFMEA : riskCategory.getFMEAList()) {
-                FMEAListFMEA.getRiskCategoryList().add(riskCategory);
-                FMEAListFMEA = em.merge(FMEAListFMEA);
+            for (Fmea fmeaListFmea : riskCategory.getFmeaList()) {
+                fmeaListFmea.getRiskCategoryList().add(riskCategory);
+                fmeaListFmea = em.merge(fmeaListFmea);
             }
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListRiskItemHasRiskCategory : riskCategory.getRiskItemHasRiskCategoryList()) {
                 RiskCategory oldRiskCategoryOfRiskItemHasRiskCategoryListRiskItemHasRiskCategory = riskItemHasRiskCategoryListRiskItemHasRiskCategory.getRiskCategory();
@@ -86,8 +86,8 @@ public class RiskCategoryJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             RiskCategory persistentRiskCategory = em.find(RiskCategory.class, riskCategory.getId());
-            List<FMEA> FMEAListOld = persistentRiskCategory.getFMEAList();
-            List<FMEA> FMEAListNew = riskCategory.getFMEAList();
+            List<Fmea> fmeaListOld = persistentRiskCategory.getFmeaList();
+            List<Fmea> fmeaListNew = riskCategory.getFmeaList();
             List<RiskItemHasRiskCategory> riskItemHasRiskCategoryListOld = persistentRiskCategory.getRiskItemHasRiskCategoryList();
             List<RiskItemHasRiskCategory> riskItemHasRiskCategoryListNew = riskCategory.getRiskItemHasRiskCategoryList();
             List<String> illegalOrphanMessages = null;
@@ -102,13 +102,13 @@ public class RiskCategoryJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<FMEA> attachedFMEAListNew = new ArrayList<FMEA>();
-            for (FMEA FMEAListNewFMEAToAttach : FMEAListNew) {
-                FMEAListNewFMEAToAttach = em.getReference(FMEAListNewFMEAToAttach.getClass(), FMEAListNewFMEAToAttach.getId());
-                attachedFMEAListNew.add(FMEAListNewFMEAToAttach);
+            List<Fmea> attachedFmeaListNew = new ArrayList<Fmea>();
+            for (Fmea fmeaListNewFmeaToAttach : fmeaListNew) {
+                fmeaListNewFmeaToAttach = em.getReference(fmeaListNewFmeaToAttach.getClass(), fmeaListNewFmeaToAttach.getId());
+                attachedFmeaListNew.add(fmeaListNewFmeaToAttach);
             }
-            FMEAListNew = attachedFMEAListNew;
-            riskCategory.setFMEAList(FMEAListNew);
+            fmeaListNew = attachedFmeaListNew;
+            riskCategory.setFmeaList(fmeaListNew);
             List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryListNew = new ArrayList<RiskItemHasRiskCategory>();
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach : riskItemHasRiskCategoryListNew) {
                 riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach = em.getReference(riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach.getClass(), riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach.getRiskItemHasRiskCategoryPK());
@@ -117,16 +117,16 @@ public class RiskCategoryJpaController implements Serializable {
             riskItemHasRiskCategoryListNew = attachedRiskItemHasRiskCategoryListNew;
             riskCategory.setRiskItemHasRiskCategoryList(riskItemHasRiskCategoryListNew);
             riskCategory = em.merge(riskCategory);
-            for (FMEA FMEAListOldFMEA : FMEAListOld) {
-                if (!FMEAListNew.contains(FMEAListOldFMEA)) {
-                    FMEAListOldFMEA.getRiskCategoryList().remove(riskCategory);
-                    FMEAListOldFMEA = em.merge(FMEAListOldFMEA);
+            for (Fmea fmeaListOldFmea : fmeaListOld) {
+                if (!fmeaListNew.contains(fmeaListOldFmea)) {
+                    fmeaListOldFmea.getRiskCategoryList().remove(riskCategory);
+                    fmeaListOldFmea = em.merge(fmeaListOldFmea);
                 }
             }
-            for (FMEA FMEAListNewFMEA : FMEAListNew) {
-                if (!FMEAListOld.contains(FMEAListNewFMEA)) {
-                    FMEAListNewFMEA.getRiskCategoryList().add(riskCategory);
-                    FMEAListNewFMEA = em.merge(FMEAListNewFMEA);
+            for (Fmea fmeaListNewFmea : fmeaListNew) {
+                if (!fmeaListOld.contains(fmeaListNewFmea)) {
+                    fmeaListNewFmea.getRiskCategoryList().add(riskCategory);
+                    fmeaListNewFmea = em.merge(fmeaListNewFmea);
                 }
             }
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListNewRiskItemHasRiskCategory : riskItemHasRiskCategoryListNew) {
@@ -180,10 +180,10 @@ public class RiskCategoryJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<FMEA> FMEAList = riskCategory.getFMEAList();
-            for (FMEA FMEAListFMEA : FMEAList) {
-                FMEAListFMEA.getRiskCategoryList().remove(riskCategory);
-                FMEAListFMEA = em.merge(FMEAListFMEA);
+            List<Fmea> fmeaList = riskCategory.getFmeaList();
+            for (Fmea fmeaListFmea : fmeaList) {
+                fmeaListFmea.getRiskCategoryList().remove(riskCategory);
+                fmeaListFmea = em.merge(fmeaListFmea);
             }
             em.remove(riskCategory);
             em.getTransaction().commit();

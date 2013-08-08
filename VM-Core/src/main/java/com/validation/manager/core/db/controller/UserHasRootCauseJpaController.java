@@ -5,17 +5,17 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.UserHasRootCause;
-import com.validation.manager.core.db.UserHasRootCausePK;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.RootCause;
+import com.validation.manager.core.db.UserHasRootCause;
+import com.validation.manager.core.db.UserHasRootCausePK;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import com.validation.manager.core.db.fmea.RootCause;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -39,9 +39,9 @@ public class UserHasRootCauseJpaController implements Serializable {
         if (userHasRootCause.getUserHasRootCausePK() == null) {
             userHasRootCause.setUserHasRootCausePK(new UserHasRootCausePK());
         }
-        userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
         userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
+        userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -79,9 +79,9 @@ public class UserHasRootCauseJpaController implements Serializable {
     }
 
     public void edit(UserHasRootCause userHasRootCause) throws NonexistentEntityException, Exception {
-        userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
         userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
+        userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

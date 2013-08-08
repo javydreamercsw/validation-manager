@@ -10,16 +10,16 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.fmea.RiskControlType;
-import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RiskControlType;
+import com.validation.manager.core.db.RiskItem;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.fmea.RiskItem;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RiskControl;
+import com.validation.manager.core.db.RiskControlPK;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import com.validation.manager.core.db.fmea.RiskControl;
-import com.validation.manager.core.db.fmea.RiskControlPK;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -42,17 +42,17 @@ public class RiskControlJpaController implements Serializable {
         if (riskControl.getRiskControlPK() == null) {
             riskControl.setRiskControlPK(new RiskControlPK());
         }
-        if (riskControl.getRequirementList() == null) {
-            riskControl.setRequirementList(new ArrayList<Requirement>());
-        }
         if (riskControl.getRiskItemList() == null) {
             riskControl.setRiskItemList(new ArrayList<RiskItem>());
         }
-        if (riskControl.getRiskItemList1() == null) {
-            riskControl.setRiskItemList1(new ArrayList<RiskItem>());
-        }
         if (riskControl.getTestCaseList() == null) {
             riskControl.setTestCaseList(new ArrayList<TestCase>());
+        }
+        if (riskControl.getRequirementList() == null) {
+            riskControl.setRequirementList(new ArrayList<Requirement>());
+        }
+        if (riskControl.getRiskItemList1() == null) {
+            riskControl.setRiskItemList1(new ArrayList<RiskItem>());
         }
         riskControl.getRiskControlPK().setRiskControlTypeId(riskControl.getRiskControlType().getId());
         EntityManager em = null;
@@ -64,50 +64,50 @@ public class RiskControlJpaController implements Serializable {
                 riskControlType = em.getReference(riskControlType.getClass(), riskControlType.getId());
                 riskControl.setRiskControlType(riskControlType);
             }
-            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
-            for (Requirement requirementListRequirementToAttach : riskControl.getRequirementList()) {
-                requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getRequirementPK());
-                attachedRequirementList.add(requirementListRequirementToAttach);
-            }
-            riskControl.setRequirementList(attachedRequirementList);
             List<RiskItem> attachedRiskItemList = new ArrayList<RiskItem>();
             for (RiskItem riskItemListRiskItemToAttach : riskControl.getRiskItemList()) {
                 riskItemListRiskItemToAttach = em.getReference(riskItemListRiskItemToAttach.getClass(), riskItemListRiskItemToAttach.getRiskItemPK());
                 attachedRiskItemList.add(riskItemListRiskItemToAttach);
             }
             riskControl.setRiskItemList(attachedRiskItemList);
-            List<RiskItem> attachedRiskItemList1 = new ArrayList<RiskItem>();
-            for (RiskItem riskItemList1RiskItemToAttach : riskControl.getRiskItemList1()) {
-                riskItemList1RiskItemToAttach = em.getReference(riskItemList1RiskItemToAttach.getClass(), riskItemList1RiskItemToAttach.getRiskItemPK());
-                attachedRiskItemList1.add(riskItemList1RiskItemToAttach);
-            }
-            riskControl.setRiskItemList1(attachedRiskItemList1);
             List<TestCase> attachedTestCaseList = new ArrayList<TestCase>();
             for (TestCase testCaseListTestCaseToAttach : riskControl.getTestCaseList()) {
                 testCaseListTestCaseToAttach = em.getReference(testCaseListTestCaseToAttach.getClass(), testCaseListTestCaseToAttach.getTestCasePK());
                 attachedTestCaseList.add(testCaseListTestCaseToAttach);
             }
             riskControl.setTestCaseList(attachedTestCaseList);
+            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
+            for (Requirement requirementListRequirementToAttach : riskControl.getRequirementList()) {
+                requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getRequirementPK());
+                attachedRequirementList.add(requirementListRequirementToAttach);
+            }
+            riskControl.setRequirementList(attachedRequirementList);
+            List<RiskItem> attachedRiskItemList1 = new ArrayList<RiskItem>();
+            for (RiskItem riskItemList1RiskItemToAttach : riskControl.getRiskItemList1()) {
+                riskItemList1RiskItemToAttach = em.getReference(riskItemList1RiskItemToAttach.getClass(), riskItemList1RiskItemToAttach.getRiskItemPK());
+                attachedRiskItemList1.add(riskItemList1RiskItemToAttach);
+            }
+            riskControl.setRiskItemList1(attachedRiskItemList1);
             em.persist(riskControl);
             if (riskControlType != null) {
                 riskControlType.getRiskControlList().add(riskControl);
                 riskControlType = em.merge(riskControlType);
             }
-            for (Requirement requirementListRequirement : riskControl.getRequirementList()) {
-                requirementListRequirement.getRiskControlList().add(riskControl);
-                requirementListRequirement = em.merge(requirementListRequirement);
-            }
             for (RiskItem riskItemListRiskItem : riskControl.getRiskItemList()) {
                 riskItemListRiskItem.getRiskControlList().add(riskControl);
                 riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
-            for (RiskItem riskItemList1RiskItem : riskControl.getRiskItemList1()) {
-                riskItemList1RiskItem.getRiskControlList().add(riskControl);
-                riskItemList1RiskItem = em.merge(riskItemList1RiskItem);
-            }
             for (TestCase testCaseListTestCase : riskControl.getTestCaseList()) {
                 testCaseListTestCase.getRiskControlList().add(riskControl);
                 testCaseListTestCase = em.merge(testCaseListTestCase);
+            }
+            for (Requirement requirementListRequirement : riskControl.getRequirementList()) {
+                requirementListRequirement.getRiskControlList().add(riskControl);
+                requirementListRequirement = em.merge(requirementListRequirement);
+            }
+            for (RiskItem riskItemList1RiskItem : riskControl.getRiskItemList1()) {
+                riskItemList1RiskItem.getRiskControlList().add(riskControl);
+                riskItemList1RiskItem = em.merge(riskItemList1RiskItem);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -131,25 +131,18 @@ public class RiskControlJpaController implements Serializable {
             RiskControl persistentRiskControl = em.find(RiskControl.class, riskControl.getRiskControlPK());
             RiskControlType riskControlTypeOld = persistentRiskControl.getRiskControlType();
             RiskControlType riskControlTypeNew = riskControl.getRiskControlType();
-            List<Requirement> requirementListOld = persistentRiskControl.getRequirementList();
-            List<Requirement> requirementListNew = riskControl.getRequirementList();
             List<RiskItem> riskItemListOld = persistentRiskControl.getRiskItemList();
             List<RiskItem> riskItemListNew = riskControl.getRiskItemList();
-            List<RiskItem> riskItemList1Old = persistentRiskControl.getRiskItemList1();
-            List<RiskItem> riskItemList1New = riskControl.getRiskItemList1();
             List<TestCase> testCaseListOld = persistentRiskControl.getTestCaseList();
             List<TestCase> testCaseListNew = riskControl.getTestCaseList();
+            List<Requirement> requirementListOld = persistentRiskControl.getRequirementList();
+            List<Requirement> requirementListNew = riskControl.getRequirementList();
+            List<RiskItem> riskItemList1Old = persistentRiskControl.getRiskItemList1();
+            List<RiskItem> riskItemList1New = riskControl.getRiskItemList1();
             if (riskControlTypeNew != null) {
                 riskControlTypeNew = em.getReference(riskControlTypeNew.getClass(), riskControlTypeNew.getId());
                 riskControl.setRiskControlType(riskControlTypeNew);
             }
-            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
-            for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
-                requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getRequirementPK());
-                attachedRequirementListNew.add(requirementListNewRequirementToAttach);
-            }
-            requirementListNew = attachedRequirementListNew;
-            riskControl.setRequirementList(requirementListNew);
             List<RiskItem> attachedRiskItemListNew = new ArrayList<RiskItem>();
             for (RiskItem riskItemListNewRiskItemToAttach : riskItemListNew) {
                 riskItemListNewRiskItemToAttach = em.getReference(riskItemListNewRiskItemToAttach.getClass(), riskItemListNewRiskItemToAttach.getRiskItemPK());
@@ -157,13 +150,6 @@ public class RiskControlJpaController implements Serializable {
             }
             riskItemListNew = attachedRiskItemListNew;
             riskControl.setRiskItemList(riskItemListNew);
-            List<RiskItem> attachedRiskItemList1New = new ArrayList<RiskItem>();
-            for (RiskItem riskItemList1NewRiskItemToAttach : riskItemList1New) {
-                riskItemList1NewRiskItemToAttach = em.getReference(riskItemList1NewRiskItemToAttach.getClass(), riskItemList1NewRiskItemToAttach.getRiskItemPK());
-                attachedRiskItemList1New.add(riskItemList1NewRiskItemToAttach);
-            }
-            riskItemList1New = attachedRiskItemList1New;
-            riskControl.setRiskItemList1(riskItemList1New);
             List<TestCase> attachedTestCaseListNew = new ArrayList<TestCase>();
             for (TestCase testCaseListNewTestCaseToAttach : testCaseListNew) {
                 testCaseListNewTestCaseToAttach = em.getReference(testCaseListNewTestCaseToAttach.getClass(), testCaseListNewTestCaseToAttach.getTestCasePK());
@@ -171,6 +157,20 @@ public class RiskControlJpaController implements Serializable {
             }
             testCaseListNew = attachedTestCaseListNew;
             riskControl.setTestCaseList(testCaseListNew);
+            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
+            for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
+                requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getRequirementPK());
+                attachedRequirementListNew.add(requirementListNewRequirementToAttach);
+            }
+            requirementListNew = attachedRequirementListNew;
+            riskControl.setRequirementList(requirementListNew);
+            List<RiskItem> attachedRiskItemList1New = new ArrayList<RiskItem>();
+            for (RiskItem riskItemList1NewRiskItemToAttach : riskItemList1New) {
+                riskItemList1NewRiskItemToAttach = em.getReference(riskItemList1NewRiskItemToAttach.getClass(), riskItemList1NewRiskItemToAttach.getRiskItemPK());
+                attachedRiskItemList1New.add(riskItemList1NewRiskItemToAttach);
+            }
+            riskItemList1New = attachedRiskItemList1New;
+            riskControl.setRiskItemList1(riskItemList1New);
             riskControl = em.merge(riskControl);
             if (riskControlTypeOld != null && !riskControlTypeOld.equals(riskControlTypeNew)) {
                 riskControlTypeOld.getRiskControlList().remove(riskControl);
@@ -179,18 +179,6 @@ public class RiskControlJpaController implements Serializable {
             if (riskControlTypeNew != null && !riskControlTypeNew.equals(riskControlTypeOld)) {
                 riskControlTypeNew.getRiskControlList().add(riskControl);
                 riskControlTypeNew = em.merge(riskControlTypeNew);
-            }
-            for (Requirement requirementListOldRequirement : requirementListOld) {
-                if (!requirementListNew.contains(requirementListOldRequirement)) {
-                    requirementListOldRequirement.getRiskControlList().remove(riskControl);
-                    requirementListOldRequirement = em.merge(requirementListOldRequirement);
-                }
-            }
-            for (Requirement requirementListNewRequirement : requirementListNew) {
-                if (!requirementListOld.contains(requirementListNewRequirement)) {
-                    requirementListNewRequirement.getRiskControlList().add(riskControl);
-                    requirementListNewRequirement = em.merge(requirementListNewRequirement);
-                }
             }
             for (RiskItem riskItemListOldRiskItem : riskItemListOld) {
                 if (!riskItemListNew.contains(riskItemListOldRiskItem)) {
@@ -204,18 +192,6 @@ public class RiskControlJpaController implements Serializable {
                     riskItemListNewRiskItem = em.merge(riskItemListNewRiskItem);
                 }
             }
-            for (RiskItem riskItemList1OldRiskItem : riskItemList1Old) {
-                if (!riskItemList1New.contains(riskItemList1OldRiskItem)) {
-                    riskItemList1OldRiskItem.getRiskControlList().remove(riskControl);
-                    riskItemList1OldRiskItem = em.merge(riskItemList1OldRiskItem);
-                }
-            }
-            for (RiskItem riskItemList1NewRiskItem : riskItemList1New) {
-                if (!riskItemList1Old.contains(riskItemList1NewRiskItem)) {
-                    riskItemList1NewRiskItem.getRiskControlList().add(riskControl);
-                    riskItemList1NewRiskItem = em.merge(riskItemList1NewRiskItem);
-                }
-            }
             for (TestCase testCaseListOldTestCase : testCaseListOld) {
                 if (!testCaseListNew.contains(testCaseListOldTestCase)) {
                     testCaseListOldTestCase.getRiskControlList().remove(riskControl);
@@ -226,6 +202,30 @@ public class RiskControlJpaController implements Serializable {
                 if (!testCaseListOld.contains(testCaseListNewTestCase)) {
                     testCaseListNewTestCase.getRiskControlList().add(riskControl);
                     testCaseListNewTestCase = em.merge(testCaseListNewTestCase);
+                }
+            }
+            for (Requirement requirementListOldRequirement : requirementListOld) {
+                if (!requirementListNew.contains(requirementListOldRequirement)) {
+                    requirementListOldRequirement.getRiskControlList().remove(riskControl);
+                    requirementListOldRequirement = em.merge(requirementListOldRequirement);
+                }
+            }
+            for (Requirement requirementListNewRequirement : requirementListNew) {
+                if (!requirementListOld.contains(requirementListNewRequirement)) {
+                    requirementListNewRequirement.getRiskControlList().add(riskControl);
+                    requirementListNewRequirement = em.merge(requirementListNewRequirement);
+                }
+            }
+            for (RiskItem riskItemList1OldRiskItem : riskItemList1Old) {
+                if (!riskItemList1New.contains(riskItemList1OldRiskItem)) {
+                    riskItemList1OldRiskItem.getRiskControlList().remove(riskControl);
+                    riskItemList1OldRiskItem = em.merge(riskItemList1OldRiskItem);
+                }
+            }
+            for (RiskItem riskItemList1NewRiskItem : riskItemList1New) {
+                if (!riskItemList1Old.contains(riskItemList1NewRiskItem)) {
+                    riskItemList1NewRiskItem.getRiskControlList().add(riskControl);
+                    riskItemList1NewRiskItem = em.merge(riskItemList1NewRiskItem);
                 }
             }
             em.getTransaction().commit();
@@ -262,25 +262,25 @@ public class RiskControlJpaController implements Serializable {
                 riskControlType.getRiskControlList().remove(riskControl);
                 riskControlType = em.merge(riskControlType);
             }
-            List<Requirement> requirementList = riskControl.getRequirementList();
-            for (Requirement requirementListRequirement : requirementList) {
-                requirementListRequirement.getRiskControlList().remove(riskControl);
-                requirementListRequirement = em.merge(requirementListRequirement);
-            }
             List<RiskItem> riskItemList = riskControl.getRiskItemList();
             for (RiskItem riskItemListRiskItem : riskItemList) {
                 riskItemListRiskItem.getRiskControlList().remove(riskControl);
                 riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
-            List<RiskItem> riskItemList1 = riskControl.getRiskItemList1();
-            for (RiskItem riskItemList1RiskItem : riskItemList1) {
-                riskItemList1RiskItem.getRiskControlList().remove(riskControl);
-                riskItemList1RiskItem = em.merge(riskItemList1RiskItem);
-            }
             List<TestCase> testCaseList = riskControl.getTestCaseList();
             for (TestCase testCaseListTestCase : testCaseList) {
                 testCaseListTestCase.getRiskControlList().remove(riskControl);
                 testCaseListTestCase = em.merge(testCaseListTestCase);
+            }
+            List<Requirement> requirementList = riskControl.getRequirementList();
+            for (Requirement requirementListRequirement : requirementList) {
+                requirementListRequirement.getRiskControlList().remove(riskControl);
+                requirementListRequirement = em.merge(requirementListRequirement);
+            }
+            List<RiskItem> riskItemList1 = riskControl.getRiskItemList1();
+            for (RiskItem riskItemList1RiskItem : riskItemList1) {
+                riskItemList1RiskItem.getRiskControlList().remove(riskControl);
+                riskItemList1RiskItem = em.merge(riskItemList1RiskItem);
             }
             em.remove(riskControl);
             em.getTransaction().commit();

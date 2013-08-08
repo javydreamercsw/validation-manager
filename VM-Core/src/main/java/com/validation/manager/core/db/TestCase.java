@@ -1,10 +1,10 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.db.fmea.RiskControl;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -40,24 +40,28 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "TestCase.findAll", query = "SELECT t FROM TestCase t"),
     @NamedQuery(name = "TestCase.findById", query = "SELECT t FROM TestCase t WHERE t.testCasePK.id = :id"),
     @NamedQuery(name = "TestCase.findByTestId", query = "SELECT t FROM TestCase t WHERE t.testCasePK.testId = :testId"),
+    @NamedQuery(name = "TestCase.findByName", query = "SELECT t FROM TestCase t WHERE t.name = :name"),
     @NamedQuery(name = "TestCase.findByVersion", query = "SELECT t FROM TestCase t WHERE t.version = :version"),
     @NamedQuery(name = "TestCase.findByCreationDate", query = "SELECT t FROM TestCase t WHERE t.creationDate = :creationDate"),
     @NamedQuery(name = "TestCase.findByActive", query = "SELECT t FROM TestCase t WHERE t.active = :active"),
     @NamedQuery(name = "TestCase.findByIsOpen", query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
 public class TestCase implements Serializable {
-    @ManyToMany(mappedBy = "testCaseList")
-    private List<RiskControl> riskControlList;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "summary")
+    private byte[] summary;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected TestCasePK testCasePK;
     @Basic(optional = false)
     @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "name")
+    private String name;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "version")
     private short version;
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "summary")
-    private byte[] summary;
     @Lob
     @Size(max = 65535)
     @Column(name = "expected_results")
@@ -71,12 +75,14 @@ public class TestCase implements Serializable {
     private Boolean active;
     @Column(name = "is_open")
     private Boolean isOpen;
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private VmUser authorId;
+    @ManyToMany(mappedBy = "testCaseList")
+    private List<RiskControl> riskControlList;
     @JoinColumn(name = "test_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Test test;
+    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private VmUser authorId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testCase")
     private List<Step> stepList;
 
@@ -103,6 +109,14 @@ public class TestCase implements Serializable {
 
     public void setTestCasePK(TestCasePK testCasePK) {
         this.testCasePK = testCasePK;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public short getVersion() {
@@ -145,12 +159,14 @@ public class TestCase implements Serializable {
         this.isOpen = isOpen;
     }
 
-    public VmUser getAuthorId() {
-        return authorId;
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskControl> getRiskControlList() {
+        return riskControlList;
     }
 
-    public void setAuthorId(VmUser authorId) {
-        this.authorId = authorId;
+    public void setRiskControlList(List<RiskControl> riskControlList) {
+        this.riskControlList = riskControlList;
     }
 
     public Test getTest() {
@@ -159,6 +175,14 @@ public class TestCase implements Serializable {
 
     public void setTest(Test test) {
         this.test = test;
+    }
+
+    public VmUser getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(VmUser authorId) {
+        this.authorId = authorId;
     }
 
     @XmlTransient
@@ -194,16 +218,6 @@ public class TestCase implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCase[ testCasePK=" + testCasePK + " ]";
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskControl> getRiskControlList() {
-        return riskControlList;
-    }
-
-    public void setRiskControlList(List<RiskControl> riskControlList) {
-        this.riskControlList = riskControlList;
     }
 
     public byte[] getSummary() {
