@@ -40,6 +40,10 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Role.findById", query = "SELECT r FROM Role r WHERE r.id = :id"),
     @NamedQuery(name = "Role.findByDescription", query = "SELECT r FROM Role r WHERE r.description = :description")})
 public class Role implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
+    private List<UserHasRole> userHasRoleList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
+    private List<RoleHasRight> roleHasRightList;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -168,5 +172,25 @@ public class Role implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Role[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<UserHasRole> getUserHasRoleList() {
+        return userHasRoleList;
+    }
+
+    public void setUserHasRoleList(List<UserHasRole> userHasRoleList) {
+        this.userHasRoleList = userHasRoleList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RoleHasRight> getRoleHasRightList() {
+        return roleHasRightList;
+    }
+
+    public void setRoleHasRightList(List<RoleHasRight> roleHasRightList) {
+        this.roleHasRightList = roleHasRightList;
     }
 }

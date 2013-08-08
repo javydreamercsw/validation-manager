@@ -7,6 +7,7 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -51,6 +53,10 @@ public class Step implements Serializable {
     @Lob
     @Column(name = "expected_result")
     private byte[] expectedResult;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
+    private List<StepHasRequirement> stepHasRequirementList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
+    private List<StepHasException> stepHasExceptionList;
     @JoinTable(name = "step_has_exception", joinColumns = {
         @JoinColumn(name = "step_id", referencedColumnName = "id"),
         @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id"),
@@ -172,6 +178,14 @@ public class Step implements Serializable {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
     }
 
+    public byte[] getExpectedResult() {
+        return expectedResult;
+    }
+
+    public void setExpectedResult(byte[] expectedResult) {
+        this.expectedResult = expectedResult;
+    }
+
     public byte[] getText() {
         return text;
     }
@@ -180,11 +194,23 @@ public class Step implements Serializable {
         this.text = text;
     }
 
-    public byte[] getExpectedResult() {
-        return expectedResult;
+    @XmlTransient
+    @JsonIgnore
+    public List<StepHasRequirement> getStepHasRequirementList() {
+        return stepHasRequirementList;
     }
 
-    public void setExpectedResult(byte[] expectedResult) {
-        this.expectedResult = expectedResult;
+    public void setStepHasRequirementList(List<StepHasRequirement> stepHasRequirementList) {
+        this.stepHasRequirementList = stepHasRequirementList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<StepHasException> getStepHasExceptionList() {
+        return stepHasExceptionList;
+    }
+
+    public void setStepHasExceptionList(List<StepHasException> stepHasExceptionList) {
+        this.stepHasExceptionList = stepHasExceptionList;
     }
 }

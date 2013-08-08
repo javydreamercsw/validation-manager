@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -40,8 +41,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
             userTestProjectRole.setUserTestProjectRolePK(new UserTestProjectRolePK());
         }
         userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
-        userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
         userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -89,8 +90,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
 
     public void edit(UserTestProjectRole userTestProjectRole) throws NonexistentEntityException, Exception {
         userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
-        userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
         userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

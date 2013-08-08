@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -39,9 +40,9 @@ public class UserAssigmentJpaController implements Serializable {
         if (userAssigment.getUserAssigmentPK() == null) {
             userAssigment.setUserAssigmentPK(new UserAssigmentPK());
         }
+        userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         userAssigment.getUserAssigmentPK().setAssignmentStatusId(userAssigment.getAssignmentStatus().getId());
         userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
-        userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -97,9 +98,9 @@ public class UserAssigmentJpaController implements Serializable {
     }
 
     public void edit(UserAssigment userAssigment) throws NonexistentEntityException, Exception {
+        userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         userAssigment.getUserAssigmentPK().setAssignmentStatusId(userAssigment.getAssignmentStatus().getId());
         userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
-        userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
