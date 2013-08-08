@@ -1,9 +1,11 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
 
+import com.validation.manager.core.db.Requirement;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
@@ -12,16 +14,17 @@ import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementSpecNode;
-import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.Step;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.RequirementHasException;
+import com.validation.manager.core.db.fmea.RiskControl;
+import com.validation.manager.core.db.StepHasRequirement;
+import com.validation.manager.core.db.RequirementHasRequirement;
 import com.validation.manager.core.db.RequirementPK;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import com.validation.manager.core.db.fmea.RiskControl;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -44,9 +47,6 @@ public class RequirementJpaController implements Serializable {
         if (requirement.getRequirementPK() == null) {
             requirement.setRequirementPK(new RequirementPK());
         }
-        if (requirement.getRequirementList() == null) {
-            requirement.setRequirementList(new ArrayList<Requirement>());
-        }
         if (requirement.getStepList() == null) {
             requirement.setStepList(new ArrayList<Step>());
         }
@@ -55,6 +55,15 @@ public class RequirementJpaController implements Serializable {
         }
         if (requirement.getRiskControlList() == null) {
             requirement.setRiskControlList(new ArrayList<RiskControl>());
+        }
+        if (requirement.getStepHasRequirementList() == null) {
+            requirement.setStepHasRequirementList(new ArrayList<StepHasRequirement>());
+        }
+        if (requirement.getRequirementHasRequirementList() == null) {
+            requirement.setRequirementHasRequirementList(new ArrayList<RequirementHasRequirement>());
+        }
+        if (requirement.getRequirementHasRequirementList1() == null) {
+            requirement.setRequirementHasRequirementList1(new ArrayList<RequirementHasRequirement>());
         }
         EntityManager em = null;
         try {
@@ -75,12 +84,6 @@ public class RequirementJpaController implements Serializable {
                 requirementSpecNode = em.getReference(requirementSpecNode.getClass(), requirementSpecNode.getRequirementSpecNodePK());
                 requirement.setRequirementSpecNode(requirementSpecNode);
             }
-            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
-            for (Requirement requirementListRequirementToAttach : requirement.getRequirementList()) {
-                requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getRequirementPK());
-                attachedRequirementList.add(requirementListRequirementToAttach);
-            }
-            requirement.setRequirementList(attachedRequirementList);
             List<Step> attachedStepList = new ArrayList<Step>();
             for (Step stepListStepToAttach : requirement.getStepList()) {
                 stepListStepToAttach = em.getReference(stepListStepToAttach.getClass(), stepListStepToAttach.getStepPK());
@@ -99,6 +102,24 @@ public class RequirementJpaController implements Serializable {
                 attachedRiskControlList.add(riskControlListRiskControlToAttach);
             }
             requirement.setRiskControlList(attachedRiskControlList);
+            List<StepHasRequirement> attachedStepHasRequirementList = new ArrayList<StepHasRequirement>();
+            for (StepHasRequirement stepHasRequirementListStepHasRequirementToAttach : requirement.getStepHasRequirementList()) {
+                stepHasRequirementListStepHasRequirementToAttach = em.getReference(stepHasRequirementListStepHasRequirementToAttach.getClass(), stepHasRequirementListStepHasRequirementToAttach.getStepHasRequirementPK());
+                attachedStepHasRequirementList.add(stepHasRequirementListStepHasRequirementToAttach);
+            }
+            requirement.setStepHasRequirementList(attachedStepHasRequirementList);
+            List<RequirementHasRequirement> attachedRequirementHasRequirementList = new ArrayList<RequirementHasRequirement>();
+            for (RequirementHasRequirement requirementHasRequirementListRequirementHasRequirementToAttach : requirement.getRequirementHasRequirementList()) {
+                requirementHasRequirementListRequirementHasRequirementToAttach = em.getReference(requirementHasRequirementListRequirementHasRequirementToAttach.getClass(), requirementHasRequirementListRequirementHasRequirementToAttach.getRequirementHasRequirementPK());
+                attachedRequirementHasRequirementList.add(requirementHasRequirementListRequirementHasRequirementToAttach);
+            }
+            requirement.setRequirementHasRequirementList(attachedRequirementHasRequirementList);
+            List<RequirementHasRequirement> attachedRequirementHasRequirementList1 = new ArrayList<RequirementHasRequirement>();
+            for (RequirementHasRequirement requirementHasRequirementList1RequirementHasRequirementToAttach : requirement.getRequirementHasRequirementList1()) {
+                requirementHasRequirementList1RequirementHasRequirementToAttach = em.getReference(requirementHasRequirementList1RequirementHasRequirementToAttach.getClass(), requirementHasRequirementList1RequirementHasRequirementToAttach.getRequirementHasRequirementPK());
+                attachedRequirementHasRequirementList1.add(requirementHasRequirementList1RequirementHasRequirementToAttach);
+            }
+            requirement.setRequirementHasRequirementList1(attachedRequirementHasRequirementList1);
             em.persist(requirement);
             if (requirementTypeId != null) {
                 requirementTypeId.getRequirementList().add(requirement);
@@ -111,10 +132,6 @@ public class RequirementJpaController implements Serializable {
             if (requirementSpecNode != null) {
                 requirementSpecNode.getRequirementList().add(requirement);
                 requirementSpecNode = em.merge(requirementSpecNode);
-            }
-            for (Requirement requirementListRequirement : requirement.getRequirementList()) {
-                requirementListRequirement.getRequirementList().add(requirement);
-                requirementListRequirement = em.merge(requirementListRequirement);
             }
             for (Step stepListStep : requirement.getStepList()) {
                 stepListStep.getRequirementList().add(requirement);
@@ -132,6 +149,33 @@ public class RequirementJpaController implements Serializable {
             for (RiskControl riskControlListRiskControl : requirement.getRiskControlList()) {
                 riskControlListRiskControl.getRequirementList().add(requirement);
                 riskControlListRiskControl = em.merge(riskControlListRiskControl);
+            }
+            for (StepHasRequirement stepHasRequirementListStepHasRequirement : requirement.getStepHasRequirementList()) {
+                Requirement oldRequirementOfStepHasRequirementListStepHasRequirement = stepHasRequirementListStepHasRequirement.getRequirement();
+                stepHasRequirementListStepHasRequirement.setRequirement(requirement);
+                stepHasRequirementListStepHasRequirement = em.merge(stepHasRequirementListStepHasRequirement);
+                if (oldRequirementOfStepHasRequirementListStepHasRequirement != null) {
+                    oldRequirementOfStepHasRequirementListStepHasRequirement.getStepHasRequirementList().remove(stepHasRequirementListStepHasRequirement);
+                    oldRequirementOfStepHasRequirementListStepHasRequirement = em.merge(oldRequirementOfStepHasRequirementListStepHasRequirement);
+                }
+            }
+            for (RequirementHasRequirement requirementHasRequirementListRequirementHasRequirement : requirement.getRequirementHasRequirementList()) {
+                Requirement oldRequirementOfRequirementHasRequirementListRequirementHasRequirement = requirementHasRequirementListRequirementHasRequirement.getParentRequirement();
+                requirementHasRequirementListRequirementHasRequirement.setParentRequirement(requirement);
+                requirementHasRequirementListRequirementHasRequirement = em.merge(requirementHasRequirementListRequirementHasRequirement);
+                if (oldRequirementOfRequirementHasRequirementListRequirementHasRequirement != null) {
+                    oldRequirementOfRequirementHasRequirementListRequirementHasRequirement.getRequirementHasRequirementList().remove(requirementHasRequirementListRequirementHasRequirement);
+                    oldRequirementOfRequirementHasRequirementListRequirementHasRequirement = em.merge(oldRequirementOfRequirementHasRequirementListRequirementHasRequirement);
+                }
+            }
+            for (RequirementHasRequirement requirementHasRequirementList1RequirementHasRequirement : requirement.getRequirementHasRequirementList1()) {
+                Requirement oldRequirement1OfRequirementHasRequirementList1RequirementHasRequirement = requirementHasRequirementList1RequirementHasRequirement.getChildRequirement();
+                requirementHasRequirementList1RequirementHasRequirement.setChildRequirement(requirement);
+                requirementHasRequirementList1RequirementHasRequirement = em.merge(requirementHasRequirementList1RequirementHasRequirement);
+                if (oldRequirement1OfRequirementHasRequirementList1RequirementHasRequirement != null) {
+                    oldRequirement1OfRequirementHasRequirementList1RequirementHasRequirement.getRequirementHasRequirementList1().remove(requirementHasRequirementList1RequirementHasRequirement);
+                    oldRequirement1OfRequirementHasRequirementList1RequirementHasRequirement = em.merge(oldRequirement1OfRequirementHasRequirementList1RequirementHasRequirement);
+                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -158,14 +202,18 @@ public class RequirementJpaController implements Serializable {
             RequirementStatus requirementStatusIdNew = requirement.getRequirementStatusId();
             RequirementSpecNode requirementSpecNodeOld = persistentRequirement.getRequirementSpecNode();
             RequirementSpecNode requirementSpecNodeNew = requirement.getRequirementSpecNode();
-            List<Requirement> requirementListOld = persistentRequirement.getRequirementList();
-            List<Requirement> requirementListNew = requirement.getRequirementList();
             List<Step> stepListOld = persistentRequirement.getStepList();
             List<Step> stepListNew = requirement.getStepList();
             List<RequirementHasException> requirementHasExceptionListOld = persistentRequirement.getRequirementHasExceptionList();
             List<RequirementHasException> requirementHasExceptionListNew = requirement.getRequirementHasExceptionList();
             List<RiskControl> riskControlListOld = persistentRequirement.getRiskControlList();
             List<RiskControl> riskControlListNew = requirement.getRiskControlList();
+            List<StepHasRequirement> stepHasRequirementListOld = persistentRequirement.getStepHasRequirementList();
+            List<StepHasRequirement> stepHasRequirementListNew = requirement.getStepHasRequirementList();
+            List<RequirementHasRequirement> requirementHasRequirementListOld = persistentRequirement.getRequirementHasRequirementList();
+            List<RequirementHasRequirement> requirementHasRequirementListNew = requirement.getRequirementHasRequirementList();
+            List<RequirementHasRequirement> requirementHasRequirementList1Old = persistentRequirement.getRequirementHasRequirementList1();
+            List<RequirementHasRequirement> requirementHasRequirementList1New = requirement.getRequirementHasRequirementList1();
             List<String> illegalOrphanMessages = null;
             for (RequirementHasException requirementHasExceptionListOldRequirementHasException : requirementHasExceptionListOld) {
                 if (!requirementHasExceptionListNew.contains(requirementHasExceptionListOldRequirementHasException)) {
@@ -173,6 +221,30 @@ public class RequirementJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain RequirementHasException " + requirementHasExceptionListOldRequirementHasException + " since its requirement field is not nullable.");
+                }
+            }
+            for (StepHasRequirement stepHasRequirementListOldStepHasRequirement : stepHasRequirementListOld) {
+                if (!stepHasRequirementListNew.contains(stepHasRequirementListOldStepHasRequirement)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain StepHasRequirement " + stepHasRequirementListOldStepHasRequirement + " since its requirement field is not nullable.");
+                }
+            }
+            for (RequirementHasRequirement requirementHasRequirementListOldRequirementHasRequirement : requirementHasRequirementListOld) {
+                if (!requirementHasRequirementListNew.contains(requirementHasRequirementListOldRequirementHasRequirement)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain RequirementHasRequirement " + requirementHasRequirementListOldRequirementHasRequirement + " since its requirement field is not nullable.");
+                }
+            }
+            for (RequirementHasRequirement requirementHasRequirementList1OldRequirementHasRequirement : requirementHasRequirementList1Old) {
+                if (!requirementHasRequirementList1New.contains(requirementHasRequirementList1OldRequirementHasRequirement)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain RequirementHasRequirement " + requirementHasRequirementList1OldRequirementHasRequirement + " since its requirement1 field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -190,13 +262,6 @@ public class RequirementJpaController implements Serializable {
                 requirementSpecNodeNew = em.getReference(requirementSpecNodeNew.getClass(), requirementSpecNodeNew.getRequirementSpecNodePK());
                 requirement.setRequirementSpecNode(requirementSpecNodeNew);
             }
-            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
-            for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
-                requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getRequirementPK());
-                attachedRequirementListNew.add(requirementListNewRequirementToAttach);
-            }
-            requirementListNew = attachedRequirementListNew;
-            requirement.setRequirementList(requirementListNew);
             List<Step> attachedStepListNew = new ArrayList<Step>();
             for (Step stepListNewStepToAttach : stepListNew) {
                 stepListNewStepToAttach = em.getReference(stepListNewStepToAttach.getClass(), stepListNewStepToAttach.getStepPK());
@@ -218,6 +283,27 @@ public class RequirementJpaController implements Serializable {
             }
             riskControlListNew = attachedRiskControlListNew;
             requirement.setRiskControlList(riskControlListNew);
+            List<StepHasRequirement> attachedStepHasRequirementListNew = new ArrayList<StepHasRequirement>();
+            for (StepHasRequirement stepHasRequirementListNewStepHasRequirementToAttach : stepHasRequirementListNew) {
+                stepHasRequirementListNewStepHasRequirementToAttach = em.getReference(stepHasRequirementListNewStepHasRequirementToAttach.getClass(), stepHasRequirementListNewStepHasRequirementToAttach.getStepHasRequirementPK());
+                attachedStepHasRequirementListNew.add(stepHasRequirementListNewStepHasRequirementToAttach);
+            }
+            stepHasRequirementListNew = attachedStepHasRequirementListNew;
+            requirement.setStepHasRequirementList(stepHasRequirementListNew);
+            List<RequirementHasRequirement> attachedRequirementHasRequirementListNew = new ArrayList<RequirementHasRequirement>();
+            for (RequirementHasRequirement requirementHasRequirementListNewRequirementHasRequirementToAttach : requirementHasRequirementListNew) {
+                requirementHasRequirementListNewRequirementHasRequirementToAttach = em.getReference(requirementHasRequirementListNewRequirementHasRequirementToAttach.getClass(), requirementHasRequirementListNewRequirementHasRequirementToAttach.getRequirementHasRequirementPK());
+                attachedRequirementHasRequirementListNew.add(requirementHasRequirementListNewRequirementHasRequirementToAttach);
+            }
+            requirementHasRequirementListNew = attachedRequirementHasRequirementListNew;
+            requirement.setRequirementHasRequirementList(requirementHasRequirementListNew);
+            List<RequirementHasRequirement> attachedRequirementHasRequirementList1New = new ArrayList<RequirementHasRequirement>();
+            for (RequirementHasRequirement requirementHasRequirementList1NewRequirementHasRequirementToAttach : requirementHasRequirementList1New) {
+                requirementHasRequirementList1NewRequirementHasRequirementToAttach = em.getReference(requirementHasRequirementList1NewRequirementHasRequirementToAttach.getClass(), requirementHasRequirementList1NewRequirementHasRequirementToAttach.getRequirementHasRequirementPK());
+                attachedRequirementHasRequirementList1New.add(requirementHasRequirementList1NewRequirementHasRequirementToAttach);
+            }
+            requirementHasRequirementList1New = attachedRequirementHasRequirementList1New;
+            requirement.setRequirementHasRequirementList1(requirementHasRequirementList1New);
             requirement = em.merge(requirement);
             if (requirementTypeIdOld != null && !requirementTypeIdOld.equals(requirementTypeIdNew)) {
                 requirementTypeIdOld.getRequirementList().remove(requirement);
@@ -242,18 +328,6 @@ public class RequirementJpaController implements Serializable {
             if (requirementSpecNodeNew != null && !requirementSpecNodeNew.equals(requirementSpecNodeOld)) {
                 requirementSpecNodeNew.getRequirementList().add(requirement);
                 requirementSpecNodeNew = em.merge(requirementSpecNodeNew);
-            }
-            for (Requirement requirementListOldRequirement : requirementListOld) {
-                if (!requirementListNew.contains(requirementListOldRequirement)) {
-                    requirementListOldRequirement.getRequirementList().remove(requirement);
-                    requirementListOldRequirement = em.merge(requirementListOldRequirement);
-                }
-            }
-            for (Requirement requirementListNewRequirement : requirementListNew) {
-                if (!requirementListOld.contains(requirementListNewRequirement)) {
-                    requirementListNewRequirement.getRequirementList().add(requirement);
-                    requirementListNewRequirement = em.merge(requirementListNewRequirement);
-                }
             }
             for (Step stepListOldStep : stepListOld) {
                 if (!stepListNew.contains(stepListOldStep)) {
@@ -288,6 +362,39 @@ public class RequirementJpaController implements Serializable {
                 if (!riskControlListOld.contains(riskControlListNewRiskControl)) {
                     riskControlListNewRiskControl.getRequirementList().add(requirement);
                     riskControlListNewRiskControl = em.merge(riskControlListNewRiskControl);
+                }
+            }
+            for (StepHasRequirement stepHasRequirementListNewStepHasRequirement : stepHasRequirementListNew) {
+                if (!stepHasRequirementListOld.contains(stepHasRequirementListNewStepHasRequirement)) {
+                    Requirement oldRequirementOfStepHasRequirementListNewStepHasRequirement = stepHasRequirementListNewStepHasRequirement.getRequirement();
+                    stepHasRequirementListNewStepHasRequirement.setRequirement(requirement);
+                    stepHasRequirementListNewStepHasRequirement = em.merge(stepHasRequirementListNewStepHasRequirement);
+                    if (oldRequirementOfStepHasRequirementListNewStepHasRequirement != null && !oldRequirementOfStepHasRequirementListNewStepHasRequirement.equals(requirement)) {
+                        oldRequirementOfStepHasRequirementListNewStepHasRequirement.getStepHasRequirementList().remove(stepHasRequirementListNewStepHasRequirement);
+                        oldRequirementOfStepHasRequirementListNewStepHasRequirement = em.merge(oldRequirementOfStepHasRequirementListNewStepHasRequirement);
+                    }
+                }
+            }
+            for (RequirementHasRequirement requirementHasRequirementListNewRequirementHasRequirement : requirementHasRequirementListNew) {
+                if (!requirementHasRequirementListOld.contains(requirementHasRequirementListNewRequirementHasRequirement)) {
+                    Requirement oldRequirementOfRequirementHasRequirementListNewRequirementHasRequirement = requirementHasRequirementListNewRequirementHasRequirement.getParentRequirement();
+                    requirementHasRequirementListNewRequirementHasRequirement.setParentRequirement(requirement);
+                    requirementHasRequirementListNewRequirementHasRequirement = em.merge(requirementHasRequirementListNewRequirementHasRequirement);
+                    if (oldRequirementOfRequirementHasRequirementListNewRequirementHasRequirement != null && !oldRequirementOfRequirementHasRequirementListNewRequirementHasRequirement.equals(requirement)) {
+                        oldRequirementOfRequirementHasRequirementListNewRequirementHasRequirement.getRequirementHasRequirementList().remove(requirementHasRequirementListNewRequirementHasRequirement);
+                        oldRequirementOfRequirementHasRequirementListNewRequirementHasRequirement = em.merge(oldRequirementOfRequirementHasRequirementListNewRequirementHasRequirement);
+                    }
+                }
+            }
+            for (RequirementHasRequirement requirementHasRequirementList1NewRequirementHasRequirement : requirementHasRequirementList1New) {
+                if (!requirementHasRequirementList1Old.contains(requirementHasRequirementList1NewRequirementHasRequirement)) {
+                    Requirement oldRequirement1OfRequirementHasRequirementList1NewRequirementHasRequirement = requirementHasRequirementList1NewRequirementHasRequirement.getChildRequirement();
+                    requirementHasRequirementList1NewRequirementHasRequirement.setChildRequirement(requirement);
+                    requirementHasRequirementList1NewRequirementHasRequirement = em.merge(requirementHasRequirementList1NewRequirementHasRequirement);
+                    if (oldRequirement1OfRequirementHasRequirementList1NewRequirementHasRequirement != null && !oldRequirement1OfRequirementHasRequirementList1NewRequirementHasRequirement.equals(requirement)) {
+                        oldRequirement1OfRequirementHasRequirementList1NewRequirementHasRequirement.getRequirementHasRequirementList1().remove(requirementHasRequirementList1NewRequirementHasRequirement);
+                        oldRequirement1OfRequirementHasRequirementList1NewRequirementHasRequirement = em.merge(oldRequirement1OfRequirementHasRequirementList1NewRequirementHasRequirement);
+                    }
                 }
             }
             em.getTransaction().commit();
@@ -327,6 +434,27 @@ public class RequirementJpaController implements Serializable {
                 }
                 illegalOrphanMessages.add("This Requirement (" + requirement + ") cannot be destroyed since the RequirementHasException " + requirementHasExceptionListOrphanCheckRequirementHasException + " in its requirementHasExceptionList field has a non-nullable requirement field.");
             }
+            List<StepHasRequirement> stepHasRequirementListOrphanCheck = requirement.getStepHasRequirementList();
+            for (StepHasRequirement stepHasRequirementListOrphanCheckStepHasRequirement : stepHasRequirementListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Requirement (" + requirement + ") cannot be destroyed since the StepHasRequirement " + stepHasRequirementListOrphanCheckStepHasRequirement + " in its stepHasRequirementList field has a non-nullable requirement field.");
+            }
+            List<RequirementHasRequirement> requirementHasRequirementListOrphanCheck = requirement.getRequirementHasRequirementList();
+            for (RequirementHasRequirement requirementHasRequirementListOrphanCheckRequirementHasRequirement : requirementHasRequirementListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Requirement (" + requirement + ") cannot be destroyed since the RequirementHasRequirement " + requirementHasRequirementListOrphanCheckRequirementHasRequirement + " in its requirementHasRequirementList field has a non-nullable requirement field.");
+            }
+            List<RequirementHasRequirement> requirementHasRequirementList1OrphanCheck = requirement.getRequirementHasRequirementList1();
+            for (RequirementHasRequirement requirementHasRequirementList1OrphanCheckRequirementHasRequirement : requirementHasRequirementList1OrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Requirement (" + requirement + ") cannot be destroyed since the RequirementHasRequirement " + requirementHasRequirementList1OrphanCheckRequirementHasRequirement + " in its requirementHasRequirementList1 field has a non-nullable requirement1 field.");
+            }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
@@ -344,11 +472,6 @@ public class RequirementJpaController implements Serializable {
             if (requirementSpecNode != null) {
                 requirementSpecNode.getRequirementList().remove(requirement);
                 requirementSpecNode = em.merge(requirementSpecNode);
-            }
-            List<Requirement> requirementList = requirement.getRequirementList();
-            for (Requirement requirementListRequirement : requirementList) {
-                requirementListRequirement.getRequirementList().remove(requirement);
-                requirementListRequirement = em.merge(requirementListRequirement);
             }
             List<Step> stepList = requirement.getStepList();
             for (Step stepListStep : stepList) {

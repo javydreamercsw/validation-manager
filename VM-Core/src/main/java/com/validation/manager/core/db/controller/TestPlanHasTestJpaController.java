@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -38,9 +39,9 @@ public class TestPlanHasTestJpaController implements Serializable {
         if (testPlanHasTest.getTestPlanHasTestPK() == null) {
             testPlanHasTest.setTestPlanHasTestPK(new TestPlanHasTestPK());
         }
-        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
-        testPlanHasTest.getTestPlanHasTestPK().setTestId(testPlanHasTest.getTest().getId());
         testPlanHasTest.getTestPlanHasTestPK().setTestPlanId(testPlanHasTest.getTestPlan().getTestPlanPK().getId());
+        testPlanHasTest.getTestPlanHasTestPK().setTestId(testPlanHasTest.getTest().getId());
+        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -78,9 +79,9 @@ public class TestPlanHasTestJpaController implements Serializable {
     }
 
     public void edit(TestPlanHasTest testPlanHasTest) throws NonexistentEntityException, Exception {
-        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
-        testPlanHasTest.getTestPlanHasTestPK().setTestId(testPlanHasTest.getTest().getId());
         testPlanHasTest.getTestPlanHasTestPK().setTestPlanId(testPlanHasTest.getTestPlan().getTestPlanPK().getId());
+        testPlanHasTest.getTestPlanHasTestPK().setTestId(testPlanHasTest.getTest().getId());
+        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         EntityManager em = null;
         try {
             em = getEntityManager();

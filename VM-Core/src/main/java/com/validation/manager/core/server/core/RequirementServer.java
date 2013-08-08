@@ -4,6 +4,7 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementHasRequirement;
 import com.validation.manager.core.db.RequirementSpecNodePK;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
@@ -13,7 +14,9 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -116,7 +119,9 @@ public final class RequirementServer extends Requirement implements EntityServer
 
     public int getTestCoverage() {
         int coverage = 0;
-        if (getRequirementList().isEmpty()) {
+        List<Requirement> children = new ArrayList<Requirement>();
+        getChildrenRequirement(children);
+        if (children.isEmpty()) {
             //Has test cases and no related requirements
             if (getStepList().size() > 0) {
                 coverage = 100;
@@ -124,18 +129,6 @@ public final class RequirementServer extends Requirement implements EntityServer
             //Has nothing, leave at 0.
         } else {
             //Get total of instances
-            List<Requirement> children = new ArrayList<Requirement>();
-            getChildrenRequirement(getEntity(), children);
-            Tool.removeDuplicates(children);
-            int index = 0;
-            for (Requirement r : children) {
-                if (r.getUniqueId().equals(getUniqueId())) {
-                    break;
-                }
-                index++;
-            }
-            //Remove requirement itself.
-            children.remove(index);
             LOG.log(Level.FINE, "Found: {0} related requirements.",
                     children.size());
             //Check coverage for children
@@ -150,19 +143,26 @@ public final class RequirementServer extends Requirement implements EntityServer
     }
 
     /**
-     * This re
+     * This returns the requirement children to this requirement.
      *
-     * @param req
-     * @param children
+     * @param children list to add the requirements found to.
      */
-    public static void getChildrenRequirement(Requirement req,
-            List<Requirement> children) {
-        Tool.removeDuplicates(children);
-        for (Requirement r : req.getRequirementList()) {
-            if (!children.contains(r)) {
-                children.add(r);
-                getChildrenRequirement(r, children);
-            }
+    public void getChildrenRequirement(List<Requirement> children) {
+        Map<String, Object> parameters = new HashMap<String, Object>();
+        parameters.put("parentRequirementId",
+                getRequirementPK().getId());
+        parameters.put("parentRequirementVersion",
+                getRequirementPK().getVersion());
+        List<Object> results = DataBaseManager.createdQuery(
+                "SELECT r FROM RequirementHasRequirement r WHERE "
+                + "r.requirementHasRequirementPK.parentRequirementId"
+                + " = :parentRequirementId "
+                + "and "
+                + "r.requirementHasRequirementPK.parentRequirementVersion"
+                + " = :parentRequirementVersion", parameters);
+        for (Object obj : results) {
+            RequirementHasRequirement rhr = (RequirementHasRequirement) obj;
+            children.add(rhr.getChildRequirement());
         }
         Tool.removeDuplicates(children);
     }

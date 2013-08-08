@@ -52,6 +52,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "VmUser.findByLastModified", query = "SELECT v FROM VmUser v WHERE v.lastModified = :lastModified"),
     @NamedQuery(name = "VmUser.findByAttempts", query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts")})
 public class VmUser extends VMAuditedObject implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
+    private List<UserHasRole> userHasRoleList;
     @JoinTable(name = "user_has_role", joinColumns = {
         @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
         @JoinColumn(name = "role_id", referencedColumnName = "id")})
@@ -378,6 +380,16 @@ public class VmUser extends VMAuditedObject implements Serializable {
 
     public void setRootCauseList(List<RootCause> rootCauseList) {
         this.rootCauseList = rootCauseList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<UserHasRole> getUserHasRoleList() {
+        return userHasRoleList;
+    }
+
+    public void setUserHasRoleList(List<UserHasRole> userHasRoleList) {
+        this.userHasRoleList = userHasRoleList;
     }
     
 }

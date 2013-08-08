@@ -46,6 +46,12 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Requirement.findByVersion", query = "SELECT r FROM Requirement r WHERE r.requirementPK.version = :version"),
     @NamedQuery(name = "Requirement.findByUniqueId", query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId")})
 public class Requirement implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
+    private List<StepHasRequirement> stepHasRequirementList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parentRequirement")
+    private List<RequirementHasRequirement> requirementHasRequirementList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "childRequirement")
+    private List<RequirementHasRequirement> requirementHasRequirementList1;
 
     @JoinTable(name = "risk_control_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
@@ -239,5 +245,35 @@ public class Requirement implements Serializable {
 
     public void setRiskControlList(List<RiskControl> riskControlList) {
         this.riskControlList = riskControlList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<StepHasRequirement> getStepHasRequirementList() {
+        return stepHasRequirementList;
+    }
+
+    public void setStepHasRequirementList(List<StepHasRequirement> stepHasRequirementList) {
+        this.stepHasRequirementList = stepHasRequirementList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RequirementHasRequirement> getRequirementHasRequirementList() {
+        return requirementHasRequirementList;
+    }
+
+    public void setRequirementHasRequirementList(List<RequirementHasRequirement> requirementHasRequirementList) {
+        this.requirementHasRequirementList = requirementHasRequirementList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RequirementHasRequirement> getRequirementHasRequirementList1() {
+        return requirementHasRequirementList1;
+    }
+
+    public void setRequirementHasRequirementList1(List<RequirementHasRequirement> requirementHasRequirementList1) {
+        this.requirementHasRequirementList1 = requirementHasRequirementList1;
     }
 }

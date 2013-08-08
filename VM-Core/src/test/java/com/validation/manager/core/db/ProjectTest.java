@@ -3,11 +3,13 @@ package com.validation.manager.core.db;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static junit.framework.TestCase.assertEquals;
 import org.junit.After;
 import org.junit.Test;
 
@@ -18,8 +20,8 @@ import org.junit.Test;
 public class ProjectTest extends AbstractVMTestCase {
 
     Project p;
-    private static final Logger LOG=
-            Logger.getLogger(ProjectTest.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(ProjectTest.class.getName());
 
     @After
     public void clear() {
@@ -65,18 +67,20 @@ public class ProjectTest extends AbstractVMTestCase {
             Requirement r = TestHelper.createRequirement("SRS-SW-0001",
                     "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             //Create Test
-            com.validation.manager.core.db.Test test =
-                    TestHelper.createTest("Test #1", "Testing",
+            com.validation.manager.core.db.Test test
+                    = TestHelper.createTest("Test #1", "Testing",
                     "Test #1 scope");
             //Create Test Case
             TestCase tc = TestHelper.createTestCase(new Short("1"),
                     "Expected Results", test, /*user,*/ "Summary");
             //Add steps
             for (int i = 1; i < 6; i++) {
+                System.out.println("Adding step: " + i);
                 tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
-                TestHelper.addRequirementToStep(tc.getStepList().get(0), r);
-                new TestCaseServer(tc.getTestCasePK()).write2DB();
-                assertTrue(tc.getStepList().get(0).getRequirementList().size() == 1);
+                Step step = tc.getStepList().get(i - 1);
+                TestHelper.addRequirementToStep(step, r);
+                new TestCaseServer(tc).write2DB();
+                assertEquals(1, new StepServer(step).getRequirementList().size());
             }
             //Create test Project
             TestProject tp = TestHelper.createTestProject("Test Project");

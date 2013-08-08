@@ -44,6 +44,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "VmException.findByReportDate", query = "SELECT v FROM VmException v WHERE v.reportDate = :reportDate"),
     @NamedQuery(name = "VmException.findByCloseDate", query = "SELECT v FROM VmException v WHERE v.closeDate = :closeDate")})
 public class VmException implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmException")
+    private List<StepHasException> stepHasExceptionList;
     @JoinTable(name = "exception_has_corrective_action", joinColumns = {
         @JoinColumn(name = "exception_id", referencedColumnName = "id"),
         @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
@@ -218,5 +220,15 @@ public class VmException implements Serializable {
 
     public void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
         this.requirementHasExceptionList = requirementHasExceptionList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<StepHasException> getStepHasExceptionList() {
+        return stepHasExceptionList;
+    }
+
+    public void setStepHasExceptionList(List<StepHasException> stepHasExceptionList) {
+        this.stepHasExceptionList = stepHasExceptionList;
     }
 }

@@ -7,6 +7,7 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,6 +18,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
@@ -37,6 +39,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "UserRight.findById", query = "SELECT u FROM UserRight u WHERE u.id = :id"),
     @NamedQuery(name = "UserRight.findByDescription", query = "SELECT u FROM UserRight u WHERE u.description = :description")})
 public class UserRight implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userRight")
+    private List<RoleHasRight> roleHasRightList;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -118,5 +122,15 @@ public class UserRight implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserRight[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RoleHasRight> getRoleHasRightList() {
+        return roleHasRightList;
+    }
+
+    public void setRoleHasRightList(List<RoleHasRight> roleHasRightList) {
+        this.roleHasRightList = roleHasRightList;
     }
 }

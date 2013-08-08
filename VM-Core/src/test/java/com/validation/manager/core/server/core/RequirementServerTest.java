@@ -181,9 +181,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.update();
             assertEquals(100, rs.getTestCoverage());
             //Add a related requirement
-            rs.getRequirementList().add(req2);
-            rs.getRequirementList().add(req3);
-            rs.write2DB();
+            RequirementHasRequirementServer rhr = new RequirementHasRequirementServer(req, req2);
+            rhr.write2DB();
+            rhr = new RequirementHasRequirementServer(req, req3);
+            rhr.write2DB();
             assertEquals(50, rs.getTestCoverage());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -204,7 +205,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
                     "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
-            RequirementServer.getChildrenRequirement(req, children);
+            new RequirementServer(req).getChildrenRequirement(children);
             assertTrue(children.isEmpty());
             //Add a child
             RequirementServer rs = new RequirementServer(req);
