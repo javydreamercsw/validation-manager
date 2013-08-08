@@ -59,14 +59,6 @@ public class StepHasExceptionJpaController implements Serializable {
                 stepHasException.setVmException(vmException);
             }
             em.persist(stepHasException);
-            if (step != null) {
-                step.getStepHasExceptionList().add(stepHasException);
-                step = em.merge(step);
-            }
-            if (vmException != null) {
-                vmException.getStepHasExceptionList().add(stepHasException);
-                vmException = em.merge(vmException);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             if (findStepHasException(stepHasException.getStepHasExceptionPK()) != null) {
@@ -104,22 +96,6 @@ public class StepHasExceptionJpaController implements Serializable {
                 stepHasException.setVmException(vmExceptionNew);
             }
             stepHasException = em.merge(stepHasException);
-            if (stepOld != null && !stepOld.equals(stepNew)) {
-                stepOld.getStepHasExceptionList().remove(stepHasException);
-                stepOld = em.merge(stepOld);
-            }
-            if (stepNew != null && !stepNew.equals(stepOld)) {
-                stepNew.getStepHasExceptionList().add(stepHasException);
-                stepNew = em.merge(stepNew);
-            }
-            if (vmExceptionOld != null && !vmExceptionOld.equals(vmExceptionNew)) {
-                vmExceptionOld.getStepHasExceptionList().remove(stepHasException);
-                vmExceptionOld = em.merge(vmExceptionOld);
-            }
-            if (vmExceptionNew != null && !vmExceptionNew.equals(vmExceptionOld)) {
-                vmExceptionNew.getStepHasExceptionList().add(stepHasException);
-                vmExceptionNew = em.merge(vmExceptionNew);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -148,16 +124,6 @@ public class StepHasExceptionJpaController implements Serializable {
                 stepHasException.getStepHasExceptionPK();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The stepHasException with id " + id + " no longer exists.", enfe);
-            }
-            Step step = stepHasException.getStep();
-            if (step != null) {
-                step.getStepHasExceptionList().remove(stepHasException);
-                step = em.merge(step);
-            }
-            VmException vmException = stepHasException.getVmException();
-            if (vmException != null) {
-                vmException.getStepHasExceptionList().remove(stepHasException);
-                vmException = em.merge(vmException);
             }
             em.remove(stepHasException);
             em.getTransaction().commit();
