@@ -1,10 +1,10 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
-import com.validation.manager.core.db.fmea.RiskControl;
 import java.beans.IntrospectionException;
 import java.util.List;
 import org.openide.nodes.Node;
