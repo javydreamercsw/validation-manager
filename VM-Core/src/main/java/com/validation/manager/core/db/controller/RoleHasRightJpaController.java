@@ -56,14 +56,6 @@ public class RoleHasRightJpaController implements Serializable {
                 roleHasRight.setUserRight(userRight);
             }
             em.persist(roleHasRight);
-            if (role != null) {
-                role.getRoleHasRightList().add(roleHasRight);
-                role = em.merge(role);
-            }
-            if (userRight != null) {
-                userRight.getRoleHasRightList().add(roleHasRight);
-                userRight = em.merge(userRight);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             if (findRoleHasRight(roleHasRight.getRoleHasRightPK()) != null) {
@@ -98,22 +90,6 @@ public class RoleHasRightJpaController implements Serializable {
                 roleHasRight.setUserRight(userRightNew);
             }
             roleHasRight = em.merge(roleHasRight);
-            if (roleOld != null && !roleOld.equals(roleNew)) {
-                roleOld.getRoleHasRightList().remove(roleHasRight);
-                roleOld = em.merge(roleOld);
-            }
-            if (roleNew != null && !roleNew.equals(roleOld)) {
-                roleNew.getRoleHasRightList().add(roleHasRight);
-                roleNew = em.merge(roleNew);
-            }
-            if (userRightOld != null && !userRightOld.equals(userRightNew)) {
-                userRightOld.getRoleHasRightList().remove(roleHasRight);
-                userRightOld = em.merge(userRightOld);
-            }
-            if (userRightNew != null && !userRightNew.equals(userRightOld)) {
-                userRightNew.getRoleHasRightList().add(roleHasRight);
-                userRightNew = em.merge(userRightNew);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -144,15 +120,6 @@ public class RoleHasRightJpaController implements Serializable {
                 throw new NonexistentEntityException("The roleHasRight with id " + id + " no longer exists.", enfe);
             }
             Role role = roleHasRight.getRole();
-            if (role != null) {
-                role.getRoleHasRightList().remove(roleHasRight);
-                role = em.merge(role);
-            }
-            UserRight userRight = roleHasRight.getUserRight();
-            if (userRight != null) {
-                userRight.getRoleHasRightList().remove(roleHasRight);
-                userRight = em.merge(userRight);
-            }
             em.remove(roleHasRight);
             em.getTransaction().commit();
         } finally {

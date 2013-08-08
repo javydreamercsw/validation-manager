@@ -56,14 +56,6 @@ public class UserHasRoleJpaController implements Serializable {
                 userHasRole.setRole(role);
             }
             em.persist(userHasRole);
-            if (vmUser != null) {
-                vmUser.getUserHasRoleList().add(userHasRole);
-                vmUser = em.merge(vmUser);
-            }
-            if (role != null) {
-                role.getUserHasRoleList().add(userHasRole);
-                role = em.merge(role);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             if (findUserHasRole(userHasRole.getUserHasRolePK()) != null) {
@@ -98,22 +90,6 @@ public class UserHasRoleJpaController implements Serializable {
                 userHasRole.setRole(roleNew);
             }
             userHasRole = em.merge(userHasRole);
-            if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
-                vmUserOld.getUserHasRoleList().remove(userHasRole);
-                vmUserOld = em.merge(vmUserOld);
-            }
-            if (vmUserNew != null && !vmUserNew.equals(vmUserOld)) {
-                vmUserNew.getUserHasRoleList().add(userHasRole);
-                vmUserNew = em.merge(vmUserNew);
-            }
-            if (roleOld != null && !roleOld.equals(roleNew)) {
-                roleOld.getUserHasRoleList().remove(userHasRole);
-                roleOld = em.merge(roleOld);
-            }
-            if (roleNew != null && !roleNew.equals(roleOld)) {
-                roleNew.getUserHasRoleList().add(userHasRole);
-                roleNew = em.merge(roleNew);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -142,16 +118,6 @@ public class UserHasRoleJpaController implements Serializable {
                 userHasRole.getUserHasRolePK();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userHasRole with id " + id + " no longer exists.", enfe);
-            }
-            VmUser vmUser = userHasRole.getVmUser();
-            if (vmUser != null) {
-                vmUser.getUserHasRoleList().remove(userHasRole);
-                vmUser = em.merge(vmUser);
-            }
-            Role role = userHasRole.getRole();
-            if (role != null) {
-                role.getUserHasRoleList().remove(userHasRole);
-                role = em.merge(role);
             }
             em.remove(userHasRole);
             em.getTransaction().commit();

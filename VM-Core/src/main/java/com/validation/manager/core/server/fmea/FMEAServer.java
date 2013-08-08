@@ -3,7 +3,7 @@ package com.validation.manager.core.server.fmea;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Fmea;
-import com.validation.manager.core.db.controller.FmeaJpaController;
+import com.validation.manager.core.db.controller.FMEAJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.logging.Level;
@@ -24,15 +24,15 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         if (getId() > 0) {
-            Fmea fmea = new FmeaJpaController(
+            Fmea fmea = new FMEAJpaController(
                     DataBaseManager.getEntityManagerFactory()).findFmea(getId());
             update(fmea, this);
-            new FmeaJpaController(
+            new FMEAJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(fmea);
         } else {
             Fmea fmea = new Fmea(getName());
             update(fmea, this);
-            new FmeaJpaController(
+            new FMEAJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(fmea);
             setId(fmea.getId());
         }
@@ -41,7 +41,7 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
 
     public static boolean deleteFMEA(int id) {
         try {
-            new FmeaJpaController(
+            new FMEAJpaController(
                     DataBaseManager.getEntityManagerFactory()).destroy(id);
             return true;
         } catch (NonexistentEntityException ex) {
@@ -53,7 +53,7 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
     }
 
     public Fmea getEntity() {
-        return new FmeaJpaController(
+        return new FMEAJpaController(
                 DataBaseManager.getEntityManagerFactory()).findFmea(getId());
     }
 

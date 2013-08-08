@@ -59,14 +59,6 @@ public class StepHasRequirementJpaController implements Serializable {
                 stepHasRequirement.setRequirement(requirement);
             }
             em.persist(stepHasRequirement);
-            if (step != null) {
-                step.getStepHasRequirementList().add(stepHasRequirement);
-                step = em.merge(step);
-            }
-            if (requirement != null) {
-                requirement.getStepHasRequirementList().add(stepHasRequirement);
-                requirement = em.merge(requirement);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             if (findStepHasRequirement(stepHasRequirement.getStepHasRequirementPK()) != null) {
@@ -104,22 +96,6 @@ public class StepHasRequirementJpaController implements Serializable {
                 stepHasRequirement.setRequirement(requirementNew);
             }
             stepHasRequirement = em.merge(stepHasRequirement);
-            if (stepOld != null && !stepOld.equals(stepNew)) {
-                stepOld.getStepHasRequirementList().remove(stepHasRequirement);
-                stepOld = em.merge(stepOld);
-            }
-            if (stepNew != null && !stepNew.equals(stepOld)) {
-                stepNew.getStepHasRequirementList().add(stepHasRequirement);
-                stepNew = em.merge(stepNew);
-            }
-            if (requirementOld != null && !requirementOld.equals(requirementNew)) {
-                requirementOld.getStepHasRequirementList().remove(stepHasRequirement);
-                requirementOld = em.merge(requirementOld);
-            }
-            if (requirementNew != null && !requirementNew.equals(requirementOld)) {
-                requirementNew.getStepHasRequirementList().add(stepHasRequirement);
-                requirementNew = em.merge(requirementNew);
-            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -148,16 +124,6 @@ public class StepHasRequirementJpaController implements Serializable {
                 stepHasRequirement.getStepHasRequirementPK();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The stepHasRequirement with id " + id + " no longer exists.", enfe);
-            }
-            Step step = stepHasRequirement.getStep();
-            if (step != null) {
-                step.getStepHasRequirementList().remove(stepHasRequirement);
-                step = em.merge(step);
-            }
-            Requirement requirement = stepHasRequirement.getRequirement();
-            if (requirement != null) {
-                requirement.getStepHasRequirementList().remove(stepHasRequirement);
-                requirement = em.merge(requirement);
             }
             em.remove(stepHasRequirement);
             em.getTransaction().commit();
