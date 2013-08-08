@@ -40,16 +40,15 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
     }
 
     public static boolean deleteFMEA(int id) {
+        boolean result = false;
         try {
             new FMEAJpaController(
                     DataBaseManager.getEntityManagerFactory()).destroy(id);
-            return true;
+            result = true;
         } catch (NonexistentEntityException ex) {
             Logger.getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalOrphanException ex) {
-            Logger.getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return false;
+        return result;
     }
 
     public Fmea getEntity() {
@@ -62,7 +61,7 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
         target.setParent(source.getParent());
         target.setRiskItemList(source.getRiskItemList());
     }
-    
+
     public void update() {
         update(this, getEntity());
     }

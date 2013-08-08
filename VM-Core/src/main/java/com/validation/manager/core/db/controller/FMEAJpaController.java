@@ -1,18 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db.controller;
 
+import com.validation.manager.core.db.Fmea;
+import com.validation.manager.core.db.RiskCategory;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.fmea.FMEA;
-import com.validation.manager.core.db.fmea.RiskCategory;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -33,50 +28,50 @@ public class FMEAJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(FMEA FMEA) {
-        if (FMEA.getRiskCategoryList() == null) {
-            FMEA.setRiskCategoryList(new ArrayList<RiskCategory>());
+    public void create(Fmea Fmea) {
+        if (Fmea.getRiskCategoryList() == null) {
+            Fmea.setRiskCategoryList(new ArrayList<RiskCategory>());
         }
-        if (FMEA.getFMEAList() == null) {
-            FMEA.setFMEAList(new ArrayList<FMEA>());
+        if (Fmea.getFmeaList() == null) {
+            Fmea.setFmeaList(new ArrayList<Fmea>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            FMEA parent = FMEA.getParent();
+            Fmea parent = Fmea.getParent();
             if (parent != null) {
                 parent = em.getReference(parent.getClass(), parent.getId());
-                FMEA.setParent(parent);
+                Fmea.setParent(parent);
             }
             List<RiskCategory> attachedRiskCategoryList = new ArrayList<RiskCategory>();
-            for (RiskCategory riskCategoryListRiskCategoryToAttach : FMEA.getRiskCategoryList()) {
+            for (RiskCategory riskCategoryListRiskCategoryToAttach : Fmea.getRiskCategoryList()) {
                 riskCategoryListRiskCategoryToAttach = em.getReference(riskCategoryListRiskCategoryToAttach.getClass(), riskCategoryListRiskCategoryToAttach.getId());
                 attachedRiskCategoryList.add(riskCategoryListRiskCategoryToAttach);
             }
-            FMEA.setRiskCategoryList(attachedRiskCategoryList);
-            List<FMEA> attachedFMEAList = new ArrayList<FMEA>();
-            for (FMEA FMEAListFMEAToAttach : FMEA.getFMEAList()) {
-                FMEAListFMEAToAttach = em.getReference(FMEAListFMEAToAttach.getClass(), FMEAListFMEAToAttach.getId());
-                attachedFMEAList.add(FMEAListFMEAToAttach);
+            Fmea.setRiskCategoryList(attachedRiskCategoryList);
+            List<Fmea> attachedFmeaList = new ArrayList<Fmea>();
+            for (Fmea FmeaListFmeaToAttach : Fmea.getFmeaList()) {
+                FmeaListFmeaToAttach = em.getReference(FmeaListFmeaToAttach.getClass(), FmeaListFmeaToAttach.getId());
+                attachedFmeaList.add(FmeaListFmeaToAttach);
             }
-            FMEA.setFMEAList(attachedFMEAList);
-            em.persist(FMEA);
+            Fmea.setFmeaList(attachedFmeaList);
+            em.persist(Fmea);
             if (parent != null) {
-                parent.getFMEAList().add(FMEA);
+                parent.getFmeaList().add(Fmea);
                 parent = em.merge(parent);
             }
-            for (RiskCategory riskCategoryListRiskCategory : FMEA.getRiskCategoryList()) {
-                riskCategoryListRiskCategory.getFMEAList().add(FMEA);
+            for (RiskCategory riskCategoryListRiskCategory : Fmea.getRiskCategoryList()) {
+                riskCategoryListRiskCategory.getFmeaList().add(Fmea);
                 riskCategoryListRiskCategory = em.merge(riskCategoryListRiskCategory);
             }
-            for (FMEA FMEAListFMEA : FMEA.getFMEAList()) {
-                FMEA oldParentOfFMEAListFMEA = FMEAListFMEA.getParent();
-                FMEAListFMEA.setParent(FMEA);
-                FMEAListFMEA = em.merge(FMEAListFMEA);
-                if (oldParentOfFMEAListFMEA != null) {
-                    oldParentOfFMEAListFMEA.getFMEAList().remove(FMEAListFMEA);
-                    oldParentOfFMEAListFMEA = em.merge(oldParentOfFMEAListFMEA);
+            for (Fmea FmeaListFmea : Fmea.getFmeaList()) {
+                Fmea oldParentOfFmeaListFmea = FmeaListFmea.getParent();
+                FmeaListFmea.setParent(Fmea);
+                FmeaListFmea = em.merge(FmeaListFmea);
+                if (oldParentOfFmeaListFmea != null) {
+                    oldParentOfFmeaListFmea.getFmeaList().remove(FmeaListFmea);
+                    oldParentOfFmeaListFmea = em.merge(oldParentOfFmeaListFmea);
                 }
             }
             em.getTransaction().commit();
@@ -87,21 +82,21 @@ public class FMEAJpaController implements Serializable {
         }
     }
 
-    public void edit(FMEA FMEA) throws NonexistentEntityException, Exception {
+    public void edit(Fmea Fmea) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            FMEA persistentFMEA = em.find(FMEA.class, FMEA.getId());
-            FMEA parentOld = persistentFMEA.getParent();
-            FMEA parentNew = FMEA.getParent();
-            List<RiskCategory> riskCategoryListOld = persistentFMEA.getRiskCategoryList();
-            List<RiskCategory> riskCategoryListNew = FMEA.getRiskCategoryList();
-            List<FMEA> FMEAListOld = persistentFMEA.getFMEAList();
-            List<FMEA> FMEAListNew = FMEA.getFMEAList();
+            Fmea persistentFmea = em.find(Fmea.class, Fmea.getId());
+            Fmea parentOld = persistentFmea.getParent();
+            Fmea parentNew = Fmea.getParent();
+            List<RiskCategory> riskCategoryListOld = persistentFmea.getRiskCategoryList();
+            List<RiskCategory> riskCategoryListNew = Fmea.getRiskCategoryList();
+            List<Fmea> FmeaListOld = persistentFmea.getFmeaList();
+            List<Fmea> FmeaListNew = Fmea.getFmeaList();
             if (parentNew != null) {
                 parentNew = em.getReference(parentNew.getClass(), parentNew.getId());
-                FMEA.setParent(parentNew);
+                Fmea.setParent(parentNew);
             }
             List<RiskCategory> attachedRiskCategoryListNew = new ArrayList<RiskCategory>();
             for (RiskCategory riskCategoryListNewRiskCategoryToAttach : riskCategoryListNew) {
@@ -109,49 +104,49 @@ public class FMEAJpaController implements Serializable {
                 attachedRiskCategoryListNew.add(riskCategoryListNewRiskCategoryToAttach);
             }
             riskCategoryListNew = attachedRiskCategoryListNew;
-            FMEA.setRiskCategoryList(riskCategoryListNew);
-            List<FMEA> attachedFMEAListNew = new ArrayList<FMEA>();
-            for (FMEA FMEAListNewFMEAToAttach : FMEAListNew) {
-                FMEAListNewFMEAToAttach = em.getReference(FMEAListNewFMEAToAttach.getClass(), FMEAListNewFMEAToAttach.getId());
-                attachedFMEAListNew.add(FMEAListNewFMEAToAttach);
+            Fmea.setRiskCategoryList(riskCategoryListNew);
+            List<Fmea> attachedFmeaListNew = new ArrayList<Fmea>();
+            for (Fmea FmeaListNewFmeaToAttach : FmeaListNew) {
+                FmeaListNewFmeaToAttach = em.getReference(FmeaListNewFmeaToAttach.getClass(), FmeaListNewFmeaToAttach.getId());
+                attachedFmeaListNew.add(FmeaListNewFmeaToAttach);
             }
-            FMEAListNew = attachedFMEAListNew;
-            FMEA.setFMEAList(FMEAListNew);
-            FMEA = em.merge(FMEA);
+            FmeaListNew = attachedFmeaListNew;
+            Fmea.setFmeaList(FmeaListNew);
+            Fmea = em.merge(Fmea);
             if (parentOld != null && !parentOld.equals(parentNew)) {
-                parentOld.getFMEAList().remove(FMEA);
+                parentOld.getFmeaList().remove(Fmea);
                 parentOld = em.merge(parentOld);
             }
             if (parentNew != null && !parentNew.equals(parentOld)) {
-                parentNew.getFMEAList().add(FMEA);
+                parentNew.getFmeaList().add(Fmea);
                 parentNew = em.merge(parentNew);
             }
             for (RiskCategory riskCategoryListOldRiskCategory : riskCategoryListOld) {
                 if (!riskCategoryListNew.contains(riskCategoryListOldRiskCategory)) {
-                    riskCategoryListOldRiskCategory.getFMEAList().remove(FMEA);
+                    riskCategoryListOldRiskCategory.getFmeaList().remove(Fmea);
                     riskCategoryListOldRiskCategory = em.merge(riskCategoryListOldRiskCategory);
                 }
             }
             for (RiskCategory riskCategoryListNewRiskCategory : riskCategoryListNew) {
                 if (!riskCategoryListOld.contains(riskCategoryListNewRiskCategory)) {
-                    riskCategoryListNewRiskCategory.getFMEAList().add(FMEA);
+                    riskCategoryListNewRiskCategory.getFmeaList().add(Fmea);
                     riskCategoryListNewRiskCategory = em.merge(riskCategoryListNewRiskCategory);
                 }
             }
-            for (FMEA FMEAListOldFMEA : FMEAListOld) {
-                if (!FMEAListNew.contains(FMEAListOldFMEA)) {
-                    FMEAListOldFMEA.setParent(null);
-                    FMEAListOldFMEA = em.merge(FMEAListOldFMEA);
+            for (Fmea FmeaListOldFmea : FmeaListOld) {
+                if (!FmeaListNew.contains(FmeaListOldFmea)) {
+                    FmeaListOldFmea.setParent(null);
+                    FmeaListOldFmea = em.merge(FmeaListOldFmea);
                 }
             }
-            for (FMEA FMEAListNewFMEA : FMEAListNew) {
-                if (!FMEAListOld.contains(FMEAListNewFMEA)) {
-                    FMEA oldParentOfFMEAListNewFMEA = FMEAListNewFMEA.getParent();
-                    FMEAListNewFMEA.setParent(FMEA);
-                    FMEAListNewFMEA = em.merge(FMEAListNewFMEA);
-                    if (oldParentOfFMEAListNewFMEA != null && !oldParentOfFMEAListNewFMEA.equals(FMEA)) {
-                        oldParentOfFMEAListNewFMEA.getFMEAList().remove(FMEAListNewFMEA);
-                        oldParentOfFMEAListNewFMEA = em.merge(oldParentOfFMEAListNewFMEA);
+            for (Fmea FmeaListNewFmea : FmeaListNew) {
+                if (!FmeaListOld.contains(FmeaListNewFmea)) {
+                    Fmea oldParentOfFmeaListNewFmea = FmeaListNewFmea.getParent();
+                    FmeaListNewFmea.setParent(Fmea);
+                    FmeaListNewFmea = em.merge(FmeaListNewFmea);
+                    if (oldParentOfFmeaListNewFmea != null && !oldParentOfFmeaListNewFmea.equals(Fmea)) {
+                        oldParentOfFmeaListNewFmea.getFmeaList().remove(FmeaListNewFmea);
+                        oldParentOfFmeaListNewFmea = em.merge(oldParentOfFmeaListNewFmea);
                     }
                 }
             }
@@ -159,8 +154,8 @@ public class FMEAJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = FMEA.getId();
-                if (findFMEA(id) == null) {
+                Integer id = Fmea.getId();
+                if (findFmea(id) == null) {
                     throw new NonexistentEntityException("The fMEA with id " + id + " no longer exists.");
                 }
             }
@@ -177,29 +172,29 @@ public class FMEAJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            FMEA FMEA;
+            Fmea Fmea;
             try {
-                FMEA = em.getReference(FMEA.class, id);
-                FMEA.getId();
+                Fmea = em.getReference(Fmea.class, id);
+                Fmea.getId();
             } catch (EntityNotFoundException enfe) {
-                throw new NonexistentEntityException("The FMEA with id " + id + " no longer exists.", enfe);
+                throw new NonexistentEntityException("The Fmea with id " + id + " no longer exists.", enfe);
             }
-            FMEA parent = FMEA.getParent();
+            Fmea parent = Fmea.getParent();
             if (parent != null) {
-                parent.getFMEAList().remove(FMEA);
+                parent.getFmeaList().remove(Fmea);
                 parent = em.merge(parent);
             }
-            List<RiskCategory> riskCategoryList = FMEA.getRiskCategoryList();
+            List<RiskCategory> riskCategoryList = Fmea.getRiskCategoryList();
             for (RiskCategory riskCategoryListRiskCategory : riskCategoryList) {
-                riskCategoryListRiskCategory.getFMEAList().remove(FMEA);
+                riskCategoryListRiskCategory.getFmeaList().remove(Fmea);
                 riskCategoryListRiskCategory = em.merge(riskCategoryListRiskCategory);
             }
-            List<FMEA> FMEAList = FMEA.getFMEAList();
-            for (FMEA FMEAListFMEA : FMEAList) {
-                FMEAListFMEA.setParent(null);
-                FMEAListFMEA = em.merge(FMEAListFMEA);
+            List<Fmea> FmeaList = Fmea.getFmeaList();
+            for (Fmea FmeaListFmea : FmeaList) {
+                FmeaListFmea.setParent(null);
+                FmeaListFmea = em.merge(FmeaListFmea);
             }
-            em.remove(FMEA);
+            em.remove(Fmea);
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -208,19 +203,19 @@ public class FMEAJpaController implements Serializable {
         }
     }
 
-    public List<FMEA> findFMEAEntities() {
-        return findFMEAEntities(true, -1, -1);
+    public List<Fmea> findFmeaEntities() {
+        return findFmeaEntities(true, -1, -1);
     }
 
-    public List<FMEA> findFMEAEntities(int maxResults, int firstResult) {
-        return findFMEAEntities(false, maxResults, firstResult);
+    public List<Fmea> findFmeaEntities(int maxResults, int firstResult) {
+        return findFmeaEntities(false, maxResults, firstResult);
     }
 
-    private List<FMEA> findFMEAEntities(boolean all, int maxResults, int firstResult) {
+    private List<Fmea> findFmeaEntities(boolean all, int maxResults, int firstResult) {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            cq.select(cq.from(FMEA.class));
+            cq.select(cq.from(Fmea.class));
             Query q = em.createQuery(cq);
             if (!all) {
                 q.setMaxResults(maxResults);
@@ -232,20 +227,20 @@ public class FMEAJpaController implements Serializable {
         }
     }
 
-    public FMEA findFMEA(Integer id) {
+    public Fmea findFmea(Integer id) {
         EntityManager em = getEntityManager();
         try {
-            return em.find(FMEA.class, id);
+            return em.find(Fmea.class, id);
         } finally {
             em.close();
         }
     }
 
-    public int getFMEACount() {
+    public int getFmeaCount() {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            Root<FMEA> rt = cq.from(FMEA.class);
+            Root<Fmea> rt = cq.from(Fmea.class);
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
