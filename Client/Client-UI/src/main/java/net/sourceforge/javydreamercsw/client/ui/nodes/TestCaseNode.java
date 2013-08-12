@@ -25,7 +25,7 @@ class TestCaseNode extends AbstractRefreshableBeanNode {
 
     @Override
     public String getName() {
-        return "Test Case #" + getLookup().lookup(TestCase.class).getTestCasePK().getId();
+        return getLookup().lookup(TestCase.class).getName();
     }
 
     @Override
