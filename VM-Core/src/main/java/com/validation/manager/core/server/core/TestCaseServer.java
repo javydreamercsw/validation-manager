@@ -23,32 +23,33 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
 
     public TestCaseServer(TestCasePK pk) {
         super(pk);
-        TestCaseJpaController controller 
+        TestCaseJpaController controller
                 = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
         TestCase temp = controller.findTestCase(getTestCasePK());
-        update(this, temp);
-    }
-    
-    public TestCaseServer(TestCase tc) {
-        update(this, tc);
+        update((TestCaseServer) this, temp);
     }
 
-    public TestCaseServer(int testCaseId, short version, Date creationDate) {
-        super(new TestCasePK(testCaseId), version, creationDate);
-        setVersion(version);
-        setCreationDate(creationDate);
+    public TestCaseServer(TestCase tc) {
+        update((TestCaseServer) this, tc);
+    }
+
+    public TestCaseServer(String name, int testCaseId, short version, Date creationDate) {
+        super(name, new TestCasePK(testCaseId), version, creationDate);
         setTest(new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(testCaseId));
     }
 
     @Override
-    public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
-        TestCaseJpaController controller = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
+    public int write2DB() throws IllegalOrphanException,
+            NonexistentEntityException, Exception {
+        TestCaseJpaController controller
+                = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
         if (getTestCasePK().getId() > 0) {
             TestCase temp = controller.findTestCase(getTestCasePK());
             update(temp, this);
             controller.edit(temp);
         } else {
-            TestCase temp = new TestCase(getTestCasePK(), getVersion(), getCreationDate());
+            TestCase temp = new TestCase(getName(), getTestCasePK(),
+                    getVersion(), getCreationDate());
             update(temp, this);
             controller.create(temp);
         }
@@ -88,8 +89,9 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         target.setTest(source.getTest());
         target.setVersion(source.getVersion());
         target.setTestCasePK(source.getTestCasePK());
+        target.setName(source.getName());
     }
-    
+
     public void update() {
         update(this, getEntity());
     }

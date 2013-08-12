@@ -93,14 +93,16 @@ public class TestCase implements Serializable {
         this.testCasePK = testCasePK;
     }
 
-    public TestCase(TestCasePK testCasePK, short version, Date creationDate) {
+    public TestCase(String name, TestCasePK testCasePK, short version, Date creationDate) {
+        this.name = name;
         this.testCasePK = testCasePK;
         this.version = version;
         this.creationDate = creationDate;
     }
 
-    public TestCase(int testId) {
+    public TestCase(String name,int testId) {
         this.testCasePK = new TestCasePK(testId);
+        this.name = name;
     }
 
     public TestCasePK getTestCasePK() {

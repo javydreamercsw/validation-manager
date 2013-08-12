@@ -86,6 +86,12 @@
             <artifactId>H2-Driver</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <artifactId>org-netbeans-swing-outline</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <type>jar</type>
+            <version>${netbeans.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestStepAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportTestStepAction;
 import org.openide.util.lookup.InstanceContent;
 
@@ -33,6 +34,7 @@ class TestCaseNode extends AbstractRefreshableBeanNode {
         List<Action> actions = new ArrayList<Action>();
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateTestStepAction());
+        actions.add(new EditTestCaseAction());
         actions.add(new ImportTestStepAction());
         //TODO: actions.add(new DeleteTestStepAction());
         return actions.toArray(new Action[actions.size()]);
@@ -43,5 +45,6 @@ class TestCaseNode extends AbstractRefreshableBeanNode {
         TestCaseServer rs =
                 new TestCaseServer(getLookup().lookup(TestCase.class).getTestCasePK());
         rs.update((TestCase) getBean(), rs.getEntity());
+        setDisplayName(((TestCase) getBean()).getName());
     }
 }
