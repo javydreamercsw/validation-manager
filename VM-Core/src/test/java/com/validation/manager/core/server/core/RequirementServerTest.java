@@ -153,7 +153,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             com.validation.manager.core.db.Test test
                     = TestHelper.createTest("Test", "Purpose", "Scope");
             //Create Test Case
-            TestCase tc = TestHelper.createTestCase(new Short("1"),
+            TestCase tc = TestHelper.createTestCase("Dummy", new Short("1"),
                     "Expected Results", test, /*user,*/ "Summary");
             //Add steps
             int i = 1;

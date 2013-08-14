@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class ProjectServer extends Project implements EntityServer<Project> {
+public final class ProjectServer extends Project implements EntityServer<Project> {
 
     public ProjectServer(String name, String notes) {
         super(name);
@@ -29,7 +29,7 @@ public class ProjectServer extends Project implements EntityServer<Project> {
     public ProjectServer(Project p) {
         Project product = new ProjectJpaController(
                 DataBaseManager.getEntityManagerFactory()).findProject(p.getId());
-        update(this, product);
+        update((ProjectServer) this, product);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class ProjectServer extends Project implements EntityServer<Project> {
         }
         return requirements;
     }
-    
+
     public void update() {
         update(this, getEntity());
     }
