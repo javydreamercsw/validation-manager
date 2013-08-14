@@ -71,7 +71,7 @@ public class ProjectTest extends AbstractVMTestCase {
                     = TestHelper.createTest("Test #1", "Testing",
                     "Test #1 scope");
             //Create Test Case
-            TestCase tc = TestHelper.createTestCase(new Short("1"),
+            TestCase tc = TestHelper.createTestCase("Dummy", new Short("1"),
                     "Expected Results", test, /*user,*/ "Summary");
             //Add steps
             for (int i = 1; i < 6; i++) {

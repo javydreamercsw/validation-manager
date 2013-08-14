@@ -31,8 +31,8 @@ import org.junit.Test;
  */
 public class StepImporterTest extends AbstractVMTestCase {
 
-    private static final Logger LOG =
-            Logger.getLogger(RequirementImporterTest.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(RequirementImporterTest.class.getName());
 
     public StepImporterTest() {
     }
@@ -101,7 +101,7 @@ public class StepImporterTest extends AbstractVMTestCase {
         System.out.println("Create Test Case");
         com.validation.manager.core.db.TestCase tc = null;
         try {
-            tc = TestHelper.createTestCase(new Short("1"),
+            tc = TestHelper.createTestCase("Dummy", new Short("1"),
                     "Test Case", test, "Test Summary");
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -123,10 +123,10 @@ public class StepImporterTest extends AbstractVMTestCase {
         System.out.println("Create Requirement to link");
         Requirement r = null;
         try {
-            RequirementSpec rs =
-                    TestHelper.createRequirementSpec("Test Spec", "Description", project, 1);
-            RequirementSpecNode rsn =
-                    TestHelper.createRequirementSpecNode(rs, "Root", "Description", "Scope");
+            RequirementSpec rs
+                    = TestHelper.createRequirementSpec("Test Spec", "Description", project, 1);
+            RequirementSpecNode rsn
+                    = TestHelper.createRequirementSpecNode(rs, "Root", "Description", "Scope");
             r = TestHelper.createRequirement("SRS-SW-0001",
                     "Sample requirement", rsn.getRequirementSpecNodePK(), "Notes", 1, 1);
         } catch (Exception ex) {

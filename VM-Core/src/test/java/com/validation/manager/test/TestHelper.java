@@ -128,10 +128,10 @@ public class TestHelper {
                 DataBaseManager.getEntityManagerFactory()).findTest(t.getId());
     }
 
-    public static TestCase createTestCase(short version,
+    public static TestCase createTestCase(String name, short version,
             String expectedResults, Test test, /*VmUser user,*/ String summary)
             throws PreexistingEntityException, Exception {
-        TestCaseServer tc = new TestCaseServer(test.getId(), version, new Date());
+        TestCaseServer tc = new TestCaseServer(name, test.getId(), version, new Date());
         tc.setExpectedResults(expectedResults);
         tc.setTest(test);
 //        tc.setVmUserId(user);
