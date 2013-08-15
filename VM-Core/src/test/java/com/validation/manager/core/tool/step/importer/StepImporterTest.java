@@ -2,6 +2,7 @@ package com.validation.manager.core.tool.step.importer;
 
 import com.validation.manager.core.tool.requirement.importer.*;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -135,13 +136,17 @@ public class StepImporterTest extends AbstractVMTestCase {
         }
         //Finally, do the test
         try {
-            StepImporter instance = new StepImporter(file,
-                    new TestCaseJpaController(
-                    DataBaseManager.getEntityManagerFactory())
-                    .findTestCase(tc.getTestCasePK()));
-            instance.importFile(true);
-            instance.processImport();
-        } catch (Exception ex) {
+            if (tc == null) {
+                fail("Test Case shouldn't be null!");
+            } else {
+                StepImporter instance = new StepImporter(file,
+                        new TestCaseJpaController(
+                        DataBaseManager.getEntityManagerFactory())
+                        .findTestCase(tc.getTestCasePK()));
+                instance.importFile(true);
+                instance.processImport();
+            }
+        } catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
