@@ -14,15 +14,20 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
@@ -33,6 +38,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.h2.jdbcx.JdbcDataSource;
 
 /**
  * Import Requirements into database
@@ -108,7 +114,12 @@ public class StepImporter implements ImporterInterface<Step> {
                             continue;
                         }
                         int cells = row.getPhysicalNumberOfCells();
-
+                        if (row.getCell(0) == null) {
+                            LOG.log(Level.WARNING,
+                                    "Found an empty row on line: {0}. "
+                                    + "Stopping processing", r);
+                            break;
+                        }
                         if (cells < 2) {
                             throw new RequirementImportException(
                                     rb.getString("message.step.import.missing.column")
@@ -135,58 +146,58 @@ public class StepImporter implements ImporterInterface<Step> {
                                         value = cell.getStringCellValue();
                                         break;
                                     default:
-                                        //Do nothing.
+                                    //Do nothing.
                                 }
                             }
                             switch (c) {
                                 case 0:
                                     if (value != null) {
-                                    //Sequence
-                                    LOG.fine("Setting sequence");
-                                    step.setStepSequence(
-                                            Integer.valueOf(value.substring(0, value.indexOf("."))));
-                                }
+                                        //Sequence
+                                        LOG.fine("Setting sequence");
+                                        step.setStepSequence(
+                                                Integer.valueOf(value.substring(0, value.indexOf("."))));
+                                    }
                                     break;
                                 case 1:
                                     if (value != null) {
-                                    //Text
-                                    LOG.fine("Setting text");
-                                    step.setText(value.getBytes("UTF-8"));
-                                }
+                                        //Text
+                                        LOG.fine("Setting text");
+                                        step.setText(value.getBytes("UTF-8"));
+                                    }
                                     break;
                                 case 2:
                                     //Optional Related requirements
                                     if (value != null && !value.trim().isEmpty()) {
-                                    LOG.fine("Setting related requirements");
-                                    StringTokenizer st = new StringTokenizer(value, ",");
-                                    while (st.hasMoreTokens()) {
-                                        String token = st.nextToken().trim();
-                                        parameters.clear();
-                                        parameters.put("uniqueId", token);
-                                        result = DataBaseManager.namedQuery(
-                                                "Requirement.findByUniqueId",
-                                                parameters);
-                                        if (!result.isEmpty()) {
-                                            for (Object o : result) {
-                                                step.getRequirementList().add((Requirement) o);
+                                        LOG.fine("Setting related requirements");
+                                        StringTokenizer st = new StringTokenizer(value, ",");
+                                        while (st.hasMoreTokens()) {
+                                            String token = st.nextToken().trim();
+                                            parameters.clear();
+                                            parameters.put("uniqueId", token);
+                                            result = DataBaseManager.namedQuery(
+                                                    "Requirement.findByUniqueId",
+                                                    parameters);
+                                            if (!result.isEmpty()) {
+                                                for (Object o : result) {
+                                                    step.getRequirementList().add((Requirement) o);
+                                                }
                                             }
                                         }
                                     }
-                                }
                                     break;
                                 case 3:
                                     if (value != null) {
-                                    //Optional Expected result
-                                    LOG.fine("Setting expected result");
-                                    step.setExpectedResult(value.getBytes("UTF-8"));
-                                }
+                                        //Optional Expected result
+                                        LOG.fine("Setting expected result");
+                                        step.setExpectedResult(value.getBytes("UTF-8"));
+                                    }
                                     break;
                                 case 4:
                                     if (value != null) {
-                                    //Optional notes
-                                    LOG.fine("Setting notes");
-                                    step.setNotes(value);
-                                }
+                                        //Optional notes
+                                        LOG.fine("Setting notes");
+                                        step.setNotes(value);
+                                    }
                                     break;
 
                                 default:
@@ -226,8 +237,7 @@ public class StepImporter implements ImporterInterface<Step> {
     @Override
     public boolean processImport() throws VMException {
         boolean result = false;
-        for (Iterator<Step> it = steps.iterator(); it.hasNext();) {
-            Step step = it.next();
+        for (Step step : steps) {
             try {
                 new StepJpaController(
                         DataBaseManager.getEntityManagerFactory())
@@ -255,8 +265,7 @@ public class StepImporter implements ImporterInterface<Step> {
         f.setColor((short) Font.COLOR_NORMAL);
         cs.setFont(f);
         Row newRow = sheet.createRow(0);
-        for (Iterator<String> it = columns.iterator(); it.hasNext();) {
-            String label = it.next();
+        for (String label : columns) {
             Cell newCell = newRow.createCell(column);
             newCell.setCellStyle(cs);
             newCell.setCellValue(label);
@@ -282,15 +291,56 @@ public class StepImporter implements ImporterInterface<Step> {
 
     public static void main(String[] args) {
         JFileChooser fc = new JFileChooser();
+        DataBaseManager.setPersistenceUnitName("TestVMPU");
         int returnVal = fc.showOpenDialog(new JFrame());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             StepImporter si = new StepImporter(file, null);
             try {
-                si.importFile(true);
-            } catch (RequirementImportException ex) {
+                List<Step> imported = si.importFile(true);
+                LOG.info("Imported Steps:");
+                for (Step s : imported) {
+                    LOG.log(Level.INFO, "Step: {0}", s.getStepSequence());
+                }
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                System.exit(1);
+            }
+        }
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            Map<String, Object> properties = DataBaseManager.getEntityManagerFactory().getProperties();
+            DataSource ds = new JdbcDataSource();
+            ((JdbcDataSource) ds).setPassword((String) properties.get("javax.persistence.jdbc.password"));
+            ((JdbcDataSource) ds).setUser((String) properties.get("javax.persistence.jdbc.user"));
+            ((JdbcDataSource) ds).setURL((String) properties.get("javax.persistence.jdbc.url"));
+            //Load the H2 driver
+            Class.forName("org.h2.Driver");
+            conn = ds.getConnection();
+            stmt = conn.createStatement();
+            stmt.executeUpdate("DROP ALL OBJECTS DELETE FILES");
+        } catch (SQLException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
+        DataBaseManager.close();
+        System.exit(0);
     }
 }

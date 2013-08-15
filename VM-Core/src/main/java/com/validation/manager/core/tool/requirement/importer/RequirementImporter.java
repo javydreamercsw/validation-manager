@@ -100,7 +100,12 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                         if (row == null) {
                             continue;
                         }
-
+                        if (row.getCell(0) == null) {
+                            LOG.log(Level.WARNING,
+                                    "Found an empty row on line: {0}. "
+                                    + "Stopping processing", r);
+                            break;
+                        }
                         int cells = row.getPhysicalNumberOfCells();
                         if (cells < 3) {
                             throw new RequirementImportException(
