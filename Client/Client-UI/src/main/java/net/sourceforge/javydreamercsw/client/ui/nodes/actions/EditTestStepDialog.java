@@ -82,7 +82,11 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             }
             if (step.getExpectedResult() != null
                     && step.getExpectedResult().length > 0) {
-                result.setText(new String(step.getExpectedResult()));
+                try {
+                    result.setText(new String(step.getExpectedResult(), "UTF8"));
+                } catch (UnsupportedEncodingException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
         }
     }
