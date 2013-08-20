@@ -111,7 +111,7 @@
     <Component class="javax.swing.JButton" name="chooseRequirements">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.chooseRequirements.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.chooseRequirements.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -142,14 +142,14 @@
     <Component class="javax.swing.JLabel" name="jLabel3">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel3.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel3.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="cancel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.cancel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.cancel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -159,35 +159,35 @@
     <Component class="javax.swing.JLabel" name="jLabel2">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel2.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel2.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel6">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel6.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel6.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="uniqueID">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.uniqueID.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.uniqueID.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel1.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel1.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel5">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel5.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel5.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
@@ -205,7 +205,7 @@
     <Component class="javax.swing.JLabel" name="jLabel4">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel4.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel4.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
@@ -229,7 +229,7 @@
     <Component class="javax.swing.JButton" name="save">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.save.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.save.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -246,7 +246,7 @@
     <Component class="javax.swing.JLabel" name="jLabel7">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel7.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="net/sourceforge/javydreamercsw/client/ui/components/requirement/edit/Bundle.properties" key="EditRequirementWindowTopComponent.jLabel7.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>

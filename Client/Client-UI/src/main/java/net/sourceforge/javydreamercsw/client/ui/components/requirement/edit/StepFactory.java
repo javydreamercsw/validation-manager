@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package net.sourceforge.javydreamercsw.client.ui.components;
+package net.sourceforge.javydreamercsw.client.ui.components.requirement.edit;
 
 import com.validation.manager.core.db.Step;
 import java.util.ArrayList;
