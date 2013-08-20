@@ -1,6 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import net.sourceforge.javydreamercsw.client.ui.components.EditRequirementWindowTopComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.requirement.edit.EditRequirementWindowTopComponent;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;

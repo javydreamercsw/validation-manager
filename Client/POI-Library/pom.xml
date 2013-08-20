@@ -8,10 +8,14 @@
     </parent>
 
     <groupId>net.sourceforge.javydreamercsw</groupId>
-    <artifactId>VM-Core-Wrapper</artifactId>
+    <artifactId>POI-Library</artifactId>
     <packaging>nbm</packaging>
 
-    <name>Core Wrapper</name>
+    <name>POI Library</name>
+
+    <properties>
+        <poi.version>3.9</poi.version>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -20,37 +24,19 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>VM-Core</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>h2</artifactId>
-                    <groupId>com.h2database</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>dom4j</artifactId>
-                    <groupId>dom4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>poi</artifactId>
-                    <groupId>org.apache.poi</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>poi-ooxml</artifactId>
-                    <groupId>org.apache.poi</groupId>
-                </exclusion>
-            </exclusions>
+            <artifactId>poi</artifactId>
+            <groupId>org.apache.poi</groupId>
+            <version>${poi.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>H2-Driver</artifactId>
-            <version>${project.version}</version>
+            <artifactId>poi-ooxml</artifactId>
+            <groupId>org.apache.poi</groupId>
+            <version>${poi.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>POI-Library</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>ooxml-schemas</artifactId>
+            <version>1.1</version>
         </dependency>
     </dependencies>
 
@@ -62,30 +48,33 @@
                 <extensions>true</extensions>
                 <configuration>
                     <moduleType>autoload</moduleType>
-                    <codeNameBase>com.validation.manager.core/1</codeNameBase>
+                    <codeNameBase>com.validation.manager.poi.library/1</codeNameBase>
                     <publicPackages>
-                        <publicPackage>com.validation.manager.*</publicPackage>
-                        <publicPackage>javax.*</publicPackage>
-                        <publicPackage>org.eclipse.*</publicPackage>
-                        <publicPackage>commonj.sdo.*</publicPackage>
+                        <publicPackage>org.apache.poi.*</publicPackage>
+                        <publicPackage>org.xml.*</publicPackage>
+                        <publicPackage>javax.xml.*</publicPackage>
+                        <publicPackage>org.w3c.*</publicPackage>
+                        <publicPackage>org.openxmlformats.*</publicPackage>
+                        <publicPackage>org.dom4j.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
 
             <plugin>
-                <!-- NetBeans 6.9+ requires JDK 6 -->
+                <!-- NetBeans 6.9+ requires JDK 6, starting NetBeans 7.4 source 1.7 will be required   -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.0</version>
+                <version>2.5.1</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.6</source>
+                    <target>1.6</target>
                 </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
                 <configuration>
                     <!-- to have the jar plugin pickup the nbm generated manifest -->
                     <useDefaultManifestFile>true</useDefaultManifestFile>

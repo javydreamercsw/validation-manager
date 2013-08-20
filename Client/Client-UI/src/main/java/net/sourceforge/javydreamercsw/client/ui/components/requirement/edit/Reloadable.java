@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.components;
+package net.sourceforge.javydreamercsw.client.ui.components.requirement.edit;
 
 /**
  *

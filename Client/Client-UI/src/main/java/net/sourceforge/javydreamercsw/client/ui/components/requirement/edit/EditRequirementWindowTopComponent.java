@@ -1,7 +1,7 @@
 /*
  * Component to edit requirements.
  */
-package net.sourceforge.javydreamercsw.client.ui.components;
+package net.sourceforge.javydreamercsw.client.ui.components.requirement.edit;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Requirement;
