@@ -41,12 +41,13 @@ public class TableExtractor {
 
     public static void main(String[] args) {
         JFileChooser fc = new JFileChooser();
+        List<XWPFTable> tables = new ArrayList<XWPFTable>();
         int returnVal = fc.showOpenDialog(new JFrame());
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             TableExtractor te = new TableExtractor(file);
             try {
-                List<XWPFTable> tables = te.extractTables();
+                tables = te.extractTables();
                 int i = 1;
                 for (XWPFTable table : tables) {
                     System.out.println("Table: " + i);
@@ -64,10 +65,13 @@ public class TableExtractor {
                     i++;
                 }
             } catch (IOException ex) {
-                Logger.getLogger(TableExtractor.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(TableExtractor.class.getName()).log(
+                        Level.SEVERE, null, ex);
                 System.exit(1);
             }
         }
+        Logger.getLogger(TableExtractor.class.getName()).log(Level.INFO,
+                "Imported {0} tables!", tables.size());
         System.exit(0);
     }
 }
