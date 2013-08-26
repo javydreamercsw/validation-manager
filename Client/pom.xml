@@ -6,7 +6,7 @@
         <groupId>net.sourceforge.javydreamercsw</groupId>
         <version>0.1-SNAPSHOT</version>
     </parent>
-    
+
     <prerequisites>
         <maven>3.0.4</maven>
     </prerequisites>
@@ -16,7 +16,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Validation Manager Admin Client parent</name>
+    <name>Validation Manager Admin Client</name>
 
     <repositories>
         <!--
@@ -91,6 +91,7 @@
         <module>HierarchyVisualizer</module>
         <module>JasperReport</module>
         <module>JasperReportViewer</module>
+        <module>POI-Library</module>
     </modules>
 
     <properties>
