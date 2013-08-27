@@ -1,6 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.components.test.importer;
 
 import com.validation.manager.core.tool.msword.importer.TableExtractor;
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,6 +9,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JTable;
@@ -238,7 +241,7 @@ public final class TestImportTopComponent extends TopComponent
         LOG.log(Level.FINE, "Changed value to: {0}", index);
         //Build the table
         XWPFTable table = tables.get(index - 1);
-        int rows = table.getNumberOfRows();
+        int rows = table.getNumberOfRows() + 1;//Add one for the mapping row
         if (header.isSelected()) {
             rows--;
         }
@@ -248,12 +251,17 @@ public final class TestImportTopComponent extends TopComponent
         for (int i = 0; i < columns; i++) {
             title[i] = "Column " + (i + 1);
         }
-        int rowNum = 0;
+        //Row 0 for mapping field
+        int rowNum = 1;
         int columnNum;
+        //Fill maping field
+        for (int i = 0; i < columns; i++) {
+            data[0][i] = "Select Mapping";
+        }
         for (XWPFTableRow row : table.getRows()) {
             columnNum = 0;
             for (XWPFTableCell cell : row.getTableCells()) {
-                if (header.isSelected() && rowNum == 0) {
+                if (header.isSelected() && rowNum == 1) {
                     title[columnNum] = cell.getText();
                 } else {
                     data[header.isSelected() ? rowNum - 1 : rowNum][columnNum] = cell.getText();
@@ -264,16 +272,39 @@ public final class TestImportTopComponent extends TopComponent
         }
         //Rebuild the table model to fit this table
         importedTable = new JTable();
-        importedTable.setModel(new javax.swing.table.DefaultTableModel(
-                data,
-                title
-        ) {
-            @Override
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return false;
-            }
-        });
+        importedTable.setDefaultEditor(Object.class, new CustomRenderer());
+        importedTable.setModel(
+                new javax.swing.table.DefaultTableModel(
+                        data,
+                        title
+                ) {
+                    @Override
+                    public boolean isCellEditable(int rowIndex, int columnIndex) {
+                        return rowIndex == 0;
+                    }
+                });
         jScrollPane1.setViewportView(importedTable);
+    }
+
+    class CustomRenderer extends DefaultCellEditor {
+
+        private final JComboBox cb;
+
+        public CustomRenderer() {
+            super(new JComboBox());
+            cb = (JComboBox) super.getComponent();
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            cb.addItem("Requirement(s)");
+            cb.addItem("Description");
+            cb.addItem("Acceptance Criteria");
+            cb.addItem("Ignore");
+            return row == 0 ? cb
+                    : super.getTableCellEditorComponent(table,
+                            value, isSelected, row, column);
+        }
     }
 
     private void enableUI(boolean valid) {
