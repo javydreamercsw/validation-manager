@@ -33,10 +33,8 @@ public class TableExtractor {
 
     public List<XWPFTable> extractTables() throws FileNotFoundException, IOException {
         InputStream fis = new FileInputStream(source);
-        List<XWPFTable> tables = new ArrayList<XWPFTable>();
         XWPFDocument doc = new XWPFDocument(fis);
-        tables.addAll(doc.getTables());
-        return tables;
+        return doc.getTables();
     }
 
     public static void main(String[] args) {
