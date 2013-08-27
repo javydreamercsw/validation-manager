@@ -14,7 +14,7 @@ public class ImportTestAction extends AbstractAction {
     private final TestImportTopComponent component = new TestImportTopComponent();
 
     public ImportTestAction() {
-        super("Import Test",
+        super("Import From Document",
                 new ImageIcon("com/validation/manager/resources/icons/Signage/Add Square.png"));
     }
 

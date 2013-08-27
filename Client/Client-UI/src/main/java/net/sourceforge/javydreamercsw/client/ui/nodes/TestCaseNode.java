@@ -16,7 +16,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class TestCaseNode extends AbstractRefreshableBeanNode {
+class TestCaseNode extends AbstractVMBeanNode {
 
     public TestCaseNode(TestCase tc) throws IntrospectionException {
         super(tc,

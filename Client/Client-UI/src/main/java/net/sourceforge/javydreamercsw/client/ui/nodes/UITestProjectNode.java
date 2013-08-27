@@ -14,7 +14,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class UITestProjectNode extends AbstractRefreshableBeanNode {
+class UITestProjectNode extends AbstractVMBeanNode {
 
     public UITestProjectNode(TestProject tp) throws IntrospectionException {
         super(tp,
