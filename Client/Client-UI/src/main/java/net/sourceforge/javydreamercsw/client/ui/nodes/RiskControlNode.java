@@ -9,7 +9,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class RiskControlNode extends AbstractRefreshableBeanNode {
+class RiskControlNode extends AbstractVMBeanNode {
 
     public RiskControlNode(RiskControl rs) throws IntrospectionException {
         super(rs,

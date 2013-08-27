@@ -4,6 +4,7 @@ import com.validation.manager.core.tool.msword.importer.TableExtractor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,6 +14,8 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import net.sourceforge.javydreamercsw.client.ui.nodes.TestPlanNode;
+import net.sourceforge.javydreamercsw.client.ui.nodes.capability.ImportCapability;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -20,8 +23,12 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
+import org.openide.util.LookupEvent;
+import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.Utilities;
 
 /**
  * Top component which displays something.
@@ -29,29 +36,32 @@ import org.openide.util.NbBundle.Messages;
 @ConvertAsProperties(
         dtd = "-//net.sourceforge.javydreamercsw.client.ui.components//TestImport//EN",
         autostore = false
-        )
+)
 @TopComponent.Description(
         preferredID = "TestImportTopComponent",
         //iconBase="SET/PATH/TO/ICON/HERE",
         persistenceType = TopComponent.PERSISTENCE_ALWAYS
-        )
+)
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
 @ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.components.TestImportTopComponent")
 @ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_TestImportAction",
         preferredID = "TestImportTopComponent"
-        )
+)
 @Messages({
     "CTL_TestImportAction=Test Import",
     "CTL_TestImportTopComponent=Test Import Window",
     "HINT_TestImportTopComponent=This is a Test Import window"
 })
-public final class TestImportTopComponent extends TopComponent {
+public final class TestImportTopComponent extends TopComponent
+        implements LookupListener {
 
     private final List<XWPFTable> tables = new ArrayList<XWPFTable>();
     private static final Logger LOG
             = Logger.getLogger(TestImportTopComponent.class.getSimpleName());
+    private final Lookup.Result<ImportCapability> result
+            = Utilities.actionsGlobalContext().lookupResult(ImportCapability.class);
 
     public TestImportTopComponent() {
         initComponents();
@@ -174,9 +184,9 @@ public final class TestImportTopComponent extends TopComponent {
                             spinner.setModel(new SpinnerNumberModel(1.0, 1.0,
                                     max, 1.0));
                             spinner.setValue(1.0);
-                            displayTable(1);
                             LOG.log(Level.INFO, "Loaded {0} tables!", tables.size());
                             valid = true;
+                            displayTable(1);
                         } else {
                             LOG.log(Level.INFO, "Found no tables!");
                         }
@@ -227,13 +237,13 @@ public final class TestImportTopComponent extends TopComponent {
     private void displayTable(Integer index) {
         LOG.log(Level.FINE, "Changed value to: {0}", index);
         //Build the table
-        assert index > 0 && index < tables.size() :
-                "Invalid index: " + index + ". Must be between 1 and "
-                + tables.size();
         XWPFTable table = tables.get(index - 1);
         int rows = table.getNumberOfRows();
+        if (header.isSelected()) {
+            rows--;
+        }
         int columns = table.getRow(0).getTableCells().size();
-        Object[][] data = new Object[columns][rows];
+        Object[][] data = new Object[rows][columns];
         String[] title = new String[columns];
         for (int i = 0; i < columns; i++) {
             title[i] = "Column " + (i + 1);
@@ -246,8 +256,9 @@ public final class TestImportTopComponent extends TopComponent {
                 if (header.isSelected() && rowNum == 0) {
                     title[columnNum] = cell.getText();
                 } else {
-                    data[columnNum][rowNum] = cell.getText();
+                    data[header.isSelected() ? rowNum - 1 : rowNum][columnNum] = cell.getText();
                 }
+                columnNum++;
             }
             rowNum++;
         }
@@ -256,12 +267,12 @@ public final class TestImportTopComponent extends TopComponent {
         importedTable.setModel(new javax.swing.table.DefaultTableModel(
                 data,
                 title
-                ) {
-                    @Override
-                    public boolean isCellEditable(int rowIndex, int columnIndex) {
-                        return false;
-                    }
-                });
+        ) {
+            @Override
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return false;
+            }
+        });
         jScrollPane1.setViewportView(importedTable);
     }
 
@@ -269,5 +280,21 @@ public final class TestImportTopComponent extends TopComponent {
         spinner.setEnabled(valid);
         header.setEnabled(valid);
         importedTable.setEnabled(valid);
+    }
+
+    @Override
+    public void resultChanged(LookupEvent le) {
+        Collection<? extends ImportCapability> results = result.allInstances();
+        if (!results.isEmpty()) {
+            updateUI(results.toArray()[0]);
+        }
+    }
+
+    private void updateUI(Object object) {
+        if (object instanceof TestPlanNode) {
+            enableUI(true);
+        } else {
+            enableUI(false);
+        }
     }
 }

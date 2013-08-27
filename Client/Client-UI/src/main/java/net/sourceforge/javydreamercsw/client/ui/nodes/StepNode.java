@@ -14,7 +14,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class StepNode extends AbstractRefreshableBeanNode {
+class StepNode extends AbstractVMBeanNode {
 
     public StepNode(Step step) throws IntrospectionException {
         super(step,

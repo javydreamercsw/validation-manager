@@ -13,7 +13,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class UIRequirementSpecNode extends AbstractRefreshableBeanNode {
+public class UIRequirementSpecNode extends AbstractVMBeanNode {
 
     public UIRequirementSpecNode(RequirementSpec spec) throws IntrospectionException {
         super(spec,

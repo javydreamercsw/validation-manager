@@ -16,7 +16,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class ProjectNode extends AbstractRefreshableBeanNode {
+public class ProjectNode extends AbstractVMBeanNode {
 
     public ProjectNode(Project project) throws IntrospectionException {
         super(project, new SubProjectChildFactory(project), new InstanceContent());
