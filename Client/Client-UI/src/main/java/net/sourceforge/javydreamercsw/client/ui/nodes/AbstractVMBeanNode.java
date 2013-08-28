@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Action;
 import javax.swing.SwingUtilities;
-import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportTestAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.RefreshAction;
-import net.sourceforge.javydreamercsw.client.ui.nodes.capability.ImportCapability;
 import net.sourceforge.javydreamercsw.client.ui.nodes.capability.RefreshableCapability;
 import org.openide.nodes.BeanNode;
 import org.openide.nodes.Children;
@@ -41,9 +39,6 @@ public abstract class AbstractVMBeanNode extends BeanNode
                 return Lookup.EMPTY;
             }
         });
-        content.add(new ImportCapability() {
-
-        });
         content.add(bean);
     }
 
@@ -73,9 +68,6 @@ public abstract class AbstractVMBeanNode extends BeanNode
         //Add refresh action if node has capability
         if (!getLookup().lookupAll(RefreshableCapability.class).isEmpty()) {
             actions.add(new RefreshAction(this));
-        }
-        if (!getLookup().lookupAll(ImportCapability.class).isEmpty()) {
-            actions.add(new ImportTestAction());
         }
         return actions.size() > 0 ? actions.toArray(new Action[actions.size()]) : new Action[]{};
     }
