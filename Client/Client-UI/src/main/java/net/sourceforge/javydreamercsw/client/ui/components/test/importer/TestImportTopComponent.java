@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,20 +19,14 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import net.sourceforge.javydreamercsw.client.ui.nodes.TestPlanNode;
-import net.sourceforge.javydreamercsw.client.ui.nodes.capability.ImportCapability;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
-import org.openide.util.LookupEvent;
-import org.openide.util.LookupListener;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.Utilities;
 
 /**
  * Top component which displays something.
@@ -45,11 +38,11 @@ import org.openide.util.Utilities;
 @TopComponent.Description(
         preferredID = "TestImportTopComponent",
         //iconBase="SET/PATH/TO/ICON/HERE",
-        persistenceType = TopComponent.PERSISTENCE_ALWAYS
+        persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
-@ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.components.TestImportTopComponent")
-@ActionReference(path = "Menu/Window" /*, position = 333 */)
+@ActionID(category = "Window",
+        id = "net.sourceforge.javydreamercsw.client.ui.components.TestImportTopComponent")
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_TestImportAction",
         preferredID = "TestImportTopComponent"
@@ -59,14 +52,11 @@ import org.openide.util.Utilities;
     "CTL_TestImportTopComponent=Test Import Window",
     "HINT_TestImportTopComponent=This is a Test Import window"
 })
-public final class TestImportTopComponent extends TopComponent
-        implements LookupListener {
+public final class TestImportTopComponent extends TopComponent {
 
     private final List<XWPFTable> tables = new ArrayList<XWPFTable>();
     private static final Logger LOG
             = Logger.getLogger(TestImportTopComponent.class.getSimpleName());
-    private final Lookup.Result<ImportCapability> result
-            = Utilities.actionsGlobalContext().lookupResult(ImportCapability.class);
 
     public TestImportTopComponent() {
         initComponents();
@@ -360,14 +350,6 @@ public final class TestImportTopComponent extends TopComponent
         header.setEnabled(valid);
         importedTable.setEnabled(valid);
         saveButton.setEnabled(valid);
-    }
-
-    @Override
-    public void resultChanged(LookupEvent le) {
-        Collection<? extends ImportCapability> results = result.allInstances();
-        if (!results.isEmpty()) {
-            updateUI(results.toArray()[0]);
-        }
     }
 
     private void updateUI(Object object) {

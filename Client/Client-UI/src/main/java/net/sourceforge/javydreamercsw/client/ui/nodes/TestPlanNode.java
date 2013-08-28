@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportTestAction;
 import org.openide.util.lookup.InstanceContent;
 
 /**
@@ -32,6 +33,7 @@ public class TestPlanNode extends AbstractVMBeanNode {
         List<Action> actions = new ArrayList<Action>();
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateTestAction());
+        actions.add(new ImportTestAction());
         return actions.toArray(new Action[actions.size()]);
     }
 
