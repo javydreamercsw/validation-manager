@@ -17,6 +17,8 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import net.sourceforge.javydreamercsw.client.ui.nodes.TestPlanNode;
 import net.sourceforge.javydreamercsw.client.ui.nodes.capability.ImportCapability;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
@@ -95,6 +97,7 @@ public final class TestImportTopComponent extends TopComponent
         importedTable = new javax.swing.JTable();
         importButton = new javax.swing.JButton();
         header = new javax.swing.JCheckBox();
+        saveButton = new javax.swing.JButton();
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.jLabel1.text")); // NOI18N
 
@@ -134,6 +137,13 @@ public final class TestImportTopComponent extends TopComponent
             }
         });
 
+        org.openide.awt.Mnemonics.setLocalizedText(saveButton, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.saveButton.text_1")); // NOI18N
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -150,7 +160,10 @@ public final class TestImportTopComponent extends TopComponent
                         .addGap(2, 2, 2)
                         .addComponent(spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(header)))
+                        .addComponent(header))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(saveButton)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -164,8 +177,9 @@ public final class TestImportTopComponent extends TopComponent
                     .addComponent(jLabel1)
                     .addComponent(header))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 256, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(saveButton))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -206,12 +220,42 @@ public final class TestImportTopComponent extends TopComponent
         displayTable((int) Math.round(Double.valueOf(spinner.getValue().toString())));
     }//GEN-LAST:event_headerActionPerformed
 
+    private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+        LOG.info("Saving imported table...");
+        int rows = importedTable.getModel().getRowCount();
+        String[] mapping = new String[rows];
+        for (int i = 0; i < importedTable.getModel().getColumnCount(); i++) {
+            DefaultCellEditor editor = (DefaultCellEditor) importedTable.getCellEditor(0, i);
+            JComboBox combo = (JComboBox) editor.getComponent();
+            LOG.log(Level.INFO, "Column {0} is mapped as: {1}",
+                    new Object[]{i, combo.getSelectedItem()});
+            mapping[i] = (String) combo.getSelectedItem();
+        }
+        /* Create and display the dialog */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                final CreateTestDialog dialog
+//                        = new CreateTestDialog(new javax.swing.JFrame(), true);
+//                dialog.setLocationRelativeTo(null);
+//                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+//                    @Override
+//                    public void windowClosing(java.awt.event.WindowEvent e) {
+//                        dialog.dispose();
+//                    }
+//                });
+//                dialog.setVisible(true);
+//            }
+//        });
+    }//GEN-LAST:event_saveButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox header;
     private javax.swing.JButton importButton;
     private javax.swing.JTable importedTable;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton saveButton;
     private javax.swing.JSpinner spinner;
     // End of variables declaration//GEN-END:variables
 
@@ -254,9 +298,11 @@ public final class TestImportTopComponent extends TopComponent
         //Row 0 for mapping field
         int rowNum = 1;
         int columnNum;
+        final List<TableCellEditor> editors = new ArrayList<TableCellEditor>();
         //Fill maping field
         for (int i = 0; i < columns; i++) {
             data[0][i] = "Select Mapping";
+            editors.add(new CustomEditor());
         }
         for (XWPFTableRow row : table.getRows()) {
             columnNum = 0;
@@ -264,43 +310,45 @@ public final class TestImportTopComponent extends TopComponent
                 if (header.isSelected() && rowNum == 1) {
                     title[columnNum] = cell.getText();
                 } else {
-                    data[header.isSelected() ? rowNum - 1 : rowNum][columnNum] = cell.getText();
+                    data[header.isSelected() ? rowNum - 1
+                            : rowNum][columnNum] = cell.getText();
                 }
                 columnNum++;
             }
             rowNum++;
         }
         //Rebuild the table model to fit this table
-        importedTable = new JTable();
-        importedTable.setDefaultEditor(Object.class, new CustomRenderer());
-        importedTable.setModel(
-                new javax.swing.table.DefaultTableModel(
-                        data,
-                        title
-                ) {
-                    @Override
-                    public boolean isCellEditable(int rowIndex, int columnIndex) {
-                        return rowIndex == 0;
-                    }
-                });
+        DefaultTableModel model = new DefaultTableModel(data, title);
+        importedTable = new JTable(model) {
+            //  Determine editor to be used by row
+            @Override
+            public TableCellEditor getCellEditor(int row, int column) {
+                int modelColumn = convertColumnIndexToModel(column);
+                if (row == 0) {
+                    return (TableCellEditor) editors.get(column);
+                } else {
+                    return super.getCellEditor(row, column);
+                }
+            }
+        };
         jScrollPane1.setViewportView(importedTable);
     }
 
-    class CustomRenderer extends DefaultCellEditor {
+    class CustomEditor extends DefaultCellEditor {
 
         private final JComboBox cb;
 
-        public CustomRenderer() {
+        public CustomEditor() {
             super(new JComboBox());
             cb = (JComboBox) super.getComponent();
+            for (TestImportMapping tim : TestImportMapping.values()) {
+                cb.addItem(tim.getValue());
+            }
         }
 
         @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            cb.addItem("Requirement(s)");
-            cb.addItem("Description");
-            cb.addItem("Acceptance Criteria");
-            cb.addItem("Ignore");
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
             return row == 0 ? cb
                     : super.getTableCellEditorComponent(table,
                             value, isSelected, row, column);
