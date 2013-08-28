@@ -60,11 +60,11 @@ public class DataBaseManager {
     private static String PU = "VMPU";
     private static EntityManager em;
     private static boolean dbError = false;
-    private static final Logger LOG =
-            Logger.getLogger(DataBaseManager.class.getSimpleName());
+    private static final Logger LOG
+            = Logger.getLogger(DataBaseManager.class.getSimpleName());
     private static DBState state;
-    private static final ResourceBundle settings =
-            ResourceBundle.getBundle("com.validation.manager.resources.settings");
+    private static final ResourceBundle settings
+            = ResourceBundle.getBundle("com.validation.manager.resources.settings");
     private static boolean locked = false;
     private static boolean usingContext;
     private static boolean demo;
@@ -129,8 +129,8 @@ public class DataBaseManager {
             LOG.log(Level.FINE,
                     "Creating ids to work around eclipse issue "
                     + "(https://bugs.eclipse.org/bugs/show_bug.cgi?id=366852)...");
-            for (Iterator<EmbeddableType<?>> it =
-                    getEntityManager().getMetamodel().getEmbeddables()
+            for (Iterator<EmbeddableType<?>> it
+                    = getEntityManager().getMetamodel().getEmbeddables()
                     .iterator(); it.hasNext();) {
                 EmbeddableType et = it.next();
                 processFields(et.getJavaType().getDeclaredFields());
@@ -253,7 +253,8 @@ public class DataBaseManager {
 
     @SuppressWarnings("unchecked")
     public static List<Object> createdQuery(String query, Map<String, Object> parameters) {
-        getEntityManager().getTransaction().begin();
+        EntityTransaction transaction = getEntityManager().getTransaction();
+        transaction.begin();
         Query q = getEntityManager().createQuery(query);
         if (parameters != null) {
             Iterator<Entry<String, Object>> entries = parameters.entrySet().iterator();
@@ -262,7 +263,7 @@ public class DataBaseManager {
                 q.setParameter(e.getKey(), e.getValue());
             }
         }
-        getEntityManager().getTransaction().commit();
+        transaction.commit();
         return q.getResultList();
     }
 
@@ -276,21 +277,23 @@ public class DataBaseManager {
     }
 
     public static List<Object> nativeQuery(String query) {
-        getEntityManager().getTransaction().begin();
+        EntityTransaction transaction = getEntityManager().getTransaction();
+        transaction.begin();
         List<Object> resultList = getEntityManager().createNativeQuery(query).getResultList();
-        getEntityManager().getTransaction().commit();
+        transaction.commit();
         return resultList;
     }
 
     public static void nativeUpdateQuery(String query) {
         boolean atomic = false;
+        EntityTransaction transaction = getEntityManager().getTransaction();
         if (!getEntityManager().getTransaction().isActive()) {
-            getEntityManager().getTransaction().begin();
+            transaction.begin();
             atomic = true;
         }
         getEntityManager().createNativeQuery(query).executeUpdate();
         if (atomic) {
-            getEntityManager().getTransaction().commit();
+            transaction.commit();
         }
     }
 
@@ -327,8 +330,9 @@ public class DataBaseManager {
 
     @SuppressWarnings("unchecked")
     private static List<Object> namedQuery(String query, Map<String, Object> parameters, boolean change) {
+        EntityTransaction transaction = getEntityManager().getTransaction();
         if (change) {
-            getEntityManager().getTransaction().begin();
+            transaction.begin();
         }
         Query q = getEntityManager().createNamedQuery(query);
         if (parameters != null) {
@@ -339,7 +343,7 @@ public class DataBaseManager {
             }
         }
         if (change) {
-            getEntityManager().getTransaction().commit();
+            transaction.commit();
         }
         return q.getResultList();
     }
@@ -526,9 +530,10 @@ public class DataBaseManager {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             } else {
-                getEntityManager().getTransaction().begin();
+                EntityTransaction transaction = getEntityManager().getTransaction();
+                transaction.begin();
                 conn = getEntityManager().unwrap(java.sql.Connection.class);
-                getEntityManager().getTransaction().commit();
+                transaction.commit();
             }
         } catch (SQLException ex) {
             LOG.log(Level.SEVERE, null, ex);
