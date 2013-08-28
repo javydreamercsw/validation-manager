@@ -359,6 +359,7 @@ public final class TestImportTopComponent extends TopComponent
         spinner.setEnabled(valid);
         header.setEnabled(valid);
         importedTable.setEnabled(valid);
+        saveButton.setEnabled(valid);
     }
 
     @Override
