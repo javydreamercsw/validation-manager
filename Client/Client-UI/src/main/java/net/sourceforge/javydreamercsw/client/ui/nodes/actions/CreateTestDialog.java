@@ -108,9 +108,9 @@ public class CreateTestDialog extends AbstractCreationDialog {
                             .addComponent(jScrollPane2)
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(save)
+                        .addComponent(cancel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancel)))
+                        .addComponent(save)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -132,11 +132,11 @@ public class CreateTestDialog extends AbstractCreationDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(save)
                     .addComponent(cancel))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -174,9 +174,9 @@ public class CreateTestDialog extends AbstractCreationDialog {
                         scope.getText().trim());
                 //Create the test
                 ts.write2DB();
-                TestPlanServer tps = 
-                        new TestPlanServer(
-                        Utilities.actionsGlobalContext().lookup(TestPlan.class));
+                TestPlanServer tps
+                        = new TestPlanServer(
+                                Utilities.actionsGlobalContext().lookup(TestPlan.class));
                 tps.addTest(ts.getEntity());
                 //Add it to the test plan
                 tps.write2DB();
