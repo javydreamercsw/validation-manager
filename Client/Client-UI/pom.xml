@@ -97,6 +97,12 @@
             <artifactId>POI-Library</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <artifactId>org-openide-dialogs</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <type>jar</type>
+            <version>${netbeans.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

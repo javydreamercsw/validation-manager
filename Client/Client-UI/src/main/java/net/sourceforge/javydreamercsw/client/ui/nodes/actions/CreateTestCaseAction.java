@@ -23,7 +23,7 @@ public class CreateTestCaseAction extends AbstractAction {
             public void run() {
                 final EditTestCaseDialog dialog
                         = new EditTestCaseDialog(new javax.swing.JFrame(),
-                        true, false);
+                                true, false);
                 dialog.setLocationRelativeTo(null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override

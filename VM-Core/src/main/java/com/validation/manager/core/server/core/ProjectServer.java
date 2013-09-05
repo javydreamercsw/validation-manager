@@ -26,6 +26,12 @@ public final class ProjectServer extends Project implements EntityServer<Project
         setId(0);
     }
 
+    public ProjectServer(int id) {
+        Project product = new ProjectJpaController(
+                DataBaseManager.getEntityManagerFactory()).findProject(id);
+        update((ProjectServer) this, product);
+    }
+
     public ProjectServer(Project p) {
         Project product = new ProjectJpaController(
                 DataBaseManager.getEntityManagerFactory()).findProject(p.getId());

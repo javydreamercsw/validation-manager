@@ -1,15 +1,29 @@
 package net.sourceforge.javydreamercsw.client.ui.components.test.importer;
 
+import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.Test;
+import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.tool.msword.importer.TableExtractor;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JTable;
@@ -18,7 +32,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
+import net.sourceforge.javydreamercsw.client.ui.components.messages.MessageUtil;
 import net.sourceforge.javydreamercsw.client.ui.nodes.TestPlanNode;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestDialog;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -57,9 +74,21 @@ public final class TestImportTopComponent extends TopComponent {
     private final List<XWPFTable> tables = new ArrayList<XWPFTable>();
     private static final Logger LOG
             = Logger.getLogger(TestImportTopComponent.class.getSimpleName());
+    private Test test;
+    private TestCase tc;
+    private final DefaultComboBoxModel model;
+    private TestPlan tp;
+    private boolean importSuccess = true;
+    private JDialog dialog;
 
     public TestImportTopComponent() {
+        Vector comboBoxItems = new Vector();
+        comboBoxItems.add(",");
+        comboBoxItems.add(";");
+        comboBoxItems.add(".");
+        model = new DefaultComboBoxModel(comboBoxItems);
         initComponents();
+        delimiter.setSelectedIndex(0);
         spinner.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -88,6 +117,10 @@ public final class TestImportTopComponent extends TopComponent {
         importButton = new javax.swing.JButton();
         header = new javax.swing.JCheckBox();
         saveButton = new javax.swing.JButton();
+        delimiter = new JComboBox(model);
+        jLabel2 = new javax.swing.JLabel();
+        delimiterField = new javax.swing.JTextField();
+        addDelimiterButton = new javax.swing.JButton();
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.jLabel1.text")); // NOI18N
 
@@ -99,17 +132,9 @@ public final class TestImportTopComponent extends TopComponent {
 
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ) {
-            boolean[] canEdit = new boolean [] {
-                false, false, true, true
-            };
 
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
             }
-        });
+        ));
         jScrollPane1.setViewportView(importedTable);
 
         org.openide.awt.Mnemonics.setLocalizedText(importButton, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.importButton.text")); // NOI18N
@@ -134,6 +159,19 @@ public final class TestImportTopComponent extends TopComponent {
             }
         });
 
+        delimiter.setModel(new javax.swing.DefaultComboBoxModel(new String[] { ",", ";", " " }));
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.jLabel2.text")); // NOI18N
+
+        delimiterField.setText(org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.delimiterField.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(addDelimiterButton, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.addDelimiterButton.text_1")); // NOI18N
+        addDelimiterButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addDelimiterButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -141,10 +179,7 @@ public final class TestImportTopComponent extends TopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(importButton)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(2, 2, 2)
@@ -152,22 +187,40 @@ public final class TestImportTopComponent extends TopComponent {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(header))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(saveButton)))
+                        .addComponent(importButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(addDelimiterButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(delimiterField, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(saveButton, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                    .addComponent(jLabel2)
+                                    .addGap(3, 3, 3)
+                                    .addComponent(delimiter, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(importButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(delimiterField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(addDelimiterButton))
+                .addGap(2, 2, 2)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(delimiter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(importButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
                     .addComponent(header))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 256, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(saveButton))
         );
@@ -212,38 +265,165 @@ public final class TestImportTopComponent extends TopComponent {
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         LOG.info("Saving imported table...");
+        TestProject testProject = tp.getTestProject();
+        List<Project> projects = new ArrayList<Project>();
+        for (Object o : DataBaseManager.nativeQuery(
+                "select pht.project_id from project_has_test_project pht "
+                + "where pht.test_project_id=" + testProject.getId())) {
+            LOG.log(Level.INFO, "Project ID: {0}", o);
+            projects.add(new ProjectServer(Integer.valueOf(o.toString())));
+        }
         int rows = importedTable.getModel().getRowCount();
-        String[] mapping = new String[rows];
+        List<String> mapping = new ArrayList<String>(rows);
         for (int i = 0; i < importedTable.getModel().getColumnCount(); i++) {
-            DefaultCellEditor editor = (DefaultCellEditor) importedTable.getCellEditor(0, i);
+            DefaultCellEditor editor
+                    = (DefaultCellEditor) importedTable.getCellEditor(0, i);
             JComboBox combo = (JComboBox) editor.getComponent();
             LOG.log(Level.INFO, "Column {0} is mapped as: {1}",
                     new Object[]{i, combo.getSelectedItem()});
-            mapping[i] = (String) combo.getSelectedItem();
+            String value = (String) combo.getSelectedItem();
+            //Make sure there's no duplicate mapping
+            assert mapping.isEmpty() || !mapping.contains(value) :
+                    showImportError("Duplicated mapping");
+            mapping.add(i, value);
+        }
+        //Make sure the basics are mapped
+        for (TestImportMapping tim : TestImportMapping.values()) {
+            if (tim.isRequired() && !mapping.contains(tim.getValue())) {
+                showImportError("Missing required mapping: " + tim.getValue());
+                setImportSuccess(false);
+                break;
+            }
         }
         /* Create and display the dialog */
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                final CreateTestDialog dialog
-//                        = new CreateTestDialog(new javax.swing.JFrame(), true);
-//                dialog.setLocationRelativeTo(null);
-//                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-//                    @Override
-//                    public void windowClosing(java.awt.event.WindowEvent e) {
-//                        dialog.dispose();
-//                    }
-//                });
-//                dialog.setVisible(true);
-//            }
-//        });
+        if (isImportSuccess()) {
+
+            setDialog(new CreateTestDialog(new javax.swing.JFrame(), true));
+            getDialog().setLocationRelativeTo(null);
+            getDialog().addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    getDialog().dispose();
+                    setDialog(null);
+                }
+            });
+            getDialog().setVisible(true);
+            test = ((CreateTestDialog) getDialog()).getTest();
+            if (test == null) {
+                showImportError("Test Creation unsuccessful!");
+                setImportSuccess(false);
+            }
+            while (getDialog() == null || getDialog().isVisible()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
+        //Create the test case to import into
+        /* Create and display the dialog */
+        if (isImportSuccess()) {
+            setDialog(new EditTestCaseDialog(new javax.swing.JFrame(),
+                    true, false));
+            dialog.setLocationRelativeTo(null);
+            ((EditTestCaseDialog) dialog).setTest(test);
+            dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    dialog.dispose();
+                    tc = ((EditTestCaseDialog) dialog).getTestCase();
+                    if (tc == null) {
+                        showImportError("Test Case Creation unsuccessful!");
+                        setImportSuccess(false);
+                    }
+                }
+            });
+            dialog.setVisible(true);
+            while (dialog.isVisible()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
+        if (isImportSuccess()) {
+            TestCaseServer tcs = new TestCaseServer(tc);
+            //We got the created test, now let's import the rest.
+            //Start on second row as first one is the mapping row.
+            for (int row = 1; row < importedTable.getModel().getRowCount(); row++) {
+                List<Requirement> requirements = new ArrayList<Requirement>();
+                String description = "", criteria = "", notes = "";
+                for (int col = 0; col < importedTable.getModel().getColumnCount(); col++) {
+                    if (!mapping.get(col).equals(TestImportMapping.IGNORE.getValue())) {
+                        //Column is to be imported
+                        if (mapping.get(col).equals(TestImportMapping.DESCRIPTION.getValue())) {
+                            description = (String) importedTable.getModel().getValueAt(row, col);
+                        } else if (mapping.get(col).equals(TestImportMapping.NOTES.getValue())) {
+                            notes = (String) importedTable.getModel().getValueAt(row, col);
+                        } else if (mapping.get(col).equals(TestImportMapping.ACCEPTANCE_CRITERIA.getValue())) {
+                            criteria = (String) importedTable.getModel().getValueAt(row, col);
+                        } else if (mapping.get(col).equals(TestImportMapping.REQUIREMENT.getValue())) {
+                            //Process requirements
+                            String reqs = (String) importedTable.getModel().getValueAt(row, col);
+                            StringTokenizer st = new StringTokenizer(reqs,
+                                    delimiter.getSelectedItem().toString());
+
+                            while (st.hasMoreTokens()) {
+                                String token = st.nextToken().trim();
+                                LOG.log(Level.INFO, "Requirement: {0}", token);
+                                boolean found = false;
+                                for (Project p : projects) {
+                                    for (Requirement r : ProjectServer.getRequirements(p)) {
+                                        if (r.getUniqueId().equals(token)) {
+                                            requirements.add(r);
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!found) {
+                                    //TODO: Create dummy? Error out?
+                                    LOG.log(Level.WARNING,
+                                            "Unable to find requirement: {0}", token);
+                                }
+                            }
+                        } else {
+                            throw new RuntimeException("Unhandled mapping: " + mapping.get(col));
+                        }
+                    }
+                    try {
+                        tcs.addStep(row, description, criteria, notes, requirements);
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+                try {
+                    tcs.write2DB();
+                } catch (NonexistentEntityException ex) {
+                    Exceptions.printStackTrace(ex);
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
     }//GEN-LAST:event_saveButtonActionPerformed
 
+    private void addDelimiterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDelimiterButtonActionPerformed
+
+        model.addElement(delimiterField.getText().trim());
+    }//GEN-LAST:event_addDelimiterButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addDelimiterButton;
+    private javax.swing.JComboBox delimiter;
+    private javax.swing.JTextField delimiterField;
     private javax.swing.JCheckBox header;
     private javax.swing.JButton importButton;
     private javax.swing.JTable importedTable;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton saveButton;
     private javax.swing.JSpinner spinner;
@@ -308,8 +488,8 @@ public final class TestImportTopComponent extends TopComponent {
             rowNum++;
         }
         //Rebuild the table model to fit this table
-        DefaultTableModel model = new DefaultTableModel(data, title);
-        importedTable = new JTable(model) {
+        DefaultTableModel tableModel = new DefaultTableModel(data, title);
+        importedTable = new JTable(tableModel) {
             //  Determine editor to be used by row
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
@@ -322,6 +502,46 @@ public final class TestImportTopComponent extends TopComponent {
             }
         };
         jScrollPane1.setViewportView(importedTable);
+    }
+
+    private Object showImportError(String message) {
+        MessageUtil.error(message);
+        return true;
+    }
+
+    /**
+     * @param tp the TestPlan to set
+     */
+    public void setTestPlan(TestPlan tp) {
+        this.tp = tp;
+    }
+
+    /**
+     * @return the importSuccess
+     */
+    private boolean isImportSuccess() {
+        return importSuccess;
+    }
+
+    /**
+     * @param importSuccess the importSuccess to set
+     */
+    private void setImportSuccess(boolean importSuccess) {
+        this.importSuccess = importSuccess;
+    }
+
+    /**
+     * @return the dialog
+     */
+    private JDialog getDialog() {
+        return dialog;
+    }
+
+    /**
+     * @param dialog the dialog to set
+     */
+    private void setDialog(JDialog dialog) {
+        this.dialog = dialog;
     }
 
     class CustomEditor extends DefaultCellEditor {
