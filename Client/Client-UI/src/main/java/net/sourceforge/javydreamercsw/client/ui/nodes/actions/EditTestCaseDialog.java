@@ -16,6 +16,8 @@ import org.openide.util.Utilities;
 public class EditTestCaseDialog extends javax.swing.JDialog {
 
     private final boolean edit;
+    private TestCase tc;
+    private Test test = null;
 
     /**
      * Creates new form EditTestCaseDialog
@@ -103,21 +105,25 @@ public class EditTestCaseDialog extends javax.swing.JDialog {
             if (edit) {
                 TestCaseServer tcs
                         = new TestCaseServer(Utilities.actionsGlobalContext()
-                        .lookup(TestCase.class));
+                                .lookup(TestCase.class));
                 tcs.setName(testCaseName.getText().trim());
                 tcs.write2DB();
+                tc = tcs.getEntity();
             } else {
-                Test t = Utilities.actionsGlobalContext().lookup(Test.class);
+                if (test == null) {
+                    test = Utilities.actionsGlobalContext().lookup(Test.class);
+                }
                 TestCaseServer tcs = new TestCaseServer(
                         testCaseName.getText().trim(),
-                        t.getTestCaseList().size() + 1,
+                        test.getTestCaseList().size() + 1,
                         new Short("1"), new Date());
                 //TODO: Use logged user instead
                 tcs.setAuthorId(new VMUserServer(1).getEntity());
                 tcs.setActive(true);
                 tcs.setIsOpen(true);
-                tcs.setTest(t);
+                tcs.setTest(test);
                 tcs.write2DB();
+                tc = tcs.getEntity();
             }
             ProjectExplorerComponent.refresh();
         } catch (Exception ex) {
@@ -136,4 +142,25 @@ public class EditTestCaseDialog extends javax.swing.JDialog {
     private javax.swing.JButton okButton;
     private javax.swing.JTextField testCaseName;
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * @return the tc
+     */
+    public TestCase getTestCase() {
+        return tc;
+    }
+
+    /**
+     * @return the test
+     */
+    public Test getTest() {
+        return test;
+    }
+
+    /**
+     * @param test the test to set
+     */
+    public void setTest(Test test) {
+        this.test = test;
+    }
 }

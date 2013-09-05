@@ -6,7 +6,6 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import java.beans.IntrospectionException;
-import java.util.Iterator;
 import java.util.List;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
@@ -25,9 +24,7 @@ class TestPlanChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
-        for (Iterator<TestPlanHasTest> it =
-                tp.getTestPlanHasTestList().iterator(); it.hasNext();) {
-            TestPlanHasTest tpht = it.next();
+        for (TestPlanHasTest tpht : tp.getTestPlanHasTestList()) {
             toPopulate.add(tpht.getTest());
         }
         return true;
@@ -55,8 +52,8 @@ class TestPlanChildFactory extends AbstractChildFactory {
 
     @Override
     protected void updateBean() {
-        TestPlanJpaController controller =
-                new TestPlanJpaController(DataBaseManager.getEntityManagerFactory());
+        TestPlanJpaController controller
+                = new TestPlanJpaController(DataBaseManager.getEntityManagerFactory());
         tp = controller.findTestPlan(tp.getTestPlanPK());
     }
 }

@@ -1,9 +1,11 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
+import com.validation.manager.core.db.TestPlan;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import net.sourceforge.javydreamercsw.client.ui.components.test.importer.TestImportTopComponent;
+import org.openide.util.Utilities;
 
 /**
  *
@@ -21,6 +23,9 @@ public class ImportTestAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         /* Create and display the dialog */
+        TestPlan tp = Utilities.actionsGlobalContext().lookup(TestPlan.class);
+        assert tp != null;
+        component.setTestPlan(tp);
         component.open();
         component.requestActive();
     }

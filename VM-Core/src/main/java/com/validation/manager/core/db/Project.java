@@ -42,16 +42,17 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Project.findById", query = "SELECT p FROM Project p WHERE p.id = :id"),
     @NamedQuery(name = "Project.findByName", query = "SELECT p FROM Project p WHERE p.name = :name")})
 public class Project implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "ProjectGen")
     @TableGenerator(name = "ProjectGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "project",
-    allocationSize = 1,
-    initialValue=1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "project",
+            allocationSize = 1,
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -170,5 +171,5 @@ public class Project implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Project[ id=" + id + " ]";
     }
-    
+
 }

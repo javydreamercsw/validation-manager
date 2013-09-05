@@ -1,5 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
+import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -16,6 +17,9 @@ import org.openide.util.Utilities;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class CreateTestDialog extends AbstractCreationDialog {
+
+    private Test test;
+    private TestPlan plan;
 
     /**
      * Creates new form CreateTestDialog
@@ -50,6 +54,7 @@ public class CreateTestDialog extends AbstractCreationDialog {
         cancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle(org.openide.util.NbBundle.getMessage(CreateTestDialog.class, "createTestDialogTitle")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(CreateTestDialog.class, "CreateTestDialog.jLabel1.text")); // NOI18N
 
@@ -180,6 +185,7 @@ public class CreateTestDialog extends AbstractCreationDialog {
                 tps.addTest(ts.getEntity());
                 //Add it to the test plan
                 tps.write2DB();
+                test = ts.getEntity();
                 ProjectExplorerComponent.refresh();
             } catch (IllegalOrphanException ex) {
                 Exceptions.printStackTrace(ex);
@@ -206,4 +212,11 @@ public class CreateTestDialog extends AbstractCreationDialog {
     private javax.swing.JButton save;
     private javax.swing.JTextArea scope;
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * @return the test
+     */
+    public Test getTest() {
+        return test;
+    }
 }

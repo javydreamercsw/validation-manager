@@ -26,7 +26,7 @@ class TestNode extends AbstractVMBeanNode {
     public String getName() {
         return getLookup().lookup(Test.class).getName();
     }
-    
+
     @Override
     public Action[] getActions(boolean b) {
         List<Action> actions = new ArrayList<Action>();

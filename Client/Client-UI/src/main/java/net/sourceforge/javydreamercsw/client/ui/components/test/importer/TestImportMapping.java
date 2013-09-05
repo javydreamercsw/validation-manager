@@ -8,20 +8,24 @@ import org.openide.util.NbBundle;
  */
 public enum TestImportMapping {
 
-    REQUIREMENT("req.map"),
-    DESCRIPTION("desc.map"),
-    ACCEPTANCE_CRITERIA("ac.map"),
-    IGNORE("ignore.map");
+    REQUIREMENT("req.map", true),
+    DESCRIPTION("desc.map", true),
+    ACCEPTANCE_CRITERIA("ac.map", true),
+    NOTES("notes.map", false),
+    IGNORE("ignore.map", false);
     private final String key;
+    private final boolean required;
 
     @NbBundle.Messages({
         "req.map=Requirement(s)",
         "desc.map=Description",
         "ac.map=Acceptance Criteria",
-        "ignore.map=Ignore"
+        "ignore.map=Ignore",
+        "notes.map=Notes"
     })
-    TestImportMapping(String key) {
+    TestImportMapping(String key, boolean required) {
         this.key = key;
+        this.required = required;
     }
 
     /**
@@ -29,5 +33,12 @@ public enum TestImportMapping {
      */
     public String getValue() {
         return org.openide.util.NbBundle.getMessage(TestImportMapping.class, key); // NOI18N
+    }
+
+    /**
+     * @return the required
+     */
+    public boolean isRequired() {
+        return required;
     }
 }
