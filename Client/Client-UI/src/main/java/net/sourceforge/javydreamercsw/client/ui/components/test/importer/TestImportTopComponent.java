@@ -265,6 +265,7 @@ public final class TestImportTopComponent extends TopComponent {
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         LOG.info("Saving imported table...");
+        importSuccess = true;
         TestProject testProject = tp.getTestProject();
         List<Project> projects = new ArrayList<Project>();
         for (Object o : DataBaseManager.nativeQuery(
@@ -307,6 +308,7 @@ public final class TestImportTopComponent extends TopComponent {
                     setDialog(null);
                 }
             });
+            ((CreateTestDialog) getDialog()).setTestPlan(tp);
             getDialog().setVisible(true);
             test = ((CreateTestDialog) getDialog()).getTest();
             if (test == null) {
@@ -331,12 +333,12 @@ public final class TestImportTopComponent extends TopComponent {
             dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent e) {
-                    dialog.dispose();
                     tc = ((EditTestCaseDialog) dialog).getTestCase();
                     if (tc == null) {
                         showImportError("Test Case Creation unsuccessful!");
                         setImportSuccess(false);
                     }
+                    dialog.dispose();
                 }
             });
             dialog.setVisible(true);
@@ -346,6 +348,11 @@ public final class TestImportTopComponent extends TopComponent {
                 } catch (InterruptedException ex) {
                     Exceptions.printStackTrace(ex);
                 }
+            }
+            tc = ((EditTestCaseDialog) dialog).getTestCase();
+            if (tc == null) {
+                showImportError("Test Case Creation unsuccessful!");
+                setImportSuccess(false);
             }
         }
         if (isImportSuccess()) {

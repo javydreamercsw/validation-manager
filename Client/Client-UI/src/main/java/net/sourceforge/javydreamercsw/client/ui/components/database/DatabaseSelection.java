@@ -1,15 +1,20 @@
-package net.sourceforge.javydreamercsw.client.ui;
+package net.sourceforge.javydreamercsw.client.ui.components.database;
 
+import net.sourceforge.javydreamercsw.client.ui.components.project.editor.ProjectExplorerComponent;
 import java.util.Arrays;
 import java.util.List;
 import org.netbeans.api.db.explorer.ConnectionManager;
 import org.netbeans.api.db.explorer.DatabaseConnection;
+import org.openide.util.NbBundle.Messages;
 
 /**
  * Allows to select connection to use with application.
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
+@Messages({
+    "DatabaseSelection.title=Please select a database connection to use below:"
+})
 public class DatabaseSelection extends javax.swing.JDialog {
 
     private final List<DatabaseConnection> connections

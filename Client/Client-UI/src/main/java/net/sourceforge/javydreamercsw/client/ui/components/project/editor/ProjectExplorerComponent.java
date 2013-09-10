@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui;
+package net.sourceforge.javydreamercsw.client.ui.components.project.editor;
 
 import java.awt.BorderLayout;
 import java.beans.PropertyVetoException;
@@ -36,8 +36,8 @@ import org.openide.util.Utilities;
         iconBase = "net/sourceforge/javydreamercsw/client/ui/VSmall.png",
         persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
-@ActionID(category = "Window", id =
-        "net.sourceforge.javydreamercsw.client.ui.ProjectExplorerTopComponent")
+@ActionID(category = "Window", id
+        = "net.sourceforge.javydreamercsw.client.ui.ProjectExplorerTopComponent")
 @ActionReference(path = "Menu/Window", position = 333)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_ProjectExplorerAction",
@@ -54,8 +54,8 @@ public final class ProjectExplorerComponent extends TopComponent
     private static DatabaseConnection conn;
     private Lookup.Result<RefreshableCapability> result = null;
     private static RefreshableCapability currentNode;
-    private static final Logger LOG =
-            Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
+    private static final Logger LOG
+            = Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
 
     public ProjectExplorerComponent() {
         initComponents();
@@ -143,14 +143,14 @@ public final class ProjectExplorerComponent extends TopComponent
      * @return the conn
      */
     public static DatabaseConnection getConnection() {
-        treePane.setEnabled(conn!=null);
+        treePane.setEnabled(conn != null);
         return conn;
     }
 
     /**
      * @param conn the conn to set
      */
-    protected static void setConnection(DatabaseConnection connection) {
+    public static void setConnection(DatabaseConnection connection) {
         conn = connection;
     }
 

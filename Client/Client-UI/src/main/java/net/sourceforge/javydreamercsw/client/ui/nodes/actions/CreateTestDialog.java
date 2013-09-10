@@ -8,14 +8,18 @@ import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestServer;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.editor.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
+@Messages({
+    "createTestDialogTitle=Create Test"
+})
 public class CreateTestDialog extends AbstractCreationDialog {
 
     private Test test;
@@ -180,8 +184,8 @@ public class CreateTestDialog extends AbstractCreationDialog {
                 //Create the test
                 ts.write2DB();
                 TestPlanServer tps
-                        = new TestPlanServer(
-                                Utilities.actionsGlobalContext().lookup(TestPlan.class));
+                        = new TestPlanServer(getTestPlan() == null
+                                ? Utilities.actionsGlobalContext().lookup(TestPlan.class) : getTestPlan());
                 tps.addTest(ts.getEntity());
                 //Add it to the test plan
                 tps.write2DB();
@@ -218,5 +222,19 @@ public class CreateTestDialog extends AbstractCreationDialog {
      */
     public Test getTest() {
         return test;
+    }
+
+    /**
+     * @return the plan
+     */
+    public TestPlan getTestPlan() {
+        return plan;
+    }
+
+    /**
+     * @param plan the plan to set
+     */
+    public void setTestPlan(TestPlan plan) {
+        this.plan = plan;
     }
 }

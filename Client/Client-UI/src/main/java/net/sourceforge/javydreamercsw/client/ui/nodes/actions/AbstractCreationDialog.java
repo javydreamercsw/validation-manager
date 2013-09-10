@@ -19,7 +19,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
-import net.sourceforge.javydreamercsw.client.ui.DataBaseTool;
+import net.sourceforge.javydreamercsw.client.ui.components.database.DataBaseTool;
 
 /**
  *

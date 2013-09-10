@@ -5,7 +5,7 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Date;
-import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.editor.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
 
