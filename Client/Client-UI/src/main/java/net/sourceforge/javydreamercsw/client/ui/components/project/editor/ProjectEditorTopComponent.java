@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui;
+package net.sourceforge.javydreamercsw.client.ui.components.project.editor;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import net.sourceforge.javydreamercsw.client.ui.components.database.DataBaseTool;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;

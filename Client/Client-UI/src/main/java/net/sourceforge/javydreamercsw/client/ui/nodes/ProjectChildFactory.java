@@ -4,7 +4,7 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
 import java.util.Iterator;
 import java.util.List;
-import net.sourceforge.javydreamercsw.client.ui.DataBaseTool;
+import net.sourceforge.javydreamercsw.client.ui.components.database.DataBaseTool;
 
 /**
  *
