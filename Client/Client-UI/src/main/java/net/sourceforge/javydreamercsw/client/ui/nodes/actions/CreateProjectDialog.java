@@ -134,8 +134,7 @@ public class CreateProjectDialog extends AbstractCreationDialog {
         } else {
             //First we update the project
             ProjectServer ps = new ProjectServer(name.getText().trim(), notes.getText().trim());
-            Project parentProject = null;
-            getSelectedProject(parent);
+            Project parentProject = getSelectedProject(parent);
             if (parentProject != null) {
                 ps.setParentProjectId(parentProject);
             }
