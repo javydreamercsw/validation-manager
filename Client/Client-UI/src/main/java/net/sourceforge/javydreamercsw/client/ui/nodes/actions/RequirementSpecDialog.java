@@ -25,6 +25,7 @@ public class RequirementSpecDialog extends AbstractCreationDialog {
         populateProjectList(project, true);
         populateSpecLevelList(level);
         setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
+        //TODO: preselect selected project as parent
     }
 
     /**
