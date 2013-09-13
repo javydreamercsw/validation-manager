@@ -114,9 +114,7 @@ public class DataBaseManager {
             if (LOG.isLoggable(Level.CONFIG)) {
                 VmIdJpaController controller = new VmIdJpaController(
                         DataBaseManager.getEntityManagerFactory());
-                for (Iterator<VmId> it = controller.findVmIdEntities()
-                        .iterator(); it.hasNext();) {
-                    VmId next = it.next();
+                for (VmId next : controller.findVmIdEntities()) {
                     LOG.log(Level.CONFIG, "{0}, {1}, {2}", new Object[]{next.getId(),
                         next.getTableName(), next.getLastId()});
                 }
@@ -129,14 +127,10 @@ public class DataBaseManager {
             LOG.log(Level.FINE,
                     "Creating ids to work around eclipse issue "
                     + "(https://bugs.eclipse.org/bugs/show_bug.cgi?id=366852)...");
-            for (Iterator<EmbeddableType<?>> it
-                    = getEntityManager().getMetamodel().getEmbeddables()
-                    .iterator(); it.hasNext();) {
-                EmbeddableType et = it.next();
+            for (EmbeddableType et : getEntityManager().getMetamodel().getEmbeddables()) {
                 processFields(et.getJavaType().getDeclaredFields());
             }
-            for (Iterator<EntityType<?>> it = getEntityManager().getMetamodel().getEntities().iterator(); it.hasNext();) {
-                EntityType et = it.next();
+            for (EntityType et : getEntityManager().getMetamodel().getEntities()) {
                 processFields(et.getBindableJavaType().getDeclaredFields());
             }
             LOG.log(Level.FINE, "Done!");
