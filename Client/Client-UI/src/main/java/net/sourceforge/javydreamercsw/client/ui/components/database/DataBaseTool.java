@@ -18,8 +18,8 @@ public class DataBaseTool {
     private static EntityManagerFactory emf;
 
     public static void connect() {
-        final DatabaseSelection dialog = 
-                new DatabaseSelection(new javax.swing.JFrame(), true);
+        final DatabaseSelection dialog
+                = new DatabaseSelection(new javax.swing.JFrame(), true);
         if (ProjectExplorerComponent.getConnection() == null) {
             dialog.setVisible(true);
         }
