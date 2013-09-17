@@ -34,7 +34,8 @@ public abstract class AbstractChildFactory extends ChildFactory<Object> {
         try {
             if (key instanceof Project) {
                 Project project = (Project) key;
-                return new ProjectNode(project);
+                return new ProjectNode(project,
+                        new SubProjectChildFactory(project));
             } else if (key instanceof RequirementSpec) {
                 RequirementSpec rs = (RequirementSpec) key;
                 return new UIRequirementSpecNode(rs);

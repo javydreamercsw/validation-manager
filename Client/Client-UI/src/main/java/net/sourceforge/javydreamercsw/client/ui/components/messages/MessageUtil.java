@@ -1,15 +1,19 @@
 package net.sourceforge.javydreamercsw.client.ui.components.messages;
 
+import com.validation.manager.core.tool.message.MessageHandler;
+import com.validation.manager.core.tool.message.MessageType;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class MessageUtil {
+@ServiceProvider(service = MessageHandler.class)
+public class MessageUtil implements MessageHandler {
 
-    private MessageUtil() {
+    public MessageUtil() {
     }
 
     /**
@@ -26,7 +30,8 @@ public class MessageUtil {
      * @param messageType As in {@link NotifyDescription} message type
      * constants.
      */
-    public static void show(String message, MessageType messageType) {
+    @Override
+    public void show(String message, MessageType messageType) {
         getDialogDisplayer().notify(new NotifyDescriptor.Message(message,
                 messageType.getNotifyDescriptorType()));
     }
@@ -36,7 +41,8 @@ public class MessageUtil {
      *
      * @param message
      */
-    public static void info(String message) {
+    @Override
+    public void info(String message) {
         show(message, MessageType.INFO);
     }
 
@@ -45,7 +51,8 @@ public class MessageUtil {
      *
      * @param message
      */
-    public static void error(String message) {
+    @Override
+    public void error(String message) {
         show(message, MessageType.ERROR);
     }
 
@@ -54,7 +61,8 @@ public class MessageUtil {
      *
      * @param message
      */
-    public static void question(String message) {
+    @Override
+    public void question(String message) {
         show(message, MessageType.QUESTION);
     }
 
@@ -63,7 +71,8 @@ public class MessageUtil {
      *
      * @param message
      */
-    public static void warn(String message) {
+    @Override
+    public void warn(String message) {
         show(message, MessageType.WARNING);
     }
 
@@ -72,7 +81,8 @@ public class MessageUtil {
      *
      * @param message
      */
-    public static void plain(String message) {
+    @Override
+    public void plain(String message) {
         show(message, MessageType.PLAIN);
     }
 }

@@ -18,8 +18,11 @@ import org.openide.util.lookup.InstanceContent;
  */
 public class ProjectNode extends AbstractVMBeanNode {
 
-    public ProjectNode(Project project) throws IntrospectionException {
-        super(project, new SubProjectChildFactory(project), new InstanceContent());
+    private final SubProjectChildFactory factory;
+
+    public ProjectNode(Project project, SubProjectChildFactory factory) throws IntrospectionException {
+        super(project, factory, new InstanceContent());
+        this.factory = factory;
         setIconBaseWithExtension("com/validation/manager/resources/icons/Papermart/Folder.png");
     }
 
@@ -42,5 +45,6 @@ public class ProjectNode extends AbstractVMBeanNode {
     public void refreshMyself() {
         ProjectServer rs = new ProjectServer(getLookup().lookup(Project.class));
         rs.update((Project) getBean(), rs.getEntity());
+        factory.refresh();
     }
 }

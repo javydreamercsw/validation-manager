@@ -59,13 +59,14 @@ public class ImportTestStepAction extends AbstractAction {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     try {
                         File file = fc.getSelectedFile();
-                        TestCase tc = 
-                                Utilities.actionsGlobalContext().lookup(TestCase.class);
+                        TestCase tc
+                                = Utilities.actionsGlobalContext().lookup(TestCase.class);
                         StepImporter instance = new StepImporter(file,
                                 new TestCaseJpaController(
-                                DataBaseManager.getEntityManagerFactory())
+                                        DataBaseManager.getEntityManagerFactory())
                                 .findTestCase(tc.getTestCasePK()));
                         instance.importFile(true);
+                        //TODO: allow cancelling, specially if an error was displayed.
                         instance.processImport();
                     } catch (UnsupportedOperationException ex) {
                         Exceptions.printStackTrace(ex);

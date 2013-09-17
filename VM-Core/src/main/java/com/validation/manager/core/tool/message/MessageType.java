@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.components.messages;
+package com.validation.manager.core.tool.message;
 
 import java.net.URL;
 import java.util.logging.Level;
@@ -48,11 +48,11 @@ public enum MessageType {
                 : ImageUtilities.loadImageIcon(resourceName, false);
     }
 
-    int getNotifyDescriptorType() {
+    public int getNotifyDescriptorType() {
         return notifyDescriptorType;
     }
 
-    Icon getIcon() {
+    public Icon getIcon() {
         return icon;
     }
 }

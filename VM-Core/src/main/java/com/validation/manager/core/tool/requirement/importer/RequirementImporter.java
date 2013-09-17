@@ -9,7 +9,10 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.tool.message.MessageHandler;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
@@ -30,6 +35,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.openide.util.Lookup;
 
 /**
  * Import Requirements into database
@@ -73,6 +79,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     public List<Requirement> importFile(boolean header) throws
             VMException {
         requirements.clear();
+        List<Integer> errors = new ArrayList<Integer>();
         if (toImport == null) {
             throw new RequirementImportException(
                     "message.requirement.import.file.null");
@@ -108,84 +115,95 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                         }
                         int cells = row.getPhysicalNumberOfCells();
                         if (cells < 3) {
-                            throw new RequirementImportException(
-                                    "message.requirement.import.missing.column");
-                        }
-                        Requirement requirement = new Requirement();
-                        HashMap<String, Object> parameters = new HashMap<String, Object>();
-                        List<Object> result;
-                        LOG.log(Level.FINE, "Row: {0}", r);
-                        for (int c = 0; c < cells; c++) {
-                            Cell cell = row.getCell(c);
-                            String value = null;
-                            if (cell != null) {
-                                switch (cell.getCellType()) {
+                            LOG.log(Level.INFO, "Processing row: {0}", r);
+                            LOG.warning(
+                                    ResourceBundle.getBundle(
+                                            "com.validation.manager.resources.VMMessages",
+                                            Locale.getDefault()).getString(
+                                            "message.requirement.import.missing.column").replaceAll("%c", "" + cells));
+                            errors.add(r);
+                        } else {
+                            Requirement requirement = new Requirement();
+                            HashMap<String, Object> parameters = new HashMap<String, Object>();
+                            List<Object> result;
+                            LOG.log(Level.FINE, "Row: {0}", r);
+                            for (int c = 0; c < cells; c++) {
+                                Cell cell = row.getCell(c);
+                                String value = "";
+                                if (cell != null) {
+                                    switch (cell.getCellType()) {
 
-                                    case Cell.CELL_TYPE_FORMULA:
-                                        value = cell.getCellFormula();
-                                        break;
+                                        case Cell.CELL_TYPE_FORMULA:
+                                            value = cell.getCellFormula();
+                                            break;
 
-                                    case Cell.CELL_TYPE_NUMERIC:
-                                        value = "" + cell.getNumericCellValue();
-                                        break;
+                                        case Cell.CELL_TYPE_NUMERIC:
+                                            value = "" + cell.getNumericCellValue();
+                                            break;
 
-                                    case Cell.CELL_TYPE_STRING:
-                                        value = cell.getStringCellValue();
-                                        break;
-
-                                    default:
+                                        case Cell.CELL_TYPE_STRING:
+                                            value = cell.getStringCellValue();
+                                            break;
+                                        default:
+                                            value = "";
+                                    }
                                 }
-                            }
-                            switch (c) {
-                                case 0:
-                                    //Unique ID
-                                    LOG.fine("Setting id");
-                                    requirement.setUniqueId(value);
-                                    break;
-                                case 1:
-                                    //Description
-                                    LOG.fine("Setting desc");
-                                    requirement.setDescription(value);
-                                    break;
-                                case 2:
-                                    //Requirement type
-                                    LOG.fine("Setting requirement type");
-                                    parameters.clear();
-                                    parameters.put("name", value);
-                                    result = DataBaseManager.namedQuery(
-                                            "RequirementType.findByName",
-                                            parameters);
-                                    if (result.isEmpty()) {
-                                        //Assume a default
+                                //Remove any extra spaces.
+                                value = value.trim();
+                                switch (c) {
+                                    case 0:
+                                        //Unique ID
+                                        LOG.fine("Setting id");
+                                        requirement.setUniqueId(value);
+                                        break;
+                                    case 1:
+                                        //Description
+                                        LOG.fine("Setting desc");
+                                        requirement.setDescription(value);
+                                        break;
+                                    case 2:
+                                        //Requirement type
+                                        LOG.fine("Setting requirement type");
                                         parameters.clear();
-                                        parameters.put("name", "HW");
+                                        parameters.put("name", value);
                                         result = DataBaseManager.namedQuery(
                                                 "RequirementType.findByName",
                                                 parameters);
-                                    }
-                                    requirement.setRequirementTypeId(
-                                            (RequirementType) result.get(0));
-                                    break;
-                                case 3:
-                                    //Optional notes
-                                    LOG.fine("Setting notes");
-                                    requirement.setNotes(value);
-                                    break;
-                                default:
-                                    throw new RuntimeException("Invalid column detected: " + c);
+                                        if (result.isEmpty()) {
+                                            //Assume a default
+                                            parameters.clear();
+                                            parameters.put("name", "HW");
+                                            result = DataBaseManager.namedQuery(
+                                                    "RequirementType.findByName",
+                                                    parameters);
+                                        }
+                                        requirement.setRequirementTypeId(
+                                                (RequirementType) result.get(0));
+                                        break;
+                                    case 3:
+                                        //Optional notes
+                                        LOG.fine("Setting notes");
+                                        requirement.setNotes(value);
+                                        break;
+                                    default:
+                                        throw new RuntimeException("Invalid column detected: " + c);
+                                }
+                                LOG.fine(value);
                             }
-                            LOG.fine(value);
+                            //This shouldn't be null
+                            assert rsn != null : "Requirement Spec Node is null?";
+                            requirement.setRequirementSpecNode(rsn);
+                            parameters.clear();
+                            parameters.put("status", "general.open");
+                            result = DataBaseManager.namedQuery(
+                                    "RequirementStatus.findByStatus", parameters);
+                            requirement.setRequirementStatusId(
+                                    (RequirementStatus) result.get(0));
+                            assert requirement.getUniqueId() != null
+                                    && !requirement.getUniqueId().isEmpty() :
+                                    new VMException("Invalid requirement detected!");
+                            requirements.add(requirement);
                         }
-                        //This shouldn't be null
-                        assert rsn != null : "Requirement Spec Node is null?";
-                        requirement.setRequirementSpecNode(rsn);
-                        parameters.clear();
-                        parameters.put("status", "general.open");
-                        result = DataBaseManager.namedQuery(
-                                "RequirementStatus.findByStatus", parameters);
-                        requirement.setRequirementStatusId(
-                                (RequirementStatus) result.get(0));
-                        requirements.add(requirement);
                     }
                 } catch (InvalidFormatException ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -195,7 +213,9 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                     LOG.log(Level.SEVERE, null, ex);
                 } finally {
                     try {
-                        inp.close();
+                        if (inp != null) {
+                            inp.close();
+                        }
                     } catch (IOException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
@@ -206,6 +226,13 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             } else {
                 throw new RequirementImportException("Unsupported file format: "
                         + toImport.getName());
+            }
+            StringBuilder sb = new StringBuilder("Rows with erros:\n");
+            for (Integer line : errors) {
+                sb.append(line).append("\n");
+            }
+            if (!errors.isEmpty()) {
+                Lookup.getDefault().lookup(MessageHandler.class).info(sb.toString());
             }
             for (Requirement r : requirements) {
                 LOG.log(Level.FINE, "{0}: {1}",
@@ -229,23 +256,44 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                     Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
                     List<Requirement> existing = ProjectServer.getRequirements(project);
                     for (Requirement r : existing) {
-                        if (r.getUniqueId().equals(requirement.getUniqueId())) {
-                            exists = true;
-                            break;
+                        if (r.getUniqueId() == null) {
+                            LOG.warning("Detected requirement with null unique id!");
+                            new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).destroy(r.getRequirementPK());
+                        } else {
+                            if (r.getUniqueId().equals(requirement.getUniqueId())) {
+                                exists = true;
+                                break;
+                            }
                         }
                     }
                     if (exists) {
-                        throw new Exception("Requirement "
-                                + requirement.getUniqueId()
+                        Lookup.getDefault().lookup(MessageHandler.class).error(
+                                "Requirement " + requirement.getUniqueId()
                                 + " already exists on project "
                                 + project.getName());
                     } else {
-                        new RequirementJpaController(
-                                DataBaseManager.getEntityManagerFactory())
-                                .create(requirement);
+                        controller.create(requirement);
                     }
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
+                    //Revert changes
+                    for (Iterator<Requirement> it2 = requirements.iterator(); it.hasNext();) {
+                        Requirement requirement = it2.next();
+                        Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
+                        List<Requirement> existing = ProjectServer.getRequirements(project);
+                        for (Requirement r : existing) {
+                            if (r.getUniqueId().equals(requirement.getUniqueId())) {
+                                try {
+                                    controller.destroy(r.getRequirementPK());
+                                } catch (IllegalOrphanException ex1) {
+                                    LOG.log(Level.SEVERE, null, ex1);
+                                } catch (NonexistentEntityException ex1) {
+                                    LOG.log(Level.SEVERE, null, ex1);
+                                }
+                                break;
+                            }
+                        }
+                    }
                     throw new VMException(ex);
                 }
             }
@@ -269,8 +317,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         f.setColor((short) Font.COLOR_NORMAL);
         cs.setFont(f);
         Row newRow = sheet.createRow(0);
-        for (Iterator<String> it = columns.iterator(); it.hasNext();) {
-            String label = it.next();
+        for (String label : columns) {
             Cell newCell = newRow.createCell(column);
             newCell.setCellStyle(cs);
             newCell.setCellValue(label);
