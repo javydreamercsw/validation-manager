@@ -236,11 +236,13 @@ public final class TestImportTopComponent extends TopComponent {
 
                     @Override
                     public boolean accept(File f) {
-                        return f.isFile() && (f.getName().endsWith(".xls")
+                        return f.isDirectory()
+                                || (f.isFile()
+                                && (f.getName().endsWith(".xls")
                                 || f.getName().endsWith(".xlsx")
                                 || f.getName().endsWith(".xlsm")
                                 || f.getName().endsWith(".doc")
-                                || f.getName().endsWith(".docx"));
+                                || f.getName().endsWith(".docx")));
                     }
 
                     @Override
