@@ -20,6 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vm.version>${project.version}</vm.version>
         <vaadin.version>7.0.7</vaadin.version>
+        <netbeans.version>RELEASE731</netbeans.version>
     </properties>
 
     <build>
