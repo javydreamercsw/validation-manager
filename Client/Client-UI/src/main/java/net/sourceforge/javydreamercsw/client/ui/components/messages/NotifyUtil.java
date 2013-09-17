@@ -1,8 +1,10 @@
 package net.sourceforge.javydreamercsw.client.ui.components.messages;
 
+import com.validation.manager.core.tool.message.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.openide.awt.NotificationDisplayer;
+import org.openide.util.Lookup;
 
 /**
  *
@@ -31,7 +33,7 @@ public class NotifyUtil {
         ActionListener actionListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                MessageUtil.show(message, type);
+                Lookup.getDefault().lookup(MessageUtil.class).show(message, type);
             }
         };
 

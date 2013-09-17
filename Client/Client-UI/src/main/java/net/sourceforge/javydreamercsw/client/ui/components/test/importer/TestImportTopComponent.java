@@ -10,9 +10,11 @@ import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.tool.message.MessageHandler;
 import com.validation.manager.core.tool.msword.importer.TableExtractor;
 import java.awt.Component;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,18 +32,16 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
-import net.sourceforge.javydreamercsw.client.ui.components.messages.MessageUtil;
 import net.sourceforge.javydreamercsw.client.ui.nodes.TestPlanNode;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestDialog;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 
@@ -71,7 +71,7 @@ import org.openide.util.NbBundle.Messages;
 })
 public final class TestImportTopComponent extends TopComponent {
 
-    private final List<XWPFTable> tables = new ArrayList<XWPFTable>();
+    private final List<DefaultTableModel> tables = new ArrayList<DefaultTableModel>();
     private static final Logger LOG
             = Logger.getLogger(TestImportTopComponent.class.getSimpleName());
     private Test test;
@@ -232,6 +232,22 @@ public final class TestImportTopComponent extends TopComponent {
             public void run() {
                 JFileChooser fc = new JFileChooser();
                 boolean valid = false;
+                fc.setFileFilter(new FileFilter() {
+
+                    @Override
+                    public boolean accept(File f) {
+                        return f.isFile() && (f.getName().endsWith(".xls")
+                                || f.getName().endsWith(".xlsx")
+                                || f.getName().endsWith(".xlsm")
+                                || f.getName().endsWith(".doc")
+                                || f.getName().endsWith(".docx"));
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return "Validation manager Test Import Files";
+                    }
+                });
                 int returnVal = fc.showOpenDialog(new JFrame());
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
@@ -250,6 +266,10 @@ public final class TestImportTopComponent extends TopComponent {
                         } else {
                             LOG.log(Level.INFO, "Found no tables!");
                         }
+                    } catch (FileNotFoundException ex) {
+                        Exceptions.printStackTrace(ex);
+                    } catch (ClassNotFoundException ex) {
+                        Exceptions.printStackTrace(ex);
                     } catch (IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
@@ -397,7 +417,8 @@ public final class TestImportTopComponent extends TopComponent {
                                 }
                             }
                         } else {
-                            throw new RuntimeException("Unhandled mapping: " + mapping.get(col));
+                            throw new RuntimeException("Unhandled mapping: "
+                                    + mapping.get(col));
                         }
                     }
                     try {
@@ -460,42 +481,26 @@ public final class TestImportTopComponent extends TopComponent {
 
     private void displayTable(Integer index) {
         LOG.log(Level.FINE, "Changed value to: {0}", index);
-        //Build the table
-        XWPFTable table = tables.get(index - 1);
-        int rows = table.getNumberOfRows() + 1;//Add one for the mapping row
+        //Rebuild the table
+        DefaultTableModel tableModel = tables.get(index - 1);
+        int rows = tableModel.getRowCount() + 1;//Add one for the mapping row
         if (header.isSelected()) {
             rows--;
         }
-        int columns = table.getRow(0).getTableCells().size();
-        Object[][] data = new Object[rows][columns];
+        int columns = tableModel.getColumnCount();
+        Object[] mappingRow = new Object[columns];
         String[] title = new String[columns];
-        for (int i = 0; i < columns; i++) {
-            title[i] = "Column " + (i + 1);
-        }
-        //Row 0 for mapping field
-        int rowNum = 1;
-        int columnNum;
         final List<TableCellEditor> editors = new ArrayList<TableCellEditor>();
-        //Fill maping field
         for (int i = 0; i < columns; i++) {
-            data[0][i] = "Select Mapping";
+            //Mapping row
+            mappingRow[i] = "Select Mapping";
+            //Default title
+            title[i] = "Column " + (i + 1);
+            //Fill maping field
             editors.add(new CustomEditor());
         }
-        for (XWPFTableRow row : table.getRows()) {
-            columnNum = 0;
-            for (XWPFTableCell cell : row.getTableCells()) {
-                if (header.isSelected() && rowNum == 1) {
-                    title[columnNum] = cell.getText();
-                } else {
-                    data[header.isSelected() ? rowNum - 1
-                            : rowNum][columnNum] = cell.getText();
-                }
-                columnNum++;
-            }
-            rowNum++;
-        }
-        //Rebuild the table model to fit this table
-        DefaultTableModel tableModel = new DefaultTableModel(data, title);
+        tableModel.insertRow(0, mappingRow);
+        tableModel.setColumnIdentifiers(title);
         importedTable = new JTable(tableModel) {
             //  Determine editor to be used by row
             @Override
@@ -512,7 +517,7 @@ public final class TestImportTopComponent extends TopComponent {
     }
 
     private Object showImportError(String message) {
-        MessageUtil.error(message);
+        Lookup.getDefault().lookup(MessageHandler.class).error(message);
         return true;
     }
 

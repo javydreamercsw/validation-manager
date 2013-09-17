@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.table.DefaultTableModel;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -34,17 +35,9 @@ public class TableExtractorTest {
                 + name
                 + System.getProperty("file.separator") + "Tables.docx");
         assert file.exists();
-        extractFromFile(file);
-    }
-
-    private void extractFromFile(File file) {
         TableExtractor te = new TableExtractor(file);
-        try {
-            List<XWPFTable> tables = te.extractTables();
-            assertEquals(2, tables.size());
-        } catch (IOException ex) {
-            Logger.getLogger(TableExtractor.class.getName()).log(Level.SEVERE, null, ex);
-            fail();
-        }
+        List<DefaultTableModel> tables = te.extractTables();
+        assertEquals(2, tables.size());
+        //TODO: Add test for excel files
     }
 }

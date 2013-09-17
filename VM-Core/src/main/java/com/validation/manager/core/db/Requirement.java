@@ -41,6 +41,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Requirement.findByVersion", query = "SELECT r FROM Requirement r WHERE r.requirementPK.version = :version"),
     @NamedQuery(name = "Requirement.findByUniqueId", query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId")})
 public class Requirement implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementPK requirementPK;
@@ -226,15 +227,14 @@ public class Requirement implements Serializable {
             return false;
         }
         Requirement other = (Requirement) object;
-        if ((this.requirementPK == null && other.requirementPK != null) || (this.requirementPK != null && !this.requirementPK.equals(other.requirementPK))) {
-            return false;
-        }
-        return true;
+        return (this.requirementPK != null || other.requirementPK == null)
+                && (this.requirementPK == null || this.requirementPK.equals(other.requirementPK));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Requirement[ requirementPK=" + requirementPK + " ]";
+        return "com.validation.manager.core.db.Requirement[ requirementPK="
+                + requirementPK + ", uniqueId=" + getUniqueId() + "]";
     }
-    
+
 }
