@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -62,7 +60,7 @@ public class TableExtractor {
         List<DefaultTableModel> tables = new ArrayList<DefaultTableModel>();
         for (XWPFTable table : extractTablesFromWord()) {
             //Build the table
-            int rows = table.getNumberOfRows() + 1;//Add one for the mapping row
+            int rows = table.getNumberOfRows();
             int columns = table.getRow(0).getTableCells().size();
             Object[][] data = new Object[rows][columns];
             String[] title = new String[columns];
@@ -70,9 +68,8 @@ public class TableExtractor {
                 title[i] = "Column " + (i + 1);
             }
             //Row 0 for mapping field
-            int rowNum = 1;
+            int rowNum = 0;
             int columnNum;
-            final List<TableCellEditor> editors = new ArrayList<TableCellEditor>();
             for (XWPFTableRow row : table.getRows()) {
                 columnNum = 0;
                 for (XWPFTableCell cell : row.getTableCells()) {
