@@ -8,27 +8,21 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.StepJpaController;
+import static com.validation.manager.core.tool.requirement.importer.RequirementImporter.exportTemplate;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.sql.DataSource;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -37,7 +31,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.h2.jdbcx.JdbcDataSource;
 
 /**
  * Import Requirements into database
@@ -54,7 +47,7 @@ public class StepImporter implements ImporterInterface<Step> {
     private static final List<String> columns = new ArrayList<String>();
     private static final ResourceBundle rb
             = ResourceBundle.getBundle(
-            "com.validation.manager.resources.VMMessages", Locale.getDefault());
+                    "com.validation.manager.resources.VMMessages", Locale.getDefault());
 
     static {
         columns.add("Sequence");
@@ -75,7 +68,7 @@ public class StepImporter implements ImporterInterface<Step> {
         List<Step> importedSteps = null;
         try {
             importedSteps = importFile(false);
-        } catch (RequirementImportException ex) {
+        } catch (TestImportException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
         return importedSteps;
@@ -83,13 +76,13 @@ public class StepImporter implements ImporterInterface<Step> {
 
     @Override
     public List<Step> importFile(boolean header) throws
-            RequirementImportException {
+            TestImportException {
         steps.clear();
         if (toImport == null) {
-            throw new RequirementImportException(
+            throw new TestImportException(
                     "message.step.import.file.null");
         } else if (!toImport.exists()) {
-            throw new RequirementImportException(
+            throw new TestImportException(
                     "message.step.import.file.invalid");
         } else {
             //Excel support
@@ -120,7 +113,7 @@ public class StepImporter implements ImporterInterface<Step> {
                             break;
                         }
                         if (cells < 2) {
-                            throw new RequirementImportException(
+                            throw new TestImportException(
                                     rb.getString("message.step.import.missing.column")
                                     .replaceAll("%c", "" + cells));
                         }
@@ -223,10 +216,10 @@ public class StepImporter implements ImporterInterface<Step> {
                     }
                 }
             } else if (toImport.getName().endsWith(".xml")) {
-                throw new RequirementImportException(
+                throw new TestImportException(
                         "XML importing not supported yet.");
             } else {
-                throw new RequirementImportException("Unsupported file format: "
+                throw new TestImportException("Unsupported file format: "
                         + toImport.getName());
             }
             return steps;
@@ -289,57 +282,15 @@ public class StepImporter implements ImporterInterface<Step> {
     }
 
     public static void main(String[] args) {
-        JFileChooser fc = new JFileChooser();
-        DataBaseManager.setPersistenceUnitName("TestVMPU");
-        int returnVal = fc.showOpenDialog(new JFrame());
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            StepImporter si = new StepImporter(file, null);
-            try {
-                List<Step> imported = si.importFile(true);
-                LOG.info("Imported Steps:");
-                for (Step s : imported) {
-                    LOG.log(Level.INFO, "Step: {0}", s.getStepSequence());
-                }
-            } catch (Exception ex) {
-                LOG.log(Level.SEVERE, null, ex);
-                System.exit(1);
-            }
-        }
-        Connection conn = null;
-        Statement stmt = null;
         try {
-            Map<String, Object> properties = DataBaseManager.getEntityManagerFactory().getProperties();
-            DataSource ds = new JdbcDataSource();
-            ((JdbcDataSource) ds).setPassword((String) properties.get("javax.persistence.jdbc.password"));
-            ((JdbcDataSource) ds).setUser((String) properties.get("javax.persistence.jdbc.user"));
-            ((JdbcDataSource) ds).setURL((String) properties.get("javax.persistence.jdbc.url"));
-            //Load the H2 driver
-            Class.forName("org.h2.Driver");
-            conn = ds.getConnection();
-            stmt = conn.createStatement();
-            stmt.executeUpdate("DROP ALL OBJECTS DELETE FILES");
-        } catch (SQLException ex) {
+            File file = exportTemplate();
+            System.out.println(file.getAbsolutePath());
+        } catch (FileNotFoundException ex) {
             LOG.log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
+        } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
+        } catch (InvalidFormatException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
-        DataBaseManager.close();
-        System.exit(0);
     }
 }
