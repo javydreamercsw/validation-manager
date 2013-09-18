@@ -19,23 +19,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
-import net.sourceforge.javydreamercsw.client.ui.nodes.TestPlanNode;
+import javax.swing.table.TableRowSorter;
+import net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.AbstractImportTopComponent;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestDialog;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -69,37 +67,22 @@ import org.openide.util.NbBundle.Messages;
     "CTL_TestImportTopComponent=Test Import Window",
     "HINT_TestImportTopComponent=This is a Test Import window"
 })
-public final class TestImportTopComponent extends TopComponent {
+public final class TestImportTopComponent extends AbstractImportTopComponent {
 
     private final List<DefaultTableModel> tables = new ArrayList<DefaultTableModel>();
     private static final Logger LOG
             = Logger.getLogger(TestImportTopComponent.class.getSimpleName());
     private Test test;
     private TestCase tc;
-    private final DefaultComboBoxModel model;
     private TestPlan tp;
     private boolean importSuccess = true;
     private JDialog dialog;
 
     public TestImportTopComponent() {
-        Vector comboBoxItems = new Vector();
-        comboBoxItems.add(",");
-        comboBoxItems.add(";");
-        comboBoxItems.add(".");
-        model = new DefaultComboBoxModel(comboBoxItems);
+        super();
         initComponents();
-        delimiter.setSelectedIndex(0);
-        spinner.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                LOG.log(Level.INFO, "Value changed to: {0}", spinner.getValue());
-                displayTable((int) Math.round(Double.valueOf(
-                        spinner.getValue().toString())));
-            }
-        });
         setName(Bundle.CTL_TestImportTopComponent());
         setToolTipText(Bundle.HINT_TestImportTopComponent());
-        enableUI(false);
     }
 
     /**
@@ -262,11 +245,22 @@ public final class TestImportTopComponent extends TopComponent {
                             spinner.setModel(new SpinnerNumberModel(1.0, 1.0,
                                     max, 1.0));
                             spinner.setValue(1.0);
-                            LOG.log(Level.INFO, "Loaded {0} tables!", tables.size());
+                            LOG.log(Level.INFO, "Loaded {0} tables!",
+                                    tables.size());
                             valid = true;
                             displayTable(1);
                         } else {
                             LOG.log(Level.INFO, "Found no tables!");
+                        }
+                        for (DefaultTableModel dtm : tables) {
+                            int columns = dtm.getColumnCount();
+                            Object[] mappingRow = new Object[columns];
+                            for (int i = 0; i < columns; i++) {
+                                //Mapping row
+                                mappingRow[i] = "Select Mapping";
+                            }
+                            //Insert mapping row
+                            dtm.insertRow(0, mappingRow);
                         }
                     } catch (FileNotFoundException ex) {
                         Exceptions.printStackTrace(ex);
@@ -282,7 +276,7 @@ public final class TestImportTopComponent extends TopComponent {
     }//GEN-LAST:event_importButtonActionPerformed
 
     private void headerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_headerActionPerformed
-        displayTable((int) Math.round(Double.valueOf(spinner.getValue().toString())));
+        handleHeaderActionPerformed();
     }//GEN-LAST:event_headerActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
@@ -306,8 +300,11 @@ public final class TestImportTopComponent extends TopComponent {
                     new Object[]{i, combo.getSelectedItem()});
             String value = (String) combo.getSelectedItem();
             //Make sure there's no duplicate mapping
-            assert mapping.isEmpty() || !mapping.contains(value) :
-                    showImportError("Duplicated mapping");
+            if (!mapping.isEmpty()
+                    && (!value.equals(TestImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
+                    && mapping.contains(value))) {
+                showImportError("Duplicated mapping: " + value);
+            }
             mapping.add(i, value);
         }
         //Make sure the basics are mapped
@@ -441,8 +438,7 @@ public final class TestImportTopComponent extends TopComponent {
     }//GEN-LAST:event_saveButtonActionPerformed
 
     private void addDelimiterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDelimiterButtonActionPerformed
-
-        model.addElement(delimiterField.getText().trim());
+        handleAddDelimiterButtonActionPerformed();
     }//GEN-LAST:event_addDelimiterButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -481,33 +477,26 @@ public final class TestImportTopComponent extends TopComponent {
         // TODO read your settings according to their version
     }
 
-    private void displayTable(Integer index) {
+    @Override
+    public void displayTable(Integer index) {
         LOG.log(Level.FINE, "Changed value to: {0}", index);
         //Rebuild the table
         DefaultTableModel tableModel = tables.get(index - 1);
-        int rows = tableModel.getRowCount() + 1;//Add one for the mapping row
-        if (header.isSelected()) {
-            rows--;
-        }
         int columns = tableModel.getColumnCount();
-        Object[] mappingRow = new Object[columns];
         String[] title = new String[columns];
-        final List<TableCellEditor> editors = new ArrayList<TableCellEditor>();
+        final List<TableCellEditor> editors
+                = new ArrayList<TableCellEditor>();
         for (int i = 0; i < columns; i++) {
-            //Mapping row
-            mappingRow[i] = "Select Mapping";
             //Default title
             title[i] = "Column " + (i + 1);
             //Fill maping field
             editors.add(new CustomEditor());
         }
-        tableModel.insertRow(0, mappingRow);
         tableModel.setColumnIdentifiers(title);
         importedTable = new JTable(tableModel) {
             //  Determine editor to be used by row
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
-                int modelColumn = convertColumnIndexToModel(column);
                 if (row == 0) {
                     return (TableCellEditor) editors.get(column);
                 } else {
@@ -515,6 +504,29 @@ public final class TestImportTopComponent extends TopComponent {
                 }
             }
         };
+        if (header.isSelected()) {
+            TableRowSorter sorter
+                    = new TableRowSorter<DefaultTableModel>(tableModel);
+            importedTable.setRowSorter(sorter);
+            RowFilter<DefaultTableModel, Object> rf;
+            //If current expression doesn't parse, don't update.
+            try {
+                //Filter the row with the title
+                RowFilter<DefaultTableModel, Object> regexFilter
+                        = RowFilter.regexFilter("^" + tableModel.getValueAt(1, 0));
+                rf = RowFilter.notFilter(regexFilter);
+                //Also change the table header
+                for (int i = 0; i < columns; i++) {
+                    title[i] = tableModel.getValueAt(1, i).toString();
+                }
+                tableModel.setColumnIdentifiers(title);
+            } catch (java.util.regex.PatternSyntaxException e) {
+                return;
+            }
+            if (rf != null) {
+                sorter.setRowFilter(rf);
+            }
+        }
         jScrollPane1.setViewportView(importedTable);
     }
 
@@ -579,18 +591,11 @@ public final class TestImportTopComponent extends TopComponent {
         }
     }
 
-    private void enableUI(boolean valid) {
+    @Override
+    public void enableUI(boolean valid) {
         spinner.setEnabled(valid);
         header.setEnabled(valid);
         importedTable.setEnabled(valid);
         saveButton.setEnabled(valid);
-    }
-
-    private void updateUI(Object object) {
-        if (object instanceof TestPlanNode) {
-            enableUI(true);
-        } else {
-            enableUI(false);
-        }
     }
 }
