@@ -141,7 +141,7 @@ public class StepImporterTest extends AbstractVMTestCase {
             } else {
                 StepImporter instance = new StepImporter(file,
                         new TestCaseJpaController(
-                        DataBaseManager.getEntityManagerFactory())
+                                DataBaseManager.getEntityManagerFactory())
                         .findTestCase(tc.getTestCasePK()));
                 instance.importFile(true);
                 instance.processImport();
@@ -161,7 +161,7 @@ public class StepImporterTest extends AbstractVMTestCase {
     public void testImportFilesXLS() {
         System.out.println("importFile (xls)");
         int initial = DataBaseManager.namedQuery("Requirement.findAll").size();
-        assertTrue(testImportFile("Reqs.xls") > 0);
+        assertTrue(testImportFile("Reqs.xls") > initial);
         assertTrue(initial < DataBaseManager.namedQuery("Requirement.findAll").size());
     }
 
