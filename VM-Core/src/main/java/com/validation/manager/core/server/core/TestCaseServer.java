@@ -105,10 +105,13 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         StepServer s = new StepServer(getEntity(), sequence, text);
         int amount = getStepList().size();
         s.setNotes(note);
+        s.setTestCase(getEntity());
         s.setExpectedResult(criteria.getBytes("UTF-8"));
         for (Requirement req : requirements) {
             s.getRequirementList().add(req);
         }
         s.write2DB();
+        update(this, getEntity());
+        assert getStepList().size() > amount;
     }
 }
