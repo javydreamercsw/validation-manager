@@ -37,7 +37,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>3.10.1</version>
+                    <version>3.11</version>
                     <extensions>true</extensions>
                     <configuration>
                         <brandingToken>${brandingToken}</brandingToken>
@@ -95,7 +95,6 @@
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE731</netbeans.version>
         <brandingToken>validation_manager_client</brandingToken>
     </properties>
 </project>
