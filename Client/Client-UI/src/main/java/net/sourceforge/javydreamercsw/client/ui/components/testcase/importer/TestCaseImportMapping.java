@@ -1,12 +1,13 @@
-package net.sourceforge.javydreamercsw.client.ui.components.test.importer;
+package net.sourceforge.javydreamercsw.client.ui.components.testcase.importer;
 
+import net.sourceforge.javydreamercsw.client.ui.components.ImportMappingInterface;
 import org.openide.util.NbBundle;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public enum TestImportMapping {
+public enum TestCaseImportMapping implements ImportMappingInterface {
 
     REQUIREMENT("req.map", true),
     DESCRIPTION("desc.map", true),
@@ -23,7 +24,7 @@ public enum TestImportMapping {
         "ignore.map=Ignore",
         "notes.map=Notes"
     })
-    TestImportMapping(String key, boolean required) {
+    TestCaseImportMapping(String key, boolean required) {
         this.key = key;
         this.required = required;
     }
@@ -31,13 +32,15 @@ public enum TestImportMapping {
     /**
      * @return the key
      */
+    @Override
     public String getValue() {
-        return org.openide.util.NbBundle.getMessage(TestImportMapping.class, key); // NOI18N
+        return org.openide.util.NbBundle.getMessage(TestCaseImportMapping.class, key); // NOI18N
     }
 
     /**
      * @return the required
      */
+    @Override
     public boolean isRequired() {
         return required;
     }
