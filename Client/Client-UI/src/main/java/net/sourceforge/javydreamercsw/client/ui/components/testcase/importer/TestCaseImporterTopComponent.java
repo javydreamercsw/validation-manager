@@ -1,19 +1,22 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.sourceforge.javydreamercsw.client.ui.components.testcase.importer;
 
+import net.sourceforge.javydreamercsw.client.ui.components.requirement.edit.AbstractImportTopComponent;
 import com.validation.manager.core.tool.msword.importer.TableExtractor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
@@ -46,7 +49,14 @@ import org.openide.util.NbBundle.Messages;
 @Messages({
     "CTL_TestCaseImporterAction=TestCaseImporter",
     "CTL_TestCaseImporterTopComponent=TestCaseImporter Window",
-    "HINT_TestCaseImporterTopComponent=This is a TestCaseImporter window"
+    "HINT_TestCaseImporterTopComponent=This is a TestCaseImporter window",
+    "TestCaseImporterTopComponent.jLabel1.text=Table:",
+    "TestCaseImporterTopComponent.addDelimiterButton.text=Add Delimiter",
+    "TestCaseImporterTopComponent.delimiterField.text=",
+    "TestCaseImporterTopComponent.jLabel2.text=Requirement Delimiter",
+    "TestCaseImporterTopComponent.saveButton.text=Save",
+    "TestCaseImporterTopComponent.header.text=Data has Header?",
+    "TestCaseImporterTopComponent.importButton.text=Import"
 })
 public final class TestCaseImporterTopComponent extends AbstractImportTopComponent {
 
@@ -55,7 +65,6 @@ public final class TestCaseImporterTopComponent extends AbstractImportTopCompone
 
     public TestCaseImporterTopComponent() {
         super();
-        initComponents();
         setName(Bundle.CTL_TestCaseImporterTopComponent());
         setToolTipText(Bundle.HINT_TestCaseImporterTopComponent());
     }
@@ -75,7 +84,7 @@ public final class TestCaseImporterTopComponent extends AbstractImportTopCompone
         importButton = new javax.swing.JButton();
         header = new javax.swing.JCheckBox();
         saveButton = new javax.swing.JButton();
-        delimiter = new JComboBox(model);
+        delimiter = new JComboBox(getModel());
         jLabel2 = new javax.swing.JLabel();
         delimiterField = new javax.swing.JTextField();
         addDelimiterButton = new javax.swing.JButton();
@@ -260,7 +269,7 @@ public final class TestCaseImporterTopComponent extends AbstractImportTopCompone
     }//GEN-LAST:event_saveButtonActionPerformed
 
     private void addDelimiterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDelimiterButtonActionPerformed
-        model.addElement(delimiterField.getText().trim());
+        getModel().addElement(delimiterField.getText().trim());
     }//GEN-LAST:event_addDelimiterButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -299,12 +308,62 @@ public final class TestCaseImporterTopComponent extends AbstractImportTopCompone
     }
 
     @Override
-    public void displayTable(Integer index) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void enableUI(boolean valid) {
+
     }
 
     @Override
-    public void enableUI(boolean valid) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void init() {
+        initComponents();
+    }
+
+    @Override
+    public DefaultCellEditor getEditor() {
+        return new TestCaseImportEditor();
+    }
+
+    @Override
+    public JTextField getDelimetterField() {
+        return delimiterField;
+    }
+
+    @Override
+    public JCheckBox getHeaderCheckbox() {
+        return header;
+    }
+
+    @Override
+    public JScrollPane getScrollPane() {
+        return jScrollPane1;
+    }
+
+    @Override
+    public void setImportTable(JTable table) {
+        importedTable = table;
+    }
+
+    @Override
+    public JTable getImportTable() {
+        return importedTable;
+    }
+
+    @Override
+    public JSpinner getSpinner() {
+        return spinner;
+    }
+
+    @Override
+    public JComboBox getDelimiter() {
+        return delimiter;
+    }
+
+    @Override
+    public void setModel(DefaultComboBoxModel model) {
+        this.model = model;
+    }
+
+    @Override
+    public DefaultComboBoxModel getModel() {
+        return model;
     }
 }

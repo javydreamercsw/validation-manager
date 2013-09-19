@@ -1,4 +1,6 @@
-package net.sourceforge.javydreamercsw.client.ui.components.test.importer;
+package net.sourceforge.javydreamercsw.client.ui.components;
+
+import javax.swing.DefaultCellEditor;
 
 /**
  *
@@ -20,4 +22,15 @@ public interface ImporterInterface {
      */
     void enableUI(boolean valid);
 
+    /**
+     * Initialize the form components.
+     */
+    void init();
+
+    /**
+     * Editor for the mapping row.
+     *
+     * @return Editor for the mapping row
+     */
+    DefaultCellEditor getEditor();
 }

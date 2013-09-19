@@ -12,7 +12,6 @@ import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.tool.message.MessageHandler;
 import com.validation.manager.core.tool.msword.importer.TableExtractor;
-import java.awt.Component;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,18 +21,21 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.RowFilter;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableRowSorter;
-import net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.AbstractImportTopComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.requirement.edit.AbstractImportTopComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.TestCaseImportMapping;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestDialog;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -69,7 +71,6 @@ import org.openide.util.NbBundle.Messages;
 })
 public final class TestImportTopComponent extends AbstractImportTopComponent {
 
-    private final List<DefaultTableModel> tables = new ArrayList<DefaultTableModel>();
     private static final Logger LOG
             = Logger.getLogger(TestImportTopComponent.class.getSimpleName());
     private Test test;
@@ -80,7 +81,7 @@ public final class TestImportTopComponent extends AbstractImportTopComponent {
 
     public TestImportTopComponent() {
         super();
-        initComponents();
+        init();
         setName(Bundle.CTL_TestImportTopComponent());
         setToolTipText(Bundle.HINT_TestImportTopComponent());
     }
@@ -301,14 +302,14 @@ public final class TestImportTopComponent extends AbstractImportTopComponent {
             String value = (String) combo.getSelectedItem();
             //Make sure there's no duplicate mapping
             if (!mapping.isEmpty()
-                    && (!value.equals(TestImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
+                    && (!value.equals(TestCaseImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
                     && mapping.contains(value))) {
                 showImportError("Duplicated mapping: " + value);
             }
             mapping.add(i, value);
         }
         //Make sure the basics are mapped
-        for (TestImportMapping tim : TestImportMapping.values()) {
+        for (TestCaseImportMapping tim : TestCaseImportMapping.values()) {
             if (tim.isRequired() && !mapping.contains(tim.getValue())) {
                 showImportError("Missing required mapping: " + tim.getValue());
                 setImportSuccess(false);
@@ -382,15 +383,15 @@ public final class TestImportTopComponent extends AbstractImportTopComponent {
                 List<Requirement> requirements = new ArrayList<Requirement>();
                 String description = "", criteria = "", notes = "";
                 for (int col = 0; col < importedTable.getModel().getColumnCount(); col++) {
-                    if (!mapping.get(col).equals(TestImportMapping.IGNORE.getValue())) {
+                    if (!mapping.get(col).equals(TestCaseImportMapping.IGNORE.getValue())) {
                         //Column is to be imported
-                        if (mapping.get(col).equals(TestImportMapping.DESCRIPTION.getValue())) {
+                        if (mapping.get(col).equals(TestCaseImportMapping.DESCRIPTION.getValue())) {
                             description = (String) importedTable.getModel().getValueAt(row, col);
-                        } else if (mapping.get(col).equals(TestImportMapping.NOTES.getValue())) {
+                        } else if (mapping.get(col).equals(TestCaseImportMapping.NOTES.getValue())) {
                             notes = (String) importedTable.getModel().getValueAt(row, col);
-                        } else if (mapping.get(col).equals(TestImportMapping.ACCEPTANCE_CRITERIA.getValue())) {
+                        } else if (mapping.get(col).equals(TestCaseImportMapping.ACCEPTANCE_CRITERIA.getValue())) {
                             criteria = (String) importedTable.getModel().getValueAt(row, col);
-                        } else if (mapping.get(col).equals(TestImportMapping.REQUIREMENT.getValue())) {
+                        } else if (mapping.get(col).equals(TestCaseImportMapping.REQUIREMENT.getValue())) {
                             //Process requirements
                             String reqs = (String) importedTable.getModel().getValueAt(row, col);
                             StringTokenizer st = new StringTokenizer(reqs,
@@ -477,59 +478,6 @@ public final class TestImportTopComponent extends AbstractImportTopComponent {
         // TODO read your settings according to their version
     }
 
-    @Override
-    public void displayTable(Integer index) {
-        LOG.log(Level.FINE, "Changed value to: {0}", index);
-        //Rebuild the table
-        DefaultTableModel tableModel = tables.get(index - 1);
-        int columns = tableModel.getColumnCount();
-        String[] title = new String[columns];
-        final List<TableCellEditor> editors
-                = new ArrayList<TableCellEditor>();
-        for (int i = 0; i < columns; i++) {
-            //Default title
-            title[i] = "Column " + (i + 1);
-            //Fill maping field
-            editors.add(new CustomEditor());
-        }
-        tableModel.setColumnIdentifiers(title);
-        importedTable = new JTable(tableModel) {
-            //  Determine editor to be used by row
-            @Override
-            public TableCellEditor getCellEditor(int row, int column) {
-                if (row == 0) {
-                    return (TableCellEditor) editors.get(column);
-                } else {
-                    return super.getCellEditor(row, column);
-                }
-            }
-        };
-        if (header.isSelected()) {
-            TableRowSorter sorter
-                    = new TableRowSorter<DefaultTableModel>(tableModel);
-            importedTable.setRowSorter(sorter);
-            RowFilter<DefaultTableModel, Object> rf;
-            //If current expression doesn't parse, don't update.
-            try {
-                //Filter the row with the title
-                RowFilter<DefaultTableModel, Object> regexFilter
-                        = RowFilter.regexFilter("^" + tableModel.getValueAt(1, 0));
-                rf = RowFilter.notFilter(regexFilter);
-                //Also change the table header
-                for (int i = 0; i < columns; i++) {
-                    title[i] = tableModel.getValueAt(1, i).toString();
-                }
-                tableModel.setColumnIdentifiers(title);
-            } catch (java.util.regex.PatternSyntaxException e) {
-                return;
-            }
-            if (rf != null) {
-                sorter.setRowFilter(rf);
-            }
-        }
-        jScrollPane1.setViewportView(importedTable);
-    }
-
     private Object showImportError(String message) {
         Lookup.getDefault().lookup(MessageHandler.class).error(message);
         return true;
@@ -570,32 +518,66 @@ public final class TestImportTopComponent extends AbstractImportTopComponent {
         this.dialog = dialog;
     }
 
-    class CustomEditor extends DefaultCellEditor {
-
-        private final JComboBox cb;
-
-        public CustomEditor() {
-            super(new JComboBox());
-            cb = (JComboBox) super.getComponent();
-            for (TestImportMapping tim : TestImportMapping.values()) {
-                cb.addItem(tim.getValue());
-            }
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                boolean isSelected, int row, int column) {
-            return row == 0 ? cb
-                    : super.getTableCellEditorComponent(table,
-                            value, isSelected, row, column);
-        }
-    }
-
     @Override
     public void enableUI(boolean valid) {
         spinner.setEnabled(valid);
         header.setEnabled(valid);
         importedTable.setEnabled(valid);
         saveButton.setEnabled(valid);
+    }
+
+    @Override
+    public void init() {
+        initComponents();
+    }
+
+    @Override
+    public DefaultCellEditor getEditor() {
+        return new TestImportEditor();
+    }
+
+    @Override
+    public JTextField getDelimetterField() {
+        return delimiterField;
+    }
+
+    @Override
+    public JCheckBox getHeaderCheckbox() {
+        return header;
+    }
+
+    @Override
+    public JScrollPane getScrollPane() {
+        return jScrollPane1;
+    }
+
+    @Override
+    public void setImportTable(JTable table) {
+        importedTable = table;
+    }
+
+    @Override
+    public JTable getImportTable() {
+        return importedTable;
+    }
+
+    @Override
+    public JSpinner getSpinner() {
+        return spinner;
+    }
+
+    @Override
+    public JComboBox getDelimiter() {
+        return delimiter;
+    }
+
+    @Override
+    public void setModel(DefaultComboBoxModel model) {
+        this.model = model;
+    }
+
+    @Override
+    public DefaultComboBoxModel getModel() {
+        return model;
     }
 }
