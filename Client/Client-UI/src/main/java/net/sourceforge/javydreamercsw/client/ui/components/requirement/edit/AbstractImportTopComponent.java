@@ -5,6 +5,7 @@
  */
 package net.sourceforge.javydreamercsw.client.ui.components.requirement.edit;
 
+import com.validation.manager.core.tool.message.MessageHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -13,6 +14,7 @@ import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -24,6 +26,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
 import net.sourceforge.javydreamercsw.client.ui.components.ImporterInterface;
+import org.openide.util.Lookup;
 import org.openide.windows.TopComponent;
 
 /**
@@ -38,6 +41,8 @@ public abstract class AbstractImportTopComponent extends TopComponent
     protected DefaultComboBoxModel model;
     private static final Logger LOG
             = Logger.getLogger(AbstractImportTopComponent.class.getSimpleName());
+    private boolean importSuccess;
+    private JDialog dialog;
 
     public AbstractImportTopComponent() {
         Vector comboBoxItems = new Vector();
@@ -166,5 +171,45 @@ public abstract class AbstractImportTopComponent extends TopComponent
             }
         }
         getScrollPane().setViewportView(getImportTable());
+    }
+
+    @Override
+    public void enableUI(boolean valid) {
+        getSpinner().setEnabled(valid);
+        getHeaderCheckbox().setEnabled(valid);
+        getImportTable().setEnabled(valid);
+        getSaveButton().setEnabled(valid);
+    }
+
+    protected void showImportError(String message) {
+        Lookup.getDefault().lookup(MessageHandler.class).error(message);
+    }
+
+    /**
+     * @param importSuccess the importSuccess to set
+     */
+    protected void setImportSuccess(boolean importSuccess) {
+        this.importSuccess = importSuccess;
+    }
+
+    /**
+     * @return the importSuccess
+     */
+    protected boolean isImportSuccess() {
+        return importSuccess;
+    }
+
+    /**
+     * @return the dialog
+     */
+    protected JDialog getDialog() {
+        return dialog;
+    }
+
+    /**
+     * @param dialog the dialog to set
+     */
+    protected void setDialog(JDialog dialog) {
+        this.dialog = dialog;
     }
 }

@@ -24,8 +24,9 @@ public class ImportTestCaseAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         /* Create and display the dialog */
-        Test tp = Utilities.actionsGlobalContext().lookup(Test.class);
-        assert tp != null;
+        Test test = Utilities.actionsGlobalContext().lookup(Test.class);
+        assert test != null;
+        component.setTest(test);
         component.open();
         component.requestActive();
     }

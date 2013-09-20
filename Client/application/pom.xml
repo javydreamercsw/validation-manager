@@ -19,8 +19,6 @@
     </ciManagement>
 
     <properties>
-        <netbeans.run.params.ide/>
-        <netbeans.run.params>${netbeans.run.params.ide}</netbeans.run.params>
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
     </properties>
 

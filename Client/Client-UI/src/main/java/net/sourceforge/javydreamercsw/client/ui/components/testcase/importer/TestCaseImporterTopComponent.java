@@ -1,14 +1,27 @@
 package net.sourceforge.javydreamercsw.client.ui.components.testcase.importer;
 
+import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.Test;
+import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestPlanHasTest;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.TestCaseServer;
 import net.sourceforge.javydreamercsw.client.ui.components.requirement.edit.AbstractImportTopComponent;
 import com.validation.manager.core.tool.msword.importer.TableExtractor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -20,6 +33,8 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestDialog;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -37,7 +52,7 @@ import org.openide.util.NbBundle.Messages;
 @TopComponent.Description(
         preferredID = "TestCaseImporterTopComponent",
         //iconBase="SET/PATH/TO/ICON/HERE",
-        persistenceType = TopComponent.PERSISTENCE_ALWAYS
+        persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
 @ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.TestCaseImporterTopComponent")
@@ -58,10 +73,12 @@ import org.openide.util.NbBundle.Messages;
     "TestCaseImporterTopComponent.header.text=Data has Header?",
     "TestCaseImporterTopComponent.importButton.text=Import"
 })
-public final class TestCaseImporterTopComponent extends AbstractImportTopComponent {
+public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
 
     private static final Logger LOG
             = Logger.getLogger(TestCaseImporterTopComponent.class.getSimpleName());
+    private Test test;
+    private TestCase tc;
 
     public TestCaseImporterTopComponent() {
         super();
@@ -265,7 +282,70 @@ public final class TestCaseImporterTopComponent extends AbstractImportTopCompone
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         LOG.info("Saving imported table...");
-
+        setImportSuccess(true);
+        int rows = importedTable.getModel().getRowCount();
+        List<String> mapping = new ArrayList<String>(rows);
+        for (int i = 0; i < importedTable.getModel().getColumnCount(); i++) {
+            DefaultCellEditor editor
+                    = (DefaultCellEditor) importedTable.getCellEditor(0, i);
+            JComboBox combo = (JComboBox) editor.getComponent();
+            LOG.log(Level.INFO, "Column {0} is mapped as: {1}",
+                    new Object[]{i, combo.getSelectedItem()});
+            String value = (String) combo.getSelectedItem();
+            //Make sure there's no duplicate mapping
+            if (!mapping.isEmpty()
+                    && (!value.equals(TestCaseImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
+                    && mapping.contains(value))) {
+                showImportError("Duplicated mapping: " + value);
+            }
+            mapping.add(i, value);
+        }
+        //Make sure the basics are mapped
+        for (TestCaseImportMapping tim : TestCaseImportMapping.values()) {
+            if (tim.isRequired() && !mapping.contains(tim.getValue())) {
+                showImportError("Missing required mapping: " + tim.getValue());
+                setImportSuccess(false);
+                break;
+            }
+        }
+        //Create the test case to import into
+        /* Create and display the dialog */
+        if (isImportSuccess()) {
+            setDialog(new EditTestCaseDialog(new javax.swing.JFrame(),
+                    true, false));
+            getDialog().setLocationRelativeTo(null);
+            ((EditTestCaseDialog) getDialog()).setTest(test);
+            getDialog().addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    tc = ((EditTestCaseDialog) getDialog()).getTestCase();
+                    if (tc == null) {
+                        showImportError("Test Case Creation unsuccessful!");
+                        setImportSuccess(false);
+                    }
+                    getDialog().dispose();
+                }
+            });
+            getDialog().setVisible(true);
+            while (getDialog().isVisible()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+            tc = ((EditTestCaseDialog) getDialog()).getTestCase();
+            if (tc == null) {
+                showImportError("Test Case Creation unsuccessful!");
+                setImportSuccess(false);
+            }
+        }
+        if (isImportSuccess()) {
+            process(mapping);
+        }
+        if (isImportSuccess()) {
+            this.close();
+        }
     }//GEN-LAST:event_saveButtonActionPerformed
 
     private void addDelimiterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDelimiterButtonActionPerformed
@@ -292,7 +372,8 @@ public final class TestCaseImporterTopComponent extends AbstractImportTopCompone
 
     @Override
     public void componentClosed() {
-        // TODO add custom code on component closing
+        enableUI(false);
+        tables.clear();
     }
 
     void writeProperties(java.util.Properties p) {
@@ -305,11 +386,6 @@ public final class TestCaseImporterTopComponent extends AbstractImportTopCompone
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
-    }
-
-    @Override
-    public void enableUI(boolean valid) {
-
     }
 
     @Override
@@ -365,5 +441,87 @@ public final class TestCaseImporterTopComponent extends AbstractImportTopCompone
     @Override
     public DefaultComboBoxModel getModel() {
         return model;
+    }
+
+    @Override
+    public JButton getSaveButton() {
+        return saveButton;
+    }
+
+    public void setTest(Test test) {
+        this.test = test;
+    }
+
+    protected void process(List<String> mapping) {
+        List<Project> projects = new ArrayList<Project>();
+        for (TestPlanHasTest tpht : test.getTestPlanHasTestList()) {
+            tpht.getTestPlan().getTestProject();
+            for (Object o : DataBaseManager.nativeQuery(
+                    "select pht.project_id from project_has_test_project pht "
+                    + "where pht.test_project_id="
+                    + tpht.getTestPlan().getTestProject().getId())) {
+                LOG.log(Level.INFO, "Project ID: {0}", o);
+                projects.add(new ProjectServer(Integer.valueOf(o.toString())));
+            }
+        }
+        TestCaseServer tcs = new TestCaseServer(tc);
+        //We got the created test, now let's import the rest.
+        //Start on second row as first one is the mapping row.
+        //Start on third row if there are headers in the data
+        int step_counter = 0;
+        int start = 1 + (header.isSelected() ? 1 : 0);
+        for (int row = start; row < importedTable.getModel().getRowCount(); row++) {
+            List<Requirement> requirements = new ArrayList<Requirement>();
+            String description = "", criteria = "", notes = "";
+            for (int col = 0; col < importedTable.getModel().getColumnCount(); col++) {
+                if (!mapping.get(col).equals(TestCaseImportMapping.IGNORE.getValue())) {
+                    //Column is to be imported
+                    if (mapping.get(col).equals(TestCaseImportMapping.DESCRIPTION.getValue())) {
+                        description = (String) importedTable.getModel().getValueAt(row, col);
+                    } else if (mapping.get(col).equals(TestCaseImportMapping.NOTES.getValue())) {
+                        notes = (String) importedTable.getModel().getValueAt(row, col);
+                    } else if (mapping.get(col).equals(TestCaseImportMapping.ACCEPTANCE_CRITERIA.getValue())) {
+                        criteria = (String) importedTable.getModel().getValueAt(row, col);
+                    } else if (mapping.get(col).equals(TestCaseImportMapping.REQUIREMENT.getValue())) {
+                        //Process requirements
+                        String reqs = (String) importedTable.getModel().getValueAt(row, col);
+                        StringTokenizer st = new StringTokenizer(reqs,
+                                delimiter.getSelectedItem().toString());
+                        while (st.hasMoreTokens()) {
+                            String token = st.nextToken().trim();
+                            LOG.log(Level.INFO, "Requirement: {0}", token);
+                            boolean found = false;
+                            for (Project p : projects) {
+                                LOG.log(Level.INFO, "Looking on project: {0}", p.getName());
+                                for (Requirement r : ProjectServer.getRequirements(p)) {
+                                    if (r.getUniqueId().trim().equals(token.trim())) {
+                                        requirements.add(r);
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!found) {
+                                //TODO: Create dummy? Error out?
+                                LOG.log(Level.WARNING,
+                                        "Unable to find requirement: '{0}'", token.trim());
+                            }
+                        }
+                    } else {
+                        throw new RuntimeException("Unhandled mapping: "
+                                + mapping.get(col));
+                    }
+                }
+            }
+            try {
+                step_counter++;
+                tcs.addStep(step_counter, description, notes, criteria, requirements);
+                tcs.write2DB();
+            } catch (NonexistentEntityException ex) {
+                Exceptions.printStackTrace(ex);
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
     }
 }
