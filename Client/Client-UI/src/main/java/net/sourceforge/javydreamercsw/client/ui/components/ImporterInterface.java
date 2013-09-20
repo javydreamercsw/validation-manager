@@ -1,6 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.components;
 
 import javax.swing.DefaultCellEditor;
+import javax.swing.JButton;
 
 /**
  *
@@ -33,4 +34,11 @@ public interface ImporterInterface {
      * @return Editor for the mapping row
      */
     DefaultCellEditor getEditor();
+
+    /**
+     * Get the save button.
+     *
+     * @return save button
+     */
+    JButton getSaveButton();
 }
