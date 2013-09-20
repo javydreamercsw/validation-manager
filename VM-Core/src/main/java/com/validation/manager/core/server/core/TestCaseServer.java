@@ -107,6 +107,9 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         s.setNotes(note);
         s.setTestCase(getEntity());
         s.setExpectedResult(criteria.getBytes("UTF-8"));
+        if (s.getRequirementList() == null) {
+            s.setRequirementList(new ArrayList<Requirement>());
+        }
         for (Requirement req : requirements) {
             s.getRequirementList().add(req);
         }
