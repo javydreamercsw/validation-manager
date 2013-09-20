@@ -38,8 +38,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
     private RequirementSpecNode rsns;
 
     private void prepare() throws Exception {
-        VmUser user = TestHelper.createUser("test1",
-                "password", "first", "test@test.com", "last");
         p = TestHelper.createProject("New Project", "Notes");
         ProjectServer project = new ProjectServer(p);
         project.setNotes("Notes 2");

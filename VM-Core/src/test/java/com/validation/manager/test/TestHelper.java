@@ -18,7 +18,6 @@ import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
-import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestJpaController;
 import com.validation.manager.core.db.controller.TestPlanHasTestJpaController;
@@ -218,7 +217,7 @@ public class TestHelper {
         TestPlanServer tps = new TestPlanServer(plan);
         TestPlanHasTest tpht = new TestPlanHasTest(
                 new TestPlanHasTestPK(plan.getTestPlanPK().getId(),
-                plan.getTestPlanPK().getTestProjectId(), test.getId()),
+                        plan.getTestPlanPK().getTestProjectId(), test.getId()),
                 new Date(), 1);
         tpht.setTest(test);
         tpht.setTestPlan(plan);
@@ -234,6 +233,8 @@ public class TestHelper {
         RequirementSpecServer rss = new RequirementSpecServer(name, description,
                 project.getId(), specLevelId);
         rss.write2DB();
+        project.getRequirementSpecList().add(rss);
+        new ProjectServer(project).write2DB();
         return rss;
     }
 
@@ -260,5 +261,13 @@ public class TestHelper {
         StepServer ss = new StepServer(step);
         ss.getRequirementList().add(req);
         ss.write2DB();
+    }
+
+    public static Project addProject(Project root, String name, String notes)
+            throws NonexistentEntityException, Exception {
+        Project sub = createProject(name, notes);
+        root.getProjectList().add(sub);
+        new ProjectServer(root).write2DB();
+        return sub;
     }
 }
