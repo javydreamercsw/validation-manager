@@ -276,9 +276,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                     }
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
-                    //Revert changes
-                    for (Iterator<Requirement> it2 = requirements.iterator(); it.hasNext();) {
-                        Requirement requirement = it2.next();
+                    for (Requirement requirement : requirements) {
                         Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
                         List<Requirement> existing = ProjectServer.getRequirements(project);
                         for (Requirement r : existing) {
