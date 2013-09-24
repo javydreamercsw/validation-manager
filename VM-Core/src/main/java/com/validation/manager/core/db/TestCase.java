@@ -46,6 +46,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "TestCase.findByActive", query = "SELECT t FROM TestCase t WHERE t.active = :active"),
     @NamedQuery(name = "TestCase.findByIsOpen", query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
 public class TestCase implements Serializable {
+
     @Lob
     @Size(max = 65535)
     @Column(name = "summary")
@@ -100,7 +101,7 @@ public class TestCase implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public TestCase(String name,int testId) {
+    public TestCase(String name, int testId) {
         this.testCasePK = new TestCasePK(testId);
         this.name = name;
     }
@@ -229,5 +230,5 @@ public class TestCase implements Serializable {
     public void setSummary(byte[] summary) {
         this.summary = summary;
     }
-    
+
 }
