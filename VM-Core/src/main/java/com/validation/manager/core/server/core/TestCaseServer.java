@@ -46,7 +46,7 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
             NonexistentEntityException, Exception {
         TestCaseJpaController controller
                 = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
-        if (getTestCasePK().getId() > 0) {
+        if (controller.findTestCase(getTestCasePK()) != null || getTestCasePK().getId() > 0) {
             TestCase temp = controller.findTestCase(getTestCasePK());
             update(temp, this);
             controller.edit(temp);
