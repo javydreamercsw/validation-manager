@@ -5,6 +5,7 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -23,6 +24,9 @@ public final class ProjectServer extends Project implements EntityServer<Project
         super(name);
         setNotes(notes);
         setId(0);
+        setProjectList(new ArrayList<Project>());
+        setRequirementSpecList(new ArrayList<RequirementSpec>());
+        setTestProjectList(new ArrayList<TestProject>());
     }
 
     public ProjectServer(int id) {
