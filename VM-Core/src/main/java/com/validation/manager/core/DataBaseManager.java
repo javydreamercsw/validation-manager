@@ -325,9 +325,7 @@ public class DataBaseManager {
     @SuppressWarnings("unchecked")
     private static List<Object> namedQuery(String query, Map<String, Object> parameters, boolean change) {
         EntityTransaction transaction = getEntityManager().getTransaction();
-        if (change) {
-            transaction.begin();
-        }
+        transaction.begin();
         Query q = getEntityManager().createNamedQuery(query);
         if (parameters != null) {
             Iterator<Entry<String, Object>> entries = parameters.entrySet().iterator();
@@ -336,9 +334,7 @@ public class DataBaseManager {
                 q.setParameter(e.getKey(), e.getValue());
             }
         }
-        if (change) {
-            transaction.commit();
-        }
+        transaction.commit();
         return q.getResultList();
     }
 
