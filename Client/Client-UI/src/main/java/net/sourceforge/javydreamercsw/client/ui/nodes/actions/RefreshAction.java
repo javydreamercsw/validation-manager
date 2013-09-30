@@ -1,7 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
 import java.awt.event.ActionEvent;
-import java.util.Iterator;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import net.sourceforge.javydreamercsw.client.ui.nodes.capability.RefreshableCapability;
@@ -23,9 +22,8 @@ public class RefreshAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        for (Iterator<? extends RefreshableCapability> it =
-                node.getLookup().lookupAll(RefreshableCapability.class).iterator(); it.hasNext();) {
-            RefreshableCapability rc = it.next();
+        for (RefreshableCapability rc
+                : node.getLookup().lookupAll(RefreshableCapability.class)) {
             rc.refresh();
         }
     }
