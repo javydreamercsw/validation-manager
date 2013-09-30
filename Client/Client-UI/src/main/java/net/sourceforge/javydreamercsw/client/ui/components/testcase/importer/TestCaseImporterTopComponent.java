@@ -33,7 +33,6 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
-import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestDialog;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
@@ -318,11 +317,6 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             getDialog().addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent e) {
-                    tc = ((EditTestCaseDialog) getDialog()).getTestCase();
-                    if (tc == null) {
-                        showImportError("Test Case Creation unsuccessful!");
-                        setImportSuccess(false);
-                    }
                     getDialog().dispose();
                 }
             });
@@ -374,6 +368,8 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
     public void componentClosed() {
         enableUI(false);
         tables.clear();
+        tc = null;
+        test = null;
     }
 
     void writeProperties(java.util.Properties p) {
@@ -504,7 +500,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                             if (!found) {
                                 //TODO: Create dummy? Error out?
                                 LOG.log(Level.WARNING,
-                                        "Unable to find requirement: '{0}'", token.trim());
+                                        "Unable to find requirement: ' {0} '", token.trim());
                             }
                         }
                     } else {

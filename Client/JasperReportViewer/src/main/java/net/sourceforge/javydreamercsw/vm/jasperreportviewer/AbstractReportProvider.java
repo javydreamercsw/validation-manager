@@ -1,7 +1,7 @@
 package net.sourceforge.javydreamercsw.vm.jasperreportviewer;
 
+import java.sql.Connection;
 import java.util.Map;
-import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -12,6 +12,7 @@ public abstract class AbstractReportProvider implements ReportProviderInterface 
 
     protected JasperReport report;
     protected Map parameters;
+    protected Connection connection;
 
     @Override
     public JasperReport getReport() {
@@ -36,8 +37,8 @@ public abstract class AbstractReportProvider implements ReportProviderInterface 
     }
 
     @Override
-    public JasperPrint generatePrint(Map parameters, JRDataSource dataSource)
+    public JasperPrint generatePrint(Map parameters)
             throws JRException {
-        return JasperFillManager.fillReport(getReport(), parameters, dataSource);
+        return JasperFillManager.fillReport(getReport(), parameters, connection);
     }
 }

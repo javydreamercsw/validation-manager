@@ -13,8 +13,6 @@ import org.openide.util.Utilities;
  */
 public class ImportTestAction extends AbstractAction {
 
-    private final TestImportTopComponent component = new TestImportTopComponent();
-
     public ImportTestAction() {
         super("Import From Document",
                 new ImageIcon("com/validation/manager/resources/icons/Signage/Add Square.png"));
@@ -23,6 +21,7 @@ public class ImportTestAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         /* Create and display the dialog */
+        TestImportTopComponent component = new TestImportTopComponent();
         TestPlan tp = Utilities.actionsGlobalContext().lookup(TestPlan.class);
         assert tp != null;
         component.setTestPlan(tp);
