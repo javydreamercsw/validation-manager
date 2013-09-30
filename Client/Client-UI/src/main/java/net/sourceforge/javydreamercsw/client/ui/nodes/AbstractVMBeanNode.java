@@ -6,10 +6,13 @@ import java.util.List;
 import javax.swing.Action;
 import javax.swing.SwingUtilities;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.RefreshAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ReportAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.capability.RefreshableCapability;
+import net.sourceforge.javydreamercsw.vm.jasperreportviewer.ReportProviderInterface;
 import org.openide.nodes.BeanNode;
 import org.openide.nodes.Children;
 import org.openide.util.Lookup;
+import org.openide.util.Utilities;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 
@@ -69,7 +72,15 @@ public abstract class AbstractVMBeanNode extends BeanNode
         if (!getLookup().lookupAll(RefreshableCapability.class).isEmpty()) {
             actions.add(new RefreshAction(this));
         }
-        return actions.size() > 0 ? actions.toArray(new Action[actions.size()]) : new Action[]{};
+        for (ReportProviderInterface rpi
+                : Lookup.getDefault().lookupAll(ReportProviderInterface.class)) {
+            if (rpi.supportsNode(this)) {
+                actions.add(new ReportAction());
+                break;
+            }
+        }
+        return actions.size() > 0
+                ? actions.toArray(new Action[actions.size()]) : new Action[]{};
     }
 
     @Override

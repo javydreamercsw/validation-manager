@@ -54,6 +54,17 @@
             <artifactId>org-netbeans-modules-projectapi</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
+        <dependency>
+            <artifactId>org-openide-nodes</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <type>jar</type>
+            <version>RELEASE731</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>VM-Core-Wrapper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -65,6 +76,9 @@
                 <configuration>
                     <moduleType>eager</moduleType>
                     <codeNameBase>com.validation.manager.jasperreports.viewer/1</codeNameBase>
+                    <publicPackages>
+                        <publicPackage>net.sourceforge.javydreamercsw.vm.jasperreportviewer</publicPackage>
+                    </publicPackages>
                 </configuration>
             </plugin>
 

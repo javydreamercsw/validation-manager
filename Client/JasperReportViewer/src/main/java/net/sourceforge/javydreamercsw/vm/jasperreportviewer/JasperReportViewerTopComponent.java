@@ -22,10 +22,10 @@ import org.openide.util.Utilities;
         autostore = false)
 @TopComponent.Description(
         preferredID = "JasperReportViewerTopComponent",
-//        iconBase = "com/validation/manager/resources/icons/VMSmall.png",
-        persistenceType = TopComponent.PERSISTENCE_ALWAYS)
+        //        iconBase = "com/validation/manager/resources/icons/VMSmall.png",
+        persistenceType = TopComponent.PERSISTENCE_NEVER)
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
-@ActionID(category = "Window", 
+@ActionID(category = "Window",
         id = "net.sourceforge.javydreamercsw.vm.jasperreportviewer.JasperReportViewerTopComponent")
 @ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(

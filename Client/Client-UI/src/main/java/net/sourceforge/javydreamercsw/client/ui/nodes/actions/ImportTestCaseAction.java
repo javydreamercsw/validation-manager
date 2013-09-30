@@ -13,9 +13,6 @@ import org.openide.util.Utilities;
  */
 public class ImportTestCaseAction extends AbstractAction {
 
-    private final TestCaseImporterTopComponent component
-            = new TestCaseImporterTopComponent();
-
     public ImportTestCaseAction() {
         super("Import Test Case",
                 new ImageIcon("com/validation/manager/resources/icons/Signage/Add Square.png"));
@@ -24,6 +21,8 @@ public class ImportTestCaseAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         /* Create and display the dialog */
+        TestCaseImporterTopComponent component
+                = new TestCaseImporterTopComponent();
         Test test = Utilities.actionsGlobalContext().lookup(Test.class);
         assert test != null;
         component.setTest(test);
