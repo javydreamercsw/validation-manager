@@ -25,6 +25,7 @@ public class ReportAction extends AbstractAction {
             public void run() {
                 ReportChooserInterface dialog
                         = Lookup.getDefault().lookup(ReportChooserInterface.class);
+                dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
             }
         });
