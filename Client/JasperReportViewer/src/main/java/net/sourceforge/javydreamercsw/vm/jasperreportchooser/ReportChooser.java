@@ -13,7 +13,6 @@ import net.sf.jasperreports.engine.JRException;
 import net.sourceforge.javydreamercsw.vm.jasperreportviewer.ReportProviderInterface;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
-import org.openide.util.Utilities;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -32,7 +31,7 @@ public class ReportChooser extends javax.swing.JDialog
         initComponents();
         jList1.setModel(new javax.swing.AbstractListModel() {
             Collection<? extends ReportProviderInterface> providers
-                    = Utilities.actionsGlobalContext().lookupAll(ReportProviderInterface.class);
+                    = Lookup.getDefault().lookupAll(ReportProviderInterface.class);
 
             @Override
             public int getSize() {
