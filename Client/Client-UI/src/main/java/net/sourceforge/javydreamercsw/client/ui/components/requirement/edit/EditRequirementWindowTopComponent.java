@@ -28,7 +28,6 @@ import net.sourceforge.javydreamercsw.client.ui.nodes.actions.RequirementSelecti
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.view.OutlineView;
-import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
