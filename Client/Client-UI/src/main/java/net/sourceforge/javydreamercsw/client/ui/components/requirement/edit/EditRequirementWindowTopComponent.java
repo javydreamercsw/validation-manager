@@ -14,7 +14,6 @@ import com.validation.manager.core.server.core.RequirementServer;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
@@ -284,12 +283,6 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                         = new RequirementSelectionDialog(new javax.swing.JFrame(),
                                 true, linkedRequirements);
                 dialog.setLocationRelativeTo(null);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        dialog.dispose();
-                    }
-                });
                 dialog.setVisible(true);
                 //Wait for the dialog to be finished
                 while (dialog.isVisible()) {
@@ -363,11 +356,6 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                 req.write2DB();
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
-            }
-            //Add linked requirements
-            req.getRequirementList().clear();
-            for (Iterator<Requirement> it = linkedRequirements.iterator(); it.hasNext();) {
-                req.getRequirementList().add(it.next());
             }
             try {
                 req.write2DB();
