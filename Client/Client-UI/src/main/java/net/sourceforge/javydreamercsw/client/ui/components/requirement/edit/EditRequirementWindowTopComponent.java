@@ -8,8 +8,6 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
-import com.validation.manager.core.db.Step;
-import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.server.core.RequirementServer;
@@ -18,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
@@ -27,15 +24,10 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.ListCellRenderer;
-import javax.swing.event.TreeModelListener;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.RequirementSelectionDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.netbeans.swing.outline.RowModel;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.view.OutlineView;
-import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -51,17 +43,17 @@ import org.openide.util.Utilities;
 @ConvertAsProperties(
         dtd = "-//net.sourceforge.javydreamercsw.client.ui.nodes.actions//EditRequirementWindow//EN",
         autostore = false
-        )
+)
 @TopComponent.Description(
         preferredID = "EditRequirementWindowTopComponent",
         iconBase = "com/validation/manager/resources/icons/Papermart/Document.png",
         persistenceType = TopComponent.PERSISTENCE_NEVER
-        )
+)
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_EditRequirementWindowAction",
         preferredID = "EditRequirementWindowTopComponent"
-        )
+)
 @Messages({
     "CTL_EditRequirementWindowAction=EditRequirementWindow",
     "CTL_EditRequirementWindowTopComponent=EditRequirementWindow Window",
@@ -83,7 +75,6 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             = ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
     private final CoveringStepFactory testCaseFactory;
     private final ExplorerManager em = new ExplorerManager();
-    private static Node root;
 
     public EditRequirementWindowTopComponent() {
         initComponents();
@@ -123,117 +114,11 @@ public final class EditRequirementWindowTopComponent extends TopComponent
 //                getActionMap()));
     }
 
-    private class TestCaseRowModel implements RowModel {
-
-        private final List<String> columns;
-
-        public TestCaseRowModel(List<String> columns) {
-            this.columns = columns;
-        }
-
-        @Override
-        public int getColumnCount() {
-            return columns.size();
-        }
-
-        @Override
-        public Object getValueFor(Object o, int i) {
-            Object result = null;
-            if (o instanceof Step) {
-                Step node = (Step) o;
-                String columnName
-                        = columns.get(i).toLowerCase(Locale.getDefault())
-                        .replaceAll("_", "");
-                if (columnName.equals("testCase")) {
-                    result = node.getTestCase().getName();
-                } else if (columnName.equals("step")) {
-                    result = node.getStepSequence();
-                }
-            } else if (o instanceof TestCase) {
-                TestCase testCase = (TestCase) o;
-            }
-            return result == null ? "" : result.toString();
-        }
-
-        @Override
-        public Class getColumnClass(int i) {
-            return String.class;
-        }
-
-        @Override
-        public boolean isCellEditable(Object o, int i) {
-            return false;
-        }
-
-        @Override
-        public void setValueFor(Object o, int i, Object o1) {
-            //Do nothing
-        }
-
-        @Override
-        public String getColumnName(int column) {
-            String name = columns.get(column);
-            return name;
-        }
-    }
-
-    private static class TestCaseTreeModel implements TreeModel {
-
-        @Override
-        public Object getRoot() {
-            return root;
-        }
-
-        @Override
-        public Object getChild(Object parent, int index) {
-            Node n = (Node) parent;
-            return n.getChildren().getNodesCount() < index
-                    ? Children.LEAF : n.getChildren().getNodeAt(index);
-        }
-
-        @Override
-        public int getChildCount(Object parent) {
-            Node n = (Node) parent;
-            return n.getChildren().getNodesCount();
-        }
-
-        @Override
-        public boolean isLeaf(Object node) {
-            if (node instanceof Node) {
-                Node n = (Node) node;
-                return n.isLeaf();
-            } else {
-                return true;
-            }
-        }
-
-        @Override
-        public void valueForPathChanged(TreePath path, Object newValue) {
-            //Do nothing
-        }
-
-        @Override
-        public int getIndexOfChild(Object parent, Object child) {
-            Node n = (Node) parent;
-            int i = 0;
-            for (Node c : n.getChildren().getNodes()) {
-                if (c.equals(child)) {
-                    return i;
-                }
-                i++;
-            }
-            return -1;
-        }
-
-        @Override
-        public void addTreeModelListener(TreeModelListener l) {
-            //Do nothing
-        }
-
-        @Override
-        public void removeTreeModelListener(TreeModelListener l) {
-            //Do nothing
-        }
+    /**
+     * @param requirement the requirement to set
+     */
+    public void setRequirement(Requirement requirement) {
+        this.requirement = requirement;
     }
 
     /**
@@ -398,7 +283,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             public void run() {
                 final RequirementSelectionDialog dialog
                         = new RequirementSelectionDialog(new javax.swing.JFrame(),
-                        true, linkedRequirements);
+                                true, linkedRequirements);
                 dialog.setLocationRelativeTo(null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
@@ -455,7 +340,11 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             //Process
             RequirementServer req;
             if (edit) {
-                req = new RequirementServer(Utilities.actionsGlobalContext().lookup(Requirement.class));
+                if (requirement == null) {
+                    req = new RequirementServer(Utilities.actionsGlobalContext().lookup(Requirement.class));
+                } else {
+                    req = new RequirementServer(requirement);
+                }
                 requirement.setUniqueId(uniqueID.getText().trim());
             } else {
                 RequirementSpecNode rsn
@@ -487,6 +376,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                 Exceptions.printStackTrace(ex);
             }
         }
+        close();
     }//GEN-LAST:event_saveActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -693,7 +583,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
         status.setSelectedIndex(0);
         if (isEdit()) {
             //Get the selected Step
-            requirement = Utilities.actionsGlobalContext().lookup(Requirement.class);
+            setRequirement(Utilities.actionsGlobalContext().lookup(Requirement.class));
             uniqueID.setText(requirement.getUniqueId());
             //Update the linked requirements
             for (Requirement req : requirement.getRequirementList()) {
