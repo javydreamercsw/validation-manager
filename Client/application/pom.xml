@@ -20,6 +20,8 @@
 
     <properties>
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
+        <netbeans.run.params.ide/>
+        <netbeans.run.params>${netbeans.run.params.ide}</netbeans.run.params>
     </properties>
 
     <dependencies>

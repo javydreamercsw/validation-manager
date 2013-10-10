@@ -2,8 +2,11 @@ package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNode;
 import java.beans.IntrospectionException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +34,14 @@ class RequirementNodeChildFactory extends AbstractChildFactory {
         for (Iterator<Object> it = projects.iterator(); it.hasNext();) {
             toPopulate.add((com.validation.manager.core.db.RequirementSpecNode) it.next());
         }
+        Collections.sort(toPopulate, new Comparator<Object>() {
+
+                    @Override
+                    public int compare(Object o1, Object o2) {
+                        //Sort them by unique id
+                        return ((Requirement)o1).getUniqueId().compareToIgnoreCase(((Requirement)o2).getUniqueId());
+                    }
+                });
         return true;
     }
 
