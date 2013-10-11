@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.components.project.editor;
+package net.sourceforge.javydreamercsw.client.ui.components.project.explorer;
 
 import java.awt.BorderLayout;
 import java.beans.PropertyVetoException;
@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.client.ui.nodes.AbstractVMBeanNode;
 import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectChildFactory;
 import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
 import net.sourceforge.javydreamercsw.client.ui.nodes.capability.RefreshableCapability;
@@ -53,7 +54,7 @@ public final class ProjectExplorerComponent extends TopComponent
     private final ExplorerManager mgr = new ExplorerManager();
     private static DatabaseConnection conn;
     private Lookup.Result<RefreshableCapability> result = null;
-    private static RefreshableCapability currentNode;
+    private static AbstractVMBeanNode currentNode;
     private static final Logger LOG
             = Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
 
@@ -170,9 +171,12 @@ public final class ProjectExplorerComponent extends TopComponent
             Iterator it = instances.iterator();
             while (it.hasNext()) {
                 Object item = it.next();
-                if (item instanceof RefreshableCapability) {
-                    RefreshableCapability p = (RefreshableCapability) item;
+                if (item instanceof AbstractVMBeanNode) {
+                    AbstractVMBeanNode p = (AbstractVMBeanNode) item;
                     currentNode = p;
+                    for (RefreshableCapability refresh : currentNode.getLookup().lookupAll(RefreshableCapability.class)) {
+                        refresh.refresh();
+                    }
                 }
             }
         }

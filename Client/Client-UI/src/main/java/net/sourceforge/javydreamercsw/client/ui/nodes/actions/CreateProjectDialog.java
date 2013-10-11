@@ -6,7 +6,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.server.core.ProjectServer;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import net.sourceforge.javydreamercsw.client.ui.components.project.editor.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 
 /**

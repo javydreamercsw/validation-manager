@@ -1,6 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.components.database;
 
-import net.sourceforge.javydreamercsw.client.ui.components.project.editor.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import com.validation.manager.core.DataBaseManager;
 import java.util.HashMap;
 import java.util.Map;

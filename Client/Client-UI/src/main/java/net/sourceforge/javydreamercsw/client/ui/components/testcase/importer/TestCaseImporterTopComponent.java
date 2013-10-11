@@ -9,11 +9,12 @@ import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
-import net.sourceforge.javydreamercsw.client.ui.components.requirement.edit.AbstractImportTopComponent;
-import com.validation.manager.core.tool.msword.importer.TableExtractor;
+import com.validation.manager.core.tool.table.extractor.TableExtractor;
+import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -230,7 +231,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
 
                     @Override
                     public String getDescription() {
-                        return "Validation manager Test Import Files";
+                        return "Validation Manager Test Import Files";
                     }
                 });
                 int returnVal = fc.showOpenDialog(new JFrame());
@@ -295,14 +296,14 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             if (!mapping.isEmpty()
                     && (!value.equals(TestCaseImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
                     && mapping.contains(value))) {
-                showImportError("Duplicated mapping: " + value);
+                showImportError(MessageFormat.format("Duplicated mapping: {0}", value));
             }
             mapping.add(i, value);
         }
         //Make sure the basics are mapped
         for (TestCaseImportMapping tim : TestCaseImportMapping.values()) {
             if (tim.isRequired() && !mapping.contains(tim.getValue())) {
-                showImportError("Missing required mapping: " + tim.getValue());
+                showImportError(MessageFormat.format("Missing required mapping: {0}", tim.getValue()));
                 setImportSuccess(false);
                 break;
             }
@@ -453,9 +454,8 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         for (TestPlanHasTest tpht : test.getTestPlanHasTestList()) {
             tpht.getTestPlan().getTestProject();
             for (Object o : DataBaseManager.nativeQuery(
-                    "select pht.project_id from project_has_test_project pht "
-                    + "where pht.test_project_id="
-                    + tpht.getTestPlan().getTestProject().getId())) {
+                    MessageFormat.format("select pht.project_id from project_has_test_project pht where pht.test_project_id={0}",
+                            tpht.getTestPlan().getTestProject().getId()))) {
                 LOG.log(Level.INFO, "Project ID: {0}", o);
                 projects.add(new ProjectServer(Integer.valueOf(o.toString())));
             }
@@ -504,8 +504,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                             }
                         }
                     } else {
-                        throw new RuntimeException("Unhandled mapping: "
-                                + mapping.get(col));
+                        throw new RuntimeException(MessageFormat.format("Unhandled mapping: {0}", mapping.get(col)));
                     }
                 }
             }

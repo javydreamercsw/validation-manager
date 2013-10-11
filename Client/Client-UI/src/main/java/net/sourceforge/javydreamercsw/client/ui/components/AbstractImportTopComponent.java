@@ -1,16 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package net.sourceforge.javydreamercsw.client.ui.components.requirement.edit;
+package net.sourceforge.javydreamercsw.client.ui.components;
 
 import com.validation.manager.core.tool.message.MessageHandler;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -25,7 +22,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
-import net.sourceforge.javydreamercsw.client.ui.components.ImporterInterface;
 import org.openide.util.Lookup;
 import org.openide.windows.TopComponent;
 
@@ -131,16 +127,19 @@ public abstract class AbstractImportTopComponent extends TopComponent
                 = new ArrayList<TableCellEditor>();
         for (int i = 0; i < columns; i++) {
             //Default title
-            title[i] = "Column " + (i + 1);
+            title[i] = MessageFormat.format("Column {0}", i + 1);
             //Fill maping field
-            editors.add(getEditor());
+            DefaultCellEditor editor = getEditor();
+            if (editor != null) {
+                editors.add(editor);
+            }
         }
         tableModel.setColumnIdentifiers(title);
         setImportTable(new JTable(tableModel) {
             //  Determine editor to be used by row
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
-                if (row == 0) {
+                if (!editors.isEmpty() && row == 0) {
                     return (TableCellEditor) editors.get(column);
                 } else {
                     return super.getCellEditor(row, column);
@@ -156,7 +155,8 @@ public abstract class AbstractImportTopComponent extends TopComponent
             try {
                 //Filter the row with the title
                 RowFilter<DefaultTableModel, Object> regexFilter
-                        = RowFilter.regexFilter("^" + tableModel.getValueAt(1, 0));
+                        = RowFilter.regexFilter(MessageFormat.format("^{0}",
+                                        tableModel.getValueAt(1, 0)));
                 rf = RowFilter.notFilter(regexFilter);
                 //Also change the table header
                 for (int i = 0; i < columns; i++) {

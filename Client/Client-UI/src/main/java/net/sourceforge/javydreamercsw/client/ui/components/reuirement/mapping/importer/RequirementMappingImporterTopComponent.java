@@ -1,18 +1,14 @@
-package net.sourceforge.javydreamercsw.client.ui.components.test.importer;
+package net.sourceforge.javydreamercsw.client.ui.components.reuirement.mapping.importer;
 
-import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
-import com.validation.manager.core.db.Test;
-import com.validation.manager.core.db.TestCase;
-import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.tool.table.extractor.TableExtractor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
@@ -28,54 +24,50 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.table.DefaultTableModel;
-import net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.TestCaseImportMapping;
-import net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.TestCaseImporterTopComponent;
-import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestDialog;
-import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
+import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.Utilities;
 
 /**
  * Top component which displays something.
  */
 @ConvertAsProperties(
-        dtd = "-//net.sourceforge.javydreamercsw.client.ui.components//TestImport//EN",
+        dtd = "-//net.sourceforge.javydreamercsw.client.ui.components.reuirement.mapping.importer//RequirementMappingImporter//EN",
         autostore = false
 )
 @TopComponent.Description(
-        preferredID = "TestImportTopComponent",
+        preferredID = "RequirementMappingImporterTopComponent",
         //iconBase="SET/PATH/TO/ICON/HERE",
         persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
 @ActionID(category = "Window",
-        id = "net.sourceforge.javydreamercsw.client.ui.components.TestImportTopComponent")
+        id = "net.sourceforge.javydreamercsw.client.ui.components.reuirement.mapping.importer.RequirementMappingImporterTopComponent")
+@ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(
-        displayName = "#CTL_TestImportAction",
-        preferredID = "TestImportTopComponent"
+        displayName = "#CTL_RequirementMappingImporterAction",
+        preferredID = "RequirementMappingImporterTopComponent"
 )
 @Messages({
-    "CTL_TestImportAction=Test Import",
-    "CTL_TestImportTopComponent=Test Import Window",
-    "HINT_TestImportTopComponent=This is a Test Import window"
+    "CTL_RequirementMappingImporterAction=RequirementMappingImporter",
+    "CTL_RequirementMappingImporterTopComponent=RequirementMappingImporter Window",
+    "HINT_RequirementMappingImporterTopComponent=This is a RequirementMappingImporter window"
 })
-public class TestImportTopComponent extends TestCaseImporterTopComponent {
+public final class RequirementMappingImporterTopComponent extends AbstractImportTopComponent {
 
     private static final Logger LOG
-            = Logger.getLogger(TestImportTopComponent.class.getSimpleName());
-    private Test test;
-    private TestCase tc;
-    private TestPlan tp;
+            = Logger.getLogger(RequirementMappingImporterTopComponent.class.getSimpleName());
+    private Project project = null;
 
-    public TestImportTopComponent() {
+    public RequirementMappingImporterTopComponent() {
         super();
-        init();
-        setName(Bundle.CTL_TestImportTopComponent());
-        setToolTipText(Bundle.HINT_TestImportTopComponent());
+        setName(Bundle.CTL_RequirementMappingImporterTopComponent());
+        setToolTipText(Bundle.HINT_RequirementMappingImporterTopComponent());
     }
 
     /**
@@ -87,21 +79,27 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        spinner = new javax.swing.JSpinner();
+        delimiter = new JComboBox(model);
+        importButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         importedTable = new javax.swing.JTable();
-        importButton = new javax.swing.JButton();
-        header = new javax.swing.JCheckBox();
+        spinner = new javax.swing.JSpinner();
         saveButton = new javax.swing.JButton();
-        delimiter = new JComboBox(model);
+        header = new javax.swing.JCheckBox();
+        addDelimiterButton = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         delimiterField = new javax.swing.JTextField();
-        addDelimiterButton = new javax.swing.JButton();
 
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.jLabel1.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(RequirementMappingImporterTopComponent.class, "RequirementMappingImporterTopComponent.jLabel1.text")); // NOI18N
 
-        spinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, 10, 1));
-        spinner.setEnabled(false);
+        delimiter.setModel(new javax.swing.DefaultComboBoxModel(new String[] { ",", ";", " " }));
+
+        org.openide.awt.Mnemonics.setLocalizedText(importButton, org.openide.util.NbBundle.getMessage(RequirementMappingImporterTopComponent.class, "RequirementMappingImporterTopComponent.importButton.text")); // NOI18N
+        importButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importButtonActionPerformed(evt);
+            }
+        });
 
         importedTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -113,14 +111,17 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
         ));
         jScrollPane1.setViewportView(importedTable);
 
-        org.openide.awt.Mnemonics.setLocalizedText(importButton, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.importButton.text")); // NOI18N
-        importButton.addActionListener(new java.awt.event.ActionListener() {
+        spinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, 10, 1));
+        spinner.setEnabled(false);
+
+        org.openide.awt.Mnemonics.setLocalizedText(saveButton, org.openide.util.NbBundle.getMessage(RequirementMappingImporterTopComponent.class, "RequirementMappingImporterTopComponent.saveButton.text")); // NOI18N
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                importButtonActionPerformed(evt);
+                saveButtonActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(header, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.header.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(header, org.openide.util.NbBundle.getMessage(RequirementMappingImporterTopComponent.class, "RequirementMappingImporterTopComponent.header.text")); // NOI18N
         header.setEnabled(false);
         header.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -128,25 +129,16 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(saveButton, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.saveButton.text_1")); // NOI18N
-        saveButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                saveButtonActionPerformed(evt);
-            }
-        });
-
-        delimiter.setModel(new javax.swing.DefaultComboBoxModel(new String[] { ",", ";", " " }));
-
-        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.jLabel2.text")); // NOI18N
-
-        delimiterField.setText(org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.delimiterField.text")); // NOI18N
-
-        org.openide.awt.Mnemonics.setLocalizedText(addDelimiterButton, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.addDelimiterButton.text_1")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(addDelimiterButton, org.openide.util.NbBundle.getMessage(RequirementMappingImporterTopComponent.class, "RequirementMappingImporterTopComponent.addDelimiterButton.text")); // NOI18N
         addDelimiterButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 addDelimiterButtonActionPerformed(evt);
             }
         });
+
+        org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(RequirementMappingImporterTopComponent.class, "RequirementMappingImporterTopComponent.jLabel2.text")); // NOI18N
+
+        delimiterField.setText(org.openide.util.NbBundle.getMessage(RequirementMappingImporterTopComponent.class, "RequirementMappingImporterTopComponent.delimiterField.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -155,7 +147,7 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(2, 2, 2)
@@ -196,7 +188,7 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
                     .addComponent(jLabel1)
                     .addComponent(header))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 169, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(saveButton))
         );
@@ -216,14 +208,12 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
                                 || (f.isFile()
                                 && (f.getName().endsWith(".xls")
                                 || f.getName().endsWith(".xlsx")
-                                || f.getName().endsWith(".xlsm")
-                                || f.getName().endsWith(".doc")
-                                || f.getName().endsWith(".docx")));
+                                || f.getName().endsWith(".xlsm")));
                     }
 
                     @Override
                     public String getDescription() {
-                        return "Validation manager Test Import Files";
+                        return "Validation Manager Requirement Mapping Import Files";
                     }
                 });
                 int returnVal = fc.showOpenDialog(new JFrame());
@@ -245,16 +235,6 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
                         } else {
                             LOG.log(Level.INFO, "Found no tables!");
                         }
-                        for (DefaultTableModel dtm : tables) {
-                            int columns = dtm.getColumnCount();
-                            Object[] mappingRow = new Object[columns];
-                            for (int i = 0; i < columns; i++) {
-                                //Mapping row
-                                mappingRow[i] = "Select Mapping";
-                            }
-                            //Insert mapping row
-                            dtm.insertRow(0, mappingRow);
-                        }
                     } catch (FileNotFoundException ex) {
                         Exceptions.printStackTrace(ex);
                     } catch (ClassNotFoundException ex) {
@@ -268,111 +248,43 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
         });
     }//GEN-LAST:event_importButtonActionPerformed
 
-    private void headerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_headerActionPerformed
-        handleHeaderActionPerformed();
-    }//GEN-LAST:event_headerActionPerformed
-
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         LOG.info("Saving imported table...");
         setImportSuccess(true);
-        TestProject testProject = tp.getTestProject();
-        List<Project> projects = new ArrayList<Project>();
-        for (Object o : DataBaseManager.nativeQuery(
-                "select pht.project_id from project_has_test_project pht "
-                + "where pht.test_project_id=" + testProject.getId())) {
-            LOG.log(Level.INFO, "Project ID: {0}", o);
-            projects.add(new ProjectServer(Integer.valueOf(o.toString())));
-        }
-        int rows = importedTable.getModel().getRowCount();
-        List<String> mapping = new ArrayList<String>(rows);
-        for (int i = 0; i < importedTable.getModel().getColumnCount(); i++) {
-            DefaultCellEditor editor
-                    = (DefaultCellEditor) importedTable.getCellEditor(0, i);
-            JComboBox combo = (JComboBox) editor.getComponent();
-            LOG.log(Level.INFO, "Column {0} is mapped as: {1}",
-                    new Object[]{i, combo.getSelectedItem()});
-            String value = (String) combo.getSelectedItem();
-            //Make sure there's no duplicate mapping
-            if (!mapping.isEmpty()
-                    && (!value.equals(TestCaseImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
-                    && mapping.contains(value))) {
-                showImportError("Duplicated mapping: " + value);
-            }
-            mapping.add(i, value);
-        }
-        //Make sure the basics are mapped
-        for (TestCaseImportMapping tim : TestCaseImportMapping.values()) {
-            if (tim.isRequired() && !mapping.contains(tim.getValue())) {
-                showImportError("Missing required mapping: " + tim.getValue());
-                setImportSuccess(false);
-                break;
-            }
-        }
-        /* Create and display the dialog */
+        project = Utilities.actionsGlobalContext().lookup(Project.class);
+        //Process the mapping
         if (isImportSuccess()) {
-            setDialog(new CreateTestDialog(new javax.swing.JFrame(), true));
-            getDialog().setLocationRelativeTo(null);
-            getDialog().addWindowListener(new java.awt.event.WindowAdapter() {
-                @Override
-                public void windowClosing(java.awt.event.WindowEvent e) {
-                    getDialog().dispose();
-                    setDialog(null);
-                }
-            });
-            ((CreateTestDialog) getDialog()).setTestPlan(tp);
-            getDialog().setVisible(true);
-            test = ((CreateTestDialog) getDialog()).getTest();
-            if (test == null) {
-                showImportError("Test Creation unsuccessful!");
-                setImportSuccess(false);
-            }
-            while (getDialog() == null || getDialog().isVisible()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            }
-        }
-        //Create the test case to import into
-        /* Create and display the dialog */
-        if (isImportSuccess()) {
-            setDialog(new EditTestCaseDialog(new javax.swing.JFrame(),
-                    true, false));
-            getDialog().setLocationRelativeTo(null);
-            ((EditTestCaseDialog) getDialog()).setTest(test);
-            getDialog().addWindowListener(new java.awt.event.WindowAdapter() {
-                @Override
-                public void windowClosing(java.awt.event.WindowEvent e) {
-                    tc = ((EditTestCaseDialog) getDialog()).getTestCase();
-                    if (tc == null) {
-                        showImportError("Test Case Creation unsuccessful!");
+            for (int row = 0; row < importedTable.getModel().getRowCount(); row++) {
+                String val1 = (String) importedTable.getModel().getValueAt(row, 0);
+                Requirement req1 = findRequirement(val1);
+                String val2 = (String) importedTable.getModel().getValueAt(row, 1);
+                Requirement req2 = findRequirement(val2);
+                if (req1 != null && req2 != null) {
+                    //Both are valid
+                    req1.getRequirementList().add(req2);
+                    try {
+                        new RequirementServer(req1).write2DB();
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
                         setImportSuccess(false);
                     }
-                    getDialog().dispose();
-                }
-            });
-            getDialog().setVisible(true);
-            while (getDialog().isVisible()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
+                } else if (req1 == null) {
+                    LOG.warning(MessageFormat.format(
+                            "Unable to find requirement {0} in this project.", val1));
+                } else {
+                    LOG.warning(MessageFormat.format(
+                            "Unable to find requirement {0} in this project.", val2));
                 }
             }
-            tc = ((EditTestCaseDialog) getDialog()).getTestCase();
-            if (tc == null) {
-                showImportError("Test Case Creation unsuccessful!");
-                setImportSuccess(false);
-            }
-        }
-        if (isImportSuccess()) {
-            process(mapping);
         }
         if (isImportSuccess()) {
             this.close();
         }
     }//GEN-LAST:event_saveButtonActionPerformed
+
+    private void headerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_headerActionPerformed
+        handleHeaderActionPerformed();
+    }//GEN-LAST:event_headerActionPerformed
 
     private void addDelimiterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDelimiterButtonActionPerformed
         handleAddDelimiterButtonActionPerformed();
@@ -391,7 +303,6 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
     private javax.swing.JButton saveButton;
     private javax.swing.JSpinner spinner;
     // End of variables declaration//GEN-END:variables
-
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
@@ -415,21 +326,9 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
         // TODO read your settings according to their version
     }
 
-    /**
-     * @param tp the TestPlan to set
-     */
-    public void setTestPlan(TestPlan tp) {
-        this.tp = tp;
-    }
-
-    @Override
-    public void init() {
-        initComponents();
-    }
-
     @Override
     public DefaultCellEditor getEditor() {
-        return new TestImportEditor();
+        return null;
     }
 
     @Override
@@ -480,5 +379,21 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
     @Override
     public JButton getSaveButton() {
         return saveButton;
+    }
+
+    private Requirement findRequirement(String id) {
+        Requirement req = null;
+        for (Requirement r : ProjectServer.getRequirements(project)) {
+            if (r.getUniqueId().equals(id)) {
+                req = r;
+                break;
+            }
+        }
+        return req;
+    }
+
+    @Override
+    public void init() {
+        initComponents();
     }
 }
