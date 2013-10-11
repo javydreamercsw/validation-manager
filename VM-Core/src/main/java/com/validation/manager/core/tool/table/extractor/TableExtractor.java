@@ -1,4 +1,4 @@
-package com.validation.manager.core.tool.msword.importer;
+package com.validation.manager.core.tool.table.extractor;
 
 import java.io.BufferedInputStream;
 import java.io.File;

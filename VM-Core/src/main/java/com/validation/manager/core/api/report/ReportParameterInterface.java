@@ -1,5 +1,6 @@
 package com.validation.manager.core.api.report;
 
+import java.awt.Component;
 import java.util.Map;
 
 /**
@@ -35,4 +36,11 @@ public interface ReportParameterInterface {
      * @param parameters the parameters to set
      */
     public void setParameters(Map parameters);
+
+    /**
+     * Set it relative to a component.
+     *
+     * @param c
+     */
+    public void setLocationRelativeTo(Component c);
 }
