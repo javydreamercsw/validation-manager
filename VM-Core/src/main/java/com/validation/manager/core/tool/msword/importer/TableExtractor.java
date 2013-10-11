@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,7 +66,7 @@ public class TableExtractor {
             Object[][] data = new Object[rows][columns];
             String[] title = new String[columns];
             for (int i = 0; i < columns; i++) {
-                title[i] = "Column " + (i + 1);
+                title[i] = MessageFormat.format("Column {0}", i + 1);
             }
             //Row 0 for mapping field
             int rowNum = 0;
@@ -106,9 +107,8 @@ public class TableExtractor {
                 || source.getName().endsWith(".docx")) {
             //Word documents
             tables = loadSerializedTables();
-        } else if (source.getName().endsWith(".xls")
-                || source.getName().endsWith(".xlsx")
-                || source.getName().endsWith(".xlsm")) {
+        } else if (source.getName().endsWith(".xls")) {
+            //Pre Office 2007+ XML
             //Excel documents
             FileInputStream file = new FileInputStream(source);
             //Get the workbook instance for XLS file
@@ -150,6 +150,7 @@ public class TableExtractor {
             tables.add(model);
         } else if (source.getName().endsWith(".xlsx")
                 || source.getName().endsWith(".xlsm")) {
+            //Office 2007+ XML
             FileInputStream file = new FileInputStream(source);
             //Get the workbook instance for XLS file
             XSSFWorkbook workbook = new XSSFWorkbook(file);
