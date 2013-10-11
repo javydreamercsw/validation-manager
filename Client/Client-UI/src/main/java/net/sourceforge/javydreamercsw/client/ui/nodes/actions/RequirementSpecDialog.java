@@ -7,7 +7,7 @@ import com.validation.manager.core.server.core.RequirementSpecServer;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import net.sourceforge.javydreamercsw.client.ui.components.project.editor.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 
 /**

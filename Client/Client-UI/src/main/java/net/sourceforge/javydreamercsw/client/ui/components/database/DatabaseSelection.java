@@ -1,6 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.components.database;
 
-import net.sourceforge.javydreamercsw.client.ui.components.project.editor.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import java.util.Arrays;
 import java.util.List;
 import org.netbeans.api.db.explorer.ConnectionManager;

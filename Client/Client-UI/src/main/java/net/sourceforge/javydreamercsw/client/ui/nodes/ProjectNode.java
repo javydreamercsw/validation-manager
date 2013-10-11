@@ -10,6 +10,7 @@ import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateProjectAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateRequirementSpecAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestProjectAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportRequirementMapping;
 import org.openide.util.lookup.InstanceContent;
 
 /**
@@ -20,7 +21,8 @@ public class ProjectNode extends AbstractVMBeanNode {
 
     private final SubProjectChildFactory factory;
 
-    public ProjectNode(Project project, SubProjectChildFactory factory) throws IntrospectionException {
+    public ProjectNode(Project project, SubProjectChildFactory factory) 
+            throws IntrospectionException {
         super(project, factory, new InstanceContent());
         this.factory = factory;
         setIconBaseWithExtension("com/validation/manager/resources/icons/Papermart/Folder.png");
@@ -38,6 +40,7 @@ public class ProjectNode extends AbstractVMBeanNode {
         actions.add(new CreateProjectAction());
         actions.add(new CreateRequirementSpecAction());
         actions.add(new CreateTestProjectAction());
+        actions.add(new ImportRequirementMapping());
         return actions.toArray(new Action[actions.size()]);
     }
 

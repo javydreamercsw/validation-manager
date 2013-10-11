@@ -3,7 +3,7 @@ package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.server.core.RequirementServer;
 import javax.swing.ImageIcon;
-import net.sourceforge.javydreamercsw.client.ui.components.project.editor.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
 
