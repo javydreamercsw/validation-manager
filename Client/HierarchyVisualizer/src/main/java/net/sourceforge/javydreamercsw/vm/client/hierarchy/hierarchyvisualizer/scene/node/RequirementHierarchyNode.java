@@ -1,15 +1,12 @@
 package net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.scene.node;
 
-import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.Step;
 import com.validation.manager.core.server.core.RequirementServer;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,8 +40,8 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
     public Image getCurrentImage() {
         BufferedImage image = null;
         try {
-            int coverage = 
-                    new RequirementServer(((Requirement) object)).getTestCoverage();
+            int coverage
+                    = new RequirementServer(((Requirement) object)).getTestCoverage();
             if (coverage == 100) {
                 image = ImageIO.read(getClass().getResource(
                         "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_green.png"));
@@ -65,18 +62,6 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
         return image;
     }
 
-    private List<Requirement> getChildRequirements() {
-        Requirement req = (Requirement) object;
-        HashMap<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put("id", req.getRequirementPK().getId());
-        parameters.put("version", req.getRequirementPK().getVersion());
-        List<Requirement> children = Arrays.asList(DataBaseManager.createdQuery(
-                "select rhr from RequirementHasRequirement rhr "
-                + "where rhr.parent_requirement_id=:id and "
-                + "rhr.parent_requirement_version=:version ", parameters).toArray(new Requirement[1]));
-        return children;
-    }
-
     @Override
     public String getCurrentLabel() {
         return ((Requirement) object).getUniqueId();
@@ -89,10 +74,11 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
         //Clear and recreate
         Requirement req = (Requirement) object;
         LOG.log(Level.INFO, "Updating children for {0}", req.getUniqueId());
-        //getRequirementList() shows all parents to this requirement
-        for (Iterator<Requirement> it = req.getRequirementList().iterator(); it.hasNext();) {
-            Requirement r = it.next();
+        for (Requirement r : req.getRequirementList()) {
             children.add(new RequirementHierarchyNode(r, getScene()));
+        }
+        for (Step s : req.getStepList()) {
+            children.add(new StepHierarchyNode(s, getScene()));
         }
         return children;
     }
