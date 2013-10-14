@@ -5,12 +5,12 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.scene.node.RequirementHierarchyNode;
+import net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.scene.node.StepHierarchyNode;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.action.SelectProvider;
 import org.netbeans.api.visual.anchor.AnchorFactory;
@@ -29,8 +29,8 @@ public class HierarchyScene extends GraphScene<Object, Object> {
 
     private final LayerWidget mainLayer, connectionLayer, interactionLayer;
     private final Map<Object, Widget> widgets = new HashMap<Object, Widget>();
-    private static final Logger LOG =
-            Logger.getLogger(HierarchyScene.class.getSimpleName());
+    private static final Logger LOG
+            = Logger.getLogger(HierarchyScene.class.getSimpleName());
     private final int horizontalGap = 100;
     private final int verticalGap = 25;
     private final ArrayList<LayerWidget> layersToClear = new ArrayList<LayerWidget>();
@@ -59,8 +59,9 @@ public class HierarchyScene extends GraphScene<Object, Object> {
             validate();
             for (AbstractHierarchyNode child : widget.getNodeChildren()) {
                 if (!hasWidget(child.getID())) {
-                    addChildWidget(widget, child, true);
+                    addChildWidget(widget, child, child instanceof RequirementHierarchyNode);
                 }
+                validate();
             }
             addWidgetActions(mainLayer, connectionLayer);
         } else {
@@ -96,8 +97,7 @@ public class HierarchyScene extends GraphScene<Object, Object> {
 
     public void addWidgetActions(LayerWidget mainLayer, LayerWidget connectionLayer) {
         List<Widget> children = mainLayer.getChildren();
-        for (Iterator<Widget> it = children.iterator(); it.hasNext();) {
-            Widget widget = it.next();
+        for (Widget widget : children) {
             // the order is important to not consume events
             widget.getActions().addAction(ActionFactory.createSelectAction(
                     new SelProvider()));
@@ -113,13 +113,13 @@ public class HierarchyScene extends GraphScene<Object, Object> {
      * @param child
      */
     private void placeChild(Widget parent, Widget child, boolean invert) {
-        Point point = new Point(getChildX(parent, invert),
-                getChildY(parent, child, invert));
-        LOG.log(Level.FINE, "Children location: {0}", point);
+        Point point = new Point(getChildX(parent, child),
+                getChildY(parent, child));
+        LOG.log(Level.INFO, "Children location: {0}", point);
         child.setPreferredLocation(point);
     }
 
-    private int getChildY(Widget parent, Widget child, boolean invert) {
+    private int getChildY(Widget parent, Widget child) {
         //Get parent location
         Rectangle bounds = parent.getBounds();
         return bounds == null ? 0 : (verticalGap
@@ -128,12 +128,18 @@ public class HierarchyScene extends GraphScene<Object, Object> {
                 * (mainLayer.getChildren().size() - 1);
     }
 
-    private int getChildX(Widget parent, boolean invert) {
+    private int getChildX(Widget parent, Widget child) {
         //Get parent location
+        int x;
         Rectangle bounds = parent.getBounds();
-        parent.getChildren().size();
-        return invert ? 0 : bounds == null ? 0 : 
-                bounds.x + bounds.width + horizontalGap;
+        if (bounds != null && child instanceof RequirementHierarchyNode) {
+            x = 0;
+        } else if (bounds != null && child instanceof StepHierarchyNode) {
+            x = (bounds.x + bounds.width + horizontalGap) * 3;
+        } else {
+            x = 0;
+        }
+        return x;
     }
 
     public void clear() {
