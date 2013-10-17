@@ -56,6 +56,7 @@ public abstract class AbstractImportTopComponent extends TopComponent
                         getSpinner().getValue().toString())));
             }
         });
+        init();
     }
 
     public abstract JTextField getDelimetterField();

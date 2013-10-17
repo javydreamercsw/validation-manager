@@ -159,11 +159,15 @@
             <id>jasper-reports</id>
             <url>http://jasperreports.sourceforge.net/maven2</url>
         </repository>
+        <!--
+        Repository hosting NetBeans modules, especially APIs.
+        Versions are based on IDE releases, e.g.: RELEASE691
+        To create your own repository, use: nbm:populate-repository
+        -->
         <repository>
-            <id>maven2-repository.netbeans.maven2</id>
-            <name>Netbeans Maven Repository</name>
+            <id>netbeans</id>
+            <name>NetBeans</name>
             <url>http://bits.netbeans.org/maven2/</url>
-            <layout>default</layout>
         </repository>
     </repositories>
 
