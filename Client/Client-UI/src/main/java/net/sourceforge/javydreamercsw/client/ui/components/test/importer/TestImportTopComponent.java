@@ -1,16 +1,14 @@
 package net.sourceforge.javydreamercsw.client.ui.components.test.importer;
 
-import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.tool.table.extractor.TableExtractor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -73,7 +71,6 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
 
     public TestImportTopComponent() {
         super();
-        init();
         setName(Bundle.CTL_TestImportTopComponent());
         setToolTipText(Bundle.HINT_TestImportTopComponent());
     }
@@ -276,13 +273,6 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
         LOG.info("Saving imported table...");
         setImportSuccess(true);
         TestProject testProject = tp.getTestProject();
-        List<Project> projects = new ArrayList<Project>();
-        for (Object o : DataBaseManager.nativeQuery(
-                "select pht.project_id from project_has_test_project pht "
-                + "where pht.test_project_id=" + testProject.getId())) {
-            LOG.log(Level.INFO, "Project ID: {0}", o);
-            projects.add(new ProjectServer(Integer.valueOf(o.toString())));
-        }
         int rows = importedTable.getModel().getRowCount();
         List<String> mapping = new ArrayList<String>(rows);
         for (int i = 0; i < importedTable.getModel().getColumnCount(); i++) {
@@ -296,14 +286,17 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
             if (!mapping.isEmpty()
                     && (!value.equals(TestCaseImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
                     && mapping.contains(value))) {
-                showImportError("Duplicated mapping: " + value);
+                showImportError(
+                        MessageFormat.format("Duplicated mapping: {0}", value));
             }
             mapping.add(i, value);
         }
         //Make sure the basics are mapped
         for (TestCaseImportMapping tim : TestCaseImportMapping.values()) {
             if (tim.isRequired() && !mapping.contains(tim.getValue())) {
-                showImportError("Missing required mapping: " + tim.getValue());
+                showImportError(
+                        MessageFormat.format("Missing required mapping: {0}",
+                                tim.getValue()));
                 setImportSuccess(false);
                 break;
             }

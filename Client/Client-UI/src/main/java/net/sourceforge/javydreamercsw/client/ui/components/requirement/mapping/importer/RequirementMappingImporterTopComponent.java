@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.components.reuirement.mapping.importer;
+package net.sourceforge.javydreamercsw.client.ui.components.requirement.mapping.importer;
 
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -27,7 +27,6 @@ import javax.swing.filechooser.FileFilter;
 import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
@@ -48,11 +47,6 @@ import org.openide.util.Utilities;
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
 @ActionID(category = "Window",
         id = "net.sourceforge.javydreamercsw.client.ui.components.reuirement.mapping.importer.RequirementMappingImporterTopComponent")
-@ActionReference(path = "Menu/Window" /*, position = 333 */)
-@TopComponent.OpenActionRegistration(
-        displayName = "#CTL_RequirementMappingImporterAction",
-        preferredID = "RequirementMappingImporterTopComponent"
-)
 @Messages({
     "CTL_RequirementMappingImporterAction=RequirementMappingImporter",
     "CTL_RequirementMappingImporterTopComponent=RequirementMappingImporter Window",
@@ -147,7 +141,7 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(2, 2, 2)
