@@ -159,6 +159,12 @@
             <id>jasper-reports</id>
             <url>http://jasperreports.sourceforge.net/maven2</url>
         </repository>
+        <repository>
+            <id>maven2-repository.netbeans.maven2</id>
+            <name>Netbeans Maven Repository</name>
+            <url>http://bits.netbeans.org/maven2/</url>
+            <layout>default</layout>
+        </repository>
     </repositories>
 
     <modules>
