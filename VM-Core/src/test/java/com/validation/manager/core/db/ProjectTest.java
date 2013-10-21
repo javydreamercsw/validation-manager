@@ -7,6 +7,7 @@ import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
+import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static junit.framework.TestCase.assertEquals;
@@ -36,9 +37,8 @@ public class ProjectTest extends AbstractVMTestCase {
     @Test
     public void testCreateAndDestroy() {
         try {
-            VmUser user = TestHelper.createUser("test1",
-                    "password", "first", "test@test.com", "last");
             p = TestHelper.createProject("New Project", "Notes");
+            assertEquals(0, ProjectServer.getRequirements(p).size());
             ProjectServer project = new ProjectServer(p);
             project.setNotes("Notes 2");
             project.write2DB();
@@ -46,7 +46,7 @@ public class ProjectTest extends AbstractVMTestCase {
                     DataBaseManager.getEntityManagerFactory())
                     .findProject(project.getId()).getNotes().equals(project.getNotes()));
             //Create requirements
-            System.out.println("Create Requirement Spec");
+            LOG.info("Create Requirement Spec");
             RequirementSpec rss = null;
             try {
                 rss = TestHelper.createRequirementSpec("Test", "Test",
@@ -55,7 +55,7 @@ public class ProjectTest extends AbstractVMTestCase {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
-            System.out.println("Create Requirement Spec Node");
+            LOG.info("Create Requirement Spec Node");
             RequirementSpecNode rsns = null;
             try {
                 rsns = TestHelper.createRequirementSpecNode(
@@ -69,13 +69,13 @@ public class ProjectTest extends AbstractVMTestCase {
             //Create Test
             com.validation.manager.core.db.Test test
                     = TestHelper.createTest("Test #1", "Testing",
-                    "Test #1 scope");
+                            "Test #1 scope");
             //Create Test Case
             TestCase tc = TestHelper.createTestCase("Dummy", new Short("1"),
                     "Expected Results", test, /*user,*/ "Summary");
             //Add steps
             for (int i = 1; i < 6; i++) {
-                System.out.println("Adding step: " + i);
+                LOG.info(MessageFormat.format("Adding step: {0}", i));
                 tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
                 Step step = tc.getStepList().get(i - 1);
                 TestHelper.addRequirementToStep(step, r);
@@ -90,6 +90,7 @@ public class ProjectTest extends AbstractVMTestCase {
             TestHelper.addTestCaseToTest(test, tc);
             //Add test to plan
             TestHelper.addTestToPlan(plan, test);
+            assertEquals(1, ProjectServer.getRequirements(p).size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
