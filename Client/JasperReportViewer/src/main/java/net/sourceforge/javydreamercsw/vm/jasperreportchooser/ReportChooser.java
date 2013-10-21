@@ -75,6 +75,7 @@ public class ReportChooser extends javax.swing.JDialog
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
+        jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(jList1);
 
         org.openide.awt.Mnemonics.setLocalizedText(selectButton, org.openide.util.NbBundle.getMessage(ReportChooser.class, "ReportChooser.selectButton.text")); // NOI18N
