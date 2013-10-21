@@ -37,6 +37,7 @@ public class TableExtractorTest {
         for (DefaultTableModel model : tables) {
             //Has header
             assertEquals(4, model.getRowCount());
+            assertEquals(5, model.getColumnCount());
         }
         file = new File(System.getProperty("user.dir")
                 + System.getProperty("file.separator") + "src"
@@ -51,6 +52,7 @@ public class TableExtractorTest {
         assertEquals(1, tables.size());
         for (DefaultTableModel model : tables) {
             assertEquals(3, model.getRowCount());
+            assertEquals(3, model.getColumnCount());
         }
         file = new File(System.getProperty("user.dir")
                 + System.getProperty("file.separator") + "src"
@@ -65,6 +67,7 @@ public class TableExtractorTest {
         assertEquals(1, tables.size());
         for (DefaultTableModel model : tables) {
             assertEquals(3, model.getRowCount());
+            assertEquals(3, model.getColumnCount());
         }
     }
 }

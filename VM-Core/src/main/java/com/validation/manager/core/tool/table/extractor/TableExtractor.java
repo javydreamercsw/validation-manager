@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -38,6 +39,8 @@ import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 public class TableExtractor {
 
     private final File source;
+    private final static Logger LOG
+            = Logger.getLogger(TableExtractor.class.getSimpleName());
 
     public TableExtractor(File source) {
         this.source = source;
@@ -118,12 +121,12 @@ public class TableExtractor {
             //Get iterator to all the rows in current sheet
             Iterator<Row> rowIterator = sheet.iterator();
             int rowNum = 0;
-            DefaultTableModel model = new DefaultTableModel();
             Map<Integer, Vector> data = new HashMap<Integer, Vector>();
+            Vector cells = new Vector();
             while (rowIterator.hasNext()) {
+                cells.clear();
                 Row row = rowIterator.next();
                 Iterator<Cell> cellIterator = row.cellIterator();
-                Vector cells = new Vector();
                 while (cellIterator.hasNext()) {
                     Cell cell = cellIterator.next();
                     String value = "";
@@ -144,10 +147,22 @@ public class TableExtractor {
                 rowNum++;
             }
             //Process
-            for (Entry<Integer, Vector> entry : data.entrySet()) {
-                model.addRow(entry.getValue());
+            int columns = cells.size();
+            Object[][] data2 = new Object[rowNum][columns];
+            String[] title = new String[columns];
+            for (int i = 0; i < columns; i++) {
+                title[i] = MessageFormat.format("Column {0}", i + 1);
             }
-            tables.add(model);
+            int row = 0, col = 0;
+            for (Entry<Integer, Vector> entry : data.entrySet()) {
+                for (Object obj : entry.getValue()) {
+                    data2[row][col] = obj;
+                    col++;
+                }
+                row++;
+                col = 0;
+            }
+            tables.add(new DefaultTableModel(data2, title));
         } else if (source.getName().endsWith(".xlsx")
                 || source.getName().endsWith(".xlsm")) {
             //Office 2007+ XML
@@ -159,12 +174,12 @@ public class TableExtractor {
             //Get iterator to all the rows in current sheet
             Iterator<Row> rowIterator = sheet.iterator();
             int rowNum = 0;
-            DefaultTableModel model = new DefaultTableModel();
             Map<Integer, Vector> data = new HashMap<Integer, Vector>();
+            Vector cells = new Vector();
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
+                cells.clear();
                 Iterator<Cell> cellIterator = row.cellIterator();
-                Vector cells = new Vector();
                 while (cellIterator.hasNext()) {
                     Cell cell = cellIterator.next();
                     String value = "";
@@ -185,10 +200,22 @@ public class TableExtractor {
                 rowNum++;
             }
             //Process
-            for (Entry<Integer, Vector> entry : data.entrySet()) {
-                model.addRow(entry.getValue());
+            int columns = cells.size();
+            Object[][] data2 = new Object[rowNum][columns];
+            String[] title = new String[columns];
+            for (int i = 0; i < columns; i++) {
+                title[i] = MessageFormat.format("Column {0}", i + 1);
             }
-            tables.add(model);
+            int row = 0, col = 0;
+            for (Entry<Integer, Vector> entry : data.entrySet()) {
+                for (Object obj : entry.getValue()) {
+                    data2[row][col] = obj;
+                    col++;
+                }
+                row++;
+                col = 0;
+            }
+            tables.add(new DefaultTableModel(data2, title));
         } else {
             throw new RuntimeException("Invalid import file: " + source);
         }
