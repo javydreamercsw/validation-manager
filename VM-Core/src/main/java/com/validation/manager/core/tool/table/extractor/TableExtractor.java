@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
@@ -17,8 +16,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -60,7 +59,6 @@ public class TableExtractor {
         File temp = File.createTempFile("table", null);
         temp.createNewFile();
         temp.deleteOnExit();
-        FileWriter fw = new FileWriter(temp);
         List<DefaultTableModel> tables = new ArrayList<DefaultTableModel>();
         for (XWPFTable table : extractTablesFromWord()) {
             //Build the table
@@ -121,10 +119,10 @@ public class TableExtractor {
             //Get iterator to all the rows in current sheet
             Iterator<Row> rowIterator = sheet.iterator();
             int rowNum = 0;
+            int columns = 0;
             Map<Integer, Vector> data = new HashMap<Integer, Vector>();
-            Vector cells = new Vector();
             while (rowIterator.hasNext()) {
-                cells.clear();
+                Vector cells = new Vector();
                 Row row = rowIterator.next();
                 Iterator<Cell> cellIterator = row.cellIterator();
                 while (cellIterator.hasNext()) {
@@ -132,30 +130,37 @@ public class TableExtractor {
                     String value = "";
                     switch (cell.getCellType()) {
                         case Cell.CELL_TYPE_BOOLEAN:
-                            value = cell.getBooleanCellValue() + "\t\t";
+                            value = MessageFormat.format("{0}\t\t",
+                                    cell.getBooleanCellValue());
                             break;
                         case Cell.CELL_TYPE_NUMERIC:
-                            value = cell.getNumericCellValue() + "\t\t";
+                            value = MessageFormat.format("{0}\t\t",
+                                    cell.getNumericCellValue());
                             break;
                         case Cell.CELL_TYPE_STRING:
-                            value = cell.getStringCellValue() + "\t\t";
+                            value = MessageFormat.format("{0}\t\t",
+                                    cell.getStringCellValue());
                             break;
                     }
                     cells.add(value);
+                    if (rowNum == 0) {
+                        columns++;
+                    }
                 }
                 data.put(rowNum, cells);
                 rowNum++;
             }
             //Process
-            int columns = cells.size();
             Object[][] data2 = new Object[rowNum][columns];
             String[] title = new String[columns];
             for (int i = 0; i < columns; i++) {
                 title[i] = MessageFormat.format("Column {0}", i + 1);
             }
             int row = 0, col = 0;
-            for (Entry<Integer, Vector> entry : data.entrySet()) {
-                for (Object obj : entry.getValue()) {
+            for (int i = 0; i < rowNum; i++) {
+                for (Object obj : data.get(row)) {
+                    LOG.log(Level.FINE, "r: {0} c: {1} v: {2}",
+                            new Object[]{row, col, obj});
                     data2[row][col] = obj;
                     col++;
                 }
@@ -174,41 +179,48 @@ public class TableExtractor {
             //Get iterator to all the rows in current sheet
             Iterator<Row> rowIterator = sheet.iterator();
             int rowNum = 0;
+            int columns = 0;
             Map<Integer, Vector> data = new HashMap<Integer, Vector>();
-            Vector cells = new Vector();
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
-                cells.clear();
+                Vector cells = new Vector();
                 Iterator<Cell> cellIterator = row.cellIterator();
                 while (cellIterator.hasNext()) {
                     Cell cell = cellIterator.next();
                     String value = "";
                     switch (cell.getCellType()) {
                         case Cell.CELL_TYPE_BOOLEAN:
-                            value = cell.getBooleanCellValue() + "\t\t";
+                            value = MessageFormat.format("{0}\t\t",
+                                    cell.getBooleanCellValue());
                             break;
                         case Cell.CELL_TYPE_NUMERIC:
-                            value = cell.getNumericCellValue() + "\t\t";
+                            value = MessageFormat.format("{0}\t\t",
+                                    cell.getNumericCellValue());
                             break;
                         case Cell.CELL_TYPE_STRING:
-                            value = cell.getStringCellValue() + "\t\t";
+                            value = MessageFormat.format("{0}\t\t",
+                                    cell.getStringCellValue());
                             break;
                     }
                     cells.add(value);
+                    if (rowNum == 0) {
+                        columns++;
+                    }
                 }
                 data.put(rowNum, cells);
                 rowNum++;
             }
             //Process
-            int columns = cells.size();
             Object[][] data2 = new Object[rowNum][columns];
             String[] title = new String[columns];
             for (int i = 0; i < columns; i++) {
                 title[i] = MessageFormat.format("Column {0}", i + 1);
             }
             int row = 0, col = 0;
-            for (Entry<Integer, Vector> entry : data.entrySet()) {
-                for (Object obj : entry.getValue()) {
+            for (int i = 0; i < rowNum; i++) {
+                for (Object obj : data.get(row)) {
+                    LOG.log(Level.FINE, "r: {0} c: {1} v: {2}",
+                            new Object[]{row, col, obj});
                     data2[row][col] = obj;
                     col++;
                 }
@@ -217,7 +229,8 @@ public class TableExtractor {
             }
             tables.add(new DefaultTableModel(data2, title));
         } else {
-            throw new RuntimeException("Invalid import file: " + source);
+            throw new RuntimeException(
+                    MessageFormat.format("Invalid import file: {0}", source));
         }
         return tables;
     }
