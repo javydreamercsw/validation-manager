@@ -11,8 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import net.sourceforge.javydreamercsw.client.ui.components.database.DataBaseTool;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
@@ -32,8 +30,6 @@ import org.openide.util.Utilities;
         iconBase = "net/sourceforge/javydreamercsw/client/ui/VSmall.png",
         persistenceType = TopComponent.PERSISTENCE_NEVER)
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
-@ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.ProjectEditorTopComponent")
-@ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_ProjectEditorAction",
         preferredID = "ProjectEditorTopComponent")
@@ -227,7 +223,7 @@ public final class ProjectEditorTopComponent extends TopComponent
             notes.setText(p.getNotes());
         }
         //Add parent project
-        List<Project> projects = new ArrayList<Project>();
+        List<Project> projects = new ArrayList<>();
         if (DataBaseTool.getEmf() != null) {
             List<Object> projectList = DataBaseManager.createdQuery(
                     "select p from Project p order by p.id");
@@ -238,7 +234,7 @@ public final class ProjectEditorTopComponent extends TopComponent
                 }
             }
         }
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         names.add("None");
         for (Iterator<Project> it3 = projects.iterator(); it3.hasNext();) {
             Project proj = it3.next();
