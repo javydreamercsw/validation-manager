@@ -12,8 +12,6 @@ import net.sourceforge.javydreamercsw.client.ui.nodes.RootNode;
 import net.sourceforge.javydreamercsw.client.ui.nodes.capability.RefreshableCapability;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
@@ -37,9 +35,6 @@ import org.openide.util.Utilities;
         iconBase = "net/sourceforge/javydreamercsw/client/ui/VSmall.png",
         persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
-@ActionID(category = "Window", id
-        = "net.sourceforge.javydreamercsw.client.ui.ProjectExplorerTopComponent")
-@ActionReference(path = "Menu/Window", position = 333)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_ProjectExplorerAction",
         preferredID = "ProjectExplorerTopComponent")
