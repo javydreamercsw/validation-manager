@@ -7,8 +7,6 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.scene.HierarchyScene;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
@@ -26,11 +24,9 @@ import org.openide.util.lookup.Lookups;
         autostore = false)
 @TopComponent.Description(
         preferredID = "HierarchyViewerTopComponent",
-        //iconBase="SET/PATH/TO/ICON/HERE", 
+        //iconBase="SET/PATH/TO/ICON/HERE",
         persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
-@ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.vm.client.hierarchy.hierarchyvisualizer.HierarchyViewerTopComponent")
-@ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_HierarchyViewerAction",
         preferredID = "HierarchyViewerTopComponent")
@@ -41,10 +37,10 @@ import org.openide.util.lookup.Lookups;
 })
 public final class HierarchyViewerTopComponent extends TopComponent implements LookupListener {
 
-    private final Lookup.Result<Requirement> result =
-            Utilities.actionsGlobalContext().lookupResult(Requirement.class);
-    private static final Logger LOG =
-            Logger.getLogger(HierarchyViewerTopComponent.class.getSimpleName());
+    private final Lookup.Result<Requirement> result
+            = Utilities.actionsGlobalContext().lookupResult(Requirement.class);
+    private static final Logger LOG
+            = Logger.getLogger(HierarchyViewerTopComponent.class.getSimpleName());
     private final HierarchyScene scene;
     private final JComponent myView;
 
@@ -57,16 +53,16 @@ public final class HierarchyViewerTopComponent extends TopComponent implements L
         myView = scene.createView();
 
         hierarchyPane.setViewportView(myView);
-        
+
         add(scene.createSatelliteView(), BorderLayout.WEST);
-        
+
         associateLookup(Lookups.fixed(
-                // exposed TopComponent, 
+                // exposed TopComponent,
                 //   and SatelliteViewProvider, BirdViewProvider interfaces, too
-                (HierarchyViewerTopComponent) this, 
+                (HierarchyViewerTopComponent) this,
                 getActionMap() // do not forget expose ActionMap
                 , scene // if some object needs it and if it is final
-                ));
+        ));
     }
 
     /**
