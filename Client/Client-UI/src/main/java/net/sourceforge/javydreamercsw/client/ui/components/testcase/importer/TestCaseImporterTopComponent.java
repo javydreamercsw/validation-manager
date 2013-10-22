@@ -55,8 +55,6 @@ import org.openide.util.NbBundle.Messages;
         persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
-@ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.TestCaseImporterTopComponent")
-@ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_TestCaseImporterAction",
         preferredID = "TestCaseImporterTopComponent"
@@ -265,9 +263,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                         }
                     } catch (FileNotFoundException ex) {
                         Exceptions.printStackTrace(ex);
-                    } catch (ClassNotFoundException ex) {
-                        Exceptions.printStackTrace(ex);
-                    } catch (IOException ex) {
+                    } catch (ClassNotFoundException | IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 }
@@ -284,7 +280,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         LOG.info("Saving imported table...");
         setImportSuccess(true);
         int rows = importedTable.getModel().getRowCount();
-        List<String> mapping = new ArrayList<String>(rows);
+        List<String> mapping = new ArrayList<>(rows);
         for (int i = 0; i < importedTable.getModel().getColumnCount(); i++) {
             DefaultCellEditor editor
                     = (DefaultCellEditor) importedTable.getCellEditor(0, i);
@@ -450,7 +446,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
     }
 
     protected void process(List<String> mapping) {
-        List<Project> projects = new ArrayList<Project>();
+        List<Project> projects = new ArrayList<>();
         for (TestPlanHasTest tpht : test.getTestPlanHasTestList()) {
             tpht.getTestPlan().getTestProject();
             for (Object o : DataBaseManager.nativeQuery(
@@ -467,7 +463,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         int step_counter = 0;
         int start = 1 + (header.isSelected() ? 1 : 0);
         for (int row = start; row < importedTable.getModel().getRowCount(); row++) {
-            List<Requirement> requirements = new ArrayList<Requirement>();
+            List<Requirement> requirements = new ArrayList<>();
             String description = "", criteria = "", notes = "";
             for (int col = 0; col < importedTable.getModel().getColumnCount(); col++) {
                 if (!mapping.get(col).equals(TestCaseImportMapping.IGNORE.getValue())) {
