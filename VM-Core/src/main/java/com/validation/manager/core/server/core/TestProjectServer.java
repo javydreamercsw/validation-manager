@@ -18,8 +18,8 @@ public class TestProjectServer extends TestProject
         super(name, active);
         setId(0);
     }
-    
-    public TestProjectServer(TestProject tp){
+
+    public TestProjectServer(TestProject tp) {
         update(this, tp);
     }
 
@@ -51,7 +51,7 @@ public class TestProjectServer extends TestProject
         target.setNotes(source.getNotes());
         target.setId(source.getId());
     }
-    
+
     public void update() {
         update(this, getEntity());
     }

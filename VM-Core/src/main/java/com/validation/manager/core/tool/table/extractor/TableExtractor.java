@@ -127,22 +127,7 @@ public class TableExtractor {
                 Iterator<Cell> cellIterator = row.cellIterator();
                 while (cellIterator.hasNext()) {
                     Cell cell = cellIterator.next();
-                    String value = "";
-                    switch (cell.getCellType()) {
-                        case Cell.CELL_TYPE_BOOLEAN:
-                            value = MessageFormat.format("{0}\t\t",
-                                    cell.getBooleanCellValue());
-                            break;
-                        case Cell.CELL_TYPE_NUMERIC:
-                            value = MessageFormat.format("{0}\t\t",
-                                    cell.getNumericCellValue());
-                            break;
-                        case Cell.CELL_TYPE_STRING:
-                            value = MessageFormat.format("{0}\t\t",
-                                    cell.getStringCellValue());
-                            break;
-                    }
-                    cells.add(value);
+                    cells.add(cell.getStringCellValue().trim());
                     if (rowNum == 0) {
                         columns++;
                     }
@@ -187,22 +172,7 @@ public class TableExtractor {
                 Iterator<Cell> cellIterator = row.cellIterator();
                 while (cellIterator.hasNext()) {
                     Cell cell = cellIterator.next();
-                    String value = "";
-                    switch (cell.getCellType()) {
-                        case Cell.CELL_TYPE_BOOLEAN:
-                            value = MessageFormat.format("{0}\t\t",
-                                    cell.getBooleanCellValue());
-                            break;
-                        case Cell.CELL_TYPE_NUMERIC:
-                            value = MessageFormat.format("{0}\t\t",
-                                    cell.getNumericCellValue());
-                            break;
-                        case Cell.CELL_TYPE_STRING:
-                            value = MessageFormat.format("{0}\t\t",
-                                    cell.getStringCellValue());
-                            break;
-                    }
-                    cells.add(value);
+                    cells.add(cell.getStringCellValue().trim());
                     if (rowNum == 0) {
                         columns++;
                     }
