@@ -5,8 +5,6 @@ import java.util.Iterator;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.swing.JRViewer;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
@@ -25,9 +23,6 @@ import org.openide.util.Utilities;
         //        iconBase = "com/validation/manager/resources/icons/VMSmall.png",
         persistenceType = TopComponent.PERSISTENCE_NEVER)
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
-@ActionID(category = "Window",
-        id = "net.sourceforge.javydreamercsw.vm.jasperreportviewer.JasperReportViewerTopComponent")
-@ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_JasperReportViewerAction",
         preferredID = "JasperReportViewerTopComponent")
