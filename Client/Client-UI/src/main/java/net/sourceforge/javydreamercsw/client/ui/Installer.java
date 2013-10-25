@@ -14,13 +14,7 @@ public class Installer extends ModuleInstall {
                 try {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
-                } catch (ClassNotFoundException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (InstantiationException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (IllegalAccessException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (UnsupportedLookAndFeelException ex) {
+                } catch (        ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
                     Exceptions.printStackTrace(ex);
                 }
             }

@@ -30,7 +30,6 @@ import org.openide.awt.ActionID;
 import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.Utilities;
 
 /**
  * Top component which displays something.
@@ -50,7 +49,14 @@ import org.openide.util.Utilities;
 @Messages({
     "CTL_RequirementMappingImporterAction=RequirementMappingImporter",
     "CTL_RequirementMappingImporterTopComponent=RequirementMappingImporter Window",
-    "HINT_RequirementMappingImporterTopComponent=This is a RequirementMappingImporter window"
+    "HINT_RequirementMappingImporterTopComponent=This is a RequirementMappingImporter window",
+    "RequirementMappingImporterTopComponent.jLabel1.text=Table:",
+    "RequirementMappingImporterTopComponent.delimiterField.text=",
+    "RequirementMappingImporterTopComponent.jLabel2.text=Requirement Delimiter",
+    "RequirementMappingImporterTopComponent.addDelimiterButton.text=Add Delimiter",
+    "RequirementMappingImporterTopComponent.header.text=Data has Header?",
+    "RequirementMappingImporterTopComponent.saveButton.text=Save",
+    "RequirementMappingImporterTopComponent.importButton.text=Import"
 })
 public final class RequirementMappingImporterTopComponent extends AbstractImportTopComponent {
 
@@ -231,9 +237,7 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
                         }
                     } catch (FileNotFoundException ex) {
                         Exceptions.printStackTrace(ex);
-                    } catch (ClassNotFoundException ex) {
-                        Exceptions.printStackTrace(ex);
-                    } catch (IOException ex) {
+                    } catch (ClassNotFoundException | IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 }
@@ -245,14 +249,13 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         LOG.info("Saving imported table...");
         setImportSuccess(true);
-        project = Utilities.actionsGlobalContext().lookup(Project.class);
         //Process the mapping
         if (isImportSuccess()) {
             for (int row = 0; row < importedTable.getModel().getRowCount(); row++) {
                 String val1 = (String) importedTable.getModel().getValueAt(row, 0);
-                Requirement req1 = findRequirement(val1);
+                Requirement req1 = findRequirement(val1.trim());
                 String val2 = (String) importedTable.getModel().getValueAt(row, 1);
-                Requirement req2 = findRequirement(val2);
+                Requirement req2 = findRequirement(val2.trim());
                 if (req1 != null && req2 != null) {
                     //Both are valid
                     req1.getRequirementList().add(req2);
@@ -264,10 +267,10 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
                     }
                 } else if (req1 == null) {
                     LOG.warning(MessageFormat.format(
-                            "Unable to find requirement {0} in this project.", val1));
+                            "Unable to find requirement {0} in this project.", val1.trim()));
                 } else {
                     LOG.warning(MessageFormat.format(
-                            "Unable to find requirement {0} in this project.", val2));
+                            "Unable to find requirement {0} in this project.", val2.trim()));
                 }
             }
         }
@@ -378,10 +381,17 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
     private Requirement findRequirement(String id) {
         Requirement req = null;
         for (Requirement r : ProjectServer.getRequirements(project)) {
-            if (r.getUniqueId().equals(id)) {
+            LOG.info(MessageFormat.format("Comparing {0} and {1}",
+                    r.getUniqueId().trim(), id.trim()));
+            if (r.getUniqueId().trim().equals(id.trim())) {
                 req = r;
+                LOG.info(MessageFormat.format("Found a match for {0}", id.trim()));
                 break;
             }
+        }
+        if (req == null) {
+            LOG.info(MessageFormat.format("Unable to find a match for {0}",
+                    id.trim()));
         }
         return req;
     }
@@ -389,5 +399,12 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
     @Override
     public void init() {
         initComponents();
+    }
+
+    /**
+     * @param project the project to set
+     */
+    public void setProject(Project project) {
+        this.project = project;
     }
 }

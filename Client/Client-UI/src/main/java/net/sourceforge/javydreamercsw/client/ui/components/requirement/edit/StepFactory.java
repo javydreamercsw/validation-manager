@@ -28,7 +28,7 @@ public class StepFactory extends ChildFactory<Step> implements Lookup.Provider {
      * The InstanceContent that keeps this entity's abilities
      */
     private final InstanceContent instanceContent;
-    private final ArrayList<Step> steps = new ArrayList<Step>();
+    private final ArrayList<Step> steps = new ArrayList<>();
 
     public StepFactory() {
         // Create an InstanceContent to hold abilities...

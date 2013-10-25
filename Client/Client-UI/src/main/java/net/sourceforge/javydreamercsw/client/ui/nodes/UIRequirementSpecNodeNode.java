@@ -30,7 +30,7 @@ public class UIRequirementSpecNodeNode extends AbstractVMBeanNode {
 
     @Override
     public Action[] getActions(boolean context) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         actions.addAll(Arrays.asList(super.getActions(context)));
         actions.add(new CreateRequirementAction());
         actions.add(new ImportRequirementAction());

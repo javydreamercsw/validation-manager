@@ -31,7 +31,7 @@ class TestCaseNode extends AbstractVMBeanNode {
 
     @Override
     public Action[] getActions(boolean b) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateTestStepAction());
         actions.add(new EditTestCaseAction());

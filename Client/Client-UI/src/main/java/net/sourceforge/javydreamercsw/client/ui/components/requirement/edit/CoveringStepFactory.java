@@ -37,7 +37,7 @@ public class CoveringStepFactory extends ChildFactory<Step>
      * The InstanceContent that keeps this entity's abilities
      */
     private final InstanceContent instanceContent;
-    private final ArrayList<Step> steps = new ArrayList<Step>();
+    private final ArrayList<Step> steps = new ArrayList<>();
     private static final Logger LOG
             = Logger.getLogger(CoveringStepFactory.class.getSimpleName());
 

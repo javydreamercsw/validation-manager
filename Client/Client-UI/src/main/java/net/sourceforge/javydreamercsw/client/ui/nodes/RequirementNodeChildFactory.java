@@ -27,7 +27,7 @@ class RequirementNodeChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
-        HashMap<String, Object> parameters = new HashMap<String, Object>();
+        HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("requirementSpecProjectId", parent.getId());
         List<Object> projects = DataBaseManager.namedQuery(
                 "RequirementSpecNode.findByRequirementSpecProjectId", parameters);

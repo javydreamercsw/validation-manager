@@ -28,7 +28,7 @@ import javax.swing.tree.TreeSelectionModel;
  */
 public class RequirementSelectionDialog extends javax.swing.JDialog {
 
-    private List<Requirement> requirements = new ArrayList<Requirement>();
+    private List<Requirement> requirements = new ArrayList<>();
     private final DefaultMutableTreeNode top
             = new DefaultMutableTreeNode("Available Requirements");
 

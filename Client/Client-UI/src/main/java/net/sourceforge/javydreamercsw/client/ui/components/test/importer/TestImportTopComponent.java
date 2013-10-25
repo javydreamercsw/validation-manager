@@ -254,9 +254,7 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
                         }
                     } catch (FileNotFoundException ex) {
                         Exceptions.printStackTrace(ex);
-                    } catch (ClassNotFoundException ex) {
-                        Exceptions.printStackTrace(ex);
-                    } catch (IOException ex) {
+                    } catch (            ClassNotFoundException | IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 }
@@ -274,7 +272,7 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
         setImportSuccess(true);
         TestProject testProject = tp.getTestProject();
         int rows = importedTable.getModel().getRowCount();
-        List<String> mapping = new ArrayList<String>(rows);
+        List<String> mapping = new ArrayList<>(rows);
         for (int i = 0; i < importedTable.getModel().getColumnCount(); i++) {
             DefaultCellEditor editor
                     = (DefaultCellEditor) importedTable.getCellEditor(0, i);
