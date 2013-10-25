@@ -33,7 +33,7 @@ public abstract class AbstractImportTopComponent extends TopComponent
         implements ImporterInterface {
 
     protected final List<DefaultTableModel> tables
-            = new ArrayList<DefaultTableModel>();
+            = new ArrayList<>();
     protected DefaultComboBoxModel model;
     private static final Logger LOG
             = Logger.getLogger(AbstractImportTopComponent.class.getSimpleName());
@@ -56,7 +56,6 @@ public abstract class AbstractImportTopComponent extends TopComponent
                         getSpinner().getValue().toString())));
             }
         });
-        init();
     }
 
     public abstract JTextField getDelimetterField();
@@ -119,13 +118,14 @@ public abstract class AbstractImportTopComponent extends TopComponent
 
     @Override
     public void displayTable(Integer index) {
-        LOG.log(Level.FINE, "Changed value to: {0}", index);
+        LOG.log(Level.INFO, "Changed value to: {0}", index);
+        LOG.log(Level.INFO, "Existing tables: {0}", tables.size());
         //Rebuild the table
         DefaultTableModel tableModel = tables.get(index - 1);
         int columns = tableModel.getColumnCount();
         String[] title = new String[columns];
         final List<TableCellEditor> editors
-                = new ArrayList<TableCellEditor>();
+                = new ArrayList<>();
         for (int i = 0; i < columns; i++) {
             //Default title
             title[i] = MessageFormat.format("Column {0}", i + 1);
@@ -149,7 +149,7 @@ public abstract class AbstractImportTopComponent extends TopComponent
         });
         if (getHeaderCheckbox().isSelected()) {
             TableRowSorter sorter
-                    = new TableRowSorter<DefaultTableModel>(tableModel);
+                    = new TableRowSorter<>(tableModel);
             getImportTable().setRowSorter(sorter);
             RowFilter<DefaultTableModel, Object> rf;
             //If current expression doesn't parse, don't update.

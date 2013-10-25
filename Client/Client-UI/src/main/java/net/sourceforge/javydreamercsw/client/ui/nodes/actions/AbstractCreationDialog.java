@@ -80,7 +80,7 @@ public abstract class AbstractCreationDialog extends JDialog {
         RequirementStatus rs = null;
         if (status.getSelectedIndex() > -1) {
             if (DataBaseTool.getEmf() != null) {
-                Map<String, Object> parameters = new HashMap<String, Object>();
+                Map<String, Object> parameters = new HashMap<>();
                 parameters.put("id",
                         ((RequirementStatus) status.getSelectedItem()).getId());
                 rs = (RequirementStatus) DataBaseManager.namedQuery(
@@ -110,7 +110,7 @@ public abstract class AbstractCreationDialog extends JDialog {
     }
 
     protected void populateProjectList(JComboBox parent, boolean addNull) {
-        List<Project> projects = new ArrayList<Project>();
+        List<Project> projects = new ArrayList<>();
         if (DataBaseTool.getEmf() != null) {
             List<Object> projectList = DataBaseManager.createdQuery("select p from Project p order by p.id");
             for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
@@ -118,7 +118,7 @@ public abstract class AbstractCreationDialog extends JDialog {
                 projects.add(temp);
             }
         }
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         if (addNull) {
             names.add("None");
         }
@@ -130,7 +130,7 @@ public abstract class AbstractCreationDialog extends JDialog {
     }
 
     protected void populateSpecLevelList(JComboBox level) {
-        List<SpecLevel> levels = new ArrayList<SpecLevel>();
+        List<SpecLevel> levels = new ArrayList<>();
         if (DataBaseTool.getEmf() != null) {
             List<Object> projectList = DataBaseManager.createdQuery(
                     "select sl from SpecLevel sl order by sl.id");
@@ -139,7 +139,7 @@ public abstract class AbstractCreationDialog extends JDialog {
                 levels.add(temp);
             }
         }
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (Iterator<SpecLevel> it3 = levels.iterator(); it3.hasNext();) {
             SpecLevel lvl = it3.next();
             names.add(internationalize(lvl.getName()));
@@ -148,7 +148,7 @@ public abstract class AbstractCreationDialog extends JDialog {
     }
 
     protected void populateRequirementTypeList(JComboBox type) {
-        List<RequirementType> types = new ArrayList<RequirementType>();
+        List<RequirementType> types = new ArrayList<>();
         if (DataBaseTool.getEmf() != null) {
             List<Object> projectList = DataBaseManager.createdQuery(
                     "select rt from RequirementType rt order by rt.id");
@@ -157,7 +157,7 @@ public abstract class AbstractCreationDialog extends JDialog {
                 types.add(temp);
             }
         }
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (Iterator<RequirementType> it3 = types.iterator(); it3.hasNext();) {
             RequirementType lvl = it3.next();
             names.add(internationalize(lvl.getName()));
@@ -175,7 +175,7 @@ public abstract class AbstractCreationDialog extends JDialog {
                         ? rb.getString(rs.getStatus()) : rs.getStatus());
             }
         });
-        List<RequirementStatus> statusses = new ArrayList<RequirementStatus>();
+        List<RequirementStatus> statusses = new ArrayList<>();
         if (DataBaseTool.getEmf() != null) {
             List<Object> projectList = DataBaseManager.createdQuery(
                     "select rs from RequirementStatus rs order by rs.id");

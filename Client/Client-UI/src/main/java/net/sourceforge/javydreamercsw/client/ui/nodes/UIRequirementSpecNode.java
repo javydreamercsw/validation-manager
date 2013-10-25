@@ -28,7 +28,7 @@ public class UIRequirementSpecNode extends AbstractVMBeanNode {
     
     @Override
     public Action[] getActions(boolean b) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         actions.addAll(Arrays.asList(super.getActions(b)));
         //TODO: actions.add(new EditRequirementSpecCaseAction());
         return actions.toArray(new Action[actions.size()]);

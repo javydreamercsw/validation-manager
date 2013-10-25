@@ -62,9 +62,9 @@ public final class EditRequirementWindowTopComponent extends TopComponent
 
     private final Lookup.Result<Requirement> result
             = Utilities.actionsGlobalContext().lookupResult(Requirement.class);
-    private final List<Requirement> linkedRequirements = new ArrayList<Requirement>();
-    private final List<RequirementStatus> statuses = new ArrayList<RequirementStatus>();
-    private final List<RequirementType> types = new ArrayList<RequirementType>();
+    private final List<Requirement> linkedRequirements = new ArrayList<>();
+    private final List<RequirementStatus> statuses = new ArrayList<>();
+    private final List<RequirementType> types = new ArrayList<>();
     private boolean edit = false;
     private Requirement requirement;
     private static final Logger LOG

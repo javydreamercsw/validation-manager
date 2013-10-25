@@ -67,7 +67,7 @@ public abstract class AbstractVMBeanNode extends BeanNode
 
     @Override
     public Action[] getActions(boolean context) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         //Add refresh action if node has capability
         if (!getLookup().lookupAll(RefreshableCapability.class).isEmpty()) {
             actions.add(new RefreshAction(this));

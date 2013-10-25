@@ -47,7 +47,7 @@ public class RootNode extends AbstractNode implements RefreshableCapability {
 
     @Override
     public Action[] getActions(boolean b) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         if (!getLookup().lookupAll(RefreshableCapability.class).isEmpty()) {
             actions.add(new RefreshAction(this));
         }

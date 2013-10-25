@@ -26,7 +26,7 @@ import org.openide.util.Utilities;
  */
 public class EditTestStepDialog extends javax.swing.JDialog {
 
-    private final List<Requirement> linkedRequirements = new ArrayList<Requirement>();
+    private final List<Requirement> linkedRequirements = new ArrayList<>();
     private final boolean edit;
     private Step step;
 
