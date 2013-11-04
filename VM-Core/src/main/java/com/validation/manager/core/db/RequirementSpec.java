@@ -44,6 +44,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "RequirementSpec.findByVersion", query = "SELECT r FROM RequirementSpec r WHERE r.version = :version"),
     @NamedQuery(name = "RequirementSpec.findByModificationDate", query = "SELECT r FROM RequirementSpec r WHERE r.modificationDate = :modificationDate")})
 public class RequirementSpec implements Serializable {
+    @Column(name = "version")
+    private Integer version;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementSpecPK requirementSpecPK;
@@ -56,10 +58,6 @@ public class RequirementSpec implements Serializable {
     @Size(max = 65535)
     @Column(name = "description")
     private String description;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "version")
-    private int version;
     @Basic(optional = false)
     @NotNull
     @Column(name = "modificationDate")
@@ -114,14 +112,6 @@ public class RequirementSpec implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
     }
 
     public Date getModificationDate() {
@@ -181,6 +171,14 @@ public class RequirementSpec implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RequirementSpec[ requirementSpecPK=" + requirementSpecPK + " ]";
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
     
 }

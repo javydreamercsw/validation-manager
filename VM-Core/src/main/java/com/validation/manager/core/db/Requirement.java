@@ -7,7 +7,6 @@ package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -22,7 +21,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -37,29 +35,29 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Requirement.findAll", query = "SELECT r FROM Requirement r"),
+    @NamedQuery(name = "Requirement.findByUniqueId", query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId"),
     @NamedQuery(name = "Requirement.findById", query = "SELECT r FROM Requirement r WHERE r.requirementPK.id = :id"),
-    @NamedQuery(name = "Requirement.findByVersion", query = "SELECT r FROM Requirement r WHERE r.requirementPK.version = :version"),
-    @NamedQuery(name = "Requirement.findByUniqueId", query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId")})
+    @NamedQuery(name = "Requirement.findByVersion", query = "SELECT r FROM Requirement r WHERE r.requirementPK.version = :version")})
 public class Requirement implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementPK requirementPK;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "unique_id")
-    private String uniqueId;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
+    @Size(max = 255)
+    @Column(name = "unique_id")
+    private String uniqueId;
+    @ManyToMany(mappedBy = "requirementList")
+    private List<Step> stepList;
+    @ManyToMany(mappedBy = "requirementList")
+    private List<RiskControl> riskControlList;
     @JoinTable(name = "requirement_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
         @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
@@ -69,23 +67,19 @@ public class Requirement implements Serializable {
     private List<Requirement> requirementList;
     @ManyToMany(mappedBy = "requirementList")
     private List<Requirement> requirementList1;
-    @ManyToMany(mappedBy = "requirementList")
-    private List<Step> stepList;
-    @ManyToMany(mappedBy = "requirementList")
-    private List<RiskControl> riskControlList;
+    @JoinColumn(name = "requirement_type_id", referencedColumnName = "id")
+    @ManyToOne
+    private RequirementType requirementTypeId;
+    @JoinColumn(name = "requirement_status_id", referencedColumnName = "id")
+    @ManyToOne
+    private RequirementStatus requirementStatusId;
     @JoinColumns({
         @JoinColumn(name = "requirement_spec_node_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", referencedColumnName = "requirement_spec_id"),
         @JoinColumn(name = "requirement_spec_node_requirement_spec_project_id", referencedColumnName = "requirement_spec_project_id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id", referencedColumnName = "requirement_spec_spec_level_id")})
-    @ManyToOne(optional = false)
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id", referencedColumnName = "requirement_spec_spec_level_id"),
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", referencedColumnName = "requirement_spec_id")})
+    @ManyToOne
     private RequirementSpecNode requirementSpecNode;
-    @JoinColumn(name = "requirement_status_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private RequirementStatus requirementStatusId;
-    @JoinColumn(name = "requirement_type_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private RequirementType requirementTypeId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
     private List<RequirementHasException> requirementHasExceptionList;
 
@@ -115,14 +109,6 @@ public class Requirement implements Serializable {
         this.requirementPK = requirementPK;
     }
 
-    public String getUniqueId() {
-        return uniqueId;
-    }
-
-    public void setUniqueId(String uniqueId) {
-        this.uniqueId = uniqueId;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -137,6 +123,14 @@ public class Requirement implements Serializable {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
     }
 
     @XmlTransient
@@ -187,20 +181,20 @@ public class Requirement implements Serializable {
         this.requirementSpecNode = requirementSpecNode;
     }
 
-    public RequirementStatus getRequirementStatusId() {
-        return requirementStatusId;
-    }
-
-    public void setRequirementStatusId(RequirementStatus requirementStatusId) {
-        this.requirementStatusId = requirementStatusId;
-    }
-
     public RequirementType getRequirementTypeId() {
         return requirementTypeId;
     }
 
     public void setRequirementTypeId(RequirementType requirementTypeId) {
         this.requirementTypeId = requirementTypeId;
+    }
+
+    public RequirementStatus getRequirementStatusId() {
+        return requirementStatusId;
+    }
+
+    public void setRequirementStatusId(RequirementStatus requirementStatusId) {
+        this.requirementStatusId = requirementStatusId;
     }
 
     @XmlTransient
@@ -227,14 +221,12 @@ public class Requirement implements Serializable {
             return false;
         }
         Requirement other = (Requirement) object;
-        return (this.requirementPK != null || other.requirementPK == null)
-                && (this.requirementPK == null || this.requirementPK.equals(other.requirementPK));
+        return (this.requirementPK != null || other.requirementPK == null) && (this.requirementPK == null || this.requirementPK.equals(other.requirementPK));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Requirement[ requirementPK="
-                + requirementPK + ", uniqueId=" + getUniqueId() + "]";
+        return "com.validation.manager.core.db.Requirement[ requirementPK=" + requirementPK + " ]";
     }
 
 }

@@ -6,7 +6,6 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
-import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.openide.util.Exceptions;
@@ -45,12 +44,18 @@ public class ProjectServerTest extends AbstractVMTestCase {
             assertEquals(0, ProjectServer.getRequirements(root).size());
             sub = TestHelper.addProject(root, "Sub", "Notes");
             System.out.println("Create Spec for sub project.");
-            RequirementSpec subSpec
-                    = TestHelper.createRequirementSpec("Spec 2", "Desc", sub, 1);
+            TestHelper.createRequirementSpec("Spec 2", "Desc", sub, 1);
             RequirementSpecNode node = TestHelper.createRequirementSpecNode(mainSpec,
                     "Requirement Doc", "Desc", "Scope");
-            TestHelper.createRequirement("REQ-001", "Desc", node.getRequirementSpecNodePK(), "Notes", 1, 1);
+            Requirement req1 = TestHelper.createRequirement("REQ-001", "Desc", node.getRequirementSpecNodePK(), "Notes", 1, 1);
             assertEquals(1, ProjectServer.getRequirements(root).size());
+            Requirement req2 = TestHelper.createRequirement("REQ-002", "Desc", node.getRequirementSpecNodePK(), "Notes", 1, 1);
+            assertEquals(2, ProjectServer.getRequirements(root).size());
+            req1 = TestHelper.addChildToRequirement(req1, req2);
+            assertEquals(1, RequirementServer.getChildrenRequirement(req1).size());
+            assertEquals(0, RequirementServer.getParentRequirement(req1).size());
+            assertEquals(1, RequirementServer.getParentRequirement(req2).size());
+            assertEquals(0, RequirementServer.getChildrenRequirement(req2).size());
             try {
                 ProjectServer.deleteProject(sub);
             } catch (Exception ex) {
