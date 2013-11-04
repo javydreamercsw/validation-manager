@@ -59,7 +59,7 @@ public class HierarchyScene extends GraphScene<Object, Object> {
             validate();
             for (AbstractHierarchyNode child : widget.getNodeChildren()) {
                 if (!hasWidget(child.getID())) {
-                    addChildWidget(widget, child, child instanceof RequirementHierarchyNode);
+                    addChildWidget(widget, child, true);
                 }
                 validate();
             }
