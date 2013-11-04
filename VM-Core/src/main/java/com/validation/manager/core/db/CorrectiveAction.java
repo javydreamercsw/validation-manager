@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
@@ -36,28 +38,34 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "CorrectiveAction.findAll", query = "SELECT c FROM CorrectiveAction c"),
     @NamedQuery(name = "CorrectiveAction.findById", query = "SELECT c FROM CorrectiveAction c WHERE c.id = :id")})
 public class CorrectiveAction implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "CAGen")
     @TableGenerator(name = "CAGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "corrective_action",
-    allocationSize = 1,
-    initialValue = 1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "corrective_action",
+            allocationSize = 1,
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "details")
     private String details;
-    @ManyToMany(mappedBy = "correctiveActionList")
+    @JoinTable(name = "exception_has_corrective_action", joinColumns = {
+        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")})
+    @ManyToMany
     private List<VmException> vmExceptionList;
-    @ManyToMany(mappedBy = "correctiveActionList")
+    @JoinTable(name = "user_has_corrective_action", joinColumns = {
+        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "user_id", referencedColumnName = "id")})
+    @ManyToMany
     private List<VmUser> vmUserList;
 
     public CorrectiveAction() {
@@ -117,15 +125,12 @@ public class CorrectiveAction implements Serializable {
             return false;
         }
         CorrectiveAction other = (CorrectiveAction) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.CorrectiveAction[ id=" + id + " ]";
     }
-    
+
 }

@@ -17,14 +17,15 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class RiskItemHasRiskCategoryPK implements Serializable {
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "risk_item_id")
-    private int riskItemId;
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "risk_item_FMEA_id")
     private int riskitemFMEAid;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "risk_item_id")
+    private int riskItemId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "risk_category_id")
@@ -39,20 +40,20 @@ public class RiskItemHasRiskCategoryPK implements Serializable {
         this.riskCategoryId = riskCategoryId;
     }
 
-    public int getRiskItemId() {
-        return riskItemId;
-    }
-
-    public void setRiskItemId(int riskItemId) {
-        this.riskItemId = riskItemId;
-    }
-
     public int getRiskitemFMEAid() {
         return riskitemFMEAid;
     }
 
     public void setRiskitemFMEAid(int riskitemFMEAid) {
         this.riskitemFMEAid = riskitemFMEAid;
+    }
+
+    public int getRiskItemId() {
+        return riskItemId;
+    }
+
+    public void setRiskItemId(int riskItemId) {
+        this.riskItemId = riskItemId;
     }
 
     public int getRiskCategoryId() {
@@ -66,8 +67,8 @@ public class RiskItemHasRiskCategoryPK implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (int) riskItemId;
         hash += (int) riskitemFMEAid;
+        hash += (int) riskItemId;
         hash += (int) riskCategoryId;
         return hash;
     }
@@ -79,21 +80,18 @@ public class RiskItemHasRiskCategoryPK implements Serializable {
             return false;
         }
         RiskItemHasRiskCategoryPK other = (RiskItemHasRiskCategoryPK) object;
-        if (this.riskItemId != other.riskItemId) {
-            return false;
-        }
         if (this.riskitemFMEAid != other.riskitemFMEAid) {
             return false;
         }
-        if (this.riskCategoryId != other.riskCategoryId) {
+        if (this.riskItemId != other.riskItemId) {
             return false;
         }
-        return true;
+        return this.riskCategoryId == other.riskCategoryId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RiskItemHasRiskCategoryPK[ riskItemId=" + riskItemId + ", riskitemFMEAid=" + riskitemFMEAid + ", riskCategoryId=" + riskCategoryId + " ]";
+        return "com.validation.manager.core.db.RiskItemHasRiskCategoryPK[ riskitemFMEAid=" + riskitemFMEAid + ", riskItemId=" + riskItemId + ", riskCategoryId=" + riskCategoryId + " ]";
     }
-    
+
 }

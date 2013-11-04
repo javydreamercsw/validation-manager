@@ -40,8 +40,8 @@ public class UserHasRootCauseJpaController implements Serializable {
             userHasRootCause.setUserHasRootCausePK(new UserHasRootCausePK());
         }
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
-        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
+        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -80,8 +80,8 @@ public class UserHasRootCauseJpaController implements Serializable {
 
     public void edit(UserHasRootCause userHasRootCause) throws NonexistentEntityException, Exception {
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
-        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
+        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -209,5 +209,5 @@ public class UserHasRootCauseJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

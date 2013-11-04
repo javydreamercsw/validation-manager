@@ -95,10 +95,7 @@ public class RequirementSpecPK implements Serializable {
         if (this.projectId != other.projectId) {
             return false;
         }
-        if (this.specLevelId != other.specLevelId) {
-            return false;
-        }
-        return true;
+        return this.specLevelId == other.specLevelId;
     }
 
     @Override

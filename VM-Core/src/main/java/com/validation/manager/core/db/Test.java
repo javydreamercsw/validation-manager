@@ -52,25 +52,19 @@ public class Test implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "notes")
-    private String notes;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "name")
     private String name;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
+    @Column(name = "notes")
+    private String notes;
+    @Lob
+    @Size(max = 2147483647)
     @Column(name = "purpose")
     private String purpose;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "scope")
     private String scope;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "test")
@@ -95,20 +89,20 @@ public class Test implements Serializable {
         this.id = id;
     }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public String getPurpose() {
@@ -161,10 +155,7 @@ public class Test implements Serializable {
             return false;
         }
         Test other = (Test) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

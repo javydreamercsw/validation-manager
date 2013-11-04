@@ -54,10 +54,6 @@ public class Requirement implements Serializable {
     @Size(max = 255)
     @Column(name = "unique_id")
     private String uniqueId;
-    @ManyToMany(mappedBy = "requirementList")
-    private List<Step> stepList;
-    @ManyToMany(mappedBy = "requirementList")
-    private List<RiskControl> riskControlList;
     @JoinTable(name = "requirement_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
         @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
@@ -67,6 +63,21 @@ public class Requirement implements Serializable {
     private List<Requirement> requirementList;
     @ManyToMany(mappedBy = "requirementList")
     private List<Requirement> requirementList1;
+    @JoinTable(name = "step_has_requirement", joinColumns = {
+        @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
+        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id"),
+        @JoinColumn(name = "step_id", referencedColumnName = "id"),
+        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id")})
+    @ManyToMany
+    private List<Step> stepList;
+    @JoinTable(name = "risk_control_has_requirement", joinColumns = {
+        @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
+        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
+        @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")})
+    @ManyToMany
+    private List<RiskControl> riskControlList;
     @JoinColumn(name = "requirement_type_id", referencedColumnName = "id")
     @ManyToOne
     private RequirementType requirementTypeId;
@@ -173,14 +184,6 @@ public class Requirement implements Serializable {
         this.riskControlList = riskControlList;
     }
 
-    public RequirementSpecNode getRequirementSpecNode() {
-        return requirementSpecNode;
-    }
-
-    public void setRequirementSpecNode(RequirementSpecNode requirementSpecNode) {
-        this.requirementSpecNode = requirementSpecNode;
-    }
-
     public RequirementType getRequirementTypeId() {
         return requirementTypeId;
     }
@@ -195,6 +198,14 @@ public class Requirement implements Serializable {
 
     public void setRequirementStatusId(RequirementStatus requirementStatusId) {
         this.requirementStatusId = requirementStatusId;
+    }
+
+    public RequirementSpecNode getRequirementSpecNode() {
+        return requirementSpecNode;
+    }
+
+    public void setRequirementSpecNode(RequirementSpecNode requirementSpecNode) {
+        this.requirementSpecNode = requirementSpecNode;
     }
 
     @XmlTransient

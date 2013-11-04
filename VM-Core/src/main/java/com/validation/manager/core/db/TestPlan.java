@@ -8,7 +8,6 @@ package com.validation.manager.core.db;
 import com.validation.manager.core.VMAuditedObject;
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -21,7 +20,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -36,27 +34,26 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "TestPlan.findAll", query = "SELECT t FROM TestPlan t"),
-    @NamedQuery(name = "TestPlan.findById", query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.id = :id"),
-    @NamedQuery(name = "TestPlan.findByTestProjectId", query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.testProjectId = :testProjectId"),
     @NamedQuery(name = "TestPlan.findByActive", query = "SELECT t FROM TestPlan t WHERE t.active = :active"),
-    @NamedQuery(name = "TestPlan.findByIsOpen", query = "SELECT t FROM TestPlan t WHERE t.isOpen = :isOpen")})
+    @NamedQuery(name = "TestPlan.findByIsOpen", query = "SELECT t FROM TestPlan t WHERE t.isOpen = :isOpen"),
+    @NamedQuery(name = "TestPlan.findById", query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.id = :id"),
+    @NamedQuery(name = "TestPlan.findByTestProjectId", query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.testProjectId = :testProjectId")})
 public class TestPlan extends VMAuditedObject implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected TestPlanPK testPlanPK;
+    @Column(name = "active")
+    private Boolean active;
+    @Column(name = "is_open")
+    private Boolean isOpen;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "active")
-    private boolean active;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "is_open")
-    private boolean isOpen;
+    @JoinColumn(name = "test_project_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private TestProject testProject;
     @OneToMany(mappedBy = "testPlan")
     private List<TestPlan> testPlanList;
     @JoinColumns({
@@ -64,9 +61,6 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         @JoinColumn(name = "regression_test_plan_test_project_id", referencedColumnName = "test_project_id")})
     @ManyToOne
     private TestPlan testPlan;
-    @JoinColumn(name = "test_project_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private TestProject testProject;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testPlan")
     private List<TestPlanHasTest> testPlanHasTestList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testPlan")
@@ -94,6 +88,22 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         this.testPlanPK = testPlanPK;
     }
 
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Boolean getIsOpen() {
+        return isOpen;
+    }
+
+    public void setIsOpen(Boolean isOpen) {
+        this.isOpen = isOpen;
+    }
+
     public String getNotes() {
         return notes;
     }
@@ -102,20 +112,12 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         this.notes = notes;
     }
 
-    public boolean getActive() {
-        return active;
+    public TestProject getTestProject() {
+        return testProject;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public boolean getIsOpen() {
-        return isOpen;
-    }
-
-    public void setIsOpen(boolean isOpen) {
-        this.isOpen = isOpen;
+    public void setTestProject(TestProject testProject) {
+        this.testProject = testProject;
     }
 
     @XmlTransient
@@ -134,14 +136,6 @@ public class TestPlan extends VMAuditedObject implements Serializable {
 
     public void setTestPlan(TestPlan testPlan) {
         this.testPlan = testPlan;
-    }
-
-    public TestProject getTestProject() {
-        return testProject;
-    }
-
-    public void setTestProject(TestProject testProject) {
-        this.testProject = testProject;
     }
 
     @XmlTransient
@@ -178,15 +172,12 @@ public class TestPlan extends VMAuditedObject implements Serializable {
             return false;
         }
         TestPlan other = (TestPlan) object;
-        if ((this.testPlanPK == null && other.testPlanPK != null) || (this.testPlanPK != null && !this.testPlanPK.equals(other.testPlanPK))) {
-            return false;
-        }
-        return true;
+        return (this.testPlanPK != null || other.testPlanPK == null) && (this.testPlanPK == null || this.testPlanPK.equals(other.testPlanPK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestPlan[ testPlanPK=" + testPlanPK + " ]";
     }
-    
+
 }

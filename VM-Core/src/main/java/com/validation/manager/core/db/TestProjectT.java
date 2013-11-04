@@ -28,31 +28,26 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "TestProjectT.findAll", query = "SELECT t FROM TestProjectT t"),
     @NamedQuery(name = "TestProjectT.findByRecordId", query = "SELECT t FROM TestProjectT t WHERE t.recordId = :recordId"),
+    @NamedQuery(name = "TestProjectT.findByActive", query = "SELECT t FROM TestProjectT t WHERE t.active = :active"),
     @NamedQuery(name = "TestProjectT.findById", query = "SELECT t FROM TestProjectT t WHERE t.id = :id"),
-    @NamedQuery(name = "TestProjectT.findByName", query = "SELECT t FROM TestProjectT t WHERE t.name = :name"),
-    @NamedQuery(name = "TestProjectT.findByActive", query = "SELECT t FROM TestProjectT t WHERE t.active = :active")})
+    @NamedQuery(name = "TestProjectT.findByName", query = "SELECT t FROM TestProjectT t WHERE t.name = :name")})
 public class TestProjectT implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @NotNull
     @Column(name = "record_id")
     private Integer recordId;
-    @Basic(optional = false)
-    @NotNull
+    @Column(name = "active")
+    private Boolean active;
     @Column(name = "id")
-    private int id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 45)
+    private Integer id;
+    @Size(max = 255)
     @Column(name = "name")
     private String name;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "active")
-    private boolean active;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
 
@@ -78,11 +73,19 @@ public class TestProjectT implements Serializable {
         this.recordId = recordId;
     }
 
-    public int getId() {
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -92,14 +95,6 @@ public class TestProjectT implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean getActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 
     public String getNotes() {
@@ -134,5 +129,5 @@ public class TestProjectT implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.TestProjectT[ recordId=" + recordId + " ]";
     }
-    
+
 }

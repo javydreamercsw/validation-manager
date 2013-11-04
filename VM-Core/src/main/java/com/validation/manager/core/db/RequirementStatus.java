@@ -8,7 +8,6 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -48,14 +47,13 @@ public class RequirementStatus implements Serializable {
             allocationSize = 1,
             initialValue = 1000)
     @Basic(optional = false)
+    @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "status")
     private String status;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementStatusId")
+    @OneToMany(mappedBy = "requirementStatusId")
     private List<Requirement> requirementList;
 
     public RequirementStatus() {
@@ -105,10 +103,7 @@ public class RequirementStatus implements Serializable {
             return false;
         }
         RequirementStatus other = (RequirementStatus) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

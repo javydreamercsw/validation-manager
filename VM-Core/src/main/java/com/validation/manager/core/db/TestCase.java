@@ -8,7 +8,6 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -23,7 +22,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -38,51 +36,44 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "TestCase.findAll", query = "SELECT t FROM TestCase t"),
-    @NamedQuery(name = "TestCase.findById", query = "SELECT t FROM TestCase t WHERE t.testCasePK.id = :id"),
-    @NamedQuery(name = "TestCase.findByTestId", query = "SELECT t FROM TestCase t WHERE t.testCasePK.testId = :testId"),
+    @NamedQuery(name = "TestCase.findByActive", query = "SELECT t FROM TestCase t WHERE t.active = :active"),
+    @NamedQuery(name = "TestCase.findByCreationDate", query = "SELECT t FROM TestCase t WHERE t.creationDate = :creationDate"),
+    @NamedQuery(name = "TestCase.findByIsOpen", query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen"),
     @NamedQuery(name = "TestCase.findByName", query = "SELECT t FROM TestCase t WHERE t.name = :name"),
     @NamedQuery(name = "TestCase.findByVersion", query = "SELECT t FROM TestCase t WHERE t.version = :version"),
-    @NamedQuery(name = "TestCase.findByCreationDate", query = "SELECT t FROM TestCase t WHERE t.creationDate = :creationDate"),
-    @NamedQuery(name = "TestCase.findByActive", query = "SELECT t FROM TestCase t WHERE t.active = :active"),
-    @NamedQuery(name = "TestCase.findByIsOpen", query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
+    @NamedQuery(name = "TestCase.findById", query = "SELECT t FROM TestCase t WHERE t.testCasePK.id = :id"),
+    @NamedQuery(name = "TestCase.findByTestId", query = "SELECT t FROM TestCase t WHERE t.testCasePK.testId = :testId")})
 public class TestCase implements Serializable {
 
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "summary")
-    private byte[] summary;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected TestCasePK testCasePK;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "version")
-    private short version;
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "expected_results")
-    private String expectedResults;
-    @Basic(optional = false)
-    @NotNull
+    @Column(name = "active")
+    private Boolean active;
     @Column(name = "creation_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
-    @Column(name = "active")
-    private Boolean active;
+    @Lob
+    @Size(max = 2147483647)
+    @Column(name = "expected_results")
+    private String expectedResults;
     @Column(name = "is_open")
     private Boolean isOpen;
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
+    @Lob
+    @Column(name = "summary")
+    private byte[] summary;
+    @Column(name = "version")
+    private Short version;
     @ManyToMany(mappedBy = "testCaseList")
     private List<RiskControl> riskControlList;
     @JoinColumn(name = "test_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Test test;
     @JoinColumn(name = "author_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne
     private VmUser authorId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testCase")
     private List<Step> stepList;
@@ -114,28 +105,12 @@ public class TestCase implements Serializable {
         this.testCasePK = testCasePK;
     }
 
-    public String getName() {
-        return name;
+    public Boolean getActive() {
+        return active;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public short getVersion() {
-        return version;
-    }
-
-    public void setVersion(short version) {
-        this.version = version;
-    }
-
-    public String getExpectedResults() {
-        return expectedResults;
-    }
-
-    public void setExpectedResults(String expectedResults) {
-        this.expectedResults = expectedResults;
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Date getCreationDate() {
@@ -146,12 +121,12 @@ public class TestCase implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public Boolean getActive() {
-        return active;
+    public String getExpectedResults() {
+        return expectedResults;
     }
 
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setExpectedResults(String expectedResults) {
+        this.expectedResults = expectedResults;
     }
 
     public Boolean getIsOpen() {
@@ -160,6 +135,30 @@ public class TestCase implements Serializable {
 
     public void setIsOpen(Boolean isOpen) {
         this.isOpen = isOpen;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public byte[] getSummary() {
+        return summary;
+    }
+
+    public void setSummary(byte[] summary) {
+        this.summary = summary;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public void setVersion(Short version) {
+        this.version = version;
     }
 
     @XmlTransient
@@ -212,23 +211,12 @@ public class TestCase implements Serializable {
             return false;
         }
         TestCase other = (TestCase) object;
-        if ((this.testCasePK == null && other.testCasePK != null) || (this.testCasePK != null && !this.testCasePK.equals(other.testCasePK))) {
-            return false;
-        }
-        return true;
+        return (this.testCasePK != null || other.testCasePK == null) && (this.testCasePK == null || this.testCasePK.equals(other.testCasePK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCase[ testCasePK=" + testCasePK + " ]";
-    }
-
-    public byte[] getSummary() {
-        return summary;
-    }
-
-    public void setSummary(byte[] summary) {
-        this.summary = summary;
     }
 
 }

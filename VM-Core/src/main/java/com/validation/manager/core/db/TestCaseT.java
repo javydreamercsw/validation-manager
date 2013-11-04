@@ -31,62 +31,51 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "TestCaseT.findAll", query = "SELECT t FROM TestCaseT t"),
     @NamedQuery(name = "TestCaseT.findByRecordId", query = "SELECT t FROM TestCaseT t WHERE t.recordId = :recordId"),
-    @NamedQuery(name = "TestCaseT.findById", query = "SELECT t FROM TestCaseT t WHERE t.id = :id"),
-    @NamedQuery(name = "TestCaseT.findByTestId", query = "SELECT t FROM TestCaseT t WHERE t.testId = :testId"),
-    @NamedQuery(name = "TestCaseT.findByVersion", query = "SELECT t FROM TestCaseT t WHERE t.version = :version"),
-    @NamedQuery(name = "TestCaseT.findByCreationDate", query = "SELECT t FROM TestCaseT t WHERE t.creationDate = :creationDate"),
-    @NamedQuery(name = "TestCaseT.findByModificationDate", query = "SELECT t FROM TestCaseT t WHERE t.modificationDate = :modificationDate"),
     @NamedQuery(name = "TestCaseT.findByActive", query = "SELECT t FROM TestCaseT t WHERE t.active = :active"),
-    @NamedQuery(name = "TestCaseT.findByIsOpen", query = "SELECT t FROM TestCaseT t WHERE t.isOpen = :isOpen"),
     @NamedQuery(name = "TestCaseT.findByAuthorId", query = "SELECT t FROM TestCaseT t WHERE t.authorId = :authorId"),
-    @NamedQuery(name = "TestCaseT.findByUpdaterId", query = "SELECT t FROM TestCaseT t WHERE t.updaterId = :updaterId")})
+    @NamedQuery(name = "TestCaseT.findByCreationDate", query = "SELECT t FROM TestCaseT t WHERE t.creationDate = :creationDate"),
+    @NamedQuery(name = "TestCaseT.findById", query = "SELECT t FROM TestCaseT t WHERE t.id = :id"),
+    @NamedQuery(name = "TestCaseT.findByIsOpen", query = "SELECT t FROM TestCaseT t WHERE t.isOpen = :isOpen"),
+    @NamedQuery(name = "TestCaseT.findByModificationDate", query = "SELECT t FROM TestCaseT t WHERE t.modificationDate = :modificationDate"),
+    @NamedQuery(name = "TestCaseT.findByTestId", query = "SELECT t FROM TestCaseT t WHERE t.testId = :testId"),
+    @NamedQuery(name = "TestCaseT.findByUpdaterId", query = "SELECT t FROM TestCaseT t WHERE t.updaterId = :updaterId"),
+    @NamedQuery(name = "TestCaseT.findByVersion", query = "SELECT t FROM TestCaseT t WHERE t.version = :version")})
 public class TestCaseT implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @NotNull
     @Column(name = "record_id")
     private Integer recordId;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "id")
-    private int id;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "test_id")
-    private int testId;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "version")
-    private short version;
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "summary")
-    private String summary;
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "expected_results")
-    private String expectedResults;
-    @Basic(optional = false)
-    @NotNull
+    @Column(name = "active")
+    private Boolean active;
+    @Column(name = "author_id")
+    private Integer authorId;
     @Column(name = "creation_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
-    @Basic(optional = false)
-    @NotNull
+    @Lob
+    @Size(max = 2147483647)
+    @Column(name = "expected_results")
+    private String expectedResults;
+    @Column(name = "id")
+    private Integer id;
+    @Column(name = "is_open")
+    private Boolean isOpen;
     @Column(name = "modification_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationDate;
-    @Column(name = "active")
-    private Boolean active;
-    @Column(name = "is_open")
-    private Boolean isOpen;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "author_id")
-    private int authorId;
+    @Lob
+    @Size(max = 2147483647)
+    @Column(name = "summary")
+    private String summary;
+    @Column(name = "test_id")
+    private Integer testId;
     @Column(name = "updater_id")
     private Integer updaterId;
+    @Column(name = "version")
+    private Short version;
 
     public TestCaseT() {
     }
@@ -113,44 +102,20 @@ public class TestCaseT implements Serializable {
         this.recordId = recordId;
     }
 
-    public int getId() {
-        return id;
+    public Boolean getActive() {
+        return active;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
-    public int getTestId() {
-        return testId;
+    public Integer getAuthorId() {
+        return authorId;
     }
 
-    public void setTestId(int testId) {
-        this.testId = testId;
-    }
-
-    public short getVersion() {
-        return version;
-    }
-
-    public void setVersion(short version) {
-        this.version = version;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
-
-    public String getExpectedResults() {
-        return expectedResults;
-    }
-
-    public void setExpectedResults(String expectedResults) {
-        this.expectedResults = expectedResults;
+    public void setAuthorId(Integer authorId) {
+        this.authorId = authorId;
     }
 
     public Date getCreationDate() {
@@ -161,20 +126,20 @@ public class TestCaseT implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public Date getModificationDate() {
-        return modificationDate;
+    public String getExpectedResults() {
+        return expectedResults;
     }
 
-    public void setModificationDate(Date modificationDate) {
-        this.modificationDate = modificationDate;
+    public void setExpectedResults(String expectedResults) {
+        this.expectedResults = expectedResults;
     }
 
-    public Boolean getActive() {
-        return active;
+    public Integer getId() {
+        return id;
     }
 
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Boolean getIsOpen() {
@@ -185,12 +150,28 @@ public class TestCaseT implements Serializable {
         this.isOpen = isOpen;
     }
 
-    public int getAuthorId() {
-        return authorId;
+    public Date getModificationDate() {
+        return modificationDate;
     }
 
-    public void setAuthorId(int authorId) {
-        this.authorId = authorId;
+    public void setModificationDate(Date modificationDate) {
+        this.modificationDate = modificationDate;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public Integer getTestId() {
+        return testId;
+    }
+
+    public void setTestId(Integer testId) {
+        this.testId = testId;
     }
 
     public Integer getUpdaterId() {
@@ -199,6 +180,14 @@ public class TestCaseT implements Serializable {
 
     public void setUpdaterId(Integer updaterId) {
         this.updaterId = updaterId;
+    }
+
+    public Short getVersion() {
+        return version;
+    }
+
+    public void setVersion(Short version) {
+        this.version = version;
     }
 
     @Override
@@ -225,5 +214,5 @@ public class TestCaseT implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.TestCaseT[ recordId=" + recordId + " ]";
     }
-    
+
 }

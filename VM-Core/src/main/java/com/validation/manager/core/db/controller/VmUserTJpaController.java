@@ -140,5 +140,5 @@ public class VmUserTJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

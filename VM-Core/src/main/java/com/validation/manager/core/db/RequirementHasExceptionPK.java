@@ -17,10 +17,11 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class RequirementHasExceptionPK implements Serializable {
+
     @Basic(optional = false)
     @NotNull
-    @Column(name = "requirement_id")
-    private int requirementId;
+    @Column(name = "vm_exception_reporter_id")
+    private int vmExceptionReporterId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "requirement_version")
@@ -31,8 +32,8 @@ public class RequirementHasExceptionPK implements Serializable {
     private int vmExceptionId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "vm_exception_reporter_id")
-    private int vmExceptionReporterId;
+    @Column(name = "requirement_id")
+    private int requirementId;
 
     public RequirementHasExceptionPK() {
     }
@@ -43,12 +44,12 @@ public class RequirementHasExceptionPK implements Serializable {
         this.vmExceptionReporterId = exceptionReporterId;
     }
 
-    public int getRequirementId() {
-        return requirementId;
+    public int getVmExceptionReporterId() {
+        return vmExceptionReporterId;
     }
 
-    public void setRequirementId(int requirementId) {
-        this.requirementId = requirementId;
+    public void setVmExceptionReporterId(int vmExceptionReporterId) {
+        this.vmExceptionReporterId = vmExceptionReporterId;
     }
 
     public int getRequirementVersion() {
@@ -67,21 +68,21 @@ public class RequirementHasExceptionPK implements Serializable {
         this.vmExceptionId = vmExceptionId;
     }
 
-    public int getVmExceptionReporterId() {
-        return vmExceptionReporterId;
+    public int getRequirementId() {
+        return requirementId;
     }
 
-    public void setVmExceptionReporterId(int vmExceptionReporterId) {
-        this.vmExceptionReporterId = vmExceptionReporterId;
+    public void setRequirementId(int requirementId) {
+        this.requirementId = requirementId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (int) requirementId;
+        hash += (int) vmExceptionReporterId;
         hash += (int) requirementVersion;
         hash += (int) vmExceptionId;
-        hash += (int) vmExceptionReporterId;
+        hash += (int) requirementId;
         return hash;
     }
 
@@ -92,7 +93,7 @@ public class RequirementHasExceptionPK implements Serializable {
             return false;
         }
         RequirementHasExceptionPK other = (RequirementHasExceptionPK) object;
-        if (this.requirementId != other.requirementId) {
+        if (this.vmExceptionReporterId != other.vmExceptionReporterId) {
             return false;
         }
         if (this.requirementVersion != other.requirementVersion) {
@@ -101,15 +102,12 @@ public class RequirementHasExceptionPK implements Serializable {
         if (this.vmExceptionId != other.vmExceptionId) {
             return false;
         }
-        if (this.vmExceptionReporterId != other.vmExceptionReporterId) {
-            return false;
-        }
-        return true;
+        return this.requirementId == other.requirementId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementHasExceptionPK[ requirementId=" + requirementId + ", requirementVersion=" + requirementVersion + ", vmExceptionId=" + vmExceptionId + ", vmExceptionReporterId=" + vmExceptionReporterId + " ]";
+        return "com.validation.manager.core.db.RequirementHasExceptionPK[ vmExceptionReporterId=" + vmExceptionReporterId + ", requirementVersion=" + requirementVersion + ", vmExceptionId=" + vmExceptionId + ", requirementId=" + requirementId + " ]";
     }
-    
+
 }

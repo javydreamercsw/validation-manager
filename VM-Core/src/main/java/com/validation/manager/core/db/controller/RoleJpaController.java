@@ -339,5 +339,5 @@ public class RoleJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

@@ -205,5 +205,5 @@ public class AssigmentTypeJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

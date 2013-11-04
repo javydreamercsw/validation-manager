@@ -439,5 +439,5 @@ public class RiskItemJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

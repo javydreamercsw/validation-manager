@@ -32,10 +32,16 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "RiskControl.findById", query = "SELECT r FROM RiskControl r WHERE r.riskControlPK.id = :id"),
     @NamedQuery(name = "RiskControl.findByRiskControlTypeId", query = "SELECT r FROM RiskControl r WHERE r.riskControlPK.riskControlTypeId = :riskControlTypeId")})
 public class RiskControl implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RiskControlPK riskControlPK;
-    @ManyToMany(mappedBy = "riskControlList")
+    @JoinTable(name = "risk_item_has_risk_control", joinColumns = {
+        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
+        @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
+        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")})
+    @ManyToMany
     private List<RiskItem> riskItemList;
     @JoinTable(name = "risk_control_has_test_case", joinColumns = {
         @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
@@ -44,12 +50,7 @@ public class RiskControl implements Serializable {
         @JoinColumn(name = "test_case_test_id", referencedColumnName = "test_id")})
     @ManyToMany
     private List<TestCase> testCaseList;
-    @JoinTable(name = "risk_control_has_requirement", joinColumns = {
-        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version")})
-    @ManyToMany
+    @ManyToMany(mappedBy = "riskControlList")
     private List<Requirement> requirementList;
     @JoinTable(name = "risk_control_has_residual_risk_item", joinColumns = {
         @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
@@ -143,15 +144,12 @@ public class RiskControl implements Serializable {
             return false;
         }
         RiskControl other = (RiskControl) object;
-        if ((this.riskControlPK == null && other.riskControlPK != null) || (this.riskControlPK != null && !this.riskControlPK.equals(other.riskControlPK))) {
-            return false;
-        }
-        return true;
+        return (this.riskControlPK != null || other.riskControlPK == null) && (this.riskControlPK == null || this.riskControlPK.equals(other.riskControlPK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RiskControl[ riskControlPK=" + riskControlPK + " ]";
     }
-    
+
 }

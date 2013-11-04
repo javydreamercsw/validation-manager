@@ -10,8 +10,8 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.TestPlanHasTestPK;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -39,31 +39,31 @@ public class TestPlanHasTestJpaController implements Serializable {
         if (testPlanHasTest.getTestPlanHasTestPK() == null) {
             testPlanHasTest.setTestPlanHasTestPK(new TestPlanHasTestPK());
         }
+        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         testPlanHasTest.getTestPlanHasTestPK().setTestId(testPlanHasTest.getTest().getId());
         testPlanHasTest.getTestPlanHasTestPK().setTestPlanId(testPlanHasTest.getTestPlan().getTestPlanPK().getId());
-        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Test test = testPlanHasTest.getTest();
-            if (test != null) {
-                test = em.getReference(test.getClass(), test.getId());
-                testPlanHasTest.setTest(test);
-            }
             TestPlan testPlan = testPlanHasTest.getTestPlan();
             if (testPlan != null) {
                 testPlan = em.getReference(testPlan.getClass(), testPlan.getTestPlanPK());
                 testPlanHasTest.setTestPlan(testPlan);
             }
-            em.persist(testPlanHasTest);
+            Test test = testPlanHasTest.getTest();
             if (test != null) {
-                test.getTestPlanHasTestList().add(testPlanHasTest);
-                test = em.merge(test);
+                test = em.getReference(test.getClass(), test.getId());
+                testPlanHasTest.setTest(test);
             }
+            em.persist(testPlanHasTest);
             if (testPlan != null) {
                 testPlan.getTestPlanHasTestList().add(testPlanHasTest);
                 testPlan = em.merge(testPlan);
+            }
+            if (test != null) {
+                test.getTestPlanHasTestList().add(testPlanHasTest);
+                test = em.merge(test);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -79,35 +79,27 @@ public class TestPlanHasTestJpaController implements Serializable {
     }
 
     public void edit(TestPlanHasTest testPlanHasTest) throws NonexistentEntityException, Exception {
+        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         testPlanHasTest.getTestPlanHasTestPK().setTestId(testPlanHasTest.getTest().getId());
         testPlanHasTest.getTestPlanHasTestPK().setTestPlanId(testPlanHasTest.getTestPlan().getTestPlanPK().getId());
-        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             TestPlanHasTest persistentTestPlanHasTest = em.find(TestPlanHasTest.class, testPlanHasTest.getTestPlanHasTestPK());
-            Test testOld = persistentTestPlanHasTest.getTest();
-            Test testNew = testPlanHasTest.getTest();
             TestPlan testPlanOld = persistentTestPlanHasTest.getTestPlan();
             TestPlan testPlanNew = testPlanHasTest.getTestPlan();
-            if (testNew != null) {
-                testNew = em.getReference(testNew.getClass(), testNew.getId());
-                testPlanHasTest.setTest(testNew);
-            }
+            Test testOld = persistentTestPlanHasTest.getTest();
+            Test testNew = testPlanHasTest.getTest();
             if (testPlanNew != null) {
                 testPlanNew = em.getReference(testPlanNew.getClass(), testPlanNew.getTestPlanPK());
                 testPlanHasTest.setTestPlan(testPlanNew);
             }
+            if (testNew != null) {
+                testNew = em.getReference(testNew.getClass(), testNew.getId());
+                testPlanHasTest.setTest(testNew);
+            }
             testPlanHasTest = em.merge(testPlanHasTest);
-            if (testOld != null && !testOld.equals(testNew)) {
-                testOld.getTestPlanHasTestList().remove(testPlanHasTest);
-                testOld = em.merge(testOld);
-            }
-            if (testNew != null && !testNew.equals(testOld)) {
-                testNew.getTestPlanHasTestList().add(testPlanHasTest);
-                testNew = em.merge(testNew);
-            }
             if (testPlanOld != null && !testPlanOld.equals(testPlanNew)) {
                 testPlanOld.getTestPlanHasTestList().remove(testPlanHasTest);
                 testPlanOld = em.merge(testPlanOld);
@@ -115,6 +107,14 @@ public class TestPlanHasTestJpaController implements Serializable {
             if (testPlanNew != null && !testPlanNew.equals(testPlanOld)) {
                 testPlanNew.getTestPlanHasTestList().add(testPlanHasTest);
                 testPlanNew = em.merge(testPlanNew);
+            }
+            if (testOld != null && !testOld.equals(testNew)) {
+                testOld.getTestPlanHasTestList().remove(testPlanHasTest);
+                testOld = em.merge(testOld);
+            }
+            if (testNew != null && !testNew.equals(testOld)) {
+                testNew.getTestPlanHasTestList().add(testPlanHasTest);
+                testNew = em.merge(testNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -145,15 +145,15 @@ public class TestPlanHasTestJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The testPlanHasTest with id " + id + " no longer exists.", enfe);
             }
-            Test test = testPlanHasTest.getTest();
-            if (test != null) {
-                test.getTestPlanHasTestList().remove(testPlanHasTest);
-                test = em.merge(test);
-            }
             TestPlan testPlan = testPlanHasTest.getTestPlan();
             if (testPlan != null) {
                 testPlan.getTestPlanHasTestList().remove(testPlanHasTest);
                 testPlan = em.merge(testPlan);
+            }
+            Test test = testPlanHasTest.getTest();
+            if (test != null) {
+                test.getTestPlanHasTestList().remove(testPlanHasTest);
+                test = em.merge(test);
             }
             em.remove(testPlanHasTest);
             em.getTransaction().commit();
@@ -209,5 +209,5 @@ public class TestPlanHasTestJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

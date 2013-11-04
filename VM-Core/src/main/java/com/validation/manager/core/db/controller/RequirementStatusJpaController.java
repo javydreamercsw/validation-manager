@@ -12,8 +12,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementStatus;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -34,7 +34,7 @@ public class RequirementStatusJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(RequirementStatus requirementStatus) {
+    public void create(RequirementStatus requirementStatus) throws PreexistingEntityException, Exception {
         if (requirementStatus.getRequirementList() == null) {
             requirementStatus.setRequirementList(new ArrayList<Requirement>());
         }
@@ -59,6 +59,11 @@ public class RequirementStatusJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findRequirementStatus(requirementStatus.getId()) != null) {
+                throw new PreexistingEntityException("RequirementStatus " + requirementStatus + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -66,7 +71,7 @@ public class RequirementStatusJpaController implements Serializable {
         }
     }
 
-    public void edit(RequirementStatus requirementStatus) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(RequirementStatus requirementStatus) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -74,18 +79,6 @@ public class RequirementStatusJpaController implements Serializable {
             RequirementStatus persistentRequirementStatus = em.find(RequirementStatus.class, requirementStatus.getId());
             List<Requirement> requirementListOld = persistentRequirementStatus.getRequirementList();
             List<Requirement> requirementListNew = requirementStatus.getRequirementList();
-            List<String> illegalOrphanMessages = null;
-            for (Requirement requirementListOldRequirement : requirementListOld) {
-                if (!requirementListNew.contains(requirementListOldRequirement)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain Requirement " + requirementListOldRequirement + " since its requirementStatusId field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
             for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
                 requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getRequirementPK());
@@ -94,6 +87,12 @@ public class RequirementStatusJpaController implements Serializable {
             requirementListNew = attachedRequirementListNew;
             requirementStatus.setRequirementList(requirementListNew);
             requirementStatus = em.merge(requirementStatus);
+            for (Requirement requirementListOldRequirement : requirementListOld) {
+                if (!requirementListNew.contains(requirementListOldRequirement)) {
+                    requirementListOldRequirement.setRequirementStatusId(null);
+                    requirementListOldRequirement = em.merge(requirementListOldRequirement);
+                }
+            }
             for (Requirement requirementListNewRequirement : requirementListNew) {
                 if (!requirementListOld.contains(requirementListNewRequirement)) {
                     RequirementStatus oldRequirementStatusIdOfRequirementListNewRequirement = requirementListNewRequirement.getRequirementStatusId();
@@ -122,7 +121,7 @@ public class RequirementStatusJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(Integer id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -134,16 +133,10 @@ public class RequirementStatusJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The requirementStatus with id " + id + " no longer exists.", enfe);
             }
-            List<String> illegalOrphanMessages = null;
-            List<Requirement> requirementListOrphanCheck = requirementStatus.getRequirementList();
-            for (Requirement requirementListOrphanCheckRequirement : requirementListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This RequirementStatus (" + requirementStatus + ") cannot be destroyed since the Requirement " + requirementListOrphanCheckRequirement + " in its requirementList field has a non-nullable requirementStatusId field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
+            List<Requirement> requirementList = requirementStatus.getRequirementList();
+            for (Requirement requirementListRequirement : requirementList) {
+                requirementListRequirement.setRequirementStatusId(null);
+                requirementListRequirement = em.merge(requirementListRequirement);
             }
             em.remove(requirementStatus);
             em.getTransaction().commit();
@@ -199,5 +192,5 @@ public class RequirementStatusJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

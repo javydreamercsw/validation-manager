@@ -28,18 +28,19 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "UserTestProjectRole.findByUserId", query = "SELECT u FROM UserTestProjectRole u WHERE u.userTestProjectRolePK.userId = :userId"),
     @NamedQuery(name = "UserTestProjectRole.findByRoleId", query = "SELECT u FROM UserTestProjectRole u WHERE u.userTestProjectRolePK.roleId = :roleId")})
 public class UserTestProjectRole implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserTestProjectRolePK userTestProjectRolePK;
-    @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Role role;
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
     @JoinColumn(name = "test_project_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private TestProject testProject;
+    @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private Role role;
 
     public UserTestProjectRole() {
     }
@@ -60,14 +61,6 @@ public class UserTestProjectRole implements Serializable {
         this.userTestProjectRolePK = userTestProjectRolePK;
     }
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
     public VmUser getVmUser() {
         return vmUser;
     }
@@ -84,6 +77,14 @@ public class UserTestProjectRole implements Serializable {
         this.testProject = testProject;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -98,15 +99,12 @@ public class UserTestProjectRole implements Serializable {
             return false;
         }
         UserTestProjectRole other = (UserTestProjectRole) object;
-        if ((this.userTestProjectRolePK == null && other.userTestProjectRolePK != null) || (this.userTestProjectRolePK != null && !this.userTestProjectRolePK.equals(other.userTestProjectRolePK))) {
-            return false;
-        }
-        return true;
+        return (this.userTestProjectRolePK != null || other.userTestProjectRolePK == null) && (this.userTestProjectRolePK == null || this.userTestProjectRolePK.equals(other.userTestProjectRolePK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserTestProjectRole[ userTestProjectRolePK=" + userTestProjectRolePK + " ]";
     }
-    
+
 }

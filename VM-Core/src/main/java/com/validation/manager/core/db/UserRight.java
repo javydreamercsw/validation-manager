@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -51,12 +53,13 @@ public class UserRight implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "description")
     private String description;
-    @ManyToMany(mappedBy = "userRightList")
+    @JoinTable(name = "role_has_right", joinColumns = {
+        @JoinColumn(name = "right_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "role_id", referencedColumnName = "id")})
+    @ManyToMany
     private List<Role> roleList;
 
     public UserRight() {
@@ -106,10 +109,7 @@ public class UserRight implements Serializable {
             return false;
         }
         UserRight other = (UserRight) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

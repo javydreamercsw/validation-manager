@@ -49,19 +49,16 @@ public class RiskControlType implements Serializable {
             allocationSize = 1,
             initialValue = 1000)
     @Basic(optional = false)
+    @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskControlType")
     private List<RiskControl> riskControlList;
 
@@ -81,20 +78,20 @@ public class RiskControlType implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @XmlTransient
@@ -121,10 +118,7 @@ public class RiskControlType implements Serializable {
             return false;
         }
         RiskControlType other = (RiskControlType) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

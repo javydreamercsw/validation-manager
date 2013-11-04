@@ -55,21 +55,19 @@ public class Role implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "description")
     private String description;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
-    @ManyToMany(mappedBy = "roleList")
-    private List<VmUser> vmUserList;
-    @JoinTable(name = "role_has_right", joinColumns = {
+    @JoinTable(name = "user_has_role", joinColumns = {
         @JoinColumn(name = "role_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "right_id", referencedColumnName = "id")})
+        @JoinColumn(name = "user_id", referencedColumnName = "id")})
     @ManyToMany
+    private List<VmUser> vmUserList;
+    @ManyToMany(mappedBy = "roleList")
     private List<UserRight> userRightList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
     private List<UserTestProjectRole> userTestProjectRoleList;
@@ -161,10 +159,7 @@ public class Role implements Serializable {
             return false;
         }
         Role other = (Role) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

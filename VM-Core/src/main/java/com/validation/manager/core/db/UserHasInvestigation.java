@@ -28,26 +28,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "UserHasInvestigation.findAll", query = "SELECT u FROM UserHasInvestigation u"),
-    @NamedQuery(name = "UserHasInvestigation.findByUserId", query = "SELECT u FROM UserHasInvestigation u WHERE u.userHasInvestigationPK.userId = :userId"),
-    @NamedQuery(name = "UserHasInvestigation.findByInvestigationId", query = "SELECT u FROM UserHasInvestigation u WHERE u.userHasInvestigationPK.investigationId = :investigationId"),
+    @NamedQuery(name = "UserHasInvestigation.findByCloseDate", query = "SELECT u FROM UserHasInvestigation u WHERE u.closeDate = :closeDate"),
     @NamedQuery(name = "UserHasInvestigation.findByStartDate", query = "SELECT u FROM UserHasInvestigation u WHERE u.startDate = :startDate"),
-    @NamedQuery(name = "UserHasInvestigation.findByCloseDate", query = "SELECT u FROM UserHasInvestigation u WHERE u.closeDate = :closeDate")})
+    @NamedQuery(name = "UserHasInvestigation.findByUserId", query = "SELECT u FROM UserHasInvestigation u WHERE u.userHasInvestigationPK.userId = :userId"),
+    @NamedQuery(name = "UserHasInvestigation.findByInvestigationId", query = "SELECT u FROM UserHasInvestigation u WHERE u.userHasInvestigationPK.investigationId = :investigationId")})
 public class UserHasInvestigation implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserHasInvestigationPK userHasInvestigationPK;
-    @Column(name = "start_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startDate;
     @Column(name = "close_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date closeDate;
-    @JoinColumn(name = "investigation_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Investigation investigation;
+    @Column(name = "start_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date startDate;
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
+    @JoinColumn(name = "investigation_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private Investigation investigation;
 
     public UserHasInvestigation() {
     }
@@ -68,14 +69,6 @@ public class UserHasInvestigation implements Serializable {
         this.userHasInvestigationPK = userHasInvestigationPK;
     }
 
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
     public Date getCloseDate() {
         return closeDate;
     }
@@ -84,12 +77,12 @@ public class UserHasInvestigation implements Serializable {
         this.closeDate = closeDate;
     }
 
-    public Investigation getInvestigation() {
-        return investigation;
+    public Date getStartDate() {
+        return startDate;
     }
 
-    public void setInvestigation(Investigation investigation) {
-        this.investigation = investigation;
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public VmUser getVmUser() {
@@ -98,6 +91,14 @@ public class UserHasInvestigation implements Serializable {
 
     public void setVmUser(VmUser vmUser) {
         this.vmUser = vmUser;
+    }
+
+    public Investigation getInvestigation() {
+        return investigation;
+    }
+
+    public void setInvestigation(Investigation investigation) {
+        this.investigation = investigation;
     }
 
     @Override
@@ -114,15 +115,12 @@ public class UserHasInvestigation implements Serializable {
             return false;
         }
         UserHasInvestigation other = (UserHasInvestigation) object;
-        if ((this.userHasInvestigationPK == null && other.userHasInvestigationPK != null) || (this.userHasInvestigationPK != null && !this.userHasInvestigationPK.equals(other.userHasInvestigationPK))) {
-            return false;
-        }
-        return true;
+        return (this.userHasInvestigationPK != null || other.userHasInvestigationPK == null) && (this.userHasInvestigationPK == null || this.userHasInvestigationPK.equals(other.userHasInvestigationPK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserHasInvestigation[ userHasInvestigationPK=" + userHasInvestigationPK + " ]";
     }
-    
+
 }

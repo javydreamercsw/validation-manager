@@ -79,10 +79,7 @@ public class RootCausePK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        if (this.rootCauseTypeId != other.rootCauseTypeId) {
-            return false;
-        }
-        return true;
+        return this.rootCauseTypeId == other.rootCauseTypeId;
     }
 
     @Override

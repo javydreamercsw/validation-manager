@@ -13,6 +13,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -33,7 +34,7 @@ public class FailureModeJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(FailureMode failureMode) {
+    public void create(FailureMode failureMode) throws PreexistingEntityException, Exception {
         if (failureMode.getRiskItemList() == null) {
             failureMode.setRiskItemList(new ArrayList<RiskItem>());
         }
@@ -53,6 +54,11 @@ public class FailureModeJpaController implements Serializable {
                 riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findFailureMode(failureMode.getId()) != null) {
+                throw new PreexistingEntityException("FailureMode " + failureMode + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -176,5 +182,5 @@ public class FailureModeJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

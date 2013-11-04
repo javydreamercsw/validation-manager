@@ -7,20 +7,17 @@ package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -34,48 +31,28 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "RiskItem.findAll", query = "SELECT r FROM RiskItem r"),
-    @NamedQuery(name = "RiskItem.findById", query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.id = :id"),
-    @NamedQuery(name = "RiskItem.findByFMEAid", query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAid = :fMEAid"),
     @NamedQuery(name = "RiskItem.findBySequence", query = "SELECT r FROM RiskItem r WHERE r.sequence = :sequence"),
-    @NamedQuery(name = "RiskItem.findByVersion", query = "SELECT r FROM RiskItem r WHERE r.version = :version")})
+    @NamedQuery(name = "RiskItem.findByVersion", query = "SELECT r FROM RiskItem r WHERE r.version = :version"),
+    @NamedQuery(name = "RiskItem.findById", query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.id = :id"),
+    @NamedQuery(name = "RiskItem.findByFMEAid", query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAid = :fMEAid")})
 public class RiskItem implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RiskItemPK riskItemPK;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "sequence")
-    private int sequence;
-    @Basic(optional = false)
-    @NotNull
+    private Integer sequence;
     @Column(name = "version")
-    private int version;
-    @JoinTable(name = "risk_item_has_failure_mode", joinColumns = {
-        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "failure_mode_id", referencedColumnName = "id")})
-    @ManyToMany
+    private Integer version;
+    @ManyToMany(mappedBy = "riskItemList")
     private List<FailureMode> failureModeList;
-    @JoinTable(name = "risk_item_has_risk_control", joinColumns = {
-        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")})
-    @ManyToMany
+    @ManyToMany(mappedBy = "riskItemList")
     private List<RiskControl> riskControlList;
-    @JoinTable(name = "risk_item_has_cause", joinColumns = {
-        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "cause_id", referencedColumnName = "id")})
-    @ManyToMany
+    @ManyToMany(mappedBy = "riskItemList")
     private List<Cause> causeList;
     @ManyToMany(mappedBy = "riskItemList1")
     private List<RiskControl> riskControlList1;
-    @JoinTable(name = "risk_item_has_hazard", joinColumns = {
-        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "hazard_id", referencedColumnName = "id")})
-    @ManyToMany
+    @ManyToMany(mappedBy = "riskItemList")
     private List<Hazard> hazardList;
     @JoinColumn(name = "FMEA_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
@@ -108,19 +85,19 @@ public class RiskItem implements Serializable {
         this.riskItemPK = riskItemPK;
     }
 
-    public int getSequence() {
+    public Integer getSequence() {
         return sequence;
     }
 
-    public void setSequence(int sequence) {
+    public void setSequence(Integer sequence) {
         this.sequence = sequence;
     }
 
-    public int getVersion() {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 
@@ -206,15 +183,12 @@ public class RiskItem implements Serializable {
             return false;
         }
         RiskItem other = (RiskItem) object;
-        if ((this.riskItemPK == null && other.riskItemPK != null) || (this.riskItemPK != null && !this.riskItemPK.equals(other.riskItemPK))) {
-            return false;
-        }
-        return true;
+        return (this.riskItemPK != null || other.riskItemPK == null) && (this.riskItemPK == null || this.riskItemPK.equals(other.riskItemPK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RiskItem[ riskItemPK=" + riskItemPK + " ]";
     }
-    
+
 }

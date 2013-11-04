@@ -7,7 +7,6 @@ package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -18,7 +17,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -31,22 +29,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "UserModifiedRecord.findAll", query = "SELECT u FROM UserModifiedRecord u"),
-    @NamedQuery(name = "UserModifiedRecord.findByUserId", query = "SELECT u FROM UserModifiedRecord u WHERE u.userModifiedRecordPK.userId = :userId"),
-    @NamedQuery(name = "UserModifiedRecord.findByRecordId", query = "SELECT u FROM UserModifiedRecord u WHERE u.userModifiedRecordPK.recordId = :recordId"),
     @NamedQuery(name = "UserModifiedRecord.findByModifiedDate", query = "SELECT u FROM UserModifiedRecord u WHERE u.modifiedDate = :modifiedDate"),
-    @NamedQuery(name = "UserModifiedRecord.findByReason", query = "SELECT u FROM UserModifiedRecord u WHERE u.reason = :reason")})
+    @NamedQuery(name = "UserModifiedRecord.findByReason", query = "SELECT u FROM UserModifiedRecord u WHERE u.reason = :reason"),
+    @NamedQuery(name = "UserModifiedRecord.findByRecordId", query = "SELECT u FROM UserModifiedRecord u WHERE u.userModifiedRecordPK.recordId = :recordId"),
+    @NamedQuery(name = "UserModifiedRecord.findByUserId", query = "SELECT u FROM UserModifiedRecord u WHERE u.userModifiedRecordPK.userId = :userId")})
 public class UserModifiedRecord implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserModifiedRecordPK userModifiedRecordPK;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "reason")
     private String reason;
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
@@ -122,5 +117,5 @@ public class UserModifiedRecord implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.UserModifiedRecord[ userModifiedRecordPK=" + userModifiedRecordPK + " ]";
     }
-    
+
 }

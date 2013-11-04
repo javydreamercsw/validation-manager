@@ -336,5 +336,5 @@ public class RiskControlJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

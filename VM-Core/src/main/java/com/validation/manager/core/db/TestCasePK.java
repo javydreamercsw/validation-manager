@@ -78,10 +78,7 @@ public class TestCasePK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        if (this.testId != other.testId) {
-            return false;
-        }
-        return true;
+        return this.testId == other.testId;
     }
 
     @Override

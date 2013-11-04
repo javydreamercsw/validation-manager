@@ -10,10 +10,10 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.Investigation;
 import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.UserHasInvestigationPK;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.List;
@@ -39,30 +39,30 @@ public class UserHasInvestigationJpaController implements Serializable {
         if (userHasInvestigation.getUserHasInvestigationPK() == null) {
             userHasInvestigation.setUserHasInvestigationPK(new UserHasInvestigationPK());
         }
-        userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
         userHasInvestigation.getUserHasInvestigationPK().setInvestigationId(userHasInvestigation.getInvestigation().getId());
+        userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Investigation investigation = userHasInvestigation.getInvestigation();
-            if (investigation != null) {
-                investigation = em.getReference(investigation.getClass(), investigation.getId());
-                userHasInvestigation.setInvestigation(investigation);
-            }
             VmUser vmUser = userHasInvestigation.getVmUser();
             if (vmUser != null) {
                 vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
                 userHasInvestigation.setVmUser(vmUser);
             }
-            em.persist(userHasInvestigation);
+            Investigation investigation = userHasInvestigation.getInvestigation();
             if (investigation != null) {
-                investigation.getUserHasInvestigationList().add(userHasInvestigation);
-                investigation = em.merge(investigation);
+                investigation = em.getReference(investigation.getClass(), investigation.getId());
+                userHasInvestigation.setInvestigation(investigation);
             }
+            em.persist(userHasInvestigation);
             if (vmUser != null) {
                 vmUser.getUserHasInvestigationList().add(userHasInvestigation);
                 vmUser = em.merge(vmUser);
+            }
+            if (investigation != null) {
+                investigation.getUserHasInvestigationList().add(userHasInvestigation);
+                investigation = em.merge(investigation);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -78,34 +78,26 @@ public class UserHasInvestigationJpaController implements Serializable {
     }
 
     public void edit(UserHasInvestigation userHasInvestigation) throws NonexistentEntityException, Exception {
-        userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
         userHasInvestigation.getUserHasInvestigationPK().setInvestigationId(userHasInvestigation.getInvestigation().getId());
+        userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             UserHasInvestigation persistentUserHasInvestigation = em.find(UserHasInvestigation.class, userHasInvestigation.getUserHasInvestigationPK());
-            Investigation investigationOld = persistentUserHasInvestigation.getInvestigation();
-            Investigation investigationNew = userHasInvestigation.getInvestigation();
             VmUser vmUserOld = persistentUserHasInvestigation.getVmUser();
             VmUser vmUserNew = userHasInvestigation.getVmUser();
-            if (investigationNew != null) {
-                investigationNew = em.getReference(investigationNew.getClass(), investigationNew.getId());
-                userHasInvestigation.setInvestigation(investigationNew);
-            }
+            Investigation investigationOld = persistentUserHasInvestigation.getInvestigation();
+            Investigation investigationNew = userHasInvestigation.getInvestigation();
             if (vmUserNew != null) {
                 vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
                 userHasInvestigation.setVmUser(vmUserNew);
             }
+            if (investigationNew != null) {
+                investigationNew = em.getReference(investigationNew.getClass(), investigationNew.getId());
+                userHasInvestigation.setInvestigation(investigationNew);
+            }
             userHasInvestigation = em.merge(userHasInvestigation);
-            if (investigationOld != null && !investigationOld.equals(investigationNew)) {
-                investigationOld.getUserHasInvestigationList().remove(userHasInvestigation);
-                investigationOld = em.merge(investigationOld);
-            }
-            if (investigationNew != null && !investigationNew.equals(investigationOld)) {
-                investigationNew.getUserHasInvestigationList().add(userHasInvestigation);
-                investigationNew = em.merge(investigationNew);
-            }
             if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
                 vmUserOld.getUserHasInvestigationList().remove(userHasInvestigation);
                 vmUserOld = em.merge(vmUserOld);
@@ -113,6 +105,14 @@ public class UserHasInvestigationJpaController implements Serializable {
             if (vmUserNew != null && !vmUserNew.equals(vmUserOld)) {
                 vmUserNew.getUserHasInvestigationList().add(userHasInvestigation);
                 vmUserNew = em.merge(vmUserNew);
+            }
+            if (investigationOld != null && !investigationOld.equals(investigationNew)) {
+                investigationOld.getUserHasInvestigationList().remove(userHasInvestigation);
+                investigationOld = em.merge(investigationOld);
+            }
+            if (investigationNew != null && !investigationNew.equals(investigationOld)) {
+                investigationNew.getUserHasInvestigationList().add(userHasInvestigation);
+                investigationNew = em.merge(investigationNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -143,15 +143,15 @@ public class UserHasInvestigationJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userHasInvestigation with id " + id + " no longer exists.", enfe);
             }
-            Investigation investigation = userHasInvestigation.getInvestigation();
-            if (investigation != null) {
-                investigation.getUserHasInvestigationList().remove(userHasInvestigation);
-                investigation = em.merge(investigation);
-            }
             VmUser vmUser = userHasInvestigation.getVmUser();
             if (vmUser != null) {
                 vmUser.getUserHasInvestigationList().remove(userHasInvestigation);
                 vmUser = em.merge(vmUser);
+            }
+            Investigation investigation = userHasInvestigation.getInvestigation();
+            if (investigation != null) {
+                investigation.getUserHasInvestigationList().remove(userHasInvestigation);
+                investigation = em.merge(investigation);
             }
             em.remove(userHasInvestigation);
             em.getTransaction().commit();
@@ -207,5 +207,5 @@ public class UserHasInvestigationJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

@@ -205,5 +205,5 @@ public class SpecLevelJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }
