@@ -27,12 +27,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "RequirementHasException.findAll", query = "SELECT r FROM RequirementHasException r"),
-    @NamedQuery(name = "RequirementHasException.findByRequirementId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.requirementId = :requirementId"),
+    @NamedQuery(name = "RequirementHasException.findByRequirementHasExceptioncol", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptioncol = :requirementHasExceptioncol"),
+    @NamedQuery(name = "RequirementHasException.findByVmExceptionReporterId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.vmExceptionReporterId = :vmExceptionReporterId"),
     @NamedQuery(name = "RequirementHasException.findByRequirementVersion", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.requirementVersion = :requirementVersion"),
     @NamedQuery(name = "RequirementHasException.findByVmExceptionId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.vmExceptionId = :vmExceptionId"),
-    @NamedQuery(name = "RequirementHasException.findByVmExceptionReporterId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.vmExceptionReporterId = :vmExceptionReporterId"),
-    @NamedQuery(name = "RequirementHasException.findByRequirementHasExceptioncol", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptioncol = :requirementHasExceptioncol")})
+    @NamedQuery(name = "RequirementHasException.findByRequirementId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.requirementId = :requirementId")})
 public class RequirementHasException implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementHasExceptionPK requirementHasExceptionPK;
@@ -52,7 +53,7 @@ public class RequirementHasException implements Serializable {
     @JoinColumns({
         @JoinColumn(name = "exception_id", referencedColumnName = "id"),
         @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")})
-    @ManyToOne(optional = false)
+    @ManyToOne
     private VmException vmException1;
 
     public RequirementHasException() {
@@ -130,5 +131,5 @@ public class RequirementHasException implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RequirementHasException[ requirementHasExceptionPK=" + requirementHasExceptionPK + " ]";
     }
-    
+
 }

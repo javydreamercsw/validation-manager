@@ -182,5 +182,5 @@ public class UserRightJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

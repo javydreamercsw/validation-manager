@@ -17,10 +17,7 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class UserHasRootCausePK implements Serializable {
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "user_id")
-    private int userId;
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "root_cause_id")
@@ -29,6 +26,10 @@ public class UserHasRootCausePK implements Serializable {
     @NotNull
     @Column(name = "root_cause_root_cause_type_id")
     private int rootCauseRootCauseTypeId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "user_id")
+    private int userId;
 
     public UserHasRootCausePK() {
     }
@@ -85,15 +86,12 @@ public class UserHasRootCausePK implements Serializable {
         if (this.rootCauseRootCauseTypeId != other.rootCauseRootCauseTypeId) {
             return false;
         }
-        if (this.userId != other.userId) {
-            return false;
-        }
-        return true;
+        return this.userId == other.userId;
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserHasRootCausePK[ rootCauseId=" + rootCauseId + ", rootCauseRootCauseTypeId=" + rootCauseRootCauseTypeId + ", userId=" + userId + " ]";
     }
-    
+
 }

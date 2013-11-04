@@ -16,6 +16,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -39,8 +40,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "TestProject.findAll", query = "SELECT t FROM TestProject t"),
     @NamedQuery(name = "TestProject.findById", query = "SELECT t FROM TestProject t WHERE t.id = :id"),
-    @NamedQuery(name = "TestProject.findByName", query = "SELECT t FROM TestProject t WHERE t.name = :name"),
-    @NamedQuery(name = "TestProject.findByActive", query = "SELECT t FROM TestProject t WHERE t.active = :active")})
+    @NamedQuery(name = "TestProject.findByActive", query = "SELECT t FROM TestProject t WHERE t.active = :active"),
+    @NamedQuery(name = "TestProject.findByName", query = "SELECT t FROM TestProject t WHERE t.name = :name")})
 public class TestProject extends VMAuditedObject implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -57,19 +58,17 @@ public class TestProject extends VMAuditedObject implements Serializable {
             allocationSize = 1,
             initialValue = 1000)
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Column(name = "active")
+    private Boolean active;
+    @Size(max = 255)
     @Column(name = "name")
     private String name;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "active")
-    private boolean active;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
+    @ManyToMany(mappedBy = "testProjectList")
+    private List<Project> projectList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testProject")
     private List<UserTestProjectRole> userTestProjectRoleList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testProject")
@@ -91,6 +90,14 @@ public class TestProject extends VMAuditedObject implements Serializable {
         this.id = id;
     }
 
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
     public String getName() {
         return name;
     }
@@ -99,20 +106,22 @@ public class TestProject extends VMAuditedObject implements Serializable {
         this.name = name;
     }
 
-    public boolean getActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
     public String getNotes() {
         return notes;
     }
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Project> getProjectList() {
+        return projectList;
+    }
+
+    public void setProjectList(List<Project> projectList) {
+        this.projectList = projectList;
     }
 
     @XmlTransient
@@ -149,10 +158,7 @@ public class TestProject extends VMAuditedObject implements Serializable {
             return false;
         }
         TestProject other = (TestProject) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

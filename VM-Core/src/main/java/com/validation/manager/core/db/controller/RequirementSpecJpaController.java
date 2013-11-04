@@ -271,5 +271,5 @@ public class RequirementSpecJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

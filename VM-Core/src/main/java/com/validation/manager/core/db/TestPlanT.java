@@ -28,43 +28,36 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "TestPlanT.findAll", query = "SELECT t FROM TestPlanT t"),
     @NamedQuery(name = "TestPlanT.findByRecordId", query = "SELECT t FROM TestPlanT t WHERE t.recordId = :recordId"),
-    @NamedQuery(name = "TestPlanT.findById", query = "SELECT t FROM TestPlanT t WHERE t.id = :id"),
-    @NamedQuery(name = "TestPlanT.findByTestProjectId", query = "SELECT t FROM TestPlanT t WHERE t.testProjectId = :testProjectId"),
     @NamedQuery(name = "TestPlanT.findByActive", query = "SELECT t FROM TestPlanT t WHERE t.active = :active"),
+    @NamedQuery(name = "TestPlanT.findById", query = "SELECT t FROM TestPlanT t WHERE t.id = :id"),
     @NamedQuery(name = "TestPlanT.findByIsOpen", query = "SELECT t FROM TestPlanT t WHERE t.isOpen = :isOpen"),
     @NamedQuery(name = "TestPlanT.findByRegressionTestPlanId", query = "SELECT t FROM TestPlanT t WHERE t.regressionTestPlanId = :regressionTestPlanId"),
-    @NamedQuery(name = "TestPlanT.findByRegressionTestPlanTestProjectId", query = "SELECT t FROM TestPlanT t WHERE t.regressionTestPlanTestProjectId = :regressionTestPlanTestProjectId")})
+    @NamedQuery(name = "TestPlanT.findByRegressionTestPlanTestProjectId", query = "SELECT t FROM TestPlanT t WHERE t.regressionTestPlanTestProjectId = :regressionTestPlanTestProjectId"),
+    @NamedQuery(name = "TestPlanT.findByTestProjectId", query = "SELECT t FROM TestPlanT t WHERE t.testProjectId = :testProjectId")})
 public class TestPlanT implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @NotNull
     @Column(name = "record_id")
     private Integer recordId;
-    @Basic(optional = false)
-    @NotNull
+    @Column(name = "active")
+    private Boolean active;
     @Column(name = "id")
-    private int id;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "test_project_id")
-    private int testProjectId;
+    private Integer id;
+    @Column(name = "is_open")
+    private Boolean isOpen;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "active")
-    private boolean active;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "is_open")
-    private boolean isOpen;
     @Column(name = "regression_test_plan_id")
     private Integer regressionTestPlanId;
     @Column(name = "regression_test_plan_test_project_id")
     private Integer regressionTestPlanTestProjectId;
+    @Column(name = "test_project_id")
+    private Integer testProjectId;
 
     public TestPlanT() {
     }
@@ -89,20 +82,28 @@ public class TestPlanT implements Serializable {
         this.recordId = recordId;
     }
 
-    public int getId() {
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public int getTestProjectId() {
-        return testProjectId;
+    public Boolean getIsOpen() {
+        return isOpen;
     }
 
-    public void setTestProjectId(int testProjectId) {
-        this.testProjectId = testProjectId;
+    public void setIsOpen(Boolean isOpen) {
+        this.isOpen = isOpen;
     }
 
     public String getNotes() {
@@ -111,22 +112,6 @@ public class TestPlanT implements Serializable {
 
     public void setNotes(String notes) {
         this.notes = notes;
-    }
-
-    public boolean getActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public boolean getIsOpen() {
-        return isOpen;
-    }
-
-    public void setIsOpen(boolean isOpen) {
-        this.isOpen = isOpen;
     }
 
     public Integer getRegressionTestPlanId() {
@@ -143,6 +128,14 @@ public class TestPlanT implements Serializable {
 
     public void setRegressionTestPlanTestProjectId(Integer regressionTestPlanTestProjectId) {
         this.regressionTestPlanTestProjectId = regressionTestPlanTestProjectId;
+    }
+
+    public Integer getTestProjectId() {
+        return testProjectId;
+    }
+
+    public void setTestProjectId(Integer testProjectId) {
+        this.testProjectId = testProjectId;
     }
 
     @Override
@@ -169,5 +162,5 @@ public class TestPlanT implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.TestPlanT[ recordId=" + recordId + " ]";
     }
-    
+
 }

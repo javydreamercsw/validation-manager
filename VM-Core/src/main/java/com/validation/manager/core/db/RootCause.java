@@ -7,7 +7,6 @@ package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -20,7 +19,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -38,13 +36,12 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "RootCause.findById", query = "SELECT r FROM RootCause r WHERE r.rootCausePK.id = :id"),
     @NamedQuery(name = "RootCause.findByRootCauseTypeId", query = "SELECT r FROM RootCause r WHERE r.rootCausePK.rootCauseTypeId = :rootCauseTypeId")})
 public class RootCause implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RootCausePK rootCausePK;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "details")
     private String details;
     @ManyToMany(mappedBy = "rootCauseList")
@@ -129,15 +126,12 @@ public class RootCause implements Serializable {
             return false;
         }
         RootCause other = (RootCause) object;
-        if ((this.rootCausePK == null && other.rootCausePK != null) || (this.rootCausePK != null && !this.rootCausePK.equals(other.rootCausePK))) {
-            return false;
-        }
-        return true;
+        return (this.rootCausePK != null || other.rootCausePK == null) && (this.rootCausePK == null || this.rootCausePK.equals(other.rootCausePK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RootCause[ rootCausePK=" + rootCausePK + " ]";
     }
-    
+
 }

@@ -79,10 +79,7 @@ public class VmExceptionPK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        if (this.reporterId != other.reporterId) {
-            return false;
-        }
-        return true;
+        return this.reporterId == other.reporterId;
     }
 
     @Override

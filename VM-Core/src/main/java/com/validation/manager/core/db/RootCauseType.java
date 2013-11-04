@@ -35,8 +35,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "RootCauseType.findAll", query = "SELECT r FROM RootCauseType r"),
     @NamedQuery(name = "RootCauseType.findById", query = "SELECT r FROM RootCauseType r WHERE r.id = :id"),
-    @NamedQuery(name = "RootCauseType.findByName", query = "SELECT r FROM RootCauseType r WHERE r.name = :name"),
-    @NamedQuery(name = "RootCauseType.findByDescription", query = "SELECT r FROM RootCauseType r WHERE r.description = :description")})
+    @NamedQuery(name = "RootCauseType.findByDescription", query = "SELECT r FROM RootCauseType r WHERE r.description = :description"),
+    @NamedQuery(name = "RootCauseType.findByName", query = "SELECT r FROM RootCauseType r WHERE r.name = :name")})
 public class RootCauseType implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -52,16 +52,12 @@ public class RootCauseType implements Serializable {
             initialValue = 1000)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "description")
     private String description;
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "rootCauseType")
     private List<RootCause> rootCauseList;
 
@@ -86,20 +82,20 @@ public class RootCauseType implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @XmlTransient
@@ -126,10 +122,7 @@ public class RootCauseType implements Serializable {
             return false;
         }
         RootCauseType other = (RootCauseType) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

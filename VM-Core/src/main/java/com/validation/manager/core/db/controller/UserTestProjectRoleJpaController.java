@@ -10,9 +10,9 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.UserTestProjectRolePK;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -40,18 +40,13 @@ public class UserTestProjectRoleJpaController implements Serializable {
         if (userTestProjectRole.getUserTestProjectRolePK() == null) {
             userTestProjectRole.setUserTestProjectRolePK(new UserTestProjectRolePK());
         }
-        userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Role role = userTestProjectRole.getRole();
-            if (role != null) {
-                role = em.getReference(role.getClass(), role.getId());
-                userTestProjectRole.setRole(role);
-            }
             VmUser vmUser = userTestProjectRole.getVmUser();
             if (vmUser != null) {
                 vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
@@ -62,11 +57,12 @@ public class UserTestProjectRoleJpaController implements Serializable {
                 testProject = em.getReference(testProject.getClass(), testProject.getId());
                 userTestProjectRole.setTestProject(testProject);
             }
-            em.persist(userTestProjectRole);
+            Role role = userTestProjectRole.getRole();
             if (role != null) {
-                role.getUserTestProjectRoleList().add(userTestProjectRole);
-                role = em.merge(role);
+                role = em.getReference(role.getClass(), role.getId());
+                userTestProjectRole.setRole(role);
             }
+            em.persist(userTestProjectRole);
             if (vmUser != null) {
                 vmUser.getUserTestProjectRoleList().add(userTestProjectRole);
                 vmUser = em.merge(vmUser);
@@ -74,6 +70,10 @@ public class UserTestProjectRoleJpaController implements Serializable {
             if (testProject != null) {
                 testProject.getUserTestProjectRoleList().add(userTestProjectRole);
                 testProject = em.merge(testProject);
+            }
+            if (role != null) {
+                role.getUserTestProjectRoleList().add(userTestProjectRole);
+                role = em.merge(role);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -89,24 +89,20 @@ public class UserTestProjectRoleJpaController implements Serializable {
     }
 
     public void edit(UserTestProjectRole userTestProjectRole) throws NonexistentEntityException, Exception {
-        userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             UserTestProjectRole persistentUserTestProjectRole = em.find(UserTestProjectRole.class, userTestProjectRole.getUserTestProjectRolePK());
-            Role roleOld = persistentUserTestProjectRole.getRole();
-            Role roleNew = userTestProjectRole.getRole();
             VmUser vmUserOld = persistentUserTestProjectRole.getVmUser();
             VmUser vmUserNew = userTestProjectRole.getVmUser();
             TestProject testProjectOld = persistentUserTestProjectRole.getTestProject();
             TestProject testProjectNew = userTestProjectRole.getTestProject();
-            if (roleNew != null) {
-                roleNew = em.getReference(roleNew.getClass(), roleNew.getId());
-                userTestProjectRole.setRole(roleNew);
-            }
+            Role roleOld = persistentUserTestProjectRole.getRole();
+            Role roleNew = userTestProjectRole.getRole();
             if (vmUserNew != null) {
                 vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
                 userTestProjectRole.setVmUser(vmUserNew);
@@ -115,15 +111,11 @@ public class UserTestProjectRoleJpaController implements Serializable {
                 testProjectNew = em.getReference(testProjectNew.getClass(), testProjectNew.getId());
                 userTestProjectRole.setTestProject(testProjectNew);
             }
+            if (roleNew != null) {
+                roleNew = em.getReference(roleNew.getClass(), roleNew.getId());
+                userTestProjectRole.setRole(roleNew);
+            }
             userTestProjectRole = em.merge(userTestProjectRole);
-            if (roleOld != null && !roleOld.equals(roleNew)) {
-                roleOld.getUserTestProjectRoleList().remove(userTestProjectRole);
-                roleOld = em.merge(roleOld);
-            }
-            if (roleNew != null && !roleNew.equals(roleOld)) {
-                roleNew.getUserTestProjectRoleList().add(userTestProjectRole);
-                roleNew = em.merge(roleNew);
-            }
             if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
                 vmUserOld.getUserTestProjectRoleList().remove(userTestProjectRole);
                 vmUserOld = em.merge(vmUserOld);
@@ -139,6 +131,14 @@ public class UserTestProjectRoleJpaController implements Serializable {
             if (testProjectNew != null && !testProjectNew.equals(testProjectOld)) {
                 testProjectNew.getUserTestProjectRoleList().add(userTestProjectRole);
                 testProjectNew = em.merge(testProjectNew);
+            }
+            if (roleOld != null && !roleOld.equals(roleNew)) {
+                roleOld.getUserTestProjectRoleList().remove(userTestProjectRole);
+                roleOld = em.merge(roleOld);
+            }
+            if (roleNew != null && !roleNew.equals(roleOld)) {
+                roleNew.getUserTestProjectRoleList().add(userTestProjectRole);
+                roleNew = em.merge(roleNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -169,11 +169,6 @@ public class UserTestProjectRoleJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userTestProjectRole with id " + id + " no longer exists.", enfe);
             }
-            Role role = userTestProjectRole.getRole();
-            if (role != null) {
-                role.getUserTestProjectRoleList().remove(userTestProjectRole);
-                role = em.merge(role);
-            }
             VmUser vmUser = userTestProjectRole.getVmUser();
             if (vmUser != null) {
                 vmUser.getUserTestProjectRoleList().remove(userTestProjectRole);
@@ -183,6 +178,11 @@ public class UserTestProjectRoleJpaController implements Serializable {
             if (testProject != null) {
                 testProject.getUserTestProjectRoleList().remove(userTestProjectRole);
                 testProject = em.merge(testProject);
+            }
+            Role role = userTestProjectRole.getRole();
+            if (role != null) {
+                role.getUserTestProjectRoleList().remove(userTestProjectRole);
+                role = em.merge(role);
             }
             em.remove(userTestProjectRole);
             em.getTransaction().commit();
@@ -238,5 +238,5 @@ public class UserTestProjectRoleJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

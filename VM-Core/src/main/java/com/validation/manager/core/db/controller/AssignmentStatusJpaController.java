@@ -205,5 +205,5 @@ public class AssignmentStatusJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

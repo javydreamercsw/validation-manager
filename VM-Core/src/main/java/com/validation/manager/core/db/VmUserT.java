@@ -30,57 +30,52 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "VmUserT.findAll", query = "SELECT v FROM VmUserT v"),
     @NamedQuery(name = "VmUserT.findByRecordId", query = "SELECT v FROM VmUserT v WHERE v.recordId = :recordId"),
-    @NamedQuery(name = "VmUserT.findById", query = "SELECT v FROM VmUserT v WHERE v.id = :id"),
-    @NamedQuery(name = "VmUserT.findByUsername", query = "SELECT v FROM VmUserT v WHERE v.username = :username"),
-    @NamedQuery(name = "VmUserT.findByPassword", query = "SELECT v FROM VmUserT v WHERE v.password = :password"),
+    @NamedQuery(name = "VmUserT.findByAttempts", query = "SELECT v FROM VmUserT v WHERE v.attempts = :attempts"),
     @NamedQuery(name = "VmUserT.findByEmail", query = "SELECT v FROM VmUserT v WHERE v.email = :email"),
     @NamedQuery(name = "VmUserT.findByFirst", query = "SELECT v FROM VmUserT v WHERE v.first = :first"),
+    @NamedQuery(name = "VmUserT.findById", query = "SELECT v FROM VmUserT v WHERE v.id = :id"),
     @NamedQuery(name = "VmUserT.findByLast", query = "SELECT v FROM VmUserT v WHERE v.last = :last"),
-    @NamedQuery(name = "VmUserT.findByLocale", query = "SELECT v FROM VmUserT v WHERE v.locale = :locale"),
     @NamedQuery(name = "VmUserT.findByLastModifed", query = "SELECT v FROM VmUserT v WHERE v.lastModifed = :lastModifed"),
-    @NamedQuery(name = "VmUserT.findByAttempts", query = "SELECT v FROM VmUserT v WHERE v.attempts = :attempts"),
-    @NamedQuery(name = "VmUserT.findByUserStatusId", query = "SELECT v FROM VmUserT v WHERE v.userStatusId = :userStatusId")})
+    @NamedQuery(name = "VmUserT.findByLocale", query = "SELECT v FROM VmUserT v WHERE v.locale = :locale"),
+    @NamedQuery(name = "VmUserT.findByPassword", query = "SELECT v FROM VmUserT v WHERE v.password = :password"),
+    @NamedQuery(name = "VmUserT.findByUserStatusId", query = "SELECT v FROM VmUserT v WHERE v.userStatusId = :userStatusId"),
+    @NamedQuery(name = "VmUserT.findByUsername", query = "SELECT v FROM VmUserT v WHERE v.username = :username")})
 public class VmUserT implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @NotNull
     @Column(name = "record_id")
     private Integer recordId;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "id")
-    private int id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 45)
-    @Column(name = "username")
-    private String username;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 45)
-    @Column(name = "password")
-    private String password;
+    @Column(name = "attempts")
+    private Integer attempts;
     // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
-    @Size(max = 100)
+    @Size(max = 255)
     @Column(name = "email")
     private String email;
-    @Size(max = 45)
+    @Size(max = 255)
     @Column(name = "first")
     private String first;
-    @Size(max = 45)
+    @Column(name = "id")
+    private Integer id;
+    @Size(max = 255)
     @Column(name = "last")
     private String last;
-    @Size(max = 10)
-    @Column(name = "locale")
-    private String locale;
     @Column(name = "last_modifed")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModifed;
-    @Column(name = "attempts")
-    private Integer attempts;
+    @Size(max = 255)
+    @Column(name = "locale")
+    private String locale;
+    @Size(max = 255)
+    @Column(name = "password")
+    private String password;
     @Column(name = "user_status_id")
     private Integer userStatusId;
+    @Size(max = 255)
+    @Column(name = "username")
+    private String username;
 
     public VmUserT() {
     }
@@ -104,28 +99,12 @@ public class VmUserT implements Serializable {
         this.recordId = recordId;
     }
 
-    public int getId() {
-        return id;
+    public Integer getAttempts() {
+        return attempts;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setAttempts(Integer attempts) {
+        this.attempts = attempts;
     }
 
     public String getEmail() {
@@ -144,20 +123,20 @@ public class VmUserT implements Serializable {
         this.first = first;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getLast() {
         return last;
     }
 
     public void setLast(String last) {
         this.last = last;
-    }
-
-    public String getLocale() {
-        return locale;
-    }
-
-    public void setLocale(String locale) {
-        this.locale = locale;
     }
 
     public Date getLastModifed() {
@@ -168,12 +147,20 @@ public class VmUserT implements Serializable {
         this.lastModifed = lastModifed;
     }
 
-    public Integer getAttempts() {
-        return attempts;
+    public String getLocale() {
+        return locale;
     }
 
-    public void setAttempts(Integer attempts) {
-        this.attempts = attempts;
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Integer getUserStatusId() {
@@ -182,6 +169,14 @@ public class VmUserT implements Serializable {
 
     public void setUserStatusId(Integer userStatusId) {
         this.userStatusId = userStatusId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override
@@ -208,5 +203,5 @@ public class VmUserT implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmUserT[ recordId=" + recordId + " ]";
     }
-    
+
 }

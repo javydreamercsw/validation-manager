@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
@@ -48,20 +50,21 @@ public class FailureMode implements Serializable {
             allocationSize = 1,
             initialValue = 1000)
     @Basic(optional = false)
+    @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
-    @ManyToMany(mappedBy = "failureModeList")
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
+    @JoinTable(name = "risk_item_has_failure_mode", joinColumns = {
+        @JoinColumn(name = "failure_mode_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
+        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")})
+    @ManyToMany
     private List<RiskItem> riskItemList;
 
     public FailureMode() {
@@ -80,20 +83,20 @@ public class FailureMode implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @XmlTransient
@@ -120,10 +123,7 @@ public class FailureMode implements Serializable {
             return false;
         }
         FailureMode other = (FailureMode) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

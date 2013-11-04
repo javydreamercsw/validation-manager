@@ -195,21 +195,21 @@ public class VmUserJpaController implements Serializable {
                 }
             }
             for (UserAssigment userAssigmentListUserAssigment : vmUser.getUserAssigmentList()) {
-                VmUser oldAssigneeIdOfUserAssigmentListUserAssigment = userAssigmentListUserAssigment.getAssigneeId();
-                userAssigmentListUserAssigment.setAssigneeId(vmUser);
+                VmUser oldVmUserOfUserAssigmentListUserAssigment = userAssigmentListUserAssigment.getVmUser();
+                userAssigmentListUserAssigment.setVmUser(vmUser);
                 userAssigmentListUserAssigment = em.merge(userAssigmentListUserAssigment);
-                if (oldAssigneeIdOfUserAssigmentListUserAssigment != null) {
-                    oldAssigneeIdOfUserAssigmentListUserAssigment.getUserAssigmentList().remove(userAssigmentListUserAssigment);
-                    oldAssigneeIdOfUserAssigmentListUserAssigment = em.merge(oldAssigneeIdOfUserAssigmentListUserAssigment);
+                if (oldVmUserOfUserAssigmentListUserAssigment != null) {
+                    oldVmUserOfUserAssigmentListUserAssigment.getUserAssigmentList().remove(userAssigmentListUserAssigment);
+                    oldVmUserOfUserAssigmentListUserAssigment = em.merge(oldVmUserOfUserAssigmentListUserAssigment);
                 }
             }
             for (UserAssigment userAssigmentList1UserAssigment : vmUser.getUserAssigmentList1()) {
-                VmUser oldVmUserOfUserAssigmentList1UserAssigment = userAssigmentList1UserAssigment.getVmUser();
-                userAssigmentList1UserAssigment.setVmUser(vmUser);
+                VmUser oldAssigneeIdOfUserAssigmentList1UserAssigment = userAssigmentList1UserAssigment.getAssigneeId();
+                userAssigmentList1UserAssigment.setAssigneeId(vmUser);
                 userAssigmentList1UserAssigment = em.merge(userAssigmentList1UserAssigment);
-                if (oldVmUserOfUserAssigmentList1UserAssigment != null) {
-                    oldVmUserOfUserAssigmentList1UserAssigment.getUserAssigmentList1().remove(userAssigmentList1UserAssigment);
-                    oldVmUserOfUserAssigmentList1UserAssigment = em.merge(oldVmUserOfUserAssigmentList1UserAssigment);
+                if (oldAssigneeIdOfUserAssigmentList1UserAssigment != null) {
+                    oldAssigneeIdOfUserAssigmentList1UserAssigment.getUserAssigmentList1().remove(userAssigmentList1UserAssigment);
+                    oldAssigneeIdOfUserAssigmentList1UserAssigment = em.merge(oldAssigneeIdOfUserAssigmentList1UserAssigment);
                 }
             }
             for (VmException vmExceptionListVmException : vmUser.getVmExceptionList()) {
@@ -308,28 +308,12 @@ public class VmUserJpaController implements Serializable {
                     illegalOrphanMessages.add("You must retain UserHasInvestigation " + userHasInvestigationListOldUserHasInvestigation + " since its vmUser field is not nullable.");
                 }
             }
-            for (TestCase testCaseListOldTestCase : testCaseListOld) {
-                if (!testCaseListNew.contains(testCaseListOldTestCase)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain TestCase " + testCaseListOldTestCase + " since its authorId field is not nullable.");
-                }
-            }
             for (UserAssigment userAssigmentListOldUserAssigment : userAssigmentListOld) {
                 if (!userAssigmentListNew.contains(userAssigmentListOldUserAssigment)) {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain UserAssigment " + userAssigmentListOldUserAssigment + " since its assigneeId field is not nullable.");
-                }
-            }
-            for (UserAssigment userAssigmentList1OldUserAssigment : userAssigmentList1Old) {
-                if (!userAssigmentList1New.contains(userAssigmentList1OldUserAssigment)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain UserAssigment " + userAssigmentList1OldUserAssigment + " since its vmUser field is not nullable.");
+                    illegalOrphanMessages.add("You must retain UserAssigment " + userAssigmentListOldUserAssigment + " since its vmUser field is not nullable.");
                 }
             }
             for (VmException vmExceptionListOldVmException : vmExceptionListOld) {
@@ -503,6 +487,12 @@ public class VmUserJpaController implements Serializable {
                     }
                 }
             }
+            for (TestCase testCaseListOldTestCase : testCaseListOld) {
+                if (!testCaseListNew.contains(testCaseListOldTestCase)) {
+                    testCaseListOldTestCase.setAuthorId(null);
+                    testCaseListOldTestCase = em.merge(testCaseListOldTestCase);
+                }
+            }
             for (TestCase testCaseListNewTestCase : testCaseListNew) {
                 if (!testCaseListOld.contains(testCaseListNewTestCase)) {
                     VmUser oldAuthorIdOfTestCaseListNewTestCase = testCaseListNewTestCase.getAuthorId();
@@ -516,23 +506,29 @@ public class VmUserJpaController implements Serializable {
             }
             for (UserAssigment userAssigmentListNewUserAssigment : userAssigmentListNew) {
                 if (!userAssigmentListOld.contains(userAssigmentListNewUserAssigment)) {
-                    VmUser oldAssigneeIdOfUserAssigmentListNewUserAssigment = userAssigmentListNewUserAssigment.getAssigneeId();
-                    userAssigmentListNewUserAssigment.setAssigneeId(vmUser);
+                    VmUser oldVmUserOfUserAssigmentListNewUserAssigment = userAssigmentListNewUserAssigment.getVmUser();
+                    userAssigmentListNewUserAssigment.setVmUser(vmUser);
                     userAssigmentListNewUserAssigment = em.merge(userAssigmentListNewUserAssigment);
-                    if (oldAssigneeIdOfUserAssigmentListNewUserAssigment != null && !oldAssigneeIdOfUserAssigmentListNewUserAssigment.equals(vmUser)) {
-                        oldAssigneeIdOfUserAssigmentListNewUserAssigment.getUserAssigmentList().remove(userAssigmentListNewUserAssigment);
-                        oldAssigneeIdOfUserAssigmentListNewUserAssigment = em.merge(oldAssigneeIdOfUserAssigmentListNewUserAssigment);
+                    if (oldVmUserOfUserAssigmentListNewUserAssigment != null && !oldVmUserOfUserAssigmentListNewUserAssigment.equals(vmUser)) {
+                        oldVmUserOfUserAssigmentListNewUserAssigment.getUserAssigmentList().remove(userAssigmentListNewUserAssigment);
+                        oldVmUserOfUserAssigmentListNewUserAssigment = em.merge(oldVmUserOfUserAssigmentListNewUserAssigment);
                     }
+                }
+            }
+            for (UserAssigment userAssigmentList1OldUserAssigment : userAssigmentList1Old) {
+                if (!userAssigmentList1New.contains(userAssigmentList1OldUserAssigment)) {
+                    userAssigmentList1OldUserAssigment.setAssigneeId(null);
+                    userAssigmentList1OldUserAssigment = em.merge(userAssigmentList1OldUserAssigment);
                 }
             }
             for (UserAssigment userAssigmentList1NewUserAssigment : userAssigmentList1New) {
                 if (!userAssigmentList1Old.contains(userAssigmentList1NewUserAssigment)) {
-                    VmUser oldVmUserOfUserAssigmentList1NewUserAssigment = userAssigmentList1NewUserAssigment.getVmUser();
-                    userAssigmentList1NewUserAssigment.setVmUser(vmUser);
+                    VmUser oldAssigneeIdOfUserAssigmentList1NewUserAssigment = userAssigmentList1NewUserAssigment.getAssigneeId();
+                    userAssigmentList1NewUserAssigment.setAssigneeId(vmUser);
                     userAssigmentList1NewUserAssigment = em.merge(userAssigmentList1NewUserAssigment);
-                    if (oldVmUserOfUserAssigmentList1NewUserAssigment != null && !oldVmUserOfUserAssigmentList1NewUserAssigment.equals(vmUser)) {
-                        oldVmUserOfUserAssigmentList1NewUserAssigment.getUserAssigmentList1().remove(userAssigmentList1NewUserAssigment);
-                        oldVmUserOfUserAssigmentList1NewUserAssigment = em.merge(oldVmUserOfUserAssigmentList1NewUserAssigment);
+                    if (oldAssigneeIdOfUserAssigmentList1NewUserAssigment != null && !oldAssigneeIdOfUserAssigmentList1NewUserAssigment.equals(vmUser)) {
+                        oldAssigneeIdOfUserAssigmentList1NewUserAssigment.getUserAssigmentList1().remove(userAssigmentList1NewUserAssigment);
+                        oldAssigneeIdOfUserAssigmentList1NewUserAssigment = em.merge(oldAssigneeIdOfUserAssigmentList1NewUserAssigment);
                     }
                 }
             }
@@ -624,26 +620,12 @@ public class VmUserJpaController implements Serializable {
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserHasInvestigation " + userHasInvestigationListOrphanCheckUserHasInvestigation + " in its userHasInvestigationList field has a non-nullable vmUser field.");
             }
-            List<TestCase> testCaseListOrphanCheck = vmUser.getTestCaseList();
-            for (TestCase testCaseListOrphanCheckTestCase : testCaseListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the TestCase " + testCaseListOrphanCheckTestCase + " in its testCaseList field has a non-nullable authorId field.");
-            }
             List<UserAssigment> userAssigmentListOrphanCheck = vmUser.getUserAssigmentList();
             for (UserAssigment userAssigmentListOrphanCheckUserAssigment : userAssigmentListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserAssigment " + userAssigmentListOrphanCheckUserAssigment + " in its userAssigmentList field has a non-nullable assigneeId field.");
-            }
-            List<UserAssigment> userAssigmentList1OrphanCheck = vmUser.getUserAssigmentList1();
-            for (UserAssigment userAssigmentList1OrphanCheckUserAssigment : userAssigmentList1OrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserAssigment " + userAssigmentList1OrphanCheckUserAssigment + " in its userAssigmentList1 field has a non-nullable vmUser field.");
+                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserAssigment " + userAssigmentListOrphanCheckUserAssigment + " in its userAssigmentList field has a non-nullable vmUser field.");
             }
             List<VmException> vmExceptionListOrphanCheck = vmUser.getVmExceptionList();
             for (VmException vmExceptionListOrphanCheckVmException : vmExceptionListOrphanCheck) {
@@ -690,6 +672,16 @@ public class VmUserJpaController implements Serializable {
             for (CorrectiveAction correctiveActionListCorrectiveAction : correctiveActionList) {
                 correctiveActionListCorrectiveAction.getVmUserList().remove(vmUser);
                 correctiveActionListCorrectiveAction = em.merge(correctiveActionListCorrectiveAction);
+            }
+            List<TestCase> testCaseList = vmUser.getTestCaseList();
+            for (TestCase testCaseListTestCase : testCaseList) {
+                testCaseListTestCase.setAuthorId(null);
+                testCaseListTestCase = em.merge(testCaseListTestCase);
+            }
+            List<UserAssigment> userAssigmentList1 = vmUser.getUserAssigmentList1();
+            for (UserAssigment userAssigmentList1UserAssigment : userAssigmentList1) {
+                userAssigmentList1UserAssigment.setAssigneeId(null);
+                userAssigmentList1UserAssigment = em.merge(userAssigmentList1UserAssigment);
             }
             em.remove(vmUser);
             em.getTransaction().commit();
@@ -745,5 +737,5 @@ public class VmUserJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

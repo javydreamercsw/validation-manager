@@ -20,21 +20,18 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class RequirementSpecNodePK implements Serializable {
+
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "RequirementSpecNodeGen")
     @TableGenerator(name = "RequirementSpecNodeGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "requirement_spec_node",
-    allocationSize = 1,
-    initialValue = 1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "requirement_spec_node",
+            allocationSize = 1,
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private int id;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "requirement_spec_id")
-    private int requirementSpecId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "requirement_spec_project_id")
@@ -43,6 +40,10 @@ public class RequirementSpecNodePK implements Serializable {
     @NotNull
     @Column(name = "requirement_spec_spec_level_id")
     private int requirementSpecSpecLevelId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "requirement_spec_id")
+    private int requirementSpecId;
 
     public RequirementSpecNodePK() {
     }
@@ -61,14 +62,6 @@ public class RequirementSpecNodePK implements Serializable {
         this.id = id;
     }
 
-    public int getRequirementSpecId() {
-        return requirementSpecId;
-    }
-
-    public void setRequirementSpecId(int requirementSpecId) {
-        this.requirementSpecId = requirementSpecId;
-    }
-
     public int getRequirementSpecProjectId() {
         return requirementSpecProjectId;
     }
@@ -85,13 +78,21 @@ public class RequirementSpecNodePK implements Serializable {
         this.requirementSpecSpecLevelId = requirementSpecSpecLevelId;
     }
 
+    public int getRequirementSpecId() {
+        return requirementSpecId;
+    }
+
+    public void setRequirementSpecId(int requirementSpecId) {
+        this.requirementSpecId = requirementSpecId;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
         hash += (int) id;
-        hash += (int) requirementSpecId;
         hash += (int) requirementSpecProjectId;
         hash += (int) requirementSpecSpecLevelId;
+        hash += (int) requirementSpecId;
         return hash;
     }
 
@@ -105,21 +106,18 @@ public class RequirementSpecNodePK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        if (this.requirementSpecId != other.requirementSpecId) {
-            return false;
-        }
         if (this.requirementSpecProjectId != other.requirementSpecProjectId) {
             return false;
         }
         if (this.requirementSpecSpecLevelId != other.requirementSpecSpecLevelId) {
             return false;
         }
-        return true;
+        return this.requirementSpecId == other.requirementSpecId;
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RequirementSpecNodePK[ id=" + id + ", requirementSpecId=" + requirementSpecId + ", requirementSpecProjectId=" + requirementSpecProjectId + ", requirementSpecSpecLevelId=" + requirementSpecSpecLevelId + " ]";
     }
-    
+
 }

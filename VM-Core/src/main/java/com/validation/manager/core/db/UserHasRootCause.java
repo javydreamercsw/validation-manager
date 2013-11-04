@@ -35,6 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "UserHasRootCause.findByRootCauseRootCauseTypeId", query = "SELECT u FROM UserHasRootCause u WHERE u.userHasRootCausePK.rootCauseRootCauseTypeId = :rootCauseRootCauseTypeId"),
     @NamedQuery(name = "UserHasRootCause.findByUserId", query = "SELECT u FROM UserHasRootCause u WHERE u.userHasRootCausePK.userId = :userId")})
 public class UserHasRootCause implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserHasRootCausePK userHasRootCausePK;
@@ -123,15 +124,12 @@ public class UserHasRootCause implements Serializable {
             return false;
         }
         UserHasRootCause other = (UserHasRootCause) object;
-        if ((this.userHasRootCausePK == null && other.userHasRootCausePK != null) || (this.userHasRootCausePK != null && !this.userHasRootCausePK.equals(other.userHasRootCausePK))) {
-            return false;
-        }
-        return true;
+        return (this.userHasRootCausePK != null || other.userHasRootCausePK == null) && (this.userHasRootCausePK == null || this.userHasRootCausePK.equals(other.userHasRootCausePK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserHasRootCause[ userHasRootCausePK=" + userHasRootCausePK + " ]";
     }
-    
+
 }

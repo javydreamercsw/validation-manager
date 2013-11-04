@@ -112,5 +112,5 @@ public class UserTestPlanRolePK implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.UserTestPlanRolePK[ testPlanId=" + testPlanId + ", testPlanTestProjectId=" + testPlanTestProjectId + ", userId=" + userId + ", roleId=" + roleId + " ]";
     }
-    
+
 }

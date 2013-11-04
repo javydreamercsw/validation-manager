@@ -32,20 +32,25 @@ public class StepPK implements Serializable {
     @NotNull
     @Column(name = "id")
     private int id;
+    @Column(name = "test_case_test_id")
+    private int testCaseTestId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "test_case_id")
     private int testCaseId;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "test_case_test_id")
-    private int testCaseTestId;
 
     public StepPK() {
     }
 
     public StepPK(int testCaseId, int testCaseTestId) {
         this.testCaseId = testCaseId;
+    }
+
+    public int getTestCaseTestId() {
+        return testCaseTestId;
+    }
+
+    public void setTestCaseTestId(int testCaseTestId) {
         this.testCaseTestId = testCaseTestId;
     }
 
@@ -65,20 +70,12 @@ public class StepPK implements Serializable {
         this.testCaseId = testCaseId;
     }
 
-    public int getTestCaseTestId() {
-        return testCaseTestId;
-    }
-
-    public void setTestCaseTestId(int testCaseTestId) {
-        this.testCaseTestId = testCaseTestId;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
+        hash += (int) testCaseTestId;
         hash += (int) id;
         hash += (int) testCaseId;
-        hash += (int) testCaseTestId;
         return hash;
     }
 
@@ -89,21 +86,18 @@ public class StepPK implements Serializable {
             return false;
         }
         StepPK other = (StepPK) object;
-        if (this.id != other.id) {
-            return false;
-        }
-        if (this.testCaseId != other.testCaseId) {
-            return false;
-        }
         if (this.testCaseTestId != other.testCaseTestId) {
             return false;
         }
-        return true;
+        if (this.id != other.id) {
+            return false;
+        }
+        return this.testCaseId == other.testCaseId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.StepPK[ id=" + id + ", testCaseId=" + testCaseId + ", testCaseTestId=" + testCaseTestId + " ]";
+        return "com.validation.manager.core.db.StepPK[ testCaseTestId=" + testCaseTestId + ", id=" + id + ", testCaseId=" + testCaseId + " ]";
     }
 
 }

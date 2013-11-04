@@ -14,6 +14,7 @@ import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.RiskControlType;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -34,7 +35,7 @@ public class RiskControlTypeJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(RiskControlType riskControlType) {
+    public void create(RiskControlType riskControlType) throws PreexistingEntityException, Exception {
         if (riskControlType.getRiskControlList() == null) {
             riskControlType.setRiskControlList(new ArrayList<RiskControl>());
         }
@@ -59,6 +60,11 @@ public class RiskControlTypeJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findRiskControlType(riskControlType.getId()) != null) {
+                throw new PreexistingEntityException("RiskControlType " + riskControlType + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -199,5 +205,5 @@ public class RiskControlTypeJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

@@ -13,6 +13,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -33,7 +34,7 @@ public class HazardJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Hazard hazard) {
+    public void create(Hazard hazard) throws PreexistingEntityException, Exception {
         if (hazard.getRiskItemList() == null) {
             hazard.setRiskItemList(new ArrayList<RiskItem>());
         }
@@ -53,6 +54,11 @@ public class HazardJpaController implements Serializable {
                 riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findHazard(hazard.getId()) != null) {
+                throw new PreexistingEntityException("Hazard " + hazard + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -176,5 +182,5 @@ public class HazardJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

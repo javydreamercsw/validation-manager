@@ -245,5 +245,5 @@ public class InvestigationJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

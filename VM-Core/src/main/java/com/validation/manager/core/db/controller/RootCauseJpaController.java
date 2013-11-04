@@ -280,5 +280,5 @@ public class RootCauseJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

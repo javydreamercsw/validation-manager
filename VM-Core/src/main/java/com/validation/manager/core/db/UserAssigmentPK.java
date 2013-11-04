@@ -39,12 +39,12 @@ public class UserAssigmentPK implements Serializable {
     private int assignerId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "assigment_type_id")
-    private int assigmentTypeId;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "assignment_status_id")
     private int assignmentStatusId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "assigment_type_id")
+    private int assigmentTypeId;
 
     public UserAssigmentPK() {
     }
@@ -71,14 +71,6 @@ public class UserAssigmentPK implements Serializable {
         this.assignerId = assignerId;
     }
 
-    public int getAssigmentTypeId() {
-        return assigmentTypeId;
-    }
-
-    public void setAssigmentTypeId(int assigmentTypeId) {
-        this.assigmentTypeId = assigmentTypeId;
-    }
-
     public int getAssignmentStatusId() {
         return assignmentStatusId;
     }
@@ -87,13 +79,21 @@ public class UserAssigmentPK implements Serializable {
         this.assignmentStatusId = assignmentStatusId;
     }
 
+    public int getAssigmentTypeId() {
+        return assigmentTypeId;
+    }
+
+    public void setAssigmentTypeId(int assigmentTypeId) {
+        this.assigmentTypeId = assigmentTypeId;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
         hash += (int) id;
         hash += (int) assignerId;
-        hash += (int) assigmentTypeId;
         hash += (int) assignmentStatusId;
+        hash += (int) assigmentTypeId;
         return hash;
     }
 
@@ -110,18 +110,15 @@ public class UserAssigmentPK implements Serializable {
         if (this.assignerId != other.assignerId) {
             return false;
         }
-        if (this.assigmentTypeId != other.assigmentTypeId) {
-            return false;
-        }
         if (this.assignmentStatusId != other.assignmentStatusId) {
             return false;
         }
-        return true;
+        return this.assigmentTypeId == other.assigmentTypeId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.UserAssigmentPK[ id=" + id + ", assignerId=" + assignerId + ", assigmentTypeId=" + assigmentTypeId + ", assignmentStatusId=" + assignmentStatusId + " ]";
+        return "com.validation.manager.core.db.UserAssigmentPK[ id=" + id + ", assignerId=" + assignerId + ", assignmentStatusId=" + assignmentStatusId + ", assigmentTypeId=" + assigmentTypeId + " ]";
     }
 
 }

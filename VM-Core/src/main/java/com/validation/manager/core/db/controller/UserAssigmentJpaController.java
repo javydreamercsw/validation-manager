@@ -11,10 +11,10 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.AssignmentStatus;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.AssigmentType;
 import com.validation.manager.core.db.UserAssigment;
 import com.validation.manager.core.db.UserAssigmentPK;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.List;
@@ -40,8 +40,8 @@ public class UserAssigmentJpaController implements Serializable {
         if (userAssigment.getUserAssigmentPK() == null) {
             userAssigment.setUserAssigmentPK(new UserAssigmentPK());
         }
-        userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
+        userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         userAssigment.getUserAssigmentPK().setAssignmentStatusId(userAssigment.getAssignmentStatus().getId());
         EntityManager em = null;
         try {
@@ -52,37 +52,37 @@ public class UserAssigmentJpaController implements Serializable {
                 assignmentStatus = em.getReference(assignmentStatus.getClass(), assignmentStatus.getId());
                 userAssigment.setAssignmentStatus(assignmentStatus);
             }
-            AssigmentType assigmentType = userAssigment.getAssigmentType();
-            if (assigmentType != null) {
-                assigmentType = em.getReference(assigmentType.getClass(), assigmentType.getId());
-                userAssigment.setAssigmentType(assigmentType);
+            VmUser vmUser = userAssigment.getVmUser();
+            if (vmUser != null) {
+                vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
+                userAssigment.setVmUser(vmUser);
             }
             VmUser assigneeId = userAssigment.getAssigneeId();
             if (assigneeId != null) {
                 assigneeId = em.getReference(assigneeId.getClass(), assigneeId.getId());
                 userAssigment.setAssigneeId(assigneeId);
             }
-            VmUser vmUser = userAssigment.getVmUser();
-            if (vmUser != null) {
-                vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
-                userAssigment.setVmUser(vmUser);
+            AssigmentType assigmentType = userAssigment.getAssigmentType();
+            if (assigmentType != null) {
+                assigmentType = em.getReference(assigmentType.getClass(), assigmentType.getId());
+                userAssigment.setAssigmentType(assigmentType);
             }
             em.persist(userAssigment);
             if (assignmentStatus != null) {
                 assignmentStatus.getUserAssigmentList().add(userAssigment);
                 assignmentStatus = em.merge(assignmentStatus);
             }
-            if (assigmentType != null) {
-                assigmentType.getUserAssigmentList().add(userAssigment);
-                assigmentType = em.merge(assigmentType);
+            if (vmUser != null) {
+                vmUser.getUserAssigmentList().add(userAssigment);
+                vmUser = em.merge(vmUser);
             }
             if (assigneeId != null) {
                 assigneeId.getUserAssigmentList().add(userAssigment);
                 assigneeId = em.merge(assigneeId);
             }
-            if (vmUser != null) {
-                vmUser.getUserAssigmentList().add(userAssigment);
-                vmUser = em.merge(vmUser);
+            if (assigmentType != null) {
+                assigmentType.getUserAssigmentList().add(userAssigment);
+                assigmentType = em.merge(assigmentType);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -98,8 +98,8 @@ public class UserAssigmentJpaController implements Serializable {
     }
 
     public void edit(UserAssigment userAssigment) throws NonexistentEntityException, Exception {
-        userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
+        userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         userAssigment.getUserAssigmentPK().setAssignmentStatusId(userAssigment.getAssignmentStatus().getId());
         EntityManager em = null;
         try {
@@ -108,27 +108,27 @@ public class UserAssigmentJpaController implements Serializable {
             UserAssigment persistentUserAssigment = em.find(UserAssigment.class, userAssigment.getUserAssigmentPK());
             AssignmentStatus assignmentStatusOld = persistentUserAssigment.getAssignmentStatus();
             AssignmentStatus assignmentStatusNew = userAssigment.getAssignmentStatus();
-            AssigmentType assigmentTypeOld = persistentUserAssigment.getAssigmentType();
-            AssigmentType assigmentTypeNew = userAssigment.getAssigmentType();
-            VmUser assigneeIdOld = persistentUserAssigment.getAssigneeId();
-            VmUser assigneeIdNew = userAssigment.getAssigneeId();
             VmUser vmUserOld = persistentUserAssigment.getVmUser();
             VmUser vmUserNew = userAssigment.getVmUser();
+            VmUser assigneeIdOld = persistentUserAssigment.getAssigneeId();
+            VmUser assigneeIdNew = userAssigment.getAssigneeId();
+            AssigmentType assigmentTypeOld = persistentUserAssigment.getAssigmentType();
+            AssigmentType assigmentTypeNew = userAssigment.getAssigmentType();
             if (assignmentStatusNew != null) {
                 assignmentStatusNew = em.getReference(assignmentStatusNew.getClass(), assignmentStatusNew.getId());
                 userAssigment.setAssignmentStatus(assignmentStatusNew);
             }
-            if (assigmentTypeNew != null) {
-                assigmentTypeNew = em.getReference(assigmentTypeNew.getClass(), assigmentTypeNew.getId());
-                userAssigment.setAssigmentType(assigmentTypeNew);
+            if (vmUserNew != null) {
+                vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
+                userAssigment.setVmUser(vmUserNew);
             }
             if (assigneeIdNew != null) {
                 assigneeIdNew = em.getReference(assigneeIdNew.getClass(), assigneeIdNew.getId());
                 userAssigment.setAssigneeId(assigneeIdNew);
             }
-            if (vmUserNew != null) {
-                vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
-                userAssigment.setVmUser(vmUserNew);
+            if (assigmentTypeNew != null) {
+                assigmentTypeNew = em.getReference(assigmentTypeNew.getClass(), assigmentTypeNew.getId());
+                userAssigment.setAssigmentType(assigmentTypeNew);
             }
             userAssigment = em.merge(userAssigment);
             if (assignmentStatusOld != null && !assignmentStatusOld.equals(assignmentStatusNew)) {
@@ -139,13 +139,13 @@ public class UserAssigmentJpaController implements Serializable {
                 assignmentStatusNew.getUserAssigmentList().add(userAssigment);
                 assignmentStatusNew = em.merge(assignmentStatusNew);
             }
-            if (assigmentTypeOld != null && !assigmentTypeOld.equals(assigmentTypeNew)) {
-                assigmentTypeOld.getUserAssigmentList().remove(userAssigment);
-                assigmentTypeOld = em.merge(assigmentTypeOld);
+            if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
+                vmUserOld.getUserAssigmentList().remove(userAssigment);
+                vmUserOld = em.merge(vmUserOld);
             }
-            if (assigmentTypeNew != null && !assigmentTypeNew.equals(assigmentTypeOld)) {
-                assigmentTypeNew.getUserAssigmentList().add(userAssigment);
-                assigmentTypeNew = em.merge(assigmentTypeNew);
+            if (vmUserNew != null && !vmUserNew.equals(vmUserOld)) {
+                vmUserNew.getUserAssigmentList().add(userAssigment);
+                vmUserNew = em.merge(vmUserNew);
             }
             if (assigneeIdOld != null && !assigneeIdOld.equals(assigneeIdNew)) {
                 assigneeIdOld.getUserAssigmentList().remove(userAssigment);
@@ -155,13 +155,13 @@ public class UserAssigmentJpaController implements Serializable {
                 assigneeIdNew.getUserAssigmentList().add(userAssigment);
                 assigneeIdNew = em.merge(assigneeIdNew);
             }
-            if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
-                vmUserOld.getUserAssigmentList().remove(userAssigment);
-                vmUserOld = em.merge(vmUserOld);
+            if (assigmentTypeOld != null && !assigmentTypeOld.equals(assigmentTypeNew)) {
+                assigmentTypeOld.getUserAssigmentList().remove(userAssigment);
+                assigmentTypeOld = em.merge(assigmentTypeOld);
             }
-            if (vmUserNew != null && !vmUserNew.equals(vmUserOld)) {
-                vmUserNew.getUserAssigmentList().add(userAssigment);
-                vmUserNew = em.merge(vmUserNew);
+            if (assigmentTypeNew != null && !assigmentTypeNew.equals(assigmentTypeOld)) {
+                assigmentTypeNew.getUserAssigmentList().add(userAssigment);
+                assigmentTypeNew = em.merge(assigmentTypeNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -197,20 +197,20 @@ public class UserAssigmentJpaController implements Serializable {
                 assignmentStatus.getUserAssigmentList().remove(userAssigment);
                 assignmentStatus = em.merge(assignmentStatus);
             }
-            AssigmentType assigmentType = userAssigment.getAssigmentType();
-            if (assigmentType != null) {
-                assigmentType.getUserAssigmentList().remove(userAssigment);
-                assigmentType = em.merge(assigmentType);
+            VmUser vmUser = userAssigment.getVmUser();
+            if (vmUser != null) {
+                vmUser.getUserAssigmentList().remove(userAssigment);
+                vmUser = em.merge(vmUser);
             }
             VmUser assigneeId = userAssigment.getAssigneeId();
             if (assigneeId != null) {
                 assigneeId.getUserAssigmentList().remove(userAssigment);
                 assigneeId = em.merge(assigneeId);
             }
-            VmUser vmUser = userAssigment.getVmUser();
-            if (vmUser != null) {
-                vmUser.getUserAssigmentList().remove(userAssigment);
-                vmUser = em.merge(vmUser);
+            AssigmentType assigmentType = userAssigment.getAssigmentType();
+            if (assigmentType != null) {
+                assigmentType.getUserAssigmentList().remove(userAssigment);
+                assigmentType = em.merge(assigmentType);
             }
             em.remove(userAssigment);
             em.getTransaction().commit();
@@ -266,5 +266,5 @@ public class UserAssigmentJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

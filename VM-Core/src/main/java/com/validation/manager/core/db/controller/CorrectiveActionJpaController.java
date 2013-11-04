@@ -222,5 +222,5 @@ public class CorrectiveActionJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

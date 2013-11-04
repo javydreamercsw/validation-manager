@@ -22,6 +22,7 @@ import javax.validation.constraints.NotNull;
 public class RiskItemPK implements Serializable {
 
     @Basic(optional = false)
+    @NotNull
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "RIGen")
     @TableGenerator(name = "RIGen", table = "vm_id",
@@ -77,10 +78,7 @@ public class RiskItemPK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        if (this.fMEAid != other.fMEAid) {
-            return false;
-        }
-        return true;
+        return this.fMEAid == other.fMEAid;
     }
 
     @Override

@@ -79,10 +79,7 @@ public class TestPlanPK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        if (this.testProjectId != other.testProjectId) {
-            return false;
-        }
-        return true;
+        return this.testProjectId == other.testProjectId;
     }
 
     @Override
