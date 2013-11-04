@@ -20,14 +20,15 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class RequirementPK implements Serializable {
+
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "ReqGen")
     @TableGenerator(name = "ReqGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "requirement",
-    allocationSize = 1,
-    initialValue = 1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "requirement",
+            allocationSize = 1,
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private int id;
@@ -77,15 +78,12 @@ public class RequirementPK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        if (this.version != other.version) {
-            return false;
-        }
-        return true;
+        return this.version == other.version;
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RequirementPK[ id=" + id + ", version=" + version + " ]";
     }
-    
+
 }

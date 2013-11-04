@@ -270,4 +270,12 @@ public class TestHelper {
         new ProjectServer(root).write2DB();
         return sub;
     }
+
+    public static Requirement addChildToRequirement(Requirement parent,
+            Requirement child) throws Exception {
+        RequirementServer rs = new RequirementServer(parent);
+        rs.getRequirementList().add(child);
+        rs.write2DB();
+        return rs.getEntity();
+    }
 }

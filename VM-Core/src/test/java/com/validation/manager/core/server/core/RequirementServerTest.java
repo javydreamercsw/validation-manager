@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
@@ -14,11 +9,9 @@ import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -156,14 +149,14 @@ public class RequirementServerTest extends AbstractVMTestCase {
             //Add steps
             int i = 1;
             for (; i < 6; i++) {
-                System.out.println("Adding step: " + i);
+                LOG.log(Level.INFO, "Adding step: {0}", i);
                 tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
                 Step step = tc.getStepList().get(i - 1);
                 TestHelper.addRequirementToStep(step, req);
                 new TestCaseServer(tc).write2DB();
                 assertEquals(1, new StepServer(step).getRequirementList().size());
             }
-            System.out.println("Adding step: " + i);
+            LOG.log(Level.INFO, "Adding step: {0}", i);
             tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
             Step step = tc.getStepList().get(i - 1);
             TestHelper.addRequirementToStep(step, req3);
@@ -179,10 +172,11 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.update();
             assertEquals(100, rs.getTestCoverage());
             //Add a related requirement
-            RequirementHasRequirementServer rhr = new RequirementHasRequirementServer(req, req2);
-            rhr.write2DB();
-            rhr = new RequirementHasRequirementServer(req, req3);
-            rhr.write2DB();
+            rs.getRequirementList().add(req3);
+            rs.write2DB();
+            assertEquals(100, rs.getTestCoverage());
+            rs.getRequirementList().add(req2);
+            rs.write2DB();
             assertEquals(50, rs.getTestCoverage());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -198,18 +192,24 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("getChildrenRequirement");
             prepare();
-            List<Requirement> children = new ArrayList<Requirement>();
+            List<Requirement> children;
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1);
             Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
-            new RequirementServer(req).getChildrenRequirement(children);
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1);
+            children = RequirementServer.getChildrenRequirement(req);
             assertTrue(children.isEmpty());
             //Add a child
             RequirementServer rs = new RequirementServer(req);
             rs.getRequirementList().add(req2);
             rs.write2DB();
             assertEquals(1, rs.getRequirementList().size());
+            assertEquals(0, rs.getRequirementList1().size());
+            RequirementServer rs2 = new RequirementServer(req2);
+            assertEquals(0, rs2.getRequirementList().size());
+            assertEquals(1, rs2.getRequirementList1().size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
