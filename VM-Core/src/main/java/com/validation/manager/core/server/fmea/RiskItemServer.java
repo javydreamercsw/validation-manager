@@ -3,7 +3,7 @@ package com.validation.manager.core.server.fmea;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RiskItem;
-import com.validation.manager.core.db.controller.FmeaJpaController;
+import com.validation.manager.core.db.controller.FMEAJpaController;
 import com.validation.manager.core.db.controller.RiskItemJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -18,7 +18,7 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
         super(fMEAid);
         setSequence(sequence);
         setVersion(version);
-        setFmea(new FmeaJpaController(
+        setFmea(new FMEAJpaController(
                 DataBaseManager.getEntityManagerFactory()).findFmea(fMEAid));
     }
 
@@ -53,7 +53,7 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
         if (source.getFailureModeList() != null) {
             target.setFailureModeList(source.getFailureModeList());
         }
-        target.setFmea(new FmeaJpaController(
+        target.setFmea(new FMEAJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findFmea(source.getRiskItemPK().getFMEAid()));
         if (source.getHazardList() != null) {
