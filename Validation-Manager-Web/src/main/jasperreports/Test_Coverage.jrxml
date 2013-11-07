@@ -10,23 +10,39 @@
 	</parameter>
 	<queryString>
 		<![CDATA[select c.covered,t.total from (
-SELECT
+SELECT DISTINCT
      count(distinct unique_id) as covered
 FROM
-     `requirement` requirement INNER JOIN `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
+     requirement
+WHERE
+     requirement.id IN (select r.id from requirement_has_requirement rhr
+     inner join requirement r on r.id=rhr.requirement_id
+     where rhr.requirement_id=requirement.id order by r.unique_id)
+     or requirement.id IN (select requirement.id from `requirement` requirement INNER JOIN `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
      AND requirement.`version` = step_has_requirement.`requirement_version`
+     INNER JOIN `step` step ON step_has_requirement.`step_id` = step.`id`
+     AND step.`test_case_id` = step_has_requirement.`step_test_case_id`
+     AND step.`test_case_test_id` = step_has_requirement.`step_test_case_test_id`
+     INNER JOIN `test_case` test_case ON step.`test_case_id` = test_case.`id`
+     AND test_case.`test_id` = step.`test_case_test_id`
+     INNER JOIN `test` test ON test_case.`test_id` = test.`id`
+     INNER JOIN `test_plan_has_test` test_plan_has_test ON test.`id` = test_plan_has_test.`test_id`
+     INNER JOIN `test_plan` test_plan ON test_plan_has_test.`test_plan_id` = test_plan.`id`
+     AND test_plan.`test_project_id` = test_plan_has_test.`test_plan_test_project_id`
+     INNER JOIN `test_project` test_project ON test_plan.`test_project_id` = test_project.`id`
+     INNER JOIN `requirement_status` requirement_status ON requirement.`requirement_status_id` = requirement_status.`id`
      INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement.`requirement_spec_node_id` = requirement_spec_node.`id`
      AND requirement_spec_node.`requirement_spec_project_id` = requirement.`requirement_spec_node_requirement_spec_project_id`
      AND requirement_spec_node.`requirement_spec_spec_level_id` = requirement.`requirement_spec_node_requirement_spec_spec_level_id`
      AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
-     INNER JOIN `requirement_status` requirement_status ON requirement.`requirement_status_id` = requirement_status.`id`
      INNER JOIN `requirement_spec` requirement_spec ON requirement_spec_node.`requirement_spec_id` = requirement_spec.`id`
      AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
      AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
      INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
-WHERE
-     project.id = $P{target_project_id}
-     or project.parent_project_id = $P{target_project_id}) c,
+     WHERE requirement_status.status='general.approved'
+     and (project.id = $P{target_project_id}
+     or project.parent_project_id = $P{target_project_id}))
+	 order by unique_id) c,
 (
 SELECT
      count(requirement.`id`) AS total
@@ -40,7 +56,8 @@ FROM
      INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
      INNER JOIN `spec_level` spec_level ON requirement_spec.`spec_level_id` = spec_level.`id`
 WHERE
-     project.id = $P{target_project_id} or project.parent_project_id = $P{target_project_id} and requirement_status.status='general.approved'
+     requirement_status.status='general.approved' and
+     (project.id = $P{target_project_id} or project.parent_project_id = $P{target_project_id})
 ) t]]>
 	</queryString>
 	<field name="covered" class="java.lang.Long"/>
