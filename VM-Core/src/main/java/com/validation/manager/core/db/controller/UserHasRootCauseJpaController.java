@@ -1,20 +1,21 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.UserHasRootCause;
-import com.validation.manager.core.db.UserHasRootCausePK;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.RootCause;
+import com.validation.manager.core.db.UserHasRootCause;
+import com.validation.manager.core.db.UserHasRootCausePK;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import com.validation.manager.core.db.fmea.RootCause;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -38,9 +39,9 @@ public class UserHasRootCauseJpaController implements Serializable {
         if (userHasRootCause.getUserHasRootCausePK() == null) {
             userHasRootCause.setUserHasRootCausePK(new UserHasRootCausePK());
         }
-        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
+        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -78,9 +79,9 @@ public class UserHasRootCauseJpaController implements Serializable {
     }
 
     public void edit(UserHasRootCause userHasRootCause) throws NonexistentEntityException, Exception {
-        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
+        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -208,5 +209,5 @@ public class UserHasRootCauseJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -29,12 +30,10 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "UserTestPlanRole.findByUserId", query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.userId = :userId"),
     @NamedQuery(name = "UserTestPlanRole.findByRoleId", query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.roleId = :roleId")})
 public class UserTestPlanRole implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserTestPlanRolePK userTestPlanRolePK;
-    @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Role role;
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
@@ -43,6 +42,9 @@ public class UserTestPlanRole implements Serializable {
         @JoinColumn(name = "test_plan_test_project_id", referencedColumnName = "test_project_id", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private TestPlan testPlan;
+    @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private Role role;
 
     public UserTestPlanRole() {
     }
@@ -55,8 +57,8 @@ public class UserTestPlanRole implements Serializable {
         this.userTestPlanRolePK = new UserTestPlanRolePK(tpl.getTestPlanPK().getId(),
                 tpl.getTestPlanPK().getTestProjectId(), user.getId(), role.getId());
         this.testPlan = tpl;
-        this.vmUser=user;
-        this.role=role;
+        this.vmUser = user;
+        this.role = role;
     }
 
     public UserTestPlanRolePK getUserTestPlanRolePK() {
@@ -65,14 +67,6 @@ public class UserTestPlanRole implements Serializable {
 
     public void setUserTestPlanRolePK(UserTestPlanRolePK userTestPlanRolePK) {
         this.userTestPlanRolePK = userTestPlanRolePK;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public VmUser getVmUser() {
@@ -91,6 +85,14 @@ public class UserTestPlanRole implements Serializable {
         this.testPlan = testPlan;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -105,15 +107,12 @@ public class UserTestPlanRole implements Serializable {
             return false;
         }
         UserTestPlanRole other = (UserTestPlanRole) object;
-        if ((this.userTestPlanRolePK == null && other.userTestPlanRolePK != null) || (this.userTestPlanRolePK != null && !this.userTestPlanRolePK.equals(other.userTestPlanRolePK))) {
-            return false;
-        }
-        return true;
+        return (this.userTestPlanRolePK != null || other.userTestPlanRolePK == null) && (this.userTestPlanRolePK == null || this.userTestPlanRolePK.equals(other.userTestPlanRolePK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserTestPlanRole[ userTestPlanRolePK=" + userTestPlanRolePK + " ]";
     }
-    
+
 }

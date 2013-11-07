@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -44,8 +45,8 @@ public class RequirementSpecJpaController implements Serializable {
         if (requirementSpec.getRequirementSpecNodeList() == null) {
             requirementSpec.setRequirementSpecNodeList(new ArrayList<RequirementSpecNode>());
         }
-        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
+        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -98,8 +99,8 @@ public class RequirementSpecJpaController implements Serializable {
     }
 
     public void edit(RequirementSpec requirementSpec) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
+        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -270,5 +271,5 @@ public class RequirementSpecJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

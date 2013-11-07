@@ -7,7 +7,7 @@ import com.validation.manager.core.server.core.RequirementSpecServer;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 
 /**
@@ -25,6 +25,7 @@ public class RequirementSpecDialog extends AbstractCreationDialog {
         populateProjectList(project, true);
         populateSpecLevelList(level);
         setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
+        //TODO: preselect selected project as parent
     }
 
     /**

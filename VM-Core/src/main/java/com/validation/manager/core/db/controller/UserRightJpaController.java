@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -12,6 +13,7 @@ import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.UserRight;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -32,7 +34,7 @@ public class UserRightJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(UserRight userRight) {
+    public void create(UserRight userRight) throws PreexistingEntityException, Exception {
         if (userRight.getRoleList() == null) {
             userRight.setRoleList(new ArrayList<Role>());
         }
@@ -52,6 +54,11 @@ public class UserRightJpaController implements Serializable {
                 roleListRole = em.merge(roleListRole);
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findUserRight(userRight.getId()) != null) {
+                throw new PreexistingEntityException("UserRight " + userRight + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -175,5 +182,5 @@ public class UserRightJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

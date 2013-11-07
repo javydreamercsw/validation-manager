@@ -1,6 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import com.dreamer.outputhandler.OutputHandler;
+import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -8,15 +8,22 @@ import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestServer;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
+@Messages({
+    "createTestDialogTitle=Create Test"
+})
 public class CreateTestDialog extends AbstractCreationDialog {
+
+    private Test test;
+    private TestPlan plan;
 
     /**
      * Creates new form CreateTestDialog
@@ -51,6 +58,7 @@ public class CreateTestDialog extends AbstractCreationDialog {
         cancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle(org.openide.util.NbBundle.getMessage(CreateTestDialog.class, "createTestDialogTitle")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(CreateTestDialog.class, "CreateTestDialog.jLabel1.text")); // NOI18N
 
@@ -109,9 +117,9 @@ public class CreateTestDialog extends AbstractCreationDialog {
                             .addComponent(jScrollPane2)
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(save)
+                        .addComponent(cancel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cancel)))
+                        .addComponent(save)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -133,11 +141,11 @@ public class CreateTestDialog extends AbstractCreationDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(save)
                     .addComponent(cancel))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -175,14 +183,13 @@ public class CreateTestDialog extends AbstractCreationDialog {
                         scope.getText().trim());
                 //Create the test
                 ts.write2DB();
-                OutputHandler.setStatus("Test: " + ts.getName() + " created!");
-                TestPlanServer tps = 
-                        new TestPlanServer(
-                        Utilities.actionsGlobalContext().lookup(TestPlan.class));
+                TestPlanServer tps
+                        = new TestPlanServer(getTestPlan() == null
+                                ? Utilities.actionsGlobalContext().lookup(TestPlan.class) : getTestPlan());
                 tps.addTest(ts.getEntity());
                 //Add it to the test plan
                 tps.write2DB();
-                OutputHandler.setStatus("Added to the test plan!");
+                test = ts.getEntity();
                 ProjectExplorerComponent.refresh();
             } catch (IllegalOrphanException ex) {
                 Exceptions.printStackTrace(ex);
@@ -209,4 +216,25 @@ public class CreateTestDialog extends AbstractCreationDialog {
     private javax.swing.JButton save;
     private javax.swing.JTextArea scope;
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * @return the test
+     */
+    public Test getTest() {
+        return test;
+    }
+
+    /**
+     * @return the plan
+     */
+    public TestPlan getTestPlan() {
+        return plan;
+    }
+
+    /**
+     * @param plan the plan to set
+     */
+    public void setTestPlan(TestPlan plan) {
+        this.plan = plan;
+    }
 }

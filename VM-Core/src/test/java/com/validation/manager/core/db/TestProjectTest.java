@@ -8,7 +8,6 @@ import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import com.validation.manager.test.TestHelper;
 import com.validation.manager.test.AbstractVMTestCase;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +23,6 @@ import org.junit.Test;
 public class TestProjectTest extends AbstractVMTestCase {
 
     private TestProject tp;
-
-    /**
-     * Default constructor.
-     */
-    public TestProjectTest() {
-    }
 
     @Override
     public void setUp() {

@@ -2,9 +2,9 @@ package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Hazard;
 import com.validation.manager.core.db.controller.HazardJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.fmea.Hazard;
 
 /**
  *
@@ -52,5 +52,9 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
         target.setDescription(source.getDescription());
         target.setName(source.getName());
         target.setRiskItemList(source.getRiskItemList());
+    }
+    
+    public void update() {
+        update(this, getEntity());
     }
 }

@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -43,18 +44,16 @@ public class CorrectiveAction implements Serializable {
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "CAGen")
     @TableGenerator(name = "CAGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "corrective_action",
-    allocationSize = 1,
-    initialValue = 1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "corrective_action",
+            allocationSize = 1,
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "details")
     private String details;
     @JoinTable(name = "exception_has_corrective_action", joinColumns = {
@@ -126,14 +125,12 @@ public class CorrectiveAction implements Serializable {
             return false;
         }
         CorrectiveAction other = (CorrectiveAction) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.CorrectiveAction[ id=" + id + " ]";
     }
+
 }

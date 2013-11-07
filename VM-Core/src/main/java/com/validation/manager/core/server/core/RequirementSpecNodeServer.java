@@ -2,11 +2,14 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  *
@@ -39,18 +42,19 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
 
     @Override
     public int write2DB() throws Exception {
+        RequirementSpecNode rsn;
         if (getRequirementSpecNodePK() != null && getRequirementSpecNodePK().getId() > 0) {
-            RequirementSpecNode rsn = new RequirementSpecNodeJpaController(
+            rsn = new RequirementSpecNodeJpaController(
                     DataBaseManager.getEntityManagerFactory()).findRequirementSpecNode(
                     getRequirementSpecNodePK());
             update(rsn, this);
             new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).edit(rsn);
         } else {
-            RequirementSpecNode rsn = new RequirementSpecNode();
+            rsn = new RequirementSpecNode();
             update(rsn, this);
             new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).create(rsn);
-            update(this, rsn);
         }
+        update(this, rsn);
         return getRequirementSpecNodePK().getId();
     }
 
@@ -68,5 +72,23 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         target.setRequirementSpec(source.getRequirementSpec());
         target.setRequirementSpecNode(source.getRequirementSpecNode());
         target.setRequirementSpecNodeList(source.getRequirementSpecNodeList());
+        target.setRequirementSpecNodePK(source.getRequirementSpecNodePK());
+        target.setRequirementList(source.getRequirementList());
+    }
+
+    public static Collection<? extends Requirement> getRequirements(RequirementSpecNode rsn) {
+        List<Requirement> requirements = new ArrayList<Requirement>();
+        RequirementSpecNodeServer rsns = new RequirementSpecNodeServer(rsn);
+        for (Requirement rs : rsns.getRequirementList()) {
+            requirements.add(rs);
+        }
+        for (RequirementSpecNode sub : rsns.getRequirementSpecNodeList()) {
+            requirements.addAll(getRequirements(sub));
+        }
+        return requirements;
+    }
+    
+    public void update() {
+        update(this, getEntity());
     }
 }

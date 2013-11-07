@@ -6,7 +6,7 @@
         <groupId>net.sourceforge.javydreamercsw</groupId>
         <version>0.1-SNAPSHOT</version>
     </parent>
-    
+
     <prerequisites>
         <maven>3.0.4</maven>
     </prerequisites>
@@ -16,20 +16,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Validation Manager Admin Client parent</name>
-
-    <repositories>
-        <!--
-        Repository hosting NetBeans modules, especially APIs.
-        Versions are based on IDE releases, e.g.: RELEASE691
-        To create your own repository, use: nbm:populate-repository
-        -->
-        <repository>
-            <id>netbeans</id>
-            <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
-        </repository>
-    </repositories>
+    <name>Validation Manager Admin Client</name>
 
     <build>
         <pluginManagement>
@@ -37,7 +24,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>nbm-maven-plugin</artifactId>
-                    <version>3.9</version>
+                    <version>3.11.1</version>
                     <extensions>true</extensions>
                     <configuration>
                         <brandingToken>${brandingToken}</brandingToken>
@@ -48,10 +35,9 @@
                     <!-- NetBeans 6.9+ requires JDK 6 -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.0</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.7</source>
+                        <target>1.7</target>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -62,7 +48,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.0</version>
+                    <version>2.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -70,6 +56,14 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -81,10 +75,13 @@
         <module>Client-UI</module>
         <module>MySQL-Driver</module>
         <module>H2-Driver</module>
+        <module>HierarchyVisualizer</module>
+        <module>JasperReport</module>
+        <module>JasperReportViewer</module>
+        <module>POI-Library</module>
     </modules>
 
     <properties>
-        <netbeans.version>RELEASE73</netbeans.version>
-        <brandingToken>client</brandingToken>
+        <brandingToken>validation_manager_client</brandingToken>
     </properties>
 </project>

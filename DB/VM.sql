@@ -11,7 +11,7 @@ USE `validation_manager` ;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`test_project` (
   `id` INT NOT NULL ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `active` TINYINT(1) NOT NULL DEFAULT 1 ,
   `notes` TEXT NULL ,
   PRIMARY KEY (`id`) ,
@@ -53,8 +53,8 @@ COMMENT = 'In some scenarios this is considered a validation plan.';
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_status` (
   `id` INT NOT NULL ,
-  `status` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(45) NULL ,
+  `status` VARCHAR(255) NOT NULL ,
+  `description` VARCHAR(255) NULL ,
   UNIQUE INDEX `unique` (`status` ASC) ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -65,12 +65,12 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`vm_user` (
   `id` INT NOT NULL ,
-  `username` VARCHAR(45) NOT NULL ,
-  `password` VARCHAR(45) NOT NULL ,
+  `username` VARCHAR(255) NOT NULL ,
+  `password` VARCHAR(255) NOT NULL ,
   `email` VARCHAR(100) NOT NULL ,
-  `first` VARCHAR(45) NOT NULL ,
-  `last` VARCHAR(45) NOT NULL ,
-  `locale` VARCHAR(10) NOT NULL DEFAULT 'en' ,
+  `first` VARCHAR(255) NOT NULL ,
+  `last` VARCHAR(255) NOT NULL ,
+  `locale` VARCHAR(255) NOT NULL DEFAULT 'en' ,
   `last_modified` DATETIME NOT NULL ,
   `attempts` INT NOT NULL DEFAULT 0 ,
   `user_status_id` INT NOT NULL ,
@@ -90,7 +90,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`test` (
   `id` INT NOT NULL ,
   `notes` TEXT NULL ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `purpose` TEXT NOT NULL ,
   `scope` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
@@ -105,8 +105,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`test_case` (
   `id` INT UNSIGNED NOT NULL ,
   `test_id` INT NOT NULL ,
   `version` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 1 ,
-  `summary` TEXT NULL ,
-  `expected_results` TEXT NULL ,
+  `summary` BLOB NULL ,
   `creation_date` DATETIME NOT NULL ,
   `active` TINYINT(1) NULL DEFAULT 1 ,
   `is_open` TINYINT(1) NULL DEFAULT 1 ,
@@ -158,7 +157,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`role` (
   `id` INT NOT NULL ,
-  `description` VARCHAR(45) NOT NULL ,
+  `description` VARCHAR(255) NOT NULL ,
   `notes` TEXT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -169,7 +168,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`user_right` (
   `id` INT NOT NULL ,
-  `description` VARCHAR(45) NOT NULL ,
+  `description` VARCHAR(255) NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -282,7 +281,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`assigment_type` (
   `id` INT NOT NULL ,
-  `fk_table` VARCHAR(45) NOT NULL ,
+  `fk_table` VARCHAR(255) NOT NULL ,
   `description` TEXT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -293,7 +292,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`assignment_status` (
   `id` INT NOT NULL ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -346,7 +345,8 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`step` (
   `test_case_id` INT UNSIGNED NOT NULL ,
   `test_case_test_id` INT NOT NULL ,
   `step_sequence` INT NOT NULL DEFAULT 1 ,
-  `text` VARCHAR(100) NOT NULL ,
+  `text` LONGBLOB NOT NULL ,
+  `expected_result` LONGBLOB NULL ,
   `notes` TEXT NULL ,
   PRIMARY KEY (`id`, `test_case_id`, `test_case_test_id`) ,
   INDEX `fk_step_test_case1_idx` (`test_case_id` ASC, `test_case_test_id` ASC) ,
@@ -363,8 +363,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_type` (
   `id` INT NOT NULL ,
-  `name` VARCHAR(45) NOT NULL ,
-  `description` VARCHAR(45) NULL ,
+  `name` VARCHAR(255) NOT NULL ,
+  `description` VARCHAR(255) NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -384,7 +384,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`project` (
   `id` INT NOT NULL ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `notes` TEXT NULL ,
   `parent_project_id` INT NULL ,
   PRIMARY KEY (`id`) ,
@@ -402,7 +402,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`spec_level` (
   `id` INT NOT NULL ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `name_UNIQUE` (`name` ASC) )
@@ -416,7 +416,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_spec` (
   `id` INT NOT NULL ,
   `project_id` INT NOT NULL ,
   `spec_level_id` INT NOT NULL ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `description` TEXT NULL ,
   `version` INT NOT NULL DEFAULT 1 ,
   `modificationDate` DATETIME NOT NULL ,
@@ -445,7 +445,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement_spec_node` (
   `requirement_spec_id` INT NOT NULL ,
   `requirement_spec_project_id` INT NOT NULL ,
   `requirement_spec_spec_level_id` INT NOT NULL ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `description` TEXT NULL ,
   `scope` TEXT NULL ,
   `parent_requirement_spec_node_requirement_spec_id` INT NULL ,
@@ -476,7 +476,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`requirement` (
   `id` INT NOT NULL ,
   `version` INT NOT NULL DEFAULT 1 ,
   `requirement_type_id` INT NOT NULL ,
-  `unique_id` VARCHAR(45) NOT NULL ,
+  `unique_id` VARCHAR(255) NOT NULL ,
   `description` TEXT NOT NULL ,
   `notes` TEXT NULL ,
   `requirement_status_id` INT NOT NULL ,
@@ -957,7 +957,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`hazard` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -968,7 +968,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`failure_mode` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -979,7 +979,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`cause` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -1059,7 +1059,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `validation_manager`.`risk_control_type` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `name` VARCHAR(45) NOT NULL ,
+  `name` VARCHAR(255) NOT NULL ,
   `description` TEXT NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -1221,7 +1221,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`attachment` (
   `file` LONGBLOB NOT NULL ,
   `string_value` VARCHAR(255) NOT NULL ,
   `TEXT_VALUE` LONGTEXT NULL DEFAULT NULL ,
-  `attachmentcol` VARCHAR(45) NULL ,
+  `attachmentcol` VARCHAR(255) NULL ,
   PRIMARY KEY (`id`, `attachment_type_id`) ,
   INDEX `fk_attachment_attachment_type1_idx` (`attachment_type_id` ASC) ,
   CONSTRAINT `fk_attachment_attachment_type1`
@@ -1330,6 +1330,7 @@ CREATE  TABLE IF NOT EXISTS `validation_manager`.`root_cause_has_user` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+USE `validation_manager` ;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

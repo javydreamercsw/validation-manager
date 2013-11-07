@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -40,26 +41,25 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Role.findById", query = "SELECT r FROM Role r WHERE r.id = :id"),
     @NamedQuery(name = "Role.findByDescription", query = "SELECT r FROM Role r WHERE r.description = :description")})
 public class Role implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "RoleGen")
     @TableGenerator(name = "RoleGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "role",
-    allocationSize = 1,
-    initialValue = 1000)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "role",
+            allocationSize = 1,
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "description")
     private String description;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
     @JoinTable(name = "user_has_role", joinColumns = {
@@ -159,14 +159,12 @@ public class Role implements Serializable {
             return false;
         }
         Role other = (Role) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Role[ id=" + id + " ]";
     }
+
 }

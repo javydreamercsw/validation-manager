@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -16,26 +17,55 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class RequirementHasExceptionPK implements Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "vm_exception_reporter_id")
+    private int vmExceptionReporterId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "requirement_version")
+    private int requirementVersion;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "vm_exception_id")
+    private int vmExceptionId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "requirement_id")
     private int requirementId;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "exception_id")
-    private int exceptionId;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "exception_reporter_id")
-    private int exceptionReporterId;
 
     public RequirementHasExceptionPK() {
     }
 
     public RequirementHasExceptionPK(int requirementId, int exceptionId, int exceptionReporterId) {
         this.requirementId = requirementId;
-        this.exceptionId = exceptionId;
-        this.exceptionReporterId = exceptionReporterId;
+        this.vmExceptionId = exceptionId;
+        this.vmExceptionReporterId = exceptionReporterId;
+    }
+
+    public int getVmExceptionReporterId() {
+        return vmExceptionReporterId;
+    }
+
+    public void setVmExceptionReporterId(int vmExceptionReporterId) {
+        this.vmExceptionReporterId = vmExceptionReporterId;
+    }
+
+    public int getRequirementVersion() {
+        return requirementVersion;
+    }
+
+    public void setRequirementVersion(int requirementVersion) {
+        this.requirementVersion = requirementVersion;
+    }
+
+    public int getVmExceptionId() {
+        return vmExceptionId;
+    }
+
+    public void setVmExceptionId(int vmExceptionId) {
+        this.vmExceptionId = vmExceptionId;
     }
 
     public int getRequirementId() {
@@ -46,28 +76,13 @@ public class RequirementHasExceptionPK implements Serializable {
         this.requirementId = requirementId;
     }
 
-    public int getExceptionId() {
-        return exceptionId;
-    }
-
-    public void setExceptionId(int exceptionId) {
-        this.exceptionId = exceptionId;
-    }
-
-    public int getExceptionReporterId() {
-        return exceptionReporterId;
-    }
-
-    public void setExceptionReporterId(int exceptionReporterId) {
-        this.exceptionReporterId = exceptionReporterId;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
+        hash += (int) vmExceptionReporterId;
+        hash += (int) requirementVersion;
+        hash += (int) vmExceptionId;
         hash += (int) requirementId;
-        hash += (int) exceptionId;
-        hash += (int) exceptionReporterId;
         return hash;
     }
 
@@ -78,21 +93,21 @@ public class RequirementHasExceptionPK implements Serializable {
             return false;
         }
         RequirementHasExceptionPK other = (RequirementHasExceptionPK) object;
-        if (this.requirementId != other.requirementId) {
+        if (this.vmExceptionReporterId != other.vmExceptionReporterId) {
             return false;
         }
-        if (this.exceptionId != other.exceptionId) {
+        if (this.requirementVersion != other.requirementVersion) {
             return false;
         }
-        if (this.exceptionReporterId != other.exceptionReporterId) {
+        if (this.vmExceptionId != other.vmExceptionId) {
             return false;
         }
-        return true;
+        return this.requirementId == other.requirementId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementHasExceptionPK[ requirementId=" + requirementId + ", exceptionId=" + exceptionId + ", exceptionReporterId=" + exceptionReporterId + " ]";
+        return "com.validation.manager.core.db.RequirementHasExceptionPK[ vmExceptionReporterId=" + vmExceptionReporterId + ", requirementVersion=" + requirementVersion + ", vmExceptionId=" + vmExceptionId + ", requirementId=" + requirementId + " ]";
     }
-    
+
 }

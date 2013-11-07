@@ -7,7 +7,8 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import java.awt.Component;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -27,9 +28,9 @@ import javax.swing.tree.TreeSelectionModel;
  */
 public class RequirementSelectionDialog extends javax.swing.JDialog {
 
-    private List<Requirement> requirements = new ArrayList<Requirement>();
-    private final DefaultMutableTreeNode top =
-            new DefaultMutableTreeNode("Available Requirements");
+    private List<Requirement> requirements = new ArrayList<>();
+    private final DefaultMutableTreeNode top
+            = new DefaultMutableTreeNode("Available Requirements");
 
     /**
      * Creates new form RequirementSelectionDialog
@@ -207,11 +208,11 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
 
     private void selectionValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_selectionValueChanged
         // Enable remove button when item is selected
-        remove.setEnabled(selection.getSelectedValues().length > 0);
+        remove.setEnabled(!selection.getSelectedValuesList().isEmpty());
     }//GEN-LAST:event_selectionValueChanged
 
     private void removeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeActionPerformed
-        for (Object value : selection.getSelectedValues()) {
+        for (Object value : selection.getSelectedValuesList()) {
             Requirement req = (Requirement) value;
             ((DefaultListModel) selection.getModel()).removeElement(req);
         }
@@ -237,23 +238,28 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
         List<RequirementSpec> specs = new RequirementSpecJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findRequirementSpecEntities();
-        for (Iterator<RequirementSpec> it = specs.iterator(); it.hasNext();) {
-            RequirementSpec spec = it.next();
-            DefaultMutableTreeNode node =
-                    new DefaultMutableTreeNode(spec);
-            for (Iterator<RequirementSpecNode> it2 =
-                    spec.getRequirementSpecNodeList().iterator(); it2.hasNext();) {
-                RequirementSpecNode rsn = it2.next();
-                for (Iterator<Requirement> it3 =
-                        rsn.getRequirementList().iterator(); it3.hasNext();) {
-                    Requirement req = it3.next();
-                    DefaultMutableTreeNode r =
-                            new DefaultMutableTreeNode(req);
+        for (RequirementSpec spec : specs) {
+            DefaultMutableTreeNode node
+                    = new DefaultMutableTreeNode(spec);
+            for (RequirementSpecNode rsn : spec.getRequirementSpecNodeList()) {
+                List<Requirement> reqs = rsn.getRequirementList();
+                Collections.sort(reqs, new Comparator<Requirement>() {
+
+                    @Override
+                    public int compare(Requirement o1, Requirement o2) {
+                        //Sort them by unique id
+                        return o1.getUniqueId().compareToIgnoreCase(o2.getUniqueId());
+                    }
+                });
+                for (Requirement req : rsn.getRequirementList()) {
+                    DefaultMutableTreeNode r
+                            = new DefaultMutableTreeNode(req);
                     node.add(r);
                 }
             }
             top.add(node);
         }
+        source.setModel(new javax.swing.tree.DefaultTreeModel(top));
     }
 
     private class InternalRenderer extends DefaultTreeCellRenderer {

@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
@@ -44,14 +45,15 @@ public abstract class AbstractVMTestCase extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         if (deleteDatabase) {
+            deleteDatabase = false;
             Connection conn = null;
             Statement stmt = null;
             try {
+                Map<String, Object> properties = DataBaseManager.getEntityManagerFactory().getProperties();
                 DataSource ds = new JdbcDataSource();
-                ((JdbcDataSource) ds).setPassword("");
-                ((JdbcDataSource) ds).setUser("vm_user");
-                ((JdbcDataSource) ds).setURL(
-                        "jdbc:h2:file:data/test/validation-manager-test;AUTO_SERVER=TRUE");
+                ((JdbcDataSource) ds).setPassword((String) properties.get("javax.persistence.jdbc.password"));
+                ((JdbcDataSource) ds).setUser((String) properties.get("javax.persistence.jdbc.user"));
+                ((JdbcDataSource) ds).setURL((String) properties.get("javax.persistence.jdbc.url"));
                 //Load the H2 driver
                 Class.forName("org.h2.Driver");
                 conn = ds.getConnection();

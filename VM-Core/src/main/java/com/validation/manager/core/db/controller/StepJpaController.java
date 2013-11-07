@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -46,8 +47,8 @@ public class StepJpaController implements Serializable {
         if (step.getRequirementList() == null) {
             step.setRequirementList(new ArrayList<Requirement>());
         }
-        step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
+        step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -96,8 +97,8 @@ public class StepJpaController implements Serializable {
     }
 
     public void edit(Step step) throws NonexistentEntityException, Exception {
-        step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
+        step.getStepPK().setTestCaseTestId(step.getTestCase().getTestCasePK().getTestId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -258,5 +259,5 @@ public class StepJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

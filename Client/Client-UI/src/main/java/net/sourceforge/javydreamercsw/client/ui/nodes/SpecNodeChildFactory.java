@@ -24,8 +24,8 @@ public class SpecNodeChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
-        for (Iterator<com.validation.manager.core.db.RequirementSpecNode> it =
-                spec.getRequirementSpecNodeList().iterator(); it.hasNext();) {
+        for (Iterator<com.validation.manager.core.db.RequirementSpecNode> it
+                = spec.getRequirementSpecNodeList().iterator(); it.hasNext();) {
             toPopulate.add(it.next());
         }
         return true;
@@ -53,9 +53,9 @@ public class SpecNodeChildFactory extends AbstractChildFactory {
 
     @Override
     protected void updateBean() {
-        RequirementSpecJpaController controller = 
-                new RequirementSpecJpaController(
-                DataBaseManager.getEntityManagerFactory());
+        RequirementSpecJpaController controller
+                = new RequirementSpecJpaController(
+                        DataBaseManager.getEntityManagerFactory());
         spec = controller.findRequirementSpec(spec.getRequirementSpecPK());
     }
 }

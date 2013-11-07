@@ -2,6 +2,7 @@ package com.validation.manager.core.tool.step.importer;
 
 import com.validation.manager.core.tool.requirement.importer.*;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -20,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static junit.framework.TestCase.assertEquals;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -30,13 +32,13 @@ import org.junit.Test;
  */
 public class StepImporterTest extends AbstractVMTestCase {
 
-    private static final Logger LOG =
-            Logger.getLogger(RequirementImporterTest.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(RequirementImporterTest.class.getName());
 
     public StepImporterTest() {
     }
 
-    private void testImportFile(String fileName) {
+    private int testImportFile(String fileName) {
         String name = StepImporterTest.class.getCanonicalName();
         Project project = TestHelper.createProject("Test Project", "Notes");
         name = name.substring(0, name.lastIndexOf("."));
@@ -49,7 +51,6 @@ public class StepImporterTest extends AbstractVMTestCase {
                 + name
                 + System.getProperty("file.separator") + fileName);
         System.out.println(file.getAbsolutePath());
-        assertTrue(DataBaseManager.namedQuery("Step.findAll").isEmpty());
         System.out.println("Create Test Project");
         TestProject tp = null;
         try {
@@ -101,7 +102,7 @@ public class StepImporterTest extends AbstractVMTestCase {
         System.out.println("Create Test Case");
         com.validation.manager.core.db.TestCase tc = null;
         try {
-            tc = TestHelper.createTestCase(new Short("1"),
+            tc = TestHelper.createTestCase("Dummy", new Short("1"),
                     "Test Case", test, "Test Summary");
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -123,10 +124,10 @@ public class StepImporterTest extends AbstractVMTestCase {
         System.out.println("Create Requirement to link");
         Requirement r = null;
         try {
-            RequirementSpec rs =
-                    TestHelper.createRequirementSpec("Test Spec", "Description", project, 1);
-            RequirementSpecNode rsn =
-                    TestHelper.createRequirementSpecNode(rs, "Root", "Description", "Scope");
+            RequirementSpec rs
+                    = TestHelper.createRequirementSpec("Test Spec", "Description", project, 1);
+            RequirementSpecNode rsn
+                    = TestHelper.createRequirementSpecNode(rs, "Root", "Description", "Scope");
             r = TestHelper.createRequirement("SRS-SW-0001",
                     "Sample requirement", rsn.getRequirementSpecNodePK(), "Notes", 1, 1);
         } catch (Exception ex) {
@@ -135,19 +136,22 @@ public class StepImporterTest extends AbstractVMTestCase {
         }
         //Finally, do the test
         try {
-            StepImporter instance = new StepImporter(file,
-                    new TestCaseJpaController(
-                    DataBaseManager.getEntityManagerFactory())
-                    .findTestCase(tc.getTestCasePK()));
-            instance.importFile(true);
-            instance.processImport();
-        } catch (Exception ex) {
+            if (tc == null) {
+                fail("Test Case shouldn't be null!");
+            } else {
+                StepImporter instance = new StepImporter(file,
+                        new TestCaseJpaController(
+                                DataBaseManager.getEntityManagerFactory())
+                        .findTestCase(tc.getTestCasePK()));
+                instance.importFile(true);
+                instance.processImport();
+            }
+        } catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
-        assertFalse(DataBaseManager.namedQuery("Step.findAll").isEmpty());
         RequirementServer rs = new RequirementServer(r);
-        assertTrue(rs.getStepList().size() > 0);
+        return rs.getStepList().size();
     }
 
     /**
@@ -156,7 +160,18 @@ public class StepImporterTest extends AbstractVMTestCase {
     @Test
     public void testImportFilesXLS() {
         System.out.println("importFile (xls)");
-        testImportFile("Reqs.xls");
+        int initial = DataBaseManager.namedQuery("Requirement.findAll").size();
+        assertTrue(testImportFile("Reqs.xls") > initial);
+        assertTrue(initial < DataBaseManager.namedQuery("Requirement.findAll").size());
+    }
+
+    @Test
+    public void testImportInvalidFile() {
+        System.out.println("importFile (invalid)");
+        int initial = DataBaseManager.namedQuery("Requirement.findAll").size();
+        assertEquals(0, testImportFile("Fail_Columns.xls"));
+        assertEquals(initial + 1,
+                DataBaseManager.namedQuery("Requirement.findAll").size());//One created by test
     }
 
     /**
@@ -165,7 +180,8 @@ public class StepImporterTest extends AbstractVMTestCase {
     @Test
     public void testImportFileXLSX() {
         System.out.println("importFile (xlsx)");
-        testImportFile("Reqs.xlsx");
+        assertTrue(testImportFile("Reqs.xlsx") > 0);
+        assertFalse(DataBaseManager.namedQuery("Step.findAll").isEmpty());
     }
 
     @Test

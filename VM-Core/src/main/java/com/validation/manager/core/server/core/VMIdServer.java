@@ -117,4 +117,8 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
         target.setLastId(source.getLastId());
         target.setTableName(source.getTableName());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

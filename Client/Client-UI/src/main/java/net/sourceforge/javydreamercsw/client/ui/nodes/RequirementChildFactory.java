@@ -5,6 +5,8 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import java.beans.IntrospectionException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import org.openide.nodes.Node;
@@ -24,16 +26,18 @@ public class RequirementChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
-        //Add Requirements
-        for (Iterator<Requirement> it =
-                node.getRequirementList().iterator(); it.hasNext();) {
-            Requirement req = it.next();
+        for (Requirement req : node.getRequirementList()) {
             toPopulate.add(req);
         }
-        //Add other nodes
-        for (Iterator<RequirementSpecNode> it =
-                node.getRequirementSpecNodeList().iterator(); it.hasNext();) {
-            RequirementSpecNode req = it.next();
+        Collections.sort(toPopulate, new Comparator<Object>() {
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                //Sort them by unique id
+                return ((Requirement) o1).getUniqueId().compareToIgnoreCase(((Requirement) o2).getUniqueId());
+            }
+        });
+        for (RequirementSpecNode req : node.getRequirementSpecNodeList()) {
             toPopulate.add(req);
         }
         return true;
@@ -64,9 +68,9 @@ public class RequirementChildFactory extends AbstractChildFactory {
 
     @Override
     protected void updateBean() {
-        RequirementSpecNodeJpaController controller =
-                new RequirementSpecNodeJpaController(
-                DataBaseManager.getEntityManagerFactory());
+        RequirementSpecNodeJpaController controller
+                = new RequirementSpecNodeJpaController(
+                        DataBaseManager.getEntityManagerFactory());
         node = controller.findRequirementSpecNode(node.getRequirementSpecNodePK());
     }
 }

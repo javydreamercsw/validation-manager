@@ -1,12 +1,12 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -18,7 +18,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -30,28 +29,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "TestPlanHasTest.findAll", query = "SELECT t FROM TestPlanHasTest t"),
-    @NamedQuery(name = "TestPlanHasTest.findByTestPlanId", query = "SELECT t FROM TestPlanHasTest t WHERE t.testPlanHasTestPK.testPlanId = :testPlanId"),
-    @NamedQuery(name = "TestPlanHasTest.findByTestPlanTestProjectId", query = "SELECT t FROM TestPlanHasTest t WHERE t.testPlanHasTestPK.testPlanTestProjectId = :testPlanTestProjectId"),
-    @NamedQuery(name = "TestPlanHasTest.findByTestId", query = "SELECT t FROM TestPlanHasTest t WHERE t.testPlanHasTestPK.testId = :testId"),
-    @NamedQuery(name = "TestPlanHasTest.findByStartDate", query = "SELECT t FROM TestPlanHasTest t WHERE t.startDate = :startDate"),
     @NamedQuery(name = "TestPlanHasTest.findByEndDate", query = "SELECT t FROM TestPlanHasTest t WHERE t.endDate = :endDate"),
-    @NamedQuery(name = "TestPlanHasTest.findByNodeOrder", query = "SELECT t FROM TestPlanHasTest t WHERE t.nodeOrder = :nodeOrder")})
+    @NamedQuery(name = "TestPlanHasTest.findByNodeOrder", query = "SELECT t FROM TestPlanHasTest t WHERE t.nodeOrder = :nodeOrder"),
+    @NamedQuery(name = "TestPlanHasTest.findByStartDate", query = "SELECT t FROM TestPlanHasTest t WHERE t.startDate = :startDate"),
+    @NamedQuery(name = "TestPlanHasTest.findByTestId", query = "SELECT t FROM TestPlanHasTest t WHERE t.testPlanHasTestPK.testId = :testId"),
+    @NamedQuery(name = "TestPlanHasTest.findByTestPlanId", query = "SELECT t FROM TestPlanHasTest t WHERE t.testPlanHasTestPK.testPlanId = :testPlanId"),
+    @NamedQuery(name = "TestPlanHasTest.findByTestPlanTestProjectId", query = "SELECT t FROM TestPlanHasTest t WHERE t.testPlanHasTestPK.testPlanTestProjectId = :testPlanTestProjectId")})
 public class TestPlanHasTest implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected TestPlanHasTestPK testPlanHasTestPK;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "start_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startDate;
     @Column(name = "end_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date endDate;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "node_order")
-    private int nodeOrder;
+    private Integer nodeOrder;
+    @Column(name = "start_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date startDate;
     @JoinColumns({
         @JoinColumn(name = "test_plan_id", referencedColumnName = "id", insertable = false, updatable = false),
         @JoinColumn(name = "test_plan_test_project_id", referencedColumnName = "test_project_id", insertable = false, updatable = false)})
@@ -86,14 +82,6 @@ public class TestPlanHasTest implements Serializable {
         this.testPlanHasTestPK = testPlanHasTestPK;
     }
 
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
     public Date getEndDate() {
         return endDate;
     }
@@ -102,12 +90,20 @@ public class TestPlanHasTest implements Serializable {
         this.endDate = endDate;
     }
 
-    public int getNodeOrder() {
+    public Integer getNodeOrder() {
         return nodeOrder;
     }
 
-    public void setNodeOrder(int nodeOrder) {
+    public void setNodeOrder(Integer nodeOrder) {
         this.nodeOrder = nodeOrder;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public TestPlan getTestPlan() {
@@ -140,15 +136,12 @@ public class TestPlanHasTest implements Serializable {
             return false;
         }
         TestPlanHasTest other = (TestPlanHasTest) object;
-        if ((this.testPlanHasTestPK == null && other.testPlanHasTestPK != null) || (this.testPlanHasTestPK != null && !this.testPlanHasTestPK.equals(other.testPlanHasTestPK))) {
-            return false;
-        }
-        return true;
+        return (this.testPlanHasTestPK != null || other.testPlanHasTestPK == null) && (this.testPlanHasTestPK == null || this.testPlanHasTestPK.equals(other.testPlanHasTestPK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestPlanHasTest[ testPlanHasTestPK=" + testPlanHasTestPK + " ]";
     }
-    
+
 }

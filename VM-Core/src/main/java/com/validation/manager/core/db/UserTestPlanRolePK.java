@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -111,5 +112,5 @@ public class UserTestPlanRolePK implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.UserTestPlanRolePK[ testPlanId=" + testPlanId + ", testPlanTestProjectId=" + testPlanTestProjectId + ", userId=" + userId + ", roleId=" + roleId + " ]";
     }
-    
+
 }

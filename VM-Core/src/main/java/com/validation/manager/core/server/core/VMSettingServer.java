@@ -102,4 +102,8 @@ public class VMSettingServer extends VmSetting
         target.setStringVal(source.getStringVal());
         target.setId(source.getId());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

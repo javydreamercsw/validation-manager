@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -18,6 +19,7 @@ import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -36,7 +38,7 @@ public class RoleJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Role role) {
+    public void create(Role role) throws PreexistingEntityException, Exception {
         if (role.getVmUserList() == null) {
             role.setVmUserList(new ArrayList<VmUser>());
         }
@@ -105,6 +107,11 @@ public class RoleJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findRole(role.getId()) != null) {
+                throw new PreexistingEntityException("Role " + role + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -332,5 +339,5 @@ public class RoleJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

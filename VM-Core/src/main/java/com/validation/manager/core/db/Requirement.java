@@ -1,13 +1,12 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.db.fmea.RiskControl;
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -22,8 +21,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -34,45 +31,29 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "requirement", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"requirement_spec_node_id",
-        "requirement_spec_node_requirement_spec_project_id",
-        "requirement_spec_node_requirement_spec_spec_level_id", "unique_id"})})
+@Table(name = "requirement")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Requirement.findAll", query = "SELECT r FROM Requirement r"),
+    @NamedQuery(name = "Requirement.findByUniqueId", query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId"),
     @NamedQuery(name = "Requirement.findById", query = "SELECT r FROM Requirement r WHERE r.requirementPK.id = :id"),
-    @NamedQuery(name = "Requirement.findByVersion", query = "SELECT r FROM Requirement r WHERE r.requirementPK.version = :version"),
-    @NamedQuery(name = "Requirement.findByUniqueId", query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId")})
+    @NamedQuery(name = "Requirement.findByVersion", query = "SELECT r FROM Requirement r WHERE r.requirementPK.version = :version")})
 public class Requirement implements Serializable {
 
-    @JoinTable(name = "risk_control_has_requirement", joinColumns = {
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
-        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")})
-    @ManyToMany
-    private List<RiskControl> riskControlList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
-    private List<RequirementHasException> requirementHasExceptionList;
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementPK requirementPK;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "unique_id")
-    private String uniqueId;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
+    @Size(max = 255)
+    @Column(name = "unique_id")
+    private String uniqueId;
     @JoinTable(name = "requirement_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
         @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
@@ -85,24 +66,33 @@ public class Requirement implements Serializable {
     @JoinTable(name = "step_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
         @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id"),
         @JoinColumn(name = "step_id", referencedColumnName = "id"),
-        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id"),
-        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id")})
+        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id")})
     @ManyToMany
     private List<Step> stepList;
+    @JoinTable(name = "risk_control_has_requirement", joinColumns = {
+        @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
+        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
+        @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")})
+    @ManyToMany
+    private List<RiskControl> riskControlList;
     @JoinColumn(name = "requirement_type_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne
     private RequirementType requirementTypeId;
     @JoinColumn(name = "requirement_status_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne
     private RequirementStatus requirementStatusId;
     @JoinColumns({
         @JoinColumn(name = "requirement_spec_node_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", referencedColumnName = "requirement_spec_id"),
         @JoinColumn(name = "requirement_spec_node_requirement_spec_project_id", referencedColumnName = "requirement_spec_project_id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id", referencedColumnName = "requirement_spec_spec_level_id")})
-    @ManyToOne(optional = false)
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id", referencedColumnName = "requirement_spec_spec_level_id"),
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", referencedColumnName = "requirement_spec_id")})
+    @ManyToOne
     private RequirementSpecNode requirementSpecNode;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
+    private List<RequirementHasException> requirementHasExceptionList;
 
     public Requirement() {
     }
@@ -130,14 +120,6 @@ public class Requirement implements Serializable {
         this.requirementPK = requirementPK;
     }
 
-    public String getUniqueId() {
-        return uniqueId;
-    }
-
-    public void setUniqueId(String uniqueId) {
-        this.uniqueId = uniqueId;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -152,6 +134,14 @@ public class Requirement implements Serializable {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
     }
 
     @XmlTransient
@@ -184,6 +174,16 @@ public class Requirement implements Serializable {
         this.stepList = stepList;
     }
 
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskControl> getRiskControlList() {
+        return riskControlList;
+    }
+
+    public void setRiskControlList(List<RiskControl> riskControlList) {
+        this.riskControlList = riskControlList;
+    }
+
     public RequirementType getRequirementTypeId() {
         return requirementTypeId;
     }
@@ -208,6 +208,16 @@ public class Requirement implements Serializable {
         this.requirementSpecNode = requirementSpecNode;
     }
 
+    @XmlTransient
+    @JsonIgnore
+    public List<RequirementHasException> getRequirementHasExceptionList() {
+        return requirementHasExceptionList;
+    }
+
+    public void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
+        this.requirementHasExceptionList = requirementHasExceptionList;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -222,10 +232,7 @@ public class Requirement implements Serializable {
             return false;
         }
         Requirement other = (Requirement) object;
-        if ((this.requirementPK == null && other.requirementPK != null) || (this.requirementPK != null && !this.requirementPK.equals(other.requirementPK))) {
-            return false;
-        }
-        return true;
+        return (this.requirementPK != null || other.requirementPK == null) && (this.requirementPK == null || this.requirementPK.equals(other.requirementPK));
     }
 
     @Override
@@ -233,23 +240,4 @@ public class Requirement implements Serializable {
         return "com.validation.manager.core.db.Requirement[ requirementPK=" + requirementPK + " ]";
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<RequirementHasException> getRequirementHasExceptionList() {
-        return requirementHasExceptionList;
-    }
-
-    public void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
-        this.requirementHasExceptionList = requirementHasExceptionList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskControl> getRiskControlList() {
-        return riskControlList;
-    }
-
-    public void setRiskControlList(List<RiskControl> riskControlList) {
-        this.riskControlList = riskControlList;
-    }
 }

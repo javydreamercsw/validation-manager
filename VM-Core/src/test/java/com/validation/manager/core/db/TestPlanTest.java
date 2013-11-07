@@ -24,9 +24,6 @@ public class TestPlanTest extends AbstractVMTestCase {
     private TestProject tp;
     private TestPlan tpl;
 
-    public TestPlanTest() {
-    }
-
     @Override
     public void setUp() {
         try {

@@ -60,11 +60,11 @@ public class DataBaseManager {
     private static String PU = "VMPU";
     private static EntityManager em;
     private static boolean dbError = false;
-    private static final Logger LOG =
-            Logger.getLogger(DataBaseManager.class.getSimpleName());
+    private static final Logger LOG
+            = Logger.getLogger(DataBaseManager.class.getSimpleName());
     private static DBState state;
-    private static ResourceBundle settings =
-            ResourceBundle.getBundle("com.validation.manager.resources.settings");
+    private static final ResourceBundle settings
+            = ResourceBundle.getBundle("com.validation.manager.resources.settings");
     private static boolean locked = false;
     private static boolean usingContext;
     private static boolean demo;
@@ -114,9 +114,7 @@ public class DataBaseManager {
             if (LOG.isLoggable(Level.CONFIG)) {
                 VmIdJpaController controller = new VmIdJpaController(
                         DataBaseManager.getEntityManagerFactory());
-                for (Iterator<VmId> it = controller.findVmIdEntities()
-                        .iterator(); it.hasNext();) {
-                    VmId next = it.next();
+                for (VmId next : controller.findVmIdEntities()) {
                     LOG.log(Level.CONFIG, "{0}, {1}, {2}", new Object[]{next.getId(),
                         next.getTableName(), next.getLastId()});
                 }
@@ -129,14 +127,10 @@ public class DataBaseManager {
             LOG.log(Level.FINE,
                     "Creating ids to work around eclipse issue "
                     + "(https://bugs.eclipse.org/bugs/show_bug.cgi?id=366852)...");
-            for (Iterator<EmbeddableType<?>> it =
-                    getEntityManager().getMetamodel().getEmbeddables()
-                    .iterator(); it.hasNext();) {
-                EmbeddableType et = it.next();
+            for (EmbeddableType et : getEntityManager().getMetamodel().getEmbeddables()) {
                 processFields(et.getJavaType().getDeclaredFields());
             }
-            for (Iterator<EntityType<?>> it = getEntityManager().getMetamodel().getEntities().iterator(); it.hasNext();) {
-                EntityType et = it.next();
+            for (EntityType et : getEntityManager().getMetamodel().getEntities()) {
                 processFields(et.getBindableJavaType().getDeclaredFields());
             }
             LOG.log(Level.FINE, "Done!");
@@ -253,7 +247,8 @@ public class DataBaseManager {
 
     @SuppressWarnings("unchecked")
     public static List<Object> createdQuery(String query, Map<String, Object> parameters) {
-        getEntityManager().getTransaction().begin();
+        EntityTransaction transaction = getEntityManager().getTransaction();
+        transaction.begin();
         Query q = getEntityManager().createQuery(query);
         if (parameters != null) {
             Iterator<Entry<String, Object>> entries = parameters.entrySet().iterator();
@@ -262,7 +257,7 @@ public class DataBaseManager {
                 q.setParameter(e.getKey(), e.getValue());
             }
         }
-        getEntityManager().getTransaction().commit();
+        transaction.commit();
         return q.getResultList();
     }
 
@@ -276,21 +271,23 @@ public class DataBaseManager {
     }
 
     public static List<Object> nativeQuery(String query) {
-        getEntityManager().getTransaction().begin();
+        EntityTransaction transaction = getEntityManager().getTransaction();
+        transaction.begin();
         List<Object> resultList = getEntityManager().createNativeQuery(query).getResultList();
-        getEntityManager().getTransaction().commit();
+        transaction.commit();
         return resultList;
     }
 
     public static void nativeUpdateQuery(String query) {
         boolean atomic = false;
+        EntityTransaction transaction = getEntityManager().getTransaction();
         if (!getEntityManager().getTransaction().isActive()) {
-            getEntityManager().getTransaction().begin();
+            transaction.begin();
             atomic = true;
         }
         getEntityManager().createNativeQuery(query).executeUpdate();
         if (atomic) {
-            getEntityManager().getTransaction().commit();
+            transaction.commit();
         }
     }
 
@@ -327,8 +324,9 @@ public class DataBaseManager {
 
     @SuppressWarnings("unchecked")
     private static List<Object> namedQuery(String query, Map<String, Object> parameters, boolean change) {
+        EntityTransaction transaction = getEntityManager().getTransaction();
         if (change) {
-            getEntityManager().getTransaction().begin();
+            transaction.begin();
         }
         Query q = getEntityManager().createNamedQuery(query);
         if (parameters != null) {
@@ -339,7 +337,7 @@ public class DataBaseManager {
             }
         }
         if (change) {
-            getEntityManager().getTransaction().commit();
+            transaction.commit();
         }
         return q.getResultList();
     }
@@ -526,9 +524,10 @@ public class DataBaseManager {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             } else {
-                getEntityManager().getTransaction().begin();
+                EntityTransaction transaction = getEntityManager().getTransaction();
+                transaction.begin();
                 conn = getEntityManager().unwrap(java.sql.Connection.class);
-                getEntityManager().getTransaction().commit();
+                transaction.commit();
             }
         } catch (SQLException ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -588,7 +587,7 @@ public class DataBaseManager {
         Flyway flyway = new Flyway();
         try {
             flyway.setDataSource(dataSource);
-            flyway.setLocations("com.validation.manager.core.db.script");
+            flyway.setLocations("db.migration");
             LOG.info("Starting migration...");
             flyway.migrate();
             LOG.info("Done!");

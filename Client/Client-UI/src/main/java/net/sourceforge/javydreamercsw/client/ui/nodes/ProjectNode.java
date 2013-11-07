@@ -10,16 +10,21 @@ import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateProjectAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateRequirementSpecAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestProjectAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportRequirementMapping;
 import org.openide.util.lookup.InstanceContent;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class ProjectNode extends AbstractRefreshableBeanNode {
+public class ProjectNode extends AbstractVMBeanNode {
 
-    public ProjectNode(Project project) throws IntrospectionException {
-        super(project, new SubProjectChildFactory(project), new InstanceContent());
+    private final SubProjectChildFactory factory;
+
+    public ProjectNode(Project project, SubProjectChildFactory factory) 
+            throws IntrospectionException {
+        super(project, factory, new InstanceContent());
+        this.factory = factory;
         setIconBaseWithExtension("com/validation/manager/resources/icons/Papermart/Folder.png");
     }
 
@@ -30,11 +35,12 @@ public class ProjectNode extends AbstractRefreshableBeanNode {
 
     @Override
     public Action[] getActions(boolean b) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateProjectAction());
         actions.add(new CreateRequirementSpecAction());
         actions.add(new CreateTestProjectAction());
+        actions.add(new ImportRequirementMapping());
         return actions.toArray(new Action[actions.size()]);
     }
 
@@ -42,5 +48,6 @@ public class ProjectNode extends AbstractRefreshableBeanNode {
     public void refreshMyself() {
         ProjectServer rs = new ProjectServer(getLookup().lookup(Project.class));
         rs.update((Project) getBean(), rs.getEntity());
+        factory.refresh();
     }
 }

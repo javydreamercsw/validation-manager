@@ -3,18 +3,21 @@ package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestProjectServer;
-import java.util.Arrays;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
+import org.openide.util.Utilities;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class CreateTestProjectDialog extends AbstractCreationDialog {
+
+    private Project selectedProject;
 
     /**
      * Creates new form CreateTestProjectDialog
@@ -132,16 +135,19 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
                     "Invalid Value",
                     JOptionPane.WARNING_MESSAGE);
         } else {
-            TestProjectServer tps = new TestProjectServer(name.getText().trim(), true);
-            Project selectedProject = getSelectedProject(project);
+            TestProjectServer tps
+                    = new TestProjectServer(name.getText().trim(), true);
             if (!notes.getText().isEmpty()) {
                 tps.setNotes(notes.getText());
             }
-            if (selectedProject != null) {
-                tps.setProjectList(Arrays.asList(new Project[]{selectedProject}));
-            }
             try {
                 tps.write2DB();
+                if (selectedProject == null) {
+                    selectedProject = Utilities.actionsGlobalContext().lookup(Project.class);
+                }
+                ProjectServer ps = new ProjectServer(selectedProject);
+                ps.getTestProjectList().add(tps.getEntity());
+                ps.write2DB();
             } catch (IllegalOrphanException ex) {
                 Exceptions.printStackTrace(ex);
             } catch (NonexistentEntityException ex) {
@@ -168,4 +174,8 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
     private javax.swing.JComboBox project;
     private javax.swing.JButton save;
     // End of variables declaration//GEN-END:variables
+
+    public void setProject(Project project) {
+        selectedProject = project;
+    }
 }

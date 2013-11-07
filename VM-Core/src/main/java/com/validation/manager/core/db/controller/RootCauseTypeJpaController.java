@@ -1,18 +1,20 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.fmea.RootCause;
-import com.validation.manager.core.db.fmea.RootCauseType;
+import com.validation.manager.core.db.RootCause;
+import com.validation.manager.core.db.RootCauseType;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -33,7 +35,7 @@ public class RootCauseTypeJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(RootCauseType rootCauseType) {
+    public void create(RootCauseType rootCauseType) throws PreexistingEntityException, Exception {
         if (rootCauseType.getRootCauseList() == null) {
             rootCauseType.setRootCauseList(new ArrayList<RootCause>());
         }
@@ -58,6 +60,11 @@ public class RootCauseTypeJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findRootCauseType(rootCauseType.getId()) != null) {
+                throw new PreexistingEntityException("RootCauseType " + rootCauseType + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -198,5 +205,5 @@ public class RootCauseTypeJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

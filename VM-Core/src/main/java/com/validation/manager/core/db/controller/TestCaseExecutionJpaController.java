@@ -1,11 +1,13 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -30,13 +32,18 @@ public class TestCaseExecutionJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(TestCaseExecution testCaseExecution) {
+    public void create(TestCaseExecution testCaseExecution) throws PreexistingEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             em.persist(testCaseExecution);
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findTestCaseExecution(testCaseExecution.getId()) != null) {
+                throw new PreexistingEntityException("TestCaseExecution " + testCaseExecution + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -133,5 +140,5 @@ public class TestCaseExecutionJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

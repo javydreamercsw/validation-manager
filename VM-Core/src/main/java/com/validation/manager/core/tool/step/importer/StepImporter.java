@@ -8,6 +8,7 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.StepJpaController;
+import static com.validation.manager.core.tool.requirement.importer.RequirementImporter.exportTemplate;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -39,15 +39,15 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
  */
 public class StepImporter implements ImporterInterface<Step> {
 
-    private File toImport;
-    private List<Step> steps = new ArrayList<Step>();
+    private final File toImport;
+    private final List<Step> steps = new ArrayList<Step>();
     private final TestCase tc;
-    private static final Logger LOG =
-            Logger.getLogger(StepImporter.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(StepImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
-    private static ResourceBundle rb =
-            ResourceBundle.getBundle(
-            "com.validation.manager.resources.VMMessages", Locale.getDefault());
+    private static final ResourceBundle rb
+            = ResourceBundle.getBundle(
+                    "com.validation.manager.resources.VMMessages", Locale.getDefault());
 
     static {
         columns.add("Sequence");
@@ -65,23 +65,24 @@ public class StepImporter implements ImporterInterface<Step> {
     @Override
     public List<Step> importFile() throws
             RequirementImportException {
+        List<Step> importedSteps = null;
         try {
-            return importFile(false);
-        } catch (Exception ex) {
+            importedSteps = importFile(false);
+        } catch (TestImportException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
-        return null;
+        return importedSteps;
     }
 
     @Override
     public List<Step> importFile(boolean header) throws
-            RequirementImportException {
+            TestImportException {
         steps.clear();
         if (toImport == null) {
-            throw new RequirementImportException(
+            throw new TestImportException(
                     "message.step.import.file.null");
         } else if (!toImport.exists()) {
-            throw new RequirementImportException(
+            throw new TestImportException(
                     "message.step.import.file.invalid");
         } else {
             //Excel support
@@ -90,8 +91,8 @@ public class StepImporter implements ImporterInterface<Step> {
                 InputStream inp = null;
                 try {
                     inp = new FileInputStream(toImport);
-                    org.apache.poi.ss.usermodel.Workbook wb =
-                            WorkbookFactory.create(inp);
+                    org.apache.poi.ss.usermodel.Workbook wb
+                            = WorkbookFactory.create(inp);
                     org.apache.poi.ss.usermodel.Sheet sheet = wb.getSheetAt(0);
                     int rows = sheet.getPhysicalNumberOfRows();
                     int r = 0;
@@ -104,10 +105,15 @@ public class StepImporter implements ImporterInterface<Step> {
                         if (row == null) {
                             continue;
                         }
-
                         int cells = row.getPhysicalNumberOfCells();
+                        if (row.getCell(0) == null) {
+                            LOG.log(Level.WARNING,
+                                    "Found an empty row on line: {0}. "
+                                    + "Stopping processing", r);
+                            break;
+                        }
                         if (cells < 2) {
-                            throw new RequirementImportException(
+                            throw new TestImportException(
                                     rb.getString("message.step.import.missing.column")
                                     .replaceAll("%c", "" + cells));
                         }
@@ -125,16 +131,14 @@ public class StepImporter implements ImporterInterface<Step> {
                                     case Cell.CELL_TYPE_FORMULA:
                                         value = cell.getCellFormula();
                                         break;
-
                                     case Cell.CELL_TYPE_NUMERIC:
                                         value = "" + cell.getNumericCellValue();
                                         break;
-
                                     case Cell.CELL_TYPE_STRING:
                                         value = cell.getStringCellValue();
                                         break;
-
                                     default:
+                                    //Do nothing.
                                 }
                             }
                             switch (c) {
@@ -204,16 +208,18 @@ public class StepImporter implements ImporterInterface<Step> {
                     LOG.log(Level.SEVERE, null, ex);
                 } finally {
                     try {
-                        inp.close();
+                        if (inp != null) {
+                            inp.close();
+                        }
                     } catch (IOException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }
             } else if (toImport.getName().endsWith(".xml")) {
-                throw new RequirementImportException(
+                throw new TestImportException(
                         "XML importing not supported yet.");
             } else {
-                throw new RequirementImportException("Unsupported file format: "
+                throw new TestImportException("Unsupported file format: "
                         + toImport.getName());
             }
             return steps;
@@ -222,22 +228,18 @@ public class StepImporter implements ImporterInterface<Step> {
 
     @Override
     public boolean processImport() throws VMException {
-        if (steps.isEmpty()) {
-            return false;
-        } else {
-            for (Iterator<Step> it = steps.iterator(); it.hasNext();) {
-                Step step = it.next();
-                try {
-                    new StepJpaController(
-                            DataBaseManager.getEntityManagerFactory())
-                            .create(step);
-                } catch (Exception ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                    throw new VMException(ex);
-                }
+        boolean result = false;
+        for (Step step : steps) {
+            try {
+                new StepJpaController(
+                        DataBaseManager.getEntityManagerFactory())
+                        .create(step);
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                throw new VMException(ex);
             }
-            return true;
         }
+        return result;
     }
 
     public static File exportTemplate() throws FileNotFoundException, IOException, InvalidFormatException {
@@ -255,8 +257,7 @@ public class StepImporter implements ImporterInterface<Step> {
         f.setColor((short) Font.COLOR_NORMAL);
         cs.setFont(f);
         Row newRow = sheet.createRow(0);
-        for (Iterator<String> it = columns.iterator(); it.hasNext();) {
-            String label = it.next();
+        for (String label : columns) {
             Cell newCell = newRow.createCell(column);
             newCell.setCellStyle(cs);
             newCell.setCellValue(label);
@@ -285,11 +286,11 @@ public class StepImporter implements ImporterInterface<Step> {
             File file = exportTemplate();
             System.out.println(file.getAbsolutePath());
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (InvalidFormatException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 }

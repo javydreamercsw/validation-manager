@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -11,8 +12,8 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -33,7 +34,7 @@ public class UserStatusJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(UserStatus userStatus) {
+    public void create(UserStatus userStatus) throws PreexistingEntityException, Exception {
         if (userStatus.getVmUserList() == null) {
             userStatus.setVmUserList(new ArrayList<VmUser>());
         }
@@ -58,6 +59,11 @@ public class UserStatusJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findUserStatus(userStatus.getId()) != null) {
+                throw new PreexistingEntityException("UserStatus " + userStatus + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -65,7 +71,7 @@ public class UserStatusJpaController implements Serializable {
         }
     }
 
-    public void edit(UserStatus userStatus) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(UserStatus userStatus) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -73,18 +79,6 @@ public class UserStatusJpaController implements Serializable {
             UserStatus persistentUserStatus = em.find(UserStatus.class, userStatus.getId());
             List<VmUser> vmUserListOld = persistentUserStatus.getVmUserList();
             List<VmUser> vmUserListNew = userStatus.getVmUserList();
-            List<String> illegalOrphanMessages = null;
-            for (VmUser vmUserListOldVmUser : vmUserListOld) {
-                if (!vmUserListNew.contains(vmUserListOldVmUser)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain VmUser " + vmUserListOldVmUser + " since its userStatusId field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
@@ -93,6 +87,12 @@ public class UserStatusJpaController implements Serializable {
             vmUserListNew = attachedVmUserListNew;
             userStatus.setVmUserList(vmUserListNew);
             userStatus = em.merge(userStatus);
+            for (VmUser vmUserListOldVmUser : vmUserListOld) {
+                if (!vmUserListNew.contains(vmUserListOldVmUser)) {
+                    vmUserListOldVmUser.setUserStatusId(null);
+                    vmUserListOldVmUser = em.merge(vmUserListOldVmUser);
+                }
+            }
             for (VmUser vmUserListNewVmUser : vmUserListNew) {
                 if (!vmUserListOld.contains(vmUserListNewVmUser)) {
                     UserStatus oldUserStatusIdOfVmUserListNewVmUser = vmUserListNewVmUser.getUserStatusId();
@@ -121,7 +121,7 @@ public class UserStatusJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(Integer id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -133,16 +133,10 @@ public class UserStatusJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userStatus with id " + id + " no longer exists.", enfe);
             }
-            List<String> illegalOrphanMessages = null;
-            List<VmUser> vmUserListOrphanCheck = userStatus.getVmUserList();
-            for (VmUser vmUserListOrphanCheckVmUser : vmUserListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This UserStatus (" + userStatus + ") cannot be destroyed since the VmUser " + vmUserListOrphanCheckVmUser + " in its vmUserList field has a non-nullable userStatusId field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
+            List<VmUser> vmUserList = userStatus.getVmUserList();
+            for (VmUser vmUserListVmUser : vmUserList) {
+                vmUserListVmUser.setUserStatusId(null);
+                vmUserListVmUser = em.merge(vmUserListVmUser);
             }
             em.remove(userStatus);
             em.getTransaction().commit();
@@ -198,5 +192,5 @@ public class UserStatusJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

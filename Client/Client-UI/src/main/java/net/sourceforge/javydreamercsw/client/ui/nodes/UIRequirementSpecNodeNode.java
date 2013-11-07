@@ -15,7 +15,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class UIRequirementSpecNodeNode extends AbstractRefreshableBeanNode {
+public class UIRequirementSpecNodeNode extends AbstractVMBeanNode {
 
     public UIRequirementSpecNodeNode(RequirementSpecNode node) throws IntrospectionException {
         super(node,
@@ -30,7 +30,7 @@ public class UIRequirementSpecNodeNode extends AbstractRefreshableBeanNode {
 
     @Override
     public Action[] getActions(boolean context) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         actions.addAll(Arrays.asList(super.getActions(context)));
         actions.add(new CreateRequirementAction());
         actions.add(new ImportRequirementAction());

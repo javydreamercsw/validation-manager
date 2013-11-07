@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -13,6 +14,7 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -33,7 +35,7 @@ public class SpecLevelJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(SpecLevel specLevel) {
+    public void create(SpecLevel specLevel) throws PreexistingEntityException, Exception {
         if (specLevel.getRequirementSpecList() == null) {
             specLevel.setRequirementSpecList(new ArrayList<RequirementSpec>());
         }
@@ -58,6 +60,11 @@ public class SpecLevelJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findSpecLevel(specLevel.getId()) != null) {
+                throw new PreexistingEntityException("SpecLevel " + specLevel + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -198,5 +205,5 @@ public class SpecLevelJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

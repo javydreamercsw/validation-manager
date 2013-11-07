@@ -96,4 +96,8 @@ public class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setTestPlanPK(source.getTestPlanPK());
     }
+    
+    public void update() {
+        update(this, getEntity());
+    }
 }

@@ -2,9 +2,9 @@ package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Cause;
 import com.validation.manager.core.db.controller.CauseJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.fmea.Cause;
 
 /**
  *
@@ -53,5 +53,9 @@ public class CauseServer extends Cause implements EntityServer<Cause> {
         if (source.getRiskItemList() != null) {
             target.setRiskItemList(source.getRiskItemList());
         }
+    }
+    
+    public void update() {
+        update(this, getEntity());
     }
 }
