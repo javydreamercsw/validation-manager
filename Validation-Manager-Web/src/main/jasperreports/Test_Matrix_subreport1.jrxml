@@ -10,7 +10,9 @@
 	<queryString>
 		<![CDATA[SELECT DISTINCT
      step.`test_case_test_id` AS test_case_test_id,
-     test.`name` AS name
+     test.`name` AS name,
+     test_case.`name` AS test_case_name,
+     step.`step_sequence` AS step_step_sequence
 FROM
      `requirement` requirement INNER JOIN `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
      AND requirement.`version` = step_has_requirement.`requirement_version`
@@ -35,6 +37,8 @@ WHERE
 	<field name="name" class="java.lang.String">
 		<fieldDescription><![CDATA[]]></fieldDescription>
 	</field>
+	<field name="test_case_name" class="java.lang.String"/>
+	<field name="step_step_sequence" class="java.lang.Integer"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -63,33 +67,53 @@ WHERE
 				<textElement textAlignment="Center">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Test Case ID"]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Test Case"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="0137474f-f58f-47cd-885d-fe04b6445aa0" x="199" y="21" width="100" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Step"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="e4515530-9c27-43ba-949a-6d319c9f077a" x="201" y="2" width="100" height="18" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{test_case_name}]]></textFieldExpression>
 			</textField>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement uuid="5562a9ef-b8bb-4e63-8217-907d08f565ee" x="100" y="0" width="100" height="20" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true"/>
-				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA[$F{test_case_test_id}]]></textFieldExpression>
-			</textField>
-			<textField>
 				<reportElement uuid="d78e934b-ce45-4ea7-ba6d-b5fad8a07842" x="0" y="0" width="100" height="20" isPrintInFirstWholeBand="true"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="5562a9ef-b8bb-4e63-8217-907d08f565ee" x="101" y="2" width="100" height="17" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{test_case_name}]]></textFieldExpression>
 			</textField>
 			<line>
 				<reportElement uuid="fe6d5094-2f44-4915-ac0c-7860a4ffcdb6" stretchType="RelativeToBandHeight" x="100" y="2" width="1" height="18"/>
 			</line>
 			<line>
-				<reportElement uuid="bbc549c7-9203-4a95-a6dd-60c3eb4c32db" positionType="FixRelativeToBottom" x="0" y="19" width="200" height="1"/>
+				<reportElement uuid="bbc549c7-9203-4a95-a6dd-60c3eb4c32db" positionType="FixRelativeToBottom" x="0" y="19" width="298" height="1"/>
 			</line>
 			<line>
-				<reportElement uuid="5fe84a32-46d7-4e35-90e7-b8c7ff3ef006" isPrintRepeatedValues="false" x="0" y="0" width="200" height="1" isPrintInFirstWholeBand="true"/>
+				<reportElement uuid="5fe84a32-46d7-4e35-90e7-b8c7ff3ef006" isPrintRepeatedValues="false" x="0" y="1" width="298" height="1" isPrintInFirstWholeBand="true"/>
 			</line>
 			<line>
 				<reportElement uuid="c54ddaca-be85-42ee-87af-bcd95d8aa2ff" stretchType="RelativeToBandHeight" x="199" y="2" width="1" height="18"/>
+			</line>
+			<textField>
+				<reportElement uuid="b7578c13-c382-4e38-bdb8-71d14f46ad4b" x="201" y="3" width="100" height="17" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{step_step_sequence}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="67afbbb8-def6-4f61-b424-65854e307bc1" stretchType="RelativeToBandHeight" x="298" y="1" width="1" height="18"/>
 			</line>
 		</band>
 	</detail>
@@ -102,7 +126,7 @@ WHERE
 	<summary>
 		<band height="20" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="0fa88e2d-c51d-4226-af93-ff7086cda51f" isPrintRepeatedValues="false" mode="Opaque" x="0" y="0" width="200" height="20" backcolor="#FF0033">
+				<reportElement uuid="0fa88e2d-c51d-4226-af93-ff7086cda51f" isPrintRepeatedValues="false" mode="Opaque" x="0" y="0" width="299" height="20" backcolor="#FF0033">
 					<printWhenExpression><![CDATA[$V{COLUMN_COUNT}.equals( 0 )]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
