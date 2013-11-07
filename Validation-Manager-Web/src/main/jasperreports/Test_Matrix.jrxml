@@ -4,7 +4,7 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="90"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA["C:\\Users\\jortiz00\\Documents\\NetBeansProjects\\validation-manager\\Validation-Manager-Web\\src\\main\\jasperreports\\"]]></defaultValueExpression>
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="project_id" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[1000]]></defaultValueExpression>
