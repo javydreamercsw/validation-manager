@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context antiJARLocking="true" path="/validation_manager" reloadable="true">
+    <!-- #################### PLEASE CONFIGURE ##########################################-->
+    <!-- ### Params: username, password, url, driverClassName                         ###-->
+    <!-- ################################################################################-->
+    <!-- ### MySQL:                                                                   ###-->
+    <!-- ### url: jdbc:mysql://localhost:3306/validation_manager?autoReconnect=true   ###-->
+    <!-- ### driverClassName: com.mysql.jdbc.Driver                                   ###-->
+    <!-- ################################################################################-->
+    <!-- ### PostgreSQL:                                                              ###-->
+    <!-- ### url: jdbc:postgresql://localhost:5432/validation_manager                 ###-->
+    <!-- ### driverClassName: org.postgresql.Driver                                   ###-->
+    <!-- ################################################################################-->
+    <!-- ### Oracle:                                                                  ###-->
+    <!-- ### url: jdbc:oracle:thin:@//server.local:1521/<service name>                ###-->
+    <!-- ### driverClassName: oracle.jdbc.driver.OracleDriver                         ###-->
+    <!-- ################################################################################-->
+    <!-- ### H2:                                                                      ###-->
+    <!-- ### url: jdbc:h2:file:VM/data/validation_manager;CREATE=TRUE;                ###-->
+    <!-- ### AUTO_SERVER=TRUE;LOCK_TIMEOUT=10000                                      ###-->
+    <!-- ### driverClassName: org.h2.Driver                                           ###-->
+    <!-- ### Note: For H2, make sure this values match the contents of                ###-->
+    <!-- ### web.xml for proper shutdown of H2 database!                              ###-->
+    <!-- ### If using H2 make sure to synchronize the database credentials with the   ###-->
+    <!-- ### web.xml file to prevent memory leaks                                     ###-->
+    <!-- #################################################################################-->
+    <Resource auth="Container" 
+              driverClassName="com.mysql.jdbc.Driver" 
+              maxActive="100" maxIdle="30" maxWait="10000" 
+              name="jdbc/VMDB" password="arthrocare" 
+              type="javax.sql.DataSource" 
+              url="jdbc:mysql://localhost:3306/validation_manager?autoReconnect=true" 
+              username="root"/>
+    <!-- Turn off session serialization -->
+    <Manager pathname=""/>
+    <!-- ################# Optional Configuration #################-->
+    <!-- Database JNDI Name -->
+    <Environment name="validation_manager/JNDIDB" override="false" type="java.lang.String" value="VMPUJNDI"/>
+    <!-- ################# ###################### #################-->
+    <!-- Demo settings -->
+    <!-- Warning! This will reset your database on 'demo-period' intervals so use with care
+    Precautions have been put in place to check the database is an H2 embedded database before proceeding
+    Please set value to false for use in production.-->
+    <Environment name="validation_manager/demo" override="false" type="java.lang.Boolean" value="false"/>
+    <Environment name="validation_manager/demo-period" override="false" type="java.lang.Long" value="86400000"/>
+    <!-- ################# ###################### #################-->
+</Context>
