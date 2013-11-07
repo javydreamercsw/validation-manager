@@ -205,11 +205,23 @@ public class RequirementServerTest extends AbstractVMTestCase {
             RequirementServer rs = new RequirementServer(req);
             rs.getRequirementList().add(req2);
             rs.write2DB();
+            for (Requirement r : rs.getRequirementList()) {
+                LOG.info(r.getUniqueId());
+            }
             assertEquals(1, rs.getRequirementList().size());
+            for (Requirement r : rs.getRequirementList1()) {
+                LOG.info(r.getUniqueId());
+            }
             assertEquals(0, rs.getRequirementList1().size());
             RequirementServer rs2 = new RequirementServer(req2);
-//            assertEquals(0, rs2.getRequirementList().size());
-//            assertEquals(1, rs2.getRequirementList1().size());
+            for (Requirement r : rs2.getRequirementList()) {
+                LOG.info(r.getUniqueId());
+            }
+            assertEquals(0, rs2.getRequirementList().size());
+            for (Requirement r : rs2.getRequirementList()) {
+                LOG.info(r.getUniqueId());
+            }
+            assertEquals(1, rs2.getRequirementList1().size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
