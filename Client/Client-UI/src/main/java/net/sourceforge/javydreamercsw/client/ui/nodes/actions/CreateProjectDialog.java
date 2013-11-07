@@ -6,7 +6,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.server.core.ProjectServer;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
-import net.sourceforge.javydreamercsw.client.ui.ProjectExplorerComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
 
 /**
@@ -134,8 +134,7 @@ public class CreateProjectDialog extends AbstractCreationDialog {
         } else {
             //First we update the project
             ProjectServer ps = new ProjectServer(name.getText().trim(), notes.getText().trim());
-            Project parentProject = null;
-            getSelectedProject(parent);
+            Project parentProject = getSelectedProject(parent);
             if (parentProject != null) {
                 ps.setParentProjectId(parentProject);
             }
@@ -149,8 +148,8 @@ public class CreateProjectDialog extends AbstractCreationDialog {
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
-            dispose();
             ProjectExplorerComponent.refresh();
+            dispose();
         }
     }//GEN-LAST:event_saveActionPerformed
 

@@ -1,7 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import com.dreamer.outputhandler.OutputHandler;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
@@ -60,21 +60,19 @@ public class ImportRequirementAction extends AbstractAction {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     try {
                         File file = fc.getSelectedFile();
-                        RequirementSpecNode rsns =
-                                Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class);
+                        RequirementSpecNode rsns
+                                = Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class);
                         RequirementImporter instance = new RequirementImporter(file,
                                 new RequirementSpecNodeJpaController(
-                                DataBaseManager.getEntityManagerFactory())
+                                        DataBaseManager.getEntityManagerFactory())
                                 .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
                         instance.importFile(true);
-                        OutputHandler.setStatus("Importing, please wait!");
                         instance.processImport();
-                        OutputHandler.setStatus("Importing done! Please refresh node to see results.");
                     } catch (UnsupportedOperationException ex) {
                         Exceptions.printStackTrace(ex);
                     } catch (RequirementImportException ex) {
                         Exceptions.printStackTrace(ex);
-                    } catch (Exception ex) {
+                    } catch (VMException ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 }

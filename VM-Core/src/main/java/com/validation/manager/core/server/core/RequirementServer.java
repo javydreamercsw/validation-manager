@@ -2,6 +2,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNodePK;
 import com.validation.manager.core.db.controller.RequirementJpaController;
@@ -10,19 +11,27 @@ import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.tool.Tool;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementServer extends Requirement implements EntityServer<Requirement> {
+public final class RequirementServer extends Requirement implements EntityServer<Requirement> {
+
+    private static final Logger LOG
+            = Logger.getLogger(RequirementServer.class.getSimpleName());
 
     public RequirementServer(String id, String desc, RequirementSpecNodePK rsn,
             String notes, int requirementType, int requirementStatus) {
         setNotes(notes);
         setRequirementSpecNode(
                 new RequirementSpecNodeJpaController(DataBaseManager
-                .getEntityManagerFactory()).findRequirementSpecNode(rsn));
+                        .getEntityManagerFactory()).findRequirementSpecNode(rsn));
         setUniqueId(id);
         setDescription(desc);
         setRequirementStatusId(new RequirementStatusJpaController(
@@ -33,19 +42,19 @@ public class RequirementServer extends Requirement implements EntityServer<Requi
 
     public static void deleteRequirement(Requirement r)
             throws IllegalOrphanException, NonexistentEntityException {
-        RequirementJpaController controller =
-                new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
+        RequirementJpaController controller
+                = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
         if (controller.findRequirement(r.getRequirementPK()) != null) {
             controller.destroy(r.getRequirementPK());
         }
     }
 
     public RequirementServer(Requirement r) {
-        RequirementJpaController controller =
-                new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
+        RequirementJpaController controller
+                = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
         Requirement requirement = controller.findRequirement(r.getRequirementPK());
         if (requirement != null) {
-            update(this, requirement);
+            update((RequirementServer) this, requirement);
         } else {
             throw new RuntimeException("Unable to find requirement with id: " + r.getRequirementPK());
         }
@@ -72,7 +81,7 @@ public class RequirementServer extends Requirement implements EntityServer<Requi
     public Requirement getEntity() {
         return new RequirementJpaController(
                 DataBaseManager.getEntityManagerFactory()).findRequirement(
-                getRequirementPK());
+                        getRequirementPK());
     }
 
     public void update(Requirement target, Requirement source) {
@@ -87,5 +96,106 @@ public class RequirementServer extends Requirement implements EntityServer<Requi
         target.setStepList(source.getStepList());
         target.setUniqueId(source.getUniqueId());
         target.setRequirementPK(source.getRequirementPK());
+    }
+
+    public static boolean isDuplicate(Requirement req) {
+        //Must be unique within a project.
+        Project project
+                = req.getRequirementSpecNode().getRequirementSpec().getProject();
+        List<Requirement> requirements = ProjectServer.getRequirements(project);
+        int count = 0;
+        for (Requirement r : requirements) {
+            if (r.getUniqueId().equals(req.getUniqueId())) {
+                count++;
+                if (count > 1) {
+                    break;
+                }
+            }
+        }
+        return count > 1;
+    }
+
+    public int getTestCoverage() {
+        int coverage = 0;
+        List<Requirement> children = getChildrenRequirement(getEntity());
+        if (children.isEmpty()) {
+            //Has test cases and no related requirements
+            if (getStepList().size() > 0) {
+                coverage = 100;
+            }
+            //Has nothing, leave at 0.
+        } else {
+            //Get total of instances
+            LOG.log(Level.FINE, "Found: {0} related requirements.",
+                    children.size());
+            //Check coverage for children
+            for (Requirement r : children) {
+                coverage += r.getStepList().isEmpty() ? 0 : 100;
+            }
+            coverage /= children.size();
+        }
+        LOG.log(Level.FINE, "{0} Coverage: {1}",
+                new Object[]{getUniqueId(), coverage});
+        return coverage;
+    }
+
+    /**
+     * This returns the requirement children to this requirement.
+     *
+     * @param r requirement to get children from
+     * @return list containing the child requirements
+     */
+    public static List<Requirement> getChildrenRequirement(Requirement r) {
+        List<Requirement> children = new ArrayList<Requirement>();
+//        Map<String, Object> parameters = new HashMap<String, Object>();
+//        parameters.put("parentRequirementId",
+//                r.getRequirementPK().getId());
+//        parameters.put("parentRequirementVersion",
+//                r.getRequirementPK().getVersion());
+//        List<Object> results = DataBaseManager.createdQuery(
+//                "SELECT r FROM RequirementHasRequirement r WHERE "
+//                + "r.requirementHasRequirementPK.parentRequirementId"
+//                + " = :parentRequirementId "
+//                + "and "
+//                + "r.requirementHasRequirementPK.parentRequirementVersion"
+//                + " = :parentRequirementVersion", parameters);
+        for (Requirement obj : new RequirementServer(r).getRequirementList()) {
+            LOG.log(Level.INFO, "Adding child: {0}", obj.getUniqueId());
+            children.add(obj);
+        }
+        Tool.removeDuplicates(children);
+        return children;
+    }
+
+    /**
+     * This returns the requirement parent to this requirement.
+     *
+     * @param r requirement to get parents from
+     * @return list containing the parent requirements
+     */
+    public static List<Requirement> getParentRequirement(Requirement r) {
+        List<Requirement> parents = new ArrayList<Requirement>();
+//        Map<String, Object> parameters = new HashMap<String, Object>();
+//        parameters.put("requirementId",
+//                r.getRequirementPK().getId());
+//        parameters.put("requirementVersion",
+//                r.getRequirementPK().getVersion());
+//        List<Object> results = DataBaseManager.createdQuery(
+//                "SELECT r FROM RequirementHasRequirement r WHERE "
+//                + "r.requirementHasRequirementPK.requirementId"
+//                + " = :requirementId "
+//                + "and "
+//                + "r.requirementHasRequirementPK.requirementVersion"
+//                + " = :requirementVersion", parameters);
+        for (Requirement obj : new RequirementServer(r).getRequirementList1()) {
+            LOG.log(Level.INFO, "Adding parent: {0}", obj.getUniqueId());
+            parents.add(obj);
+        }
+        Tool.removeDuplicates(parents);
+        return parents;
+    }
+
+    public void update() {
+        update(this, getEntity());
     }
 }

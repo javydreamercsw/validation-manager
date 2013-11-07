@@ -1,14 +1,13 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.db.fmea.RootCause;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -24,7 +23,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -39,38 +37,35 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "VmException.findAll", query = "SELECT v FROM VmException v"),
-    @NamedQuery(name = "VmException.findById", query = "SELECT v FROM VmException v WHERE v.vmExceptionPK.id = :id"),
-    @NamedQuery(name = "VmException.findByReporterId", query = "SELECT v FROM VmException v WHERE v.vmExceptionPK.reporterId = :reporterId"),
+    @NamedQuery(name = "VmException.findByCloseDate", query = "SELECT v FROM VmException v WHERE v.closeDate = :closeDate"),
     @NamedQuery(name = "VmException.findByReportDate", query = "SELECT v FROM VmException v WHERE v.reportDate = :reportDate"),
-    @NamedQuery(name = "VmException.findByCloseDate", query = "SELECT v FROM VmException v WHERE v.closeDate = :closeDate")})
+    @NamedQuery(name = "VmException.findById", query = "SELECT v FROM VmException v WHERE v.vmExceptionPK.id = :id"),
+    @NamedQuery(name = "VmException.findByReporterId", query = "SELECT v FROM VmException v WHERE v.vmExceptionPK.reporterId = :reporterId")})
 public class VmException implements Serializable {
-    @JoinTable(name = "exception_has_corrective_action", joinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")})
-    @ManyToMany
-    private List<CorrectiveAction> correctiveActionList;
-    @ManyToMany(mappedBy = "vmExceptionList")
-    private List<Step> stepList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmException")
-    private List<RequirementHasException> requirementHasExceptionList;
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected VmExceptionPK vmExceptionPK;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "report_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date reportDate;
     @Column(name = "close_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date closeDate;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
+    @Column(name = "report_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date reportDate;
+    @ManyToMany(mappedBy = "vmExceptionList")
+    private List<CorrectiveAction> correctiveActionList;
+    @JoinTable(name = "step_has_exception", joinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id"),
+        @JoinColumn(name = "step_id", referencedColumnName = "id"),
+        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id")})
+    @ManyToMany
+    private List<Step> stepList;
     @JoinTable(name = "exception_has_root_cause", joinColumns = {
         @JoinColumn(name = "exception_id", referencedColumnName = "id"),
         @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
@@ -87,6 +82,10 @@ public class VmException implements Serializable {
     @JoinColumn(name = "reporter_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmException")
+    private List<RequirementHasException> requirementHasExceptionList;
+    @OneToMany(mappedBy = "vmException1")
+    private List<RequirementHasException> requirementHasExceptionList1;
 
     public VmException() {
     }
@@ -113,14 +112,6 @@ public class VmException implements Serializable {
         this.vmExceptionPK = vmExceptionPK;
     }
 
-    public Date getReportDate() {
-        return reportDate;
-    }
-
-    public void setReportDate(Date reportDate) {
-        this.reportDate = reportDate;
-    }
-
     public Date getCloseDate() {
         return closeDate;
     }
@@ -135,6 +126,14 @@ public class VmException implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Date getReportDate() {
+        return reportDate;
+    }
+
+    public void setReportDate(Date reportDate) {
+        this.reportDate = reportDate;
     }
 
     @XmlTransient
@@ -185,6 +184,26 @@ public class VmException implements Serializable {
         this.vmUser = vmUser;
     }
 
+    @XmlTransient
+    @JsonIgnore
+    public List<RequirementHasException> getRequirementHasExceptionList() {
+        return requirementHasExceptionList;
+    }
+
+    public void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
+        this.requirementHasExceptionList = requirementHasExceptionList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RequirementHasException> getRequirementHasExceptionList1() {
+        return requirementHasExceptionList1;
+    }
+
+    public void setRequirementHasExceptionList1(List<RequirementHasException> requirementHasExceptionList1) {
+        this.requirementHasExceptionList1 = requirementHasExceptionList1;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -199,10 +218,7 @@ public class VmException implements Serializable {
             return false;
         }
         VmException other = (VmException) object;
-        if ((this.vmExceptionPK == null && other.vmExceptionPK != null) || (this.vmExceptionPK != null && !this.vmExceptionPK.equals(other.vmExceptionPK))) {
-            return false;
-        }
-        return true;
+        return (this.vmExceptionPK != null || other.vmExceptionPK == null) && (this.vmExceptionPK == null || this.vmExceptionPK.equals(other.vmExceptionPK));
     }
 
     @Override
@@ -210,13 +226,4 @@ public class VmException implements Serializable {
         return "com.validation.manager.core.db.VmException[ vmExceptionPK=" + vmExceptionPK + " ]";
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<RequirementHasException> getRequirementHasExceptionList() {
-        return requirementHasExceptionList;
-    }
-
-    public void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
-        this.requirementHasExceptionList = requirementHasExceptionList;
-    }
 }

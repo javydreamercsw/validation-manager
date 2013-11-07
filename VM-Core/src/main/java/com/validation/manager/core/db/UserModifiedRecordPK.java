@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -19,6 +20,7 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class UserModifiedRecordPK implements Serializable {
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "user_id")
@@ -26,11 +28,11 @@ public class UserModifiedRecordPK implements Serializable {
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "UserModifiedRecordGen")
     @TableGenerator(name = "UserModifiedRecordGen", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "user_modified_record",
-    allocationSize = 1,
-    initialValue = 1)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "user_modified_record",
+            allocationSize = 1,
+            initialValue = 1)
     @NotNull
     @Column(name = "record_id")
     private int recordId;
@@ -42,14 +44,6 @@ public class UserModifiedRecordPK implements Serializable {
         this.userId = userId;
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
     public int getRecordId() {
         return recordId;
     }
@@ -58,11 +52,19 @@ public class UserModifiedRecordPK implements Serializable {
         this.recordId = recordId;
     }
 
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (int) userId;
         hash += (int) recordId;
+        hash += (int) userId;
         return hash;
     }
 
@@ -73,18 +75,15 @@ public class UserModifiedRecordPK implements Serializable {
             return false;
         }
         UserModifiedRecordPK other = (UserModifiedRecordPK) object;
-        if (this.userId != other.userId) {
-            return false;
-        }
         if (this.recordId != other.recordId) {
             return false;
         }
-        return true;
+        return this.userId == other.userId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.UserModifiedRecordPK[ userId=" + userId + ", recordId=" + recordId + " ]";
+        return "com.validation.manager.core.db.UserModifiedRecordPK[ recordId=" + recordId + ", userId=" + userId + " ]";
     }
-    
+
 }

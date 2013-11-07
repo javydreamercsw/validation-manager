@@ -14,7 +14,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class UITestProjectNode extends AbstractRefreshableBeanNode {
+class UITestProjectNode extends AbstractVMBeanNode {
 
     public UITestProjectNode(TestProject tp) throws IntrospectionException {
         super(tp,
@@ -29,7 +29,7 @@ class UITestProjectNode extends AbstractRefreshableBeanNode {
     
     @Override
     public Action[] getActions(boolean b) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateTestPlanAction());
         return actions.toArray(new Action[actions.size()]);

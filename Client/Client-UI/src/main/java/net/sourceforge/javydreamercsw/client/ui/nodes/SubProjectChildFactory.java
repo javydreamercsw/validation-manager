@@ -5,7 +5,7 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.TestProject;
 import java.util.Iterator;
 import java.util.List;
-import net.sourceforge.javydreamercsw.client.ui.DataBaseTool;
+import net.sourceforge.javydreamercsw.client.ui.components.database.DataBaseTool;
 
 /**
  *

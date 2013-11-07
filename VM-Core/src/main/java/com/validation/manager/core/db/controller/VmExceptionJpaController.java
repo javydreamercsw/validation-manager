@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -14,7 +15,7 @@ import com.validation.manager.core.db.CorrectiveAction;
 import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.Step;
-import com.validation.manager.core.db.fmea.RootCause;
+import com.validation.manager.core.db.RootCause;
 import com.validation.manager.core.db.Investigation;
 import com.validation.manager.core.db.RequirementHasException;
 import com.validation.manager.core.db.VmException;
@@ -59,6 +60,9 @@ public class VmExceptionJpaController implements Serializable {
         if (vmException.getRequirementHasExceptionList() == null) {
             vmException.setRequirementHasExceptionList(new ArrayList<RequirementHasException>());
         }
+        if (vmException.getRequirementHasExceptionList1() == null) {
+            vmException.setRequirementHasExceptionList1(new ArrayList<RequirementHasException>());
+        }
         vmException.getVmExceptionPK().setReporterId(vmException.getVmUser().getId());
         EntityManager em = null;
         try {
@@ -99,6 +103,12 @@ public class VmExceptionJpaController implements Serializable {
                 attachedRequirementHasExceptionList.add(requirementHasExceptionListRequirementHasExceptionToAttach);
             }
             vmException.setRequirementHasExceptionList(attachedRequirementHasExceptionList);
+            List<RequirementHasException> attachedRequirementHasExceptionList1 = new ArrayList<RequirementHasException>();
+            for (RequirementHasException requirementHasExceptionList1RequirementHasExceptionToAttach : vmException.getRequirementHasExceptionList1()) {
+                requirementHasExceptionList1RequirementHasExceptionToAttach = em.getReference(requirementHasExceptionList1RequirementHasExceptionToAttach.getClass(), requirementHasExceptionList1RequirementHasExceptionToAttach.getRequirementHasExceptionPK());
+                attachedRequirementHasExceptionList1.add(requirementHasExceptionList1RequirementHasExceptionToAttach);
+            }
+            vmException.setRequirementHasExceptionList1(attachedRequirementHasExceptionList1);
             em.persist(vmException);
             if (vmUser != null) {
                 vmUser.getVmExceptionList().add(vmException);
@@ -127,6 +137,15 @@ public class VmExceptionJpaController implements Serializable {
                 if (oldVmExceptionOfRequirementHasExceptionListRequirementHasException != null) {
                     oldVmExceptionOfRequirementHasExceptionListRequirementHasException.getRequirementHasExceptionList().remove(requirementHasExceptionListRequirementHasException);
                     oldVmExceptionOfRequirementHasExceptionListRequirementHasException = em.merge(oldVmExceptionOfRequirementHasExceptionListRequirementHasException);
+                }
+            }
+            for (RequirementHasException requirementHasExceptionList1RequirementHasException : vmException.getRequirementHasExceptionList1()) {
+                VmException oldVmException1OfRequirementHasExceptionList1RequirementHasException = requirementHasExceptionList1RequirementHasException.getVmException1();
+                requirementHasExceptionList1RequirementHasException.setVmException1(vmException);
+                requirementHasExceptionList1RequirementHasException = em.merge(requirementHasExceptionList1RequirementHasException);
+                if (oldVmException1OfRequirementHasExceptionList1RequirementHasException != null) {
+                    oldVmException1OfRequirementHasExceptionList1RequirementHasException.getRequirementHasExceptionList1().remove(requirementHasExceptionList1RequirementHasException);
+                    oldVmException1OfRequirementHasExceptionList1RequirementHasException = em.merge(oldVmException1OfRequirementHasExceptionList1RequirementHasException);
                 }
             }
             em.getTransaction().commit();
@@ -161,6 +180,8 @@ public class VmExceptionJpaController implements Serializable {
             List<Investigation> investigationListNew = vmException.getInvestigationList();
             List<RequirementHasException> requirementHasExceptionListOld = persistentVmException.getRequirementHasExceptionList();
             List<RequirementHasException> requirementHasExceptionListNew = vmException.getRequirementHasExceptionList();
+            List<RequirementHasException> requirementHasExceptionList1Old = persistentVmException.getRequirementHasExceptionList1();
+            List<RequirementHasException> requirementHasExceptionList1New = vmException.getRequirementHasExceptionList1();
             List<String> illegalOrphanMessages = null;
             for (RequirementHasException requirementHasExceptionListOldRequirementHasException : requirementHasExceptionListOld) {
                 if (!requirementHasExceptionListNew.contains(requirementHasExceptionListOldRequirementHasException)) {
@@ -212,6 +233,13 @@ public class VmExceptionJpaController implements Serializable {
             }
             requirementHasExceptionListNew = attachedRequirementHasExceptionListNew;
             vmException.setRequirementHasExceptionList(requirementHasExceptionListNew);
+            List<RequirementHasException> attachedRequirementHasExceptionList1New = new ArrayList<RequirementHasException>();
+            for (RequirementHasException requirementHasExceptionList1NewRequirementHasExceptionToAttach : requirementHasExceptionList1New) {
+                requirementHasExceptionList1NewRequirementHasExceptionToAttach = em.getReference(requirementHasExceptionList1NewRequirementHasExceptionToAttach.getClass(), requirementHasExceptionList1NewRequirementHasExceptionToAttach.getRequirementHasExceptionPK());
+                attachedRequirementHasExceptionList1New.add(requirementHasExceptionList1NewRequirementHasExceptionToAttach);
+            }
+            requirementHasExceptionList1New = attachedRequirementHasExceptionList1New;
+            vmException.setRequirementHasExceptionList1(requirementHasExceptionList1New);
             vmException = em.merge(vmException);
             if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
                 vmUserOld.getVmExceptionList().remove(vmException);
@@ -280,6 +308,23 @@ public class VmExceptionJpaController implements Serializable {
                     }
                 }
             }
+            for (RequirementHasException requirementHasExceptionList1OldRequirementHasException : requirementHasExceptionList1Old) {
+                if (!requirementHasExceptionList1New.contains(requirementHasExceptionList1OldRequirementHasException)) {
+                    requirementHasExceptionList1OldRequirementHasException.setVmException1(null);
+                    requirementHasExceptionList1OldRequirementHasException = em.merge(requirementHasExceptionList1OldRequirementHasException);
+                }
+            }
+            for (RequirementHasException requirementHasExceptionList1NewRequirementHasException : requirementHasExceptionList1New) {
+                if (!requirementHasExceptionList1Old.contains(requirementHasExceptionList1NewRequirementHasException)) {
+                    VmException oldVmException1OfRequirementHasExceptionList1NewRequirementHasException = requirementHasExceptionList1NewRequirementHasException.getVmException1();
+                    requirementHasExceptionList1NewRequirementHasException.setVmException1(vmException);
+                    requirementHasExceptionList1NewRequirementHasException = em.merge(requirementHasExceptionList1NewRequirementHasException);
+                    if (oldVmException1OfRequirementHasExceptionList1NewRequirementHasException != null && !oldVmException1OfRequirementHasExceptionList1NewRequirementHasException.equals(vmException)) {
+                        oldVmException1OfRequirementHasExceptionList1NewRequirementHasException.getRequirementHasExceptionList1().remove(requirementHasExceptionList1NewRequirementHasException);
+                        oldVmException1OfRequirementHasExceptionList1NewRequirementHasException = em.merge(oldVmException1OfRequirementHasExceptionList1NewRequirementHasException);
+                    }
+                }
+            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -345,6 +390,11 @@ public class VmExceptionJpaController implements Serializable {
                 investigationListInvestigation.getVmExceptionList().remove(vmException);
                 investigationListInvestigation = em.merge(investigationListInvestigation);
             }
+            List<RequirementHasException> requirementHasExceptionList1 = vmException.getRequirementHasExceptionList1();
+            for (RequirementHasException requirementHasExceptionList1RequirementHasException : requirementHasExceptionList1) {
+                requirementHasExceptionList1RequirementHasException.setVmException1(null);
+                requirementHasExceptionList1RequirementHasException = em.merge(requirementHasExceptionList1RequirementHasException);
+            }
             em.remove(vmException);
             em.getTransaction().commit();
         } finally {
@@ -399,5 +449,5 @@ public class VmExceptionJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

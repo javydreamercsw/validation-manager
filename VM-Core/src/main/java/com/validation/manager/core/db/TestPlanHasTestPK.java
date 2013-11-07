@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -16,6 +17,11 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class TestPlanHasTestPK implements Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "test_id")
+    private int testId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "test_plan_id")
@@ -24,17 +30,21 @@ public class TestPlanHasTestPK implements Serializable {
     @NotNull
     @Column(name = "test_plan_test_project_id")
     private int testPlanTestProjectId;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "test_id")
-    private int testId;
 
     public TestPlanHasTestPK() {
     }
 
-    public TestPlanHasTestPK(int testPlanId, int testPlanTestProjectId, int testId) {
+    public TestPlanHasTestPK(int testId, int testPlanId, int testPlanTestProjectId) {
+        this.testId = testId;
         this.testPlanId = testPlanId;
         this.testPlanTestProjectId = testPlanTestProjectId;
+    }
+
+    public int getTestId() {
+        return testId;
+    }
+
+    public void setTestId(int testId) {
         this.testId = testId;
     }
 
@@ -54,20 +64,12 @@ public class TestPlanHasTestPK implements Serializable {
         this.testPlanTestProjectId = testPlanTestProjectId;
     }
 
-    public int getTestId() {
-        return testId;
-    }
-
-    public void setTestId(int testId) {
-        this.testId = testId;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
+        hash += (int) testId;
         hash += (int) testPlanId;
         hash += (int) testPlanTestProjectId;
-        hash += (int) testId;
         return hash;
     }
 
@@ -78,21 +80,18 @@ public class TestPlanHasTestPK implements Serializable {
             return false;
         }
         TestPlanHasTestPK other = (TestPlanHasTestPK) object;
-        if (this.testPlanId != other.testPlanId) {
-            return false;
-        }
-        if (this.testPlanTestProjectId != other.testPlanTestProjectId) {
-            return false;
-        }
         if (this.testId != other.testId) {
             return false;
         }
-        return true;
+        if (this.testPlanId != other.testPlanId) {
+            return false;
+        }
+        return this.testPlanTestProjectId == other.testPlanTestProjectId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.TestPlanHasTestPK[ testPlanId=" + testPlanId + ", testPlanTestProjectId=" + testPlanTestProjectId + ", testId=" + testId + " ]";
+        return "com.validation.manager.core.db.TestPlanHasTestPK[ testId=" + testId + ", testPlanId=" + testPlanId + ", testPlanTestProjectId=" + testPlanTestProjectId + " ]";
     }
-    
+
 }

@@ -1,6 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
-import com.validation.manager.core.db.fmea.RiskControl;
+import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.server.core.RiskControlServer;
 import java.beans.IntrospectionException;
 import org.openide.util.lookup.InstanceContent;
@@ -9,7 +9,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class RiskControlNode extends AbstractRefreshableBeanNode {
+class RiskControlNode extends AbstractVMBeanNode {
 
     public RiskControlNode(RiskControl rs) throws IntrospectionException {
         super(rs,

@@ -8,13 +8,14 @@ import java.util.Arrays;
 import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportTestAction;
 import org.openide.util.lookup.InstanceContent;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class TestPlanNode extends AbstractRefreshableBeanNode {
+public class TestPlanNode extends AbstractVMBeanNode {
 
     public TestPlanNode(TestPlan tp) throws IntrospectionException {
         super(tp,
@@ -29,9 +30,10 @@ class TestPlanNode extends AbstractRefreshableBeanNode {
 
     @Override
     public Action[] getActions(boolean b) {
-        List<Action> actions = new ArrayList<Action>();
+        List<Action> actions = new ArrayList<>();
         actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new CreateTestAction());
+        actions.add(new ImportTestAction());
         return actions.toArray(new Action[actions.size()]);
     }
 

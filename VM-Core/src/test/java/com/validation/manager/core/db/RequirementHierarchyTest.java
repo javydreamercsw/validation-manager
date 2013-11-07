@@ -116,7 +116,6 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         for (Requirement req : requirements) {
             try {
                 req.getRequirementList().add(requirements.get(requirementAmount - count - 1));
-                req.getRequirementList1().add(requirements.get(count));
                 new RequirementServer(req).write2DB();
                 count++;
             } catch (Exception ex) {

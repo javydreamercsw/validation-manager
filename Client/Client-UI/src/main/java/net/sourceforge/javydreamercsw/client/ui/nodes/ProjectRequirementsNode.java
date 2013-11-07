@@ -9,7 +9,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class ProjectRequirementsNode extends AbstractRefreshableBeanNode {
+public class ProjectRequirementsNode extends AbstractVMBeanNode {
 
     public ProjectRequirementsNode(Project parent) throws IntrospectionException {
         super(parent,

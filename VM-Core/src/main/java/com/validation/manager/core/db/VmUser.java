@@ -1,11 +1,11 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.VMAuditedObject;
-import com.validation.manager.core.db.fmea.RootCause;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +17,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -43,91 +42,68 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "VmUser.findAll", query = "SELECT v FROM VmUser v"),
     @NamedQuery(name = "VmUser.findById", query = "SELECT v FROM VmUser v WHERE v.id = :id"),
-    @NamedQuery(name = "VmUser.findByUsername", query = "SELECT v FROM VmUser v WHERE v.username = :username"),
-    @NamedQuery(name = "VmUser.findByPassword", query = "SELECT v FROM VmUser v WHERE v.password = :password"),
+    @NamedQuery(name = "VmUser.findByAttempts", query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts"),
     @NamedQuery(name = "VmUser.findByEmail", query = "SELECT v FROM VmUser v WHERE v.email = :email"),
     @NamedQuery(name = "VmUser.findByFirst", query = "SELECT v FROM VmUser v WHERE v.first = :first"),
     @NamedQuery(name = "VmUser.findByLast", query = "SELECT v FROM VmUser v WHERE v.last = :last"),
-    @NamedQuery(name = "VmUser.findByLocale", query = "SELECT v FROM VmUser v WHERE v.locale = :locale"),
     @NamedQuery(name = "VmUser.findByLastModified", query = "SELECT v FROM VmUser v WHERE v.lastModified = :lastModified"),
-    @NamedQuery(name = "VmUser.findByAttempts", query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts")})
+    @NamedQuery(name = "VmUser.findByLocale", query = "SELECT v FROM VmUser v WHERE v.locale = :locale"),
+    @NamedQuery(name = "VmUser.findByPassword", query = "SELECT v FROM VmUser v WHERE v.password = :password"),
+    @NamedQuery(name = "VmUser.findByUsername", query = "SELECT v FROM VmUser v WHERE v.username = :username")})
 public class VmUser extends VMAuditedObject implements Serializable {
-    @JoinTable(name = "user_has_role", joinColumns = {
-        @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "role_id", referencedColumnName = "id")})
-    @ManyToMany
-    private List<Role> roleList;
-    @JoinTable(name = "user_has_corrective_action", joinColumns = {
-        @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")})
-    @ManyToMany
-    private List<CorrectiveAction> correctiveActionList;
-    @ManyToMany(mappedBy = "vmUserList")
-    private List<RootCause> rootCauseList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "VM_UserGEN")
     @TableGenerator(name = "VM_UserGEN",
-    table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "vm_user",
-    initialValue = 1000,
-    allocationSize = 1)
+            table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "vm_user",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "username")
-    private String username;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "password")
-    private String password;
+    @Column(name = "attempts")
+    private Integer attempts;
     // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 100)
+    @Size(max = 255)
     @Column(name = "email")
     private String email;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "first")
     private String first;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "last")
     private String last;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 10)
-    @Column(name = "locale")
-    private String locale;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "last_modified")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModified;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "attempts")
-    private int attempts;
+    @Size(max = 255)
+    @Column(name = "locale")
+    private String locale;
+    @Size(max = 255)
+    @Column(name = "password")
+    private String password;
+    @Size(max = 255)
+    @Column(name = "username")
+    private String username;
+    @ManyToMany(mappedBy = "vmUserList")
+    private List<Role> roleList;
+    @ManyToMany(mappedBy = "vmUserList")
+    private List<CorrectiveAction> correctiveActionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserModifiedRecord> userModifiedRecordList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserHasInvestigation> userHasInvestigationList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "assigneeId")
-    private List<UserAssigment> userAssigmentList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
-    private List<UserAssigment> userAssigmentList1;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "authorId")
+    @OneToMany(mappedBy = "authorId")
     private List<TestCase> testCaseList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
+    private List<UserAssigment> userAssigmentList;
+    @OneToMany(mappedBy = "assigneeId")
+    private List<UserAssigment> userAssigmentList1;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<VmException> vmExceptionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
@@ -137,7 +113,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserTestPlanRole> userTestPlanRoleList;
     @JoinColumn(name = "user_status_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne
     private UserStatus userStatusId;
 
     public VmUser() {
@@ -163,20 +139,12 @@ public class VmUser extends VMAuditedObject implements Serializable {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public Integer getAttempts() {
+        return attempts;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setAttempts(Integer attempts) {
+        this.attempts = attempts;
     }
 
     public String getEmail() {
@@ -203,14 +171,6 @@ public class VmUser extends VMAuditedObject implements Serializable {
         this.last = last;
     }
 
-    public String getLocale() {
-        return locale;
-    }
-
-    public void setLocale(String locale) {
-        this.locale = locale;
-    }
-
     public Date getLastModified() {
         return lastModified;
     }
@@ -219,12 +179,28 @@ public class VmUser extends VMAuditedObject implements Serializable {
         this.lastModified = lastModified;
     }
 
-    public int getAttempts() {
-        return attempts;
+    public String getLocale() {
+        return locale;
     }
 
-    public void setAttempts(int attempts) {
-        this.attempts = attempts;
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @XmlTransient
@@ -269,6 +245,16 @@ public class VmUser extends VMAuditedObject implements Serializable {
 
     @XmlTransient
     @JsonIgnore
+    public List<TestCase> getTestCaseList() {
+        return testCaseList;
+    }
+
+    public void setTestCaseList(List<TestCase> testCaseList) {
+        this.testCaseList = testCaseList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
     public List<UserAssigment> getUserAssigmentList() {
         return userAssigmentList;
     }
@@ -285,16 +271,6 @@ public class VmUser extends VMAuditedObject implements Serializable {
 
     public void setUserAssigmentList1(List<UserAssigment> userAssigmentList1) {
         this.userAssigmentList1 = userAssigmentList1;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<TestCase> getTestCaseList() {
-        return testCaseList;
-    }
-
-    public void setTestCaseList(List<TestCase> testCaseList) {
-        this.testCaseList = testCaseList;
     }
 
     @XmlTransient
@@ -359,10 +335,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
             return false;
         }
         VmUser other = (VmUser) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
@@ -370,14 +343,4 @@ public class VmUser extends VMAuditedObject implements Serializable {
         return "com.validation.manager.core.db.VmUser[ id=" + id + " ]";
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<RootCause> getRootCauseList() {
-        return rootCauseList;
-    }
-
-    public void setRootCauseList(List<RootCause> rootCauseList) {
-        this.rootCauseList = rootCauseList;
-    }
-    
 }

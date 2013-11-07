@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -37,30 +38,27 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "AssignmentStatus.findById", query = "SELECT a FROM AssignmentStatus a WHERE a.id = :id"),
     @NamedQuery(name = "AssignmentStatus.findByName", query = "SELECT a FROM AssignmentStatus a WHERE a.name = :name")})
 public class AssignmentStatus implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "Assignment_Status_IDGEN")
     @TableGenerator(name = "Assignment_Status_IDGEN", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "assigment_status",
-    initialValue = 1000,
-    allocationSize = 1)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "assigment_status",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignmentStatus")
     private List<UserAssigment> userAssigmentList;
 
@@ -80,20 +78,20 @@ public class AssignmentStatus implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @XmlTransient
@@ -120,15 +118,12 @@ public class AssignmentStatus implements Serializable {
             return false;
         }
         AssignmentStatus other = (AssignmentStatus) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.AssignmentStatus[ id=" + id + " ]";
     }
-    
+
 }

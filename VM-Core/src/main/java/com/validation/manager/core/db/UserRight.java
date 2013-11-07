@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -37,23 +38,22 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "UserRight.findById", query = "SELECT u FROM UserRight u WHERE u.id = :id"),
     @NamedQuery(name = "UserRight.findByDescription", query = "SELECT u FROM UserRight u WHERE u.description = :description")})
 public class UserRight implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "UserRightGEN")
     @TableGenerator(name = "UserRightGEN",
-    table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "user_right",
-    initialValue = 1000,
-    allocationSize = 1)
+            table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "user_right",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "description")
     private String description;
     @JoinTable(name = "role_has_right", joinColumns = {
@@ -109,14 +109,12 @@ public class UserRight implements Serializable {
             return false;
         }
         UserRight other = (UserRight) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserRight[ id=" + id + " ]";
     }
+
 }

@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class UserTestProjectRolePK implements Serializable {
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "test_project_id")
@@ -84,15 +86,12 @@ public class UserTestProjectRolePK implements Serializable {
         if (this.userId != other.userId) {
             return false;
         }
-        if (this.roleId != other.roleId) {
-            return false;
-        }
-        return true;
+        return this.roleId == other.roleId;
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserTestProjectRolePK[ testProjectId=" + testProjectId + ", userId=" + userId + ", roleId=" + roleId + " ]";
     }
-    
+
 }

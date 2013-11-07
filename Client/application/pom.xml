@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>net.sourceforge.javydreamercsw</groupId>
@@ -11,13 +11,17 @@
     <artifactId>Client-app</artifactId>
     <packaging>nbm-application</packaging>
 
-    <name>Validation Manager Admin Client</name>
+    <name>Admin Client</name>
+
+    <ciManagement>
+        <system>hudson</system>
+        <url>https://xinco.ci.cloudbees.com/job/Validation%20Manager/</url>
+    </ciManagement>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
         <netbeans.run.params.ide/>
         <netbeans.run.params>${netbeans.run.params.ide}</netbeans.run.params>
-        <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
     </properties>
 
     <dependencies>
@@ -34,14 +38,13 @@
             <version>${netbeans.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- To use Jelly Tools in your functional tests, add or replace with:
+        <!-- To use Jelly Tools in your functional tests, add or replace with:-->
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-modules-jellytools-platform</artifactId>
             <version>${netbeans.version}</version>
             <scope>test</scope>
         </dependency>
-        -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>vm-client-branding</artifactId>
@@ -53,14 +56,51 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.sourceforge.javydreamercsw.vm.client.hierarchy</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>HierarchyVisualizer</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>net.sourceforge.javydreamercsw.vm.client.hierarchy</groupId>
-            <artifactId>UserInterface</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>Client-UI</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>JasperReportViewer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>JasperReport</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>MySQL-Driver</artifactId>
+            <groupId>net.sourceforge.javydreamercsw</groupId>
+            <type>jar</type>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>VM-Core-Wrapper</artifactId>
+            <groupId>net.sourceforge.javydreamercsw</groupId>
+            <type>jar</type>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>POI-Library</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-libs-jna-platform</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-keyring-fallback</artifactId>
+            <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
 
@@ -69,6 +109,9 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
+                <configuration>
+                    <etcconffile>src/main/resources/customized.conf</etcconffile>
+                </configuration>
             </plugin>
             <!-- Permits NbModuleSuite to be run in integration-test phase: -->
             <plugin>
@@ -85,8 +128,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>

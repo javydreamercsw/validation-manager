@@ -6,45 +6,47 @@
     <version>0.1-SNAPSHOT</version>
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <packaging>pom</packaging>
-    
+
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
         <version>7</version>
     </parent>
 
-    <name>Validation-Manager</name>
-    <url>http://maven.apache.org</url>
+    <name>Validation Manager</name>
+    <url>https://sourceforge.net/projects/validationmgr/</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vm.version>${project.version}</vm.version>
+        <vaadin.version>7.1.7</vaadin.version>
+        <netbeans.version>RELEASE74</netbeans.version>
     </properties>
-    
+
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.0</version>
+                    <version>3.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
-                    <version>2.3</version>
+                    <version>2.4</version>
                 </plugin>
                 <plugin>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-maven-plugin</artifactId>
-                    <version>7.0.2</version>
+                    <version>${vaadin.version}</version>
                 </plugin>
                 <!-- Compiles your custom GWT components with the GWT compiler -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
                     <!-- Version 2.1.0-1 works at least with Vaadin 6.5 -->
-                    <version>2.5.0</version>
+                    <version>2.5.1</version>
                 </plugin>
                 <!-- A simple Jetty test server at http://localhost:8084/Validation-Manager-Web can be launched with the Maven goal jetty:run
                 and stopped with jetty:stop -->
@@ -56,18 +58,18 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>cobertura-maven-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>2.6</version>
                 </plugin>
                 <!--Flyway configuration-->
                 <plugin>
                     <groupId>com.googlecode.flyway</groupId>
                     <artifactId>flyway-maven-plugin</artifactId>
-                    <version>2.1.1</version>
+                    <version>2.2.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.2</version>
+                    <version>3.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -78,19 +80,51 @@
                         <dependency>
                             <groupId>net.sf.jasperreports</groupId>
                             <artifactId>jasperreports</artifactId>
-                            <version>5.0.1</version>
+                            <version>5.2.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.14</version>
+                    <version>2.16</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.2.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>install-gsp</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>mvn</executable>
+                            <arguments>
+                                <argument>install:install-file</argument>
+                                <argument>-Dfile=repo/gudosoft/gsqlparser/gsp/4.2/gsp-4.2.jar</argument>
+                                <argument>-DgroupId=gudosoft.gsqlparser</argument>
+                                <argument>-DartifactId=gsp</argument>
+                                <argument>-Dversion=4.2</argument>
+                                <argument>-Dpackaging=jar</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
-    
+
     <repositories>
         <repository>
             <id>vaadin-snapshots</id>
@@ -125,11 +159,23 @@
             <id>jasper-reports</id>
             <url>http://jasperreports.sourceforge.net/maven2</url>
         </repository>
+        <!--
+        Repository hosting NetBeans modules, especially APIs.
+        Versions are based on IDE releases, e.g.: RELEASE691
+        To create your own repository, use: nbm:populate-repository
+        -->
+        <repository>
+            <id>netbeans</id>
+            <name>NetBeans</name>
+            <url>http://bits.netbeans.org/maven2/</url>
+        </repository>
     </repositories>
-    
+
     <modules>
         <!--<module>Validation-Manager-Web</module>-->
         <module>VM-Core</module>
         <module>Client</module>
+        <module>ValidationManager</module>
+        <module>WebServiceClient</module>
     </modules>
 </project>

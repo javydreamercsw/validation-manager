@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db.controller;
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNodePK;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
@@ -46,8 +46,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
         if (requirementSpecNode.getRequirementList() == null) {
             requirementSpecNode.setRequirementList(new ArrayList<Requirement>());
         }
-        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         EntityManager em = null;
         try {
@@ -115,9 +115,9 @@ public class RequirementSpecNodeJpaController implements Serializable {
         }
     }
 
-    public void edit(RequirementSpecNode requirementSpecNode) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
+    public void edit(RequirementSpecNode requirementSpecNode) throws NonexistentEntityException, Exception {
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         EntityManager em = null;
         try {
@@ -132,18 +132,6 @@ public class RequirementSpecNodeJpaController implements Serializable {
             List<RequirementSpecNode> requirementSpecNodeListNew = requirementSpecNode.getRequirementSpecNodeList();
             List<Requirement> requirementListOld = persistentRequirementSpecNode.getRequirementList();
             List<Requirement> requirementListNew = requirementSpecNode.getRequirementList();
-            List<String> illegalOrphanMessages = null;
-            for (Requirement requirementListOldRequirement : requirementListOld) {
-                if (!requirementListNew.contains(requirementListOldRequirement)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain Requirement " + requirementListOldRequirement + " since its requirementSpecNode field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             if (requirementSpecNodeRelNew != null) {
                 requirementSpecNodeRelNew = em.getReference(requirementSpecNodeRelNew.getClass(), requirementSpecNodeRelNew.getRequirementSpecNodePK());
                 requirementSpecNode.setRequirementSpecNode(requirementSpecNodeRelNew);
@@ -200,6 +188,12 @@ public class RequirementSpecNodeJpaController implements Serializable {
                     }
                 }
             }
+            for (Requirement requirementListOldRequirement : requirementListOld) {
+                if (!requirementListNew.contains(requirementListOldRequirement)) {
+                    requirementListOldRequirement.setRequirementSpecNode(null);
+                    requirementListOldRequirement = em.merge(requirementListOldRequirement);
+                }
+            }
             for (Requirement requirementListNewRequirement : requirementListNew) {
                 if (!requirementListOld.contains(requirementListNewRequirement)) {
                     RequirementSpecNode oldRequirementSpecNodeOfRequirementListNewRequirement = requirementListNewRequirement.getRequirementSpecNode();
@@ -228,7 +222,7 @@ public class RequirementSpecNodeJpaController implements Serializable {
         }
     }
 
-    public void destroy(RequirementSpecNodePK id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(RequirementSpecNodePK id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -239,17 +233,6 @@ public class RequirementSpecNodeJpaController implements Serializable {
                 requirementSpecNode.getRequirementSpecNodePK();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The requirementSpecNode with id " + id + " no longer exists.", enfe);
-            }
-            List<String> illegalOrphanMessages = null;
-            List<Requirement> requirementListOrphanCheck = requirementSpecNode.getRequirementList();
-            for (Requirement requirementListOrphanCheckRequirement : requirementListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This RequirementSpecNode (" + requirementSpecNode + ") cannot be destroyed since the Requirement " + requirementListOrphanCheckRequirement + " in its requirementList field has a non-nullable requirementSpecNode field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             RequirementSpecNode requirementSpecNodeRel = requirementSpecNode.getRequirementSpecNode();
             if (requirementSpecNodeRel != null) {
@@ -265,6 +248,11 @@ public class RequirementSpecNodeJpaController implements Serializable {
             for (RequirementSpecNode requirementSpecNodeListRequirementSpecNode : requirementSpecNodeList) {
                 requirementSpecNodeListRequirementSpecNode.setRequirementSpecNode(null);
                 requirementSpecNodeListRequirementSpecNode = em.merge(requirementSpecNodeListRequirementSpecNode);
+            }
+            List<Requirement> requirementList = requirementSpecNode.getRequirementList();
+            for (Requirement requirementListRequirement : requirementList) {
+                requirementListRequirement.setRequirementSpecNode(null);
+                requirementListRequirement = em.merge(requirementListRequirement);
             }
             em.remove(requirementSpecNode);
             em.getTransaction().commit();
@@ -320,5 +308,5 @@ public class RequirementSpecNodeJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

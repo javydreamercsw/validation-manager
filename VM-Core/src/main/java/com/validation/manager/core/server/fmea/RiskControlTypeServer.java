@@ -2,10 +2,10 @@ package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.RiskControlType;
 import com.validation.manager.core.db.controller.RiskControlTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.fmea.RiskControlType;
 
 /**
  *
@@ -56,5 +56,9 @@ public class RiskControlTypeServer extends RiskControlType
         if (source.getRiskControlList() != null) {
             target.setRiskControlList(source.getRiskControlList());
         }
+    }
+    
+    public void update() {
+        update(this, getEntity());
     }
 }

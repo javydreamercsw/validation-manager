@@ -26,12 +26,7 @@ public class TestServer extends Test implements EntityServer<Test> {
         setId(id);
         TestJpaController controller = new TestJpaController(DataBaseManager.getEntityManagerFactory());
         Test temp = controller.findTest(getId());
-        setName(temp.getName());
-        setNotes(temp.getNotes());
-        setPurpose(temp.getPurpose());
-        setScope(temp.getScope());
-        setTestCaseList(temp.getTestCaseList());
-        setTestPlanHasTestList(temp.getTestPlanHasTestList());
+        update(this,temp);
     }
 
     @Override
@@ -44,22 +39,11 @@ public class TestServer extends Test implements EntityServer<Test> {
         }
         if (getId() != null && getId() > 0) {
             Test temp = new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(getId());
-            temp.setName(getName());
-            temp.setNotes(getNotes());
-            temp.setPurpose(getPurpose());
-            temp.setScope(getScope());
-            if (getTestCaseList() != null) {
-                temp.setTestCaseList(getTestCaseList());
-            }
-            if (getTestPlanHasTestList() != null) {
-                temp.setTestPlanHasTestList(getTestPlanHasTestList());
-            }
+            update(this,temp);
             new TestJpaController(DataBaseManager.getEntityManagerFactory()).edit(temp);
         } else {
             Test temp = new Test(getName(), getPurpose(), getScope());
-            temp.setNotes(getNotes());
-            temp.setTestCaseList(getTestCaseList());
-            temp.setTestPlanHasTestList(getTestPlanHasTestList());
+            update(this,temp);
             new TestJpaController(DataBaseManager.getEntityManagerFactory()).create(temp);
             setId(temp.getId());
         }
@@ -83,6 +67,19 @@ public class TestServer extends Test implements EntityServer<Test> {
     }
 
     public void update(Test target, Test source) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        target.setName(source.getName());
+        target.setNotes(source.getNotes());
+        target.setPurpose(source.getPurpose());
+        target.setScope(source.getScope());
+        if (source.getTestCaseList() != null) {
+            target.setTestCaseList(source.getTestCaseList());
+        }
+        if (source.getTestPlanHasTestList() != null) {
+            target.setTestPlanHasTestList(source.getTestPlanHasTestList());
+        }
+    }
+    
+    public void update() {
+        update(this, getEntity());
     }
 }

@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -19,7 +20,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -31,38 +31,34 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "spec_level", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name"})})
+@Table(name = "spec_level")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "SpecLevel.findAll", query = "SELECT s FROM SpecLevel s"),
     @NamedQuery(name = "SpecLevel.findById", query = "SELECT s FROM SpecLevel s WHERE s.id = :id"),
     @NamedQuery(name = "SpecLevel.findByName", query = "SELECT s FROM SpecLevel s WHERE s.name = :name")})
 public class SpecLevel implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "Spec_Level_IDGEN")
     @TableGenerator(name = "Spec_Level_IDGEN", table = "vm_id",
-    pkColumnName = "table_name",
-    valueColumnName = "last_id",
-    pkColumnValue = "spec_level",
-    initialValue = 1000,
-    allocationSize = 1)
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "spec_level",
+            initialValue = 1000,
+            allocationSize = 1)
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "specLevel")
     private List<RequirementSpec> requirementSpecList;
 
@@ -82,20 +78,20 @@ public class SpecLevel implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @XmlTransient
@@ -122,15 +118,12 @@ public class SpecLevel implements Serializable {
             return false;
         }
         SpecLevel other = (SpecLevel) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.SpecLevel[ id=" + id + " ]";
     }
-    
+
 }

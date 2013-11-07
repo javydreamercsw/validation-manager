@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package com.validation.manager.core.db;
@@ -27,20 +28,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "UserHasInvestigation.findAll", query = "SELECT u FROM UserHasInvestigation u"),
-    @NamedQuery(name = "UserHasInvestigation.findByUserId", query = "SELECT u FROM UserHasInvestigation u WHERE u.userHasInvestigationPK.userId = :userId"),
-    @NamedQuery(name = "UserHasInvestigation.findByInvestigationId", query = "SELECT u FROM UserHasInvestigation u WHERE u.userHasInvestigationPK.investigationId = :investigationId"),
+    @NamedQuery(name = "UserHasInvestigation.findByCloseDate", query = "SELECT u FROM UserHasInvestigation u WHERE u.closeDate = :closeDate"),
     @NamedQuery(name = "UserHasInvestigation.findByStartDate", query = "SELECT u FROM UserHasInvestigation u WHERE u.startDate = :startDate"),
-    @NamedQuery(name = "UserHasInvestigation.findByCloseDate", query = "SELECT u FROM UserHasInvestigation u WHERE u.closeDate = :closeDate")})
+    @NamedQuery(name = "UserHasInvestigation.findByUserId", query = "SELECT u FROM UserHasInvestigation u WHERE u.userHasInvestigationPK.userId = :userId"),
+    @NamedQuery(name = "UserHasInvestigation.findByInvestigationId", query = "SELECT u FROM UserHasInvestigation u WHERE u.userHasInvestigationPK.investigationId = :investigationId")})
 public class UserHasInvestigation implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserHasInvestigationPK userHasInvestigationPK;
-    @Column(name = "start_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startDate;
     @Column(name = "close_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date closeDate;
+    @Column(name = "start_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date startDate;
     @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
@@ -67,20 +69,20 @@ public class UserHasInvestigation implements Serializable {
         this.userHasInvestigationPK = userHasInvestigationPK;
     }
 
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
     public Date getCloseDate() {
         return closeDate;
     }
 
     public void setCloseDate(Date closeDate) {
         this.closeDate = closeDate;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public VmUser getVmUser() {
@@ -113,15 +115,12 @@ public class UserHasInvestigation implements Serializable {
             return false;
         }
         UserHasInvestigation other = (UserHasInvestigation) object;
-        if ((this.userHasInvestigationPK == null && other.userHasInvestigationPK != null) || (this.userHasInvestigationPK != null && !this.userHasInvestigationPK.equals(other.userHasInvestigationPK))) {
-            return false;
-        }
-        return true;
+        return (this.userHasInvestigationPK != null || other.userHasInvestigationPK == null) && (this.userHasInvestigationPK == null || this.userHasInvestigationPK.equals(other.userHasInvestigationPK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserHasInvestigation[ userHasInvestigationPK=" + userHasInvestigationPK + " ]";
     }
-    
+
 }
