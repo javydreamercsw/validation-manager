@@ -76,11 +76,6 @@ WHERE
 				</textElement>
 				<textFieldExpression><![CDATA["Step"]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement uuid="e4515530-9c27-43ba-949a-6d319c9f077a" x="201" y="2" width="100" height="18" isRemoveLineWhenBlank="true" isPrintInFirstWholeBand="true"/>
-				<textElement textAlignment="Center"/>
-				<textFieldExpression><![CDATA[$F{test_case_name}]]></textFieldExpression>
-			</textField>
 		</band>
 	</columnHeader>
 	<detail>
