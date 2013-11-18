@@ -272,7 +272,9 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                     node.add(r);
                 }
             }
-            top.add(node);
+            if (node.getChildCount() > 0) {
+                top.add(node);
+            }
         }
         source.setModel(new javax.swing.tree.DefaultTreeModel(top));
     }
