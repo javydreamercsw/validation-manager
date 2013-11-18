@@ -20,6 +20,7 @@ public class UIRequirementNode extends AbstractVMBeanNode {
         super(req,
                 null, new InstanceContent());
         setIconBaseWithExtension("com/validation/manager/resources/icons/Papermart/Document.png");
+        setShortDescription(req.getDescription());
     }
 
     @Override
