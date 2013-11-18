@@ -12,6 +12,8 @@ import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.server.core.RequirementServer;
 import java.awt.Component;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.RequirementSelectionDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.explorer.ExplorerManager;
@@ -448,6 +451,17 @@ public final class EditRequirementWindowTopComponent extends TopComponent
 
                 return new JLabel(
                         ((Requirement) value).getUniqueId());
+            }
+        });
+        requirements.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                JList l = (JList) e.getSource();
+                ListModel m = l.getModel();
+                int index = l.locationToIndex(e.getPoint());
+                if (index > -1) {
+                    l.setToolTipText(((Requirement) m.getElementAt(index)).getDescription());
+                }
             }
         });
         status.setModel(new DefaultComboBoxModel<RequirementStatus>() {
