@@ -6,6 +6,8 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import java.awt.Component;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTree;
 import javax.swing.ListCellRenderer;
+import javax.swing.ListModel;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -40,8 +43,8 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
-        ToolTipManager.sharedInstance().registerComponent(source);
         source.setCellRenderer(new InternalRenderer());
+        ToolTipManager.sharedInstance().registerComponent(source);
         source.getSelectionModel().setSelectionMode(
                 TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         populateNodes();
@@ -85,9 +88,21 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
         selection.setCellRenderer(new ListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList list,
-                    Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                    Object value, int index, boolean isSelected,
+                    boolean cellHasFocus) {
 
                 return new JLabel(((Requirement) ((DefaultListModel) selection.getModel()).getElementAt(index)).getUniqueId());
+            }
+        });
+        selection.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                JList l = (JList) e.getSource();
+                ListModel m = l.getModel();
+                int index = l.locationToIndex(e.getPoint());
+                if (index > -1) {
+                    l.setToolTipText(((Requirement) m.getElementAt(index)).getDescription());
+                }
             }
         });
         for (Requirement requirement : initial) {
@@ -273,26 +288,24 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                 boolean leaf,
                 int row,
                 boolean hasFocus) {
-
-            super.getTreeCellRendererComponent(
-                    tree, value, sel,
-                    expanded, leaf, row,
-                    hasFocus);
+            String label = null;
             if (((DefaultMutableTreeNode) value).getUserObject() instanceof RequirementSpec) {
                 RequirementSpec spec = (RequirementSpec) ((DefaultMutableTreeNode) value).getUserObject();
-//                setIcon(tutorialIcon);
+                //setIcon(tutorialIcon);
                 setToolTipText("Requirement Specification");
-                return new JLabel(spec.getName());
+                label = spec.getName();
             } else if (((DefaultMutableTreeNode) value).getUserObject() instanceof Requirement) {
                 Requirement req = (Requirement) ((DefaultMutableTreeNode) value).getUserObject();
-                //                setIcon(tutorialIcon);
-                setToolTipText("Requirement");
-                return new JLabel(req.getUniqueId());
+                //setIcon(tutorialIcon);
+                setToolTipText(req.getDescription());
+                label = req.getUniqueId();
             } else {
                 setToolTipText(null); //no tool tip
             }
-
-            return this;
+            return super.getTreeCellRendererComponent(
+                    tree, label != null ? label : value, sel,
+                    expanded, leaf, row,
+                    hasFocus);
         }
     }
 }
