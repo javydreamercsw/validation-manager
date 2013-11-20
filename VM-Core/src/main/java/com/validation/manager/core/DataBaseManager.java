@@ -71,13 +71,11 @@ public class DataBaseManager {
     private static Long demoResetPeriod;
     private static DataBaseManager instance;
 
+    static {
+        state = DBState.START_UP;
+    }
+
     private DataBaseManager() {
-        try {
-            state = DBState.START_UP;
-            reload();
-        } catch (VMException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
     }
 
     public static DataBaseManager get() throws Exception {
@@ -548,9 +546,7 @@ public class DataBaseManager {
                 getEntityManager();
             } finally {
                 try {
-                    if (conn != null) {
-                        conn.close();
-                    }
+                    conn.close();
                 } catch (SQLException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
