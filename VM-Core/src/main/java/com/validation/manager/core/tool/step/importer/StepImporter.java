@@ -146,8 +146,12 @@ public class StepImporter implements ImporterInterface<Step> {
                                     if (value != null) {
                                         //Sequence
                                         LOG.fine("Setting sequence");
-                                        step.setStepSequence(
-                                                Integer.valueOf(value.substring(0, value.indexOf("."))));
+                                        Integer val
+                                                = value.contains(".")
+                                                ? Integer.valueOf(value.substring(0,
+                                                                value.indexOf(".")))
+                                                : Integer.valueOf(value);
+                                        step.setStepSequence(val);
                                     }
                                     break;
                                 case 1:
