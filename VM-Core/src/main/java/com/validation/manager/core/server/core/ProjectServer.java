@@ -88,7 +88,7 @@ public final class ProjectServer extends Project implements EntityServer<Project
     public List<Project> getChildren() {
         ArrayList<Project> children = new ArrayList<Project>();
         for (Project p : getProjects()) {
-            if (p.getParentProjectId().getId() == getId()) {
+            if (p.getParentProjectId().getId().equals(getId())) {
                 children.add(p);
             }
         }
