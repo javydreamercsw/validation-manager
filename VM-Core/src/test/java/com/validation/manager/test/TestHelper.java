@@ -43,7 +43,9 @@ import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -274,8 +276,7 @@ public class TestHelper {
     public static Requirement addChildToRequirement(Requirement parent,
             Requirement child) throws Exception {
         RequirementServer rs = new RequirementServer(parent);
-        rs.getRequirementList().add(child);
-        rs.write2DB();
+        rs.addChildRequirement(child);
         return rs.getEntity();
     }
 }

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -93,8 +92,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(instance.getUniqueId(), target.getUniqueId());
             assertEquals(instance.getDescription(), target.getDescription());
             assertEquals(instance.getNotes(), target.getNotes());
-            assertEquals(instance.getRequirementTypeId(), target.getRequirementTypeId());
-            assertEquals(instance.getRequirementStatusId(), target.getRequirementStatusId());
+            assertEquals(instance.getRequirementTypeId().getId(), target.getRequirementTypeId().getId());
+            assertEquals(instance.getRequirementStatusId().getId(), target.getRequirementStatusId().getId());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -203,8 +202,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertTrue(children.isEmpty());
             //Add a child
             RequirementServer rs = new RequirementServer(req);
-            rs.getRequirementList().add(req2);
-            rs.write2DB();
+            rs.addChildRequirement(req2);
             for (Requirement r : rs.getRequirementList()) {
                 LOG.info(r.getUniqueId());
             }
@@ -217,13 +215,11 @@ public class RequirementServerTest extends AbstractVMTestCase {
             for (Requirement r : rs2.getRequirementList()) {
                 LOG.info(r.getUniqueId());
             }
-            //TODO: This fails. 
-            //See: http://stackoverflow.com/questions/19848505/jpa-netbeans-and-many-to-many-relationship-to-self
-            //assertEquals(0, rs2.getRequirementList().size());
-            //for (Requirement r : rs2.getRequirementList()) {
-            //    LOG.info(r.getUniqueId());
-            //}
-            //assertEquals(1, rs2.getRequirementList1().size());
+            assertEquals(0, rs2.getRequirementList().size());
+            for (Requirement r : rs2.getRequirementList()) {
+                LOG.info(r.getUniqueId());
+            }
+            assertEquals(1, rs2.getRequirementList1().size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();

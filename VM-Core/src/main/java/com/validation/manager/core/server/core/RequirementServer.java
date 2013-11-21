@@ -21,7 +21,8 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public final class RequirementServer extends Requirement implements EntityServer<Requirement> {
+public final class RequirementServer extends Requirement
+        implements EntityServer<Requirement> {
 
     private static final Logger LOG
             = Logger.getLogger(RequirementServer.class.getSimpleName());
@@ -56,7 +57,8 @@ public final class RequirementServer extends Requirement implements EntityServer
         if (requirement != null) {
             update((RequirementServer) this, requirement);
         } else {
-            throw new RuntimeException("Unable to find requirement with id: " + r.getRequirementPK());
+            throw new RuntimeException("Unable to find requirement with id: "
+                    + r.getRequirementPK());
         }
     }
 
@@ -64,7 +66,8 @@ public final class RequirementServer extends Requirement implements EntityServer
     public int write2DB() throws Exception {
         if (getRequirementPK() != null && getRequirementPK().getId() > 0) {
             Requirement req = new RequirementJpaController(
-                    DataBaseManager.getEntityManagerFactory()).findRequirement(getRequirementPK());
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRequirement(getRequirementPK());
             update(req, this);
             new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(req);
@@ -147,18 +150,6 @@ public final class RequirementServer extends Requirement implements EntityServer
      */
     public static List<Requirement> getChildrenRequirement(Requirement r) {
         List<Requirement> children = new ArrayList<Requirement>();
-//        Map<String, Object> parameters = new HashMap<String, Object>();
-//        parameters.put("parentRequirementId",
-//                r.getRequirementPK().getId());
-//        parameters.put("parentRequirementVersion",
-//                r.getRequirementPK().getVersion());
-//        List<Object> results = DataBaseManager.createdQuery(
-//                "SELECT r FROM RequirementHasRequirement r WHERE "
-//                + "r.requirementHasRequirementPK.parentRequirementId"
-//                + " = :parentRequirementId "
-//                + "and "
-//                + "r.requirementHasRequirementPK.parentRequirementVersion"
-//                + " = :parentRequirementVersion", parameters);
         for (Requirement obj : new RequirementServer(r).getRequirementList()) {
             LOG.log(Level.INFO, "Adding child: {0}", obj.getUniqueId());
             children.add(obj);
@@ -175,18 +166,6 @@ public final class RequirementServer extends Requirement implements EntityServer
      */
     public static List<Requirement> getParentRequirement(Requirement r) {
         List<Requirement> parents = new ArrayList<Requirement>();
-//        Map<String, Object> parameters = new HashMap<String, Object>();
-//        parameters.put("requirementId",
-//                r.getRequirementPK().getId());
-//        parameters.put("requirementVersion",
-//                r.getRequirementPK().getVersion());
-//        List<Object> results = DataBaseManager.createdQuery(
-//                "SELECT r FROM RequirementHasRequirement r WHERE "
-//                + "r.requirementHasRequirementPK.requirementId"
-//                + " = :requirementId "
-//                + "and "
-//                + "r.requirementHasRequirementPK.requirementVersion"
-//                + " = :requirementVersion", parameters);
         for (Requirement obj : new RequirementServer(r).getRequirementList1()) {
             LOG.log(Level.INFO, "Adding parent: {0}", obj.getUniqueId());
             parents.add(obj);
@@ -197,5 +176,14 @@ public final class RequirementServer extends Requirement implements EntityServer
 
     public void update() {
         update(this, getEntity());
+    }
+
+    public void addChildRequirement(Requirement child) throws Exception {
+        //See: http://stackoverflow.com/questions/19848505/jpa-netbeans-and-many-to-many-relationship-to-self
+        getRequirementList().add(child);
+        RequirementServer childS = new RequirementServer(child);
+        childS.getRequirementList1().add(getEntity());
+        write2DB();
+        childS.write2DB();
     }
 }

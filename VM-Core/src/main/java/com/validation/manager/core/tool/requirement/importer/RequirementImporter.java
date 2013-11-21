@@ -201,7 +201,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                     (RequirementStatus) result.get(0));
                             assert requirement.getUniqueId() != null
                                     && !requirement.getUniqueId().isEmpty() :
-                                    new VMException("Invalid requirement detected!");
+                                    "Invalid requirement detected!";
                             requirements.add(requirement);
                         }
                     }
@@ -243,62 +243,58 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     }
 
     public boolean processImport() throws VMException {
-        boolean result;
-        if (requirements.isEmpty()) {
-            result = false;
-        } else {
-            RequirementJpaController controller = new RequirementJpaController(
-                    DataBaseManager.getEntityManagerFactory());
-            for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
-                try {
-                    Requirement requirement = it.next();
-                    boolean exists = false;
+        boolean result = true;
+        RequirementJpaController controller = new RequirementJpaController(
+                DataBaseManager.getEntityManagerFactory());
+        for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
+            try {
+                Requirement requirement = it.next();
+                boolean exists = false;
+                Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
+                List<Requirement> existing = ProjectServer.getRequirements(project);
+                for (Requirement r : existing) {
+                    if (r.getUniqueId() == null) {
+                        LOG.warning("Detected requirement with null unique id!");
+                        new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).destroy(r.getRequirementPK());
+                    } else {
+                        if (r.getUniqueId().equals(requirement.getUniqueId())) {
+                            exists = true;
+                            result = false;
+                            break;
+                        }
+                    }
+                }
+                if (exists) {
+                    MessageHandler handler = Lookup.getDefault().lookup(MessageHandler.class);
+                    if (handler != null) {
+                        handler.error(
+                                "Requirement " + requirement.getUniqueId()
+                                + " already exists on project "
+                                + project.getName());
+                    }
+                } else {
+                    controller.create(requirement);
+                }
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                for (Requirement requirement : requirements) {
                     Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
                     List<Requirement> existing = ProjectServer.getRequirements(project);
                     for (Requirement r : existing) {
-                        if (r.getUniqueId() == null) {
-                            LOG.warning("Detected requirement with null unique id!");
-                            new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).destroy(r.getRequirementPK());
-                        } else {
-                            if (r.getUniqueId().equals(requirement.getUniqueId())) {
-                                exists = true;
-                                break;
+                        if (r.getUniqueId().equals(requirement.getUniqueId())) {
+                            try {
+                                controller.destroy(r.getRequirementPK());
+                            } catch (IllegalOrphanException ex1) {
+                                LOG.log(Level.SEVERE, null, ex1);
+                            } catch (NonexistentEntityException ex1) {
+                                LOG.log(Level.SEVERE, null, ex1);
                             }
+                            break;
                         }
                     }
-                    if (exists) {
-                        MessageHandler handler = Lookup.getDefault().lookup(MessageHandler.class);
-                        if (handler != null) {
-                            handler.error(
-                                    "Requirement " + requirement.getUniqueId()
-                                    + " already exists on project "
-                                    + project.getName());
-                        }
-                    } else {
-                        controller.create(requirement);
-                    }
-                } catch (Exception ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                    for (Requirement requirement : requirements) {
-                        Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
-                        List<Requirement> existing = ProjectServer.getRequirements(project);
-                        for (Requirement r : existing) {
-                            if (r.getUniqueId().equals(requirement.getUniqueId())) {
-                                try {
-                                    controller.destroy(r.getRequirementPK());
-                                } catch (IllegalOrphanException ex1) {
-                                    LOG.log(Level.SEVERE, null, ex1);
-                                } catch (NonexistentEntityException ex1) {
-                                    LOG.log(Level.SEVERE, null, ex1);
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    throw new VMException(ex);
                 }
+                throw new VMException(ex);
             }
-            result = true;
         }
         return result;
     }
