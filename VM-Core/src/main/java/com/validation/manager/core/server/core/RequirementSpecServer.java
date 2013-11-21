@@ -13,14 +13,13 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementSpecServer extends RequirementSpec
+public final class RequirementSpecServer extends RequirementSpec
         implements EntityServer<RequirementSpec> {
 
     public RequirementSpecServer(String name, String description, int projectId, int specLevelId) {
@@ -31,11 +30,12 @@ public class RequirementSpecServer extends RequirementSpec
         setName(name);
         setVersion(1);
         setModificationDate(new Date());
+        setRequirementSpecNodeList(new ArrayList<RequirementSpecNode>());
     }
 
     public RequirementSpecServer(RequirementSpec rs) {
         super(rs.getRequirementSpecPK());
-        update(this, rs);
+        update((RequirementSpecServer) this, rs);
     }
 
     /**
@@ -60,9 +60,7 @@ public class RequirementSpecServer extends RequirementSpec
                 .findRequirementSpec(getRequirementSpecPK()),
                 name, description, scope);
         sns.write2DB();
-        for (Iterator<Requirement> it = requirements.iterator();
-                it.hasNext();) {
-            Requirement req = it.next();
+        for (Requirement req : requirements) {
             req.setRequirementSpecNode(sns);
         }
         getRequirementSpecNodeList().add(
