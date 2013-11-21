@@ -7,7 +7,6 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.openide.util.Exceptions;
 
 /**
@@ -54,8 +53,8 @@ public class ProjectServerTest extends AbstractVMTestCase {
             req1 = TestHelper.addChildToRequirement(req1, req2);
             assertEquals(1, RequirementServer.getChildrenRequirement(req1).size());
             assertEquals(0, RequirementServer.getParentRequirement(req1).size());
-//            assertEquals(1, RequirementServer.getParentRequirement(req2).size());
-//            assertEquals(0, RequirementServer.getChildrenRequirement(req2).size());
+            assertEquals(1, RequirementServer.getParentRequirement(req2).size());
+            assertEquals(0, RequirementServer.getChildrenRequirement(req2).size());
             try {
                 ProjectServer.deleteProject(sub);
             } catch (Exception ex) {
