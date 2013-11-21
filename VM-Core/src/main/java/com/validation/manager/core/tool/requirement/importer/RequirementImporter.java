@@ -267,10 +267,13 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                         }
                     }
                     if (exists) {
-                        Lookup.getDefault().lookup(MessageHandler.class).error(
-                                "Requirement " + requirement.getUniqueId()
-                                + " already exists on project "
-                                + project.getName());
+                        MessageHandler handler = Lookup.getDefault().lookup(MessageHandler.class);
+                        if (handler != null) {
+                            handler.error(
+                                    "Requirement " + requirement.getUniqueId()
+                                    + " already exists on project "
+                                    + project.getName());
+                        }
                     } else {
                         controller.create(requirement);
                     }
