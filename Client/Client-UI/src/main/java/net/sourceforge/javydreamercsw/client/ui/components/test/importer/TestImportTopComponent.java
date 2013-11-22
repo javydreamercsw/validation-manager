@@ -34,8 +34,8 @@ import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.util.Exceptions;
-import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.openide.windows.TopComponent;
 
 /**
  * Top component which displays something.
@@ -59,7 +59,13 @@ import org.openide.util.NbBundle.Messages;
 @Messages({
     "CTL_TestImportAction=Test Import",
     "CTL_TestImportTopComponent=Test Import Window",
-    "HINT_TestImportTopComponent=This is a Test Import window"
+    "HINT_TestImportTopComponent=This is a Test Import window",
+    "TestImportTopComponent.addDelimiterButton.text_1=Add Delimiter",
+    "test.import.button=Import Test",
+    "TestImportTopComponent.jLabel1.text=Index",
+    "TestImportTopComponent.header.text=Data has headers?",
+    "TestImportTopComponent.saveButton.text_1=Save",
+    "TestImportTopComponent.jLabel2.text=Select Delimiter"
 })
 public class TestImportTopComponent extends TestCaseImporterTopComponent {
 
@@ -110,7 +116,7 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
         ));
         jScrollPane1.setViewportView(importedTable);
 
-        org.openide.awt.Mnemonics.setLocalizedText(importButton, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.importButton.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(importButton, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "test.import.button")); // NOI18N
         importButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 importButtonActionPerformed(evt);
@@ -136,8 +142,6 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.jLabel2.text")); // NOI18N
 
-        delimiterField.setText(org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.delimiterField.text")); // NOI18N
-
         org.openide.awt.Mnemonics.setLocalizedText(addDelimiterButton, org.openide.util.NbBundle.getMessage(TestImportTopComponent.class, "TestImportTopComponent.addDelimiterButton.text_1")); // NOI18N
         addDelimiterButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -152,7 +156,7 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(2, 2, 2)
@@ -254,7 +258,7 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
                         }
                     } catch (FileNotFoundException ex) {
                         Exceptions.printStackTrace(ex);
-                    } catch (            ClassNotFoundException | IOException ex) {
+                    } catch (ClassNotFoundException | IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 }
