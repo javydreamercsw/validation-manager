@@ -5,12 +5,12 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.tool.table.extractor.TableExtractor;
-import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -34,13 +34,12 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
+import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
-import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.openide.windows.TopComponent;
 
 /**
  * Top component which displays something.
@@ -75,8 +74,9 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
 
     private static final Logger LOG
             = Logger.getLogger(TestCaseImporterTopComponent.class.getSimpleName());
-    private Test test;
-    private TestCase tc;
+    protected Test test;
+    protected TestCase tc;
+    protected TestPlan tp;
 
     public TestCaseImporterTopComponent() {
         super();
@@ -277,66 +277,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
     }//GEN-LAST:event_headerActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
-        LOG.info("Saving imported table...");
-        setImportSuccess(true);
-        int rows = importedTable.getModel().getRowCount();
-        List<String> mapping = new ArrayList<>(rows);
-        for (int i = 0; i < importedTable.getModel().getColumnCount(); i++) {
-            DefaultCellEditor editor
-                    = (DefaultCellEditor) importedTable.getCellEditor(0, i);
-            JComboBox combo = (JComboBox) editor.getComponent();
-            LOG.log(Level.INFO, "Column {0} is mapped as: {1}",
-                    new Object[]{i, combo.getSelectedItem()});
-            String value = (String) combo.getSelectedItem();
-            //Make sure there's no duplicate mapping
-            if (!mapping.isEmpty()
-                    && (!value.equals(TestCaseImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
-                    && mapping.contains(value))) {
-                showImportError(MessageFormat.format("Duplicated mapping: {0}", value));
-            }
-            mapping.add(i, value);
-        }
-        //Make sure the basics are mapped
-        for (TestCaseImportMapping tim : TestCaseImportMapping.values()) {
-            if (tim.isRequired() && !mapping.contains(tim.getValue())) {
-                showImportError(MessageFormat.format("Missing required mapping: {0}", tim.getValue()));
-                setImportSuccess(false);
-                break;
-            }
-        }
-        //Create the test case to import into
-        /* Create and display the dialog */
-        if (isImportSuccess()) {
-            setDialog(new EditTestCaseDialog(new javax.swing.JFrame(),
-                    true, false));
-            getDialog().setLocationRelativeTo(null);
-            ((EditTestCaseDialog) getDialog()).setTest(test);
-            getDialog().addWindowListener(new java.awt.event.WindowAdapter() {
-                @Override
-                public void windowClosing(java.awt.event.WindowEvent e) {
-                    getDialog().dispose();
-                }
-            });
-            getDialog().setVisible(true);
-            while (getDialog().isVisible()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            }
-            tc = ((EditTestCaseDialog) getDialog()).getTestCase();
-            if (tc == null) {
-                showImportError("Test Case Creation unsuccessful!");
-                setImportSuccess(false);
-            }
-        }
-        if (isImportSuccess()) {
-            process(mapping);
-        }
-        if (isImportSuccess()) {
-            this.close();
-        }
+        save();
     }//GEN-LAST:event_saveButtonActionPerformed
 
     private void addDelimiterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDelimiterButtonActionPerformed
@@ -359,6 +300,13 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
+    }
+
+    /**
+     * @param tp the TestPlan to set
+     */
+    public void setTestPlan(TestPlan tp) {
+        this.tp = tp;
     }
 
     @Override
@@ -513,6 +461,69 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
+        }
+    }
+
+    protected void save() {
+        LOG.info("Saving imported table...");
+        setImportSuccess(true);
+        int rows = getImportTable().getModel().getRowCount();
+        List<String> mapping = new ArrayList<>(rows);
+        for (int i = 0; i < getImportTable().getModel().getColumnCount(); i++) {
+            DefaultCellEditor editor
+                    = (DefaultCellEditor) getImportTable().getCellEditor(0, i);
+            JComboBox combo = (JComboBox) editor.getComponent();
+            LOG.log(Level.INFO, "Column {0} is mapped as: {1}",
+                    new Object[]{i, combo.getSelectedItem()});
+            String value = (String) combo.getSelectedItem();
+            //Make sure there's no duplicate mapping
+            if (!mapping.isEmpty()
+                    && (!value.equals(TestCaseImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
+                    && mapping.contains(value))) {
+                showImportError(MessageFormat.format("Duplicated mapping: {0}", value));
+            }
+            mapping.add(i, value);
+        }
+        //Make sure the basics are mapped
+        for (TestCaseImportMapping tim : TestCaseImportMapping.values()) {
+            if (tim.isRequired() && !mapping.contains(tim.getValue())) {
+                showImportError(MessageFormat.format("Missing required mapping: {0}", tim.getValue()));
+                setImportSuccess(false);
+                break;
+            }
+        }
+        //Create the test case to import into
+        /* Create and display the dialog */
+        if (isImportSuccess()) {
+            setDialog(new EditTestCaseDialog(new javax.swing.JFrame(),
+                    true, false));
+            getDialog().setLocationRelativeTo(null);
+            ((EditTestCaseDialog) getDialog()).setTest(test);
+            getDialog().addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    getDialog().dispose();
+                }
+            });
+            getDialog().setVisible(true);
+            while (getDialog().isVisible()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+            tc = ((EditTestCaseDialog) getDialog()).getTestCase();
+            if (tc == null) {
+                showImportError("Test Case Creation unsuccessful!");
+                setImportSuccess(false);
+            }
+        }
+        if (isImportSuccess()) {
+            process(mapping);
+        }
+        if (isImportSuccess()) {
+            this.close();
         }
     }
 }
