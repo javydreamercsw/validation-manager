@@ -5,9 +5,14 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.SpecLevel;
+import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.RequirementTypeServer;
+import com.validation.manager.core.server.core.SpecLevelServer;
 import java.awt.Component;
 import java.awt.Frame;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,8 +32,8 @@ import net.sourceforge.javydreamercsw.client.ui.components.database.DataBaseTool
  */
 public abstract class AbstractCreationDialog extends JDialog {
 
-    private static ResourceBundle rb =
-            ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
+    private static final ResourceBundle rb
+            = ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
 
     public AbstractCreationDialog(Frame owner, boolean modal) {
         super(owner, modal);
@@ -42,13 +47,9 @@ public abstract class AbstractCreationDialog extends JDialog {
         SpecLevel specLevel = null;
         if (level.getSelectedIndex() > -1) {
             if (DataBaseTool.getEmf() != null) {
-                List<Object> projectList = DataBaseManager.createdQuery(
-                        "select sl from SpecLevel sl where sl.name='"
-                        + level.getSelectedItem() + "'");
-                for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
-                    SpecLevel temp = ((SpecLevel) it2.next());
-                    if (temp.getName().equals(level.getSelectedItem().toString())) {
-                        specLevel = temp;
+                for (SpecLevel spec : SpecLevelServer.getLevels()) {
+                    if (spec.getName().equals(level.getSelectedItem().toString())) {
+                        specLevel = spec;
                         break;
                     }
                 }
@@ -61,11 +62,7 @@ public abstract class AbstractCreationDialog extends JDialog {
         RequirementType rt = null;
         if (type.getSelectedIndex() > -1) {
             if (DataBaseTool.getEmf() != null) {
-                List<Object> requirementTypeList = DataBaseManager.createdQuery(
-                        "select rt from RequirementType rt where rt.name='"
-                        + type.getSelectedItem() + "'");
-                for (Iterator<Object> it2 = requirementTypeList.iterator(); it2.hasNext();) {
-                    RequirementType temp = ((RequirementType) it2.next());
+                for (RequirementType temp : RequirementTypeServer.getRequirementTypes()) {
                     if (temp.getName().equals(type.getSelectedItem().toString())) {
                         rt = temp;
                         break;
@@ -91,57 +88,52 @@ public abstract class AbstractCreationDialog extends JDialog {
     }
 
     protected Project getSelectedProject(JComboBox list) {
-        Project parentProject = null;
+        Project selectedProject = null;
         if (list.getSelectedIndex() > 0) {
             if (DataBaseTool.getEmf() != null) {
-                List<Object> projectList = DataBaseManager.createdQuery(
-                        "select p from Project p where p.name='"
-                        + list.getSelectedItem() + "'");
-                for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
-                    Project temp = ((Project) it2.next());
+                for (Project temp : ProjectServer.getProjects()) {
                     if (temp.getName().equals(list.getSelectedItem().toString())) {
-                        parentProject = temp;
+                        selectedProject = temp;
                         break;
                     }
                 }
             }
         }
-        return parentProject;
+        return selectedProject;
     }
 
     protected void populateProjectList(JComboBox parent, boolean addNull) {
-        List<Project> projects = new ArrayList<>();
-        if (DataBaseTool.getEmf() != null) {
-            List<Object> projectList = DataBaseManager.createdQuery("select p from Project p order by p.id");
-            for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
-                Project temp = (Project) it2.next();
-                projects.add(temp);
-            }
-        }
+        List<Project> projects = ProjectServer.getProjects();
         List<String> names = new ArrayList<>();
         if (addNull) {
             names.add("None");
         }
-        for (Iterator<Project> it3 = projects.iterator(); it3.hasNext();) {
-            Project proj = it3.next();
+        Collections.sort(projects, new Comparator<Project>() {
+
+            @Override
+            public int compare(Project o1, Project o2) {
+                return o1.getName().compareToIgnoreCase(o2.getName());
+            }
+        });
+        for (Project proj : projects) {
             names.add(internationalize(proj.getName()));
         }
-        parent.setModel(new DefaultComboBoxModel(names.toArray(new String[projects.size() + (addNull ? 1 : 0)])));
+        parent.setModel(new DefaultComboBoxModel(
+                names.toArray(new String[projects.size()
+                        + (addNull ? 1 : 0)])));
     }
 
     protected void populateSpecLevelList(JComboBox level) {
-        List<SpecLevel> levels = new ArrayList<>();
-        if (DataBaseTool.getEmf() != null) {
-            List<Object> projectList = DataBaseManager.createdQuery(
-                    "select sl from SpecLevel sl order by sl.id");
-            for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
-                SpecLevel temp = (SpecLevel) it2.next();
-                levels.add(temp);
+        List<SpecLevel> levels = SpecLevelServer.getLevels();
+        Collections.sort(levels, new Comparator<SpecLevel>() {
+
+            @Override
+            public int compare(SpecLevel o1, SpecLevel o2) {
+                return o1.getName().compareToIgnoreCase(o2.getName());
             }
-        }
+        });
         List<String> names = new ArrayList<>();
-        for (Iterator<SpecLevel> it3 = levels.iterator(); it3.hasNext();) {
-            SpecLevel lvl = it3.next();
+        for (SpecLevel lvl : levels) {
             names.add(internationalize(lvl.getName()));
         }
         level.setModel(new DefaultComboBoxModel(names.toArray(new String[levels.size()])));
@@ -158,8 +150,7 @@ public abstract class AbstractCreationDialog extends JDialog {
             }
         }
         List<String> names = new ArrayList<>();
-        for (Iterator<RequirementType> it3 = types.iterator(); it3.hasNext();) {
-            RequirementType lvl = it3.next();
+        for (RequirementType lvl : types) {
             names.add(internationalize(lvl.getName()));
         }
         type.setModel(new DefaultComboBoxModel(names.toArray(new String[types.size()])));
