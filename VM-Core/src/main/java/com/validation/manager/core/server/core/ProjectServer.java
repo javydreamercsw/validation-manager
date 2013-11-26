@@ -2,6 +2,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -57,13 +58,21 @@ public final class ProjectServer extends Project implements EntityServer<Project
         return getId();
     }
 
-    public static void deleteProject(Project p) {
-        try {
-            new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).destroy(p.getId());
-        } catch (IllegalOrphanException ex) {
-            Logger.getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NonexistentEntityException ex) {
-            Logger.getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
+    public static void deleteProject(Project p) throws VMException {
+        if (p.getProjectList().isEmpty()) {
+            try {
+                if (p.getRequirementSpecList().isEmpty()) {
+                    new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).destroy(p.getId());
+                } else {
+                    throw new VMException("Unable to delete project with Requirement Specifications!");
+                }
+            } catch (IllegalOrphanException ex) {
+                Logger.getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NonexistentEntityException ex) {
+                Logger.getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            throw new VMException("Unable to delete project with children!");
         }
     }
 
