@@ -142,12 +142,16 @@ public abstract class AbstractCreationDialog extends JDialog {
     protected void populateRequirementTypeList(JComboBox type) {
         List<RequirementType> types = new ArrayList<>();
         if (DataBaseTool.getEmf() != null) {
-            List<Object> projectList = DataBaseManager.createdQuery(
-                    "select rt from RequirementType rt order by rt.id");
-            for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
-                RequirementType temp = (RequirementType) it2.next();
+            for (RequirementType temp : RequirementTypeServer.getRequirementTypes()) {
                 types.add(temp);
             }
+            Collections.sort(types, new Comparator<RequirementType>() {
+
+                @Override
+                public int compare(RequirementType o1, RequirementType o2) {
+                    return o1.getName().compareToIgnoreCase(o2.getName());
+                }
+            });
         }
         List<String> names = new ArrayList<>();
         for (RequirementType lvl : types) {
