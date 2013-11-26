@@ -1,5 +1,6 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -43,12 +44,14 @@ public class ProjectServerTest extends AbstractVMTestCase {
             assertEquals(0, ProjectServer.getRequirements(root).size());
             sub = TestHelper.addProject(root, "Sub", "Notes");
             System.out.println("Create Spec for sub project.");
-            TestHelper.createRequirementSpec("Spec 2", "Desc", sub, 1);
+            RequirementSpec spec = TestHelper.createRequirementSpec("Spec 2", "Desc", sub, 1);
             RequirementSpecNode node = TestHelper.createRequirementSpecNode(mainSpec,
                     "Requirement Doc", "Desc", "Scope");
-            Requirement req1 = TestHelper.createRequirement("REQ-001", "Desc", node.getRequirementSpecNodePK(), "Notes", 1, 1);
+            Requirement req1 = TestHelper.createRequirement("REQ-001", "Desc",
+                    node.getRequirementSpecNodePK(), "Notes", 1, 1);
             assertEquals(1, ProjectServer.getRequirements(root).size());
-            Requirement req2 = TestHelper.createRequirement("REQ-002", "Desc", node.getRequirementSpecNodePK(), "Notes", 1, 1);
+            Requirement req2 = TestHelper.createRequirement("REQ-002", "Desc",
+                    node.getRequirementSpecNodePK(), "Notes", 1, 1);
             assertEquals(2, ProjectServer.getRequirements(root).size());
             req1 = TestHelper.addChildToRequirement(req1, req2);
             assertEquals(1, RequirementServer.getChildrenRequirement(req1).size());
@@ -57,10 +60,16 @@ public class ProjectServerTest extends AbstractVMTestCase {
             assertEquals(0, RequirementServer.getChildrenRequirement(req2).size());
             try {
                 ProjectServer.deleteProject(sub);
-            } catch (Exception ex) {
+            } catch (VMException ex) {
                 //Expected failure
                 System.out.println("Expected failure!");
+            }
+            RequirementSpecServer.deleteRequirementSpec(spec);
+            try {
+                ProjectServer.deleteProject(new ProjectServer(sub).getEntity());
+            } catch (VMException ex) {
                 Exceptions.printStackTrace(ex);
+                fail();
             }
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
