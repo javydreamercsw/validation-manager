@@ -6,6 +6,7 @@ import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.List;
 
 /**
  *
@@ -58,5 +59,9 @@ public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel
     
     public void update() {
         update(this, getEntity());
+    }
+
+    public static List<SpecLevel> getLevels() {
+        return new SpecLevelJpaController(DataBaseManager.getEntityManagerFactory()).findSpecLevelEntities();
     }
 }
