@@ -15,10 +15,7 @@ SELECT DISTINCT
 FROM
      requirement
 WHERE
-     requirement.id IN (select r.id from requirement_has_requirement rhr
-     inner join requirement r on r.id=rhr.requirement_id
-     where rhr.requirement_id=requirement.id order by r.unique_id)
-     or requirement.id IN (select requirement.id from `requirement` requirement INNER JOIN `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
+     requirement.id IN (select requirement.id from `requirement` requirement INNER JOIN `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
      AND requirement.`version` = step_has_requirement.`requirement_version`
      INNER JOIN `step` step ON step_has_requirement.`step_id` = step.`id`
      AND step.`test_case_id` = step_has_requirement.`step_test_case_id`
