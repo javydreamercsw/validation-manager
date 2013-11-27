@@ -46,7 +46,7 @@ FROM
      INNER JOIN `project_has_test_project` project_has_test_project ON test_project.`id` = project_has_test_project.`test_project_id`
      INNER JOIN `project` project ON project_has_test_project.`project_id` = project.`id`
      INNER JOIN `requirement_status` requirement_status ON requirement_status.`id` = requirement.`requirement_status_id`
-	where project_id=$P{project_id} and requirement_status.status='general.approved')]]>
+	where (project.id = $P{project_id} or parent_project_id=$P{project_id}) and requirement_status.status='general.approved')]]>
 	</queryString>
 	<field name="unique_id" class="java.lang.String">
 		<fieldDescription><![CDATA[]]></fieldDescription>
