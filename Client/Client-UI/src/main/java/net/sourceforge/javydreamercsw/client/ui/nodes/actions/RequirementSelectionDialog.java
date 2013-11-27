@@ -295,7 +295,7 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                 RequirementSpec spec = (RequirementSpec) ((DefaultMutableTreeNode) value).getUserObject();
                 //setIcon(tutorialIcon);
                 setToolTipText("Requirement Specification");
-                label = spec.getName();
+                label = spec.getProject().getName() + ": " + spec.getName();
             } else if (((DefaultMutableTreeNode) value).getUserObject() instanceof Requirement) {
                 Requirement req = (Requirement) ((DefaultMutableTreeNode) value).getUserObject();
                 //setIcon(tutorialIcon);

@@ -1,6 +1,8 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.server.core.RequirementServer;
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
@@ -25,7 +27,10 @@ public class UIRequirementNode extends AbstractVMBeanNode {
 
     @Override
     public String getName() {
-        return getLookup().lookup(Requirement.class).getUniqueId();
+        return new RequirementJpaController(
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirement(getLookup().lookup(Requirement.class)
+                        .getRequirementPK()).getUniqueId();
     }
 
     @Override
@@ -38,7 +43,9 @@ public class UIRequirementNode extends AbstractVMBeanNode {
 
     @Override
     public void refreshMyself() {
-        RequirementServer rs = new RequirementServer(getLookup().lookup(Requirement.class));
+        RequirementServer rs
+                = new RequirementServer(getLookup().lookup(Requirement.class));
         rs.update((Requirement) getBean(), rs.getEntity());
+        rs.update(getLookup().lookup(Requirement.class), rs.getEntity());
     }
 }
