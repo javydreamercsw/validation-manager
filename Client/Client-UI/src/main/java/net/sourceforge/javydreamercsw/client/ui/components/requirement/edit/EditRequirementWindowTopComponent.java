@@ -34,9 +34,9 @@ import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
-import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import org.openide.windows.TopComponent;
 
 /**
  * Top component which displays something.
@@ -56,9 +56,9 @@ import org.openide.util.Utilities;
         preferredID = "EditRequirementWindowTopComponent"
 )
 @Messages({
-    "CTL_EditRequirementWindowAction=EditRequirementWindow",
-    "CTL_EditRequirementWindowTopComponent=EditRequirementWindow Window",
-    "HINT_EditRequirementWindowTopComponent=This is a EditRequirementWindow window"
+    "CTL_EditRequirementWindowAction=Edit Requirement Window",
+    "CTL_EditRequirementWindowTopComponent=Edit Requirement Window",
+    "HINT_EditRequirementWindowTopComponent=This is a Edit Requirement Window"
 })
 public final class EditRequirementWindowTopComponent extends TopComponent
         implements LookupListener {
@@ -83,36 +83,6 @@ public final class EditRequirementWindowTopComponent extends TopComponent
         setName(Bundle.CTL_EditRequirementWindowTopComponent());
         setToolTipText(Bundle.HINT_EditRequirementWindowTopComponent());
         testCaseFactory = new CoveringStepFactory();
-        //TODO: Get working.
-//        root = new AbstractNode(Children.create(testCaseFactory, true));
-//        String[] properties = new String[]{"Test Case", "testCase",
-//            "Step", "step"};
-//        ((OutlineView) stepsPane).setPropertyColumns(properties);
-//        ArrayList<String> columns = new ArrayList<String>();
-//        columns.add("testCase");
-//        columns.add("step");
-//        ((OutlineView) stepsPane).getOutline().setDefaultRenderer(String.class,
-//                new TableCellRenderer() {
-//
-//                    @Override
-//                    public Component getTableCellRendererComponent(JTable table,
-//                    Object value, boolean isSelected,
-//                    boolean hasFocus, int row, int column) {
-//                        Component component = new JLabel();
-//                        if (value instanceof Boolean) {
-//                            component = new JCheckBox();
-//                        }
-//                        return component;
-//                    }
-//                });
-//        ((OutlineView) stepsPane).getOutline().setModel(
-//                DefaultOutlineModel.createOutlineModel(
-//                new TestCaseTreeModel(),
-//                new TestCaseRowModel(columns),
-//                true, "Test Case"));
-//        getExplorerManager().setRootContext(root);
-//        associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
-//                getActionMap()));
     }
 
     /**
@@ -336,11 +306,12 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             RequirementServer req;
             if (edit) {
                 if (requirement == null) {
-                    req = new RequirementServer(Utilities.actionsGlobalContext().lookup(Requirement.class));
+                    req = new RequirementServer(Utilities.actionsGlobalContext()
+                            .lookup(Requirement.class));
                 } else {
                     req = new RequirementServer(requirement);
                 }
-                requirement.setUniqueId(uniqueID.getText().trim());
+                req.setUniqueId(uniqueID.getText().trim());
             } else {
                 RequirementSpecNode rsn
                         = Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class);
@@ -355,11 +326,6 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             req.setDescription(description.getText().trim());
             req.setNotes(notes.getText().trim());
             req.setRequirementList(linkedRequirements);
-            try {
-                req.write2DB();
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
             try {
                 req.write2DB();
             } catch (Exception ex) {
@@ -403,15 +369,17 @@ public final class EditRequirementWindowTopComponent extends TopComponent
     }
 
     void writeProperties(java.util.Properties p) {
-        // better to version settings since initial version as advocated at
-        // http://wiki.apidesign.org/wiki/PropertyFiles
         p.setProperty("version", "1.0");
-        // TODO store your settings
+        // Store your settings
     }
 
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
-        // TODO read your settings according to their version
+        switch(version){
+            case "1.0":
+                //Do nothing
+                break;
+        }
     }
 
     private void clear() {
