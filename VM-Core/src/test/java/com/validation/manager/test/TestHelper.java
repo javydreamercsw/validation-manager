@@ -1,6 +1,7 @@
 package com.validation.manager.test;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -112,7 +113,8 @@ public class TestHelper {
         return p;
     }
 
-    public static void destroyProject(Project p) throws IllegalOrphanException, NonexistentEntityException {
+    public static void destroyProject(Project p) throws IllegalOrphanException,
+            NonexistentEntityException, VMException {
         ProjectServer.deleteProject(p);
         assertTrue(new ProjectJpaController(
                 DataBaseManager.getEntityManagerFactory()).findProject(p.getId()) == null);
