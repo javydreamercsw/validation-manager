@@ -1,6 +1,7 @@
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.StepServer;
@@ -27,7 +28,11 @@ public class ProjectTest extends AbstractVMTestCase {
     @After
     public void clear() {
         if (p != null) {
-            ProjectServer.deleteProject(p);
+            try {
+                ProjectServer.deleteProject(p);
+            } catch (VMException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
         }
     }
 
