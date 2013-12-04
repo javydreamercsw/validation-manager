@@ -21,7 +21,7 @@
     <properties>
         <all.clusters>${project.build.directory}/${brandingToken}</all.clusters>
         <netbeans.run.params.ide/>
-        <netbeans.run.params>${netbeans.run.params.ide}</netbeans.run.params>
+        <netbeans.run.params>${netbeans.run.params.ide} --branding validation_manager_client -J-Xms24m -J-Xmx512m</netbeans.run.params>
     </properties>
 
     <dependencies>
