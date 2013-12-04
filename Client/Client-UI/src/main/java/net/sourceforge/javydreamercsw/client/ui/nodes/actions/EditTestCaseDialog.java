@@ -1,5 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.server.core.TestCaseServer;
@@ -113,10 +114,15 @@ public class EditTestCaseDialog extends javax.swing.JDialog {
                 if (test == null) {
                     test = Utilities.actionsGlobalContext().lookup(Test.class);
                 }
+                if (test == null) {
+                    throw new VMException("Unable to get a valid Test!");
+                }
                 TestCaseServer tcs = new TestCaseServer(
                         testCaseName.getText().trim(),
-                        test.getTestCaseList().size() + 1,
-                        new Short("1"), new Date());
+                        test.getTestCaseList() == null ? 0
+                        : test.getTestCaseList().size() + 1,
+                        new Short("1"),
+                        new Date());
                 //TODO: Use logged user instead
                 tcs.setAuthorId(new VMUserServer(1).getEntity());
                 tcs.setActive(true);

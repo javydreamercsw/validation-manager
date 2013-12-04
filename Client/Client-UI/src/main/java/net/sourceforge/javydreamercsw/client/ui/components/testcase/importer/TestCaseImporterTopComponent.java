@@ -1,12 +1,12 @@
 package net.sourceforge.javydreamercsw.client.ui.components.testcase.importer;
 
-import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestPlanHasTest;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -397,11 +398,14 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         List<Project> projects = new ArrayList<>();
         for (TestPlanHasTest tpht : test.getTestPlanHasTestList()) {
             tpht.getTestPlan().getTestProject();
-            for (Object o : DataBaseManager.nativeQuery(
-                    MessageFormat.format("select pht.project_id from project_has_test_project pht where pht.test_project_id={0}",
-                            tpht.getTestPlan().getTestProject().getId()))) {
-                LOG.log(Level.INFO, "Project ID: {0}", o);
-                projects.add(new ProjectServer(Integer.valueOf(o.toString())));
+            for (Project p : ProjectServer.getProjects()) {
+                for (TestProject temp : p.getTestProjectList()) {
+                    if(Objects.equals(temp.getId(), 
+                            tpht.getTestPlan().getTestProject().getId())){
+                        LOG.log(Level.INFO, "Project ID: {0}", p.getId());
+                        projects.add(p);
+                    }
+                }
             }
         }
         TestCaseServer tcs = new TestCaseServer(tc);
@@ -418,10 +422,13 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                     //Column is to be imported
                     if (mapping.get(col).equals(TestCaseImportMapping.DESCRIPTION.getValue())) {
                         description = (String) importedTable.getModel().getValueAt(row, col);
+                        LOG.log(Level.INFO, "Description: {0}", description);
                     } else if (mapping.get(col).equals(TestCaseImportMapping.NOTES.getValue())) {
                         notes = (String) importedTable.getModel().getValueAt(row, col);
+                        LOG.log(Level.INFO, "Notes: {0}", notes);
                     } else if (mapping.get(col).equals(TestCaseImportMapping.ACCEPTANCE_CRITERIA.getValue())) {
                         criteria = (String) importedTable.getModel().getValueAt(row, col);
+                        LOG.log(Level.INFO, "Criteria: {0}", criteria);
                     } else if (mapping.get(col).equals(TestCaseImportMapping.REQUIREMENT.getValue())) {
                         //Process requirements
                         String reqs = (String) importedTable.getModel().getValueAt(row, col);
