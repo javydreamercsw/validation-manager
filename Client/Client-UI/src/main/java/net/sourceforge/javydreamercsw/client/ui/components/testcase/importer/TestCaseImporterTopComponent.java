@@ -245,12 +245,12 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                             spinner.setModel(new SpinnerNumberModel(1.0, 1.0,
                                     max, 1.0));
                             spinner.setValue(1.0);
-                            LOG.log(Level.INFO, "Loaded {0} tables!",
+                            LOG.log(Level.FINE, "Loaded {0} tables!",
                                     tables.size());
                             valid = true;
                             displayTable(1);
                         } else {
-                            LOG.log(Level.INFO, "Found no tables!");
+                            LOG.log(Level.FINE, "Found no tables!");
                         }
                         for (DefaultTableModel dtm : tables) {
                             int columns = dtm.getColumnCount();
@@ -400,9 +400,9 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             tpht.getTestPlan().getTestProject();
             for (Project p : ProjectServer.getProjects()) {
                 for (TestProject temp : p.getTestProjectList()) {
-                    if(Objects.equals(temp.getId(), 
-                            tpht.getTestPlan().getTestProject().getId())){
-                        LOG.log(Level.INFO, "Project ID: {0}", p.getId());
+                    if (Objects.equals(temp.getId(),
+                            tpht.getTestPlan().getTestProject().getId())) {
+                        LOG.log(Level.FINE, "Project ID: {0}", p.getId());
                         projects.add(p);
                     }
                 }
@@ -418,28 +418,34 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             List<Requirement> requirements = new ArrayList<>();
             String description = "", criteria = "", notes = "";
             for (int col = 0; col < importedTable.getModel().getColumnCount(); col++) {
-                if (!mapping.get(col).equals(TestCaseImportMapping.IGNORE.getValue())) {
+                if (!mapping.get(col).equals(
+                        TestCaseImportMapping.IGNORE.getValue())) {
                     //Column is to be imported
-                    if (mapping.get(col).equals(TestCaseImportMapping.DESCRIPTION.getValue())) {
+                    if (mapping.get(col).equals(
+                            TestCaseImportMapping.DESCRIPTION.getValue())) {
                         description = (String) importedTable.getModel().getValueAt(row, col);
-                        LOG.log(Level.INFO, "Description: {0}", description);
-                    } else if (mapping.get(col).equals(TestCaseImportMapping.NOTES.getValue())) {
+                        LOG.log(Level.FINE, "Description: {0}", description);
+                    } else if (mapping.get(col).equals(
+                            TestCaseImportMapping.NOTES.getValue())) {
                         notes = (String) importedTable.getModel().getValueAt(row, col);
-                        LOG.log(Level.INFO, "Notes: {0}", notes);
-                    } else if (mapping.get(col).equals(TestCaseImportMapping.ACCEPTANCE_CRITERIA.getValue())) {
+                        LOG.log(Level.FINE, "Notes: {0}", notes);
+                    } else if (mapping.get(col).equals(
+                            TestCaseImportMapping.ACCEPTANCE_CRITERIA.getValue())) {
                         criteria = (String) importedTable.getModel().getValueAt(row, col);
-                        LOG.log(Level.INFO, "Criteria: {0}", criteria);
-                    } else if (mapping.get(col).equals(TestCaseImportMapping.REQUIREMENT.getValue())) {
+                        LOG.log(Level.FINE, "Criteria: {0}", criteria);
+                    } else if (mapping.get(col).equals(
+                            TestCaseImportMapping.REQUIREMENT.getValue())) {
                         //Process requirements
                         String reqs = (String) importedTable.getModel().getValueAt(row, col);
                         StringTokenizer st = new StringTokenizer(reqs,
                                 delimiter.getSelectedItem().toString());
                         while (st.hasMoreTokens()) {
                             String token = st.nextToken().trim();
-                            LOG.log(Level.INFO, "Requirement: {0}", token);
+                            LOG.log(Level.FINE, "Requirement: {0}", token);
                             boolean found = false;
                             for (Project p : projects) {
-                                LOG.log(Level.INFO, "Looking on project: {0}", p.getName());
+                                LOG.log(Level.FINE, 
+                                        "Looking on project: {0}", p.getName());
                                 for (Requirement r : ProjectServer.getRequirements(p)) {
                                     if (r.getUniqueId().trim().equals(token.trim())) {
                                         requirements.add(r);
@@ -450,18 +456,21 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                             }
                             if (!found) {
                                 //TODO: Create dummy? Error out?
-                                LOG.log(Level.WARNING,
-                                        "Unable to find requirement: ' {0} '", token.trim());
+                                LOG.log(Level.WARNING, 
+                                        "Unable to find requirement: {0}", 
+                                        token.trim());
                             }
                         }
                     } else {
-                        throw new RuntimeException(MessageFormat.format("Unhandled mapping: {0}", mapping.get(col)));
+                        throw new RuntimeException(MessageFormat.format(
+                                "Unhandled mapping: {0}", mapping.get(col)));
                     }
                 }
             }
             try {
                 step_counter++;
-                tcs.addStep(step_counter, description, notes, criteria, requirements);
+                tcs.addStep(step_counter, description, notes, criteria, 
+                        requirements);
                 tcs.write2DB();
             } catch (NonexistentEntityException ex) {
                 Exceptions.printStackTrace(ex);
@@ -480,21 +489,23 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             DefaultCellEditor editor
                     = (DefaultCellEditor) getImportTable().getCellEditor(0, i);
             JComboBox combo = (JComboBox) editor.getComponent();
-            LOG.log(Level.INFO, "Column {0} is mapped as: {1}",
+            LOG.log(Level.FINE, "Column {0} is mapped as: {1}",
                     new Object[]{i, combo.getSelectedItem()});
             String value = (String) combo.getSelectedItem();
             //Make sure there's no duplicate mapping
             if (!mapping.isEmpty()
-                    && (!value.equals(TestCaseImportMapping.IGNORE.getValue())//Ignore the ignore mapping.
+                    && (!value.equals(TestCaseImportMapping.IGNORE.getValue())
                     && mapping.contains(value))) {
-                showImportError(MessageFormat.format("Duplicated mapping: {0}", value));
+                showImportError(MessageFormat.format(
+                        "Duplicated mapping: {0}", value));
             }
             mapping.add(i, value);
         }
         //Make sure the basics are mapped
         for (TestCaseImportMapping tim : TestCaseImportMapping.values()) {
             if (tim.isRequired() && !mapping.contains(tim.getValue())) {
-                showImportError(MessageFormat.format("Missing required mapping: {0}", tim.getValue()));
+                showImportError(MessageFormat.format(
+                        "Missing required mapping: {0}", tim.getValue()));
                 setImportSuccess(false);
                 break;
             }
@@ -529,7 +540,9 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         if (isImportSuccess()) {
             process(mapping);
         }
-        if (isImportSuccess()) {
+        if (isImportSuccess()
+                && tables.size()
+                == ((int) Math.round(Double.valueOf(spinner.getValue().toString())))) {
             this.close();
         }
     }
