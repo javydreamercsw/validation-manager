@@ -51,7 +51,7 @@ public abstract class AbstractImportTopComponent extends TopComponent
         getSpinner().addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                LOG.log(Level.INFO, "Value changed to: {0}", getSpinner().getValue());
+                LOG.log(Level.FINE, "Value changed to: {0}", getSpinner().getValue());
                 displayTable((int) Math.round(Double.valueOf(
                         getSpinner().getValue().toString())));
             }
@@ -118,8 +118,8 @@ public abstract class AbstractImportTopComponent extends TopComponent
 
     @Override
     public void displayTable(Integer index) {
-        LOG.log(Level.INFO, "Changed value to: {0}", index);
-        LOG.log(Level.INFO, "Existing tables: {0}", tables.size());
+        LOG.log(Level.FINE, "Changed value to: {0}", index);
+        LOG.log(Level.FINE, "Existing tables: {0}", tables.size());
         //Rebuild the table
         DefaultTableModel tableModel = tables.get(index - 1);
         int columns = tableModel.getColumnCount();
