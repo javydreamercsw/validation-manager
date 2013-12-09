@@ -74,7 +74,7 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <moduleType>eager</moduleType>
+                    <moduleType>autoload</moduleType>
                     <codeNameBase>com.validation.manager.jasperreports.viewer/1</codeNameBase>
                     <publicPackages>
                         <publicPackage>net.sourceforge.javydreamercsw.vm.jasperreportviewer</publicPackage>

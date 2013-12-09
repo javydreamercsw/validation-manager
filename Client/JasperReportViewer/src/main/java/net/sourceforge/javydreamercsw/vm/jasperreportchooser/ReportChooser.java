@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.view.JasperViewer;
 import net.sourceforge.javydreamercsw.vm.jasperreportviewer.ReportProviderInterface;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -150,7 +151,7 @@ public class ReportChooser extends javax.swing.JDialog
                 parameters = p.getParameters();
             }
             try {
-                report.generatePrint(parameters);
+                JasperViewer.viewReport(report.generatePrint(parameters));
             } catch (JRException ex) {
                 Exceptions.printStackTrace(ex);
             }
