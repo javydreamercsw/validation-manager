@@ -21,7 +21,7 @@ public class ProjectNode extends AbstractVMBeanNode {
 
     private final SubProjectChildFactory factory;
 
-    public ProjectNode(Project project, SubProjectChildFactory factory) 
+    public ProjectNode(Project project, SubProjectChildFactory factory)
             throws IntrospectionException {
         super(project, factory, new InstanceContent());
         this.factory = factory;
@@ -48,6 +48,8 @@ public class ProjectNode extends AbstractVMBeanNode {
     public void refreshMyself() {
         ProjectServer rs = new ProjectServer(getLookup().lookup(Project.class));
         rs.update((Project) getBean(), rs.getEntity());
-        factory.refresh();
+        if (factory != null) {
+            factory.refresh();
+        }
     }
 }
