@@ -381,16 +381,16 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
     private Requirement findRequirement(String id) {
         Requirement req = null;
         for (Requirement r : ProjectServer.getRequirements(project)) {
-            LOG.info(MessageFormat.format("Comparing {0} and {1}",
+            LOG.fine(MessageFormat.format("Comparing {0} and {1}",
                     r.getUniqueId().trim(), id.trim()));
             if (r.getUniqueId().trim().equals(id.trim())) {
                 req = r;
-                LOG.info(MessageFormat.format("Found a match for {0}", id.trim()));
+                LOG.fine(MessageFormat.format("Found a match for {0}", id.trim()));
                 break;
             }
         }
         if (req == null) {
-            LOG.info(MessageFormat.format("Unable to find a match for {0}",
+            LOG.warning(MessageFormat.format("Unable to find a match for {0}",
                     id.trim()));
         }
         return req;
