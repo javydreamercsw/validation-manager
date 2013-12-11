@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import net.sourceforge.javydreamercsw.client.ui.components.database.DataBaseTool;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.Exceptions;
@@ -156,7 +157,7 @@ public final class ProjectEditorTopComponent extends TopComponent
                         "select p from Project p where p.name=" + parent.getSelectedItem());
                 for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
                     Project temp = ((Project) it2.next());
-                    if (temp.getId() != currentProject.getId()) {
+                    if (!Objects.equals(temp.getId(), currentProject.getId())) {
                         parentProject = temp;
                         break;
                     }
@@ -229,15 +230,14 @@ public final class ProjectEditorTopComponent extends TopComponent
                     "select p from Project p order by p.id");
             for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
                 Project temp = ((Project) it2.next());
-                if (temp.getId() != p.getId()) {
+                if (!Objects.equals(temp.getId(), p.getId())) {
                     projects.add(temp);
                 }
             }
         }
         List<String> names = new ArrayList<>();
         names.add("None");
-        for (Iterator<Project> it3 = projects.iterator(); it3.hasNext();) {
-            Project proj = it3.next();
+        for (Project proj : projects) {
             names.add(proj.getName());
         }
         parent.setModel(new javax.swing.DefaultComboBoxModel(names.toArray(new String[projects.size() + 1])));

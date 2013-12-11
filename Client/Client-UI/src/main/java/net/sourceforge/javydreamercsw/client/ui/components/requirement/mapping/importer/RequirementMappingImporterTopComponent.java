@@ -251,6 +251,7 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
         setImportSuccess(true);
         //Process the mapping
         if (isImportSuccess()) {
+            enableUI(false);
             for (int row = 0; row < importedTable.getModel().getRowCount(); row++) {
                 String val1 = (String) importedTable.getModel().getValueAt(row, 0);
                 Requirement req1 = findRequirement(val1.trim());
@@ -274,6 +275,7 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
                 }
             }
         }
+        enableUI(true);
         if (isImportSuccess()) {
             this.close();
         }

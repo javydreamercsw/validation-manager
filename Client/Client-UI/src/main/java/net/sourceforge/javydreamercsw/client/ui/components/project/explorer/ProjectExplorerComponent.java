@@ -1,7 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.components.project.explorer;
 
 import java.awt.BorderLayout;
-import java.beans.PropertyVetoException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -15,8 +14,6 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
-import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
@@ -33,7 +30,7 @@ import org.openide.util.Utilities;
 @TopComponent.Description(
         preferredID = "ProjectExplorerTopComponent",
         iconBase = "net/sourceforge/javydreamercsw/client/ui/VSmall.png",
-        persistenceType = TopComponent.PERSISTENCE_ALWAYS)
+        persistenceType = TopComponent.PERSISTENCE_NEVER)
 @TopComponent.Registration(mode = "explorer", openAtStartup = true)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_ProjectExplorerAction",
@@ -61,13 +58,8 @@ public final class ProjectExplorerComponent extends TopComponent
         add(new BeanTreeView(), BorderLayout.CENTER);
         associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
                 getActionMap()));
-        RootNode root = new RootNode(new ProjectChildFactory());
+        RootNode root = new RootNode(new ProjectChildFactory().setShowChildren(false));
         getExplorerManager().setRootContext(root);
-        try {
-            getExplorerManager().setSelectedNodes(new Node[]{root});
-        } catch (PropertyVetoException ex) {
-            Exceptions.printStackTrace(ex);
-        }
     }
 
     /**
@@ -169,7 +161,8 @@ public final class ProjectExplorerComponent extends TopComponent
                 if (item instanceof AbstractVMBeanNode) {
                     AbstractVMBeanNode p = (AbstractVMBeanNode) item;
                     currentNode = p;
-                    for (RefreshableCapability refresh : currentNode.getLookup().lookupAll(RefreshableCapability.class)) {
+                    for (RefreshableCapability refresh 
+                            : currentNode.getLookup().lookupAll(RefreshableCapability.class)) {
                         refresh.refresh();
                     }
                 }

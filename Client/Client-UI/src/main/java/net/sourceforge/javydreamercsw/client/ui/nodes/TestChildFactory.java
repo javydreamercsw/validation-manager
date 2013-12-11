@@ -5,7 +5,6 @@ import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.TestJpaController;
 import java.beans.IntrospectionException;
-import java.util.Iterator;
 import java.util.List;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
@@ -24,9 +23,7 @@ class TestChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
-        for (Iterator<TestCase> it =
-                test.getTestCaseList().iterator(); it.hasNext();) {
-            TestCase tc = it.next();
+        for (TestCase tc : test.getTestCaseList()) {
             toPopulate.add(tc);
         }
         return true;

@@ -108,6 +108,12 @@
             <artifactId>JasperReportViewer</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-visual</artifactId>
+            <version>${netbeans.version}</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>
@@ -118,7 +124,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <moduleType>eager</moduleType>
-                    <codeNameBase>com.validation.manager.ui/1</codeNameBase>
+                    <codeNameBase>com.validation.manager.client.ui/1</codeNameBase>
                 </configuration>
             </plugin>
 
