@@ -137,6 +137,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             Requirement req3 = TestHelper.createRequirement("SRS-SW-0003",
                     "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+            Requirement req4 = TestHelper.createRequirement("SRS-SW-0004",
+                    "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
             assertEquals(0, rs.getTestCoverage());
             //Add a test case
@@ -177,6 +179,9 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.getRequirementList().add(req2);
             rs.write2DB();
             assertEquals(50, rs.getTestCoverage());
+            rs.getRequirementList().add(req4);
+            rs.write2DB();
+            assertEquals(33, rs.getTestCoverage());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -187,9 +192,9 @@ public class RequirementServerTest extends AbstractVMTestCase {
      * Test of getChildrenRequirement method, of class RequirementServer.
      */
     @Test
-    public void testGetChildrenRequirement() {
+    public void testChildAndParentRequirements() {
         try {
-            System.out.println("getChildrenRequirement");
+            System.out.println("Child And Parent Requirements");
             prepare();
             List<Requirement> children;
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
@@ -216,10 +221,14 @@ public class RequirementServerTest extends AbstractVMTestCase {
                 LOG.info(r.getUniqueId());
             }
             assertEquals(0, rs2.getRequirementList().size());
-            for (Requirement r : rs2.getRequirementList()) {
+            for (Requirement r : rs2.getRequirementList1()) {
                 LOG.info(r.getUniqueId());
             }
             assertEquals(1, rs2.getRequirementList1().size());
+            assertEquals(1, RequirementServer.getChildrenRequirement(req).size());
+            assertEquals(0, RequirementServer.getParentRequirement(req).size());
+            assertEquals(0, RequirementServer.getChildrenRequirement(req2).size());
+            assertEquals(1, RequirementServer.getParentRequirement(req2).size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
