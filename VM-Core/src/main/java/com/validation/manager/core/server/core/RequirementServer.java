@@ -120,16 +120,22 @@ public final class RequirementServer extends Requirement
 
     public int getTestCoverage() {
         int coverage = 0;
+        LOG.log(Level.INFO, "Getting test coverage for: {0}...",
+                    getUniqueId());
+        update();
         List<Requirement> children = getChildrenRequirement(getEntity());
         if (children.isEmpty()) {
+            LOG.log(Level.INFO, "No child requirements");
             //Has test cases and no related requirements
             if (getStepList().size() > 0) {
+                LOG.log(Level.INFO, "Found: {0} related steps.",
+                    getStepList().size());
                 coverage = 100;
             }
             //Has nothing, leave at 0.
         } else {
             //Get total of instances
-            LOG.log(Level.FINE, "Found: {0} related requirements.",
+            LOG.log(Level.INFO, "Found: {0} related requirements.",
                     children.size());
             //Check coverage for children
             for (Requirement r : children) {
@@ -137,7 +143,7 @@ public final class RequirementServer extends Requirement
             }
             coverage /= children.size();
         }
-        LOG.log(Level.FINE, "{0} Coverage: {1}",
+        LOG.log(Level.INFO, "{0} Coverage: {1}",
                 new Object[]{getUniqueId(), coverage});
         return coverage;
     }
@@ -185,5 +191,6 @@ public final class RequirementServer extends Requirement
         childS.getRequirementList1().add(getEntity());
         write2DB();
         childS.write2DB();
+        update();
     }
 }
