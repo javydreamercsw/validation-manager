@@ -258,9 +258,9 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
                 Requirement req2 = findRequirement(val2.trim());
                 if (req1 != null && req2 != null) {
                     //Both are valid
-                    req1.getRequirementList().add(req2);
                     try {
-                        new RequirementServer(req1).write2DB();
+                        RequirementServer rs = new RequirementServer(req1);
+                        rs.addChildRequirement(req2);
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
                         setImportSuccess(false);
