@@ -57,11 +57,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>HierarchyVisualizer</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>Client-UI</artifactId>
             <version>${project.version}</version>
         </dependency>
