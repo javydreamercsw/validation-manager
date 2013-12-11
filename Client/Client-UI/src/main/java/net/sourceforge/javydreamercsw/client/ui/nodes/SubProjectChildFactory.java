@@ -3,7 +3,6 @@ package net.sourceforge.javydreamercsw.client.ui.nodes;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.TestProject;
-import java.util.Iterator;
 import java.util.List;
 import net.sourceforge.javydreamercsw.client.ui.components.database.DataBaseTool;
 
@@ -23,23 +22,16 @@ public class SubProjectChildFactory extends ProjectChildFactory {
     protected boolean createKeys(List<Object> list) {
         //Add sub projects
         if (DataBaseTool.getEmf() != null) {
-            for (Iterator<Project> it = 
-                    parent.getProjectList().iterator(); it.hasNext();) {
-                Project project = it.next();
+            for (Project project : parent.getProjectList()) {
                 list.add(project);
             }
         }
-        
         //Add requirement specs
-        for (Iterator<RequirementSpec> it =
-                parent.getRequirementSpecList().iterator(); it.hasNext();) {
-            RequirementSpec rs = it.next();
+        for (RequirementSpec rs : parent.getRequirementSpecList()) {
             list.add(rs);
         }
         //Add test projects
-        for (Iterator<TestProject> it = 
-                parent.getTestProjectList().iterator(); it.hasNext();) {
-            TestProject tp = it.next();
+        for (TestProject tp : parent.getTestProjectList()) {
             list.add(tp);
         }
         return true;

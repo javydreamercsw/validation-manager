@@ -7,7 +7,6 @@ import com.validation.manager.core.db.controller.RequirementSpecNodeJpaControlle
 import java.beans.IntrospectionException;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
@@ -53,7 +52,8 @@ public class RequirementChildFactory extends AbstractChildFactory {
         try {
             if (key instanceof Requirement) {
                 Requirement req = (Requirement) key;
-                return new UIRequirementNode(req);
+                return new UIRequirementNode(req, 
+                        new RequirementTestChildFactory(req));
             } else if (key instanceof RequirementSpecNode) {
                 RequirementSpecNode rs = (RequirementSpecNode) key;
                 return new UIRequirementSpecNodeNode(rs);

@@ -24,6 +24,8 @@ import org.openide.util.Exceptions;
  */
 public abstract class AbstractChildFactory extends ChildFactory<Object> {
 
+    private boolean showChildren = true;
+
     @Override
     protected Node[] createNodesForKey(Object key) {
         return new Node[]{createNodeForKey(key)};
@@ -35,7 +37,8 @@ public abstract class AbstractChildFactory extends ChildFactory<Object> {
             if (key instanceof Project) {
                 Project project = (Project) key;
                 return new ProjectNode(project,
-                        new SubProjectChildFactory(project));
+                        isShowChildren() ? 
+                                new SubProjectChildFactory(project) : null);
             } else if (key instanceof RequirementSpec) {
                 RequirementSpec rs = (RequirementSpec) key;
                 return new UIRequirementSpecNode(rs);
@@ -44,7 +47,8 @@ public abstract class AbstractChildFactory extends ChildFactory<Object> {
                 return new UITestProjectNode(tp);
             } else if (key instanceof Requirement) {
                 Requirement req = (Requirement) key;
-                return new UIRequirementNode(req);
+                return new UIRequirementNode(req, 
+                        new RequirementTestChildFactory(req));
             } else if (key instanceof RequirementSpecNode) {
                 RequirementSpecNode rs = (RequirementSpecNode) key;
                 return new UIRequirementSpecNodeNode(rs);
@@ -81,4 +85,19 @@ public abstract class AbstractChildFactory extends ChildFactory<Object> {
      * This makes sure the bean is up to date.
      */
     protected abstract void updateBean();
+
+    /**
+     * @return the showChildren
+     */
+    public boolean isShowChildren() {
+        return showChildren;
+    }
+
+    /**
+     * @param showChildren the showChildren to set
+     */
+    public AbstractChildFactory setShowChildren(boolean showChildren) {
+        this.showChildren = showChildren;
+        return this;
+    }
 }

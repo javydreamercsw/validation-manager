@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -30,7 +31,6 @@ import net.sourceforge.javydreamercsw.client.ui.nodes.actions.RequirementSelecti
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.view.OutlineView;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
@@ -262,7 +262,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
                 }
                 linkedRequirements.clear();
@@ -325,11 +325,17 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             req.setRequirementTypeId(((RequirementType) type.getSelectedItem()));
             req.setDescription(description.getText().trim());
             req.setNotes(notes.getText().trim());
-            req.setRequirementList(linkedRequirements);
             try {
                 req.write2DB();
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.SEVERE, null, ex);
+            }
+            for (Requirement child : linkedRequirements) {
+                try {
+                    req.addChildRequirement(child);
+                } catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
             }
         }
         close();
@@ -375,7 +381,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
 
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
-        switch(version){
+        switch (version) {
             case "1.0":
                 //Do nothing
                 break;

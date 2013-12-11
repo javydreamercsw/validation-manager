@@ -21,8 +21,8 @@ public class CreateProjectAction extends AbstractAction {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                final CreateProjectDialog dialog = 
-                        new CreateProjectDialog(new javax.swing.JFrame(), true);
+                final CreateProjectDialog dialog
+                        = new CreateProjectDialog(new javax.swing.JFrame(), true);
                 dialog.setLocationRelativeTo(null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
