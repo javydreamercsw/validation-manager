@@ -25,10 +25,12 @@ import org.openide.util.lookup.InstanceContent;
 public class UIRequirementNode extends AbstractVMBeanNode {
 
     private static BufferedImage green, red, orange, yellow;
+    private final Requirement requirement;
 
     public UIRequirementNode(Requirement req,
             RequirementTestChildFactory factory) throws IntrospectionException {
         super(req, factory, new InstanceContent());
+        requirement=req;
         setIconBaseWithExtension("com/validation/manager/resources/icons/Papermart/Document.png");
         setShortDescription(req.getDescription());
     }
@@ -94,5 +96,12 @@ public class UIRequirementNode extends AbstractVMBeanNode {
         }
         return image == null ? null
                 : image.getScaledInstance(16, 16, java.awt.Image.SCALE_SMOOTH);
+    }
+
+    /**
+     * @return the requirement
+     */
+    public Requirement getRequirement() {
+        return requirement;
     }
 }

@@ -1,11 +1,18 @@
 package net.sourceforge.javydreamercsw.client.ui.components.project.viewer;
 
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementStatus;
+import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene.HierarchyScene;
 import net.sourceforge.javydreamercsw.client.ui.nodes.SubProjectChildFactory;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -43,10 +50,11 @@ import org.openide.windows.TopComponent;
 @Messages({
     "CTL_ProjectViewerAction=Project Viewer",
     "CTL_ProjectViewerTopComponent=Project Viewer",
-    "HINT_ProjectViewerTopComponent=This is a Project Viewer window"
+    "HINT_ProjectViewerTopComponent=This is a Project Viewer window",
+    "ProjectViewerTopComponent.filterPane.border.title=Requirement Filters"
 })
 public final class ProjectViewerTopComponent extends TopComponent
-        implements ExplorerManager.Provider, LookupListener {
+        implements ExplorerManager.Provider, LookupListener, ChangeListener {
 
     private final ExplorerManager em = new ExplorerManager();
     private SubProjectChildFactory projectFactory;
@@ -55,6 +63,8 @@ public final class ProjectViewerTopComponent extends TopComponent
     private final HierarchyScene scene;
     private final JComponent myView;
     private Node root = null;
+    private static final ResourceBundle rb
+            = ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
     private static final Logger LOG
             = Logger.getLogger(ProjectViewerTopComponent.class.getSimpleName());
 
@@ -67,6 +77,11 @@ public final class ProjectViewerTopComponent extends TopComponent
         hierarchyPane.setViewportView(myView);
         associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
                 getActionMap()));
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent e) {
+
     }
 
     @Override
@@ -85,10 +100,15 @@ public final class ProjectViewerTopComponent extends TopComponent
         jSplitPane1 = new javax.swing.JSplitPane();
         projectPane = new OutlineView();
         hierarchyPane = new BeanTreeView();
+        filterPane = new javax.swing.JPanel();
 
-        jSplitPane1.setDividerLocation(200);
+        jSplitPane1.setDividerLocation(300);
         jSplitPane1.setLeftComponent(projectPane);
         jSplitPane1.setRightComponent(hierarchyPane);
+
+        filterPane.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(ProjectViewerTopComponent.class, "ProjectViewerTopComponent.filterPane.border.title"))); // NOI18N
+        filterPane.setName(""); // NOI18N
+        filterPane.setLayout(new java.awt.GridLayout(0, 3, 2, 1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -96,19 +116,24 @@ public final class ProjectViewerTopComponent extends TopComponent
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 471, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 649, Short.MAX_VALUE)
+                    .addComponent(filterPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
+                .addComponent(filterPane, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel filterPane;
     private javax.swing.JScrollPane hierarchyPane;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JScrollPane projectPane;
@@ -157,6 +182,15 @@ public final class ProjectViewerTopComponent extends TopComponent
                     root = new AbstractNode(Children.create(projectFactory, true));
                     root.setDisplayName(p.getName());
                     getExplorerManager().setRootContext(root);
+                    //Update the available filters
+                    filterPane.removeAll();
+                    for (RequirementStatus rs : new RequirementStatusJpaController(
+                            DataBaseManager.getEntityManagerFactory()).findRequirementStatusEntities()) {
+                        JCheckBox filter = new JCheckBox(rb.containsKey(rs.getStatus())
+                                ? rb.getString(rs.getStatus()) : rs.getStatus());
+                        filter.addChangeListener((ProjectViewerTopComponent) this);
+                        filterPane.add(filter);
+                    }
                 } else if (item instanceof Requirement) {
                     Requirement req = (Requirement) item;
                     scene.clear();
