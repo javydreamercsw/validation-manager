@@ -32,8 +32,8 @@ import org.openide.windows.TopComponent;
 )
 @TopComponent.Description(
         preferredID = "ProjectViewerTopComponent",
-        //iconBase="SET/PATH/TO/ICON/HERE", 
-        persistenceType = TopComponent.PERSISTENCE_ALWAYS
+        iconBase = "net/sourceforge/javydreamercsw/client/ui/VSmall.png",
+        persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
 @TopComponent.OpenActionRegistration(
@@ -65,15 +65,6 @@ public final class ProjectViewerTopComponent extends TopComponent
         scene = new HierarchyScene();
         myView = scene.createView();
         hierarchyPane.setViewportView(myView);
-//        hierarchyPane.add(scene.createSatelliteView(), BorderLayout.WEST);
-//        associateLookup(Lookups.fixed(
-//                // exposed TopComponent,
-//                //   and SatelliteViewProvider, BirdViewProvider interfaces, too
-//                (ProjectViewerTopComponent) this,
-//                getActionMap() // do not forget expose ActionMap
-//                , scene // if some object needs it and if it is final
-//                ,getExplorerManager()
-//        ));
         associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
                 getActionMap()));
     }
