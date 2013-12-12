@@ -97,18 +97,28 @@ public final class ProjectViewerTopComponent extends TopComponent
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jSplitPane2 = new javax.swing.JSplitPane();
         jSplitPane1 = new javax.swing.JSplitPane();
         projectPane = new OutlineView();
         hierarchyPane = new BeanTreeView();
+        jScrollPane1 = new javax.swing.JScrollPane();
         filterPane = new javax.swing.JPanel();
+
+        jSplitPane2.setDividerLocation(80);
+        jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
         jSplitPane1.setDividerLocation(300);
         jSplitPane1.setLeftComponent(projectPane);
         jSplitPane1.setRightComponent(hierarchyPane);
 
+        jSplitPane2.setRightComponent(jSplitPane1);
+
         filterPane.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(ProjectViewerTopComponent.class, "ProjectViewerTopComponent.filterPane.border.title"))); // NOI18N
         filterPane.setName(""); // NOI18N
         filterPane.setLayout(new java.awt.GridLayout(0, 3, 2, 1));
+        jScrollPane1.setViewportView(filterPane);
+
+        jSplitPane2.setTopComponent(jScrollPane1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -116,18 +126,14 @@ public final class ProjectViewerTopComponent extends TopComponent
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 649, Short.MAX_VALUE)
-                    .addComponent(filterPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jSplitPane2)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(filterPane, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 549, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -135,7 +141,9 @@ public final class ProjectViewerTopComponent extends TopComponent
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel filterPane;
     private javax.swing.JScrollPane hierarchyPane;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JSplitPane jSplitPane2;
     private javax.swing.JScrollPane projectPane;
     // End of variables declaration//GEN-END:variables
     @Override
