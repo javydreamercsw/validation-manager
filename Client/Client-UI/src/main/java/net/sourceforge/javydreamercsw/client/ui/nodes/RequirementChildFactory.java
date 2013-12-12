@@ -52,7 +52,7 @@ public class RequirementChildFactory extends AbstractChildFactory {
         try {
             if (key instanceof Requirement) {
                 Requirement req = (Requirement) key;
-                return new UIRequirementNode(req, 
+                return new UIRequirementNode(req,
                         new RequirementTestChildFactory(req));
             } else if (key instanceof RequirementSpecNode) {
                 RequirementSpecNode rs = (RequirementSpecNode) key;
