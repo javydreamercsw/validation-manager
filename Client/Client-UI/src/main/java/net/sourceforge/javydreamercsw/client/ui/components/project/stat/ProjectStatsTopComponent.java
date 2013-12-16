@@ -40,7 +40,8 @@ import org.openide.util.NbBundle.Messages;
         persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
-@ActionID(category = "Window", id = "net.sourceforge.javydreamercsw.client.ui.components.project.stat.ProjectStatsTopComponent")
+@ActionID(category = "Window",
+        id = "net.sourceforge.javydreamercsw.client.ui.components.project.stat.ProjectStatsTopComponent")
 @ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_ProjectStatsAction",
@@ -65,6 +66,7 @@ public final class ProjectStatsTopComponent extends TopComponent {
         setName(Bundle.CTL_ProjectStatsTopComponent());
         setToolTipText(Bundle.HINT_ProjectStatsTopComponent());
         setLayout(new BorderLayout());
+        //Disable JavaFX for now
         init();
     }
 
@@ -74,7 +76,6 @@ public final class ProjectStatsTopComponent extends TopComponent {
     }
 
     public void init() {
-
         tableModel = new SampleTableModel();
         // create javafx panel for charts
         chartFxPanel = new JFXPanel();

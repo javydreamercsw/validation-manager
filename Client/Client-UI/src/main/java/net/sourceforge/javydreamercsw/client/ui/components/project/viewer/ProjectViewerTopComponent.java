@@ -5,14 +5,19 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilterChangeListener;
+import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilterChangeProvider;
 import net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene.HierarchyScene;
 import net.sourceforge.javydreamercsw.client.ui.nodes.SubProjectChildFactory;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -54,7 +59,8 @@ import org.openide.windows.TopComponent;
     "ProjectViewerTopComponent.filterPane.border.title=Requirement Filters"
 })
 public final class ProjectViewerTopComponent extends TopComponent
-        implements ExplorerManager.Provider, LookupListener, ChangeListener {
+        implements ExplorerManager.Provider, LookupListener, ItemListener,
+        RequirementStatusFilterChangeProvider {
 
     private final ExplorerManager em = new ExplorerManager();
     private SubProjectChildFactory projectFactory;
@@ -67,6 +73,9 @@ public final class ProjectViewerTopComponent extends TopComponent
             = ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
     private static final Logger LOG
             = Logger.getLogger(ProjectViewerTopComponent.class.getSimpleName());
+    private final List<JCheckBox> filters = new ArrayList<>();
+    private final List<RequirementStatusFilterChangeListener> listeners
+            = new ArrayList<>();
 
     public ProjectViewerTopComponent() {
         initComponents();
@@ -77,11 +86,6 @@ public final class ProjectViewerTopComponent extends TopComponent
         hierarchyPane.setViewportView(myView);
         associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
                 getActionMap()));
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent e) {
-
     }
 
     @Override
@@ -115,7 +119,7 @@ public final class ProjectViewerTopComponent extends TopComponent
 
         filterPane.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(ProjectViewerTopComponent.class, "ProjectViewerTopComponent.filterPane.border.title"))); // NOI18N
         filterPane.setName(""); // NOI18N
-        filterPane.setLayout(new java.awt.GridLayout(0, 3, 2, 1));
+        filterPane.setLayout(new java.awt.GridLayout(0, 6, 2, 1));
         jScrollPane1.setViewportView(filterPane);
 
         jSplitPane2.setTopComponent(jScrollPane1);
@@ -190,14 +194,17 @@ public final class ProjectViewerTopComponent extends TopComponent
                     root = new AbstractNode(Children.create(projectFactory, true));
                     root.setDisplayName(p.getName());
                     getExplorerManager().setRootContext(root);
-                    //Update the available filters
-                    filterPane.removeAll();
-                    for (RequirementStatus rs : new RequirementStatusJpaController(
-                            DataBaseManager.getEntityManagerFactory()).findRequirementStatusEntities()) {
-                        JCheckBox filter = new JCheckBox(rb.containsKey(rs.getStatus())
-                                ? rb.getString(rs.getStatus()) : rs.getStatus());
-                        filter.addChangeListener((ProjectViewerTopComponent) this);
-                        filterPane.add(filter);
+                    if (filters.isEmpty()) {
+                        //Update the available filters if they are not there already. No need to reprocess each time.
+                        filterPane.removeAll();
+                        for (RequirementStatus rs : new RequirementStatusJpaController(
+                                DataBaseManager.getEntityManagerFactory()).findRequirementStatusEntities()) {
+                            JCheckBox filter = new JCheckBox(rb.containsKey(rs.getStatus())
+                                    ? rb.getString(rs.getStatus()) : rs.getStatus());
+                            filter.addItemListener((ProjectViewerTopComponent) this);
+                            filters.add(filter);
+                            filterPane.add(filter);
+                        }
                     }
                 } else if (item instanceof Requirement) {
                     Requirement req = (Requirement) item;
@@ -206,6 +213,62 @@ public final class ProjectViewerTopComponent extends TopComponent
                     scene.addRequirement(req);
                 }
             }
+        }
+    }
+
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        LOG.log(Level.INFO, "Clicked: {0}",
+                ((JCheckBox) e.getSource()).getText());
+        List<Integer> ids = new ArrayList<>();
+        for (JCheckBox cb : filters) {
+            if (cb.isSelected()) {
+                String sourceText = cb.getText();
+                String toMatch;
+                if (sourceText.equals(rb.getString("general.approved"))) {
+                    toMatch = "general.approved";
+                } else if (sourceText.equals(rb.getString("general.obsolete"))) {
+                    toMatch = "general.obsolete";
+                } else if (sourceText.equals(rb.getString("general.rejected"))) {
+                    toMatch = "general.rejected";
+                } else if (sourceText.equals(rb.getString("general.open"))) {
+                    toMatch = "general.open";
+                } else {
+                    //Not translated (i.e. custom)
+                    toMatch = sourceText;
+                }
+                RequirementStatus status = null;
+                for (RequirementStatus rs : new RequirementStatusJpaController(
+                        DataBaseManager.getEntityManagerFactory()).findRequirementStatusEntities()) {
+                    if (rs.getStatus().equals(toMatch)) {
+                        status = rs;
+                        break;
+                    }
+                }
+                if (status != null) {
+                    ids.add(status.getId());
+                }
+            }
+        }
+        //This is not working, do the opposite and make RequirementCHild factory register themselves.
+        for (RequirementStatusFilterChangeListener sfcl : listeners) {
+            sfcl.filterChange(ids.toArray(new Integer[0]));
+            LOG.log(Level.INFO, "Sending event to: {0}",
+                    sfcl.getClass().getSimpleName());
+        }
+    }
+
+    @Override
+    public void register(RequirementStatusFilterChangeListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+        }
+    }
+
+    @Override
+    public void unregister(RequirementStatusFilterChangeListener listener) {
+        if (listeners.contains(listener)) {
+            listeners.remove(listener);
         }
     }
 }

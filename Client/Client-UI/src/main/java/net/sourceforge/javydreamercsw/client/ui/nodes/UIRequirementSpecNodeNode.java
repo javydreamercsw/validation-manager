@@ -39,7 +39,8 @@ public class UIRequirementSpecNodeNode extends AbstractVMBeanNode {
 
     @Override
     public void refreshMyself() {
-        RequirementSpecNodeServer rs = new RequirementSpecNodeServer(getLookup().lookup(RequirementSpecNode.class));
+        RequirementSpecNodeServer rs = 
+                new RequirementSpecNodeServer(getLookup().lookup(RequirementSpecNode.class));
         rs.update((RequirementSpecNode) getBean(), rs.getEntity());
     }
 }
