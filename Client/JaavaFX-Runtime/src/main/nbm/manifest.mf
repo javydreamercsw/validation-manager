@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Localizing-Bundle: net/sourceforge/javydreamercsw/jaavafx/runtime/Bundle.properties
+

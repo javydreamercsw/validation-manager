@@ -49,10 +49,10 @@ public class SampleTableModel extends AbstractTableModel {
     
     private final String[] names = {"2007", "2008", "2009"};
  
-    private Object[][] data = {
-            {new Double(567), new Double(956), new Double(1154)},
-            {new Double(1292), new Double(1665), new Double(1927)},
-            {new Double(1292), new Double(2559), new Double(2774)}
+    private final Object[][] data = {
+            {(double) 567, (double) 956, (double) 1154},
+            {(double) 1292, (double) 1665, (double) 1927},
+            {(double) 1292, (double) 2559, (double) 2774}
         };
 
     public double getTickUnit() {
