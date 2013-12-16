@@ -116,7 +116,7 @@ ORDER BY
 			</textField>
 			<textField isStretchWithOverflow="true">
 				<reportElement uuid="6cfdaed7-d446-42db-a84f-7b2658f33b51" x="89" y="0" width="194" height="20"/>
-				<textElement verticalAlignment="Middle"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{requirement_description}]]></textFieldExpression>
 			</textField>
 			<line>
