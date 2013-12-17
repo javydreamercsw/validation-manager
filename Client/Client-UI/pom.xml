@@ -114,6 +114,12 @@
             <version>${netbeans.version}</version>
             <type>jar</type>
         </dependency>
+        <!--TODO<dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-libs-javafx</artifactId>
+            <version>${netbeans.version}</version>
+            <version>${netbeans.version}</version>
+        </dependency>-->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>JavaFX-Runtime</artifactId>
