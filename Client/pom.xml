@@ -78,7 +78,6 @@
         <module>JasperReport</module>
         <module>JasperReportViewer</module>
         <module>POI-Library</module>
-        <module>JaavaFX-Runtime</module>
     </modules>
 
     <properties>
