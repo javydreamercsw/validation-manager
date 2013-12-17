@@ -5,8 +5,6 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import java.beans.IntrospectionException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,8 +36,9 @@ public class RequirementChildFactory extends AbstractChildFactory
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
         for (Requirement req : node.getRequirementList()) {
-            //Filter out status ids
-            if (!new ArrayList<>(Arrays.asList(ids)).contains(req.getRequirementStatusId().getId())) {
+            //TODO: Filter out status ids
+//            if (!new ArrayList<>(Arrays.asList(ids)).contains(req.getRequirementStatusId().getId())) {
+            if (req.getRequirementStatusId().getId() == 2) {
                 toPopulate.add(req);
             }
         }
