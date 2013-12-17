@@ -70,8 +70,10 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             //Get the selected Step
             step = Utilities.actionsGlobalContext().lookup(Step.class);
             //Update the linked requirements
-            for (Requirement req : step.getRequirementList()) {
-                ((DefaultListModel) requirements.getModel()).addElement(req);
+            if (step.getRequirementList() != null) {
+                for (Requirement req : step.getRequirementList()) {
+                    ((DefaultListModel) requirements.getModel()).addElement(req);
+                }
             }
             //Update other fields
             if (step.getNotes() != null && !step.getNotes().trim().isEmpty()) {
@@ -298,7 +300,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             public void run() {
                 final RequirementSelectionDialog dialog
                         = new RequirementSelectionDialog(new javax.swing.JFrame(),
-                        true, linkedRequirements);
+                                true, linkedRequirements);
                 dialog.setLocationRelativeTo(null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
