@@ -33,6 +33,7 @@ import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.TopComponent;
 
 /**
@@ -58,6 +59,7 @@ import org.openide.windows.TopComponent;
     "HINT_ProjectViewerTopComponent=This is a Project Viewer window",
     "ProjectViewerTopComponent.filterPane.border.title=Requirement Filters"
 })
+@ServiceProvider(service=RequirementStatusFilterChangeProvider.class)
 public final class ProjectViewerTopComponent extends TopComponent
         implements ExplorerManager.Provider, LookupListener, ItemListener,
         RequirementStatusFilterChangeProvider {
@@ -206,6 +208,7 @@ public final class ProjectViewerTopComponent extends TopComponent
                             filterPane.add(filter);
                         }
                     }
+                    filterPane.repaint();
                 } else if (item instanceof Requirement) {
                     Requirement req = (Requirement) item;
                     scene.clear();
@@ -250,7 +253,6 @@ public final class ProjectViewerTopComponent extends TopComponent
                 }
             }
         }
-        //This is not working, do the opposite and make RequirementCHild factory register themselves.
         for (RequirementStatusFilterChangeListener sfcl : listeners) {
             sfcl.filterChange(ids.toArray(new Integer[0]));
             LOG.log(Level.INFO, "Sending event to: {0}",

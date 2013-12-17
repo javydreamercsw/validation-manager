@@ -14,7 +14,7 @@ import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilt
 import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilterChangeProvider;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
+import org.openide.util.Utilities;
 
 /**
  *
@@ -29,13 +29,10 @@ public class RequirementChildFactory extends AbstractChildFactory
     public RequirementChildFactory(RequirementSpecNode node) {
         this.node = node;
         for (RequirementStatusFilterChangeProvider provider
-                : Lookup.getDefault().lookupAll(RequirementStatusFilterChangeProvider.class)) {
+                : Utilities.actionsGlobalContext().lookupAll(RequirementStatusFilterChangeProvider.class)) {
             provider.register((RequirementChildFactory) this);
+            System.out.println("Found provider: " + provider.getClass().getSimpleName());
         }
-    }
-
-    public RequirementChildFactory() {
-        //To comply with ServiceProvider
     }
 
     @Override
