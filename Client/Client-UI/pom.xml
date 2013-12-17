@@ -114,6 +114,11 @@
             <version>${netbeans.version}</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>JavaFX-Runtime</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
