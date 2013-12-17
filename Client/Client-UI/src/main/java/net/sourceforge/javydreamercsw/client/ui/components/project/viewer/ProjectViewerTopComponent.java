@@ -132,7 +132,7 @@ public final class ProjectViewerTopComponent extends TopComponent
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane2)
+                .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 606, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -204,6 +204,8 @@ public final class ProjectViewerTopComponent extends TopComponent
                             JCheckBox filter = new JCheckBox(rb.containsKey(rs.getStatus())
                                     ? rb.getString(rs.getStatus()) : rs.getStatus());
                             filter.addItemListener((ProjectViewerTopComponent) this);
+                            //TODO: Remove when filter is working.
+                            filter.setEnabled(false);
                             filters.add(filter);
                             filterPane.add(filter);
                         }
