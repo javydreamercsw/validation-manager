@@ -23,7 +23,7 @@
         <netbeans.run.params.ide/>
         <netbeans.run.params>${netbeans.run.params.ide} --branding validation_manager_client -J-Xms24m -J-Xmx512m</netbeans.run.params>
     </properties>
-
+    
     <dependencies>
         <dependency>
             <groupId>org.netbeans.cluster</groupId>
@@ -105,7 +105,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
                 <configuration>
-                    <etcconffile>src/main/resources/customized.conf</etcconffile>
+                    <etcConfFile>src/main/resources/customized.conf</etcConfFile>
                 </configuration>
             </plugin>
             <!-- Permits NbModuleSuite to be run in integration-test phase: -->
