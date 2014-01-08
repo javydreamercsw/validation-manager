@@ -12,7 +12,18 @@
     <packaging>nbm</packaging>
 
     <name>User Interface</name>
-
+    
+    <repositories>
+        <repository>
+            <id>Netbeans-Dev</id>
+            <name>Netbeans Dev</name>
+            <url>http://bits.netbeans.org/nexus/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    
     <dependencies>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -107,6 +118,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>JasperReportViewer</artifactId>
             <version>${project.version}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -114,17 +126,18 @@
             <version>${netbeans.version}</version>
             <type>jar</type>
         </dependency>
-        <!--TODO<dependency>
+        <!--<dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-libs-javafx</artifactId>
             <version>${netbeans.version}</version>
-            <version>${netbeans.version}</version>
-        </dependency>-->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>JavaFX-Runtime</artifactId>
-            <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>javafx</artifactId>
+            <version>2.2.4</version>
+            <scope>system</scope>
+            <systemPath>${java.home}/lib/jfxrt.jar</systemPath>
+        </dependency>-->
     </dependencies>
 
     <build>
@@ -144,9 +157,14 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
+                    <!-- this maven plugin does not functions with java 8 yet, passing java 7 is just fine. -->
                     <source>1.7</source>
                     <target>1.7</target>
                     <showDeprecation>true</showDeprecation>
+                    <!-- To add Java FX to the compilation
+                    <compilerArguments>
+                        <bootclasspath>${sun.boot.class.path}${path.separator}${java.home}/lib/jfxrt.jar</bootclasspath>
+                    </compilerArguments>-->
                 </configuration>
             </plugin>
 
