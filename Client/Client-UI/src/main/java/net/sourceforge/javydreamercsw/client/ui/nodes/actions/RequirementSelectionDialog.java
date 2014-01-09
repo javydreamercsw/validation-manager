@@ -5,6 +5,7 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -12,18 +13,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTree;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import org.netbeans.api.annotations.common.SuppressWarnings;
 
 /**
  *
@@ -85,15 +86,15 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                 super.removeRange(fromIndex, toIndex);
             }
         });
-        selection.setCellRenderer(new ListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList list,
-                    Object value, int index, boolean isSelected,
-                    boolean cellHasFocus) {
-
-                return new JLabel(((Requirement) ((DefaultListModel) selection.getModel()).getElementAt(index)).getUniqueId());
-            }
-        });
+        selection.setCellRenderer(new SelectedListCellRenderer());
+//        selection.setCellRenderer(new ListCellRenderer() {
+//            @Override
+//            public Component getListCellRendererComponent(JList list,
+//                    Object value, int index, boolean isSelected,
+//                    boolean cellHasFocus) {
+//                return new JLabel(((Requirement) ((DefaultListModel) selection.getModel()).getElementAt(index)).getUniqueId());
+//            }
+//        });
         selection.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -107,6 +108,19 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
         });
         for (Requirement requirement : initial) {
             ((DefaultListModel) selection.getModel()).addElement(requirement);
+        }
+    }
+
+    public class SelectedListCellRenderer extends DefaultListCellRenderer {
+
+        @Override
+        public Component getListCellRendererComponent(JList list,
+                Object value, int index, boolean isSelected,
+                boolean cellHasFocus) {
+            Component c = super.getListCellRendererComponent(list,
+                    ((Requirement) ((DefaultListModel) selection.getModel()).getElementAt(index)).getUniqueId(),
+                    index, isSelected, cellHasFocus);
+            return c;
         }
     }
 
