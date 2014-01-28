@@ -13,6 +13,7 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,12 +66,28 @@ public final class RequirementServer extends Requirement
     @Override
     public int write2DB() throws Exception {
         if (getRequirementPK() != null && getRequirementPK().getId() > 0) {
-            Requirement req = new RequirementJpaController(
-                    DataBaseManager.getEntityManagerFactory())
-                    .findRequirement(getRequirementPK());
-            update(req, this);
-            new RequirementJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(req);
+            if (DataBaseManager.isVersioningEnabled()) {
+                //One exists already, need to make a copy of the 
+                //requirement and increase the version
+                Requirement req = new Requirement(getUniqueId(), getDescription(),
+                        getNotes(),
+                        getRequirementPK().getMajorVersion(),
+                        getRequirementPK().getMidVersion(),
+                        //Increase the minor version
+                        getRequirementPK().getMinorVersion() + 1);
+                //Store in db
+                new RequirementJpaController(
+                    DataBaseManager.getEntityManagerFactory()).create(req);
+                //Update this to the new version
+                update(this, req);
+            } else {
+                Requirement req = new RequirementJpaController(
+                        DataBaseManager.getEntityManagerFactory())
+                        .findRequirement(getRequirementPK());
+                update(req, this);
+                new RequirementJpaController(
+                        DataBaseManager.getEntityManagerFactory()).edit(req);
+            }
         } else {
             Requirement req = new Requirement(getUniqueId(), getDescription());
             update(req, this);
@@ -121,7 +138,7 @@ public final class RequirementServer extends Requirement
     public int getTestCoverage() {
         int coverage = 0;
         LOG.log(Level.FINE, "Getting test coverage for: {0}...",
-                    getUniqueId());
+                getUniqueId());
         update();
         List<Requirement> children = getChildrenRequirement(getEntity());
         if (children.isEmpty()) {
@@ -129,7 +146,7 @@ public final class RequirementServer extends Requirement
             //Has test cases and no related requirements
             if (getStepList().size() > 0) {
                 LOG.log(Level.FINE, "Found: {0} related steps.",
-                    getStepList().size());
+                        getStepList().size());
                 coverage = 100;
             }
             //Has nothing, leave at 0.
@@ -192,5 +209,20 @@ public final class RequirementServer extends Requirement
         write2DB();
         childS.write2DB();
         update();
+    }
+    
+    public static List<Requirement> getRequirementVersions(Requirement req) {
+        List<Requirement> versions = new ArrayList<Requirement>();
+        HashMap parameters = new HashMap<String, Object>();
+        parameters.put("uniqueId", req.getUniqueId());
+        for (Object obj : DataBaseManager.createdQuery(
+                "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId", parameters)) {
+            versions.add((Requirement) obj);
+        }
+        return versions;
+    }
+
+    public List<Requirement> getRequirementVersions() {
+        return RequirementServer.getRequirementVersions(getEntity());
     }
 }
