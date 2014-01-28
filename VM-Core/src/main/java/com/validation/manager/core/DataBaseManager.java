@@ -70,9 +70,24 @@ public class DataBaseManager {
     private static boolean demo;
     private static Long demoResetPeriod;
     private static DataBaseManager instance;
+    private static boolean versioning_enabled = true;
 
     static {
         state = DBState.START_UP;
+    }
+
+    /**
+     * @return the versioning_enabled
+     */
+    public static boolean isVersioningEnabled() {
+        return versioning_enabled;
+    }
+
+    /**
+     * @param aVersioning_enabled the versioning_enabled to set
+     */
+    public static void setVersioningEnabled(boolean aVersioning_enabled) {
+        versioning_enabled = aVersioning_enabled;
     }
 
     private DataBaseManager() {
@@ -512,7 +527,7 @@ public class DataBaseManager {
                     ((JdbcDataSource) ds).setPassword("");
                     ((JdbcDataSource) ds).setUser("vm_user");
                     ((JdbcDataSource) ds).setURL(
-                            "jdbc:h2:file:data/test/validation-manager-test;AUTO_SERVER=TRUE");
+                            "jdbc:h2:file:target/data/test/validation-manager-test;AUTO_SERVER=TRUE");
                     //Load the H2 driver
                     Class.forName("org.h2.Driver");
                     conn = ds.getConnection();

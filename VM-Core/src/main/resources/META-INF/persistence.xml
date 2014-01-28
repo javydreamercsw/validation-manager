@@ -116,7 +116,7 @@
     <class>com.validation.manager.core.db.VmUserT</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:data/test/validation-manager-test"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:target/data/test/validation-manager-test"/>
       <property name="javax.persistence.jdbc.password" value=""/>
       <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
       <property name="javax.persistence.jdbc.user" value="vm_user"/>

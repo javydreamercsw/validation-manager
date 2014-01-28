@@ -47,7 +47,9 @@ public class RequirementHasException implements Serializable {
     private VmException vmException;
     @JoinColumns({
         @JoinColumn(name = "requirement_id", referencedColumnName = "id", insertable = false, updatable = false),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version", insertable = false, updatable = false)})
+        @JoinColumn(name = "requirement_major_version", referencedColumnName = "major_version", insertable = false, updatable = false),
+        @JoinColumn(name = "requirement_mid_version", referencedColumnName = "mid_version", insertable = false, updatable = false),
+        @JoinColumn(name = "requirement_minor_version", referencedColumnName = "minor_version", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private Requirement requirement;
     @JoinColumns({

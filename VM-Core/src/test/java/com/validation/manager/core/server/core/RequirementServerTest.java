@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.Test;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -235,4 +236,33 @@ public class RequirementServerTest extends AbstractVMTestCase {
         }
     }
 
+    /**
+     * Test of getChildrenRequirement method, of class RequirementServer.
+     */
+    @Test
+    public void testRequirementVersioning() {
+        try {
+            System.out.println("getTestCoverage");
+            prepare();
+            String first="Sample requirement", second="Updated";
+            Requirement req = TestHelper.createRequirement("SRS-SW-0001",
+                    first, rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+            RequirementServer rs = new RequirementServer(req);
+            assertEquals(0, rs.getRequirementPK().getMajorVersion());
+            assertEquals(0, rs.getRequirementPK().getMidVersion());
+            assertEquals(0, rs.getRequirementPK().getMinorVersion());
+            assertEquals(1, rs.getRequirementVersions().size());
+            assertEquals(first, rs.getDescription());
+            rs.setDescription(second);
+            rs.write2DB();
+            assertEquals(0, rs.getRequirementPK().getMajorVersion());
+            assertEquals(0, rs.getRequirementPK().getMidVersion());
+            assertEquals(1, rs.getRequirementPK().getMinorVersion());
+            assertEquals(second, rs.getDescription());
+            assertEquals(2, rs.getRequirementVersions().size());
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            fail();
+        }
+    }
 }

@@ -36,8 +36,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "Requirement.findAll", query = "SELECT r FROM Requirement r"),
     @NamedQuery(name = "Requirement.findByUniqueId", query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId"),
-    @NamedQuery(name = "Requirement.findById", query = "SELECT r FROM Requirement r WHERE r.requirementPK.id = :id"),
-    @NamedQuery(name = "Requirement.findByVersion", query = "SELECT r FROM Requirement r WHERE r.requirementPK.version = :version")})
+    @NamedQuery(name = "Requirement.findById", query = "SELECT r FROM Requirement r WHERE r.requirementPK.id = :id")})
 public class Requirement implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -56,16 +55,22 @@ public class Requirement implements Serializable {
     private String uniqueId;
     @JoinTable(name = "requirement_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "requirement_major_version", referencedColumnName = "major_version", insertable = false, updatable = false),
+        @JoinColumn(name = "requirement_mid_version", referencedColumnName = "mid_version", insertable = false, updatable = false),
+        @JoinColumn(name = "requirement_minor_version", referencedColumnName = "minor_version", insertable = false, updatable = false)}, inverseJoinColumns = {
         @JoinColumn(name = "parent_requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "parent_requirement_version", referencedColumnName = "version")})
+        @JoinColumn(name = "parent_major_version", referencedColumnName = "major_version", insertable = false, updatable = false),
+        @JoinColumn(name = "parent_mid_version", referencedColumnName = "mid_version", insertable = false, updatable = false),
+        @JoinColumn(name = "parent_minor_version", referencedColumnName = "minor_version", insertable = false, updatable = false)})
     @ManyToMany
     private List<Requirement> requirementList;
     @ManyToMany(mappedBy = "requirementList")
     private List<Requirement> requirementList1;
     @JoinTable(name = "step_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "requirement_major_version", referencedColumnName = "major_version", insertable = false, updatable = false),
+        @JoinColumn(name = "requirement_mid_version", referencedColumnName = "mid_version", insertable = false, updatable = false),
+        @JoinColumn(name = "requirement_minor_version", referencedColumnName = "minor_version", insertable = false, updatable = false)}, inverseJoinColumns = {
         @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id"),
         @JoinColumn(name = "step_id", referencedColumnName = "id"),
         @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id")})
@@ -73,7 +78,9 @@ public class Requirement implements Serializable {
     private List<Step> stepList;
     @JoinTable(name = "risk_control_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_version", referencedColumnName = "version")}, inverseJoinColumns = {
+        @JoinColumn(name = "requirement_major_version", referencedColumnName = "major_version", insertable = false, updatable = false),
+        @JoinColumn(name = "requirement_mid_version", referencedColumnName = "mid_version", insertable = false, updatable = false),
+        @JoinColumn(name = "requirement_minor_version", referencedColumnName = "minor_version", insertable = false, updatable = false)}, inverseJoinColumns = {
         @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
         @JoinColumn(name = "risk_control_risk_control_type_id", referencedColumnName = "risk_control_type_id")})
     @ManyToMany
@@ -108,8 +115,18 @@ public class Requirement implements Serializable {
         this.notes = notes;
     }
 
-    public Requirement(int version) {
-        this.requirementPK = new RequirementPK(version);
+    public Requirement(String uniqueId, String description, String notes,
+            int major_version, int mid_version, int minor_version) {
+        this.uniqueId = uniqueId;
+        this.description = description;
+        this.notes = notes;
+        this.requirementPK
+                = new RequirementPK(major_version, mid_version, minor_version);
+    }
+
+    public Requirement(int major_version, int mid_version, int minor_version) {
+        this.requirementPK
+                = new RequirementPK(major_version, mid_version, minor_version);
     }
 
     public RequirementPK getRequirementPK() {

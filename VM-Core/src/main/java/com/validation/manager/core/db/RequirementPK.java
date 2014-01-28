@@ -34,14 +34,24 @@ public class RequirementPK implements Serializable {
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "version")
-    private int version;
+    @Column(name = "major_version")
+    private int major_version;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "mid_version")
+    private int mid_version;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "minor_version")
+    private int minor_version;
 
     public RequirementPK() {
     }
 
-    public RequirementPK(int version) {
-        this.version = version;
+    public RequirementPK(int major_version, int mid_version, int minor_version) {
+        this.major_version = major_version;
+        this.mid_version = mid_version;
+        this.minor_version = minor_version;
     }
 
     public int getId() {
@@ -52,19 +62,35 @@ public class RequirementPK implements Serializable {
         this.id = id;
     }
 
-    public int getVersion() {
-        return version;
+    public int getMinorVersion() {
+        return minor_version;
     }
 
-    public void setVersion(int version) {
-        this.version = version;
+    public void setMinorVersion(int version) {
+        this.minor_version = version;
+    }
+    
+    public int getMajorVersion() {
+        return major_version;
+    }
+
+    public void setMajorVersion(int version) {
+        this.major_version = version;
+    }
+    
+    public int getMidVersion() {
+        return mid_version;
+    }
+
+    public void setMidVersion(int version) {
+        this.mid_version = version;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
         hash += (int) id;
-        hash += (int) version;
+        hash += (int) minor_version;
         return hash;
     }
 
@@ -78,12 +104,12 @@ public class RequirementPK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        return this.version == other.version;
+        return this.minor_version == other.minor_version;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementPK[ id=" + id + ", version=" + version + " ]";
+        return "com.validation.manager.core.db.RequirementPK[ id=" + id + ", version=" + minor_version + " ]";
     }
 
 }

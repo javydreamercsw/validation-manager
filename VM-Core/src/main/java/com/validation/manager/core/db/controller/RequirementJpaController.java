@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package com.validation.manager.core.db.controller;
 
 import java.io.Serializable;
@@ -454,5 +455,5 @@ public class RequirementJpaController implements Serializable {
             em.close();
         }
     }
-
+    
 }
