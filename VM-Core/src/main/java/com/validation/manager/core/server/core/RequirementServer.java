@@ -80,6 +80,13 @@ public final class RequirementServer extends Requirement
                     DataBaseManager.getEntityManagerFactory()).create(req);
                 //Update this to the new version
                 update(this, req);
+                /**TODO: This will have the requirement as uncovered. GUI should
+                 * allow user to either:
+                 * 1) Blindly copy the test coverage.
+                 * 2) Review the current test cases covering previous version 
+                 * and deciding if those still cover the requirement changes in a one by one basis.
+                 * 3) Don't do anything, leaving it uncovered.
+                 */
             } else {
                 Requirement req = new RequirementJpaController(
                         DataBaseManager.getEntityManagerFactory())
