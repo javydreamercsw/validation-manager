@@ -244,7 +244,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("getTestCoverage");
             prepare();
-            String first="Sample requirement", second="Updated";
+            String first = "Sample requirement", second = "Updated";
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
                     first, rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
