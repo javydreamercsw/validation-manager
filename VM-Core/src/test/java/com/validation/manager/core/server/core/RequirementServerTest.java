@@ -254,12 +254,18 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(1, rs.getRequirementVersions().size());
             assertEquals(first, rs.getDescription());
             rs.setDescription(second);
+            rs.updateMajorVersion(rs.getRequirementPK().getMinorVersion() + 1);
+            rs.updateMidVersion(rs.getRequirementPK().getMinorVersion() + 2);
+            rs.updateMinorVersion(rs.getRequirementPK().getMinorVersion() + 3);
             rs.write2DB();
-            assertEquals(0, rs.getRequirementPK().getMajorVersion());
-            assertEquals(0, rs.getRequirementPK().getMidVersion());
-            assertEquals(1, rs.getRequirementPK().getMinorVersion());
+            assertEquals(1, rs.getRequirementPK().getMajorVersion());
+            assertEquals(2, rs.getRequirementPK().getMidVersion());
+            assertEquals(3, rs.getRequirementPK().getMinorVersion());
             assertEquals(second, rs.getDescription());
             assertEquals(2, rs.getRequirementVersions().size());
+            for (Requirement r : rs.getRequirementVersions()) {
+                System.out.println(r);
+            }
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             fail();

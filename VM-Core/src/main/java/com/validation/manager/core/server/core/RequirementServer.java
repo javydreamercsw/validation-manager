@@ -67,25 +67,23 @@ public final class RequirementServer extends Requirement
     public int write2DB() throws Exception {
         if (getRequirementPK() != null && getRequirementPK().getId() > 0) {
             if (DataBaseManager.isVersioningEnabled()) {
-                //One exists already, need to make a copy of the 
-                //requirement and increase the version
+                //One exists already, need to make a copy of the requirement
                 Requirement req = new Requirement(getUniqueId(), getDescription(),
                         getNotes(),
                         getRequirementPK().getMajorVersion(),
                         getRequirementPK().getMidVersion(),
-                        //Increase the minor version
-                        getRequirementPK().getMinorVersion() + 1);
+                        getRequirementPK().getMinorVersion());
                 //Store in db
                 new RequirementJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(req);
+                        DataBaseManager.getEntityManagerFactory()).create(req);
                 //Update this to the new version
                 update(this, req);
-                /**TODO: This will have the requirement as uncovered. GUI should
-                 * allow user to either:
-                 * 1) Blindly copy the test coverage.
-                 * 2) Review the current test cases covering previous version 
-                 * and deciding if those still cover the requirement changes in a one by one basis.
-                 * 3) Don't do anything, leaving it uncovered.
+                /**
+                 * TODO: This will have the requirement as uncovered. GUI should
+                 * allow user to either: 1) Blindly copy the test coverage. 2)
+                 * Review the current test cases covering previous version and
+                 * deciding if those still cover the requirement changes in a
+                 * one by one basis. 3) Don't do anything, leaving it uncovered.
                  */
             } else {
                 Requirement req = new RequirementJpaController(
@@ -217,7 +215,7 @@ public final class RequirementServer extends Requirement
         childS.write2DB();
         update();
     }
-    
+
     public static List<Requirement> getRequirementVersions(Requirement req) {
         List<Requirement> versions = new ArrayList<Requirement>();
         HashMap parameters = new HashMap<String, Object>();
@@ -231,5 +229,23 @@ public final class RequirementServer extends Requirement
 
     public List<Requirement> getRequirementVersions() {
         return RequirementServer.getRequirementVersions(getEntity());
+    }
+
+    public void updateMajorVersion(int version) {
+        if (getRequirementPK() != null) {
+            getRequirementPK().setMajorVersion(version);
+        }
+    }
+
+    public void updateMidVersion(int version) {
+        if (getRequirementPK() != null) {
+            getRequirementPK().setMidVersion(version);
+        }
+    }
+
+    public void updateMinorVersion(int version) {
+        if (getRequirementPK() != null) {
+            getRequirementPK().setMinorVersion(version);
+        }
     }
 }

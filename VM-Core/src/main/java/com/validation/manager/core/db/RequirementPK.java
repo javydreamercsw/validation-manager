@@ -69,7 +69,7 @@ public class RequirementPK implements Serializable {
     public void setMinorVersion(int version) {
         this.minor_version = version;
     }
-    
+
     public int getMajorVersion() {
         return major_version;
     }
@@ -77,7 +77,7 @@ public class RequirementPK implements Serializable {
     public void setMajorVersion(int version) {
         this.major_version = version;
     }
-    
+
     public int getMidVersion() {
         return mid_version;
     }
@@ -109,7 +109,9 @@ public class RequirementPK implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementPK[ id=" + id + ", version=" + minor_version + " ]";
+        return "com.validation.manager.core.db.RequirementPK[ id=" + id
+                + ", version=" + major_version + "." + mid_version
+                + "." + minor_version + " ]";
     }
 
 }
