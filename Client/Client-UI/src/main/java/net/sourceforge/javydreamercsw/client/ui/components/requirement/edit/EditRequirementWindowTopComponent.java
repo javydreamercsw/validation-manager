@@ -312,6 +312,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                     req = new RequirementServer(requirement);
                 }
                 req.setUniqueId(uniqueID.getText().trim());
+                req.setMinorVersion(req.getMinorVersion() + 1);
             } else {
                 RequirementSpecNode rsn
                         = Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class);
