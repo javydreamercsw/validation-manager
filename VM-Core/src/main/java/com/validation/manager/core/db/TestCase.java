@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -36,13 +31,20 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "TestCase.findAll", query = "SELECT t FROM TestCase t"),
-    @NamedQuery(name = "TestCase.findByActive", query = "SELECT t FROM TestCase t WHERE t.active = :active"),
-    @NamedQuery(name = "TestCase.findByCreationDate", query = "SELECT t FROM TestCase t WHERE t.creationDate = :creationDate"),
-    @NamedQuery(name = "TestCase.findByIsOpen", query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen"),
-    @NamedQuery(name = "TestCase.findByName", query = "SELECT t FROM TestCase t WHERE t.name = :name"),
-    @NamedQuery(name = "TestCase.findByVersion", query = "SELECT t FROM TestCase t WHERE t.version = :version"),
-    @NamedQuery(name = "TestCase.findById", query = "SELECT t FROM TestCase t WHERE t.testCasePK.id = :id"),
-    @NamedQuery(name = "TestCase.findByTestId", query = "SELECT t FROM TestCase t WHERE t.testCasePK.testId = :testId")})
+    @NamedQuery(name = "TestCase.findByActive",
+            query = "SELECT t FROM TestCase t WHERE t.active = :active"),
+    @NamedQuery(name = "TestCase.findByCreationDate",
+            query = "SELECT t FROM TestCase t WHERE t.creationDate = :creationDate"),
+    @NamedQuery(name = "TestCase.findByIsOpen",
+            query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen"),
+    @NamedQuery(name = "TestCase.findByName",
+            query = "SELECT t FROM TestCase t WHERE t.name = :name"),
+    @NamedQuery(name = "TestCase.findByVersion",
+            query = "SELECT t FROM TestCase t WHERE t.version = :version"),
+    @NamedQuery(name = "TestCase.findById",
+            query = "SELECT t FROM TestCase t WHERE t.testCasePK.id = :id"),
+    @NamedQuery(name = "TestCase.findByTestId",
+            query = "SELECT t FROM TestCase t WHERE t.testCasePK.testId = :testId")})
 public class TestCase implements Serializable {
 
     private static final long serialVersionUID = 1L;

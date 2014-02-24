@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -34,24 +29,15 @@ public class RequirementPK implements Serializable {
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "major_version")
-    private int major_version;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "mid_version")
-    private int mid_version;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "minor_version")
-    private int minor_version;
+    @Column(name = "versionable_version_id")
+    private int versionableVersionId;
 
     public RequirementPK() {
     }
 
-    public RequirementPK(int major_version, int mid_version, int minor_version) {
-        this.major_version = major_version;
-        this.mid_version = mid_version;
-        this.minor_version = minor_version;
+    public RequirementPK(int id, int versionableVersionId) {
+        this.id = id;
+        this.versionableVersionId = versionableVersionId;
     }
 
     public int getId() {
@@ -62,35 +48,19 @@ public class RequirementPK implements Serializable {
         this.id = id;
     }
 
-    public int getMinorVersion() {
-        return minor_version;
+    public int getVersionableVersionId() {
+        return versionableVersionId;
     }
 
-    public void setMinorVersion(int version) {
-        this.minor_version = version;
-    }
-
-    public int getMajorVersion() {
-        return major_version;
-    }
-
-    public void setMajorVersion(int version) {
-        this.major_version = version;
-    }
-
-    public int getMidVersion() {
-        return mid_version;
-    }
-
-    public void setMidVersion(int version) {
-        this.mid_version = version;
+    public void setVersionableVersionId(int versionableVersionId) {
+        this.versionableVersionId = versionableVersionId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
         hash += (int) id;
-        hash += (int) minor_version;
+        hash += (int) versionableVersionId;
         return hash;
     }
 
@@ -104,14 +74,15 @@ public class RequirementPK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        return this.minor_version == other.minor_version;
+        if (this.versionableVersionId != other.versionableVersionId) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementPK[ id=" + id
-                + ", version=" + major_version + "." + mid_version
-                + "." + minor_version + " ]";
+        return "com.validation.manager.core.db.RequirementPK[ id=" + id + ", versionableVersionId=" + versionableVersionId + " ]";
     }
 
 }

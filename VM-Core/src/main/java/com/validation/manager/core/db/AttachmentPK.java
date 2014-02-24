@@ -14,30 +14,29 @@ import javax.validation.constraints.NotNull;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
-public class VmExceptionPK implements Serializable {
+public class AttachmentPK implements Serializable {
 
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "VM_ExceptionGEN")
-    @TableGenerator(name = "VM_ExceptionGEN",
-            table = "vm_id",
+    @NotNull
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "Attachment_IDGEN")
+    @TableGenerator(name = "Attachment_IDGEN", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
-            pkColumnValue = "vm_exception",
+            pkColumnValue = "attachment",
             initialValue = 1000,
             allocationSize = 1)
-    @NotNull
     @Column(name = "id")
     private int id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "reporter_id")
-    private int reporterId;
+    @Column(name = "attachment_type_id")
+    private int attachmentTypeId;
 
-    public VmExceptionPK() {
+    public AttachmentPK() {
     }
 
-    public VmExceptionPK(int reporterId) {
-        this.reporterId = reporterId;
+    public AttachmentPK(int attachmentTypeId) {
+        this.attachmentTypeId = attachmentTypeId;
     }
 
     public int getId() {
@@ -48,33 +47,33 @@ public class VmExceptionPK implements Serializable {
         this.id = id;
     }
 
-    public int getReporterId() {
-        return reporterId;
+    public int getAttachmentTypeId() {
+        return attachmentTypeId;
     }
 
-    public void setReporterId(int reporterId) {
-        this.reporterId = reporterId;
+    public void setAttachmentTypeId(int attachmentTypeId) {
+        this.attachmentTypeId = attachmentTypeId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
         hash += (int) id;
-        hash += (int) reporterId;
+        hash += (int) attachmentTypeId;
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof VmExceptionPK)) {
+        if (!(object instanceof AttachmentPK)) {
             return false;
         }
-        VmExceptionPK other = (VmExceptionPK) object;
+        AttachmentPK other = (AttachmentPK) object;
         if (this.id != other.id) {
             return false;
         }
-        if (this.reporterId != other.reporterId) {
+        if (this.attachmentTypeId != other.attachmentTypeId) {
             return false;
         }
         return true;
@@ -82,8 +81,8 @@ public class VmExceptionPK implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.VmExceptionPK[ id=" + id
-                + ", reporterId=" + reporterId + " ]";
+        return "com.validation.manager.core.db.AttachmentPK[ id=" + id
+                + ", attachmentTypeId=" + attachmentTypeId + " ]";
     }
 
 }

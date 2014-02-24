@@ -1,14 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -38,9 +32,12 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Fmea.findAll", query = "SELECT f FROM Fmea f"),
-    @NamedQuery(name = "Fmea.findById", query = "SELECT f FROM Fmea f WHERE f.id = :id"),
-    @NamedQuery(name = "Fmea.findByDescription", query = "SELECT f FROM Fmea f WHERE f.description = :description"),
-    @NamedQuery(name = "Fmea.findByName", query = "SELECT f FROM Fmea f WHERE f.name = :name")})
+    @NamedQuery(name = "Fmea.findById",
+            query = "SELECT f FROM Fmea f WHERE f.id = :id"),
+    @NamedQuery(name = "Fmea.findByName",
+            query = "SELECT f FROM Fmea f WHERE f.name = :name"),
+    @NamedQuery(name = "Fmea.findByDescription",
+            query = "SELECT f FROM Fmea f WHERE f.description = :description")})
 public class Fmea implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -56,19 +53,19 @@ public class Fmea implements Serializable {
             initialValue = 1000)
     @Column(name = "id")
     private Integer id;
-    @Size(max = 255)
-    @Column(name = "description")
-    private String description;
-    @Size(max = 255)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
     @Column(name = "name")
     private String name;
+    @Size(max = 45)
+    @Column(name = "description")
+    private String description;
     @JoinTable(name = "fmea_has_risk_category", joinColumns = {
         @JoinColumn(name = "FMEA_id", referencedColumnName = "id")}, inverseJoinColumns = {
         @JoinColumn(name = "risk_category_id", referencedColumnName = "id")})
     @ManyToMany
     private List<RiskCategory> riskCategoryList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fmea")
-    private List<RiskItem> riskItemList;
     @OneToMany(mappedBy = "parent")
     private List<Fmea> fmeaList;
     @JoinColumn(name = "parent", referencedColumnName = "id")
@@ -90,20 +87,20 @@ public class Fmea implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @XmlTransient
@@ -114,16 +111,6 @@ public class Fmea implements Serializable {
 
     public void setRiskCategoryList(List<RiskCategory> riskCategoryList) {
         this.riskCategoryList = riskCategoryList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskItem> getRiskItemList() {
-        return riskItemList;
-    }
-
-    public void setRiskItemList(List<RiskItem> riskItemList) {
-        this.riskItemList = riskItemList;
     }
 
     @XmlTransient
@@ -158,7 +145,10 @@ public class Fmea implements Serializable {
             return false;
         }
         Fmea other = (Fmea) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
     }
 
     @Override
