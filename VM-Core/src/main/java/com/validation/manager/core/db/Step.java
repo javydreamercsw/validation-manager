@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -32,10 +27,14 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Step.findAll", query = "SELECT s FROM Step s"),
-    @NamedQuery(name = "Step.findByStepSequence", query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence"),
-    @NamedQuery(name = "Step.findByTestCaseTestId", query = "SELECT s FROM Step s WHERE s.stepPK.testCaseTestId = :testCaseTestId"),
-    @NamedQuery(name = "Step.findById", query = "SELECT s FROM Step s WHERE s.stepPK.id = :id"),
-    @NamedQuery(name = "Step.findByTestCaseId", query = "SELECT s FROM Step s WHERE s.stepPK.testCaseId = :testCaseId")})
+    @NamedQuery(name = "Step.findByStepSequence",
+            query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence"),
+    @NamedQuery(name = "Step.findByTestCaseTestId",
+            query = "SELECT s FROM Step s WHERE s.stepPK.testCaseTestId = :testCaseTestId"),
+    @NamedQuery(name = "Step.findById",
+            query = "SELECT s FROM Step s WHERE s.stepPK.id = :id"),
+    @NamedQuery(name = "Step.findByTestCaseId",
+            query = "SELECT s FROM Step s WHERE s.stepPK.testCaseId = :testCaseId")})
 public class Step implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -58,8 +57,11 @@ public class Step implements Serializable {
     @ManyToMany(mappedBy = "stepList")
     private List<Requirement> requirementList;
     @JoinColumns({
-        @JoinColumn(name = "test_case_id", referencedColumnName = "id", insertable = false, updatable = false),
-        @JoinColumn(name = "test_case_test_id", referencedColumnName = "test_id", insertable = false, updatable = false)})
+        @JoinColumn(name = "test_case_id", referencedColumnName = "id",
+                insertable = false, updatable = false),
+        @JoinColumn(name = "test_case_test_id",
+                referencedColumnName = "test_id", insertable = false,
+                updatable = false)})
     @ManyToOne(optional = false)
     private TestCase testCase;
 

@@ -1,22 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -25,15 +19,13 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@EntityListeners(com.validation.manager.core.VMIdGenerator.class)
-@Table(name = "vm_id", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"table_name"})})
+@Table(name = "vm_id")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "VmId.findAll", query = "SELECT v FROM VmId v"),
     @NamedQuery(name = "VmId.findById", query = "SELECT v FROM VmId v WHERE v.id = :id"),
-    @NamedQuery(name = "VmId.findByLastId", query = "SELECT v FROM VmId v WHERE v.lastId = :lastId"),
-    @NamedQuery(name = "VmId.findByTableName", query = "SELECT v FROM VmId v WHERE v.tableName = :tableName")})
+    @NamedQuery(name = "VmId.findByTableName", query = "SELECT v FROM VmId v WHERE v.tableName = :tableName"),
+    @NamedQuery(name = "VmId.findByLastId", query = "SELECT v FROM VmId v WHERE v.lastId = :lastId")})
 public class VmId implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -42,11 +34,15 @@ public class VmId implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "last_id")
-    private Integer lastId;
-    @Size(max = 255)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 100)
     @Column(name = "table_name")
     private String tableName;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "last_id")
+    private int lastId;
 
     public VmId() {
     }
@@ -64,20 +60,20 @@ public class VmId implements Serializable {
         this.id = id;
     }
 
-    public Integer getLastId() {
-        return lastId;
-    }
-
-    public void setLastId(Integer lastId) {
-        this.lastId = lastId;
-    }
-
     public String getTableName() {
         return tableName;
     }
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public int getLastId() {
+        return lastId;
+    }
+
+    public void setLastId(int lastId) {
+        this.lastId = lastId;
     }
 
     @Override
@@ -94,7 +90,10 @@ public class VmId implements Serializable {
             return false;
         }
         VmId other = (VmId) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
     }
 
     @Override

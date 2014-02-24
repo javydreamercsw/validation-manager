@@ -1,12 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -18,6 +15,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -31,38 +29,49 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "requirement_spec_node")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RequirementSpecNode.findAll", query = "SELECT r FROM RequirementSpecNode r"),
-    @NamedQuery(name = "RequirementSpecNode.findByName", query = "SELECT r FROM RequirementSpecNode r WHERE r.name = :name"),
-    @NamedQuery(name = "RequirementSpecNode.findByParentRequirementSpecNodeRequirementSpecId", query = "SELECT r FROM RequirementSpecNode r WHERE r.parentRequirementSpecNodeRequirementSpecId = :parentRequirementSpecNodeRequirementSpecId"),
-    @NamedQuery(name = "RequirementSpecNode.findById", query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.id = :id"),
-    @NamedQuery(name = "RequirementSpecNode.findByRequirementSpecProjectId", query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.requirementSpecProjectId = :requirementSpecProjectId"),
-    @NamedQuery(name = "RequirementSpecNode.findByRequirementSpecSpecLevelId", query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.requirementSpecSpecLevelId = :requirementSpecSpecLevelId"),
-    @NamedQuery(name = "RequirementSpecNode.findByRequirementSpecId", query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.requirementSpecId = :requirementSpecId")})
+    @NamedQuery(name = "RequirementSpecNode.findAll",
+            query = "SELECT r FROM RequirementSpecNode r"),
+    @NamedQuery(name = "RequirementSpecNode.findById",
+            query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.id = :id"),
+    @NamedQuery(name = "RequirementSpecNode.findByRequirementSpecId",
+            query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.requirementSpecId = :requirementSpecId"),
+    @NamedQuery(name = "RequirementSpecNode.findByRequirementSpecProjectId",
+            query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.requirementSpecProjectId = :requirementSpecProjectId"),
+    @NamedQuery(name = "RequirementSpecNode.findByRequirementSpecSpecLevelId",
+            query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.requirementSpecSpecLevelId = :requirementSpecSpecLevelId"),
+    @NamedQuery(name = "RequirementSpecNode.findByName",
+            query = "SELECT r FROM RequirementSpecNode r WHERE r.name = :name"),
+    @NamedQuery(name = "RequirementSpecNode.findByParentRequirementSpecNodeRequirementSpecId",
+            query = "SELECT r FROM RequirementSpecNode r WHERE r.parentRequirementSpecNodeRequirementSpecId = :parentRequirementSpecNodeRequirementSpecId")})
 public class RequirementSpecNode implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementSpecNode")
+    private List<Requirement> requirementList;
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RequirementSpecNodePK requirementSpecNodePK;
-    @Lob
-    @Size(max = 2147483647)
-    @Column(name = "description")
-    private String description;
-    @Size(max = 255)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
-    @Column(name = "parent_requirement_spec_node_requirement_spec_id")
-    private Integer parentRequirementSpecNodeRequirementSpecId;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 65535)
+    @Column(name = "description")
+    private String description;
+    @Lob
+    @Size(max = 65535)
     @Column(name = "scope")
     private String scope;
+    @Column(name = "parent_requirement_spec_node_requirement_spec_id")
+    private Integer parentRequirementSpecNodeRequirementSpecId;
     @OneToMany(mappedBy = "requirementSpecNode")
     private List<RequirementSpecNode> requirementSpecNodeList;
     @JoinColumns({
         @JoinColumn(name = "requirement_spec_node_id", referencedColumnName = "id"),
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", referencedColumnName = "requirement_spec_id"),
         @JoinColumn(name = "requirement_spec_node_requirement_spec_project_id", referencedColumnName = "requirement_spec_project_id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id", referencedColumnName = "requirement_spec_spec_level_id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", referencedColumnName = "requirement_spec_id")})
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id", referencedColumnName = "requirement_spec_spec_level_id")})
     @ManyToOne
     private RequirementSpecNode requirementSpecNode;
     @JoinColumns({
@@ -71,8 +80,6 @@ public class RequirementSpecNode implements Serializable {
         @JoinColumn(name = "requirement_spec_spec_level_id", referencedColumnName = "spec_level_id", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private RequirementSpec requirementSpec;
-    @OneToMany(mappedBy = "requirementSpecNode")
-    private List<Requirement> requirementList;
 
     public RequirementSpecNode() {
     }
@@ -84,11 +91,6 @@ public class RequirementSpecNode implements Serializable {
     public RequirementSpecNode(RequirementSpecNodePK requirementSpecNodePK, String name) {
         this.requirementSpecNodePK = requirementSpecNodePK;
         this.name = name;
-    }
-
-    public RequirementSpecNode(RequirementSpecPK pk) {
-        this.requirementSpecNodePK = new RequirementSpecNodePK(pk.getId(),
-                pk.getProjectId(), pk.getSpecLevelId());
     }
 
     public RequirementSpecNode(int requirementSpecId,
@@ -106,14 +108,6 @@ public class RequirementSpecNode implements Serializable {
         this.requirementSpecNodePK = requirementSpecNodePK;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getName() {
         return name;
     }
@@ -122,12 +116,12 @@ public class RequirementSpecNode implements Serializable {
         this.name = name;
     }
 
-    public Integer getParentRequirementSpecNodeRequirementSpecId() {
-        return parentRequirementSpecNodeRequirementSpecId;
+    public String getDescription() {
+        return description;
     }
 
-    public void setParentRequirementSpecNodeRequirementSpecId(Integer parentRequirementSpecNodeRequirementSpecId) {
-        this.parentRequirementSpecNodeRequirementSpecId = parentRequirementSpecNodeRequirementSpecId;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getScope() {
@@ -136,6 +130,14 @@ public class RequirementSpecNode implements Serializable {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public Integer getParentRequirementSpecNodeRequirementSpecId() {
+        return parentRequirementSpecNodeRequirementSpecId;
+    }
+
+    public void setParentRequirementSpecNodeRequirementSpecId(Integer parentRequirementSpecNodeRequirementSpecId) {
+        this.parentRequirementSpecNodeRequirementSpecId = parentRequirementSpecNodeRequirementSpecId;
     }
 
     @XmlTransient
@@ -164,16 +166,6 @@ public class RequirementSpecNode implements Serializable {
         this.requirementSpec = requirementSpec;
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<Requirement> getRequirementList() {
-        return requirementList;
-    }
-
-    public void setRequirementList(List<Requirement> requirementList) {
-        this.requirementList = requirementList;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -188,12 +180,25 @@ public class RequirementSpecNode implements Serializable {
             return false;
         }
         RequirementSpecNode other = (RequirementSpecNode) object;
-        return (this.requirementSpecNodePK != null || other.requirementSpecNodePK == null) && (this.requirementSpecNodePK == null || this.requirementSpecNodePK.equals(other.requirementSpecNodePK));
+        if ((this.requirementSpecNodePK == null && other.requirementSpecNodePK != null) || (this.requirementSpecNodePK != null && !this.requirementSpecNodePK.equals(other.requirementSpecNodePK))) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RequirementSpecNode[ requirementSpecNodePK=" + requirementSpecNodePK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Requirement> getRequirementList() {
+        return requirementList;
+    }
+
+    public void setRequirementList(List<Requirement> requirementList) {
+        this.requirementList = requirementList;
     }
 
 }

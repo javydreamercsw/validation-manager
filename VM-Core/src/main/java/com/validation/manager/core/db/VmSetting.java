@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -29,11 +24,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "vm_setting")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "VmSetting.findAll", query = "SELECT v FROM VmSetting v"),
-    @NamedQuery(name = "VmSetting.findById", query = "SELECT v FROM VmSetting v WHERE v.id = :id"),
-    @NamedQuery(name = "VmSetting.findByBoolVal", query = "SELECT v FROM VmSetting v WHERE v.boolVal = :boolVal"),
-    @NamedQuery(name = "VmSetting.findByIntVal", query = "SELECT v FROM VmSetting v WHERE v.intVal = :intVal"),
-    @NamedQuery(name = "VmSetting.findBySetting", query = "SELECT v FROM VmSetting v WHERE v.setting = :setting")})
+    @NamedQuery(name = "VmSetting.findAll",
+            query = "SELECT v FROM VmSetting v"),
+    @NamedQuery(name = "VmSetting.findById",
+            query = "SELECT v FROM VmSetting v WHERE v.id = :id"),
+    @NamedQuery(name = "VmSetting.findBySetting",
+            query = "SELECT v FROM VmSetting v WHERE v.setting = :setting"),
+    @NamedQuery(name = "VmSetting.findByBoolVal",
+            query = "SELECT v FROM VmSetting v WHERE v.boolVal = :boolVal"),
+    @NamedQuery(name = "VmSetting.findByIntVal",
+            query = "SELECT v FROM VmSetting v WHERE v.intVal = :intVal")})
 public class VmSetting implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -50,19 +50,21 @@ public class VmSetting implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "setting")
+    private String setting;
     @Column(name = "bool_val")
     private Boolean boolVal;
     @Column(name = "int_val")
     private Integer intVal;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 16777215)
     @Column(name = "long_val")
     private String longVal;
-    @Size(max = 255)
-    @Column(name = "setting")
-    private String setting;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 65535)
     @Column(name = "string_val")
     private String stringVal;
 
@@ -79,6 +81,14 @@ public class VmSetting implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getSetting() {
+        return setting;
+    }
+
+    public void setSetting(String setting) {
+        this.setting = setting;
     }
 
     public Boolean getBoolVal() {
@@ -105,14 +115,6 @@ public class VmSetting implements Serializable {
         this.longVal = longVal;
     }
 
-    public String getSetting() {
-        return setting;
-    }
-
-    public void setSetting(String setting) {
-        this.setting = setting;
-    }
-
     public String getStringVal() {
         return stringVal;
     }
@@ -135,7 +137,10 @@ public class VmSetting implements Serializable {
             return false;
         }
         VmSetting other = (VmSetting) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
     }
 
     @Override

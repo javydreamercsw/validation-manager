@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -52,25 +47,29 @@ public class Test implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Size(max = 255)
-    @Column(name = "name")
-    private String name;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 65535)
     @Column(name = "notes")
     private String notes;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "name")
+    private String name;
+    @Basic(optional = false)
+    @NotNull
     @Lob
-    @Size(max = 2147483647)
+    @Size(min = 1, max = 65535)
     @Column(name = "purpose")
     private String purpose;
+    @Basic(optional = false)
+    @NotNull
     @Lob
-    @Size(max = 2147483647)
+    @Size(min = 1, max = 65535)
     @Column(name = "scope")
     private String scope;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "test")
     private List<TestCase> testCaseList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "test")
-    private List<TestPlanHasTest> testPlanHasTestList;
 
     public Test() {
     }
@@ -89,20 +88,20 @@ public class Test implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getNotes() {
         return notes;
     }
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPurpose() {
@@ -131,16 +130,6 @@ public class Test implements Serializable {
         this.testCaseList = testCaseList;
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<TestPlanHasTest> getTestPlanHasTestList() {
-        return testPlanHasTestList;
-    }
-
-    public void setTestPlanHasTestList(List<TestPlanHasTest> testPlanHasTestList) {
-        this.testPlanHasTestList = testPlanHasTestList;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -155,7 +144,10 @@ public class Test implements Serializable {
             return false;
         }
         Test other = (Test) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
     }
 
     @Override
