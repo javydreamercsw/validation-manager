@@ -248,4 +248,28 @@ public final class RequirementServer extends Requirement
             getRequirementPK().setMinorVersion(version);
         }
     }
+
+    public int getMinorVersion() {
+        return getRequirementPK().getMinorVersion();
+    }
+
+    public void setMinorVersion(int version) {
+        getRequirementPK().setMinorVersion(version);
+    }
+
+    public int getMidVersion() {
+        return getRequirementPK().getMidVersion();
+    }
+
+    public void setMidVersion(int version) {
+        getRequirementPK().setMidVersion(version);
+    }
+
+    public int getMajorVersion() {
+        return getRequirementPK().getMajorVersion();
+    }
+
+    public void setMajorVersion(int version) {
+        getRequirementPK().setMajorVersion(version);
+    }
 }
