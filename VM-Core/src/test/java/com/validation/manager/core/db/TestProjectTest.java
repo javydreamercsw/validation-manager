@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -65,7 +64,7 @@ public class TestProjectTest extends AbstractVMTestCase {
             new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(tp);
             tp = ((TestProject) DataBaseManager.namedQuery("TestProject.findByName", parameters).get(0));
             DataBaseManager.namedQuery("TestProject.findByName", parameters);
-            assertTrue(tp.getId() >= 1000);
+            assertTrue(tp.getId() >= 0);
             assignRolesForTestProject();
         } catch (Exception ex) {
             Logger.getLogger(TestProjectTest.class.getSimpleName()).log(Level.SEVERE, null, ex);

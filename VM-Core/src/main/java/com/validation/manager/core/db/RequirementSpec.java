@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -34,13 +29,20 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "requirement_spec")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RequirementSpec.findAll", query = "SELECT r FROM RequirementSpec r"),
-    @NamedQuery(name = "RequirementSpec.findByModificationDate", query = "SELECT r FROM RequirementSpec r WHERE r.modificationDate = :modificationDate"),
-    @NamedQuery(name = "RequirementSpec.findByName", query = "SELECT r FROM RequirementSpec r WHERE r.name = :name"),
-    @NamedQuery(name = "RequirementSpec.findByVersion", query = "SELECT r FROM RequirementSpec r WHERE r.version = :version"),
-    @NamedQuery(name = "RequirementSpec.findById", query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.id = :id"),
-    @NamedQuery(name = "RequirementSpec.findByProjectId", query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.projectId = :projectId"),
-    @NamedQuery(name = "RequirementSpec.findBySpecLevelId", query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.specLevelId = :specLevelId")})
+    @NamedQuery(name = "RequirementSpec.findAll", 
+            query = "SELECT r FROM RequirementSpec r"),
+    @NamedQuery(name = "RequirementSpec.findByModificationDate", 
+            query = "SELECT r FROM RequirementSpec r WHERE r.modificationDate = :modificationDate"),
+    @NamedQuery(name = "RequirementSpec.findByName", 
+            query = "SELECT r FROM RequirementSpec r WHERE r.name = :name"),
+    @NamedQuery(name = "RequirementSpec.findByVersion", 
+            query = "SELECT r FROM RequirementSpec r WHERE r.version = :version"),
+    @NamedQuery(name = "RequirementSpec.findById", 
+            query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.id = :id"),
+    @NamedQuery(name = "RequirementSpec.findByProjectId", 
+            query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.projectId = :projectId"),
+    @NamedQuery(name = "RequirementSpec.findBySpecLevelId",
+            query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.specLevelId = :specLevelId")})
 public class RequirementSpec implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -58,10 +60,12 @@ public class RequirementSpec implements Serializable {
     private String name;
     @Column(name = "version")
     private Integer version;
-    @JoinColumn(name = "spec_level_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "spec_level_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private SpecLevel specLevel;
-    @JoinColumn(name = "project_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "project_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Project project;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementSpec")
@@ -74,7 +78,8 @@ public class RequirementSpec implements Serializable {
         this.requirementSpecPK = requirementSpecPK;
     }
 
-    public RequirementSpec(RequirementSpecPK requirementSpecPK, String name, int version, Date modificationDate) {
+    public RequirementSpec(RequirementSpecPK requirementSpecPK, String name,
+            int version, Date modificationDate) {
         this.requirementSpecPK = requirementSpecPK;
         this.name = name;
         this.version = version;

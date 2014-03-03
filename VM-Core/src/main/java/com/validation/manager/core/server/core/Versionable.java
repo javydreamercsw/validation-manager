@@ -1,5 +1,6 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.VMAuditedObject;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -15,7 +16,7 @@ import javax.validation.constraints.NotNull;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @MappedSuperclass
-public class Versionable implements Serializable {
+public class Versionable extends VMAuditedObject implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id

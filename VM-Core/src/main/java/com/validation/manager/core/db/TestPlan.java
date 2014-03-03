@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.VMAuditedObject;
@@ -33,11 +28,16 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "test_plan")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "TestPlan.findAll", query = "SELECT t FROM TestPlan t"),
-    @NamedQuery(name = "TestPlan.findByActive", query = "SELECT t FROM TestPlan t WHERE t.active = :active"),
-    @NamedQuery(name = "TestPlan.findByIsOpen", query = "SELECT t FROM TestPlan t WHERE t.isOpen = :isOpen"),
-    @NamedQuery(name = "TestPlan.findById", query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.id = :id"),
-    @NamedQuery(name = "TestPlan.findByTestProjectId", query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.testProjectId = :testProjectId")})
+    @NamedQuery(name = "TestPlan.findAll", 
+            query = "SELECT t FROM TestPlan t"),
+    @NamedQuery(name = "TestPlan.findByActive", 
+            query = "SELECT t FROM TestPlan t WHERE t.active = :active"),
+    @NamedQuery(name = "TestPlan.findByIsOpen", 
+            query = "SELECT t FROM TestPlan t WHERE t.isOpen = :isOpen"),
+    @NamedQuery(name = "TestPlan.findById",
+            query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.id = :id"),
+    @NamedQuery(name = "TestPlan.findByTestProjectId", 
+            query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.testProjectId = :testProjectId")})
 public class TestPlan extends VMAuditedObject implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -51,14 +51,16 @@ public class TestPlan extends VMAuditedObject implements Serializable {
     @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
-    @JoinColumn(name = "test_project_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "test_project_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private TestProject testProject;
     @OneToMany(mappedBy = "testPlan")
     private List<TestPlan> testPlanList;
     @JoinColumns({
         @JoinColumn(name = "regression_test_plan_id", referencedColumnName = "id"),
-        @JoinColumn(name = "regression_test_plan_test_project_id", referencedColumnName = "test_project_id")})
+        @JoinColumn(name = "regression_test_plan_test_project_id", 
+                referencedColumnName = "test_project_id")})
     @ManyToOne
     private TestPlan testPlan;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testPlan")
