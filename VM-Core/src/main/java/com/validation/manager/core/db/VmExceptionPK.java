@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -74,16 +79,12 @@ public class VmExceptionPK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        if (this.reporterId != other.reporterId) {
-            return false;
-        }
-        return true;
+        return this.reporterId == other.reporterId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.VmExceptionPK[ id=" + id
-                + ", reporterId=" + reporterId + " ]";
+        return "com.validation.manager.core.db.VmExceptionPK[ id=" + id + ", reporterId=" + reporterId + " ]";
     }
 
 }

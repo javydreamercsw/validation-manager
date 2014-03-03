@@ -72,7 +72,7 @@ public final class RequirementServer extends Requirement
                         getNotes(),
                         getRequirementPK().getMajorVersion(),
                         getRequirementPK().getMidVersion(),
-                        getRequirementPK().getMinorVersion());
+                        getRequirementPK().getMinorVersion() + 1);
                 //Store in db
                 new RequirementJpaController(
                         DataBaseManager.getEntityManagerFactory()).create(req);
@@ -247,29 +247,5 @@ public final class RequirementServer extends Requirement
         if (getRequirementPK() != null) {
             getRequirementPK().setMinorVersion(version);
         }
-    }
-
-    public int getMinorVersion() {
-        return getRequirementPK().getMinorVersion();
-    }
-
-    public void setMinorVersion(int version) {
-        getRequirementPK().setMinorVersion(version);
-    }
-
-    public int getMidVersion() {
-        return getRequirementPK().getMidVersion();
-    }
-
-    public void setMidVersion(int version) {
-        getRequirementPK().setMidVersion(version);
-    }
-
-    public int getMajorVersion() {
-        return getRequirementPK().getMajorVersion();
-    }
-
-    public void setMajorVersion(int version) {
-        getRequirementPK().setMajorVersion(version);
     }
 }

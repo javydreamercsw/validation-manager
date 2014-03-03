@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.VMAuditedObject;
@@ -35,26 +40,16 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "vm_user")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "VmUser.findAll",
-            query = "SELECT v FROM VmUser v"),
-    @NamedQuery(name = "VmUser.findById",
-            query = "SELECT v FROM VmUser v WHERE v.id = :id"),
-    @NamedQuery(name = "VmUser.findByAttempts",
-            query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts"),
-    @NamedQuery(name = "VmUser.findByEmail",
-            query = "SELECT v FROM VmUser v WHERE v.email = :email"),
-    @NamedQuery(name = "VmUser.findByFirst",
-            query = "SELECT v FROM VmUser v WHERE v.first = :first"),
-    @NamedQuery(name = "VmUser.findByLast",
-            query = "SELECT v FROM VmUser v WHERE v.last = :last"),
-    @NamedQuery(name = "VmUser.findByLastModified",
-            query = "SELECT v FROM VmUser v WHERE v.lastModified = :lastModified"),
-    @NamedQuery(name = "VmUser.findByLocale",
-            query = "SELECT v FROM VmUser v WHERE v.locale = :locale"),
-    @NamedQuery(name = "VmUser.findByPassword",
-            query = "SELECT v FROM VmUser v WHERE v.password = :password"),
-    @NamedQuery(name = "VmUser.findByUsername",
-            query = "SELECT v FROM VmUser v WHERE v.username = :username")})
+    @NamedQuery(name = "VmUser.findAll", query = "SELECT v FROM VmUser v"),
+    @NamedQuery(name = "VmUser.findById", query = "SELECT v FROM VmUser v WHERE v.id = :id"),
+    @NamedQuery(name = "VmUser.findByAttempts", query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts"),
+    @NamedQuery(name = "VmUser.findByEmail", query = "SELECT v FROM VmUser v WHERE v.email = :email"),
+    @NamedQuery(name = "VmUser.findByFirst", query = "SELECT v FROM VmUser v WHERE v.first = :first"),
+    @NamedQuery(name = "VmUser.findByLast", query = "SELECT v FROM VmUser v WHERE v.last = :last"),
+    @NamedQuery(name = "VmUser.findByLastModified", query = "SELECT v FROM VmUser v WHERE v.lastModified = :lastModified"),
+    @NamedQuery(name = "VmUser.findByLocale", query = "SELECT v FROM VmUser v WHERE v.locale = :locale"),
+    @NamedQuery(name = "VmUser.findByPassword", query = "SELECT v FROM VmUser v WHERE v.password = :password"),
+    @NamedQuery(name = "VmUser.findByUsername", query = "SELECT v FROM VmUser v WHERE v.username = :username")})
 public class VmUser extends VMAuditedObject implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -124,9 +119,7 @@ public class VmUser extends VMAuditedObject implements Serializable {
     public VmUser() {
     }
 
-    public VmUser(String username, String password, String email,
-            String first, String last, String locale, Date lastModified,
-            UserStatus userStatus, int attempts) {
+    public VmUser(String username, String password, String email, String first, String last, String locale, Date lastModified, UserStatus userStatus, int attempts) {
         this.username = username;
         this.password = password;
         this.email = email;

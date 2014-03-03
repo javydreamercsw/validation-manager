@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -18,29 +23,22 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "user_test_project_role")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "UserTestProjectRole.findAll",
-            query = "SELECT u FROM UserTestProjectRole u"),
-    @NamedQuery(name = "UserTestProjectRole.findByTestProjectId",
-            query = "SELECT u FROM UserTestProjectRole u WHERE u.userTestProjectRolePK.testProjectId = :testProjectId"),
-    @NamedQuery(name = "UserTestProjectRole.findByUserId",
-            query = "SELECT u FROM UserTestProjectRole u WHERE u.userTestProjectRolePK.userId = :userId"),
-    @NamedQuery(name = "UserTestProjectRole.findByRoleId",
-            query = "SELECT u FROM UserTestProjectRole u WHERE u.userTestProjectRolePK.roleId = :roleId")})
+    @NamedQuery(name = "UserTestProjectRole.findAll", query = "SELECT u FROM UserTestProjectRole u"),
+    @NamedQuery(name = "UserTestProjectRole.findByTestProjectId", query = "SELECT u FROM UserTestProjectRole u WHERE u.userTestProjectRolePK.testProjectId = :testProjectId"),
+    @NamedQuery(name = "UserTestProjectRole.findByUserId", query = "SELECT u FROM UserTestProjectRole u WHERE u.userTestProjectRolePK.userId = :userId"),
+    @NamedQuery(name = "UserTestProjectRole.findByRoleId", query = "SELECT u FROM UserTestProjectRole u WHERE u.userTestProjectRolePK.roleId = :roleId")})
 public class UserTestProjectRole implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserTestProjectRolePK userTestProjectRolePK;
-    @JoinColumn(name = "user_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
-    @JoinColumn(name = "test_project_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumn(name = "test_project_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private TestProject testProject;
-    @JoinColumn(name = "role_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Role role;
 
