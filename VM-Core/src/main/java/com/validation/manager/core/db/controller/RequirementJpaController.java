@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.validation.manager.core.db.controller;
 
 import java.io.Serializable;
@@ -43,9 +42,6 @@ public class RequirementJpaController implements Serializable {
     }
 
     public void create(Requirement requirement) throws PreexistingEntityException, Exception {
-        if (requirement.getRequirementPK() == null) {
-            requirement.setRequirementPK(new RequirementPK());
-        }
         if (requirement.getRequirementList() == null) {
             requirement.setRequirementList(new ArrayList<Requirement>());
         }
@@ -82,13 +78,13 @@ public class RequirementJpaController implements Serializable {
             }
             List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
             for (Requirement requirementListRequirementToAttach : requirement.getRequirementList()) {
-                requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getRequirementPK());
+                requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getId());
                 attachedRequirementList.add(requirementListRequirementToAttach);
             }
             requirement.setRequirementList(attachedRequirementList);
             List<Requirement> attachedRequirementList1 = new ArrayList<Requirement>();
             for (Requirement requirementList1RequirementToAttach : requirement.getRequirementList1()) {
-                requirementList1RequirementToAttach = em.getReference(requirementList1RequirementToAttach.getClass(), requirementList1RequirementToAttach.getRequirementPK());
+                requirementList1RequirementToAttach = em.getReference(requirementList1RequirementToAttach.getClass(), requirementList1RequirementToAttach.getId());
                 attachedRequirementList1.add(requirementList1RequirementToAttach);
             }
             requirement.setRequirementList1(attachedRequirementList1);
@@ -150,7 +146,7 @@ public class RequirementJpaController implements Serializable {
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
-            if (findRequirement(requirement.getRequirementPK()) != null) {
+            if (findRequirement(requirement.getId()) != null) {
                 throw new PreexistingEntityException("Requirement " + requirement + " already exists.", ex);
             }
             throw ex;
@@ -166,7 +162,7 @@ public class RequirementJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Requirement persistentRequirement = em.find(Requirement.class, requirement.getRequirementPK());
+            Requirement persistentRequirement = em.find(Requirement.class, requirement.getId());
             RequirementType requirementTypeIdOld = persistentRequirement.getRequirementTypeId();
             RequirementType requirementTypeIdNew = requirement.getRequirementTypeId();
             RequirementStatus requirementStatusIdOld = persistentRequirement.getRequirementStatusId();
@@ -209,14 +205,14 @@ public class RequirementJpaController implements Serializable {
             }
             List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
             for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
-                requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getRequirementPK());
+                requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getId());
                 attachedRequirementListNew.add(requirementListNewRequirementToAttach);
             }
             requirementListNew = attachedRequirementListNew;
             requirement.setRequirementList(requirementListNew);
             List<Requirement> attachedRequirementList1New = new ArrayList<Requirement>();
             for (Requirement requirementList1NewRequirementToAttach : requirementList1New) {
-                requirementList1NewRequirementToAttach = em.getReference(requirementList1NewRequirementToAttach.getClass(), requirementList1NewRequirementToAttach.getRequirementPK());
+                requirementList1NewRequirementToAttach = em.getReference(requirementList1NewRequirementToAttach.getClass(), requirementList1NewRequirementToAttach.getId());
                 attachedRequirementList1New.add(requirementList1NewRequirementToAttach);
             }
             requirementList1New = attachedRequirementList1New;
@@ -330,7 +326,7 @@ public class RequirementJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                RequirementPK id = requirement.getRequirementPK();
+                int id = requirement.getId();
                 if (findRequirement(id) == null) {
                     throw new NonexistentEntityException("The requirement with id " + id + " no longer exists.");
                 }
@@ -343,7 +339,7 @@ public class RequirementJpaController implements Serializable {
         }
     }
 
-    public void destroy(RequirementPK id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(int id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -351,7 +347,7 @@ public class RequirementJpaController implements Serializable {
             Requirement requirement;
             try {
                 requirement = em.getReference(Requirement.class, id);
-                requirement.getRequirementPK();
+                requirement.getId();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The requirement with id " + id + " no longer exists.", enfe);
             }
@@ -434,7 +430,7 @@ public class RequirementJpaController implements Serializable {
         }
     }
 
-    public Requirement findRequirement(RequirementPK id) {
+    public Requirement findRequirement(int id) {
         EntityManager em = getEntityManager();
         try {
             return em.find(Requirement.class, id);
@@ -455,5 +451,5 @@ public class RequirementJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

@@ -156,7 +156,7 @@ public class TestHelper {
         req.write2DB();
         return new RequirementJpaController(
                 DataBaseManager.getEntityManagerFactory())
-                .findRequirement(req.getRequirementPK());
+                .findRequirement(req.getId());
     }
 
     public static void destroyRequirement(Requirement r)
@@ -165,7 +165,7 @@ public class TestHelper {
             RequirementServer.deleteRequirement(r);
             assertTrue(new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory())
-                    .findRequirement(r.getRequirementPK()) == null);
+                    .findRequirement(r.getId()) == null);
         } catch (IllegalOrphanException ex) {
             Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
             fail();
