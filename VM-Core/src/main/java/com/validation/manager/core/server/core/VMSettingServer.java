@@ -6,7 +6,6 @@ import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.VmSettingJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -14,10 +13,9 @@ import java.util.List;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class VMSettingServer extends VmSetting
-        implements EntityServer<VmSetting> {
+        implements EntityServer<VmSetting>, VersionableServer<VmSetting> {
 
     private static List<Object> result;
-    private static HashMap parameters = new HashMap();
 
     public VMSettingServer(String setting) {
         VmSetting s = getSetting(setting);
@@ -102,8 +100,19 @@ public class VMSettingServer extends VmSetting
         target.setStringVal(source.getStringVal());
         target.setId(source.getId());
     }
-    
+
     public void update() {
         update(this, getEntity());
+    }
+
+    public List<VmSetting> getVersions() {
+        List<VmSetting> versions = new ArrayList<VmSetting>();
+        parameters.clear();
+        parameters.put("id", getEntity().getId());
+        for (Object obj : DataBaseManager.namedQuery("VmSetting.findById",
+                parameters)) {
+            versions.add((VmSetting) obj);
+        }
+        return versions;
     }
 }

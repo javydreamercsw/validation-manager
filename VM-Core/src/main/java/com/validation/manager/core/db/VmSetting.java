@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -29,11 +24,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "vm_setting")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "VmSetting.findAll", query = "SELECT v FROM VmSetting v"),
-    @NamedQuery(name = "VmSetting.findById", query = "SELECT v FROM VmSetting v WHERE v.id = :id"),
-    @NamedQuery(name = "VmSetting.findByBoolVal", query = "SELECT v FROM VmSetting v WHERE v.boolVal = :boolVal"),
-    @NamedQuery(name = "VmSetting.findByIntVal", query = "SELECT v FROM VmSetting v WHERE v.intVal = :intVal"),
-    @NamedQuery(name = "VmSetting.findBySetting", query = "SELECT v FROM VmSetting v WHERE v.setting = :setting")})
+    @NamedQuery(name = "VmSetting.findAll", 
+            query = "SELECT v FROM VmSetting v"),
+    @NamedQuery(name = "VmSetting.findById", 
+            query = "SELECT v FROM VmSetting v WHERE v.id = :id"),
+    @NamedQuery(name = "VmSetting.findByBoolVal", 
+            query = "SELECT v FROM VmSetting v WHERE v.boolVal = :boolVal"),
+    @NamedQuery(name = "VmSetting.findByIntVal", 
+            query = "SELECT v FROM VmSetting v WHERE v.intVal = :intVal"),
+    @NamedQuery(name = "VmSetting.findBySetting", 
+            query = "SELECT v FROM VmSetting v WHERE v.setting = :setting")})
 public class VmSetting implements Serializable {
 
     private static final long serialVersionUID = 1L;

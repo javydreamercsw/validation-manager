@@ -19,7 +19,8 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public final class ProjectServer extends Project implements EntityServer<Project> {
+public final class ProjectServer extends Project 
+implements EntityServer<Project>, VersionableServer<Project>{
 
     public ProjectServer(String name, String notes) {
         super(name);
@@ -118,5 +119,16 @@ public final class ProjectServer extends Project implements EntityServer<Project
 
     public void update() {
         update(this, getEntity());
+    }
+
+    public List<Project> getVersions() {
+        List<Project> versions = new ArrayList<Project>();
+        parameters.clear();
+        parameters.put("id", getEntity().getId());
+        for (Object obj : DataBaseManager.namedQuery("Project.findById",
+                parameters)) {
+            versions.add((Project) obj);
+        }
+        return versions;
     }
 }

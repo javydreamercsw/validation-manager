@@ -1,18 +1,10 @@
 package com.validation.manager.core;
 
-import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestPlanT;
-import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.TestProjectT;
 import com.validation.manager.core.db.UserModifiedRecord;
 import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.VmUserT;
-import com.validation.manager.core.db.controller.TestPlanTJpaController;
-import com.validation.manager.core.db.controller.TestProjectTJpaController;
 import com.validation.manager.core.db.controller.UserModifiedRecordJpaController;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
-import com.validation.manager.core.db.controller.VmUserTJpaController;
 import com.validation.manager.core.server.core.VMIdServer;
 import com.validation.manager.core.tool.MD5;
 import java.util.Date;
@@ -32,7 +24,8 @@ public class AuditedEntityListener {
 
     private static boolean enabled = true;
     private AuditedObject last;
-    private static final Logger LOG = Logger.getLogger(AuditedEntityListener.class.getSimpleName());
+    private static final Logger LOG = 
+            Logger.getLogger(AuditedEntityListener.class.getSimpleName());
 
     /**
      * Just before persisting an entity.
@@ -116,7 +109,6 @@ public class AuditedEntityListener {
                         modifier = new VmUserJpaController(
                                 DataBaseManager.getEntityManagerFactory()).findVmUser(
                                 auditedObject.getModifierId());
-                        boolean updated = false;
                         if (modifier == null) {
                             //Default to admin
                             modifier = new VmUserJpaController(
@@ -163,63 +155,6 @@ public class AuditedEntityListener {
                         new UserModifiedRecordJpaController(
                                 DataBaseManager.getEntityManagerFactory()).create(mod);
                         setEnabled(true);
-                        LOG.log(Level.FINE, "Done!");
-                        if (auditedObject instanceof VmUser) {
-                            VmUser user = (VmUser) auditedObject;
-                            LOG.log(Level.FINE, "Updating audit trail for {0}",
-                                    auditedObject.getClass().getSimpleName());
-                            VmUserT newUser = new VmUserT(mod.getUserModifiedRecordPK().getRecordId(),
-                                    user.getId(), user.getUsername(), user.getPassword());
-                            if (user.getUserStatusId() != null) {
-                                newUser.setUserStatusId(user.getUserStatusId().getId());
-                            }
-                            newUser.setAttempts(user.getAttempts());
-                            newUser.setEmail(user.getEmail());
-                            newUser.setFirst(user.getFirst());
-                            newUser.setLast(user.getLast());
-                            newUser.setLastModifed(user.getLastModified());
-                            newUser.setLocale(user.getLocale());
-                            new VmUserTJpaController(
-                                    DataBaseManager.getEntityManagerFactory()).create(newUser);
-                            updated = true;
-                            LOG.log(Level.FINE, "Done!");
-                        }
-                        else if (auditedObject instanceof TestProject) {
-                            TestProject project = (TestProject) auditedObject;
-                            LOG.log(Level.FINE, "Updating audit trail for {0}",
-                                    auditedObject.getClass().getSimpleName());
-                            TestProjectT newProject = new TestProjectT(mod.getUserModifiedRecordPK().getRecordId(),
-                                    project.getId(), project.getName(), project.getActive());
-                            if (project.getNotes() != null) {
-                                newProject.setNotes(project.getNotes());
-                            }
-                            new TestProjectTJpaController(
-                                    DataBaseManager.getEntityManagerFactory()).create(newProject);
-                            updated = true;
-                            LOG.log(Level.FINE, "Done!");
-                        }
-                        else if (auditedObject instanceof TestPlan) {
-                            TestPlan tpl = (TestPlan) auditedObject;
-                            LOG.log(Level.FINE, "Updating audit trail for {0}",
-                                    auditedObject.getClass().getSimpleName());
-                            TestPlanT tplt = new TestPlanT(mod.getUserModifiedRecordPK().getRecordId(),
-                                    tpl.getTestPlanPK().getId(), tpl.getTestPlanPK().getTestProjectId(),
-                                    tpl.getIsOpen(), tpl.getIsOpen());
-                            tplt.setNotes(tpl.getNotes());
-                            if (tpl.getTestPlan() != null) {
-                                tplt.setRegressionTestPlanId(tpl.getTestPlan().getTestPlanPK().getId());
-                                tplt.setRegressionTestPlanTestProjectId(tpl.getTestPlan().getTestPlanPK().getTestProjectId());
-                            }
-                            new TestPlanTJpaController(
-                                    DataBaseManager.getEntityManagerFactory()).create(tplt);
-                            updated = true;
-                            LOG.log(Level.FINE, "Done!");
-                        }
-                        if (!updated) {
-                            throw new Exception(auditedObject
-                                    + " is an Auditable Object but it's processing "
-                                    + "logic is not implemented yet!");
-                        }
                         LOG.log(Level.FINE, "Done!");
                     }
                 }

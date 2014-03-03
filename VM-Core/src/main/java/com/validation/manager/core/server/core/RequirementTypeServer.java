@@ -6,13 +6,15 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public final class RequirementTypeServer extends RequirementType
-        implements EntityServer<RequirementType> {
+        implements EntityServer<RequirementType>,
+        VersionableServer<RequirementType> {
 
     public RequirementTypeServer(RequirementType rt) {
         RequirementType temp
@@ -64,5 +66,16 @@ public final class RequirementTypeServer extends RequirementType
         return new RequirementTypeJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findRequirementTypeEntities();
+    }
+
+    public List<RequirementType> getVersions() {
+       List<RequirementType> versions = new ArrayList<RequirementType>();
+        parameters.clear();
+        parameters.put("id", getEntity().getId());
+        for (Object obj : DataBaseManager.namedQuery("RequirementType.findById",
+                parameters)) {
+            versions.add((RequirementType) obj);
+        }
+        return versions;
     }
 }

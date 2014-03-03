@@ -1,12 +1,14 @@
 package com.validation.manager.core;
 
+import java.util.HashMap;
+
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  * @param <T> Entity
  */
 public interface EntityServer<T> {
-    
+    static HashMap parameters = new HashMap();
     /**
      * Write Entity to database
      *

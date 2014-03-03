@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public final class RequirementServer extends Requirement
-        implements EntityServer<Requirement> {
+        implements EntityServer<Requirement>, VersionableServer<Requirement> {
 
     private static final Logger LOG
             = Logger.getLogger(RequirementServer.class.getSimpleName());
@@ -222,30 +222,16 @@ public final class RequirementServer extends Requirement
         update();
     }
 
-    public static List<Requirement> getRequirementVersions(Requirement req) {
+    @Override
+    public List<Requirement> getVersions() {
         List<Requirement> versions = new ArrayList<Requirement>();
-        HashMap parameters = new HashMap<String, Object>();
-        parameters.put("uniqueId", req.getUniqueId());
+        parameters.clear();
+        parameters.put("uniqueId", getEntity().getUniqueId());
         for (Object obj : DataBaseManager.createdQuery(
-                "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId", parameters)) {
+                "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId", 
+                parameters)) {
             versions.add((Requirement) obj);
         }
         return versions;
-    }
-
-    public List<Requirement> getRequirementVersions() {
-        return RequirementServer.getRequirementVersions(getEntity());
-    }
-
-    public void updateMajorVersion(int version) {
-        setMajorVersion(version);
-    }
-
-    public void updateMidVersion(int version) {
-        setMidVersion(version);
-    }
-
-    public void updateMinorVersion(int version) {
-        setMinorVersion(version);
     }
 }
