@@ -1,15 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
@@ -34,14 +29,15 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "requirement")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Requirement.findAll", query = "SELECT r FROM Requirement r"),
-    @NamedQuery(name = "Requirement.findByUniqueId", query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId"),
-    @NamedQuery(name = "Requirement.findById", query = "SELECT r FROM Requirement r WHERE r.requirementPK.id = :id")})
-public class Requirement implements Serializable {
+    @NamedQuery(name = "Requirement.findAll",
+            query = "SELECT r FROM Requirement r"),
+    @NamedQuery(name = "Requirement.findByUniqueId",
+            query = "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId"),
+    @NamedQuery(name = "Requirement.findById",
+            query = "SELECT r FROM Requirement r WHERE r.id = :id")})
+public class Requirement extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected RequirementPK requirementPK;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "description")
@@ -120,21 +116,15 @@ public class Requirement implements Serializable {
         this.uniqueId = uniqueId;
         this.description = description;
         this.notes = notes;
-        this.requirementPK
-                = new RequirementPK(major_version, mid_version, minor_version);
+        setMajorVersion(major_version);
+        setMidVersion(mid_version);
+        setMinorVersion(minor_version);
     }
 
     public Requirement(int major_version, int mid_version, int minor_version) {
-        this.requirementPK
-                = new RequirementPK(major_version, mid_version, minor_version);
-    }
-
-    public RequirementPK getRequirementPK() {
-        return requirementPK;
-    }
-
-    public void setRequirementPK(RequirementPK requirementPK) {
-        this.requirementPK = requirementPK;
+        setMajorVersion(major_version);
+        setMidVersion(mid_version);
+        setMinorVersion(minor_version);
     }
 
     public String getDescription() {
@@ -238,7 +228,7 @@ public class Requirement implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (requirementPK != null ? requirementPK.hashCode() : 0);
+        hash += getId();
         return hash;
     }
 
@@ -249,12 +239,12 @@ public class Requirement implements Serializable {
             return false;
         }
         Requirement other = (Requirement) object;
-        return (this.requirementPK != null || other.requirementPK == null) && (this.requirementPK == null || this.requirementPK.equals(other.requirementPK));
+        return this.getId() == other.getId();
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Requirement[ requirementPK=" + requirementPK + " ]";
+        return "com.validation.manager.core.db.Requirement[ id=" + getId() + " ]";
     }
 
 }

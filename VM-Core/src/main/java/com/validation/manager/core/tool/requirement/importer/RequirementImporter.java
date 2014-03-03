@@ -255,7 +255,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                 for (Requirement r : existing) {
                     if (r.getUniqueId() == null) {
                         LOG.warning("Detected requirement with null unique id!");
-                        new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).destroy(r.getRequirementPK());
+                        new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).destroy(r.getId());
                     } else {
                         if (r.getUniqueId().equals(requirement.getUniqueId())) {
                             exists = true;
@@ -283,7 +283,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                     for (Requirement r : existing) {
                         if (r.getUniqueId().equals(requirement.getUniqueId())) {
                             try {
-                                controller.destroy(r.getRequirementPK());
+                                controller.destroy(r.getId());
                             } catch (IllegalOrphanException ex1) {
                                 LOG.log(Level.SEVERE, null, ex1);
                             } catch (NonexistentEntityException ex1) {

@@ -69,7 +69,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             RequirementServer.deleteRequirement(r);
             parameters.clear();
-            parameters.put("id", r.getRequirementPK().getId());
+            parameters.put("id", r.getId());
             assertTrue(DataBaseManager.namedQuery("Requirement.findById", parameters).isEmpty());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -272,22 +272,22 @@ public class RequirementServerTest extends AbstractVMTestCase {
         Requirement req = TestHelper.createRequirement("SRS-SW-0001",
                 first, rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
         RequirementServer rs = new RequirementServer(req);
-        assertEquals(0, rs.getRequirementPK().getMajorVersion());
-        assertEquals(0, rs.getRequirementPK().getMidVersion());
-        assertEquals(0, rs.getRequirementPK().getMinorVersion());
+        assertEquals(0, rs.getMajorVersion());
+        assertEquals(0, rs.getMidVersion());
+        assertEquals(0, rs.getMinorVersion());
         assertEquals(1, rs.getRequirementVersions().size());
         assertEquals(first, rs.getDescription());
         rs.setDescription(second);
         if (DataBaseManager.isVersioningEnabled()) {
             rs.write2DB();
-            assertEquals(0, rs.getRequirementPK().getMajorVersion());
-            assertEquals(0, rs.getRequirementPK().getMidVersion());
-            assertEquals(1, rs.getRequirementPK().getMinorVersion());
+            assertEquals(0, rs.getMajorVersion());
+            assertEquals(0, rs.getMidVersion());
+            assertEquals(1, rs.getMinorVersion());
         } else {
             rs.write2DB();
-            assertEquals(0, rs.getRequirementPK().getMajorVersion());
-            assertEquals(0, rs.getRequirementPK().getMidVersion());
-            assertEquals(0, rs.getRequirementPK().getMinorVersion());
+            assertEquals(0, rs.getMajorVersion());
+            assertEquals(0, rs.getMidVersion());
+            assertEquals(0, rs.getMinorVersion());
         }
         assertEquals(second, rs.getDescription());
         assertEquals(DataBaseManager.isVersioningEnabled() ? 2 : 1,

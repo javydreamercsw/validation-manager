@@ -23,8 +23,8 @@ import org.junit.Test;
  */
 public class RequirementHierarchyTest extends AbstractVMTestCase {
 
-    private static final Logger LOG =
-            Logger.getLogger(RequirementHierarchyTest.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(RequirementHierarchyTest.class.getName());
     private ProjectServer project;
 
     @Test
@@ -67,14 +67,14 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         int requirementAmount = 15;
         for (int i = 0; i < requirementAmount; i++) {
             try {
-                Requirement reqs =
-                        TestHelper.createRequirement("SRS-SW-00" + i,
-                        "Description " + i,
-                        rsns.getRequirementSpecNodePK(),
-                        "Notes " + i, 2, 1);
+                Requirement reqs
+                        = TestHelper.createRequirement("SRS-SW-00" + i,
+                                "Description " + i,
+                                rsns.getRequirementSpecNodePK(),
+                                "Notes " + i, 2, 1);
                 requirements.add(new RequirementJpaController(
                         DataBaseManager.getEntityManagerFactory())
-                        .findRequirement(reqs.getRequirementPK()));
+                        .findRequirement(reqs.getId()));
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
@@ -83,8 +83,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         System.out.println("Done!");
         System.out.println("Create Requirement Spec Levels");
         SpecLevelServer userSpecLevel = createSpecLevel("User Requirement");
-        SpecLevelServer functionalSpecLevel =
-                createSpecLevel("Functional Requirement");
+        SpecLevelServer functionalSpecLevel
+                = createSpecLevel("Functional Requirement");
         SpecLevelServer unitSpecLevel = createSpecLevel("Unit Requirement");
         System.out.println("Done!");
         System.out.println("Create Requirement Specs");

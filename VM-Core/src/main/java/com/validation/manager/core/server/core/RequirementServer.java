@@ -46,33 +46,33 @@ public final class RequirementServer extends Requirement
             throws IllegalOrphanException, NonexistentEntityException {
         RequirementJpaController controller
                 = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
-        if (controller.findRequirement(r.getRequirementPK()) != null) {
-            controller.destroy(r.getRequirementPK());
+        if (controller.findRequirement(r.getId()) != null) {
+            controller.destroy(r.getId());
         }
     }
 
     public RequirementServer(Requirement r) {
         RequirementJpaController controller
                 = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
-        Requirement requirement = controller.findRequirement(r.getRequirementPK());
+        Requirement requirement = controller.findRequirement(r.getId());
         if (requirement != null) {
             update((RequirementServer) this, requirement);
         } else {
             throw new RuntimeException("Unable to find requirement with id: "
-                    + r.getRequirementPK());
+                    + r.getId());
         }
     }
 
     @Override
     public int write2DB() throws Exception {
-        if (getRequirementPK() != null && getRequirementPK().getId() > 0) {
+        if (getId() != null && getId() > 0) {
             if (DataBaseManager.isVersioningEnabled()) {
                 //One exists already, need to make a copy of the requirement
                 Requirement req = new Requirement(getUniqueId(), getDescription(),
                         getNotes(),
-                        getRequirementPK().getMajorVersion(),
-                        getRequirementPK().getMidVersion(),
-                        getRequirementPK().getMinorVersion() + 1);
+                        getMajorVersion(),
+                        getMidVersion(),
+                        getMinorVersion() + 1);
                 //Store in db
                 new RequirementJpaController(
                         DataBaseManager.getEntityManagerFactory()).create(req);
@@ -88,7 +88,7 @@ public final class RequirementServer extends Requirement
             }
             Requirement req = new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory())
-                    .findRequirement(getRequirementPK());
+                    .findRequirement(getId());
             update(req, this);
             new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).edit(req);
@@ -97,15 +97,15 @@ public final class RequirementServer extends Requirement
             update(req, this);
             new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(req);
-            setRequirementPK(req.getRequirementPK());
+            setId(req.getId());
         }
-        return getRequirementPK().getId();
+        return getId();
     }
 
     public Requirement getEntity() {
         return new RequirementJpaController(
                 DataBaseManager.getEntityManagerFactory()).findRequirement(
-                        getRequirementPK());
+                        getId());
     }
 
     public void update(Requirement target, Requirement source) {
@@ -123,7 +123,10 @@ public final class RequirementServer extends Requirement
         target.setRiskControlList(source.getRiskControlList());
         target.setStepList(source.getStepList());
         target.setUniqueId(source.getUniqueId());
-        target.setRequirementPK(source.getRequirementPK());
+        target.setId(source.getId());
+        target.setMajorVersion(source.getMajorVersion());
+        target.setMidVersion(source.getMidVersion());
+        target.setMinorVersion(source.getMinorVersion());
     }
 
     public static boolean isDuplicate(Requirement req) {
@@ -235,20 +238,14 @@ public final class RequirementServer extends Requirement
     }
 
     public void updateMajorVersion(int version) {
-        if (getRequirementPK() != null) {
-            getRequirementPK().setMajorVersion(version);
-        }
+        setMajorVersion(version);
     }
 
     public void updateMidVersion(int version) {
-        if (getRequirementPK() != null) {
-            getRequirementPK().setMidVersion(version);
-        }
+        setMidVersion(version);
     }
 
     public void updateMinorVersion(int version) {
-        if (getRequirementPK() != null) {
-            getRequirementPK().setMinorVersion(version);
-        }
+        setMinorVersion(version);
     }
 }
