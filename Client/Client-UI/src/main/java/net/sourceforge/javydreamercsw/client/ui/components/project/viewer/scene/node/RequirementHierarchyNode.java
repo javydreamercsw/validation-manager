@@ -33,7 +33,7 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
 
     @Override
     public Object getID() {
-        return ((Requirement) object).getRequirementPK();
+        return ((Requirement) object).getId();
     }
 
     @Override

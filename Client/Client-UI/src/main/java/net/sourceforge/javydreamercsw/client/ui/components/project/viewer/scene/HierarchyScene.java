@@ -28,12 +28,12 @@ import org.netbeans.api.visual.widget.Widget;
 public class HierarchyScene extends GraphScene<Object, Object> {
 
     private final LayerWidget mainLayer, connectionLayer, interactionLayer;
-    private final Map<Object, Widget> widgets = new HashMap<Object, Widget>();
+    private final Map<Object, Widget> widgets = new HashMap<>();
     private static final Logger LOG
             = Logger.getLogger(HierarchyScene.class.getSimpleName());
     private final int horizontalGap = 100;
     private final int verticalGap = 25;
-    private final ArrayList<LayerWidget> layersToClear = new ArrayList<LayerWidget>();
+    private final ArrayList<LayerWidget> layersToClear = new ArrayList<>();
 
     public HierarchyScene() {
         mainLayer = new LayerWidget(this);
@@ -234,7 +234,7 @@ public class HierarchyScene extends GraphScene<Object, Object> {
     }
 
     public void addRequirement(Requirement req) {
-        widgets.put(req.getRequirementPK(), attachNodeWidget(req));
+        widgets.put(req.getId(), attachNodeWidget(req));
     }
 
     private AbstractHierarchyNode createWidget(Object o) {

@@ -40,7 +40,7 @@ public class UIRequirementNode extends AbstractVMBeanNode {
         return new RequirementJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findRequirement(getLookup().lookup(Requirement.class)
-                        .getRequirementPK()).getUniqueId();
+                        .getId()).getUniqueId();
     }
 
     @Override
