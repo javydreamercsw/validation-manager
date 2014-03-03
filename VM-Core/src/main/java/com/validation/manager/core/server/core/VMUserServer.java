@@ -14,7 +14,6 @@ import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.VmUserT;
 import com.validation.manager.core.db.controller.CorrectiveActionJpaController;
 import com.validation.manager.core.db.controller.RoleJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
@@ -46,7 +45,8 @@ import javax.persistence.EntityTransaction;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
+public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
+        VersionableServer<VmUser> {
 
     private static final long serialVersionUID = 1L;
     private boolean hashPassword = true;
@@ -136,34 +136,16 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     }
 
 //create user object for data structures
-    public VMUserServer(int attrID) throws Exception {
+    public VMUserServer(int id) throws Exception {
         parameters.clear();
-        parameters.put("id", attrID);
+        parameters.put("id", id);
         result = DataBaseManager.namedQuery("VmUser.findById", parameters);
         //throw exception if no result found
         if (result.size() > 0) {
             VmUser vmu = (VmUser) result.get(0);
-            setId(vmu.getId());
-            setUsername(vmu.getUsername());
+            update(this, vmu);
             //previously hashing the already hashed password
             hashPassword = false;
-            setPassword(vmu.getPassword());
-            setFirst(vmu.getFirst());
-            setLast(vmu.getLast());
-            setEmail(vmu.getEmail());
-            setUserStatusId(vmu.getUserStatusId());
-            setAttempts(vmu.getAttempts());
-            setLastModified(vmu.getLastModified());
-            setRoleList(vmu.getRoleList());
-            setCorrectiveActionList(vmu.getCorrectiveActionList());
-            setTestCaseList(vmu.getTestCaseList());
-            setUserAssigmentList(vmu.getUserAssigmentList());
-            setUserAssigmentList1(vmu.getUserAssigmentList1());
-            setUserHasInvestigationList(vmu.getUserHasInvestigationList());
-            setUserHasRootCauseList(vmu.getUserHasRootCauseList());
-            setUserTestPlanRoleList(vmu.getUserTestPlanRoleList());
-            setUserTestProjectRoleList(vmu.getUserTestProjectRoleList());
-            setVmExceptionList(vmu.getVmExceptionList());
         } else {
             throw new Exception("Unable to find user");
         }
@@ -334,18 +316,11 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
             } else {
                 //Here we'll catch if the password have been used in the
                 //unusable period (use id in case the username was modified)
-                result = DataBaseManager.createdQuery(
-                        "Select x from VmUser x where x.id=" + getId());
-                id = ((VmUser) result.get(0)).getId();
-                result = DataBaseManager.createdQuery(
-                        "Select x from VmUserT x where x.id=" + id
-                        + " and x.password='"
-                        + (hash ? MD5.encrypt(newPass) : newPass) + "'");
-                for (Object o : result) {
+                VMUserServer user = new VMUserServer(getId());
+                for (VmUser u : user.getVersions()) {
                     //Now check the aging
-                    VmUserT user = (VmUserT) o;
                     long diff = System.currentTimeMillis()
-                            - user.getLastModifed().getTime();
+                            - u.getLastModified().getTime();
                     if (diff / (1000 * 60 * 60 * 24)
                             > VMSettingServer.getSetting("password.unusable_period")
                             .getIntVal()) {
@@ -516,5 +491,16 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
 
     public void update() {
         update(this, getEntity());
+    }
+
+    public List<VmUser> getVersions() {
+        List<VmUser> versions = new ArrayList<VmUser>();
+        parameters.clear();
+        parameters.put("id", getEntity().getId());
+        for (Object obj : DataBaseManager.namedQuery("VmUser.findById",
+                parameters)) {
+            versions.add((VmUser) obj);
+        }
+        return versions;
     }
 }

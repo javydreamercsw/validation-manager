@@ -1,9 +1,11 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.AuditedEntityListener;
 import com.validation.manager.core.VMAuditedObject;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +18,7 @@ import javax.validation.constraints.NotNull;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @MappedSuperclass
+@EntityListeners(AuditedEntityListener.class)
 public class Versionable extends VMAuditedObject implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,7 +30,7 @@ public class Versionable extends VMAuditedObject implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "versioning",
             allocationSize = 1,
-            initialValue = 1)
+            initialValue = 1000)
     @NotNull
     @Column(name = "id")
     private Integer id;

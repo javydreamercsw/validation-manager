@@ -275,7 +275,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
         assertEquals(0, rs.getMajorVersion());
         assertEquals(0, rs.getMidVersion());
         assertEquals(0, rs.getMinorVersion());
-        assertEquals(1, rs.getRequirementVersions().size());
+        assertEquals(1, rs.getVersions().size());
         assertEquals(first, rs.getDescription());
         rs.setDescription(second);
         if (DataBaseManager.isVersioningEnabled()) {
@@ -291,8 +291,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
         }
         assertEquals(second, rs.getDescription());
         assertEquals(DataBaseManager.isVersioningEnabled() ? 2 : 1,
-                rs.getRequirementVersions().size());
-        for (Requirement r : rs.getRequirementVersions()) {
+                rs.getVersions().size());
+        for (Requirement r : rs.getVersions()) {
             System.out.println(r);
         }
     }

@@ -22,7 +22,8 @@ import java.util.List;
 public final class RequirementSpecServer extends RequirementSpec
         implements EntityServer<RequirementSpec> {
 
-    public RequirementSpecServer(String name, String description, int projectId, int specLevelId) {
+    public RequirementSpecServer(String name, String description, 
+            int projectId, int specLevelId) {
         super(projectId, specLevelId);
         setProject(new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(projectId));
         setSpecLevel(new SpecLevelJpaController(DataBaseManager.getEntityManagerFactory()).findSpecLevel(specLevelId));

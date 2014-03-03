@@ -4,13 +4,16 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RequirementStatusServer extends RequirementStatus
-        implements EntityServer<RequirementStatus> {
+        implements EntityServer<RequirementStatus> , 
+        VersionableServer<RequirementStatus>{
 
     public int write2DB() throws Exception {
         RequirementStatus p;
@@ -43,5 +46,16 @@ public class RequirementStatusServer extends RequirementStatus
 
     public void update() {
         update(this, getEntity());
+    }
+
+    public List<RequirementStatus> getVersions() {
+         List<RequirementStatus> versions = new ArrayList<RequirementStatus>();
+        parameters.clear();
+        parameters.put("id", getEntity().getId());
+        for (Object obj : DataBaseManager.namedQuery("RequirementStatus.findById",
+                parameters)) {
+            versions.add((RequirementStatus) obj);
+        }
+        return versions;
     }
 }
