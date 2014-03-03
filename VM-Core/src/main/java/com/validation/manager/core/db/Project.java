@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -10,7 +15,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -49,22 +56,25 @@ public class Project implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "name")
     private String name;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
+    @JoinTable(name = "project_has_test_project", joinColumns = {
+        @JoinColumn(name = "project_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "test_project_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<TestProject> testProjectList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
+    private List<RequirementSpec> requirementSpecList;
     @OneToMany(mappedBy = "parentProjectId")
     private List<Project> projectList;
     @JoinColumn(name = "parent_project_id", referencedColumnName = "id")
     @ManyToOne
     private Project parentProjectId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
-    private List<RequirementSpec> requirementSpecList;
 
     public Project() {
     }
@@ -99,6 +109,26 @@ public class Project implements Serializable {
 
     @XmlTransient
     @JsonIgnore
+    public List<TestProject> getTestProjectList() {
+        return testProjectList;
+    }
+
+    public void setTestProjectList(List<TestProject> testProjectList) {
+        this.testProjectList = testProjectList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RequirementSpec> getRequirementSpecList() {
+        return requirementSpecList;
+    }
+
+    public void setRequirementSpecList(List<RequirementSpec> requirementSpecList) {
+        this.requirementSpecList = requirementSpecList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
     public List<Project> getProjectList() {
         return projectList;
     }
@@ -113,16 +143,6 @@ public class Project implements Serializable {
 
     public void setParentProjectId(Project parentProjectId) {
         this.parentProjectId = parentProjectId;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RequirementSpec> getRequirementSpecList() {
-        return requirementSpecList;
-    }
-
-    public void setRequirementSpecList(List<RequirementSpec> requirementSpecList) {
-        this.requirementSpecList = requirementSpecList;
     }
 
     @Override

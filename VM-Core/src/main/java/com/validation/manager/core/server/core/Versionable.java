@@ -1,40 +1,21 @@
-package com.validation.manager.core.db;
+package com.validation.manager.core.server.core;
 
 import java.io.Serializable;
-import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.MappedSuperclass;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-@Entity
-@Table(name = "versionable")
-@XmlRootElement
-@NamedQueries({
-    @NamedQuery(name = "Versionable.findAll", query = "SELECT v FROM Versionable v"),
-    @NamedQuery(name = "Versionable.findByVersionId", query = "SELECT v FROM Versionable v WHERE v.versionId = :versionId"),
-    @NamedQuery(name = "Versionable.findByMajorVersion", query = "SELECT v FROM Versionable v WHERE v.majorVersion = :majorVersion"),
-    @NamedQuery(name = "Versionable.findByMidVersion", query = "SELECT v FROM Versionable v WHERE v.midVersion = :midVersion"),
-    @NamedQuery(name = "Versionable.findByMinorVersion", query = "SELECT v FROM Versionable v WHERE v.minorVersion = :minorVersion")})
+@MappedSuperclass
 public class Versionable implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "versionable")
-    private List<Requirement> requirementList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -47,8 +28,8 @@ public class Versionable implements Serializable {
             allocationSize = 1,
             initialValue = 1)
     @NotNull
-    @Column(name = "version_id")
-    private Integer versionId;
+    @Column(name = "id")
+    private Integer id;
     @Basic(optional = false)
     @NotNull
     @Column(name = "major_version")
@@ -66,7 +47,7 @@ public class Versionable implements Serializable {
     }
 
     public Versionable(Integer versionId) {
-        this.versionId = versionId;
+        this.id = versionId;
     }
 
     public Versionable(int majorVersion, int midVersion, int minorVersion) {
@@ -75,12 +56,12 @@ public class Versionable implements Serializable {
         this.minorVersion = minorVersion;
     }
 
-    public Integer getVersionId() {
-        return versionId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setVersionId(Integer versionId) {
-        this.versionId = versionId;
+    public void setId(Integer versionId) {
+        this.id = versionId;
     }
 
     public int getMajorVersion() {
@@ -110,7 +91,7 @@ public class Versionable implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (versionId != null ? versionId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -121,7 +102,8 @@ public class Versionable implements Serializable {
             return false;
         }
         Versionable other = (Versionable) object;
-        if ((this.versionId == null && other.versionId != null) || (this.versionId != null && !this.versionId.equals(other.versionId))) {
+        if ((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
         return true;
@@ -129,17 +111,6 @@ public class Versionable implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Versionable[ versionId=" + versionId + " ]";
+        return "com.validation.manager.core.db.Versionable[ versionId=" + id + " ]";
     }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<Requirement> getRequirementList() {
-        return requirementList;
-    }
-
-    public void setRequirementList(List<Requirement> requirementList) {
-        this.requirementList = requirementList;
-    }
-
 }

@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -8,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
@@ -28,15 +35,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "corrective_action")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "CorrectiveAction.findAll",
-            query = "SELECT c FROM CorrectiveAction c"),
-    @NamedQuery(name = "CorrectiveAction.findById",
-            query = "SELECT c FROM CorrectiveAction c WHERE c.id = :id")})
+    @NamedQuery(name = "CorrectiveAction.findAll", query = "SELECT c FROM CorrectiveAction c"),
+    @NamedQuery(name = "CorrectiveAction.findById", query = "SELECT c FROM CorrectiveAction c WHERE c.id = :id")})
 public class CorrectiveAction implements Serializable {
-    @ManyToMany(mappedBy = "correctiveActionList")
-    private List<VmUser> vmUserList;
-    @ManyToMany(mappedBy = "correctiveActionList")
-    private List<VmException> vmExceptionList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -51,12 +52,21 @@ public class CorrectiveAction implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "details")
     private String details;
+    @JoinTable(name = "exception_has_corrective_action", joinColumns = {
+        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
+        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")})
+    @ManyToMany
+    private List<VmException> vmExceptionList;
+    @JoinTable(name = "user_has_corrective_action", joinColumns = {
+        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "user_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<VmUser> vmUserList;
 
     public CorrectiveAction() {
     }
@@ -81,6 +91,26 @@ public class CorrectiveAction implements Serializable {
         this.details = details;
     }
 
+    @XmlTransient
+    @JsonIgnore
+    public List<VmException> getVmExceptionList() {
+        return vmExceptionList;
+    }
+
+    public void setVmExceptionList(List<VmException> vmExceptionList) {
+        this.vmExceptionList = vmExceptionList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<VmUser> getVmUserList() {
+        return vmUserList;
+    }
+
+    public void setVmUserList(List<VmUser> vmUserList) {
+        this.vmUserList = vmUserList;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -95,35 +125,12 @@ public class CorrectiveAction implements Serializable {
             return false;
         }
         CorrectiveAction other = (CorrectiveAction) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.CorrectiveAction[ id=" + id + " ]";
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmUser> getVmUserList() {
-        return vmUserList;
-    }
-
-    public void setVmUserList(List<VmUser> vmUserList) {
-        this.vmUserList = vmUserList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
     }
 
 }

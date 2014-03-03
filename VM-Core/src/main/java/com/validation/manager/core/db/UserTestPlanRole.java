@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -19,35 +24,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "user_test_plan_role")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "UserTestPlanRole.findAll",
-            query = "SELECT u FROM UserTestPlanRole u"),
-    @NamedQuery(name = "UserTestPlanRole.findByTestPlanId",
-            query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.testPlanId = :testPlanId"),
-    @NamedQuery(name = "UserTestPlanRole.findByTestPlanTestProjectId",
-            query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.testPlanTestProjectId = :testPlanTestProjectId"),
-    @NamedQuery(name = "UserTestPlanRole.findByUserId",
-            query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.userId = :userId"),
-    @NamedQuery(name = "UserTestPlanRole.findByRoleId",
-            query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.roleId = :roleId")})
+    @NamedQuery(name = "UserTestPlanRole.findAll", query = "SELECT u FROM UserTestPlanRole u"),
+    @NamedQuery(name = "UserTestPlanRole.findByTestPlanId", query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.testPlanId = :testPlanId"),
+    @NamedQuery(name = "UserTestPlanRole.findByTestPlanTestProjectId", query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.testPlanTestProjectId = :testPlanTestProjectId"),
+    @NamedQuery(name = "UserTestPlanRole.findByUserId", query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.userId = :userId"),
+    @NamedQuery(name = "UserTestPlanRole.findByRoleId", query = "SELECT u FROM UserTestPlanRole u WHERE u.userTestPlanRolePK.roleId = :roleId")})
 public class UserTestPlanRole implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserTestPlanRolePK userTestPlanRolePK;
-    @JoinColumn(name = "user_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
     @JoinColumns({
-        @JoinColumn(name = "test_plan_id", referencedColumnName = "id",
-                insertable = false, updatable = false),
-        @JoinColumn(name = "test_plan_test_project_id",
-                referencedColumnName = "test_project_id",
-                insertable = false, updatable = false)})
+        @JoinColumn(name = "test_plan_id", referencedColumnName = "id", insertable = false, updatable = false),
+        @JoinColumn(name = "test_plan_test_project_id", referencedColumnName = "test_project_id", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private TestPlan testPlan;
-    @JoinColumn(name = "role_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Role role;
 
@@ -117,8 +112,7 @@ public class UserTestPlanRole implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.UserTestPlanRole[ userTestPlanRolePK="
-                + userTestPlanRolePK + " ]";
+        return "com.validation.manager.core.db.UserTestPlanRole[ userTestPlanRolePK=" + userTestPlanRolePK + " ]";
     }
 
 }

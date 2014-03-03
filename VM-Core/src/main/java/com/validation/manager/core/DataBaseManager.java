@@ -70,14 +70,15 @@ public class DataBaseManager {
     private static boolean demo;
     private static Long demoResetPeriod;
     private static DataBaseManager instance;
-    private static boolean versioning_enabled = true;
+    //TODO: WIP
+    private static boolean versioning_enabled = false;
 
     static {
         state = DBState.START_UP;
     }
 
     /**
-     * @return the versioning_enabled
+     * @return the versioning enabled
      */
     public static boolean isVersioningEnabled() {
         return versioning_enabled;

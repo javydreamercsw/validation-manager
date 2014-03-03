@@ -1,7 +1,14 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,11 +17,14 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -24,12 +34,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "assignment_status")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "AssignmentStatus.findAll",
-            query = "SELECT a FROM AssignmentStatus a"),
-    @NamedQuery(name = "AssignmentStatus.findById",
-            query = "SELECT a FROM AssignmentStatus a WHERE a.id = :id"),
-    @NamedQuery(name = "AssignmentStatus.findByName",
-            query = "SELECT a FROM AssignmentStatus a WHERE a.name = :name")})
+    @NamedQuery(name = "AssignmentStatus.findAll", query = "SELECT a FROM AssignmentStatus a"),
+    @NamedQuery(name = "AssignmentStatus.findById", query = "SELECT a FROM AssignmentStatus a WHERE a.id = :id"),
+    @NamedQuery(name = "AssignmentStatus.findByName", query = "SELECT a FROM AssignmentStatus a WHERE a.name = :name")})
 public class AssignmentStatus implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -45,17 +52,15 @@ public class AssignmentStatus implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "assignmentStatus")
+    private List<UserAssigment> userAssigmentList;
 
     public AssignmentStatus() {
     }
@@ -73,6 +78,14 @@ public class AssignmentStatus implements Serializable {
         this.id = id;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getName() {
         return name;
     }
@@ -81,12 +94,14 @@ public class AssignmentStatus implements Serializable {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
+    @XmlTransient
+    @JsonIgnore
+    public List<UserAssigment> getUserAssigmentList() {
+        return userAssigmentList;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setUserAssigmentList(List<UserAssigment> userAssigmentList) {
+        this.userAssigmentList = userAssigmentList;
     }
 
     @Override
@@ -103,10 +118,7 @@ public class AssignmentStatus implements Serializable {
             return false;
         }
         AssignmentStatus other = (AssignmentStatus) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

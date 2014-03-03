@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -90,16 +95,12 @@ public class RequirementSpecPK implements Serializable {
         if (this.projectId != other.projectId) {
             return false;
         }
-        if (this.specLevelId != other.specLevelId) {
-            return false;
-        }
-        return true;
+        return this.specLevelId == other.specLevelId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementSpecPK[ id=" + id
-                + ", projectId=" + projectId + ", specLevelId=" + specLevelId + " ]";
+        return "com.validation.manager.core.db.RequirementSpecPK[ id=" + id + ", projectId=" + projectId + ", specLevelId=" + specLevelId + " ]";
     }
 
 }

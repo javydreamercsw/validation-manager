@@ -1,9 +1,13 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -28,17 +32,11 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "requirement_type")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RequirementType.findAll",
-            query = "SELECT r FROM RequirementType r"),
-    @NamedQuery(name = "RequirementType.findById",
-            query = "SELECT r FROM RequirementType r WHERE r.id = :id"),
-    @NamedQuery(name = "RequirementType.findByName",
-            query = "SELECT r FROM RequirementType r WHERE r.name = :name"),
-    @NamedQuery(name = "RequirementType.findByDescription",
-            query = "SELECT r FROM RequirementType r WHERE r.description = :description")})
+    @NamedQuery(name = "RequirementType.findAll", query = "SELECT r FROM RequirementType r"),
+    @NamedQuery(name = "RequirementType.findById", query = "SELECT r FROM RequirementType r WHERE r.id = :id"),
+    @NamedQuery(name = "RequirementType.findByDescription", query = "SELECT r FROM RequirementType r WHERE r.description = :description"),
+    @NamedQuery(name = "RequirementType.findByName", query = "SELECT r FROM RequirementType r WHERE r.name = :name")})
 public class RequirementType implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementTypeId")
-    private List<Requirement> requirementList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -53,14 +51,14 @@ public class RequirementType implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
     @Size(max = 255)
     @Column(name = "description")
     private String description;
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
+    @OneToMany(mappedBy = "requirementTypeId")
+    private List<Requirement> requirementList;
 
     public RequirementType() {
     }
@@ -77,6 +75,14 @@ public class RequirementType implements Serializable {
         this.id = id;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getName() {
         return name;
     }
@@ -85,12 +91,14 @@ public class RequirementType implements Serializable {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
+    @XmlTransient
+    @JsonIgnore
+    public List<Requirement> getRequirementList() {
+        return requirementList;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setRequirementList(List<Requirement> requirementList) {
+        this.requirementList = requirementList;
     }
 
     @Override
@@ -107,25 +115,12 @@ public class RequirementType implements Serializable {
             return false;
         }
         RequirementType other = (RequirementType) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RequirementType[ id=" + id + " ]";
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<Requirement> getRequirementList() {
-        return requirementList;
-    }
-
-    public void setRequirementList(List<Requirement> requirementList) {
-        this.requirementList = requirementList;
     }
 
 }
