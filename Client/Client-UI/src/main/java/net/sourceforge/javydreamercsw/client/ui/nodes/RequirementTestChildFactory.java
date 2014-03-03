@@ -22,11 +22,11 @@ public class RequirementTestChildFactory extends AbstractChildFactory {
     @Override
     protected boolean createKeys(List<Object> list) {
         if (DataBaseTool.getEmf() != null) {
-            RequirementJpaController controller = 
-                    new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
-            Requirement requirement = 
-                    controller.findRequirement(req.getRequirementPK());
-            for (Step s:requirement.getStepList()) {
+            RequirementJpaController controller
+                    = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
+            Requirement requirement
+                    = controller.findRequirement(req.getId());
+            for (Step s : requirement.getStepList()) {
                 list.add(s);
             }
         }
