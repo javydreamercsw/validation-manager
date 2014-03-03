@@ -237,38 +237,63 @@ public class RequirementServerTest extends AbstractVMTestCase {
     }
 
     /**
-     * Test of getChildrenRequirement method, of class RequirementServer.
+     * Test of requirement versioning method, of class RequirementServer.
      */
     @Test
-    public void testRequirementVersioning() {
+    public void testRequirementVersioningEnabled() {
         try {
-            System.out.println("getTestCoverage");
-            prepare();
-            String first = "Sample requirement", second = "Updated";
-            Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    first, rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
-            RequirementServer rs = new RequirementServer(req);
-            assertEquals(0, rs.getRequirementPK().getMajorVersion());
-            assertEquals(0, rs.getRequirementPK().getMidVersion());
-            assertEquals(0, rs.getRequirementPK().getMinorVersion());
-            assertEquals(1, rs.getRequirementVersions().size());
-            assertEquals(first, rs.getDescription());
-            rs.setDescription(second);
-            rs.updateMajorVersion(rs.getRequirementPK().getMinorVersion() + 1);
-            rs.updateMidVersion(rs.getRequirementPK().getMinorVersion() + 2);
-            rs.updateMinorVersion(rs.getRequirementPK().getMinorVersion() + 3);
-            rs.write2DB();
-            assertEquals(1, rs.getRequirementPK().getMajorVersion());
-            assertEquals(2, rs.getRequirementPK().getMidVersion());
-            assertEquals(3, rs.getRequirementPK().getMinorVersion());
-            assertEquals(second, rs.getDescription());
-            assertEquals(2, rs.getRequirementVersions().size());
-            for (Requirement r : rs.getRequirementVersions()) {
-                System.out.println(r);
-            }
+            System.out.println("Requirement Versioning (Enabled)");
+            DataBaseManager.setVersioningEnabled(true);
+            runVersioningTest();
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             fail();
+        }
+    }
+
+    /**
+     * Test of requirement versioning method, of class RequirementServer.
+     */
+    @Test
+    public void testRequirementVersioningDisabled() {
+        try {
+            System.out.println("Requirement Versioning (Disabled)");
+            DataBaseManager.setVersioningEnabled(false);
+            runVersioningTest();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            fail();
+        }
+    }
+
+    private void runVersioningTest() throws Exception {
+        prepare();
+        String first = "Sample requirement", second = "Updated";
+        Requirement req = TestHelper.createRequirement("SRS-SW-0001",
+                first, rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+        RequirementServer rs = new RequirementServer(req);
+        assertEquals(0, rs.getRequirementPK().getMajorVersion());
+        assertEquals(0, rs.getRequirementPK().getMidVersion());
+        assertEquals(0, rs.getRequirementPK().getMinorVersion());
+        assertEquals(1, rs.getRequirementVersions().size());
+        assertEquals(first, rs.getDescription());
+        rs.setDescription(second);
+        if (DataBaseManager.isVersioningEnabled()) {
+            rs.write2DB();
+            assertEquals(0, rs.getRequirementPK().getMajorVersion());
+            assertEquals(0, rs.getRequirementPK().getMidVersion());
+            assertEquals(1, rs.getRequirementPK().getMinorVersion());
+        } else {
+            rs.write2DB();
+            assertEquals(0, rs.getRequirementPK().getMajorVersion());
+            assertEquals(0, rs.getRequirementPK().getMidVersion());
+            assertEquals(0, rs.getRequirementPK().getMinorVersion());
+        }
+        assertEquals(second, rs.getDescription());
+        assertEquals(DataBaseManager.isVersioningEnabled() ? 2 : 1,
+                rs.getRequirementVersions().size());
+        for (Requirement r : rs.getRequirementVersions()) {
+            System.out.println(r);
         }
     }
 }

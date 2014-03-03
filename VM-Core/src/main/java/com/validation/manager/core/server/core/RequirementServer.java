@@ -85,14 +85,13 @@ public final class RequirementServer extends Requirement
                  * deciding if those still cover the requirement changes in a
                  * one by one basis. 3) Don't do anything, leaving it uncovered.
                  */
-            } else {
-                Requirement req = new RequirementJpaController(
-                        DataBaseManager.getEntityManagerFactory())
-                        .findRequirement(getRequirementPK());
-                update(req, this);
-                new RequirementJpaController(
-                        DataBaseManager.getEntityManagerFactory()).edit(req);
             }
+            Requirement req = new RequirementJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRequirement(getRequirementPK());
+            update(req, this);
+            new RequirementJpaController(
+                    DataBaseManager.getEntityManagerFactory()).edit(req);
         } else {
             Requirement req = new Requirement(getUniqueId(), getDescription());
             update(req, this);
@@ -110,8 +109,12 @@ public final class RequirementServer extends Requirement
     }
 
     public void update(Requirement target, Requirement source) {
-        target.setNotes(source.getNotes());
-        target.setDescription(source.getDescription());
+        if (source.getNotes() != null) {
+            target.setNotes(source.getNotes());
+        }
+        if (source.getDescription() != null) {
+            target.setDescription(source.getDescription());
+        }
         target.setRequirementSpecNode(source.getRequirementSpecNode());
         target.setRequirementList(source.getRequirementList());
         target.setRequirementList1(source.getRequirementList1());
