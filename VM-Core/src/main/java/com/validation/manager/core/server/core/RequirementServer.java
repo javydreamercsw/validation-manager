@@ -13,7 +13,6 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,7 +64,7 @@ public final class RequirementServer extends Requirement
 
     @Override
     public int write2DB() throws Exception {
-        if (getId() != null && getId() > 0) {
+        if (getId() > 0) {
             if (DataBaseManager.isVersioningEnabled()) {
                 //One exists already, need to make a copy of the requirement
                 Requirement req = new Requirement(getUniqueId(), getDescription(),
@@ -228,7 +227,7 @@ public final class RequirementServer extends Requirement
         parameters.clear();
         parameters.put("uniqueId", getEntity().getUniqueId());
         for (Object obj : DataBaseManager.createdQuery(
-                "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId", 
+                "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId",
                 parameters)) {
             versions.add((Requirement) obj);
         }
