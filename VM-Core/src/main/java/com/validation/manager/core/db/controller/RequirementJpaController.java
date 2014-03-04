@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db.controller;
 
 import java.io.Serializable;
@@ -19,7 +14,6 @@ import java.util.List;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.RequirementHasException;
-import com.validation.manager.core.db.RequirementPK;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;

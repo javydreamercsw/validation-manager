@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -38,7 +33,8 @@ public class RequirementHasExceptionPK implements Serializable {
     public RequirementHasExceptionPK() {
     }
 
-    public RequirementHasExceptionPK(int requirementId, int exceptionId, int exceptionReporterId) {
+    public RequirementHasExceptionPK(int requirementId, int exceptionId,
+            int exceptionReporterId) {
         this.requirementId = requirementId;
         this.vmExceptionId = exceptionId;
         this.vmExceptionReporterId = exceptionReporterId;

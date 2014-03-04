@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -38,7 +34,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Hazard.findAll", query = "SELECT h FROM Hazard h"),
     @NamedQuery(name = "Hazard.findById", query = "SELECT h FROM Hazard h WHERE h.id = :id"),
     @NamedQuery(name = "Hazard.findByName", query = "SELECT h FROM Hazard h WHERE h.name = :name")})
-public class Hazard implements Serializable {
+public class Hazard extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id

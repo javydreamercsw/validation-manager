@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -26,12 +21,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "requirement_has_exception")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RequirementHasException.findAll", query = "SELECT r FROM RequirementHasException r"),
-    @NamedQuery(name = "RequirementHasException.findByRequirementHasExceptioncol", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptioncol = :requirementHasExceptioncol"),
-    @NamedQuery(name = "RequirementHasException.findByVmExceptionReporterId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.vmExceptionReporterId = :vmExceptionReporterId"),
-    @NamedQuery(name = "RequirementHasException.findByRequirementVersion", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.requirementVersion = :requirementVersion"),
-    @NamedQuery(name = "RequirementHasException.findByVmExceptionId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.vmExceptionId = :vmExceptionId"),
-    @NamedQuery(name = "RequirementHasException.findByRequirementId", query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.requirementId = :requirementId")})
+    @NamedQuery(name = "RequirementHasException.findAll",
+            query = "SELECT r FROM RequirementHasException r"),
+    @NamedQuery(name = "RequirementHasException.findByRequirementHasExceptioncol",
+            query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptioncol = :requirementHasExceptioncol"),
+    @NamedQuery(name = "RequirementHasException.findByVmExceptionReporterId",
+            query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.vmExceptionReporterId = :vmExceptionReporterId"),
+    @NamedQuery(name = "RequirementHasException.findByRequirementVersion",
+            query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.requirementVersion = :requirementVersion"),
+    @NamedQuery(name = "RequirementHasException.findByVmExceptionId",
+            query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.vmExceptionId = :vmExceptionId"),
+    @NamedQuery(name = "RequirementHasException.findByRequirementId",
+            query = "SELECT r FROM RequirementHasException r WHERE r.requirementHasExceptionPK.requirementId = :requirementId")})
 public class RequirementHasException implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -41,20 +42,22 @@ public class RequirementHasException implements Serializable {
     @Column(name = "requirement_has_exceptioncol")
     private String requirementHasExceptioncol;
     @JoinColumns({
-        @JoinColumn(name = "vm_exception_id", referencedColumnName = "id", insertable = false, updatable = false),
-        @JoinColumn(name = "vm_exception_reporter_id", referencedColumnName = "reporter_id", insertable = false, updatable = false)})
+        @JoinColumn(name = "vm_exception_id", referencedColumnName = "id",
+                insertable = false, updatable = false),
+        @JoinColumn(name = "vm_exception_reporter_id",
+                referencedColumnName = "reporter_id", insertable = false,
+                updatable = false)})
     @ManyToOne(optional = false)
     private VmException vmException;
     @JoinColumns({
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id", insertable = false, updatable = false),
-        @JoinColumn(name = "requirement_major_version", referencedColumnName = "major_version", insertable = false, updatable = false),
-        @JoinColumn(name = "requirement_mid_version", referencedColumnName = "mid_version", insertable = false, updatable = false),
-        @JoinColumn(name = "requirement_minor_version", referencedColumnName = "minor_version", insertable = false, updatable = false)})
+        @JoinColumn(name = "requirement_id", referencedColumnName = "id",
+                insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private Requirement requirement;
     @JoinColumns({
         @JoinColumn(name = "exception_id", referencedColumnName = "id"),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")})
+        @JoinColumn(name = "exception_reporter_id",
+                referencedColumnName = "reporter_id")})
     @ManyToOne
     private VmException vmException1;
 

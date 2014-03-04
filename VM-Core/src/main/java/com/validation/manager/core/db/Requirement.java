@@ -3,9 +3,13 @@ package com.validation.manager.core.db;
 import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.JoinTable;
@@ -16,6 +20,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -38,6 +44,18 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 public class Requirement extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    @Id
+    @Basic(optional = false)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "ReqGen")
+    @TableGenerator(name = "ReqGen", table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "requirement",
+            allocationSize = 1,
+            initialValue = 1000)
+    @NotNull
+    @Column(name = "id")
+    private int id;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "description")
@@ -51,62 +69,62 @@ public class Requirement extends Versionable implements Serializable {
     private String uniqueId;
     @JoinTable(name = "requirement_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_major_version", 
-                referencedColumnName = "major_version", insertable = false, 
+        @JoinColumn(name = "requirement_major_version",
+                referencedColumnName = "major_version", insertable = false,
                 updatable = false),
-        @JoinColumn(name = "requirement_mid_version", 
-                referencedColumnName = "mid_version", insertable = false, 
+        @JoinColumn(name = "requirement_mid_version",
+                referencedColumnName = "mid_version", insertable = false,
                 updatable = false),
-        @JoinColumn(name = "requirement_minor_version", 
-                referencedColumnName = "minor_version", insertable = false, 
+        @JoinColumn(name = "requirement_minor_version",
+                referencedColumnName = "minor_version", insertable = false,
                 updatable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "parent_requirement_id", 
-                referencedColumnName = "id"),
-        @JoinColumn(name = "parent_major_version", 
-                referencedColumnName = "major_version", insertable = false, 
-                updatable = false),
-        @JoinColumn(name = "parent_mid_version", 
-                referencedColumnName = "mid_version", insertable = false, 
-                updatable = false),
-        @JoinColumn(name = "parent_minor_version", 
-                referencedColumnName = "minor_version", insertable = false, 
-                updatable = false)})
+                @JoinColumn(name = "parent_requirement_id",
+                        referencedColumnName = "id"),
+                @JoinColumn(name = "parent_major_version",
+                        referencedColumnName = "major_version", insertable = false,
+                        updatable = false),
+                @JoinColumn(name = "parent_mid_version",
+                        referencedColumnName = "mid_version", insertable = false,
+                        updatable = false),
+                @JoinColumn(name = "parent_minor_version",
+                        referencedColumnName = "minor_version", insertable = false,
+                        updatable = false)})
     @ManyToMany
     private List<Requirement> requirementList;
     @ManyToMany(mappedBy = "requirementList")
     private List<Requirement> requirementList1;
     @JoinTable(name = "step_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_major_version", 
-                referencedColumnName = "major_version", insertable = false, 
+        @JoinColumn(name = "requirement_major_version",
+                referencedColumnName = "major_version", insertable = false,
                 updatable = false),
-        @JoinColumn(name = "requirement_mid_version", 
-                referencedColumnName = "mid_version", insertable = false, 
+        @JoinColumn(name = "requirement_mid_version",
+                referencedColumnName = "mid_version", insertable = false,
                 updatable = false),
-        @JoinColumn(name = "requirement_minor_version", 
-                referencedColumnName = "minor_version", insertable = false, 
+        @JoinColumn(name = "requirement_minor_version",
+                referencedColumnName = "minor_version", insertable = false,
                 updatable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "step_test_case_test_id", 
-                referencedColumnName = "test_case_test_id"),
-        @JoinColumn(name = "step_id", referencedColumnName = "id"),
-        @JoinColumn(name = "step_test_case_id", 
-                referencedColumnName = "test_case_id")})
+                @JoinColumn(name = "step_test_case_test_id",
+                        referencedColumnName = "test_case_test_id"),
+                @JoinColumn(name = "step_id", referencedColumnName = "id"),
+                @JoinColumn(name = "step_test_case_id",
+                        referencedColumnName = "test_case_id")})
     @ManyToMany
     private List<Step> stepList;
     @JoinTable(name = "risk_control_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_major_version", 
-                referencedColumnName = "major_version", insertable = false, 
+        @JoinColumn(name = "requirement_major_version",
+                referencedColumnName = "major_version", insertable = false,
                 updatable = false),
-        @JoinColumn(name = "requirement_mid_version", 
-                referencedColumnName = "mid_version", insertable = false, 
+        @JoinColumn(name = "requirement_mid_version",
+                referencedColumnName = "mid_version", insertable = false,
                 updatable = false),
-        @JoinColumn(name = "requirement_minor_version", 
-                referencedColumnName = "minor_version", insertable = false, 
+        @JoinColumn(name = "requirement_minor_version",
+                referencedColumnName = "minor_version", insertable = false,
                 updatable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_control_risk_control_type_id", 
-                referencedColumnName = "risk_control_type_id")})
+                @JoinColumn(name = "risk_control_id", referencedColumnName = "id"),
+                @JoinColumn(name = "risk_control_risk_control_type_id",
+                        referencedColumnName = "risk_control_type_id")})
     @ManyToMany
     private List<RiskControl> riskControlList;
     @JoinColumn(name = "requirement_type_id", referencedColumnName = "id")
@@ -118,11 +136,11 @@ public class Requirement extends Versionable implements Serializable {
     @JoinColumns({
         @JoinColumn(name = "requirement_spec_node_id",
                 referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_project_id", 
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_project_id",
                 referencedColumnName = "requirement_spec_project_id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id", 
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id",
                 referencedColumnName = "requirement_spec_spec_level_id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", 
+        @JoinColumn(name = "requirement_spec_node_requirement_spec_id",
                 referencedColumnName = "requirement_spec_id")})
     @ManyToOne
     private RequirementSpecNode requirementSpecNode;
@@ -279,4 +297,11 @@ public class Requirement extends Versionable implements Serializable {
         return "com.validation.manager.core.db.Requirement[ id=" + getId() + " ]";
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

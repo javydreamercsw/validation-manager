@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -35,10 +31,13 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "failure_mode")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "FailureMode.findAll", query = "SELECT f FROM FailureMode f"),
-    @NamedQuery(name = "FailureMode.findById", query = "SELECT f FROM FailureMode f WHERE f.id = :id"),
-    @NamedQuery(name = "FailureMode.findByName", query = "SELECT f FROM FailureMode f WHERE f.name = :name")})
-public class FailureMode implements Serializable {
+    @NamedQuery(name = "FailureMode.findAll", 
+            query = "SELECT f FROM FailureMode f"),
+    @NamedQuery(name = "FailureMode.findById", 
+            query = "SELECT f FROM FailureMode f WHERE f.id = :id"),
+    @NamedQuery(name = "FailureMode.findByName", 
+            query = "SELECT f FROM FailureMode f WHERE f.name = :name")})
+public class FailureMode extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id

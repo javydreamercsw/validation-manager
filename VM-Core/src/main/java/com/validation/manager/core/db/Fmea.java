@@ -1,10 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -37,11 +33,15 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "fmea")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Fmea.findAll", query = "SELECT f FROM Fmea f"),
-    @NamedQuery(name = "Fmea.findById", query = "SELECT f FROM Fmea f WHERE f.id = :id"),
-    @NamedQuery(name = "Fmea.findByDescription", query = "SELECT f FROM Fmea f WHERE f.description = :description"),
-    @NamedQuery(name = "Fmea.findByName", query = "SELECT f FROM Fmea f WHERE f.name = :name")})
-public class Fmea implements Serializable {
+    @NamedQuery(name = "Fmea.findAll", 
+            query = "SELECT f FROM Fmea f"),
+    @NamedQuery(name = "Fmea.findById", 
+            query = "SELECT f FROM Fmea f WHERE f.id = :id"),
+    @NamedQuery(name = "Fmea.findByDescription", 
+            query = "SELECT f FROM Fmea f WHERE f.description = :description"),
+    @NamedQuery(name = "Fmea.findByName", 
+            query = "SELECT f FROM Fmea f WHERE f.name = :name")})
+public class Fmea extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -63,7 +63,8 @@ public class Fmea implements Serializable {
     @Column(name = "name")
     private String name;
     @JoinTable(name = "fmea_has_risk_category", joinColumns = {
-        @JoinColumn(name = "FMEA_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "FMEA_id", referencedColumnName = "id")},
+            inverseJoinColumns = {
         @JoinColumn(name = "risk_category_id", referencedColumnName = "id")})
     @ManyToMany
     private List<RiskCategory> riskCategoryList;
