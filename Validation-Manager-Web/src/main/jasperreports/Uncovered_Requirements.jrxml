@@ -29,7 +29,6 @@ SELECT
      requirement.`unique_id`
 FROM
      `requirement` requirement INNER JOIN `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
-     AND requirement.`version` = step_has_requirement.`requirement_version`
      INNER JOIN `step` step ON step_has_requirement.`step_id` = step.`id`
      AND step.`test_case_test_id` = step_has_requirement.`step_test_case_test_id`
      AND step.`test_case_id` = step_has_requirement.`step_test_case_id`
