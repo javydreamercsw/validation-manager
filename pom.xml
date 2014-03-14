@@ -186,7 +186,7 @@
     <modules>
         <module>VM-Core</module>
         <module>Client</module>
-        <module>ValidationManager</module>
+        <!--<module>ValidationManager</module>-->
         <!--<module>WebServiceClient</module>-->
     </modules>
 </project>
