@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -17,6 +17,37 @@
 
     <name>Validation Manager</name>
     <url>https://sourceforge.net/projects/validationmgr/</url>
+
+    <issueManagement>
+        <system>jira</system>
+        <url>https://simple-marauroa.jira.com/browse/JW</url>
+    </issueManagement>
+    <developers>
+        <developer>
+            <id>javydreamercsw</id>
+            <name>Javier A. Ortiz Bultron</name>
+            <roles>
+                <role>admin</role>
+            </roles>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>CDDL-1.0</name>
+            <url>http://www.opensource.org/licenses/cddl1.php</url>
+            <comments>Common Development and Distribution License</comments>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://bitbucket.org/javydreamercsw/validation-manager/src</url>
+        <connection>scm:hg:https://bitbucket.org/javydreamercsw/validation-manager/src</connection>
+        <developerConnection>scm:hg:ssh://hg@bitbucket.org/javydreamercsw/validation-manager</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>https://xinco.ci.cloudbees.com/</url>
+    </ciManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
