@@ -2,6 +2,7 @@ package com.validation.manager.core.db;
 
 import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -169,12 +170,22 @@ public class Requirement extends Versionable implements Serializable {
         setMajorVersion(major_version);
         setMidVersion(mid_version);
         setMinorVersion(minor_version);
+        setRequirementHasExceptionList(new ArrayList<RequirementHasException>());
+        setRequirementList(new ArrayList<Requirement>());
+        setRequirementList1(new ArrayList<Requirement>());
+        setRiskControlList(new ArrayList<RiskControl>());
+        setStepList(new ArrayList<Step>());
     }
 
     public Requirement(int major_version, int mid_version, int minor_version) {
         setMajorVersion(major_version);
         setMidVersion(mid_version);
         setMinorVersion(minor_version);
+        setRequirementHasExceptionList(new ArrayList<RequirementHasException>());
+        setRequirementList(new ArrayList<Requirement>());
+        setRequirementList1(new ArrayList<Requirement>());
+        setRiskControlList(new ArrayList<RiskControl>());
+        setStepList(new ArrayList<Step>());
     }
 
     public String getDescription() {
