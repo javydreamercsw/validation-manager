@@ -2,6 +2,7 @@ package com.validation.manager.core.tool.table.extractor;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import static java.io.File.createTempFile;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -11,6 +12,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.MessageFormat;
+import static java.text.MessageFormat.format;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,6 +21,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.swing.table.DefaultTableModel;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -39,7 +42,7 @@ public class TableExtractor {
 
     private final File source;
     private final static Logger LOG
-            = Logger.getLogger(TableExtractor.class.getSimpleName());
+            = getLogger(TableExtractor.class.getSimpleName());
 
     public TableExtractor(File source) {
         this.source = source;
@@ -56,7 +59,7 @@ public class TableExtractor {
     }
 
     private File writeTablesToFile() throws IOException {
-        File temp = File.createTempFile("table", null);
+        File temp = createTempFile("table", null);
         temp.createNewFile();
         temp.deleteOnExit();
         List<DefaultTableModel> tables = new ArrayList<DefaultTableModel>();
@@ -67,7 +70,7 @@ public class TableExtractor {
             Object[][] data = new Object[rows][columns];
             String[] title = new String[columns];
             for (int i = 0; i < columns; i++) {
-                title[i] = MessageFormat.format("Column {0}", i + 1);
+                title[i] = format("Column {0}", i + 1);
             }
             //Row 0 for mapping field
             int rowNum = 0;
@@ -139,7 +142,7 @@ public class TableExtractor {
             Object[][] data2 = new Object[rowNum][columns];
             String[] title = new String[columns];
             for (int i = 0; i < columns; i++) {
-                title[i] = MessageFormat.format("Column {0}", i + 1);
+                title[i] = format("Column {0}", i + 1);
             }
             int row = 0, col = 0;
             for (int i = 0; i < rowNum; i++) {
@@ -184,7 +187,7 @@ public class TableExtractor {
             Object[][] data2 = new Object[rowNum][columns];
             String[] title = new String[columns];
             for (int i = 0; i < columns; i++) {
-                title[i] = MessageFormat.format("Column {0}", i + 1);
+                title[i] = format("Column {0}", i + 1);
             }
             int row = 0, col = 0;
             for (int i = 0; i < rowNum; i++) {
@@ -200,7 +203,7 @@ public class TableExtractor {
             tables.add(new DefaultTableModel(data2, title));
         } else {
             throw new RuntimeException(
-                    MessageFormat.format("Invalid import file: {0}", source));
+                    format("Invalid import file: {0}", source));
         }
         return tables;
     }

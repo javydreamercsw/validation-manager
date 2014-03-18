@@ -1,6 +1,8 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
@@ -19,14 +21,14 @@ public class RequirementStatusServer extends RequirementStatus
         RequirementStatus p;
         if (getId() > 0) {
             p = new RequirementStatusJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findRequirementStatus(getId());
             update(p, this);
-            new RequirementStatusJpaController(DataBaseManager.getEntityManagerFactory()).edit(p);
+            new RequirementStatusJpaController(getEntityManagerFactory()).edit(p);
         } else {
             p = new RequirementStatus(getStatus());
             update(p, this);
-            new RequirementStatusJpaController(DataBaseManager.getEntityManagerFactory()).create(p);
+            new RequirementStatusJpaController(getEntityManagerFactory()).create(p);
             setId(p.getId());
         }
         return getId();
@@ -34,7 +36,7 @@ public class RequirementStatusServer extends RequirementStatus
 
     public RequirementStatus getEntity() {
         return new RequirementStatusJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRequirementStatus(getId());
     }
 
@@ -52,7 +54,7 @@ public class RequirementStatusServer extends RequirementStatus
          List<RequirementStatus> versions = new ArrayList<RequirementStatus>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
-        for (Object obj : DataBaseManager.namedQuery("RequirementStatus.findById",
+        for (Object obj : namedQuery("RequirementStatus.findById",
                 parameters)) {
             versions.add((RequirementStatus) obj);
         }

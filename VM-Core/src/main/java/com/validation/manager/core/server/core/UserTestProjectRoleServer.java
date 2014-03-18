@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.controller.RoleJpaController;
@@ -11,6 +12,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -22,12 +24,12 @@ public class UserTestProjectRoleServer extends UserTestProjectRole
     public UserTestProjectRoleServer(int testProjectId, int userId, int roleId) {
         super(testProjectId, userId, roleId);
         setRole(new RoleJpaController(
-                DataBaseManager.getEntityManagerFactory()).findRole(roleId));
+                getEntityManagerFactory()).findRole(roleId));
         setTestProject(
                 new TestProjectJpaController(
-                DataBaseManager.getEntityManagerFactory()).findTestProject(testProjectId));
+                getEntityManagerFactory()).findTestProject(testProjectId));
         setVmUser(new VmUserJpaController(
-                DataBaseManager.getEntityManagerFactory()).findVmUser(userId));
+                getEntityManagerFactory()).findVmUser(userId));
     }
 
     /**
@@ -39,7 +41,7 @@ public class UserTestProjectRoleServer extends UserTestProjectRole
     @Override
     public int write2DB() throws PreexistingEntityException, Exception {
         UserTestProjectRoleJpaController controller =
-                new UserTestProjectRoleJpaController(DataBaseManager.getEntityManagerFactory());
+                new UserTestProjectRoleJpaController(getEntityManagerFactory());
         if (getUserTestProjectRolePK().getRoleId() > 0
                 && getUserTestProjectRolePK().getTestProjectId() > 0
                 && getUserTestProjectRolePK().getUserId() > 0) {
@@ -72,10 +74,10 @@ public class UserTestProjectRoleServer extends UserTestProjectRole
     public static boolean deleteUserTestProjectRole(UserTestProjectRole role) {
         try {
             new UserTestProjectRoleJpaController(
-                    DataBaseManager.getEntityManagerFactory()).destroy(
+                    getEntityManagerFactory()).destroy(
                     role.getUserTestProjectRolePK());
         } catch (NonexistentEntityException ex) {
-            Logger.getLogger(UserTestProjectRoleServer.class.getName())
+            getLogger(UserTestProjectRoleServer.class.getName())
                     .log(Level.SEVERE, null, ex);
             return false;
         }
@@ -84,7 +86,7 @@ public class UserTestProjectRoleServer extends UserTestProjectRole
 
     public UserTestProjectRole getEntity() {
         return new UserTestProjectRoleJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findUserTestProjectRole(getUserTestProjectRolePK());
     }
 

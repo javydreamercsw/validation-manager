@@ -1,6 +1,8 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -33,13 +36,13 @@ implements EntityServer<Project>, VersionableServer<Project>{
 
     public ProjectServer(int id) {
         Project product = new ProjectJpaController(
-                DataBaseManager.getEntityManagerFactory()).findProject(id);
+                getEntityManagerFactory()).findProject(id);
         update((ProjectServer) this, product);
     }
 
     public ProjectServer(Project p) {
         Project product = new ProjectJpaController(
-                DataBaseManager.getEntityManagerFactory()).findProject(p.getId());
+                getEntityManagerFactory()).findProject(p.getId());
         update((ProjectServer) this, product);
     }
 
@@ -47,13 +50,13 @@ implements EntityServer<Project>, VersionableServer<Project>{
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
         Project p;
         if (getId() > 0) {
-            p = new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(getId());
+            p = new ProjectJpaController(getEntityManagerFactory()).findProject(getId());
             update(p, this);
-            new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).edit(p);
+            new ProjectJpaController(getEntityManagerFactory()).edit(p);
         } else {
             p = new Project(getName());
             update(p, this);
-            new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(p);
+            new ProjectJpaController(getEntityManagerFactory()).create(p);
             setId(p.getId());
         }
         return getId();
@@ -63,14 +66,14 @@ implements EntityServer<Project>, VersionableServer<Project>{
         if (p.getProjectList().isEmpty()) {
             try {
                 if (p.getRequirementSpecList().isEmpty()) {
-                    new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).destroy(p.getId());
+                    new ProjectJpaController(getEntityManagerFactory()).destroy(p.getId());
                 } else {
                     throw new VMException("Unable to delete project with Requirement Specifications!");
                 }
             } catch (IllegalOrphanException ex) {
-                Logger.getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
             } catch (NonexistentEntityException ex) {
-                Logger.getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             throw new VMException("Unable to delete project with children!");
@@ -78,7 +81,7 @@ implements EntityServer<Project>, VersionableServer<Project>{
     }
 
     public Project getEntity() {
-        return new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(getId());
+        return new ProjectJpaController(getEntityManagerFactory()).findProject(getId());
     }
 
     public void update(Project target, Project source) {
@@ -92,7 +95,7 @@ implements EntityServer<Project>, VersionableServer<Project>{
     }
 
     public static List<Project> getProjects() {
-        return new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProjectEntities();
+        return new ProjectJpaController(getEntityManagerFactory()).findProjectEntities();
     }
 
     public List<Project> getChildren() {
@@ -125,7 +128,7 @@ implements EntityServer<Project>, VersionableServer<Project>{
         List<Project> versions = new ArrayList<Project>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
-        for (Object obj : DataBaseManager.namedQuery("Project.findById",
+        for (Object obj : namedQuery("Project.findById",
                 parameters)) {
             versions.add((Project) obj);
         }

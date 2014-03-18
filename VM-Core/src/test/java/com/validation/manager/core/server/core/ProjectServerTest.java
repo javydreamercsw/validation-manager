@@ -5,10 +5,22 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import static com.validation.manager.core.server.core.ProjectServer.deleteProject;
+import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
+import static com.validation.manager.core.server.core.RequirementServer.getChildrenRequirement;
+import static com.validation.manager.core.server.core.RequirementServer.getParentRequirement;
+import static com.validation.manager.core.server.core.RequirementSpecServer.deleteRequirementSpec;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
+import static com.validation.manager.test.TestHelper.addChildToRequirement;
+import static com.validation.manager.test.TestHelper.addProject;
+import static com.validation.manager.test.TestHelper.createProject;
+import static com.validation.manager.test.TestHelper.createRequirement;
+import static com.validation.manager.test.TestHelper.createRequirementSpec;
+import static com.validation.manager.test.TestHelper.createRequirementSpecNode;
 import org.junit.Test;
 import org.openide.util.Exceptions;
+import static org.openide.util.Exceptions.printStackTrace;
 
 /**
  *
@@ -26,53 +38,53 @@ public class ProjectServerTest extends AbstractVMTestCase {
     public void testCreateAndDeleteProject() {
         try {
             System.out.println("Create a project");
-            Project root = TestHelper.createProject("Test", "Notes");
+            Project root = createProject("Test", "Notes");
             System.out.println("Add a sub project");
-            Project sub = TestHelper.addProject(root, "Sub", "Notes");
+            Project sub = addProject(root, "Sub", "Notes");
             System.out.println("Create Spec for main project.");
             //No errors, nothing dependent
             try {
-                ProjectServer.deleteProject(sub);
+                deleteProject(sub);
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                printStackTrace(ex);
                 fail();
             }
-            assertTrue(ProjectServer.getRequirements(root).isEmpty());
+            assertTrue(getRequirements(root).isEmpty());
             RequirementSpec mainSpec
-                    = TestHelper.createRequirementSpec("Spec", "Desc", root, 1);
+                    = createRequirementSpec("Spec", "Desc", root, 1);
             assertTrue(!root.getRequirementSpecList().isEmpty());
-            assertEquals(0, ProjectServer.getRequirements(root).size());
-            sub = TestHelper.addProject(root, "Sub", "Notes");
+            assertEquals(0, getRequirements(root).size());
+            sub = addProject(root, "Sub", "Notes");
             System.out.println("Create Spec for sub project.");
-            RequirementSpec spec = TestHelper.createRequirementSpec("Spec 2", "Desc", sub, 1);
-            RequirementSpecNode node = TestHelper.createRequirementSpecNode(mainSpec,
+            RequirementSpec spec = createRequirementSpec("Spec 2", "Desc", sub, 1);
+            RequirementSpecNode node = createRequirementSpecNode(mainSpec,
                     "Requirement Doc", "Desc", "Scope");
-            Requirement req1 = TestHelper.createRequirement("REQ-001", "Desc",
+            Requirement req1 = createRequirement("REQ-001", "Desc",
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
-            assertEquals(1, ProjectServer.getRequirements(root).size());
-            Requirement req2 = TestHelper.createRequirement("REQ-002", "Desc",
+            assertEquals(1, getRequirements(root).size());
+            Requirement req2 = createRequirement("REQ-002", "Desc",
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
-            assertEquals(2, ProjectServer.getRequirements(root).size());
-            req1 = TestHelper.addChildToRequirement(req1, req2);
-            assertEquals(1, RequirementServer.getChildrenRequirement(req1).size());
-            assertEquals(0, RequirementServer.getParentRequirement(req1).size());
-            assertEquals(1, RequirementServer.getParentRequirement(req2).size());
-            assertEquals(0, RequirementServer.getChildrenRequirement(req2).size());
+            assertEquals(2, getRequirements(root).size());
+            req1 = addChildToRequirement(req1, req2);
+            assertEquals(1, getChildrenRequirement(req1).size());
+            assertEquals(0, getParentRequirement(req1).size());
+            assertEquals(1, getParentRequirement(req2).size());
+            assertEquals(0, getChildrenRequirement(req2).size());
             try {
-                ProjectServer.deleteProject(sub);
+                deleteProject(sub);
             } catch (VMException ex) {
                 //Expected failure
                 System.out.println("Expected failure!");
             }
-            RequirementSpecServer.deleteRequirementSpec(spec);
+            deleteRequirementSpec(spec);
             try {
-                ProjectServer.deleteProject(new ProjectServer(sub).getEntity());
+                deleteProject(new ProjectServer(sub).getEntity());
             } catch (VMException ex) {
-                Exceptions.printStackTrace(ex);
+                printStackTrace(ex);
                 fail();
             }
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            printStackTrace(ex);
             fail();
         }
     }

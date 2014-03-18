@@ -1,6 +1,7 @@
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -10,10 +11,13 @@ import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.SpecLevelServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
+import static com.validation.manager.test.TestHelper.createRequirement;
+import static com.validation.manager.test.TestHelper.createRequirementSpecNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import org.junit.Test;
 
 /**
@@ -23,7 +27,7 @@ import org.junit.Test;
 public class RequirementHierarchyTest extends AbstractVMTestCase {
 
     private static final Logger LOG
-            = Logger.getLogger(RequirementHierarchyTest.class.getName());
+            = getLogger(RequirementHierarchyTest.class.getName());
     private ProjectServer project;
 
     @Test
@@ -55,7 +59,7 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         System.out.println("Create Requirement Spec Node");
         RequirementSpecNode rsns = null;
         try {
-            rsns = TestHelper.createRequirementSpecNode(
+            rsns = createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -67,12 +71,12 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         for (int i = 0; i < requirementAmount; i++) {
             try {
                 Requirement reqs
-                        = TestHelper.createRequirement("SRS-SW-00" + i,
+                        = createRequirement("SRS-SW-00" + i,
                                 "Description " + i,
                                 rsns.getRequirementSpecNodePK(),
                                 "Notes " + i, 2, 1);
                 requirements.add(new RequirementJpaController(
-                        DataBaseManager.getEntityManagerFactory())
+                        getEntityManagerFactory())
                         .findRequirement(reqs.getId()));
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
@@ -130,13 +134,13 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         try {
             assertTrue(sl.write2DB() > 0);
         } catch (IllegalOrphanException ex) {
-            Logger.getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         } catch (NonexistentEntityException ex) {
-            Logger.getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         } catch (Exception ex) {
-            Logger.getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
         return sl;
@@ -147,7 +151,7 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         try {
             rss.write2DB();
         } catch (Exception ex) {
-            Logger.getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
         return rss;

@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Cause;
 import com.validation.manager.core.db.controller.CauseJpaController;
@@ -21,16 +22,16 @@ public class CauseServer extends Cause implements EntityServer<Cause> {
     public int write2DB() throws NonexistentEntityException, Exception {
         if (getId() > 0) {
             Cause c = new CauseJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findCause(getId());
             update(c, this);
             new CauseJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(c);
+                    getEntityManagerFactory()).edit(c);
         } else {
             Cause c = new Cause();
             update(c, this);
             new CauseJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(c);
+                    getEntityManagerFactory()).create(c);
             setId(c.getId());
         }
         return getId();
@@ -38,13 +39,13 @@ public class CauseServer extends Cause implements EntityServer<Cause> {
 
     public static boolean deleteCause(Cause c) throws NonexistentEntityException {
         new CauseJpaController(
-                DataBaseManager.getEntityManagerFactory()).destroy(c.getId());
+                getEntityManagerFactory()).destroy(c.getId());
         return true;
     }
 
     public Cause getEntity() {
         return new CauseJpaController(
-                DataBaseManager.getEntityManagerFactory()).findCause(getId());
+                getEntityManagerFactory()).findCause(getId());
     }
 
     public void update(Cause target, Cause source) {

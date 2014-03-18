@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.controller.FMEAJpaController;
@@ -19,7 +20,7 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
         setSequence(sequence);
         setVersion(version);
         setFmea(new FMEAJpaController(
-                DataBaseManager.getEntityManagerFactory()).findFmea(fMEAid));
+                getEntityManagerFactory()).findFmea(fMEAid));
     }
 
     @Override
@@ -29,12 +30,12 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
             RiskItem ri = getEntity();
             update(ri, this);
             new RiskItemJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(ri);
+                    getEntityManagerFactory()).edit(ri);
         } else {
             RiskItem ri = new RiskItem(getFmea().getId());
             update(ri, this);
             new RiskItemJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(ri);
+                    getEntityManagerFactory()).create(ri);
             setRiskItemPK(ri.getRiskItemPK());
         }
         return getRiskItemPK().getId();
@@ -42,7 +43,7 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
 
     public RiskItem getEntity() {
         return new RiskItemJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRiskItem(getRiskItemPK());
     }
 
@@ -54,7 +55,7 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
             target.setFailureModeList(source.getFailureModeList());
         }
         target.setFmea(new FMEAJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findFmea(source.getRiskItemPK().getFMEAid()));
         if (source.getHazardList() != null) {
             target.setHazardList(source.getHazardList());

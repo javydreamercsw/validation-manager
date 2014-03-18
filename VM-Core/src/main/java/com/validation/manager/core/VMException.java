@@ -2,7 +2,9 @@ package com.validation.manager.core;
 
 import java.util.List;
 import java.util.Locale;
+import static java.util.Locale.getDefault;
 import java.util.ResourceBundle;
+import static java.util.ResourceBundle.getBundle;
 
 /**
  *
@@ -12,8 +14,8 @@ public class VMException extends Exception {
 
     private String vm_message = "";
     private static ResourceBundle rb =
-            ResourceBundle.getBundle(
-            "com.validation.manager.resources.VMMessages", Locale.getDefault());
+            getBundle(
+            "com.validation.manager.resources.VMMessages", getDefault());
 
     public VMException() {
         super();

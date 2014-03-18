@@ -2,11 +2,18 @@ package com.validation.manager.test;
 
 import com.validation.manager.core.DBState;
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.close;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.getState;
+import static com.validation.manager.core.DataBaseManager.setPersistenceUnitName;
 import com.validation.manager.core.db.TestProjectTest;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.server.core.VMUserServer;
+import static com.validation.manager.core.server.core.VMUserServer.deleteUser;
 import com.validation.manager.core.tool.MD5;
+import static com.validation.manager.core.tool.MD5.encrypt;
+import static java.lang.Class.forName;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.sql.DataSource;
 import junit.framework.TestCase;
 import org.h2.jdbcx.JdbcDataSource;
@@ -39,8 +47,8 @@ public abstract class AbstractVMTestCase extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        DataBaseManager.setPersistenceUnitName("TestVMPU");
-        assertTrue(DataBaseManager.getState().equals(DBState.VALID));
+        setPersistenceUnitName("TestVMPU");
+        assertTrue(getState().equals(DBState.VALID));
     }
 
     @Override
@@ -51,20 +59,20 @@ public abstract class AbstractVMTestCase extends TestCase {
             Connection conn = null;
             Statement stmt = null;
             try {
-                Map<String, Object> properties = DataBaseManager.getEntityManagerFactory().getProperties();
+                Map<String, Object> properties = getEntityManagerFactory().getProperties();
                 DataSource ds = new JdbcDataSource();
                 ((JdbcDataSource) ds).setPassword((String) properties.get("javax.persistence.jdbc.password"));
                 ((JdbcDataSource) ds).setUser((String) properties.get("javax.persistence.jdbc.user"));
                 ((JdbcDataSource) ds).setURL((String) properties.get("javax.persistence.jdbc.url"));
                 //Load the H2 driver
-                Class.forName("org.h2.Driver");
+                forName("org.h2.Driver");
                 conn = ds.getConnection();
                 stmt = conn.createStatement();
                 stmt.executeUpdate("DROP ALL OBJECTS DELETE FILES");
             } catch (SQLException ex) {
-                Logger.getLogger(AbstractVMTestCase.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(AbstractVMTestCase.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClassNotFoundException ex) {
-                Logger.getLogger(AbstractVMTestCase.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(AbstractVMTestCase.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
                     if (stmt != null) {
@@ -82,7 +90,7 @@ public abstract class AbstractVMTestCase extends TestCase {
                 }
             }
         }
-        DataBaseManager.close();
+        close();
         //Restore to default to make it atomic.
         deleteDatabase = true;
     }
@@ -92,28 +100,28 @@ public abstract class AbstractVMTestCase extends TestCase {
             VMUserServer temp = new VMUserServer("test1",
                     "password", "test@test.com", "first", "last");
             temp.write2DB();
-            designer = new VmUserJpaController(DataBaseManager.getEntityManagerFactory()).findVmUser(temp.getId());
+            designer = new VmUserJpaController(getEntityManagerFactory()).findVmUser(temp.getId());
             temp = new VMUserServer("test2",
                     "password", "test@test.com", "first", "last");
             temp.write2DB();
-            tester = new VmUserJpaController(DataBaseManager.getEntityManagerFactory()).findVmUser(temp.getId());
+            tester = new VmUserJpaController(getEntityManagerFactory()).findVmUser(temp.getId());
             temp = new VMUserServer("test3",
-                    MD5.encrypt("password"), "test@test.com", "first", "last");
+                    encrypt("password"), "test@test.com", "first", "last");
             temp.write2DB();
-            leader = new VmUserJpaController(DataBaseManager.getEntityManagerFactory()).findVmUser(temp.getId());
-            Logger.getLogger(TestProjectTest.class.getSimpleName()).log(Level.INFO, "Done!");
+            leader = new VmUserJpaController(getEntityManagerFactory()).findVmUser(temp.getId());
+            getLogger(TestProjectTest.class.getSimpleName()).log(Level.INFO, "Done!");
         } catch (Exception ex) {
-            Logger.getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
+            getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
         }
     }
 
     protected void deleteTestUsers() {
         try {
-            VMUserServer.deleteUser(designer);
-            VMUserServer.deleteUser(tester);
-            VMUserServer.deleteUser(leader);
+            deleteUser(designer);
+            deleteUser(tester);
+            deleteUser(leader);
         } catch (Exception ex) {
-            Logger.getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
+            getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
         }
     }
 }

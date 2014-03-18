@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
@@ -27,13 +28,13 @@ public class TestProjectServer extends TestProject
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
         TestProject tp;
         if (getId() > 0) {
-            tp = new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).findTestProject(getId());
+            tp = new TestProjectJpaController(getEntityManagerFactory()).findTestProject(getId());
             update(tp, this);
-            new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).edit(tp);
+            new TestProjectJpaController(getEntityManagerFactory()).edit(tp);
         } else {
             tp = new TestProject(getName(), getActive());
             update(tp, this);
-            new TestProjectJpaController(DataBaseManager.getEntityManagerFactory()).create(tp);
+            new TestProjectJpaController(getEntityManagerFactory()).create(tp);
         }
         update(this, tp);
         return getId();
@@ -41,7 +42,7 @@ public class TestProjectServer extends TestProject
 
     public TestProject getEntity() {
         return new TestProjectJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findTestProject(getId());
     }
 

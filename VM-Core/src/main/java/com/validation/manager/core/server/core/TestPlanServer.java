@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestPlan;
@@ -15,6 +16,7 @@ import com.validation.manager.core.db.controller.exceptions.PreexistingEntityExc
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -23,7 +25,7 @@ import java.util.logging.Logger;
 public class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
 
     public TestPlanServer(TestPlan plan) {
-        TestPlanJpaController controller = new TestPlanJpaController(DataBaseManager.getEntityManagerFactory());
+        TestPlanJpaController controller = new TestPlanJpaController(getEntityManagerFactory());
         TestPlan temp = controller.findTestPlan(plan.getTestPlanPK());
         update(this, temp);
     }
@@ -35,7 +37,7 @@ public class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
 
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
-        TestPlanJpaController controller = new TestPlanJpaController(DataBaseManager.getEntityManagerFactory());
+        TestPlanJpaController controller = new TestPlanJpaController(getEntityManagerFactory());
         if (getTestPlanPK().getId() > 0) {
             TestPlan temp = controller.findTestPlan(getTestPlanPK());
             update(temp, this);
@@ -51,12 +53,12 @@ public class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
 
     public static boolean deleteTestPlan(TestPlan tp) {
         try {
-            new TestPlanJpaController(DataBaseManager.getEntityManagerFactory()).destroy(tp.getTestPlanPK());
+            new TestPlanJpaController(getEntityManagerFactory()).destroy(tp.getTestPlanPK());
         } catch (IllegalOrphanException ex) {
-            Logger.getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         } catch (NonexistentEntityException ex) {
-            Logger.getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
         return true;
@@ -68,22 +70,22 @@ public class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
                     new TestPlanHasTestPK(getTestPlanPK().getId(), getTestPlanPK().getTestProjectId(), test.getId()),
                     new Date(), 1);
             tpht.setTest(test);
-            tpht.setTestPlan(new TestPlanJpaController(DataBaseManager.getEntityManagerFactory()).findTestPlan(getTestPlanPK()));
-            new TestPlanHasTestJpaController(DataBaseManager.getEntityManagerFactory()).create(tpht);
+            tpht.setTestPlan(new TestPlanJpaController(getEntityManagerFactory()).findTestPlan(getTestPlanPK()));
+            new TestPlanHasTestJpaController(getEntityManagerFactory()).create(tpht);
             getTestPlanHasTestList().add(tpht);
             write2DB();
             return true;
         } catch (PreexistingEntityException ex) {
-            Logger.getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
 
     public TestPlan getEntity() {
         return new TestPlanJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findTestPlan(getTestPlanPK());
     }
 

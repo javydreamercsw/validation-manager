@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
@@ -11,6 +12,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -24,7 +26,7 @@ public class TestServer extends Test implements EntityServer<Test> {
 
     public TestServer(Integer id) {
         setId(id);
-        TestJpaController controller = new TestJpaController(DataBaseManager.getEntityManagerFactory());
+        TestJpaController controller = new TestJpaController(getEntityManagerFactory());
         Test temp = controller.findTest(getId());
         update(this,temp);
     }
@@ -38,13 +40,13 @@ public class TestServer extends Test implements EntityServer<Test> {
             setTestPlanHasTestList(new ArrayList<TestPlanHasTest>());
         }
         if (getId() != null && getId() > 0) {
-            Test temp = new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(getId());
+            Test temp = new TestJpaController(getEntityManagerFactory()).findTest(getId());
             update(this,temp);
-            new TestJpaController(DataBaseManager.getEntityManagerFactory()).edit(temp);
+            new TestJpaController(getEntityManagerFactory()).edit(temp);
         } else {
             Test temp = new Test(getName(), getPurpose(), getScope());
             update(this,temp);
-            new TestJpaController(DataBaseManager.getEntityManagerFactory()).create(temp);
+            new TestJpaController(getEntityManagerFactory()).create(temp);
             setId(temp.getId());
         }
         return getId();
@@ -52,18 +54,18 @@ public class TestServer extends Test implements EntityServer<Test> {
 
     public static boolean deleteTest(Test t) {
         try {
-            new TestJpaController(DataBaseManager.getEntityManagerFactory()).destroy(t.getId());
+            new TestJpaController(getEntityManagerFactory()).destroy(t.getId());
             return true;
         } catch (IllegalOrphanException ex) {
-            Logger.getLogger(TestServer.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NonexistentEntityException ex) {
-            Logger.getLogger(TestServer.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
 
     public Test getEntity() {
-        return new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(getId());
+        return new TestJpaController(getEntityManagerFactory()).findTest(getId());
     }
 
     public void update(Test target, Test source) {

@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RiskControlType;
 import com.validation.manager.core.db.controller.RiskControlTypeJpaController;
@@ -26,12 +27,12 @@ public class RiskControlTypeServer extends RiskControlType
             RiskControlType rct = getEntity();
             update(rct, this);
             new RiskControlTypeJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(rct);
+                    getEntityManagerFactory()).edit(rct);
         } else {
             RiskControlType rct = new RiskControlType();
             update(rct, this);
             new RiskControlTypeJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(rct);
+                    getEntityManagerFactory()).create(rct);
             setId(rct.getId());
         }
         return getId();
@@ -40,13 +41,13 @@ public class RiskControlTypeServer extends RiskControlType
     public static boolean deleteRiskControlType(RiskControlType rct)
             throws IllegalOrphanException, NonexistentEntityException {
         new RiskControlTypeJpaController(
-                DataBaseManager.getEntityManagerFactory()).destroy(rct.getId());
+                getEntityManagerFactory()).destroy(rct.getId());
         return true;
     }
 
     public RiskControlType getEntity() {
         return new RiskControlTypeJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRiskControlType(getId());
     }
 

@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.controller.RiskControlJpaController;
@@ -18,7 +19,7 @@ public class RiskControlServer extends RiskControl
     public RiskControlServer(int riskControlTypeId) {
         super(riskControlTypeId);
         setRiskControlType(new RiskControlTypeJpaController(
-                DataBaseManager.getEntityManagerFactory()).
+                getEntityManagerFactory()).
                 findRiskControlType(riskControlTypeId));
     }
 
@@ -26,16 +27,16 @@ public class RiskControlServer extends RiskControl
     public int write2DB() throws NonexistentEntityException, Exception {
         if (getRiskControlPK() != null && getRiskControlPK().getId() > 0) {
             RiskControl rc = new RiskControlJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findRiskControl(getRiskControlPK());
             update(rc, this);
             new RiskControlJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(rc);
+                    getEntityManagerFactory()).edit(rc);
         } else {
             RiskControl rc = new RiskControl();
             update(rc, this);
             new RiskControlJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(rc);
+                    getEntityManagerFactory()).create(rc);
             setRiskControlPK(rc.getRiskControlPK());
         }
         return getRiskControlPK().getId();
@@ -44,14 +45,14 @@ public class RiskControlServer extends RiskControl
     public static boolean deleteRiskControl(RiskControl rc)
             throws NonexistentEntityException, IllegalOrphanException {
         new RiskControlJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .destroy(rc.getRiskControlPK());
         return true;
     }
 
     public RiskControl getEntity() {
         return new RiskControlJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRiskControl(getRiskControlPK());
     }
 

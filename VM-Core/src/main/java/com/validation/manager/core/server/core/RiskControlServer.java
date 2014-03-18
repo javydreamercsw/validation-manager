@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.RiskControlPK;
@@ -9,6 +10,7 @@ import com.validation.manager.core.db.controller.RiskControlTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -19,18 +21,18 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
     public RiskControlServer(RiskControlPK riskControlPK) {
         super(riskControlPK);
         setRiskControlType(new RiskControlTypeJpaController(
-                DataBaseManager.getEntityManagerFactory()).findRiskControlType(
+                getEntityManagerFactory()).findRiskControlType(
                 riskControlPK.getRiskControlTypeId()));
     }
 
     public RiskControlServer(int riskControlTypeId) {
         super(new RiskControlPK(riskControlTypeId));
-        setRiskControlType(new RiskControlTypeJpaController(DataBaseManager.getEntityManagerFactory()).findRiskControlType(riskControlTypeId));
+        setRiskControlType(new RiskControlTypeJpaController(getEntityManagerFactory()).findRiskControlType(riskControlTypeId));
     }
 
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
-        RiskControlJpaController controller = new RiskControlJpaController(DataBaseManager.getEntityManagerFactory());
+        RiskControlJpaController controller = new RiskControlJpaController(getEntityManagerFactory());
         if (getRiskControlPK().getId() > 0) {
             RiskControl target = controller.findRiskControl(getRiskControlPK());
             update(target, this);
@@ -47,11 +49,11 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
     public static boolean deleteRiskControl(RiskControl rc) {
         try {
             new RiskControlJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .destroy(rc.getRiskControlPK());
             return true;
         } catch (NonexistentEntityException ex) {
-            Logger.getLogger(RiskControlServer.class.getName()).log(
+            getLogger(RiskControlServer.class.getName()).log(
                     Level.SEVERE, null, ex);
         }
         return false;
@@ -59,7 +61,7 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
 
     public RiskControl getEntity() {
         return new RiskControlJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRiskControl(getRiskControlPK());
     }
 

@@ -9,18 +9,27 @@ import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
+import static com.validation.manager.core.server.core.ProjectServer.getProjects;
+import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.tool.table.extractor.TableExtractor;
+import static java.awt.EventQueue.invokeLater;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import static java.lang.Double.valueOf;
+import static java.lang.Math.round;
+import static java.lang.Math.round;
+import static java.lang.Thread.sleep;
 import java.text.MessageFormat;
+import static java.text.MessageFormat.format;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -36,10 +45,16 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
+import static net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.Bundle.CTL_TestCaseImporterTopComponent;
+import static net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.Bundle.HINT_TestCaseImporterTopComponent;
+import static net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.TestCaseImportMapping.values;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
+import static org.openide.awt.Mnemonics.setLocalizedText;
 import org.openide.util.Exceptions;
+import static org.openide.util.Exceptions.printStackTrace;
 import org.openide.util.NbBundle.Messages;
+import static org.openide.util.NbBundle.getMessage;
 import org.openide.windows.TopComponent;
 
 /**
@@ -74,15 +89,15 @@ import org.openide.windows.TopComponent;
 public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
 
     private static final Logger LOG
-            = Logger.getLogger(TestCaseImporterTopComponent.class.getSimpleName());
+            = getLogger(TestCaseImporterTopComponent.class.getSimpleName());
     protected Test test;
     protected TestCase tc;
     protected TestPlan tp;
 
     public TestCaseImporterTopComponent() {
         super();
-        setName(Bundle.CTL_TestCaseImporterTopComponent());
-        setToolTipText(Bundle.HINT_TestCaseImporterTopComponent());
+        setName(CTL_TestCaseImporterTopComponent());
+        setToolTipText(HINT_TestCaseImporterTopComponent());
     }
 
     /**

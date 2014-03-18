@@ -1,6 +1,9 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.namedQuery;
+import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.VmSettingJpaController;
@@ -48,7 +51,7 @@ public class VMSettingServer extends VmSetting
     public static VmSetting getSetting(String s) {
         parameters.clear();
         parameters.put("setting", s);
-        result = DataBaseManager.namedQuery("VmSetting.findBySetting",
+        result = namedQuery("VmSetting.findBySetting",
                 parameters);
         if (result.isEmpty()) {
             return null;
@@ -60,7 +63,7 @@ public class VMSettingServer extends VmSetting
     @SuppressWarnings("unchecked")
     public static ArrayList<VmSetting> getSettings() {
         ArrayList<VmSetting> settings = new ArrayList<VmSetting>();
-        result = DataBaseManager.namedQuery("VmSetting.findAll");
+        result = namedQuery("VmSetting.findAll");
         for (Object o : result) {
             settings.add((VmSetting) o);
         }
@@ -71,16 +74,16 @@ public class VMSettingServer extends VmSetting
     public int write2DB() throws NonexistentEntityException, Exception {
         if (getId() > 0) {
             VmSetting s = new VmSettingJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findVmSetting(getId());
             update(s, this);
             new VmSettingJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(s);
+                    getEntityManagerFactory()).edit(s);
         } else {
             VmSetting s = new VmSetting();
             update(s, this);
             new VmSettingJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(s);
+                    getEntityManagerFactory()).create(s);
             setId(s.getId());
         }
         return getId();
@@ -88,7 +91,7 @@ public class VMSettingServer extends VmSetting
 
     public VmSetting getEntity() {
         return new VmSettingJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findVmSetting(getId());
     }
 
@@ -109,7 +112,7 @@ public class VMSettingServer extends VmSetting
         List<VmSetting> versions = new ArrayList<VmSetting>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
-        for (Object obj : DataBaseManager.namedQuery("VmSetting.findById",
+        for (Object obj : namedQuery("VmSetting.findById",
                 parameters)) {
             versions.add((VmSetting) obj);
         }

@@ -20,6 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import static java.lang.Class.forName;
+import static java.lang.Integer.parseInt;
+import static java.lang.Integer.parseInt;
+import static java.lang.Long.valueOf;
+import static java.lang.System.getProperty;
+import static java.lang.Thread.sleep;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,15 +38,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
+import static java.util.ResourceBundle.getBundle;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import static javax.persistence.Persistence.createEntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.TableGenerator;
 import javax.persistence.metamodel.EmbeddableType;
@@ -61,10 +70,10 @@ public class DataBaseManager {
     private static EntityManager em;
     private static boolean dbError = false;
     private static final Logger LOG
-            = Logger.getLogger(DataBaseManager.class.getSimpleName());
+            = getLogger(DataBaseManager.class.getSimpleName());
     private static DBState state;
     private static final ResourceBundle settings
-            = ResourceBundle.getBundle("com.validation.manager.resources.settings");
+            = getBundle("com.validation.manager.resources.settings");
     private static boolean locked = false;
     private static boolean usingContext;
     private static boolean demo;
@@ -112,7 +121,7 @@ public class DataBaseManager {
                     Map<String, Object> parameters = new HashMap<String, Object>();
                     String tableName = annotation.pkColumnValue();
                     parameters.put("tableName", tableName);
-                    if (DataBaseManager.namedQuery("VmId.findByTableName", parameters, false).isEmpty()) {
+                    if (namedQuery("VmId.findByTableName", parameters, false).isEmpty()) {
                         LOG.log(Level.FINE, "Adding: {0}: {1}",
                                 new Object[]{tableName, annotation.initialValue() - 1});
                         VMIdServer temp = new VMIdServer(tableName, annotation.initialValue() - 1);
@@ -127,7 +136,7 @@ public class DataBaseManager {
         } finally {
             if (LOG.isLoggable(Level.CONFIG)) {
                 VmIdJpaController controller = new VmIdJpaController(
-                        DataBaseManager.getEntityManagerFactory());
+                        getEntityManagerFactory());
                 for (VmId next : controller.findVmIdEntities()) {
                     LOG.log(Level.CONFIG, "{0}, {1}, {2}", new Object[]{next.getId(),
                         next.getTableName(), next.getLastId()});
@@ -208,7 +217,7 @@ public class DataBaseManager {
                         demoResetPeriod = (Long) ctx.lookup("java:comp/env/validation_manager/demo-period");
                     } catch (NamingException e) {
                         LOG.log(Level.SEVERE, null, e);
-                        demoResetPeriod = Long.valueOf(0);
+                        demoResetPeriod = valueOf(0);
                     }
                     if (demoResetPeriod > 0) {
                         LOG.log(Level.WARNING,
@@ -217,7 +226,7 @@ public class DataBaseManager {
                     }
                 }
                 final String JNDIDB = (String) ctx.lookup("java:comp/env/validation_manager/JNDIDB");
-                emf = Persistence.createEntityManagerFactory(JNDIDB);
+                emf = createEntityManagerFactory(JNDIDB);
                 LOG.log(Level.INFO, "Using context defined database connection: {0}", JNDIDB);
                 usingContext = true;
             } catch (NamingException e) {
@@ -227,7 +236,7 @@ public class DataBaseManager {
                     LOG.log(Level.WARNING,
                             "Manually specified connection parameters. "
                             + "Using pre-defined persistence unit: {0}", PU);
-                    emf = Persistence.createEntityManagerFactory(PU);
+                    emf = createEntityManagerFactory(PU);
                 } else {
                     LOG.log(Level.SEVERE,
                             "Context doesn't exist. Check your configuration.", e);
@@ -368,26 +377,26 @@ public class DataBaseManager {
     public static void main(String[] args) {
         //Used to update the init script
         //Get the MySQL script file
-        File script = new File(new File(System.getProperty("user.dir")).getParent()
-                + System.getProperty("file.separator")
-                + "DB" + System.getProperty("file.separator")
+        File script = new File(new File(getProperty("user.dir")).getParent()
+                + getProperty("file.separator")
+                + "DB" + getProperty("file.separator")
                 + "VM.sql");
         if (script.exists()) {
             try {
                 ArrayList<String> contents = readFileAsString(script.getAbsolutePath(), null);
                 if (!contents.isEmpty()) {
                     //Create the init.sql file
-                    File initFile = new File(System.getProperty("user.dir")
-                            + System.getProperty("file.separator") + "src"
-                            + System.getProperty("file.separator") + "main"
-                            + System.getProperty("file.separator") + "resources"
-                            + System.getProperty("file.separator") + "com"
-                            + System.getProperty("file.separator") + "validation"
-                            + System.getProperty("file.separator") + "manager"
-                            + System.getProperty("file.separator") + "core"
-                            + System.getProperty("file.separator") + "db"
-                            + System.getProperty("file.separator") + "script"
-                            + System.getProperty("file.separator") + "init.sql");
+                    File initFile = new File(getProperty("user.dir")
+                            + getProperty("file.separator") + "src"
+                            + getProperty("file.separator") + "main"
+                            + getProperty("file.separator") + "resources"
+                            + getProperty("file.separator") + "com"
+                            + getProperty("file.separator") + "validation"
+                            + getProperty("file.separator") + "manager"
+                            + getProperty("file.separator") + "core"
+                            + getProperty("file.separator") + "db"
+                            + getProperty("file.separator") + "script"
+                            + getProperty("file.separator") + "init.sql");
                     if (initFile.exists()) {
                         initFile.delete();
                     }
@@ -530,7 +539,7 @@ public class DataBaseManager {
                     ((JdbcDataSource) ds).setURL(
                             "jdbc:h2:file:target/data/test/validation-manager-test;AUTO_SERVER=TRUE");
                     //Load the H2 driver
-                    Class.forName("org.h2.Driver");
+                    forName("org.h2.Driver");
                     conn = ds.getConnection();
                 } catch (ClassNotFoundException ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -623,14 +632,14 @@ public class DataBaseManager {
     }
 
     public static void waitForDB() {
-        while (DataBaseManager.getState() != DBState.VALID
-                && DataBaseManager.getState() != DBState.UPDATED
-                && DataBaseManager.getState() != DBState.ERROR) {
+        while (getState() != DBState.VALID
+                && getState() != DBState.UPDATED
+                && getState() != DBState.ERROR) {
             LOG.log(Level.INFO,
                     "Waiting for DB initialization. Current state: {0}",
-                    (DataBaseManager.getState() != null ? DataBaseManager.getState().name() : null));
+                    (getState() != null ? getState().name() : null));
             try {
-                Thread.sleep(10000);
+                sleep(10000);
             } catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
@@ -699,8 +708,8 @@ public class DataBaseManager {
         } else {
             try {
                 while (firstST.hasMoreTokens()) {
-                    int firstInt = Integer.parseInt(firstST.nextToken());
-                    int secondInt = Integer.parseInt(secondST.nextToken());
+                    int firstInt = parseInt(firstST.nextToken());
+                    int secondInt = parseInt(secondST.nextToken());
                     //Both numbers let's continue
                     if (firstInt != secondInt) {
                         result = false;
