@@ -13,7 +13,7 @@ import org.openide.util.NbBundle.Messages;
         category = "Tools",
         id = "net.sourceforge.javydreamercsw.client.ui.ConnectAction")
 @ActionRegistration(
-        iconBase = "net/sourceforge/javydreamercsw/client/ui/database-connect-icon.png",
+        iconBase = "net/sourceforge/javydreamercsw/client/ui/database/database-connect-icon.png",
         displayName = "#CTL_ConnectAction")
 @ActionReferences({
     @ActionReference(path = "Toolbars/Actions", position = 300),

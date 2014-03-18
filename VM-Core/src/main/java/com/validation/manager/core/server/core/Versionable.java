@@ -30,6 +30,7 @@ public class Versionable extends VMAuditedObject implements Serializable {
     @NotNull
     @Column(name = "minor_version")
     private int minorVersion;
+    private boolean inheritRelationships=false;
 
     public Versionable() {
     }
@@ -86,5 +87,19 @@ public class Versionable extends VMAuditedObject implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Versionable[ " + majorVersion
                 + "." + midVersion + "." + minorVersion + " ]";
+    }
+
+    /**
+     * @return the inheritRelationships
+     */
+    public boolean isInheritRelationships() {
+        return inheritRelationships;
+    }
+
+    /**
+     * @param inheritRelationships the inheritRelationships to set
+     */
+    public void setInheritRelationships(boolean inheritRelationships) {
+        this.inheritRelationships = inheritRelationships;
     }
 }

@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 import junit.framework.TestCase;
 import org.h2.jdbcx.JdbcDataSource;
+import org.junit.AfterClass;
 
 /**
  *
@@ -43,6 +44,7 @@ public abstract class AbstractVMTestCase extends TestCase {
     }
 
     @Override
+    @AfterClass
     protected void tearDown() throws Exception {
         if (deleteDatabase) {
             deleteDatabase = false;
