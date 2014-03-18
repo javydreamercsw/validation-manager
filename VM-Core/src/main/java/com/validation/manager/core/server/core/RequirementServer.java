@@ -62,6 +62,24 @@ public final class RequirementServer extends Requirement
         }
     }
 
+    private void copyRelationships(Requirement target, Requirement source) {
+        if (source.getRequirementHasExceptionList() != null) {
+            target.getRequirementHasExceptionList().addAll(source.getRequirementHasExceptionList());
+        }
+        if (source.getRequirementList() != null) {
+            target.getRequirementList().addAll(source.getRequirementList());
+        }
+        if (source.getRequirementList1() != null) {
+            target.getRequirementList1().addAll(source.getRequirementList1());
+        }
+        if (source.getRiskControlList() != null) {
+            target.getRiskControlList().addAll(source.getRiskControlList());
+        }
+        if (source.getStepList() != null) {
+            target.getStepList().addAll(source.getStepList());
+        }
+    }
+
     @Override
     public int write2DB() throws Exception {
         if (getId() > 0) {
@@ -72,18 +90,24 @@ public final class RequirementServer extends Requirement
                         getMajorVersion(),
                         getMidVersion(),
                         getMinorVersion() + 1);
-                //Store in db
+                /**
+                 * TODO: GUI should allow user to either: 
+                 * 1) Blindly copy the test coverage. 
+                 * 2) Review the current test cases covering previous version and
+                 * deciding if those still cover the requirement changes in a
+                 * one by one basis. 
+                 * 3) Don't do anything, leaving it uncovered.
+                 */
+                if (isInheritRelationships()) {
+                    //Copy the relationships
+                    copyRelationships(req, this);
+                } else {
+                    //Do nothing. This will have the requirement as uncovered.
+                }
+                //Store in data base.
                 new RequirementJpaController(
                         DataBaseManager.getEntityManagerFactory()).create(req);
-                //Update this to the new version
                 update(this, req);
-                /**
-                 * TODO: This will have the requirement as uncovered. GUI should
-                 * allow user to either: 1) Blindly copy the test coverage. 2)
-                 * Review the current test cases covering previous version and
-                 * deciding if those still cover the requirement changes in a
-                 * one by one basis. 3) Don't do anything, leaving it uncovered.
-                 */
             }
             Requirement req = new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory())
