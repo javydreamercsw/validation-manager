@@ -1,17 +1,23 @@
 package com.validation.manager.core;
 
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.db.UserModifiedRecord;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.UserModifiedRecordJpaController;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.server.core.VMIdServer;
+import static com.validation.manager.core.server.core.VMIdServer.getNextId;
 import com.validation.manager.core.tool.MD5;
+import static com.validation.manager.core.tool.MD5.encrypt;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import static java.util.Locale.getDefault;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
@@ -25,7 +31,7 @@ public class AuditedEntityListener {
     private static boolean enabled = true;
     private AuditedObject last;
     private static final Logger LOG = 
-            Logger.getLogger(AuditedEntityListener.class.getSimpleName());
+            getLogger(AuditedEntityListener.class.getSimpleName());
 
     /**
      * Just before persisting an entity.
@@ -107,28 +113,28 @@ public class AuditedEntityListener {
                     if (auditedObject.isAuditable()) {
                         LOG.log(Level.FINE, "Creating audit trail for {0}", o);
                         modifier = new VmUserJpaController(
-                                DataBaseManager.getEntityManagerFactory()).findVmUser(
+                                getEntityManagerFactory()).findVmUser(
                                 auditedObject.getModifierId());
                         if (modifier == null) {
                             //Default to admin
                             modifier = new VmUserJpaController(
-                                    DataBaseManager.getEntityManagerFactory())
+                                    getEntityManagerFactory())
                                     .findVmUser(1);
                             if (modifier == null) {
                                 LOG.log(Level.FINE,
                                         "Default user not available, creating...");
                                 //Need to create the user
                                 modifier = new VmUser("System",
-                                        MD5.encrypt("system"), "", "System",
+                                        encrypt("system"), "", "System",
                                         "User",
-                                        Locale.getDefault().toString(),
+                                        getDefault().toString(),
                                         new Date(),
                                         new UserStatusJpaController(
-                                        DataBaseManager.getEntityManagerFactory())
+                                        getEntityManagerFactory())
                                         .findUserStatus(1), 0);
                                 modifier.setAuditable(false);
                                 new VmUserJpaController(
-                                        DataBaseManager.getEntityManagerFactory())
+                                        getEntityManagerFactory())
                                         .create(modifier);
                                 modifier.setAuditable(true);
                                 LOG.log(Level.FINE, "Done!");
@@ -139,10 +145,10 @@ public class AuditedEntityListener {
                         HashMap<String, Object> parameters = new HashMap<String, Object>();
                         int record_ID;
                         while (used) {
-                            record_ID = VMIdServer.getNextId("user_modified_record");
+                            record_ID = getNextId("user_modified_record");
                             parameters.clear();
                             parameters.put("recordId", record_ID);
-                            used = !DataBaseManager.namedQuery(
+                            used = !namedQuery(
                                     "UserModifiedRecord.findByRecordId",
                                     parameters).isEmpty();
                         }
@@ -153,7 +159,7 @@ public class AuditedEntityListener {
                         mod.setVmUser(modifier);
                         mod.setModifiedDate(new Date());
                         new UserModifiedRecordJpaController(
-                                DataBaseManager.getEntityManagerFactory()).create(mod);
+                                getEntityManagerFactory()).create(mod);
                         setEnabled(true);
                         LOG.log(Level.FINE, "Done!");
                     }

@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RiskCategory;
 import com.validation.manager.core.db.controller.RiskCategoryJpaController;
@@ -24,16 +25,16 @@ public class RiskCategoryServer extends RiskCategory
             NonexistentEntityException, Exception {
         if (getId() > 0) {
             RiskCategory rc = new RiskCategoryJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findRiskCategory(getId());
             update(rc, this);
             new RiskCategoryJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(rc);
+                    getEntityManagerFactory()).edit(rc);
         } else {
             RiskCategory rc = new RiskCategory(getName(), getMinimum(),
                     getMaximum());
             new RiskCategoryJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(rc);
+                    getEntityManagerFactory()).create(rc);
             setId(rc.getId());
         }
         return getId();
@@ -42,13 +43,13 @@ public class RiskCategoryServer extends RiskCategory
     public static boolean deleteRiskCategory(RiskCategory rc)
             throws IllegalOrphanException, NonexistentEntityException {
         new RiskCategoryJpaController(
-                DataBaseManager.getEntityManagerFactory()).destroy(rc.getId());
+                getEntityManagerFactory()).destroy(rc.getId());
         return true;
     }
 
     public RiskCategory getEntity() {
         return new RiskCategoryJpaController(
-                DataBaseManager.getEntityManagerFactory()).findRiskCategory(getId());
+                getEntityManagerFactory()).findRiskCategory(getId());
     }
 
     public void update(RiskCategory target, RiskCategory source) {

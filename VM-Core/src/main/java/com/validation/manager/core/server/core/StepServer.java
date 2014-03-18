@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.StepPK;
@@ -33,7 +34,7 @@ public class StepServer extends Step implements EntityServer<Step> {
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
         StepJpaController controller = new StepJpaController(
-                DataBaseManager.getEntityManagerFactory());
+                getEntityManagerFactory());
         if (getStepPK().getId() > 0) {
             Step temp = controller.findStep(getStepPK());
             update(temp, this);
@@ -50,15 +51,15 @@ public class StepServer extends Step implements EntityServer<Step> {
 
     public static void deleteStep(Step s) throws NonexistentEntityException, Exception {
         for (VmException e : s.getVmExceptionList()) {
-            new VmExceptionJpaController(DataBaseManager.getEntityManagerFactory()).destroy(e.getVmExceptionPK());
+            new VmExceptionJpaController(getEntityManagerFactory()).destroy(e.getVmExceptionPK());
         }
         s.getVmExceptionList().clear();
-        new StepJpaController(DataBaseManager.getEntityManagerFactory()).edit(s);
-        new StepJpaController(DataBaseManager.getEntityManagerFactory()).destroy(s.getStepPK());
+        new StepJpaController(getEntityManagerFactory()).edit(s);
+        new StepJpaController(getEntityManagerFactory()).destroy(s.getStepPK());
     }
 
     public Step getEntity() {
-        return new StepJpaController(DataBaseManager.getEntityManagerFactory())
+        return new StepJpaController(getEntityManagerFactory())
                 .findStep(getStepPK());
     }
 

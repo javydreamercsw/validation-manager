@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -31,7 +32,7 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         setRequirementSpecNodeList(new ArrayList<RequirementSpecNode>());
         setRequirementSpec(
                 new RequirementSpecJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRequirementSpec(rs.getRequirementSpecPK()));
     }
 
@@ -45,14 +46,14 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         RequirementSpecNode rsn;
         if (getRequirementSpecNodePK() != null && getRequirementSpecNodePK().getId() > 0) {
             rsn = new RequirementSpecNodeJpaController(
-                    DataBaseManager.getEntityManagerFactory()).findRequirementSpecNode(
+                    getEntityManagerFactory()).findRequirementSpecNode(
                     getRequirementSpecNodePK());
             update(rsn, this);
-            new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).edit(rsn);
+            new RequirementSpecNodeJpaController(getEntityManagerFactory()).edit(rsn);
         } else {
             rsn = new RequirementSpecNode();
             update(rsn, this);
-            new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).create(rsn);
+            new RequirementSpecNodeJpaController(getEntityManagerFactory()).create(rsn);
         }
         update(this, rsn);
         return getRequirementSpecNodePK().getId();
@@ -60,7 +61,7 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
 
     public RequirementSpecNode getEntity() {
         return new RequirementSpecNodeJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRequirementSpecNode(getRequirementSpecNodePK());
     }
 

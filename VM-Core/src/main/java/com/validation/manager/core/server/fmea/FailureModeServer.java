@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.FailureMode;
 import com.validation.manager.core.db.controller.FailureModeJpaController;
@@ -22,16 +23,16 @@ public class FailureModeServer extends FailureMode
     public int write2DB() throws NonexistentEntityException, Exception {
         if (getId() > 0) {
             FailureMode fm = new FailureModeJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findFailureMode(getId());
             update(fm, this);
             new FailureModeJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(fm);
+                    getEntityManagerFactory()).edit(fm);
         } else {
             FailureMode fm = new FailureMode();
             update(fm, this);
             new FailureModeJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(fm);
+                    getEntityManagerFactory()).create(fm);
             setId(fm.getId());
         }
         return getId();
@@ -39,13 +40,13 @@ public class FailureModeServer extends FailureMode
 
     public static boolean deleteFailureMode(FailureMode fm) throws NonexistentEntityException {
         new FailureModeJpaController(
-                DataBaseManager.getEntityManagerFactory()).destroy(fm.getId());
+                getEntityManagerFactory()).destroy(fm.getId());
         return true;
     }
 
     public FailureMode getEntity() {
         return new FailureModeJpaController(
-                DataBaseManager.getEntityManagerFactory()).findFailureMode(getId());
+                getEntityManagerFactory()).findFailureMode(getId());
     }
 
     public void update(FailureMode target, FailureMode source) {

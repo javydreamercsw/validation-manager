@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Hazard;
 import com.validation.manager.core.db.controller.HazardJpaController;
@@ -21,16 +22,16 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
     public int write2DB() throws NonexistentEntityException, Exception {
         if (getId() > 0) {
             Hazard h = new HazardJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findHazard(getId());
             update(h, this);
             new HazardJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(h);
+                    getEntityManagerFactory()).edit(h);
         } else {
             Hazard h = new Hazard();
             update(h, this);
             new HazardJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(h);
+                    getEntityManagerFactory()).create(h);
             setId(h.getId());
         }
         return getId();
@@ -39,13 +40,13 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
     public static boolean deleteHazard(Hazard h)
             throws NonexistentEntityException {
         new HazardJpaController(
-                DataBaseManager.getEntityManagerFactory()).destroy(h.getId());
+                getEntityManagerFactory()).destroy(h.getId());
         return true;
     }
 
     public Hazard getEntity() {
         return new HazardJpaController(
-                DataBaseManager.getEntityManagerFactory()).findHazard(getId());
+                getEntityManagerFactory()).findHazard(getId());
     }
 
     public void update(Hazard target, Hazard source) {

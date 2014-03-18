@@ -1,6 +1,8 @@
 package com.validation.manager.core.tool;
 
+import static java.lang.Integer.toHexString;
 import java.security.MessageDigest;
+import static java.security.MessageDigest.getInstance;
 import java.security.NoSuchAlgorithmException;
 
 /**
@@ -17,7 +19,7 @@ public class MD5 {
 
     public static String encrypt(String text) throws Exception {
         try {
-            algorithm = MessageDigest.getInstance("MD5");
+            algorithm = getInstance("MD5");
         } catch (NoSuchAlgorithmException nsae) {
             throw new Exception("Cannot find digest algorithm");
         }
@@ -28,7 +30,7 @@ public class MD5 {
         StringBuilder hexString = new StringBuilder();
 
         for (int i = 0; i < messageDigest.length; i++) {
-            String hex = Integer.toHexString(0xFF & messageDigest[i]);
+            String hex = toHexString(0xFF & messageDigest[i]);
             if (hex.length() == 1) {
                 hexString.append('0');
             }

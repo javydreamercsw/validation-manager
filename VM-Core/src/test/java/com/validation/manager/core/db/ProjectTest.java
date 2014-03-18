@@ -1,16 +1,32 @@
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
+import static com.validation.manager.core.server.core.ProjectServer.deleteProject;
+import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
+import static com.validation.manager.test.TestHelper.addRequirementToStep;
+import static com.validation.manager.test.TestHelper.addStep;
+import static com.validation.manager.test.TestHelper.addTestCaseToTest;
+import static com.validation.manager.test.TestHelper.addTestToPlan;
+import static com.validation.manager.test.TestHelper.createProject;
+import static com.validation.manager.test.TestHelper.createRequirement;
+import static com.validation.manager.test.TestHelper.createRequirementSpec;
+import static com.validation.manager.test.TestHelper.createRequirementSpecNode;
+import static com.validation.manager.test.TestHelper.createTest;
+import static com.validation.manager.test.TestHelper.createTestCase;
+import static com.validation.manager.test.TestHelper.createTestPlan;
+import static com.validation.manager.test.TestHelper.createTestProject;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import static junit.framework.TestCase.assertEquals;
 import org.junit.After;
 import org.junit.Test;
@@ -23,13 +39,13 @@ public class ProjectTest extends AbstractVMTestCase {
 
     Project p;
     private static final Logger LOG
-            = Logger.getLogger(ProjectTest.class.getName());
+            = getLogger(ProjectTest.class.getName());
 
     @After
     public void clear() {
         if (p != null) {
             try {
-                ProjectServer.deleteProject(p);
+                deleteProject(p);
             } catch (VMException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
@@ -42,19 +58,19 @@ public class ProjectTest extends AbstractVMTestCase {
     @Test
     public void testCreateAndDestroy() {
         try {
-            p = TestHelper.createProject("New Project", "Notes");
-            assertEquals(0, ProjectServer.getRequirements(p).size());
+            p = createProject("New Project", "Notes");
+            assertEquals(0, getRequirements(p).size());
             ProjectServer project = new ProjectServer(p);
             project.setNotes("Notes 2");
             project.write2DB();
             assertTrue(new ProjectJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findProject(project.getId()).getNotes().equals(project.getNotes()));
             //Create requirements
             LOG.info("Create Requirement Spec");
             RequirementSpec rss = null;
             try {
-                rss = TestHelper.createRequirementSpec("Test", "Test",
+                rss = createRequirementSpec("Test", "Test",
                         project, 1);
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
@@ -63,39 +79,39 @@ public class ProjectTest extends AbstractVMTestCase {
             LOG.info("Create Requirement Spec Node");
             RequirementSpecNode rsns = null;
             try {
-                rsns = TestHelper.createRequirementSpecNode(
+                rsns = createRequirementSpecNode(
                         rss, "Test", "Test", "Test");
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
-            Requirement r = TestHelper.createRequirement("SRS-SW-0001",
+            Requirement r = createRequirement("SRS-SW-0001",
                     "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             //Create Test
             com.validation.manager.core.db.Test test
-                    = TestHelper.createTest("Test #1", "Testing",
+                    = createTest("Test #1", "Testing",
                             "Test #1 scope");
             //Create Test Case
-            TestCase tc = TestHelper.createTestCase("Dummy", new Short("1"),
+            TestCase tc = createTestCase("Dummy", new Short("1"),
                     "Expected Results", test, /*user,*/ "Summary");
             //Add steps
             for (int i = 1; i < 6; i++) {
                 LOG.info(MessageFormat.format("Adding step: {0}", i));
-                tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
+                tc = addStep(tc, i, "Step " + i, "Note " + i);
                 Step step = tc.getStepList().get(i - 1);
-                TestHelper.addRequirementToStep(step, r);
+                addRequirementToStep(step, r);
                 new TestCaseServer(tc).write2DB();
                 assertEquals(1, new StepServer(step).getRequirementList().size());
             }
             //Create test Project
-            TestProject tp = TestHelper.createTestProject("Test Project");
+            TestProject tp = createTestProject("Test Project");
             //Create test plan
-            TestPlan plan = TestHelper.createTestPlan(tp, "Notes", true, true);
+            TestPlan plan = createTestPlan(tp, "Notes", true, true);
             //Add test case to test
-            TestHelper.addTestCaseToTest(test, tc);
+            addTestCaseToTest(test, tc);
             //Add test to plan
-            TestHelper.addTestToPlan(plan, test);
-            assertEquals(1, ProjectServer.getRequirements(p).size());
+            addTestToPlan(plan, test);
+            assertEquals(1, getRequirements(p).size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();

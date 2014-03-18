@@ -1,6 +1,7 @@
 package com.validation.manager.core.tool.table.extractor;
 
 import java.io.File;
+import static java.lang.System.getProperty;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import org.junit.Test;
@@ -22,14 +23,14 @@ public class TableExtractorTest {
         System.out.println("extractTables");
         String name = TableExtractorTest.class.getCanonicalName();
         name = name.substring(0, name.lastIndexOf("."));
-        name = name.replace(".", System.getProperty("file.separator"));
-        File file = new File(System.getProperty("user.dir")
-                + System.getProperty("file.separator") + "src"
-                + System.getProperty("file.separator") + "test"
-                + System.getProperty("file.separator") + "java"
-                + System.getProperty("file.separator")
+        name = name.replace(".", getProperty("file.separator"));
+        File file = new File(getProperty("user.dir")
+                + getProperty("file.separator") + "src"
+                + getProperty("file.separator") + "test"
+                + getProperty("file.separator") + "java"
+                + getProperty("file.separator")
                 + name
-                + System.getProperty("file.separator") + "Tables.docx");
+                + getProperty("file.separator") + "Tables.docx");
         assert file.exists();
         TableExtractor te = new TableExtractor(file);
         List<DefaultTableModel> tables = te.extractTables();
@@ -39,13 +40,13 @@ public class TableExtractorTest {
             assertEquals(4, model.getRowCount());
             assertEquals(5, model.getColumnCount());
         }
-        file = new File(System.getProperty("user.dir")
-                + System.getProperty("file.separator") + "src"
-                + System.getProperty("file.separator") + "test"
-                + System.getProperty("file.separator") + "java"
-                + System.getProperty("file.separator")
+        file = new File(getProperty("user.dir")
+                + getProperty("file.separator") + "src"
+                + getProperty("file.separator") + "test"
+                + getProperty("file.separator") + "java"
+                + getProperty("file.separator")
                 + name
-                + System.getProperty("file.separator") + "Tables.xls");
+                + getProperty("file.separator") + "Tables.xls");
         assert file.exists();
         te = new TableExtractor(file);
         tables = te.extractTables();
@@ -54,13 +55,13 @@ public class TableExtractorTest {
             assertEquals(3, model.getRowCount());
             assertEquals(3, model.getColumnCount());
         }
-        file = new File(System.getProperty("user.dir")
-                + System.getProperty("file.separator") + "src"
-                + System.getProperty("file.separator") + "test"
-                + System.getProperty("file.separator") + "java"
-                + System.getProperty("file.separator")
+        file = new File(getProperty("user.dir")
+                + getProperty("file.separator") + "src"
+                + getProperty("file.separator") + "test"
+                + getProperty("file.separator") + "java"
+                + getProperty("file.separator")
                 + name
-                + System.getProperty("file.separator") + "Tables.xlsx");
+                + getProperty("file.separator") + "Tables.xlsx");
         assert file.exists();
         te = new TableExtractor(file);
         tables = te.extractTables();

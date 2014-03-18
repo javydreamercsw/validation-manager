@@ -1,7 +1,9 @@
 package com.validation.manager.core.tool.step.importer;
 
 import java.util.Locale;
+import static java.util.Locale.getDefault;
 import java.util.ResourceBundle;
+import static java.util.ResourceBundle.getBundle;
 
 /**
  *
@@ -10,8 +12,8 @@ import java.util.ResourceBundle;
 public class StepImportException extends Exception {
 
     private static ResourceBundle rb =
-            ResourceBundle.getBundle(
-            "com.validation.manager.resources.VMMessages", Locale.getDefault());
+            getBundle(
+            "com.validation.manager.resources.VMMessages", getDefault());
 
     public StepImportException(String message) {
         super(rb.containsKey(message) ? rb.getString(message) : message);

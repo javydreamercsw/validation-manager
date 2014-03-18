@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.fmea;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Fmea;
 import com.validation.manager.core.db.controller.FMEAJpaController;
@@ -8,6 +9,7 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -25,15 +27,15 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
             NonexistentEntityException, Exception {
         if (getId() > 0) {
             Fmea fmea = new FMEAJpaController(
-                    DataBaseManager.getEntityManagerFactory()).findFmea(getId());
+                    getEntityManagerFactory()).findFmea(getId());
             update(fmea, this);
             new FMEAJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(fmea);
+                    getEntityManagerFactory()).edit(fmea);
         } else {
             Fmea fmea = new Fmea(getName());
             update(fmea, this);
             new FMEAJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(fmea);
+                    getEntityManagerFactory()).create(fmea);
             setId(fmea.getId());
         }
         return getId();
@@ -43,19 +45,19 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
         boolean result = false;
         try {
             new FMEAJpaController(
-                    DataBaseManager.getEntityManagerFactory()).destroy(id);
+                    getEntityManagerFactory()).destroy(id);
             result = true;
         } catch (NonexistentEntityException ex) {
-            Logger.getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalOrphanException ex) {
-            Logger.getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
     }
 
     public Fmea getEntity() {
         return new FMEAJpaController(
-                DataBaseManager.getEntityManagerFactory()).findFmea(getId());
+                getEntityManagerFactory()).findFmea(getId());
     }
 
     public void update(Fmea target, Fmea source) {

@@ -2,6 +2,7 @@ package com.validation.manager.core.db.fmea;
 
 import com.validation.manager.test.AbstractVMTestCase;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import org.junit.Test;
 
 /**
@@ -11,7 +12,7 @@ import org.junit.Test;
 public class FMEATest extends AbstractVMTestCase {
 
     private static final Logger LOG =
-            Logger.getLogger(FMEATest.class.getName());
+            getLogger(FMEATest.class.getName());
 
     public FMEATest() {
     }

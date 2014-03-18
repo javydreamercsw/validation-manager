@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RiskControl;
@@ -12,7 +13,9 @@ import com.validation.manager.core.db.controller.TestJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import static com.validation.manager.core.server.core.StepServer.deleteStep;
 import com.validation.manager.core.server.fmea.RiskControlServer;
+import static com.validation.manager.core.server.fmea.RiskControlServer.deleteRiskControl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -27,7 +30,7 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
     public TestCaseServer(TestCasePK pk) {
         super(pk);
         TestCaseJpaController controller
-                = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
+                = new TestCaseJpaController(getEntityManagerFactory());
         TestCase temp = controller.findTestCase(getTestCasePK());
         update((TestCaseServer) this, temp);
     }
@@ -38,14 +41,14 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
 
     public TestCaseServer(String name, int testCaseId, short version, Date creationDate) {
         super(name, new TestCasePK(testCaseId), version, creationDate);
-        setTest(new TestJpaController(DataBaseManager.getEntityManagerFactory()).findTest(testCaseId));
+        setTest(new TestJpaController(getEntityManagerFactory()).findTest(testCaseId));
     }
 
     @Override
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         TestCaseJpaController controller
-                = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
+                = new TestCaseJpaController(getEntityManagerFactory());
         if (controller.findTestCase(getTestCasePK()) != null || getTestCasePK().getId() > 0) {
             TestCase temp = controller.findTestCase(getTestCasePK());
             update(temp, this);
@@ -61,20 +64,20 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
 
     public static void deleteTestCase(TestCase tc) throws NonexistentEntityException, IllegalOrphanException, Exception {
         for (Iterator<Step> it = tc.getStepList().iterator(); it.hasNext();) {
-            StepServer.deleteStep(it.next());
+            deleteStep(it.next());
         }
         tc.getStepList().clear();
         for (Iterator<RiskControl> it = tc.getRiskControlList().iterator(); it.hasNext();) {
-            RiskControlServer.deleteRiskControl(it.next());
+            deleteRiskControl(it.next());
         }
         tc.getRiskControlList().clear();
-        new TestCaseJpaController(DataBaseManager.getEntityManagerFactory()).edit(tc);
-        new TestCaseJpaController(DataBaseManager.getEntityManagerFactory()).destroy(tc.getTestCasePK());
+        new TestCaseJpaController(getEntityManagerFactory()).edit(tc);
+        new TestCaseJpaController(getEntityManagerFactory()).destroy(tc.getTestCasePK());
     }
 
     public TestCase getEntity() {
         return new TestCaseJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findTestCase(getTestCasePK());
     }
 

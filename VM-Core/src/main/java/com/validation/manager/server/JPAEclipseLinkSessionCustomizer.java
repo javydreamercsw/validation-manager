@@ -2,6 +2,7 @@ package com.validation.manager.server;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -20,7 +21,7 @@ public class JPAEclipseLinkSessionCustomizer implements SessionCustomizer {
 
     public static final String JNDI_DATASOURCE_NAME = "java:comp/env/jdbc/VMDB";
     private static final Logger logger =
-            Logger.getLogger(JPAEclipseLinkSessionCustomizer.class.getSimpleName());
+            getLogger(JPAEclipseLinkSessionCustomizer.class.getSimpleName());
 
     /**
      * Get a dataSource connection and set it on the session with

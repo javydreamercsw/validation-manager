@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -25,8 +26,8 @@ public final class RequirementSpecServer extends RequirementSpec
     public RequirementSpecServer(String name, String description, 
             int projectId, int specLevelId) {
         super(projectId, specLevelId);
-        setProject(new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProject(projectId));
-        setSpecLevel(new SpecLevelJpaController(DataBaseManager.getEntityManagerFactory()).findSpecLevel(specLevelId));
+        setProject(new ProjectJpaController(getEntityManagerFactory()).findProject(projectId));
+        setSpecLevel(new SpecLevelJpaController(getEntityManagerFactory()).findSpecLevel(specLevelId));
         setDescription(description);
         setName(name);
         setVersion(1);
@@ -57,7 +58,7 @@ public final class RequirementSpecServer extends RequirementSpec
             List<Requirement> requirements) throws Exception {
         RequirementSpecNodeServer sns = new RequirementSpecNodeServer(
                 new RequirementSpecJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRequirementSpec(getRequirementSpecPK()),
                 name, description, scope);
         sns.write2DB();
@@ -66,7 +67,7 @@ public final class RequirementSpecServer extends RequirementSpec
         }
         getRequirementSpecNodeList().add(
                 new RequirementSpecNodeJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRequirementSpecNode(sns.getRequirementSpecNodePK()));
         write2DB();
     }
@@ -79,16 +80,16 @@ public final class RequirementSpecServer extends RequirementSpec
         if (getRequirementSpecPK() != null
                 && getRequirementSpecPK().getId() > 0) {
             RequirementSpec rs = new RequirementSpecJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findRequirementSpec(getRequirementSpecPK());
             update(rs, this);
             new RequirementSpecJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(rs);
+                    getEntityManagerFactory()).edit(rs);
         } else {
             RequirementSpec rs = new RequirementSpec();
             update(rs, this);
             new RequirementSpecJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(rs);
+                    getEntityManagerFactory()).create(rs);
             setRequirementSpecPK(rs.getRequirementSpecPK());
         }
         return getRequirementSpecPK().getId();
@@ -97,13 +98,13 @@ public final class RequirementSpecServer extends RequirementSpec
     public static void deleteRequirementSpec(RequirementSpec rs)
             throws IllegalOrphanException, NonexistentEntityException {
         new RequirementSpecJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .destroy(rs.getRequirementSpecPK());
     }
 
     public RequirementSpec getEntity() {
         return new RequirementSpecJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRequirementSpec(getRequirementSpecPK());
     }
 

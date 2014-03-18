@@ -1,6 +1,7 @@
 package com.validation.manager.core.tool.requirement.importer;
 
-import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.ImporterInterface;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
@@ -11,7 +12,7 @@ import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.server.core.ProjectServer;
+import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
 import com.validation.manager.core.tool.message.MessageHandler;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,15 +28,16 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import static java.util.logging.Logger.getLogger;
+import static org.apache.poi.hssf.usermodel.HSSFDataFormat.getBuiltinFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.openide.util.Lookup;
+import static org.apache.poi.ss.usermodel.WorkbookFactory.create;
+import static org.openide.util.Lookup.getDefault;
 
 /**
  * Import Requirements into database
@@ -48,7 +50,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     private final ArrayList<Requirement> requirements = new ArrayList<Requirement>();
     private final RequirementSpecNode rsn;
     private static final Logger LOG
-            = Logger.getLogger(RequirementImporter.class.getName());
+            = getLogger(RequirementImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
 
     static {
@@ -94,7 +96,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                 try {
                     inp = new FileInputStream(toImport);
                     org.apache.poi.ss.usermodel.Workbook wb
-                            = WorkbookFactory.create(inp);
+                            = create(inp);
                     org.apache.poi.ss.usermodel.Sheet sheet = wb.getSheetAt(0);
                     int rows = sheet.getPhysicalNumberOfRows();
                     int r = 0;
@@ -166,14 +168,14 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                         LOG.fine("Setting requirement type");
                                         parameters.clear();
                                         parameters.put("name", value);
-                                        result = DataBaseManager.namedQuery(
+                                        result = namedQuery(
                                                 "RequirementType.findByName",
                                                 parameters);
                                         if (result.isEmpty()) {
                                             //Assume a default
                                             parameters.clear();
                                             parameters.put("name", "HW");
-                                            result = DataBaseManager.namedQuery(
+                                            result = namedQuery(
                                                     "RequirementType.findByName",
                                                     parameters);
                                         }
@@ -195,7 +197,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                             requirement.setRequirementSpecNode(rsn);
                             parameters.clear();
                             parameters.put("status", "general.open");
-                            result = DataBaseManager.namedQuery(
+                            result = namedQuery(
                                     "RequirementStatus.findByStatus", parameters);
                             requirement.setRequirementStatusId(
                                     (RequirementStatus) result.get(0));
@@ -232,7 +234,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                 sb.append(line).append("\n");
             }
             if (!errors.isEmpty()) {
-                Lookup.getDefault().lookup(MessageHandler.class).info(sb.toString());
+                getDefault().lookup(MessageHandler.class).info(sb.toString());
             }
             for (Requirement r : requirements) {
                 LOG.log(Level.FINE, "{0}: {1}",
@@ -245,17 +247,17 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     public boolean processImport() throws VMException {
         boolean result = true;
         RequirementJpaController controller = new RequirementJpaController(
-                DataBaseManager.getEntityManagerFactory());
+                getEntityManagerFactory());
         for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
             try {
                 Requirement requirement = it.next();
                 boolean exists = false;
                 Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
-                List<Requirement> existing = ProjectServer.getRequirements(project);
+                List<Requirement> existing = getRequirements(project);
                 for (Requirement r : existing) {
                     if (r.getUniqueId() == null) {
                         LOG.warning("Detected requirement with null unique id!");
-                        new RequirementJpaController(DataBaseManager.getEntityManagerFactory()).destroy(r.getId());
+                        new RequirementJpaController(getEntityManagerFactory()).destroy(r.getId());
                     } else {
                         if (r.getUniqueId().equals(requirement.getUniqueId())) {
                             exists = true;
@@ -265,7 +267,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                     }
                 }
                 if (exists) {
-                    MessageHandler handler = Lookup.getDefault().lookup(MessageHandler.class);
+                    MessageHandler handler = getDefault().lookup(MessageHandler.class);
                     if (handler != null) {
                         handler.error(
                                 "Requirement " + requirement.getUniqueId()
@@ -279,7 +281,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                 LOG.log(Level.SEVERE, null, ex);
                 for (Requirement requirement : requirements) {
                     Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
-                    List<Requirement> existing = ProjectServer.getRequirements(project);
+                    List<Requirement> existing = getRequirements(project);
                     for (Requirement r : existing) {
                         if (r.getUniqueId().equals(requirement.getUniqueId())) {
                             try {
@@ -307,7 +309,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         wb.setSheetName(0, "Requirements");
         int column = 0;
         CellStyle cs = wb.createCellStyle();
-        cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("text"));
+        cs.setDataFormat(getBuiltinFormat("text"));
         Font f = wb.createFont();
         f.setFontHeightInPoints((short) 12);
         f.setBoldweight(Font.BOLDWEIGHT_BOLD);
@@ -343,11 +345,11 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             File file = exportTemplate();
             System.out.println(file.getAbsolutePath());
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InvalidFormatException ex) {
-            Logger.getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

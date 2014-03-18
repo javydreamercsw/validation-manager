@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestPlan;
@@ -10,6 +11,7 @@ import com.validation.manager.core.db.controller.UserTestPlanRoleJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -28,7 +30,7 @@ public class UserTestPlanRoleServer extends UserTestPlanRole
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
         UserTestPlanRoleJpaController controller = 
-                new UserTestPlanRoleJpaController(DataBaseManager.getEntityManagerFactory());
+                new UserTestPlanRoleJpaController(getEntityManagerFactory());
         UserTestPlanRole temp = new UserTestPlanRole(getTestPlan(), getVmUser(), getRole());
         update(temp, this);
         controller.create(temp);
@@ -38,10 +40,10 @@ public class UserTestPlanRoleServer extends UserTestPlanRole
     public static boolean deleteUserTestPlanRole(UserTestPlanRole utpr) {
         try {
             new UserTestPlanRoleJpaController(
-                    DataBaseManager.getEntityManagerFactory()).destroy(
+                    getEntityManagerFactory()).destroy(
                     utpr.getUserTestPlanRolePK());
         } catch (NonexistentEntityException ex) {
-            Logger.getLogger(UserTestPlanRoleServer.class.getName())
+            getLogger(UserTestPlanRoleServer.class.getName())
                     .log(Level.SEVERE, null, ex);
             return false;
         }
@@ -50,7 +52,7 @@ public class UserTestPlanRoleServer extends UserTestPlanRole
 
     public UserTestPlanRole getEntity() {
         return new UserTestPlanRoleJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findUserTestPlanRole(getUserTestPlanRolePK());
     }
 

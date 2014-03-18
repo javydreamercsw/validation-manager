@@ -1,6 +1,8 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.createdQuery;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -11,11 +13,13 @@ import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.tool.Tool;
+import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
+import static com.validation.manager.core.tool.Tool.removeDuplicates;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -25,26 +29,25 @@ public final class RequirementServer extends Requirement
         implements EntityServer<Requirement>, VersionableServer<Requirement> {
 
     private static final Logger LOG
-            = Logger.getLogger(RequirementServer.class.getSimpleName());
+            = getLogger(RequirementServer.class.getSimpleName());
 
     public RequirementServer(String id, String desc, RequirementSpecNodePK rsn,
             String notes, int requirementType, int requirementStatus) {
         setNotes(notes);
         setRequirementSpecNode(
-                new RequirementSpecNodeJpaController(DataBaseManager
-                        .getEntityManagerFactory()).findRequirementSpecNode(rsn));
+                new RequirementSpecNodeJpaController(getEntityManagerFactory()).findRequirementSpecNode(rsn));
         setUniqueId(id);
         setDescription(desc);
         setRequirementStatusId(new RequirementStatusJpaController(
-                DataBaseManager.getEntityManagerFactory()).findRequirementStatus(requirementStatus));
+                getEntityManagerFactory()).findRequirementStatus(requirementStatus));
         setRequirementTypeId(new RequirementTypeJpaController(
-                DataBaseManager.getEntityManagerFactory()).findRequirementType(requirementType));
+                getEntityManagerFactory()).findRequirementType(requirementType));
     }
 
     public static void deleteRequirement(Requirement r)
             throws IllegalOrphanException, NonexistentEntityException {
         RequirementJpaController controller
-                = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
+                = new RequirementJpaController(getEntityManagerFactory());
         if (controller.findRequirement(r.getId()) != null) {
             controller.destroy(r.getId());
         }
@@ -52,7 +55,7 @@ public final class RequirementServer extends Requirement
 
     public RequirementServer(Requirement r) {
         RequirementJpaController controller
-                = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
+                = new RequirementJpaController(getEntityManagerFactory());
         Requirement requirement = controller.findRequirement(r.getId());
         if (requirement != null) {
             update((RequirementServer) this, requirement);
@@ -83,7 +86,7 @@ public final class RequirementServer extends Requirement
     @Override
     public int write2DB() throws Exception {
         if (getId() > 0) {
-            if (DataBaseManager.isVersioningEnabled()) {
+            if (isVersioningEnabled()) {
                 //One exists already, need to make a copy of the requirement
                 Requirement req = new Requirement(getUniqueId(), getDescription(),
                         getNotes(),
@@ -106,20 +109,20 @@ public final class RequirementServer extends Requirement
                 }
                 //Store in data base.
                 new RequirementJpaController(
-                        DataBaseManager.getEntityManagerFactory()).create(req);
+                        getEntityManagerFactory()).create(req);
                 update(this, req);
             }
             Requirement req = new RequirementJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findRequirement(getId());
             update(req, this);
             new RequirementJpaController(
-                    DataBaseManager.getEntityManagerFactory()).edit(req);
+                    getEntityManagerFactory()).edit(req);
         } else {
             Requirement req = new Requirement(getUniqueId(), getDescription());
             update(req, this);
             new RequirementJpaController(
-                    DataBaseManager.getEntityManagerFactory()).create(req);
+                    getEntityManagerFactory()).create(req);
             setId(req.getId());
         }
         return getId();
@@ -127,7 +130,7 @@ public final class RequirementServer extends Requirement
 
     public Requirement getEntity() {
         return new RequirementJpaController(
-                DataBaseManager.getEntityManagerFactory()).findRequirement(
+                getEntityManagerFactory()).findRequirement(
                         getId());
     }
 
@@ -156,7 +159,7 @@ public final class RequirementServer extends Requirement
         //Must be unique within a project.
         Project project
                 = req.getRequirementSpecNode().getRequirementSpec().getProject();
-        List<Requirement> requirements = ProjectServer.getRequirements(project);
+        List<Requirement> requirements = getRequirements(project);
         int count = 0;
         for (Requirement r : requirements) {
             if (r.getUniqueId().equals(req.getUniqueId())) {
@@ -211,7 +214,7 @@ public final class RequirementServer extends Requirement
             LOG.log(Level.FINE, "Adding child: {0}", obj.getUniqueId());
             children.add(obj);
         }
-        Tool.removeDuplicates(children);
+        removeDuplicates(children);
         return children;
     }
 
@@ -227,7 +230,7 @@ public final class RequirementServer extends Requirement
             LOG.log(Level.FINE, "Adding parent: {0}", obj.getUniqueId());
             parents.add(obj);
         }
-        Tool.removeDuplicates(parents);
+        removeDuplicates(parents);
         return parents;
     }
 
@@ -250,7 +253,7 @@ public final class RequirementServer extends Requirement
         List<Requirement> versions = new ArrayList<Requirement>();
         parameters.clear();
         parameters.put("uniqueId", getEntity().getUniqueId());
-        for (Object obj : DataBaseManager.createdQuery(
+        for (Object obj : createdQuery(
                 "SELECT r FROM Requirement r WHERE r.uniqueId = :uniqueId",
                 parameters)) {
             versions.add((Requirement) obj);

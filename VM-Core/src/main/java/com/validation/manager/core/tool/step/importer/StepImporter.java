@@ -3,6 +3,8 @@ package com.validation.manager.core.tool.step.importer;
 import com.validation.manager.core.ImporterInterface;
 import com.validation.manager.core.tool.requirement.importer.*;
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
@@ -15,15 +17,21 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import static java.lang.Integer.valueOf;
+import static java.lang.Integer.valueOf;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import static java.util.Locale.getDefault;
 import java.util.ResourceBundle;
+import static java.util.ResourceBundle.getBundle;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import static org.apache.poi.hssf.usermodel.HSSFDataFormat.getBuiltinFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -31,6 +39,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import static org.apache.poi.ss.usermodel.WorkbookFactory.create;
 
 /**
  * Import Requirements into database
@@ -43,11 +52,11 @@ public class StepImporter implements ImporterInterface<Step> {
     private final List<Step> steps = new ArrayList<Step>();
     private final TestCase tc;
     private static final Logger LOG
-            = Logger.getLogger(StepImporter.class.getName());
+            = getLogger(StepImporter.class.getName());
     private static final List<String> columns = new ArrayList<String>();
     private static final ResourceBundle rb
-            = ResourceBundle.getBundle(
-                    "com.validation.manager.resources.VMMessages", Locale.getDefault());
+            = getBundle(
+                    "com.validation.manager.resources.VMMessages", getDefault());
 
     static {
         columns.add("Sequence");
@@ -92,7 +101,7 @@ public class StepImporter implements ImporterInterface<Step> {
                 try {
                     inp = new FileInputStream(toImport);
                     org.apache.poi.ss.usermodel.Workbook wb
-                            = WorkbookFactory.create(inp);
+                            = create(inp);
                     org.apache.poi.ss.usermodel.Sheet sheet = wb.getSheetAt(0);
                     int rows = sheet.getPhysicalNumberOfRows();
                     int r = 0;
@@ -148,9 +157,9 @@ public class StepImporter implements ImporterInterface<Step> {
                                         LOG.fine("Setting sequence");
                                         Integer val
                                                 = value.contains(".")
-                                                ? Integer.valueOf(value.substring(0,
+                                                ? valueOf(value.substring(0,
                                                                 value.indexOf(".")))
-                                                : Integer.valueOf(value);
+                                                : valueOf(value);
                                         step.setStepSequence(val);
                                     }
                                     break;
@@ -170,7 +179,7 @@ public class StepImporter implements ImporterInterface<Step> {
                                             String token = st.nextToken().trim();
                                             parameters.clear();
                                             parameters.put("uniqueId", token);
-                                            result = DataBaseManager.namedQuery(
+                                            result = namedQuery(
                                                     "Requirement.findByUniqueId",
                                                     parameters);
                                             if (!result.isEmpty()) {
@@ -236,7 +245,7 @@ public class StepImporter implements ImporterInterface<Step> {
         for (Step step : steps) {
             try {
                 new StepJpaController(
-                        DataBaseManager.getEntityManagerFactory())
+                        getEntityManagerFactory())
                         .create(step);
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
@@ -254,7 +263,7 @@ public class StepImporter implements ImporterInterface<Step> {
         wb.setSheetName(0, "Steps");
         int column = 0;
         CellStyle cs = wb.createCellStyle();
-        cs.setDataFormat(HSSFDataFormat.getBuiltinFormat("text"));
+        cs.setDataFormat(getBuiltinFormat("text"));
         Font f = wb.createFont();
         f.setFontHeightInPoints((short) 12);
         f.setBoldweight(Font.BOLDWEIGHT_BOLD);

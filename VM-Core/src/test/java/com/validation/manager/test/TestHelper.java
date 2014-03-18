@@ -1,6 +1,7 @@
 package com.validation.manager.test;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -31,7 +32,9 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
+import static com.validation.manager.core.server.core.ProjectServer.deleteProject;
 import com.validation.manager.core.server.core.RequirementServer;
+import static com.validation.manager.core.server.core.RequirementServer.deleteRequirement;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.StepServer;
@@ -44,6 +47,7 @@ import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -59,10 +63,10 @@ public class TestHelper {
         VMUserServer temp = new VMUserServer(name,
                 pass, first, email, last);
         temp.setUserStatusId(new UserStatusJpaController(
-                DataBaseManager.getEntityManagerFactory()).findUserStatus(1));
+                getEntityManagerFactory()).findUserStatus(1));
         temp.write2DB();
         return new VmUserJpaController(
-                DataBaseManager.getEntityManagerFactory()).findVmUser(temp.getId());
+                getEntityManagerFactory()).findVmUser(temp.getId());
     }
 
     public static void deleteUser(VmUser user) throws NonexistentEntityException,
@@ -77,7 +81,7 @@ public class TestHelper {
         UserTestPlanRoleServer temp = new UserTestPlanRoleServer(tpl, user, role);
         temp.write2DB();
         UserTestPlanRole utpr = new UserTestPlanRoleJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findUserTestPlanRole(temp.getUserTestPlanRolePK());
         assertTrue(utpr.getUserTestPlanRolePK().getTestPlanTestProjectId()
                 == temp.getUserTestPlanRolePK().getTestPlanTestProjectId());
@@ -94,30 +98,30 @@ public class TestHelper {
         try {
             ps.write2DB();
         } catch (IllegalOrphanException ex) {
-            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         } catch (NonexistentEntityException ex) {
-            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         } catch (Exception ex) {
-            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
         Project p = new ProjectJpaController(
-                DataBaseManager.getEntityManagerFactory()).findProject(ps.getId());
+                getEntityManagerFactory()).findProject(ps.getId());
         assertTrue(new ProjectJpaController(
-                DataBaseManager.getEntityManagerFactory()).findProject(p.getId()) != null);
+                getEntityManagerFactory()).findProject(p.getId()) != null);
         assertTrue(new ProjectJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findProject(p.getId()).getNotes().equals(p.getNotes()));
         return p;
     }
 
     public static void destroyProject(Project p) throws IllegalOrphanException,
             NonexistentEntityException, VMException {
-        ProjectServer.deleteProject(p);
+        deleteProject(p);
         assertTrue(new ProjectJpaController(
-                DataBaseManager.getEntityManagerFactory()).findProject(p.getId()) == null);
+                getEntityManagerFactory()).findProject(p.getId()) == null);
     }
 
     public static Test createTest(String name, String purpose,
@@ -126,9 +130,9 @@ public class TestHelper {
         t.setNotes("Notes");
         t.write2DB();
         assertTrue(new TestJpaController(
-                DataBaseManager.getEntityManagerFactory()).findTest(t.getId()) != null);
+                getEntityManagerFactory()).findTest(t.getId()) != null);
         return new TestJpaController(
-                DataBaseManager.getEntityManagerFactory()).findTest(t.getId());
+                getEntityManagerFactory()).findTest(t.getId());
     }
 
     public static TestCase createTestCase(String name, short version,
@@ -143,7 +147,7 @@ public class TestHelper {
         tc.setIsOpen(true);
         tc.setSummary(summary.getBytes());
         TestCaseJpaController controller = new TestCaseJpaController(
-                DataBaseManager.getEntityManagerFactory());
+                getEntityManagerFactory());
         tc.write2DB();
         return controller.findTestCase(tc.getTestCasePK());
     }
@@ -155,19 +159,19 @@ public class TestHelper {
                 requirementType, requirementStatus);
         req.write2DB();
         return new RequirementJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRequirement(req.getId());
     }
 
     public static void destroyRequirement(Requirement r)
             throws NonexistentEntityException {
         try {
-            RequirementServer.deleteRequirement(r);
+            deleteRequirement(r);
             assertTrue(new RequirementJpaController(
-                    DataBaseManager.getEntityManagerFactory())
+                    getEntityManagerFactory())
                     .findRequirement(r.getId()) == null);
         } catch (IllegalOrphanException ex) {
-            Logger.getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(TestHelper.class.getName()).log(Level.SEVERE, null, ex);
             fail();
         }
     }
@@ -181,7 +185,7 @@ public class TestHelper {
         TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
         assertEquals(amount + 1, tcs.getStepList().size());
         return new TestCaseJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findTestCase(tc.getTestCasePK());
     }
 
@@ -190,7 +194,7 @@ public class TestHelper {
         TestProjectServer tps = new TestProjectServer("Test Project", true);
         tps.write2DB();
         return new TestProjectJpaController(
-                DataBaseManager.getEntityManagerFactory()).findTestProject(tps.getId());
+                getEntityManagerFactory()).findTestProject(tps.getId());
     }
 
     public static TestPlan createTestPlan(TestProject tp, String notes,
@@ -201,7 +205,7 @@ public class TestHelper {
         plan.setTestProject(tp);
         plan.write2DB();
         return new TestPlanJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findTestPlan(plan.getTestPlanPK());
     }
 
@@ -226,7 +230,7 @@ public class TestHelper {
         tpht.setTest(test);
         tpht.setTestPlan(plan);
         new TestPlanHasTestJpaController(
-                DataBaseManager.getEntityManagerFactory()).create(tpht);
+                getEntityManagerFactory()).create(tpht);
         tps.getTestPlanHasTestList().add(tpht);
         tps.write2DB();
         assertTrue(tps.getTestPlanHasTestList().size() > testInPlan);

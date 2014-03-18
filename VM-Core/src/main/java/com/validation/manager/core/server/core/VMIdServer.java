@@ -1,6 +1,8 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.VmId;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -22,7 +25,7 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
 
     public VMIdServer(Integer id) throws VMException {
         VmIdJpaController controller = new VmIdJpaController(
-                DataBaseManager.getEntityManagerFactory());
+                getEntityManagerFactory());
         VmId vmId = controller.findVmId(id);
         if (vmId != null) {
             update(this, vmId);
@@ -41,7 +44,7 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
     public int write2DB() throws VMException {
         try {
             VmIdJpaController controller = new VmIdJpaController(
-                    DataBaseManager.getEntityManagerFactory());
+                    getEntityManagerFactory());
             VmId vmId;
             if (getId() > 0) {
                 vmId = controller.findVmId(getId());
@@ -58,14 +61,14 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
             }
             return getId();
         } catch (Exception ex) {
-            Logger.getLogger(VMIdServer.class.getSimpleName()).log(Level.SEVERE, null, ex);
+            getLogger(VMIdServer.class.getSimpleName()).log(Level.SEVERE, null, ex);
             throw new VMException(ex);
         }
     }
 
     public static int deleteFromDB(VmId id) throws VMException {
         VmIdJpaController controller = new VmIdJpaController(
-                DataBaseManager.getEntityManagerFactory());
+                getEntityManagerFactory());
         if (id != null) {
             try {
                 controller.destroy(id.getId());
@@ -79,7 +82,7 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
     public static VMIdServer getVMId(String table) throws VMException {
         HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("tableName", table);
-        List<Object> result = DataBaseManager.namedQuery("VmId.findByTableName", parameters);
+        List<Object> result = namedQuery("VmId.findByTableName", parameters);
         if (!result.isEmpty()) {
             return new VMIdServer(((VmId) result.get(0)).getId());
         } else {
@@ -96,7 +99,7 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
 
     public static List<VMIdServer> getIds() throws VMException {
         ArrayList<VMIdServer> ids = new ArrayList<VMIdServer>();
-        List<Object> result = DataBaseManager.namedQuery("VMId.findAll");
+        List<Object> result = namedQuery("VMId.findAll");
         if (!result.isEmpty()) {
             for (Object o : result) {
                 ids.add(new VMIdServer(((VmId) o).getId()));
@@ -109,7 +112,7 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
 
     public VmId getEntity() {
         return new VmIdJpaController(
-                DataBaseManager.getEntityManagerFactory()).findVmId(getId());
+                getEntityManagerFactory()).findVmId(getId());
     }
 
     public void update(VmId target, VmId source) {

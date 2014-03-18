@@ -1,6 +1,8 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementType;
@@ -19,7 +21,7 @@ public final class RequirementTypeServer extends RequirementType
     public RequirementTypeServer(RequirementType rt) {
         RequirementType temp
                 = new RequirementTypeJpaController(
-                        DataBaseManager.getEntityManagerFactory())
+                        getEntityManagerFactory())
                 .findRequirementType(rt.getId());
         update((RequirementType) this, temp);
     }
@@ -33,13 +35,13 @@ public final class RequirementTypeServer extends RequirementType
     public int write2DB() throws Exception {
         RequirementType rt;
         if (getId() > 0) {
-            rt = new RequirementTypeJpaController(DataBaseManager.getEntityManagerFactory()).findRequirementType(getId());
+            rt = new RequirementTypeJpaController(getEntityManagerFactory()).findRequirementType(getId());
             update(rt, this);
-            new RequirementTypeJpaController(DataBaseManager.getEntityManagerFactory()).edit(rt);
+            new RequirementTypeJpaController(getEntityManagerFactory()).edit(rt);
         } else {
             rt = new RequirementType(getName());
             update(rt, this);
-            new RequirementTypeJpaController(DataBaseManager.getEntityManagerFactory()).create(rt);
+            new RequirementTypeJpaController(getEntityManagerFactory()).create(rt);
             setId(rt.getId());
         }
         return getId();
@@ -47,7 +49,7 @@ public final class RequirementTypeServer extends RequirementType
 
     public RequirementType getEntity() {
         return new RequirementTypeJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRequirementType(getId());
     }
 
@@ -64,7 +66,7 @@ public final class RequirementTypeServer extends RequirementType
 
     public static Iterable<RequirementType> getRequirementTypes() {
         return new RequirementTypeJpaController(
-                DataBaseManager.getEntityManagerFactory())
+                getEntityManagerFactory())
                 .findRequirementTypeEntities();
     }
 
@@ -72,7 +74,7 @@ public final class RequirementTypeServer extends RequirementType
        List<RequirementType> versions = new ArrayList<RequirementType>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
-        for (Object obj : DataBaseManager.namedQuery("RequirementType.findById",
+        for (Object obj : namedQuery("RequirementType.findById",
                 parameters)) {
             versions.add((RequirementType) obj);
         }
