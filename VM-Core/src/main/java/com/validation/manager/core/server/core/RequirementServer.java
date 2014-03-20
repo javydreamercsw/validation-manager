@@ -207,12 +207,6 @@ public final class RequirementServer extends Requirement
 
     public void addChildRequirement(Requirement child) throws Exception {
         //See: http://stackoverflow.com/questions/19848505/jpa-netbeans-and-many-to-many-relationship-to-self
-//        getRequirementList().add(child);
-//        RequirementServer childS = new RequirementServer(child);
-//        childS.getRequirementList1().add(getEntity());
-//        write2DB();
-//        childS.write2DB();
-//        update();
         RequirementServer childS = new RequirementServer(child);
         childS.getRequirementList().add(getEntity());
         getRequirementList1().add(child);
