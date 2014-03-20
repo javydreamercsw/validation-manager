@@ -14,7 +14,6 @@ import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
-import static com.validation.manager.core.tool.Tool.removeDuplicates;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -174,10 +173,10 @@ public final class RequirementServer extends Requirement
 
     public int getTestCoverage() {
         int coverage = 0;
-        LOG.log(Level.FINE, "Getting test coverage for: {0}...",
+        LOG.log(Level.INFO, "Getting test coverage for: {0}...",
                 getUniqueId());
         update();
-        List<Requirement> children = getChildrenRequirement(getEntity());
+        List<Requirement> children = getEntity().getRequirementList1();
         if (children.isEmpty()) {
             LOG.log(Level.FINE, "No child requirements");
             //Has test cases and no related requirements
@@ -189,7 +188,7 @@ public final class RequirementServer extends Requirement
             //Has nothing, leave at 0.
         } else {
             //Get total of instances
-            LOG.log(Level.FINE, "Found: {0} related requirements.",
+            LOG.log(Level.INFO, "Found: {0} related requirements.",
                     children.size());
             //Check coverage for children
             for (Requirement r : children) {
@@ -202,49 +201,23 @@ public final class RequirementServer extends Requirement
         return coverage;
     }
 
-    /**
-     * This returns the requirement children to this requirement.
-     *
-     * @param r requirement to get children from
-     * @return list containing the child requirements
-     */
-    public static List<Requirement> getChildrenRequirement(Requirement r) {
-        List<Requirement> children = new ArrayList<Requirement>();
-        for (Requirement obj : new RequirementServer(r).getRequirementList()) {
-            LOG.log(Level.FINE, "Adding child: {0}", obj.getUniqueId());
-            children.add(obj);
-        }
-        removeDuplicates(children);
-        return children;
-    }
-
-    /**
-     * This returns the requirement parent to this requirement.
-     *
-     * @param r requirement to get parents from
-     * @return list containing the parent requirements
-     */
-    public static List<Requirement> getParentRequirement(Requirement r) {
-        List<Requirement> parents = new ArrayList<Requirement>();
-        for (Requirement obj : new RequirementServer(r).getRequirementList1()) {
-            LOG.log(Level.FINE, "Adding parent: {0}", obj.getUniqueId());
-            parents.add(obj);
-        }
-        removeDuplicates(parents);
-        return parents;
-    }
-
     public void update() {
         update(this, getEntity());
     }
 
     public void addChildRequirement(Requirement child) throws Exception {
         //See: http://stackoverflow.com/questions/19848505/jpa-netbeans-and-many-to-many-relationship-to-self
-        getRequirementList().add(child);
+//        getRequirementList().add(child);
+//        RequirementServer childS = new RequirementServer(child);
+//        childS.getRequirementList1().add(getEntity());
+//        write2DB();
+//        childS.write2DB();
+//        update();
         RequirementServer childS = new RequirementServer(child);
-        childS.getRequirementList1().add(getEntity());
-        write2DB();
+        childS.getRequirementList().add(getEntity());
+        getRequirementList1().add(child);
         childS.write2DB();
+        write2DB();
         update();
     }
 

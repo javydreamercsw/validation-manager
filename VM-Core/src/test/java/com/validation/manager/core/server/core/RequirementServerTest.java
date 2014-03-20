@@ -14,8 +14,6 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import static com.validation.manager.core.server.core.RequirementServer.deleteRequirement;
-import static com.validation.manager.core.server.core.RequirementServer.getChildrenRequirement;
-import static com.validation.manager.core.server.core.RequirementServer.getParentRequirement;
 import static com.validation.manager.core.server.core.RequirementServer.isDuplicate;
 import com.validation.manager.test.AbstractVMTestCase;
 import static com.validation.manager.test.TestHelper.addRequirementToStep;
@@ -32,7 +30,6 @@ import static com.validation.manager.test.TestHelper.createTestCase;
 import static com.validation.manager.test.TestHelper.createTestPlan;
 import static com.validation.manager.test.TestHelper.createTestProject;
 import static java.lang.Short.valueOf;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -218,39 +215,38 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("Child And Parent Requirements");
             prepare();
-            List<Requirement> children;
             Requirement req = createRequirement("SRS-SW-0001",
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req2 = createRequirement("SRS-SW-0002",
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
-            children = getChildrenRequirement(req);
-            assertTrue(children.isEmpty());
+            assertTrue(req.getRequirementList1().isEmpty());
             //Add a child
             RequirementServer rs = new RequirementServer(req);
+            rs.setInheritRelationships(true);
             rs.addChildRequirement(req2);
-            for (Requirement r : rs.getRequirementList()) {
-                LOG.info(r.getUniqueId());
-            }
-            assertEquals(1, rs.getRequirementList().size());
+            //Should have one children now
             for (Requirement r : rs.getRequirementList1()) {
                 LOG.info(r.getUniqueId());
             }
-            assertEquals(0, rs.getRequirementList1().size());
+            assertEquals(1, rs.getRequirementList1().size());
+            for (Requirement r : rs.getRequirementList()) {
+                LOG.info(r.getUniqueId());
+            }
+            //No parents
+            assertEquals(0, rs.getRequirementList().size());
             RequirementServer rs2 = new RequirementServer(req2);
             for (Requirement r : rs2.getRequirementList()) {
                 LOG.info(r.getUniqueId());
             }
-            assertEquals(0, rs2.getRequirementList().size());
+            //One parent
+            assertEquals(1, rs2.getRequirementList().size());
             for (Requirement r : rs2.getRequirementList1()) {
                 LOG.info(r.getUniqueId());
             }
-            assertEquals(1, rs2.getRequirementList1().size());
-            assertEquals(1, getChildrenRequirement(req).size());
-            assertEquals(0, getParentRequirement(req).size());
-            assertEquals(0, getChildrenRequirement(req2).size());
-            assertEquals(1, getParentRequirement(req2).size());
+            //No children
+            assertEquals(0, rs2.getRequirementList1().size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();

@@ -7,11 +7,8 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import static com.validation.manager.core.server.core.ProjectServer.deleteProject;
 import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
-import static com.validation.manager.core.server.core.RequirementServer.getChildrenRequirement;
-import static com.validation.manager.core.server.core.RequirementServer.getParentRequirement;
 import static com.validation.manager.core.server.core.RequirementSpecServer.deleteRequirementSpec;
 import com.validation.manager.test.AbstractVMTestCase;
-import com.validation.manager.test.TestHelper;
 import static com.validation.manager.test.TestHelper.addChildToRequirement;
 import static com.validation.manager.test.TestHelper.addProject;
 import static com.validation.manager.test.TestHelper.createProject;
@@ -19,7 +16,6 @@ import static com.validation.manager.test.TestHelper.createRequirement;
 import static com.validation.manager.test.TestHelper.createRequirementSpec;
 import static com.validation.manager.test.TestHelper.createRequirementSpecNode;
 import org.junit.Test;
-import org.openide.util.Exceptions;
 import static org.openide.util.Exceptions.printStackTrace;
 
 /**
@@ -45,7 +41,7 @@ public class ProjectServerTest extends AbstractVMTestCase {
             //No errors, nothing dependent
             try {
                 deleteProject(sub);
-            } catch (Exception ex) {
+            } catch (VMException ex) {
                 printStackTrace(ex);
                 fail();
             }
@@ -66,10 +62,10 @@ public class ProjectServerTest extends AbstractVMTestCase {
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
             assertEquals(2, getRequirements(root).size());
             req1 = addChildToRequirement(req1, req2);
-            assertEquals(1, getChildrenRequirement(req1).size());
-            assertEquals(0, getParentRequirement(req1).size());
-            assertEquals(1, getParentRequirement(req2).size());
-            assertEquals(0, getChildrenRequirement(req2).size());
+            assertEquals(1, req1.getRequirementList1().size());
+            assertEquals(0, req1.getRequirementList().size());
+            assertEquals(1, req2.getRequirementList().size());
+            assertEquals(0, req2.getRequirementList1().size());
             try {
                 deleteProject(sub);
             } catch (VMException ex) {
