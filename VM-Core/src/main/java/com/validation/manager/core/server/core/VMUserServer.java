@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import static java.util.Calendar.getInstance;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import static java.util.Locale.getDefault;
 import java.util.logging.Level;
