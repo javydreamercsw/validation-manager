@@ -489,6 +489,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setUserTestProjectRoleList(source.getUserTestProjectRoleList());
         target.setVmExceptionList(source.getVmExceptionList());
+        target.setId(source.getId());
     }
 
     public void update() {
