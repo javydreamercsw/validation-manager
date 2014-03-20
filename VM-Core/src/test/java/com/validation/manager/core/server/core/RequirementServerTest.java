@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
@@ -19,7 +18,6 @@ import static com.validation.manager.core.server.core.RequirementServer.getChild
 import static com.validation.manager.core.server.core.RequirementServer.getParentRequirement;
 import static com.validation.manager.core.server.core.RequirementServer.isDuplicate;
 import com.validation.manager.test.AbstractVMTestCase;
-import com.validation.manager.test.TestHelper;
 import static com.validation.manager.test.TestHelper.addRequirementToStep;
 import static com.validation.manager.test.TestHelper.addStep;
 import static com.validation.manager.test.TestHelper.addTestCaseToTest;
@@ -39,7 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import org.junit.Test;
-import org.openide.util.Exceptions;
 import static org.openide.util.Exceptions.printStackTrace;
 
 /**
