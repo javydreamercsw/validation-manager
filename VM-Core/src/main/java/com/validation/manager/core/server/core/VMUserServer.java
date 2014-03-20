@@ -1,15 +1,8 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
-import static com.validation.manager.core.DataBaseManager.createdQuery;
-import static com.validation.manager.core.DataBaseManager.createdQuery;
 import static com.validation.manager.core.DataBaseManager.createdQuery;
 import static com.validation.manager.core.DataBaseManager.getEntityManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
@@ -39,7 +32,6 @@ import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import static com.validation.manager.core.server.core.VMSettingServer.getSetting;
-import com.validation.manager.core.tool.MD5;
 import static com.validation.manager.core.tool.MD5.encrypt;
 import static java.lang.System.currentTimeMillis;
 import java.sql.Timestamp;
@@ -47,13 +39,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import static java.util.Calendar.getInstance;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import static java.util.Locale.getDefault;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import javax.persistence.EntityTransaction;
 
@@ -68,12 +57,10 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     private boolean hashPassword = true;
     private boolean increaseAttempts = false;
     private static List<Object> result;
-    private static HashMap<String, Object> parameters
-            = new HashMap<String, Object>();
     private boolean change;
 
     public VMUserServer(VmUser vmu) {
-        update(this, vmu);
+        update(VMUserServer.this, vmu);
         //previously hashing the already hashed password
         hashPassword = false;
     }
@@ -102,7 +89,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                 throw new Exception();
             } else {
                 VmUser vmu = (VmUser) result.get(0);
-                update(this, vmu);
+                update(VMUserServer.this, vmu);
                 //previously hashing the already hashed password
                 hashPassword = false;
                 int status = vmu.getUserStatusId().getId();
@@ -139,7 +126,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             //increase number of attempts
             if (!result.isEmpty()) {
                 VmUser vmu = (VmUser) result.get(0);
-                update(this, vmu);
+                update(VMUserServer.this, vmu);
                 //Don't rehash the pasword!
                 hashPassword = false;
                 //Increase attempts after a unsuccessfull login.
@@ -159,7 +146,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         //throw exception if no result found
         if (result.size() > 0) {
             VmUser vmu = (VmUser) result.get(0);
-            update(this, vmu);
+            update(VMUserServer.this, vmu);
             //previously hashing the already hashed password
             hashPassword = false;
         } else {
