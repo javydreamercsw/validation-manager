@@ -22,7 +22,6 @@ import java.io.InputStreamReader;
 import java.io.Writer;
 import static java.lang.Class.forName;
 import static java.lang.Integer.parseInt;
-import static java.lang.Integer.parseInt;
 import static java.lang.Long.valueOf;
 import static java.lang.System.getProperty;
 import static java.lang.Thread.sleep;
@@ -48,7 +47,6 @@ import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
 import static javax.persistence.Persistence.createEntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.TableGenerator;
@@ -79,8 +77,7 @@ public class DataBaseManager {
     private static boolean demo;
     private static Long demoResetPeriod;
     private static DataBaseManager instance;
-    //TODO: WIP
-    private static boolean versioning_enabled = false;
+    private static boolean versioning_enabled = true;
 
     static {
         state = DBState.START_UP;

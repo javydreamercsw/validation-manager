@@ -30,7 +30,7 @@ public class Versionable extends VMAuditedObject implements Serializable {
     @NotNull
     @Column(name = "minor_version")
     private int minorVersion;
-    private boolean inheritRelationships=false;
+    private boolean inheritRelationships = false;
 
     public Versionable() {
     }
