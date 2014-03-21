@@ -15,7 +15,8 @@ import javax.validation.constraints.NotNull;
  */
 @MappedSuperclass
 @EntityListeners(AuditedEntityListener.class)
-public class Versionable extends VMAuditedObject implements Serializable {
+public class Versionable extends VMAuditedObject implements Serializable,
+        Comparable<Versionable> {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
@@ -101,5 +102,25 @@ public class Versionable extends VMAuditedObject implements Serializable {
      */
     public void setInheritRelationships(boolean inheritRelationships) {
         this.inheritRelationships = inheritRelationships;
+    }
+
+    public int compareTo(Versionable o) {
+        if (getMajorVersion() > o.getMajorVersion()) {
+            return 1;
+        } else if (getMajorVersion() < o.getMajorVersion()) {
+            return -1;
+        }//Same major version
+        else if (getMidVersion() > o.getMidVersion()) {
+            return 1;
+        } else if (getMidVersion() < o.getMidVersion()) {
+            return -1;
+        } //Same mid version
+        else if (getMinorVersion() > o.getMinorVersion()) {
+            return 1;
+        } else if (getMinorVersion() < o.getMinorVersion()) {
+            return -1;
+        }
+        //Everything the same
+        return 0;
     }
 }
