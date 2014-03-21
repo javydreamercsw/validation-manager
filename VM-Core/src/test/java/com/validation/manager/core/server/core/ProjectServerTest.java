@@ -61,11 +61,7 @@ public class ProjectServerTest extends AbstractVMTestCase {
             Requirement req2 = createRequirement("REQ-002", "Desc",
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
             assertEquals(2, getRequirements(root).size());
-            req1 = addChildToRequirement(req1, req2);
-            assertEquals(1, req1.getRequirementList1().size());
-            assertEquals(0, req1.getRequirementList().size());
-            assertEquals(1, req2.getRequirementList().size());
-            assertEquals(0, req2.getRequirementList1().size());
+            addChildToRequirement(req1, req2);
             try {
                 deleteProject(sub);
             } catch (VMException ex) {
