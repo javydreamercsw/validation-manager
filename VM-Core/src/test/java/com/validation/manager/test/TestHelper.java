@@ -1,6 +1,5 @@
 package com.validation.manager.test;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
@@ -46,7 +45,6 @@ import com.validation.manager.core.server.core.UserTestPlanRoleServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Date;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
