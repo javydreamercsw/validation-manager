@@ -85,7 +85,7 @@ public class UIRequirementNode extends AbstractVMBeanNode {
                             "/net/sourceforge/javydreamercsw/client/ui/circle_yellow.png"));
                 }
                 image = yellow;
-            } else if (coverage < 50 && coverage > 0) {
+            } else if (coverage < 50 && coverage > 25) {
                 if (orange == null) {
                     orange = ImageIO.read(getClass().getResource(
                             "/net/sourceforge/javydreamercsw/client/ui/circle_orange.png"));
