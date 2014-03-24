@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.text.MessageFormat;
 import static java.text.MessageFormat.format;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,7 +107,8 @@ public class TableExtractor {
             throws IOException, FileNotFoundException, ClassNotFoundException {
         List<DefaultTableModel> tables = new ArrayList<DefaultTableModel>();
         if (source.getName().endsWith(".doc")
-                || source.getName().endsWith(".docx")) {
+                || source.getName().endsWith(".docx")
+                || source.getName().endsWith(".docm")) {
             //Word documents
             tables = loadSerializedTables();
         } else if (source.getName().endsWith(".xls")) {
