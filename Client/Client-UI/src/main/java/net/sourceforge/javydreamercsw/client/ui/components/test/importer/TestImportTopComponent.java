@@ -206,7 +206,8 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
                                 || f.getName().endsWith(".xlsx")
                                 || f.getName().endsWith(".xlsm")
                                 || f.getName().endsWith(".doc")
-                                || f.getName().endsWith(".docx")));
+                                || f.getName().endsWith(".docx")
+                                || f.getName().endsWith(".docm")));
                     }
 
                     @Override
