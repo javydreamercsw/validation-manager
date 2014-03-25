@@ -65,7 +65,8 @@ public class Project extends Versionable implements Serializable {
     @JoinTable(name = "project_has_test_project", joinColumns = {
         @JoinColumn(name = "project_id", referencedColumnName = "id")},
             inverseJoinColumns = {
-                @JoinColumn(name = "test_project_id", referencedColumnName = "id")})
+                @JoinColumn(name = "test_project_id", 
+                        referencedColumnName = "id")})
     @ManyToMany
     private List<TestProject> testProjectList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")

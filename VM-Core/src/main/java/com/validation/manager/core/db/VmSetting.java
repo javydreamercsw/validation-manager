@@ -1,5 +1,6 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -24,17 +25,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "vm_setting")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "VmSetting.findAll", 
+    @NamedQuery(name = "VmSetting.findAll",
             query = "SELECT v FROM VmSetting v"),
-    @NamedQuery(name = "VmSetting.findById", 
+    @NamedQuery(name = "VmSetting.findById",
             query = "SELECT v FROM VmSetting v WHERE v.id = :id"),
-    @NamedQuery(name = "VmSetting.findByBoolVal", 
+    @NamedQuery(name = "VmSetting.findByBoolVal",
             query = "SELECT v FROM VmSetting v WHERE v.boolVal = :boolVal"),
-    @NamedQuery(name = "VmSetting.findByIntVal", 
+    @NamedQuery(name = "VmSetting.findByIntVal",
             query = "SELECT v FROM VmSetting v WHERE v.intVal = :intVal"),
-    @NamedQuery(name = "VmSetting.findBySetting", 
+    @NamedQuery(name = "VmSetting.findBySetting",
             query = "SELECT v FROM VmSetting v WHERE v.setting = :setting")})
-public class VmSetting implements Serializable {
+public class VmSetting extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id

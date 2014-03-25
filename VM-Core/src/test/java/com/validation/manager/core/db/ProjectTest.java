@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.ProjectJpaController;
@@ -10,7 +9,6 @@ import static com.validation.manager.core.server.core.ProjectServer.getRequireme
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.test.AbstractVMTestCase;
-import com.validation.manager.test.TestHelper;
 import static com.validation.manager.test.TestHelper.addRequirementToStep;
 import static com.validation.manager.test.TestHelper.addStep;
 import static com.validation.manager.test.TestHelper.addTestCaseToTest;
@@ -63,9 +61,10 @@ public class ProjectTest extends AbstractVMTestCase {
             ProjectServer project = new ProjectServer(p);
             project.setNotes("Notes 2");
             project.write2DB();
-            assertTrue(new ProjectJpaController(
+            Project temp = new ProjectJpaController(
                     getEntityManagerFactory())
-                    .findProject(project.getId()).getNotes().equals(project.getNotes()));
+                    .findProject(project.getId());
+            assertTrue(temp.getNotes().equals(project.getNotes()));
             //Create requirements
             LOG.info("Create Requirement Spec");
             RequirementSpec rss = null;
@@ -86,7 +85,8 @@ public class ProjectTest extends AbstractVMTestCase {
                 fail();
             }
             Requirement r = createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Notes", 1, 1);
             //Create Test
             com.validation.manager.core.db.Test test
                     = createTest("Test #1", "Testing",
@@ -111,7 +111,7 @@ public class ProjectTest extends AbstractVMTestCase {
             addTestCaseToTest(test, tc);
             //Add test to plan
             addTestToPlan(plan, test);
-            assertEquals(1, getRequirements(p).size());
+            assertEquals(1, getRequirements(project.getEntity()).size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();

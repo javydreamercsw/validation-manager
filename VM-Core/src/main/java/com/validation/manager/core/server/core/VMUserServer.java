@@ -490,6 +490,9 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         target.setUserTestProjectRoleList(source.getUserTestProjectRoleList());
         target.setVmExceptionList(source.getVmExceptionList());
         target.setId(source.getId());
+        target.setMajorVersion(source.getMajorVersion());
+        target.setMidVersion(source.getMidVersion());
+        target.setMinorVersion(source.getMinorVersion());
     }
 
     public void update() {
@@ -505,5 +508,9 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             versions.add((VmUser) obj);
         }
         return versions;
+    }
+
+    public boolean isChangeVersionable() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

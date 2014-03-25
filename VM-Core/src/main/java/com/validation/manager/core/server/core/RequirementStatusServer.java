@@ -1,7 +1,7 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RequirementStatus;
@@ -14,17 +14,25 @@ import java.util.List;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RequirementStatusServer extends RequirementStatus
-        implements EntityServer<RequirementStatus> , 
-        VersionableServer<RequirementStatus>{
+        implements EntityServer<RequirementStatus>,
+        VersionableServer<RequirementStatus> {
 
     public int write2DB() throws Exception {
         RequirementStatus p;
         if (getId() > 0) {
-            p = new RequirementStatusJpaController(
-                    getEntityManagerFactory())
-                    .findRequirementStatus(getId());
-            update(p, this);
-            new RequirementStatusJpaController(getEntityManagerFactory()).edit(p);
+            if (isVersioningEnabled() && isChangeVersionable()) {
+                p = new RequirementStatus();
+                p.setMajorVersion(getMajorVersion());
+                p.setMidVersion(getMidVersion());
+                p.setMinorVersion(getMinorVersion()+1);
+                update(this,p);
+            } else {
+                p = new RequirementStatusJpaController(
+                        getEntityManagerFactory())
+                        .findRequirementStatus(getId());
+                update(p, this);
+                new RequirementStatusJpaController(getEntityManagerFactory()).edit(p);
+            }
         } else {
             p = new RequirementStatus(getStatus());
             update(p, this);
@@ -44,6 +52,9 @@ public class RequirementStatusServer extends RequirementStatus
         target.setId(source.getId());
         target.setStatus(source.getStatus());
         target.setRequirementList(source.getRequirementList());
+        target.setMajorVersion(source.getMajorVersion());
+        target.setMidVersion(source.getMidVersion());
+        target.setMinorVersion(source.getMinorVersion());
     }
 
     public void update() {
@@ -51,7 +62,7 @@ public class RequirementStatusServer extends RequirementStatus
     }
 
     public List<RequirementStatus> getVersions() {
-         List<RequirementStatus> versions = new ArrayList<RequirementStatus>();
+        List<RequirementStatus> versions = new ArrayList<RequirementStatus>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
         for (Object obj : namedQuery("RequirementStatus.findById",
@@ -59,5 +70,9 @@ public class RequirementStatusServer extends RequirementStatus
             versions.add((RequirementStatus) obj);
         }
         return versions;
+    }
+
+    public boolean isChangeVersionable() {
+        return !getStatus().equals(getEntity().getStatus());
     }
 }

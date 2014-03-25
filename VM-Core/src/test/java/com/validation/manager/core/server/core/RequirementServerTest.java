@@ -224,7 +224,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertTrue(req.getRequirementList1().isEmpty());
             //Add a child
             RequirementServer rs = new RequirementServer(req);
-            rs.setInheritRelationships(true);
             rs.addChildRequirement(req2);
             //Should have one children now
             for (Requirement r : rs.getRequirementList1()) {
@@ -308,22 +307,12 @@ public class RequirementServerTest extends AbstractVMTestCase {
         rs.getStepList().add(step.getStepList().get(0));
         rs.setDescription(second);
         if (isVersioningEnabled()) {
-            rs.setInheritRelationships(true);
             rs.write2DB();
             version++;
             assertEquals(0, rs.getMajorVersion());
             assertEquals(0, rs.getMidVersion());
             assertEquals(version, rs.getMinorVersion());
             assertEquals(1, rs.getStepList().size());
-            //No inheritance
-            rs.setInheritRelationships(false);
-            rs.setNotes(rs.getNotes() + "!");
-            rs.write2DB();
-            version++;
-            assertEquals(0, rs.getMajorVersion());
-            assertEquals(0, rs.getMidVersion());
-            assertEquals(version, rs.getMinorVersion());
-            assertEquals(0, rs.getStepList().size());
         } else {
             rs.write2DB();
             version++;
