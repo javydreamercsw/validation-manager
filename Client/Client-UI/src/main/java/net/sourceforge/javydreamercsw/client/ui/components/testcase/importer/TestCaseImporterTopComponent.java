@@ -10,6 +10,7 @@ import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.tool.message.MessageHandler;
 import com.validation.manager.core.tool.table.extractor.TableExtractor;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,6 +43,7 @@ import static net.sourceforge.javydreamercsw.client.ui.components.testcase.impor
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 
@@ -397,8 +399,39 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         this.test = test;
     }
 
+    /**
+     * Recursive method to find root project from the current project.
+     *
+     * @param p Project to start searching from.
+     * @return Root project
+     */
+    private Project getRootProject(Project p) {
+        if (p.getParentProjectId() == null) {
+            //No parents, we found it!
+            return p;
+        } else {
+            //Still has parents, keep searching up in the tree
+            return getRootProject(p.getParentProjectId());
+        }
+    }
+
+    private void getSubProjects(Project root, List<Project> toAdd) {
+        if (!toAdd.contains(root)) {
+            //Add root project as well, if not already in the list.
+            toAdd.add(root);
+        }
+        //Add child projects
+        for (Project sub : root.getProjectList()) {
+            if (!toAdd.contains(sub)) {
+                toAdd.add(sub);
+                getSubProjects(sub, toAdd);
+            }
+        }
+    }
+
     protected void process(List<String> mapping) {
         List<Project> projects = new ArrayList<>();
+        //Add projects that has this test on their plans
         for (TestPlanHasTest tpht : test.getTestPlanHasTestList()) {
             tpht.getTestPlan().getTestProject();
             for (Project p : ProjectServer.getProjects()) {
@@ -406,7 +439,10 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                     if (Objects.equals(temp.getId(),
                             tpht.getTestPlan().getTestProject().getId())) {
                         LOG.log(Level.FINE, "Project ID: {0}", p.getId());
-                        projects.add(p);
+                        if (!projects.contains(p)) {
+                            projects.add(p);
+                            getSubProjects(getRootProject(p), projects);
+                        }
                     }
                 }
             }
@@ -453,14 +489,15 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                                     if (r.getUniqueId().trim().equals(token.trim())) {
                                         requirements.add(r);
                                         found = true;
+                                        LOG.log(Level.FINE, "Found it!");
                                         break;
                                     }
                                 }
                             }
                             if (!found) {
                                 //TODO: Create dummy? Error out?
-                                LOG.log(Level.WARNING, 
-                                        "Unable to find requirement: {0}", 
+                                LOG.log(Level.WARNING,
+                                        "Unable to find requirement: {0}",
                                         token.trim());
                             }
                         }
@@ -472,7 +509,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             }
             try {
                 step_counter++;
-                tcs.addStep(step_counter, description, notes, criteria, 
+                tcs.addStep(step_counter, description, notes, criteria,
                         requirements);
                 tcs.write2DB();
             } catch (NonexistentEntityException ex) {
@@ -546,7 +583,8 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         if (isImportSuccess()
                 && tables.size()
                 == ((int) Math.round(Double.valueOf(spinner.getValue().toString())))) {
-            this.close();
+            //TODO: internationalize
+            Lookup.getDefault().lookup(MessageHandler.class).plain("Import completed succesfully!");
         }
     }
 }
