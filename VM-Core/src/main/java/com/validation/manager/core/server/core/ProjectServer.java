@@ -1,7 +1,7 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
@@ -15,15 +15,14 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public final class ProjectServer extends Project 
-implements EntityServer<Project>, VersionableServer<Project>{
+public final class ProjectServer extends Project
+        implements EntityServer<Project>, VersionableServer<Project> {
 
     public ProjectServer(String name, String notes) {
         super(name);
@@ -46,13 +45,46 @@ implements EntityServer<Project>, VersionableServer<Project>{
         update((ProjectServer) this, product);
     }
 
+    private void copyRelationships(Project target, Project source) {
+        if (source.getProjectList() != null) {
+            target.getProjectList().clear();
+            target.getProjectList().addAll(source.getProjectList());
+        }
+        if (source.getRequirementSpecList() != null) {
+            target.getRequirementSpecList().clear();
+            target.getRequirementSpecList().addAll(source.getRequirementSpecList());
+        }
+        if (source.getTestProjectList() != null) {
+            target.getTestProjectList().clear();
+            target.getTestProjectList().addAll(source.getTestProjectList());
+        }
+    }
+
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
         Project p;
         if (getId() > 0) {
-            p = new ProjectJpaController(getEntityManagerFactory()).findProject(getId());
-            update(p, this);
-            new ProjectJpaController(getEntityManagerFactory()).edit(p);
+            //Check what has changed, if is only relationshipd, don't version
+            //Get the one from DB
+            if (isVersioningEnabled() && isChangeVersionable()) {
+                p = new Project(getName());
+                p.setMajorVersion(getMajorVersion());
+                p.setMidVersion(getMidVersion());
+                p.setMinorVersion(getMinorVersion() + 1);
+                if (isInheritRelationships()) {
+                    //Copy the relationships
+                    copyRelationships(p, this);
+                } else {
+                    //Do nothing. This will have the requirement as uncovered.
+                }
+                //Store in data base.
+                new ProjectJpaController(getEntityManagerFactory()).create(p);
+                update(this, p);
+            } else {
+                p = new ProjectJpaController(getEntityManagerFactory()).findProject(getId());
+                update(p, this);
+                new ProjectJpaController(getEntityManagerFactory()).edit(p);
+            }
         } else {
             p = new Project(getName());
             update(p, this);
@@ -133,5 +165,10 @@ implements EntityServer<Project>, VersionableServer<Project>{
             versions.add((Project) obj);
         }
         return versions;
+    }
+
+    public boolean isChangeVersionable() {
+        return !getName().equals(getEntity().getName())
+                || !getNotes().equals(getEntity().getNotes());
     }
 }
