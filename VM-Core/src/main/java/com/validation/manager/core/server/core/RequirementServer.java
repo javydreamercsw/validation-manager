@@ -66,18 +66,23 @@ public final class RequirementServer extends Requirement
 
     private void copyRelationships(Requirement target, Requirement source) {
         if (source.getRequirementHasExceptionList() != null) {
+            target.getRequirementHasExceptionList().clear();
             target.getRequirementHasExceptionList().addAll(source.getRequirementHasExceptionList());
         }
         if (source.getRequirementList() != null) {
+            target.getRequirementList().clear();
             target.getRequirementList().addAll(source.getRequirementList());
         }
         if (source.getRequirementList1() != null) {
+            target.getRequirementList1().clear();
             target.getRequirementList1().addAll(source.getRequirementList1());
         }
         if (source.getRiskControlList() != null) {
+            target.getRiskControlList().clear();
             target.getRiskControlList().addAll(source.getRiskControlList());
         }
         if (source.getStepList() != null) {
+            target.getStepList().clear();
             target.getStepList().addAll(source.getStepList());
         }
     }
@@ -85,7 +90,9 @@ public final class RequirementServer extends Requirement
     @Override
     public int write2DB() throws Exception {
         if (getId() > 0) {
-            if (isVersioningEnabled()) {
+            //Check what has changed, if is only relationshipd, don't version
+            //Get the one from DB
+            if (isVersioningEnabled() && isChangeVersionable()) {
                 //One exists already, need to make a copy of the requirement
                 Requirement req = new Requirement(getUniqueId(), getDescription(),
                         getNotes(),
@@ -226,5 +233,10 @@ public final class RequirementServer extends Requirement
             versions.add((Requirement) obj);
         }
         return versions;
+    }
+
+    public boolean isChangeVersionable() {
+        return !getEntity().getDescription().equals(getDescription())
+                    || !getEntity().getNotes().equals(getNotes());
     }
 }

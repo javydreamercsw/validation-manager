@@ -192,13 +192,13 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.update();
             assertEquals(100, rs.getTestCoverage());
             //Add a related requirement
-            rs.getRequirementList().add(req3);
+            rs.addChildRequirement(req3);
             rs.write2DB();
             assertEquals(100, rs.getTestCoverage());
-            rs.getRequirementList().add(req2);
+            rs.addChildRequirement(req2);
             rs.write2DB();
             assertEquals(50, rs.getTestCoverage());
-            rs.getRequirementList().add(req4);
+            rs.addChildRequirement(req4);
             rs.write2DB();
             assertEquals(33, rs.getTestCoverage());
         } catch (Exception ex) {
@@ -317,6 +317,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(1, rs.getStepList().size());
             //No inheritance
             rs.setInheritRelationships(false);
+            rs.setNotes(rs.getNotes() + "!");
             rs.write2DB();
             version++;
             assertEquals(0, rs.getMajorVersion());
