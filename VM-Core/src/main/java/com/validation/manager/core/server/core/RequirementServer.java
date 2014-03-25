@@ -107,12 +107,8 @@ public final class RequirementServer extends Requirement
                  * one by one basis. 
                  * 3) Don't do anything, leaving it uncovered.
                  */
-                if (isInheritRelationships()) {
-                    //Copy the relationships
-                    copyRelationships(req, this);
-                } else {
-                    //Do nothing. This will have the requirement as uncovered.
-                }
+                //Copy the relationships
+                copyRelationships(req, this);
                 //Store in data base.
                 new RequirementJpaController(
                         getEntityManagerFactory()).create(req);
@@ -237,6 +233,6 @@ public final class RequirementServer extends Requirement
 
     public boolean isChangeVersionable() {
         return !getEntity().getDescription().equals(getDescription())
-                    || !getEntity().getNotes().equals(getNotes());
+                || !getEntity().getNotes().equals(getNotes());
     }
 }

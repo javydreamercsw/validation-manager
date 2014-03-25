@@ -1,8 +1,6 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.VmSetting;
@@ -102,6 +100,9 @@ public class VMSettingServer extends VmSetting
         target.setSetting(source.getSetting());
         target.setStringVal(source.getStringVal());
         target.setId(source.getId());
+        target.setMajorVersion(source.getMajorVersion());
+        target.setMidVersion(source.getMidVersion());
+        target.setMinorVersion(source.getMinorVersion());
     }
 
     public void update() {
@@ -117,5 +118,9 @@ public class VMSettingServer extends VmSetting
             versions.add((VmSetting) obj);
         }
         return versions;
+    }
+
+    public boolean isChangeVersionable() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

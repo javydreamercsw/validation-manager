@@ -45,21 +45,6 @@ public final class ProjectServer extends Project
         update((ProjectServer) this, product);
     }
 
-    private void copyRelationships(Project target, Project source) {
-        if (source.getProjectList() != null) {
-            target.getProjectList().clear();
-            target.getProjectList().addAll(source.getProjectList());
-        }
-        if (source.getRequirementSpecList() != null) {
-            target.getRequirementSpecList().clear();
-            target.getRequirementSpecList().addAll(source.getRequirementSpecList());
-        }
-        if (source.getTestProjectList() != null) {
-            target.getTestProjectList().clear();
-            target.getTestProjectList().addAll(source.getTestProjectList());
-        }
-    }
-
     @Override
     public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
         Project p;
@@ -68,15 +53,10 @@ public final class ProjectServer extends Project
             //Get the one from DB
             if (isVersioningEnabled() && isChangeVersionable()) {
                 p = new Project(getName());
+                update(p, this, false);
                 p.setMajorVersion(getMajorVersion());
                 p.setMidVersion(getMidVersion());
                 p.setMinorVersion(getMinorVersion() + 1);
-                if (isInheritRelationships()) {
-                    //Copy the relationships
-                    copyRelationships(p, this);
-                } else {
-                    //Do nothing. This will have the requirement as uncovered.
-                }
                 //Store in data base.
                 new ProjectJpaController(getEntityManagerFactory()).create(p);
                 update(this, p);
@@ -116,14 +96,20 @@ public final class ProjectServer extends Project
         return new ProjectJpaController(getEntityManagerFactory()).findProject(getId());
     }
 
-    public void update(Project target, Project source) {
+    private void update(Project target, Project source, boolean copyId) {
         target.setNotes(source.getNotes());
         target.setName(source.getName());
         target.setParentProjectId(source.getParentProjectId());
         target.setProjectList(source.getProjectList());
         target.setRequirementSpecList(source.getRequirementSpecList());
         target.setTestProjectList(source.getTestProjectList());
-        target.setId(source.getId());
+        if (copyId) {
+            target.setId(source.getId());
+        }
+    }
+
+    public void update(Project target, Project source) {
+        update(target, source, true);
     }
 
     public static List<Project> getProjects() {
