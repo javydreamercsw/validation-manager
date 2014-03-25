@@ -11,6 +11,8 @@ import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.server.core.RequirementServer;
+import com.validation.manager.core.tool.message.MessageHandler;
+import com.validation.manager.core.tool.message.MessageType;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -311,6 +313,11 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                 } else {
                     req = new RequirementServer(requirement);
                 }
+                //TODO: Ask via Web Service is versioning is enabled.
+                Lookup.getDefault().lookup(MessageHandler.class)
+                        .show("Relationships to other requirements and "
+                                + "test cases will be copied over.", 
+                                MessageType.WARNING);
                 req.setUniqueId(uniqueID.getText().trim());
                 req.setMinorVersion(req.getMinorVersion() + 1);
             } else {
@@ -562,7 +569,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             setRequirement(Utilities.actionsGlobalContext().lookup(Requirement.class));
             uniqueID.setText(requirement.getUniqueId());
             //Update the linked requirements
-            for (Requirement req : requirement.getRequirementList()) {
+            for (Requirement req : requirement.getRequirementList1()) {
                 ((DefaultListModel) requirements.getModel()).addElement(req);
             }
             //Update other fields
