@@ -215,8 +215,8 @@ public class TestImportTopComponent extends TestCaseImporterTopComponent {
                         return "Validation Manager Test Import Files";
                     }
                 });
-                int returnVal = fc.showOpenDialog(new JFrame());
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                if (fc.showOpenDialog(new JFrame())
+                        == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
                     TableExtractor te = new TableExtractor(file);
                     try {
