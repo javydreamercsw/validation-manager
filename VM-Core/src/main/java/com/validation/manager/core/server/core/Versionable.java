@@ -7,6 +7,7 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -21,14 +22,17 @@ public class Versionable extends VMAuditedObject implements Serializable,
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
+    @Min(0)
     @Column(name = "major_version")
     private int majorVersion;
     @Basic(optional = false)
     @NotNull
+    @Min(0)
     @Column(name = "mid_version")
     private int midVersion;
     @Basic(optional = false)
     @NotNull
+    @Min(1)
     @Column(name = "minor_version")
     private int minorVersion;
 
