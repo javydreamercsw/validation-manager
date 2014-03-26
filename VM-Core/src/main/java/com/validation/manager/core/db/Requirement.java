@@ -218,7 +218,7 @@ public class Requirement extends Versionable implements Serializable {
         return requirementList;
     }
 
-    public void setRequirementList(List<Requirement> requirementList) {
+    public final void setRequirementList(List<Requirement> requirementList) {
         this.requirementList = requirementList;
     }
 
@@ -228,7 +228,7 @@ public class Requirement extends Versionable implements Serializable {
         return requirementList1;
     }
 
-    public void setRequirementList1(List<Requirement> requirementList1) {
+    public final void setRequirementList1(List<Requirement> requirementList1) {
         this.requirementList1 = requirementList1;
     }
 
@@ -238,7 +238,7 @@ public class Requirement extends Versionable implements Serializable {
         return stepList;
     }
 
-    public void setStepList(List<Step> stepList) {
+    public final void setStepList(List<Step> stepList) {
         this.stepList = stepList;
     }
 
@@ -248,7 +248,7 @@ public class Requirement extends Versionable implements Serializable {
         return riskControlList;
     }
 
-    public void setRiskControlList(List<RiskControl> riskControlList) {
+    public final void setRiskControlList(List<RiskControl> riskControlList) {
         this.riskControlList = riskControlList;
     }
 
@@ -282,7 +282,7 @@ public class Requirement extends Versionable implements Serializable {
         return requirementHasExceptionList;
     }
 
-    public void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
+    public final void setRequirementHasExceptionList(List<RequirementHasException> requirementHasExceptionList) {
         this.requirementHasExceptionList = requirementHasExceptionList;
     }
 
