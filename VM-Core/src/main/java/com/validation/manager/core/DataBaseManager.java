@@ -293,7 +293,8 @@ public class DataBaseManager {
     public static List<Object> nativeQuery(String query) {
         EntityTransaction transaction = getEntityManager().getTransaction();
         transaction.begin();
-        List<Object> resultList = getEntityManager().createNativeQuery(query).getResultList();
+        List<Object> resultList
+                = getEntityManager().createNativeQuery(query).getResultList();
         transaction.commit();
         return resultList;
     }
@@ -338,19 +339,22 @@ public class DataBaseManager {
      * @param parameters query parameters
      * @return query result
      */
-    public static List<Object> namedQuery(String query, Map<String, Object> parameters) {
+    public static List<Object> namedQuery(String query,
+            Map<String, Object> parameters) {
         return namedQuery(query, parameters, false);
     }
 
     @SuppressWarnings("unchecked")
-    private static List<Object> namedQuery(String query, Map<String, Object> parameters, boolean change) {
+    private static List<Object> namedQuery(String query,
+            Map<String, Object> parameters, boolean change) {
         EntityTransaction transaction = getEntityManager().getTransaction();
         if (change) {
             transaction.begin();
         }
         Query q = getEntityManager().createNamedQuery(query);
         if (parameters != null) {
-            Iterator<Entry<String, Object>> entries = parameters.entrySet().iterator();
+            Iterator<Entry<String, Object>> entries
+                    = parameters.entrySet().iterator();
             while (entries.hasNext()) {
                 Entry<String, Object> e = entries.next();
                 q.setParameter(e.getKey(), e.getValue());
