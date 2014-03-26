@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
@@ -9,10 +8,8 @@ import com.validation.manager.core.db.VmId;
 import com.validation.manager.core.db.controller.VmIdJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 
 /**
@@ -80,7 +77,6 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
     }
 
     public static VMIdServer getVMId(String table) throws VMException {
-        HashMap<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("tableName", table);
         List<Object> result = namedQuery("VmId.findByTableName", parameters);
         if (!result.isEmpty()) {
