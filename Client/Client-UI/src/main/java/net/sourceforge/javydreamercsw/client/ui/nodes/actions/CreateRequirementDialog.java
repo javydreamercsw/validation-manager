@@ -5,13 +5,14 @@ import com.validation.manager.core.server.core.RequirementServer;
 import javax.swing.ImageIcon;
 import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
-import org.openide.util.Utilities;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class CreateRequirementDialog extends AbstractCreationDialog {
+
+    private RequirementSpecNode rsn;
 
     /**
      * Creates new form CreateRequirementDialog
@@ -153,7 +154,7 @@ public class CreateRequirementDialog extends AbstractCreationDialog {
     private void saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveActionPerformed
         RequirementServer rs = new RequirementServer(uniqueId.getText(),
                 description.getText(),
-                Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class).getRequirementSpecNodePK(),
+                rsn.getRequirementSpecNodePK(),
                 notes.getText(),
                 getSelectedRequirementType(type).getId(),
                 getSelectedRequirementStatus(status).getId());
@@ -181,4 +182,8 @@ public class CreateRequirementDialog extends AbstractCreationDialog {
     private javax.swing.JComboBox type;
     private javax.swing.JTextField uniqueId;
     // End of variables declaration//GEN-END:variables
+
+    public void setRequirementSpecNode(RequirementSpecNode rsn) {
+        this.rsn = rsn;
+    }
 }
