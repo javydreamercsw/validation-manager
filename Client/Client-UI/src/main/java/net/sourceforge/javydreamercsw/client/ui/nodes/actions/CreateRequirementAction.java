@@ -1,8 +1,10 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
+import com.validation.manager.core.db.RequirementSpecNode;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import org.openide.util.Utilities;
 
 /**
  *
@@ -30,6 +32,7 @@ public class CreateRequirementAction extends AbstractAction {
                         dialog.dispose();
                     }
                 });
+                dialog.setRequirementSpecNode(Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class));
                 dialog.setVisible(true);
             }
         });

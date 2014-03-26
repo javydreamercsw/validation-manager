@@ -20,6 +20,8 @@ import org.netbeans.api.visual.widget.Scene;
  */
 public class RequirementHierarchyNode extends AbstractHierarchyNode {
 
+    private BufferedImage image = null;
+
     private static final Logger LOG
             = Logger.getLogger(RequirementHierarchyNode.class.getSimpleName());
 
@@ -38,26 +40,27 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
 
     @Override
     public Image getCurrentImage() {
-        BufferedImage image = null;
-        try {
-            int coverage
-                    = new RequirementServer(((Requirement) object)).getTestCoverage();
-            if (coverage == 100) {
-                image = ImageIO.read(getClass().getResource(
-                        "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_green.png"));
-            } else if (coverage < 100 && coverage > 50) {
-                image = ImageIO.read(getClass().getResource(
-                        "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_yellow.png"));
-            } else if (coverage < 50 && coverage > 0) {
-                image = ImageIO.read(getClass().getResource(
-                        "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_orange.png"));
-            } else {
-                image = ImageIO.read(getClass().getResource(
-                        "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_red.png"));
-            }
+        if (image == null) {
+            try {
+                int coverage
+                        = new RequirementServer(((Requirement) object)).getTestCoverage();
+                if (coverage == 100) {
+                    image = ImageIO.read(getClass().getResource(
+                            "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_green.png"));
+                } else if (coverage < 100 && coverage > 50) {
+                    image = ImageIO.read(getClass().getResource(
+                            "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_yellow.png"));
+                } else if (coverage < 50 && coverage > 0) {
+                    image = ImageIO.read(getClass().getResource(
+                            "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_orange.png"));
+                } else {
+                    image = ImageIO.read(getClass().getResource(
+                            "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_red.png"));
+                }
 
-        } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
         }
         return image;
     }
@@ -70,11 +73,11 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
     @Override
     protected List<AbstractHierarchyNode> getNodeChildren() {
         ArrayList<AbstractHierarchyNode> children
-                = new ArrayList<AbstractHierarchyNode>();
+                = new ArrayList<>();
         //Clear and recreate
         Requirement req = (Requirement) object;
         LOG.log(Level.INFO, "Updating children for {0}", req.getUniqueId());
-        for (Requirement r : req.getRequirementList()) {
+        for (Requirement r : req.getRequirementList1()) {
             children.add(new RequirementHierarchyNode(r, getScene()));
         }
         for (Step s : req.getStepList()) {

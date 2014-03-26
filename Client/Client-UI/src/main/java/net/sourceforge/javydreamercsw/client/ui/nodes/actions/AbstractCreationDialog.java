@@ -157,14 +157,16 @@ public abstract class AbstractCreationDialog extends JDialog {
         for (RequirementType lvl : types) {
             names.add(internationalize(lvl.getName()));
         }
-        type.setModel(new DefaultComboBoxModel(names.toArray(new String[types.size()])));
+        type.setModel(new DefaultComboBoxModel(names
+                .toArray(new String[types.size()])));
     }
 
     protected void populateRequirementStatusList(JComboBox status) {
         status.setRenderer(new ListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList list,
-                    Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                    Object value, int index, boolean isSelected, 
+                    boolean cellHasFocus) {
                 RequirementStatus rs = (RequirementStatus) value;
                 return new JLabel(rb.containsKey(rs.getStatus())
                         ? rb.getString(rs.getStatus()) : rs.getStatus());
@@ -172,13 +174,14 @@ public abstract class AbstractCreationDialog extends JDialog {
         });
         List<RequirementStatus> statusses = new ArrayList<>();
         if (DataBaseTool.getEmf() != null) {
-            List<Object> projectList = DataBaseManager.createdQuery(
-                    "select rs from RequirementStatus rs order by rs.id");
+            List<Object> projectList = DataBaseManager.namedQuery(
+                    "RequirementStatus.findAll");
             for (Iterator<Object> it2 = projectList.iterator(); it2.hasNext();) {
                 RequirementStatus temp = (RequirementStatus) it2.next();
                 statusses.add(temp);
             }
         }
-        status.setModel(new DefaultComboBoxModel(statusses.toArray(new RequirementStatus[statusses.size()])));
+        status.setModel(new DefaultComboBoxModel(statusses
+                .toArray(new RequirementStatus[statusses.size()])));
     }
 }
