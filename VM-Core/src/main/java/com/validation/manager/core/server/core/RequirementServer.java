@@ -89,6 +89,8 @@ public final class RequirementServer extends Requirement
 
     @Override
     public int write2DB() throws Exception {
+        //Make sure unique id is trimmed
+        setUniqueId(getUniqueId().trim());
         if (getId() > 0) {
             //Check what has changed, if is only relationshipd, don't version
             //Get the one from DB
