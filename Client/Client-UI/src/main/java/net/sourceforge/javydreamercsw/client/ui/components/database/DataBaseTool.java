@@ -20,9 +20,7 @@ public class DataBaseTool {
     public static void connect() {
         final DatabaseSelection dialog
                 = new DatabaseSelection(new javax.swing.JFrame(), true);
-        if (ProjectExplorerComponent.getConnection() == null) {
-            dialog.setVisible(true);
-        }
+        dialog.setVisible(true);
         while (dialog.isVisible()) {
             try {
                 Thread.sleep(100);
