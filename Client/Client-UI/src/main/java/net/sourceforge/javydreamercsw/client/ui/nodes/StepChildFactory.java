@@ -6,7 +6,6 @@ import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.controller.StepJpaController;
 import java.beans.IntrospectionException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
