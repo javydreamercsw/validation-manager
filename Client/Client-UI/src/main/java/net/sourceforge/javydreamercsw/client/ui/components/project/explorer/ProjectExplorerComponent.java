@@ -43,19 +43,20 @@ import org.openide.util.Utilities;
 public final class ProjectExplorerComponent extends TopComponent
         implements ExplorerManager.Provider, LookupListener {
 
-    private final ExplorerManager mgr = new ExplorerManager();
+    private static final ExplorerManager mgr = new ExplorerManager();
     private static DatabaseConnection conn;
     private Lookup.Result<RefreshableCapability> result = null;
     private static AbstractVMBeanNode currentNode;
     private static final Logger LOG
             = Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
+    private static final BeanTreeView myBeanTreeView=new BeanTreeView();
 
     public ProjectExplorerComponent() {
         initComponents();
         setName(Bundle.CTL_ProjectExplorerTopComponent());
         setToolTipText(Bundle.HINT_ProjectExplorerTopComponent());
         setLayout(new BorderLayout());
-        add(new BeanTreeView(), BorderLayout.CENTER);
+        add(myBeanTreeView, BorderLayout.CENTER);
         associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
                 getActionMap()));
         RootNode root = new RootNode(new ProjectChildFactory().setShowChildren(false));
@@ -147,6 +148,11 @@ public final class ProjectExplorerComponent extends TopComponent
             LOG.log(Level.FINE, "Refreshing: {0}", currentNode);
             currentNode.refresh();
         }
+        for (RefreshableCapability rc
+                : mgr.getRootContext().getLookup().lookupAll(RefreshableCapability.class)) {
+            rc.refresh();
+        }
+        myBeanTreeView.expandNode(mgr.getRootContext());
     }
 
     @Override
@@ -161,7 +167,7 @@ public final class ProjectExplorerComponent extends TopComponent
                 if (item instanceof AbstractVMBeanNode) {
                     AbstractVMBeanNode p = (AbstractVMBeanNode) item;
                     currentNode = p;
-                    for (RefreshableCapability refresh 
+                    for (RefreshableCapability refresh
                             : currentNode.getLookup().lookupAll(RefreshableCapability.class)) {
                         refresh.refresh();
                     }
