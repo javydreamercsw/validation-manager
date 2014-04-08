@@ -43,6 +43,7 @@ public class DataBaseTool {
                     DataBaseManager.getPersistenceUnitName(),
                     addedOrOverridenProperties);
             DataBaseManager.setEntityManagerFactory(getEmf());
+            ProjectExplorerComponent.refresh();
         }
     }
 

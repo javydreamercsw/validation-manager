@@ -1,6 +1,5 @@
 package net.sourceforge.javydreamercsw.client.ui.components.database;
 
-import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.openide.awt.ActionID;
@@ -26,6 +25,5 @@ public final class ConnectAction implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         //Connect to database
         DataBaseTool.connect();
-        ProjectExplorerComponent.refresh();
     }
 }
