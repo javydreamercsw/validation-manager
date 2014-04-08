@@ -1,7 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
 import com.validation.manager.core.db.Project;
-import com.validation.manager.core.db.TestPlan;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
