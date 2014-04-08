@@ -7,6 +7,7 @@ import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.beans.IntrospectionException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -19,15 +20,15 @@ import javax.swing.JComponent;
 import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilterChangeListener;
 import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilterChangeProvider;
 import net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene.HierarchyScene;
+import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectNode;
 import net.sourceforge.javydreamercsw.client.ui.nodes.SubProjectChildFactory;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.explorer.view.OutlineView;
-import org.openide.nodes.AbstractNode;
-import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
@@ -59,7 +60,7 @@ import org.openide.windows.TopComponent;
     "HINT_ProjectViewerTopComponent=This is a Project Viewer window",
     "ProjectViewerTopComponent.filterPane.border.title=Requirement Filters"
 })
-@ServiceProvider(service=RequirementStatusFilterChangeProvider.class)
+@ServiceProvider(service = RequirementStatusFilterChangeProvider.class)
 public final class ProjectViewerTopComponent extends TopComponent
         implements ExplorerManager.Provider, LookupListener, ItemListener,
         RequirementStatusFilterChangeProvider {
@@ -191,26 +192,30 @@ public final class ProjectViewerTopComponent extends TopComponent
             while (it.hasNext()) {
                 Object item = it.next();
                 if (item instanceof Project) {
-                    Project p = (Project) item;
-                    projectFactory = new SubProjectChildFactory(p);
-                    root = new AbstractNode(Children.create(projectFactory, true));
-                    root.setDisplayName(p.getName());
-                    getExplorerManager().setRootContext(root);
-                    if (filters.isEmpty()) {
-                        //Update the available filters if they are not there already. No need to reprocess each time.
-                        filterPane.removeAll();
-                        for (RequirementStatus rs : new RequirementStatusJpaController(
-                                DataBaseManager.getEntityManagerFactory()).findRequirementStatusEntities()) {
-                            JCheckBox filter = new JCheckBox(rb.containsKey(rs.getStatus())
-                                    ? rb.getString(rs.getStatus()) : rs.getStatus());
-                            filter.addItemListener((ProjectViewerTopComponent) this);
-                            //TODO: Remove when filter is working.
-                            filter.setEnabled(false);
-                            filters.add(filter);
-                            filterPane.add(filter);
+                    try {
+                        Project p = (Project) item;
+                        projectFactory = new SubProjectChildFactory(p);
+                        root = new ProjectNode(p, new SubProjectChildFactory(p));
+                        root.setDisplayName(p.getName());
+                        getExplorerManager().setRootContext(root);
+                        if (filters.isEmpty()) {
+                            //Update the available filters if they are not there already. No need to reprocess each time.
+                            filterPane.removeAll();
+                            for (RequirementStatus rs : new RequirementStatusJpaController(
+                                    DataBaseManager.getEntityManagerFactory()).findRequirementStatusEntities()) {
+                                JCheckBox filter = new JCheckBox(rb.containsKey(rs.getStatus())
+                                        ? rb.getString(rs.getStatus()) : rs.getStatus());
+                                filter.addItemListener((ProjectViewerTopComponent) this);
+                                //TODO: Remove when filter is working.
+                                filter.setEnabled(false);
+                                filters.add(filter);
+                                filterPane.add(filter);
+                            }
                         }
+                        filterPane.repaint();
+                    } catch (IntrospectionException ex) {
+                        Exceptions.printStackTrace(ex);
                     }
-                    filterPane.repaint();
                 } else if (item instanceof Requirement) {
                     Requirement req = (Requirement) item;
                     scene.clear();
