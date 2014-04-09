@@ -229,10 +229,11 @@ public abstract class AbstractImportTopComponent extends TopComponent
             //Make sure there's no duplicate mapping
             if (!mapping.isEmpty()
                     && (getMapping().getMappingValue(value) != null
-                    && getMapping().getMappingValue(value).isIgnored()
+                    && !getMapping().getMappingValue(value).isIgnored()
                     && mapping.contains(value))) {
                 showImportError(MessageFormat.format(
                         "Duplicated mapping: {0}", value));
+                setImportSuccess(false);
             }
             mapping.add(i, value);
         }
