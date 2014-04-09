@@ -67,8 +67,8 @@ import org.openide.windows.TopComponent;
 )
 @Messages({
     "CTL_TestCaseImporterAction=Test Case Importer",
-    "CTL_TestCaseImporterTopComponent=TestCase Importer Window",
-    "HINT_TestCaseImporterTopComponent=This is a TestCase Importer window",
+    "CTL_TestCaseImporterTopComponent=Test Case Importer Window",
+    "HINT_TestCaseImporterTopComponent=This is a Test Case Importer window",
     "TestCaseImporterTopComponent.jLabel1.text=Table:",
     "TestCaseImporterTopComponent.addDelimiterButton.text=Add Delimiter",
     "TestCaseImporterTopComponent.delimiterField.text=",
@@ -477,29 +477,31 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                             TestCaseImportMapping.REQUIREMENT.getValue())) {
                         //Process requirements
                         String reqs = (String) importedTable.getModel().getValueAt(row, col);
-                        StringTokenizer st = new StringTokenizer(reqs,
-                                delimiter.getSelectedItem().toString());
-                        while (st.hasMoreTokens()) {
-                            String token = st.nextToken().trim();
-                            LOG.log(Level.FINE, "Requirement: {0}", token);
-                            boolean found = false;
-                            for (Project p : projects) {
-                                LOG.log(Level.FINE,
-                                        "Looking on project: {0}", p.getName());
-                                for (Requirement r : ProjectServer.getRequirements(p)) {
-                                    if (r.getUniqueId().trim().equals(token.trim())) {
-                                        requirements.add(r);
-                                        found = true;
-                                        LOG.log(Level.FINE, "Found it!");
-                                        break;
+                        if (reqs != null) {
+                            StringTokenizer st = new StringTokenizer(reqs,
+                                    delimiter.getSelectedItem().toString());
+                            while (st.hasMoreTokens()) {
+                                String token = st.nextToken().trim();
+                                LOG.log(Level.FINE, "Requirement: {0}", token);
+                                boolean found = false;
+                                for (Project p : projects) {
+                                    LOG.log(Level.FINE,
+                                            "Looking on project: {0}", p.getName());
+                                    for (Requirement r : ProjectServer.getRequirements(p)) {
+                                        if (r.getUniqueId().trim().equals(token.trim())) {
+                                            requirements.add(r);
+                                            found = true;
+                                            LOG.log(Level.FINE, "Found it!");
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            if (!found) {
-                                //TODO: Create dummy? Error out?
-                                LOG.log(Level.WARNING,
-                                        "Unable to find requirement: {0}",
-                                        token.trim());
+                                if (!found) {
+                                    //TODO: Create dummy? Error out?
+                                    LOG.log(Level.WARNING,
+                                            "Unable to find requirement: {0}",
+                                            token.trim());
+                                }
                             }
                         }
                     } else {
