@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.sourceforge.javydreamercsw.client.ui.components;
 
-import javax.swing.DefaultCellEditor;
+import java.util.List;
 
 /**
  *
@@ -19,7 +14,26 @@ public interface ImportMappingInterface {
     String getValue();
 
     /**
-     * @return the required
+     * @return is required
      */
     boolean isRequired();
+    
+    /**
+     * Should this mapping be ignored?
+     * @return true if ti should.
+     */
+    boolean isIgnored();
+    
+    /**
+     * Get the value for the provided key
+     * @param key provided key
+     * @return value for the provided key or null if non found.
+     */
+    ImportMappingInterface getMappingValue(String key);
+
+    /**
+     * Return yourself to expose the values
+     * @return 
+     */
+    public List<ImportMappingInterface> getValues();
 }

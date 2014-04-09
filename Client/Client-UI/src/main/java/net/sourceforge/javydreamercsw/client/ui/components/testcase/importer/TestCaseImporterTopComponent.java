@@ -38,6 +38,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.ImportMappingInterface;
 import static net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.Bundle.CTL_TestCaseImporterTopComponent;
 import static net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.Bundle.HINT_TestCaseImporterTopComponent;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseDialog;
@@ -483,7 +484,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                             LOG.log(Level.FINE, "Requirement: {0}", token);
                             boolean found = false;
                             for (Project p : projects) {
-                                LOG.log(Level.FINE, 
+                                LOG.log(Level.FINE,
                                         "Looking on project: {0}", p.getName());
                                 for (Requirement r : ProjectServer.getRequirements(p)) {
                                     if (r.getUniqueId().trim().equals(token.trim())) {
@@ -523,33 +524,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
     protected void save() {
         LOG.info("Saving imported table...");
         setImportSuccess(true);
-        int rows = getImportTable().getModel().getRowCount();
-        List<String> mapping = new ArrayList<>(rows);
-        for (int i = 0; i < getImportTable().getModel().getColumnCount(); i++) {
-            DefaultCellEditor editor
-                    = (DefaultCellEditor) getImportTable().getCellEditor(0, i);
-            JComboBox combo = (JComboBox) editor.getComponent();
-            LOG.log(Level.FINE, "Column {0} is mapped as: {1}",
-                    new Object[]{i, combo.getSelectedItem()});
-            String value = (String) combo.getSelectedItem();
-            //Make sure there's no duplicate mapping
-            if (!mapping.isEmpty()
-                    && (!value.equals(TestCaseImportMapping.IGNORE.getValue())
-                    && mapping.contains(value))) {
-                showImportError(MessageFormat.format(
-                        "Duplicated mapping: {0}", value));
-            }
-            mapping.add(i, value);
-        }
-        //Make sure the basics are mapped
-        for (TestCaseImportMapping tim : TestCaseImportMapping.values()) {
-            if (tim.isRequired() && !mapping.contains(tim.getValue())) {
-                showImportError(MessageFormat.format(
-                        "Missing required mapping: {0}", tim.getValue()));
-                setImportSuccess(false);
-                break;
-            }
-        }
+        List<String> mapping = super.checkMappings();
         //Create the test case to import into
         /* Create and display the dialog */
         if (isImportSuccess()) {
@@ -586,5 +561,10 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             //TODO: internationalize
             Lookup.getDefault().lookup(MessageHandler.class).plain("Import completed succesfully!");
         }
+    }
+
+    @Override
+    public ImportMappingInterface getMapping() {
+        return TestCaseImportMapping.IGNORE;
     }
 }

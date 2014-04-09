@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
@@ -24,9 +27,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.DefaultTableModel;
 import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
+import net.sourceforge.javydreamercsw.client.ui.components.ImportMappingInterface;
 import org.netbeans.api.settings.ConvertAsProperties;
-import org.openide.awt.ActionID;
 import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
@@ -44,12 +48,9 @@ import org.openide.util.NbBundle.Messages;
         persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = false)
-@ActionID(category = "Window",
-        id = "net.sourceforge.javydreamercsw.client.ui.components.reuirement.mapping.importer.RequirementMappingImporterTopComponent")
 @Messages({
-    "CTL_RequirementMappingImporterAction=RequirementMappingImporter",
-    "CTL_RequirementMappingImporterTopComponent=RequirementMappingImporter Window",
-    "HINT_RequirementMappingImporterTopComponent=This is a RequirementMappingImporter window",
+    "CTL_RequirementMappingImporterTopComponent=Requirement Mapping Importer Window",
+    "HINT_RequirementMappingImporterTopComponent=This is a Requirement Mapping Importer window",
     "RequirementMappingImporterTopComponent.jLabel1.text=Table:",
     "RequirementMappingImporterTopComponent.delimiterField.text=",
     "RequirementMappingImporterTopComponent.jLabel2.text=Requirement Delimiter",
@@ -58,7 +59,8 @@ import org.openide.util.NbBundle.Messages;
     "RequirementMappingImporterTopComponent.saveButton.text=Save",
     "RequirementMappingImporterTopComponent.importButton.text=Import"
 })
-public final class RequirementMappingImporterTopComponent extends AbstractImportTopComponent {
+public final class RequirementMappingImporterTopComponent
+        extends AbstractImportTopComponent {
 
     private static final Logger LOG
             = Logger.getLogger(RequirementMappingImporterTopComponent.class.getSimpleName());
@@ -235,6 +237,16 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
                         } else {
                             LOG.log(Level.INFO, "Found no tables!");
                         }
+                        for (DefaultTableModel dtm : tables) {
+                            int columns = dtm.getColumnCount();
+                            Object[] mappingRow = new Object[columns];
+                            for (int i = 0; i < columns; i++) {
+                                //Mapping row
+                                mappingRow[i] = "Select Mapping";
+                            }
+                            //Insert mapping row
+                            dtm.insertRow(0, mappingRow);
+                        }
                     } catch (FileNotFoundException ex) {
                         Exceptions.printStackTrace(ex);
                     } catch (ClassNotFoundException | IOException ex) {
@@ -249,29 +261,93 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         LOG.info("Saving imported table...");
         setImportSuccess(true);
+        List<String> mapping = super.checkMappings();
         //Process the mapping
         if (isImportSuccess()) {
             enableUI(false);
-            for (int row = 0; row < importedTable.getModel().getRowCount(); row++) {
-                String val1 = (String) importedTable.getModel().getValueAt(row, 0);
-                Requirement req1 = findRequirement(val1.trim());
-                String val2 = (String) importedTable.getModel().getValueAt(row, 1);
-                Requirement req2 = findRequirement(val2.trim());
-                if (req1 != null && req2 != null) {
-                    //Both are valid
-                    try {
-                        RequirementServer rs = new RequirementServer(req1);
-                        rs.addChildRequirement(req2);
-                    } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
-                        setImportSuccess(false);
+            //Start on second row as first one is the mapping row.
+            //Start on third row if there are headers in the data
+            int start = 1 + (header.isSelected() ? 1 : 0);
+            for (int row = start; row < importedTable.getModel().getRowCount(); row++) {
+                String parent = "";
+                String child = "";
+                for (int col = 0; col < importedTable.getModel().getColumnCount(); col++) {
+                    List<Requirement> requirements = new ArrayList<>();
+                    if (!mapping.get(col).equals(
+                            RequirementMapMapping.IGNORE.getValue())) {
+                        if (mapping.get(col).equals(
+                                RequirementMapMapping.PARENT.getValue())) {
+                            parent = (String) importedTable.getModel().getValueAt(row, col);
+                            LOG.log(Level.FINE, "Parent: {0}", parent);
+                        } else if (mapping.get(col).equals(
+                                RequirementMapMapping.CHILDREN.getValue())) {
+                            child = (String) importedTable.getModel().getValueAt(row, col);
+                            LOG.log(Level.FINE, "Children: {0}", child);
+                        }
+                        Requirement parentReq = null;
+                        if (parent != null
+                                && !parent.trim().isEmpty()
+                                && child != null
+                                && !child.trim().isEmpty()) {
+                            //Process parents
+                            StringTokenizer st = new StringTokenizer(parent,
+                                    delimiter.getSelectedItem().toString());
+                            while (st.hasMoreTokens()) {
+                                String token = st.nextToken().trim();
+                                parentReq = findRequirement(token.trim());
+                                //Process requirements
+                                StringTokenizer cst = new StringTokenizer(child,
+                                        delimiter.getSelectedItem().toString());
+                                while (cst.hasMoreTokens()) {
+                                    String token2 = cst.nextToken().trim();
+                                    LOG.log(Level.FINE, "Requirement: {0}", token2);
+                                    boolean found = false;
+                                    for (Requirement r : ProjectServer.getRequirements(project)) {
+                                        if (r.getUniqueId().trim().equals(token2.trim())) {
+                                            requirements.add(r);
+                                            found = true;
+                                            LOG.log(Level.FINE, "Found it!");
+                                            break;
+                                        }
+                                    }
+                                    if (!found) {
+                                        //TODO: Create dummy? Error out?
+                                        LOG.log(Level.WARNING,
+                                                "Unable to find requirement: {0}",
+                                                token.trim());
+                                    } else {
+                                        //Both are valid
+                                        try {
+                                            RequirementServer rs
+                                                    = new RequirementServer(parentReq);
+                                            for (Requirement r : requirements) {
+                                                LOG.log(Level.FINE,
+                                                        "Add requirement ''{0}'' "
+                                                        + "as a children to ''{1}''",
+                                                        new Object[]{r.getUniqueId().trim(),
+                                                            rs.getUniqueId().trim()});
+                                                rs.addChildRequirement(r);
+                                            }
+                                            requirements.clear();
+                                        } catch (Exception ex) {
+                                            Exceptions.printStackTrace(ex);
+                                            setImportSuccess(false);
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (parentReq == null) {
+                            if (parent != null && !parent.trim().isEmpty()) {
+                                LOG.warning(MessageFormat.format(
+                                        "Unable to find Parent requirement {0} in this project.", parent.trim()));
+                            }
+                        } else {
+                            if (child != null && !child.trim().isEmpty()) {
+                                LOG.warning(MessageFormat.format(
+                                        "Unable to find Child requirement {0} in this project.", child.trim()));
+                            }
+                        }
                     }
-                } else if (req1 == null) {
-                    LOG.warning(MessageFormat.format(
-                            "Unable to find requirement {0} in this project.", val1.trim()));
-                } else {
-                    LOG.warning(MessageFormat.format(
-                            "Unable to find requirement {0} in this project.", val2.trim()));
                 }
             }
         }
@@ -327,7 +403,7 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
 
     @Override
     public DefaultCellEditor getEditor() {
-        return null;
+        return new RequirementMappingImportEditor();
     }
 
     @Override
@@ -408,5 +484,10 @@ public final class RequirementMappingImporterTopComponent extends AbstractImport
      */
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    @Override
+    public ImportMappingInterface getMapping() {
+        return RequirementMapMapping.CHILDREN;
     }
 }

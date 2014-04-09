@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.components.testcase.importer;
+package net.sourceforge.javydreamercsw.client.ui.components.requirement.mapping.importer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,35 +10,32 @@ import org.openide.util.NbBundle;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public enum TestCaseImportMapping implements ImportMappingInterface {
+public enum RequirementMapMapping implements ImportMappingInterface {
 
-    REQUIREMENT("req.map", true),
-    DESCRIPTION("desc.map", true),
-    ACCEPTANCE_CRITERIA("ac.map", true),
-    NOTES("notes.map", false),
+    PARENT("parent.map", true),
+    CHILDREN("child.map", true),
     IGNORE("ignore.map", false, true);
     private final String key;
     private final boolean required;
     private final boolean ignore;
 
     @NbBundle.Messages({
-        "req.map=Requirement(s)",
-        "desc.map=Description",
-        "ac.map=Acceptance Criteria",
-        "ignore.map=Ignore",
-        "notes.map=Notes"
+        "parent.map=Parent",
+        "child.map=Child(ren)",
+        "ignore.map=Ignore"
     })
-    TestCaseImportMapping(String key, boolean required) {
+
+    RequirementMapMapping(String key, boolean required) {
         this.key = key;
         this.required = required;
         this.ignore = false;
     }
 
-    TestCaseImportMapping(String key, boolean required,
-            boolean ignored) {
+    RequirementMapMapping(String key, boolean required,
+            boolean ignore) {
         this.key = key;
         this.required = required;
-        this.ignore = ignored;
+        this.ignore = ignore;
     }
 
     /**
@@ -46,7 +43,7 @@ public enum TestCaseImportMapping implements ImportMappingInterface {
      */
     @Override
     public String getValue() {
-        return NbBundle.getMessage(TestCaseImportMapping.class, key); // NOI18N
+        return NbBundle.getMessage(RequirementMapMapping.class, key); // NOI18N
     }
 
     /**
