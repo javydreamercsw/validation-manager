@@ -213,4 +213,38 @@ public abstract class AbstractImportTopComponent extends TopComponent
     protected void setDialog(JDialog dialog) {
         this.dialog = dialog;
     }
+
+    public abstract ImportMappingInterface getMapping();
+
+    public List<String> checkMappings() {
+        int rows = getImportTable().getModel().getRowCount();
+        List<String> mapping = new ArrayList<>(rows);
+        for (int i = 0; i < getImportTable().getModel().getColumnCount(); i++) {
+            DefaultCellEditor editor
+                    = (DefaultCellEditor) getImportTable().getCellEditor(0, i);
+            JComboBox combo = (JComboBox) editor.getComponent();
+            LOG.log(Level.FINE, "Column {0} is mapped as: {1}",
+                    new Object[]{i, combo.getSelectedItem()});
+            String value = (String) combo.getSelectedItem();
+            //Make sure there's no duplicate mapping
+            if (!mapping.isEmpty()
+                    && (getMapping().getMappingValue(value) != null
+                    && getMapping().getMappingValue(value).isIgnored()
+                    && mapping.contains(value))) {
+                showImportError(MessageFormat.format(
+                        "Duplicated mapping: {0}", value));
+            }
+            mapping.add(i, value);
+        }
+        //Make sure the basics are mapped
+        for (ImportMappingInterface tim : getMapping().getValues()) {
+            if (tim.isRequired() && !mapping.contains(tim.getValue())) {
+                showImportError(MessageFormat.format(
+                        "Missing required mapping: {0}", tim.getValue()));
+                setImportSuccess(false);
+                break;
+            }
+        }
+        return mapping;
+    }
 }
