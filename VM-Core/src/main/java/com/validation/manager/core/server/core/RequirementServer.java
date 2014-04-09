@@ -234,7 +234,15 @@ public final class RequirementServer extends Requirement
     }
 
     public boolean isChangeVersionable() {
-        return !getEntity().getDescription().equals(getDescription())
-                || !getEntity().getNotes().equals(getNotes());
+        String description = getEntity().getDescription();
+        if (description == null) {
+            description = "";
+        }
+        String notes = getEntity().getNotes();
+        if (notes == null) {
+            notes = "";
+        }
+        return !description.equals(getDescription())
+                || !notes.equals(getNotes());
     }
 }
