@@ -306,7 +306,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
         } else {
             //Process
             RequirementServer req;
-            if (edit) {
+            if (isEdit()) {
                 if (requirement == null) {
                     req = new RequirementServer(Utilities.actionsGlobalContext()
                             .lookup(Requirement.class));
@@ -316,7 +316,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                 //TODO: Ask via Web Service is versioning is enabled.
                 Lookup.getDefault().lookup(MessageHandler.class)
                         .show("Relationships to other requirements and "
-                                + "test cases will be copied over.", 
+                                + "test cases will be copied over.",
                                 MessageType.WARNING);
                 req.setUniqueId(uniqueID.getText().trim());
                 req.setMinorVersion(req.getMinorVersion() + 1);
@@ -565,8 +565,11 @@ public final class EditRequirementWindowTopComponent extends TopComponent
         }
         status.setSelectedIndex(0);
         if (isEdit()) {
+            if (requirement == null) {
+                requirement = Utilities.actionsGlobalContext()
+                        .lookup(Requirement.class);
+            }
             //Get the selected Step
-            setRequirement(Utilities.actionsGlobalContext().lookup(Requirement.class));
             uniqueID.setText(requirement.getUniqueId());
             //Update the linked requirements
             for (Requirement req : requirement.getRequirementList1()) {
