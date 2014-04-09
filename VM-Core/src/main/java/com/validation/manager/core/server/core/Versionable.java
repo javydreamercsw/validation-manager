@@ -1,11 +1,9 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.AuditedEntityListener;
 import com.validation.manager.core.VMAuditedObject;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -15,7 +13,6 @@ import javax.validation.constraints.NotNull;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @MappedSuperclass
-@EntityListeners(AuditedEntityListener.class)
 public class Versionable extends VMAuditedObject implements Serializable,
         Comparable<Versionable> {
 
