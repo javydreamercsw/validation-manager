@@ -66,9 +66,9 @@ import org.openide.windows.TopComponent;
         preferredID = "TestCaseImporterTopComponent"
 )
 @Messages({
-    "CTL_TestCaseImporterAction=TestCaseImporter",
-    "CTL_TestCaseImporterTopComponent=TestCaseImporter Window",
-    "HINT_TestCaseImporterTopComponent=This is a TestCaseImporter window",
+    "CTL_TestCaseImporterAction=Test Case Importer",
+    "CTL_TestCaseImporterTopComponent=TestCase Importer Window",
+    "HINT_TestCaseImporterTopComponent=This is a TestCase Importer window",
     "TestCaseImporterTopComponent.jLabel1.text=Table:",
     "TestCaseImporterTopComponent.addDelimiterButton.text=Add Delimiter",
     "TestCaseImporterTopComponent.delimiterField.text=",
