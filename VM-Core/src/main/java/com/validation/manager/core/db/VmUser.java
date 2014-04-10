@@ -44,9 +44,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "VmUser.findByEmail",
             query = "SELECT v FROM VmUser v WHERE v.email = :email"),
     @NamedQuery(name = "VmUser.findByFirst",
-            query = "SELECT v FROM VmUser v WHERE v.first = :first"),
+            query = "SELECT v FROM VmUser v WHERE v.firstName = :first"),
     @NamedQuery(name = "VmUser.findByLast",
-            query = "SELECT v FROM VmUser v WHERE v.last = :last"),
+            query = "SELECT v FROM VmUser v WHERE v.lastName = :last"),
     @NamedQuery(name = "VmUser.findByLastModified",
             query = "SELECT v FROM VmUser v WHERE v.lastModified = :lastModified"),
     @NamedQuery(name = "VmUser.findByLocale",
@@ -79,10 +79,10 @@ public class VmUser extends Versionable implements Serializable {
     private String email;
     @Size(max = 255)
     @Column(name = "first")
-    private String first;
+    private String firstName;
     @Size(max = 255)
     @Column(name = "last")
-    private String last;
+    private String lastName;
     @Column(name = "last_modified")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModified;
@@ -130,8 +130,8 @@ public class VmUser extends Versionable implements Serializable {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.first = first;
-        this.last = last;
+        this.firstName = first;
+        this.lastName = last;
         this.locale = locale;
         this.lastModified = lastModified;
         this.attempts = attempts;
@@ -162,20 +162,20 @@ public class VmUser extends Versionable implements Serializable {
         this.email = email;
     }
 
-    public String getFirst() {
-        return first;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirst(String first) {
-        this.first = first;
+    public void setFirstName(String first) {
+        this.firstName = first;
     }
 
-    public String getLast() {
-        return last;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLast(String last) {
-        this.last = last;
+    public void setLastName(String last) {
+        this.lastName = last;
     }
 
     public Date getLastModified() {

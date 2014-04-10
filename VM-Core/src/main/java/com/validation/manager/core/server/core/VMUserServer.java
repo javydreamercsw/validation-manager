@@ -158,8 +158,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         setId(0);
         setUsername(name);
         setPassword(password);
-        setFirst(firstName);
-        setLast(lastName);
+        setFirstName(firstName);
+        setLastName(lastName);
         setEmail(email);
         setLocale(getDefault().toString());
         setUserStatusId(new UserStatusJpaController(
@@ -175,8 +175,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             java.sql.Timestamp lastModified) throws Exception {
         setUsername(name);
         setPassword(password);
-        setFirst(firstName);
-        setLast(lastName);
+        setFirstName(firstName);
+        setLastName(lastName);
         setEmail(email);
         setUserStatusId(new UserStatusJpaController(
                 getEntityManagerFactory())
@@ -234,9 +234,9 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             VmUser vmu = controller.findVmUser(getId());
             vmu.setAttempts(getAttempts());
             vmu.setEmail(getEmail().replaceAll("'", "\\\\'"));
-            vmu.setLast(getLast().replaceAll("'", "\\\\'"));
+            vmu.setLastName(getLastName().replaceAll("'", "\\\\'"));
             vmu.setLastModified(getLastModified());
-            vmu.setFirst(getFirst().replaceAll("'", "\\\\'"));
+            vmu.setFirstName(getFirstName().replaceAll("'", "\\\\'"));
             vmu.setUserStatusId(getUserStatusId());
             vmu.setUsername(getUsername().replaceAll("'", "\\\\'"));
             vmu.setPassword(password);
@@ -259,8 +259,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             VmUser vmu = new VmUser(
                     getUsername().replaceAll("'", "\\\\'"), getPassword(),
                     getEmail().replaceAll("'", "\\\\'"),
-                    getFirst().replaceAll("'", "\\\\'"),
-                    getLast().replaceAll("'", "\\\\'"), getLocale(),
+                    getFirstName().replaceAll("'", "\\\\'"),
+                    getLastName().replaceAll("'", "\\\\'"), getLocale(),
                     getLastModified(), new UserStatusJpaController(
                             getEntityManagerFactory())
                     .findUserStatus(1), getAttempts());
@@ -473,8 +473,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
 
     public void update(VmUser target, VmUser source) {
         target.setPassword(source.getPassword());
-        target.setFirst(source.getFirst());
-        target.setLast(source.getLast());
+        target.setFirstName(source.getFirstName());
+        target.setLastName(source.getLastName());
         target.setEmail(source.getEmail());
         target.setAttempts(source.getAttempts());
         target.setLastModified(source.getLastModified());
