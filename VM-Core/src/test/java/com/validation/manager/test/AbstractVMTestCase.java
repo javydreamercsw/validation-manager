@@ -1,7 +1,6 @@
 package com.validation.manager.test;
 
 import com.validation.manager.core.DBState;
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.close;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.getState;
@@ -10,9 +9,8 @@ import com.validation.manager.core.db.TestProjectTest;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.server.core.VMUserServer;
-import static com.validation.manager.core.server.core.VMUserServer.deleteUser;
-import com.validation.manager.core.tool.MD5;
 import static com.validation.manager.core.tool.MD5.encrypt;
+import static com.validation.manager.test.TestHelper.deleteUser;
 import static java.lang.Class.forName;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import javax.sql.DataSource;
 import junit.framework.TestCase;
