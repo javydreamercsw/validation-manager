@@ -640,7 +640,7 @@ public class DataBaseManager {
                     "Waiting for DB initialization. Current state: {0}",
                     (getState() != null ? getState().name() : null));
             try {
-                sleep(10000);
+                sleep(100);
             } catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
