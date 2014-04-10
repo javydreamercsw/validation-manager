@@ -29,7 +29,8 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
         super(object, scene);
     }
 
-    public RequirementHierarchyNode(Object object, Scene scene, TextOrientation orientation) {
+    public RequirementHierarchyNode(Object object, Scene scene, 
+            TextOrientation orientation) {
         super(object, scene, orientation);
     }
 
