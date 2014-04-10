@@ -1,5 +1,7 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.DataBaseManager.createdQuery;
 import static com.validation.manager.core.DataBaseManager.createdQuery;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
@@ -19,6 +21,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.RollbackException;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -102,12 +108,11 @@ public final class RequirementServer extends Requirement
                         getMidVersion(),
                         getMinorVersion() + 1);
                 /**
-                 * TODO: GUI should allow user to either: 
-                 * 1) Blindly copy the test coverage. 
-                 * 2) Review the current test cases covering previous version and
-                 * deciding if those still cover the requirement changes in a
-                 * one by one basis. 
-                 * 3) Don't do anything, leaving it uncovered.
+                 * TODO: GUI should allow user to either: 1) Blindly copy the
+                 * test coverage. 2) Review the current test cases covering
+                 * previous version and deciding if those still cover the
+                 * requirement changes in a one by one basis. 3) Don't do
+                 * anything, leaving it uncovered.
                  */
                 //Copy the relationships
                 copyRelationships(req, this);
@@ -244,5 +249,95 @@ public final class RequirementServer extends Requirement
         }
         return !description.equals(getDescription())
                 || !notes.equals(getNotes());
+    }
+
+    public static void main(String[] args) {
+        List<String> params = new ArrayList<String>();
+        params.add("javax.persistence.jdbc.url");
+        params.add("javax.persistence.jdbc.password");
+        params.add("javax.persistence.jdbc.driver");
+        params.add("javax.persistence.jdbc.user");
+        /**
+         * Check requirements to make sure they only have latest version of a
+         * linked requirement as children.
+         */
+        if (args.length == params.size()) {
+            parameters.clear();
+            int count = 0;
+            for (String key : params) {
+                parameters.put(key, args[count]);
+                count++;
+            }
+            EntityManagerFactory emf
+                    = Persistence.createEntityManagerFactory("VMPU", parameters);
+            DataBaseManager.setEntityManagerFactory(emf);
+            for (Requirement req : new RequirementJpaController(
+                    DataBaseManager.getEntityManagerFactory()).findRequirementEntities()) {
+                if (!req.getRequirementList1().isEmpty()) {
+                    //Has some children
+                    LOG.log(Level.INFO, "Checking children of: {0}",
+                            req.getUniqueId());
+                    List<Requirement> reqs = new ArrayList<Requirement>();
+                    for (Requirement child : req.getRequirementList1()) {
+                        boolean found = false;
+                        //Compare with the ones in the list
+                        ArrayList<Requirement> copiedList
+                                = new ArrayList<Requirement>(reqs);
+                        for (Requirement inList : copiedList) {
+                            if (inList.getUniqueId().trim().equals(child.getUniqueId().trim())) {
+                                found = true;
+                                //They are the same, keep only the newer one
+                                LOG.log(Level.FINE, "{0} vs. {1}",
+                                        new Object[]{inList.toString(),
+                                            child.toString()});
+                                if (inList.compareTo(child) < 0) {
+                                    //Child is newer, replace the one in the list
+                                    LOG.fine("Replacing copy on the list with newer version.");
+                                    reqs.remove(inList);
+                                    reqs.add(child);
+                                } else if (inList.compareTo(child) == 0) {
+                                    LOG.fine("Same version, ignore.");
+                                } else {
+                                    LOG.fine("Newer version already in list, ignoring.");
+                                }
+                            }
+                        }
+                        if (!found) {
+                            //Not there, add it
+                            reqs.add(child);
+                        }
+                    }
+                    //Now that we cleaned the list, let's replace it with the correct ones.
+                    RequirementServer r = new RequirementServer(req);
+                    try {
+                        LOG.log(Level.INFO, "Initial amount of children: {0}",
+                                r.getRequirementList1().size());
+                        for (Requirement x : r.getRequirementList1()) {
+                            LOG.fine(x.toString());
+                        }
+                        //Remove the ones currently in the list
+                        r.getRequirementList1().clear();
+                        //Add the new ones
+                        r.getRequirementList1().addAll(reqs);
+                        r.write2DB();
+                        LOG.log(Level.INFO, "Updated amount of children: {0}",
+                                r.getRequirementList1().size());
+                        for (Requirement x : reqs) {
+                            LOG.fine(x.toString());
+                        }
+                    } catch(RollbackException ex){
+                        //Relationship already exists.
+                    }
+                    catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+            DataBaseManager.close();
+        } else {
+            LOG.severe(new StringBuilder().append("Missing parameters to be "
+                    + "provided. The following parameters need to be "
+                    + "provided:\n").append(params.toString()).toString());
+        }
     }
 }
