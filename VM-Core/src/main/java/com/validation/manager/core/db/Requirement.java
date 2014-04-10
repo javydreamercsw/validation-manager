@@ -305,7 +305,8 @@ public class Requirement extends Versionable implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Requirement[ id=" + getId() + " ]";
+        return "com.validation.manager.core.db.Requirement[ id=" + getId()
+                + ", uniqueId=" + getUniqueId() + " ]" + super.toString();
     }
 
     public int getId() {

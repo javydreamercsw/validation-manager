@@ -86,7 +86,7 @@ public class Versionable extends VMAuditedObject implements Serializable,
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Versionable[ " + majorVersion
+        return "Version [ " + majorVersion
                 + "." + midVersion + "." + minorVersion + " ]";
     }
 
