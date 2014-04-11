@@ -58,7 +58,7 @@ public class StepHierarchyNode extends AbstractHierarchyNode {
 
     @Override
     protected List<AbstractHierarchyNode> getNodeChildren() {
-        return new ArrayList<AbstractHierarchyNode>();
+        return new ArrayList<>();
     }
 
 }
