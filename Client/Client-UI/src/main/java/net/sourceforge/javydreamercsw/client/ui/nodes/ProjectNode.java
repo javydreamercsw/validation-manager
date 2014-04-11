@@ -10,6 +10,7 @@ import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateProjectAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateRequirementSpecAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestProjectAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ExportRequirementMappingAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportRequirementMapping;
 import org.openide.util.lookup.InstanceContent;
 
@@ -41,6 +42,7 @@ public class ProjectNode extends AbstractVMBeanNode {
         actions.add(new CreateRequirementSpecAction());
         actions.add(new CreateTestProjectAction());
         actions.add(new ImportRequirementMapping());
+        actions.add(new ExportRequirementMappingAction());
         return actions.toArray(new Action[actions.size()]);
     }
 
