@@ -78,10 +78,10 @@ public class VmUser extends Versionable implements Serializable {
     @Column(name = "email")
     private String email;
     @Size(max = 255)
-    @Column(name = "first")
+    @Column(name = "firstName")
     private String firstName;
     @Size(max = 255)
-    @Column(name = "last")
+    @Column(name = "lastName")
     private String lastName;
     @Column(name = "last_modified")
     @Temporal(TemporalType.TIMESTAMP)
