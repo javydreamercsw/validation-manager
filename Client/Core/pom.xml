@@ -25,10 +25,6 @@
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>h2</artifactId>
-                    <groupId>com.h2database</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>dom4j</artifactId>
                     <groupId>dom4j</groupId>
                 </exclusion>
