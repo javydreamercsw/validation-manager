@@ -8,6 +8,8 @@ import static com.validation.manager.core.DataBaseManager.setPersistenceUnitName
 import com.validation.manager.core.db.TestProjectTest;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.VmUserJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.VMUserServer;
 import static com.validation.manager.core.tool.MD5.encrypt;
 import static com.validation.manager.test.TestHelper.deleteUser;
@@ -45,7 +47,7 @@ public abstract class AbstractVMTestCase extends TestCase {
     @Override
     protected void setUp() throws Exception {
         setPersistenceUnitName("TestVMPU");
-        assertTrue(getState().equals(DBState.VALID));
+        assertEquals(DBState.VALID, getState());
     }
 
     @Override
@@ -117,7 +119,9 @@ public abstract class AbstractVMTestCase extends TestCase {
             deleteUser(designer);
             deleteUser(tester);
             deleteUser(leader);
-        } catch (Exception ex) {
+        } catch (IllegalOrphanException ex) {
+            getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
+        } catch (NonexistentEntityException ex) {
             getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
         }
     }
