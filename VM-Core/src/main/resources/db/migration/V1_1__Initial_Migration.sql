@@ -2,7 +2,7 @@ INSERT INTO `user_status` (`id`, `status`, `description`) VALUES (1, 'user.statu
 INSERT INTO `user_status` (`id`, `status`, `description`) VALUES (2, 'user.status.inactive', 'user.status.inactive.desc');
 INSERT INTO `user_status` (`id`, `status`, `description`) VALUES (3, 'user.status.locked', 'user.status.locked.desc');
 INSERT INTO `user_status` (`id`, `status`, `description`) VALUES (4, 'user.status.aged', 'user.status.aged.desc');
-INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first`, `last`, `locale`, `last_modified`, `attempts`, `user_status_id`) VALUES (1, 'admin', '21232f297a57a5a743894a0e4a801fc3', '', 'System', 'Administrator', 'en', now(), 0, 1);
+INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `locale`, `user_status_id`) VALUES (1, 'admin', '21232f297a57a5a743894a0e4a801fc3', '', 'System', 'Administrator', 'en', 1);
 INSERT INTO `role` (`id`, `description`, `notes`) VALUES (1, 'reserved1', 'reserver.desc');
 INSERT INTO `role` (`id`, `description`, `notes`) VALUES (2, 'reserved2', 'reserved2.desc');
 INSERT INTO `role` (`id`, `description`, `notes`) VALUES (3, 'none', 'none.desc');
