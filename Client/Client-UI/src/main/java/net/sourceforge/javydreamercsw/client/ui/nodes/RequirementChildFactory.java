@@ -8,6 +8,8 @@ import java.beans.IntrospectionException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilterChangeListener;
 import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilterChangeProvider;
 import org.openide.nodes.Node;
@@ -23,6 +25,8 @@ public class RequirementChildFactory extends AbstractChildFactory
 
     private RequirementSpecNode node;
     private Integer[] ids = new Integer[0];
+    private static final Logger LOG
+            = Logger.getLogger(RequirementChildFactory.class.getSimpleName());
 
     public RequirementChildFactory(RequirementSpecNode node) {
         this.node = node;
@@ -38,8 +42,12 @@ public class RequirementChildFactory extends AbstractChildFactory
         for (Requirement req : node.getRequirementList()) {
             //TODO: Filter out status ids
 //            if (!new ArrayList<>(Arrays.asList(ids)).contains(req.getRequirementStatusId().getId())) {
-            if (req.getRequirementStatusId().getId() == 2) {
+            if (req.getRequirementStatusId() != null
+                    && req.getRequirementStatusId().getId() == 2) {
                 toPopulate.add(req);
+            } else if (req.getRequirementStatusId() == null) {
+                LOG.log(Level.WARNING,
+                        "Invalid Requirement without status: {0}", req);
             }
         }
         Collections.sort(toPopulate, new Comparator<Object>() {
@@ -47,7 +55,8 @@ public class RequirementChildFactory extends AbstractChildFactory
             @Override
             public int compare(Object o1, Object o2) {
                 //Sort them by unique id
-                return ((Requirement) o1).getUniqueId().compareToIgnoreCase(((Requirement) o2).getUniqueId());
+                return ((Requirement) o1).getUniqueId()
+                        .compareToIgnoreCase(((Requirement) o2).getUniqueId());
             }
         });
         for (RequirementSpecNode req : node.getRequirementSpecNodeList()) {
