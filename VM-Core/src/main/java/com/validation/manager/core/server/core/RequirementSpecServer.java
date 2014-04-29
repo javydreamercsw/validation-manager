@@ -102,12 +102,14 @@ public final class RequirementSpecServer extends RequirementSpec
                 .destroy(rs.getRequirementSpecPK());
     }
 
+    @Override
     public RequirementSpec getEntity() {
         return new RequirementSpecJpaController(
                 getEntityManagerFactory())
                 .findRequirementSpec(getRequirementSpecPK());
     }
 
+    @Override
     public void update(RequirementSpec target, RequirementSpec source) {
         target.setProject(source.getProject());
         target.setSpecLevel(source.getSpecLevel());
@@ -128,6 +130,7 @@ public final class RequirementSpecServer extends RequirementSpec
         return requirements;
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

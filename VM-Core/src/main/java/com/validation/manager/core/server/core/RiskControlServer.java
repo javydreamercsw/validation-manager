@@ -59,12 +59,14 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
         return false;
     }
 
+    @Override
     public RiskControl getEntity() {
         return new RiskControlJpaController(
                 getEntityManagerFactory())
                 .findRiskControl(getRiskControlPK());
     }
 
+    @Override
     public void update(RiskControl target, RiskControl source) {
         target.setRiskItemList(source.getRiskItemList());
         target.setRiskItemList1(source.getRiskItemList1());
@@ -73,6 +75,7 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
         target.setRiskControlType(source.getRiskControlType());
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

@@ -84,18 +84,21 @@ public class UserTestProjectRoleServer extends UserTestProjectRole
         return true;
     }
 
+    @Override
     public UserTestProjectRole getEntity() {
         return new UserTestProjectRoleJpaController(
                 getEntityManagerFactory())
                 .findUserTestProjectRole(getUserTestProjectRolePK());
     }
 
+    @Override
     public void update(UserTestProjectRole target, UserTestProjectRole source) {
         target.setRole(source.getRole());
         target.setTestProject(source.getTestProject());
         target.setVmUser(source.getVmUser());
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

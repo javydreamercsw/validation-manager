@@ -83,12 +83,14 @@ public class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
         return false;
     }
 
+    @Override
     public TestPlan getEntity() {
         return new TestPlanJpaController(
                 getEntityManagerFactory())
                 .findTestPlan(getTestPlanPK());
     }
 
+    @Override
     public void update(TestPlan target, TestPlan source) {
         target.setActive(source.getActive());
         target.setIsOpen(source.getIsOpen());
@@ -99,6 +101,7 @@ public class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
         target.setTestPlanPK(source.getTestPlanPK());
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

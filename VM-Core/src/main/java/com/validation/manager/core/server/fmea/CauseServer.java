@@ -43,11 +43,13 @@ public class CauseServer extends Cause implements EntityServer<Cause> {
         return true;
     }
 
+    @Override
     public Cause getEntity() {
         return new CauseJpaController(
                 getEntityManagerFactory()).findCause(getId());
     }
 
+    @Override
     public void update(Cause target, Cause source) {
         target.setDescription(source.getDescription());
         target.setName(source.getName());
@@ -56,6 +58,7 @@ public class CauseServer extends Cause implements EntityServer<Cause> {
         }
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

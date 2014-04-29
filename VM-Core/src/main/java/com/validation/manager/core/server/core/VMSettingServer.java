@@ -87,12 +87,14 @@ public class VMSettingServer extends VmSetting
         return getId();
     }
 
+    @Override
     public VmSetting getEntity() {
         return new VmSettingJpaController(
                 getEntityManagerFactory())
                 .findVmSetting(getId());
     }
 
+    @Override
     public void update(VmSetting target, VmSetting source) {
         target.setBoolVal(source.getBoolVal());
         target.setIntVal(source.getIntVal());
@@ -105,10 +107,12 @@ public class VMSettingServer extends VmSetting
         target.setMinorVersion(source.getMinorVersion());
     }
 
+    @Override
     public void update() {
         update(this, getEntity());
     }
 
+    @Override
     public List<VmSetting> getVersions() {
         List<VmSetting> versions = new ArrayList<VmSetting>();
         parameters.clear();
@@ -120,6 +124,7 @@ public class VMSettingServer extends VmSetting
         return versions;
     }
 
+    @Override
     public boolean isChangeVersionable() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

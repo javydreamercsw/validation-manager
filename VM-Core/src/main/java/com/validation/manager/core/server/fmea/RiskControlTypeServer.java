@@ -45,12 +45,14 @@ public class RiskControlTypeServer extends RiskControlType
         return true;
     }
 
+    @Override
     public RiskControlType getEntity() {
         return new RiskControlTypeJpaController(
                 getEntityManagerFactory())
                 .findRiskControlType(getId());
     }
 
+    @Override
     public void update(RiskControlType target, RiskControlType source) {
         target.setName(source.getName());
         target.setDescription(source.getDescription());
@@ -59,6 +61,7 @@ public class RiskControlTypeServer extends RiskControlType
         }
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

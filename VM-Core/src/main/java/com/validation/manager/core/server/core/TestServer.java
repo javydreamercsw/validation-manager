@@ -64,10 +64,12 @@ public class TestServer extends Test implements EntityServer<Test> {
         return false;
     }
 
+    @Override
     public Test getEntity() {
         return new TestJpaController(getEntityManagerFactory()).findTest(getId());
     }
 
+    @Override
     public void update(Test target, Test source) {
         target.setName(source.getName());
         target.setNotes(source.getNotes());
@@ -81,6 +83,7 @@ public class TestServer extends Test implements EntityServer<Test> {
         }
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

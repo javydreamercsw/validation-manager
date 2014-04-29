@@ -44,17 +44,20 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
         return true;
     }
 
+    @Override
     public Hazard getEntity() {
         return new HazardJpaController(
                 getEntityManagerFactory()).findHazard(getId());
     }
 
+    @Override
     public void update(Hazard target, Hazard source) {
         target.setDescription(source.getDescription());
         target.setName(source.getName());
         target.setRiskItemList(source.getRiskItemList());
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

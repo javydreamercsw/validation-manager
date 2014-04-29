@@ -58,11 +58,13 @@ public class StepServer extends Step implements EntityServer<Step> {
         new StepJpaController(getEntityManagerFactory()).destroy(s.getStepPK());
     }
 
+    @Override
     public Step getEntity() {
         return new StepJpaController(getEntityManagerFactory())
                 .findStep(getStepPK());
     }
 
+    @Override
     public void update(Step target, Step source) {
         target.setExpectedResult(source.getExpectedResult());
         target.setNotes(source.getNotes());
@@ -73,6 +75,7 @@ public class StepServer extends Step implements EntityServer<Step> {
         target.setVmExceptionList(source.getVmExceptionList());
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

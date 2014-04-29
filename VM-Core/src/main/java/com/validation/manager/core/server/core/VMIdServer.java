@@ -106,17 +106,20 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
         return ids;
     }
 
+    @Override
     public VmId getEntity() {
         return new VmIdJpaController(
                 getEntityManagerFactory()).findVmId(getId());
     }
 
+    @Override
     public void update(VmId target, VmId source) {
         target.setId(source.getId());
         target.setLastId(source.getLastId());
         target.setTableName(source.getTableName());
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

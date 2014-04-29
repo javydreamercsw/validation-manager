@@ -55,17 +55,20 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
         return result;
     }
 
+    @Override
     public Fmea getEntity() {
         return new FMEAJpaController(
                 getEntityManagerFactory()).findFmea(getId());
     }
 
+    @Override
     public void update(Fmea target, Fmea source) {
         target.setFmeaList(source.getFmeaList());
         target.setParent(source.getParent());
         target.setRiskItemList(source.getRiskItemList());
     }
 
+    @Override
     public void update() {
         update(this, getEntity());
     }

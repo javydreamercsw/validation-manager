@@ -44,11 +44,13 @@ public class FailureModeServer extends FailureMode
         return true;
     }
 
+    @Override
     public FailureMode getEntity() {
         return new FailureModeJpaController(
                 getEntityManagerFactory()).findFailureMode(getId());
     }
 
+    @Override
     public void update(FailureMode target, FailureMode source) {
         target.setName(source.getName());
         target.setDescription(source.getDescription());
@@ -57,6 +59,7 @@ public class FailureModeServer extends FailureMode
         }
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

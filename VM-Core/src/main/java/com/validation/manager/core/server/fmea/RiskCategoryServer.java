@@ -47,16 +47,19 @@ public class RiskCategoryServer extends RiskCategory
         return true;
     }
 
+    @Override
     public RiskCategory getEntity() {
         return new RiskCategoryJpaController(
                 getEntityManagerFactory()).findRiskCategory(getId());
     }
 
+    @Override
     public void update(RiskCategory target, RiskCategory source) {
         target.setMaximum(source.getMaximum());
         target.setMinimum(source.getMinimum());
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

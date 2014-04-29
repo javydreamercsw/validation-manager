@@ -17,6 +17,7 @@ public class RequirementStatusServer extends RequirementStatus
         implements EntityServer<RequirementStatus>,
         VersionableServer<RequirementStatus> {
 
+    @Override
     public int write2DB() throws Exception {
         RequirementStatus p;
         if (getId() > 0) {
@@ -42,12 +43,14 @@ public class RequirementStatusServer extends RequirementStatus
         return getId();
     }
 
+    @Override
     public RequirementStatus getEntity() {
         return new RequirementStatusJpaController(
                 getEntityManagerFactory())
                 .findRequirementStatus(getId());
     }
 
+    @Override
     public void update(RequirementStatus target, RequirementStatus source) {
         target.setId(source.getId());
         target.setStatus(source.getStatus());
@@ -57,10 +60,12 @@ public class RequirementStatusServer extends RequirementStatus
         target.setMinorVersion(source.getMinorVersion());
     }
 
+    @Override
     public void update() {
         update(this, getEntity());
     }
 
+    @Override
     public List<RequirementStatus> getVersions() {
         List<RequirementStatus> versions = new ArrayList<RequirementStatus>();
         parameters.clear();
@@ -72,6 +77,7 @@ public class RequirementStatusServer extends RequirementStatus
         return versions;
     }
 
+    @Override
     public boolean isChangeVersionable() {
         return !getStatus().equals(getEntity().getStatus());
     }
