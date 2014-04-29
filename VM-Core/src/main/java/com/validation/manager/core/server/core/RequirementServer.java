@@ -143,12 +143,14 @@ public final class RequirementServer extends Requirement
         return getId();
     }
 
+    @Override
     public Requirement getEntity() {
         return new RequirementJpaController(
                 getEntityManagerFactory()).findRequirement(
                         getId());
     }
 
+    @Override
     public void update(Requirement target, Requirement source) {
         if (source.getNotes() != null) {
             target.setNotes(source.getNotes());
@@ -217,6 +219,7 @@ public final class RequirementServer extends Requirement
         return coverage;
     }
 
+    @Override
     public void update() {
         update(this, getEntity());
     }
@@ -244,6 +247,7 @@ public final class RequirementServer extends Requirement
         return versions;
     }
 
+    @Override
     public boolean isChangeVersionable() {
         String description = getEntity().getDescription();
         if (description == null) {
@@ -288,7 +292,7 @@ public final class RequirementServer extends Requirement
                     if (!r.getUniqueId().equals(req.getUniqueId().trim())) {
                         r.setUniqueId(req.getUniqueId().trim());
                         r.write2DB();
-                        LOG.log(Level.INFO, "Trimmed unique id for: {0}", 
+                        LOG.log(Level.FINE, "Trimmed unique id for: {0}",
                                 r.getUniqueId());
                     }
                     if (!req.getRequirementList1().isEmpty()) {
@@ -351,12 +355,16 @@ public final class RequirementServer extends Requirement
                     Requirement older = Collections.min(versions, null);
                     Requirement newer = Collections.max(versions, null);
                     counter = 0;
-                    if (newer.compareTo(older) > 0 
+                    List<String> updated = new ArrayList<String>();
+                    if (!updated.contains(newer.getUniqueId())
+                            && newer.compareTo(older) > 0
                             && newer.getRequirementSpecNode() == null
                             && older.getRequirementSpecNode() != null) {
                         r.copyRelationships(newer, older);
-                        LOG.log(Level.INFO, "Updated relationships for: {0}", newer);
+                        LOG.log(Level.FINE,
+                                "Updated relationships for: {0}", newer);
                         r.write2DB();
+                        updated.add(r.getUniqueId().trim());
                         counter++;
                     }
                     new RequirementServer(newer).write2DB();
@@ -373,5 +381,33 @@ public final class RequirementServer extends Requirement
                     + "provided. The following parameters need to be "
                     + "provided:\n").append(params.toString()).toString());
         }
+    }
+
+    public static List<Requirement> getLatestChildren(Requirement parent) {
+        List<Requirement> children = new ArrayList<Requirement>();
+        List<Requirement> toAdd = new ArrayList<Requirement>();
+        for (Requirement req : parent.getRequirementList1()) {
+            //Make sure to remove duplicates (versions of the same requirement)
+            boolean found = false;
+            for (Requirement in : toAdd) {
+                if (in.getUniqueId().trim().equals(req.getUniqueId().trim())) {
+                        //Check if we have a new version
+                    //They have the same Unique ID, so they are versions of the same requirement
+                    if (in.compareTo(req) < 0) {
+                        //The one in is older. Remove it and replace with the new one
+                        toAdd.remove(in);
+                        toAdd.add(req);
+                        found = true;
+                    } else {
+                        //The one in is either the same or greater, just keep it
+}
+                }
+            }
+            if (!found) {
+                toAdd.add(req);
+            }
+        }
+        children.addAll(toAdd);
+        return children;
     }
 }

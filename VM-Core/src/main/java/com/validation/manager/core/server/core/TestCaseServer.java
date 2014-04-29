@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Requirement;
@@ -14,7 +13,6 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import static com.validation.manager.core.server.core.StepServer.deleteStep;
-import com.validation.manager.core.server.fmea.RiskControlServer;
 import static com.validation.manager.core.server.fmea.RiskControlServer.deleteRiskControl;
 import java.util.ArrayList;
 import java.util.Date;
@@ -75,12 +73,14 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         new TestCaseJpaController(getEntityManagerFactory()).destroy(tc.getTestCasePK());
     }
 
+    @Override
     public TestCase getEntity() {
         return new TestCaseJpaController(
                 getEntityManagerFactory())
                 .findTestCase(getTestCasePK());
     }
 
+    @Override
     public void update(TestCase target, TestCase source) {
         target.setActive(source.getActive());
         target.setCreationDate(source.getCreationDate());
@@ -98,6 +98,7 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         target.setName(source.getName());
     }
 
+    @Override
     public void update() {
         update(this, getEntity());
     }
