@@ -4,6 +4,7 @@ import static com.validation.manager.core.DataBaseManager.getEntityManagerFactor
 import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.server.core.Versionable;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import java.util.ArrayList;
@@ -23,10 +24,14 @@ public class RequirementStatusServer extends RequirementStatus
         if (getId() > 0) {
             if (isVersioningEnabled() && isChangeVersionable()) {
                 p = new RequirementStatus();
-                p.setMajorVersion(getMajorVersion());
-                p.setMidVersion(getMidVersion());
-                p.setMinorVersion(getMinorVersion()+1);
-                update(this,p);
+                if (p.getClass().isInstance(Versionable.class)) {
+                    Versionable vTarget = Versionable.class.cast(p);
+                    Versionable vSource = Versionable.class.cast(this);
+                    vTarget.setMajorVersion(vSource.getMajorVersion());
+                    vTarget.setMidVersion(vSource.getMidVersion());
+                    vTarget.setMinorVersion(vSource.getMinorVersion() + 1);
+                }
+                update(this, p);
             } else {
                 p = new RequirementStatusJpaController(
                         getEntityManagerFactory())
@@ -55,9 +60,13 @@ public class RequirementStatusServer extends RequirementStatus
         target.setId(source.getId());
         target.setStatus(source.getStatus());
         target.setRequirementList(source.getRequirementList());
-        target.setMajorVersion(source.getMajorVersion());
-        target.setMidVersion(source.getMidVersion());
-        target.setMinorVersion(source.getMinorVersion());
+        if (target.getClass().isInstance(Versionable.class)) {
+            Versionable vTarget = Versionable.class.cast(target);
+            Versionable vSource = Versionable.class.cast(source);
+            vTarget.setMajorVersion(vSource.getMajorVersion());
+            vTarget.setMidVersion(vSource.getMidVersion());
+            vTarget.setMinorVersion(vSource.getMinorVersion());
+        }
     }
 
     @Override

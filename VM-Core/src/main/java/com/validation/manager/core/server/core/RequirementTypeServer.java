@@ -60,9 +60,13 @@ public final class RequirementTypeServer extends RequirementType
         target.setName(source.getName());
         target.setId(source.getId());
         target.setRequirementList(source.getRequirementList());
-        target.setMajorVersion(source.getMajorVersion());
-        target.setMidVersion(source.getMidVersion());
-        target.setMinorVersion(source.getMinorVersion());
+        if (target.getClass().isInstance(Versionable.class)) {
+            Versionable vTarget = Versionable.class.cast(target);
+            Versionable vSource = Versionable.class.cast(source);
+            vTarget.setMajorVersion(vSource.getMajorVersion());
+            vTarget.setMidVersion(vSource.getMidVersion());
+            vTarget.setMinorVersion(vSource.getMinorVersion());
+        }
     }
 
     @Override
