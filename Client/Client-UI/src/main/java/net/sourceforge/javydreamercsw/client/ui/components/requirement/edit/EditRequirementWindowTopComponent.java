@@ -572,7 +572,9 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             //Get the selected Step
             uniqueID.setText(requirement.getUniqueId());
             //Update the linked requirements
-            for (Requirement req : requirement.getRequirementList1()) {
+            List<Requirement> toAdd = 
+                    RequirementServer.getLatestChildren(requirement);
+            for (Requirement req : toAdd) {
                 ((DefaultListModel) requirements.getModel()).addElement(req);
             }
             //Update other fields
