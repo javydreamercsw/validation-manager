@@ -559,9 +559,11 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         }
         if (isImportSuccess()
                 && tables.size()
-                == ((int) Math.round(Double.valueOf(spinner.getValue().toString())))) {
+                == ((int) Math.round(
+                        Double.valueOf(spinner.getValue().toString())))) {
             //TODO: internationalize
-            Lookup.getDefault().lookup(MessageHandler.class).plain("Import completed succesfully!");
+            Lookup.getDefault().lookup(MessageHandler.class)
+                    .plain("Import completed succesfully!");
         }
     }
 
