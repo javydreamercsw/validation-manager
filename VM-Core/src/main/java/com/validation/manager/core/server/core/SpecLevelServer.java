@@ -45,11 +45,13 @@ public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel
                 getEntityManagerFactory()).destroy(sl.getId());
     }
 
+    @Override
     public SpecLevel getEntity() {
         return new SpecLevelJpaController(
                 getEntityManagerFactory()).findSpecLevel(getId());
     }
 
+    @Override
     public void update(SpecLevel target, SpecLevel source) {
         target.setDescription(source.getDescription());
         target.setName(source.getName());
@@ -58,6 +60,7 @@ public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel
         }
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

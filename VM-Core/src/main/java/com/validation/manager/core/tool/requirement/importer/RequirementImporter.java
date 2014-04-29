@@ -66,6 +66,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         this.rsn = rsn;
     }
 
+    @Override
     public List<Requirement> importFile() throws RequirementImportException {
         List<Requirement> importedRequirements = null;
         try {
@@ -78,6 +79,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         return importedRequirements;
     }
 
+    @Override
     public List<Requirement> importFile(boolean header) throws
             VMException {
         requirements.clear();
@@ -244,6 +246,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         }
     }
 
+    @Override
     public boolean processImport() throws VMException {
         boolean result = true;
         RequirementJpaController controller = new RequirementJpaController(

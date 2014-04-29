@@ -40,12 +40,14 @@ public class TestProjectServer extends TestProject
         return getId();
     }
 
+    @Override
     public TestProject getEntity() {
         return new TestProjectJpaController(
                 getEntityManagerFactory())
                 .findTestProject(getId());
     }
 
+    @Override
     public void update(TestProject target, TestProject source) {
         target.setActive(source.getActive());
         target.setName(source.getName());
@@ -53,6 +55,7 @@ public class TestProjectServer extends TestProject
         target.setId(source.getId());
     }
 
+    @Override
     public void update() {
         update(this, getEntity());
     }

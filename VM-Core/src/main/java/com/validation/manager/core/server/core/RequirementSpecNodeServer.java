@@ -59,12 +59,14 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         return getRequirementSpecNodePK().getId();
     }
 
+    @Override
     public RequirementSpecNode getEntity() {
         return new RequirementSpecNodeJpaController(
                 getEntityManagerFactory())
                 .findRequirementSpecNode(getRequirementSpecNodePK());
     }
 
+    @Override
     public void update(RequirementSpecNode target, RequirementSpecNode source) {
         target.setDescription(source.getDescription());
         target.setName(source.getName());
@@ -89,6 +91,7 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         return requirements;
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }

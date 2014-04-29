@@ -92,6 +92,7 @@ public final class ProjectServer extends Project
         }
     }
 
+    @Override
     public Project getEntity() {
         return new ProjectJpaController(getEntityManagerFactory()).findProject(getId());
     }
@@ -108,6 +109,7 @@ public final class ProjectServer extends Project
         }
     }
 
+    @Override
     public void update(Project target, Project source) {
         update(target, source, true);
     }
@@ -138,10 +140,12 @@ public final class ProjectServer extends Project
         return requirements;
     }
 
+    @Override
     public void update() {
         update(this, getEntity());
     }
 
+    @Override
     public List<Project> getVersions() {
         List<Project> versions = new ArrayList<Project>();
         parameters.clear();
@@ -153,6 +157,7 @@ public final class ProjectServer extends Project
         return versions;
     }
 
+    @Override
     public boolean isChangeVersionable() {
         return !getName().equals(getEntity().getName())
                 || !getNotes().equals(getEntity().getNotes());

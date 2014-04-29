@@ -41,12 +41,14 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
         return getRiskItemPK().getId();
     }
 
+    @Override
     public RiskItem getEntity() {
         return new RiskItemJpaController(
                 getEntityManagerFactory())
                 .findRiskItem(getRiskItemPK());
     }
 
+    @Override
     public void update(RiskItem target, RiskItem source) {
         if (source.getCauseList() != null) {
             target.setCauseList(source.getCauseList());
@@ -70,6 +72,7 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
         target.setVersion(source.getVersion());
     }
 
+    @Override
     public void update() {
         update(this, getEntity());
     }

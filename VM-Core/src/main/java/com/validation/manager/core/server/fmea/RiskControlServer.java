@@ -50,12 +50,14 @@ public class RiskControlServer extends RiskControl
         return true;
     }
 
+    @Override
     public RiskControl getEntity() {
         return new RiskControlJpaController(
                 getEntityManagerFactory())
                 .findRiskControl(getRiskControlPK());
     }
 
+    @Override
     public void update(RiskControl target, RiskControl source) {
         target.setRequirementList(source.getRequirementList());
         target.setRiskControlType(source.getRiskControlType());
@@ -64,6 +66,7 @@ public class RiskControlServer extends RiskControl
         target.setTestCaseList(source.getTestCaseList());
     }
     
+    @Override
     public void update() {
         update(this, getEntity());
     }
