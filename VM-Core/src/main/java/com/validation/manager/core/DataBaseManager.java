@@ -69,7 +69,7 @@ public class DataBaseManager {
     private static boolean dbError = false;
     private static final Logger LOG
             = getLogger(DataBaseManager.class.getSimpleName());
-    private static DBState state;
+    private static DBState state = DBState.START_UP;
     private static final ResourceBundle settings
             = getBundle("com.validation.manager.resources.settings");
     private static boolean locked = false;
@@ -78,10 +78,6 @@ public class DataBaseManager {
     private static Long demoResetPeriod;
     private static DataBaseManager instance;
     private static boolean versioning_enabled = true;
-
-    static {
-        state = DBState.START_UP;
-    }
 
     /**
      * @return the versioning enabled
@@ -538,7 +534,7 @@ public class DataBaseManager {
                     ((JdbcDataSource) ds).setPassword("");
                     ((JdbcDataSource) ds).setUser("vm_user");
                     ((JdbcDataSource) ds).setURL(
-                            "jdbc:h2:file:target/data/test/validation-manager-test;AUTO_SERVER=TRUE");
+                            "jdbc:h2:file:./target/data/test/validation-manager-test;AUTO_SERVER=TRUE");
                     //Load the H2 driver
                     forName("org.h2.Driver");
                     conn = ds.getConnection();

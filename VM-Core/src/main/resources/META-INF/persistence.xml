@@ -71,7 +71,6 @@
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
     <class>com.validation.manager.core.db.RequirementHasException</class>
-    <class>com.validation.manager.core.db.RequirementHasRequirement</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
     <class>com.validation.manager.core.db.RequirementStatus</class>
@@ -106,7 +105,7 @@
     <class>com.validation.manager.core.db.VmUser</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:target/data/test/validation-manager-test"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:./target/data/test/validation-manager-test;AUTO_SERVER=TRUE"/>
       <property name="javax.persistence.jdbc.password" value=""/>
       <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
       <property name="javax.persistence.jdbc.user" value="vm_user"/>
@@ -173,7 +172,7 @@
       <!--The client will require an implementation of SessionCustomizer
             that will set the lookupType on the JNDI connector to STRING_LOOKUP
             instead of Composite-->
-      <property name="eclipselink.session.customizer" value="com.validation.manager.server.JPAEclipseLinkSessionCustomizer"/>
+      <property name="eclipselink.session.customizer" value="com.validation.manager.core.server.JPAEclipseLinkSessionCustomizer"/>
     </properties>
   </persistence-unit>
 </persistence>

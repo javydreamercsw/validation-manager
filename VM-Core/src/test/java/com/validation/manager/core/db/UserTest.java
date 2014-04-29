@@ -1,19 +1,14 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
-import com.validation.manager.core.tool.MD5;
 import static com.validation.manager.core.tool.MD5.encrypt;
 import com.validation.manager.test.AbstractVMTestCase;
 import java.util.Date;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**

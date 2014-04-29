@@ -1,6 +1,6 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
+import com.validation.manager.core.server.core.Login;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -19,8 +19,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -55,7 +53,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT v FROM VmUser v WHERE v.password = :password"),
     @NamedQuery(name = "VmUser.findByUsername",
             query = "SELECT v FROM VmUser v WHERE v.username = :username")})
-public class VmUser extends Versionable implements Serializable {
+public class VmUser extends Login implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -71,21 +69,16 @@ public class VmUser extends Versionable implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Column(name = "attempts")
-    private Integer attempts;
     // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
     @Size(max = 255)
     @Column(name = "email")
     private String email;
     @Size(max = 255)
-    @Column(name = "firstName")
+    @Column(name = "first_name")
     private String firstName;
     @Size(max = 255)
-    @Column(name = "lastName")
+    @Column(name = "last_name")
     private String lastName;
-    @Column(name = "last_modified")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastModified;
     @Size(max = 255)
     @Column(name = "locale")
     private String locale;
@@ -133,8 +126,8 @@ public class VmUser extends Versionable implements Serializable {
         this.firstName = first;
         this.lastName = last;
         this.locale = locale;
-        this.lastModified = lastModified;
-        this.attempts = attempts;
+        setLastModified(lastModified);
+        setAttempts(attempts);
         this.userStatusId = userStatus;
     }
 
@@ -144,14 +137,6 @@ public class VmUser extends Versionable implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getAttempts() {
-        return attempts;
-    }
-
-    public void setAttempts(Integer attempts) {
-        this.attempts = attempts;
     }
 
     public String getEmail() {
@@ -176,14 +161,6 @@ public class VmUser extends Versionable implements Serializable {
 
     public void setLastName(String last) {
         this.lastName = last;
-    }
-
-    public Date getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
     }
 
     public String getLocale() {

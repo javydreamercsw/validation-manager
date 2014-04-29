@@ -32,6 +32,14 @@ public class Versionable extends VMAuditedObject implements Serializable,
     @Min(1)
     @Column(name = "minor_version")
     private int minorVersion;
+//    @Basic(optional = false)
+//    @Column(name = "last_modified", insertable = false, updatable = false,
+//            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+//    @Temporal(TemporalType.TIMESTAMP)
+//    private Date lastModified;
+//    @Basic(optional = false)
+//    @Column(name = "updated_by")
+//    private int updatedBy;
 
     public Versionable() {
     }
@@ -90,6 +98,7 @@ public class Versionable extends VMAuditedObject implements Serializable,
                 + "." + midVersion + "." + minorVersion + " ]";
     }
 
+    @Override
     public int compareTo(Versionable o) {
         if (getMajorVersion() > o.getMajorVersion()) {
             return 1;
@@ -109,4 +118,32 @@ public class Versionable extends VMAuditedObject implements Serializable,
         //Everything the same
         return 0;
     }
+//
+//    /**
+//     * @return the lastModified
+//     */
+//    public Date getLastModified() {
+//        return lastModified;
+//}
+//
+//    /**
+//     * @param lastModified the lastModified to set
+//     */
+//    public void setLastModified(Date lastModified) {
+//        this.lastModified = lastModified;
+//    }
+//
+//    /**
+//     * @return the updatedBy
+//     */
+//    public int getUpdatedBy() {
+//        return updatedBy;
+//    }
+//
+//    /**
+//     * @param updatedBy the updatedBy to set
+//     */
+//    public void setUpdatedBy(int updatedBy) {
+//        this.updatedBy = updatedBy;
+//    }
 }

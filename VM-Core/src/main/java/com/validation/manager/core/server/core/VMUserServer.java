@@ -465,12 +465,14 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         }
     }
 
+    @Override
     public VmUser getEntity() {
         return new VmUserJpaController(
                 getEntityManagerFactory())
                 .findVmUser(getId());
     }
 
+    @Override
     public void update(VmUser target, VmUser source) {
         target.setPassword(source.getPassword());
         target.setFirstName(source.getFirstName());
@@ -495,10 +497,12 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         target.setMinorVersion(source.getMinorVersion());
     }
 
+    @Override
     public void update() {
         update(this, getEntity());
     }
 
+    @Override
     public List<VmUser> getVersions() {
         List<VmUser> versions = new ArrayList<VmUser>();
         parameters.clear();
@@ -510,7 +514,9 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         return versions;
     }
 
+    @Override
     public boolean isChangeVersionable() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //TODO
+        return false;
     }
 }
