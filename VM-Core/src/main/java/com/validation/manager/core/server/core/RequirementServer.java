@@ -310,6 +310,7 @@ public final class RequirementServer extends Requirement
                         counter = 0;
                         int lastRequirementType = 0;
                         int lastRequirementStatus = 0;
+                        RequirementSpecNodePK lastNode = null;
                         for (Requirement t : versions) {
                             //Fix requirement type
                             if (t.getRequirementTypeId() != null) {
@@ -348,6 +349,26 @@ public final class RequirementServer extends Requirement
                                             .findRequirementStatus(lastRequirementStatus));
                                     temp.write2DB();
                                     lastRequirementStatus = temp.getRequirementStatusId().getId();
+                                    counter++;
+                                }
+                            }
+                            //Fix spec node
+                            if (t.getRequirementSpecNode() != null) {
+                                if (t.getRequirementSpecNode().getRequirementSpecNodePK() !=null) {
+                                    lastNode = t.getRequirementSpecNode().getRequirementSpecNodePK();
+                                }
+                            } else {
+                                if (lastNode != null) {
+                                    LOG.log(Level.FINE,
+                                            "Updated Requirement Spec node: {0}",
+                                            t.toString());
+                                    RequirementServer temp = new RequirementServer(t);
+                                    temp.setRequirementSpecNode(
+                                            new RequirementSpecNodeJpaController(
+                                                    DataBaseManager.getEntityManagerFactory())
+                                            .findRequirementSpecNode(lastNode));
+                                    temp.write2DB();
+                                    lastNode = temp.getRequirementSpecNode().getRequirementSpecNodePK();
                                     counter++;
                                 }
                             }
