@@ -97,7 +97,7 @@ public final class RequirementServer extends Requirement
         if (source.getRequirementStatusId() != null) {
             target.setRequirementStatusId(source.getRequirementStatusId());
         }
-        if(source.getRequirementTypeId()!=null){
+        if (source.getRequirementTypeId() != null) {
             target.setRequirementTypeId(source.getRequirementTypeId());
         }
     }
@@ -290,8 +290,7 @@ public final class RequirementServer extends Requirement
             List<String> processed = new ArrayList<String>();
             for (final Requirement req : new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).findRequirementEntities()) {
-                if (req.getUniqueId().trim().equals("IMSR0001")
-                        && !processed.contains(req.getUniqueId().trim())) {
+                if (!processed.contains(req.getUniqueId().trim())) {
                     processed.add(req.getUniqueId().trim());
                     try {
                         //Trim the requirement unique id
@@ -307,24 +306,49 @@ public final class RequirementServer extends Requirement
                         List<Requirement> versions = r.getVersions();
                         Requirement older = Collections.min(versions, null);
                         Requirement newer = Collections.max(versions, null);
-                        //Copy requirement type
                         Collections.sort(versions);
-                        int last = 0;
+                        counter = 0;
+                        int lastRequirementType = 0;
+                        int lastRequirementStatus = 0;
                         for (Requirement t : versions) {
-                            if (t.getRequirementTypeId() != null
-                                    && t.getRequirementTypeId().getId() > last) {
-                                last = t.getRequirementTypeId().getId();
+                            //Fix requirement type
+                            if (t.getRequirementTypeId() != null) {
+                                if (t.getRequirementTypeId().getId() > lastRequirementType) {
+                                    lastRequirementType = t.getRequirementTypeId().getId();
+                                }
                             } else {
-                                if (last > 0) {
-                                    LOG.log(Level.INFO,
+                                if (lastRequirementType > 0) {
+                                    LOG.log(Level.FINE,
                                             "Updated Requirement type for: {0}",
                                             t.toString());
                                     RequirementServer temp = new RequirementServer(t);
                                     temp.setRequirementTypeId(
                                             new RequirementTypeJpaController(
                                                     DataBaseManager.getEntityManagerFactory())
-                                            .findRequirementType(last));
+                                            .findRequirementType(lastRequirementType));
                                     temp.write2DB();
+                                    lastRequirementType = temp.getRequirementTypeId().getId();
+                                    counter++;
+                                }
+                            }
+                            //Fix requirement status
+                            if (t.getRequirementStatusId() != null) {
+                                if (t.getRequirementStatusId().getId() > lastRequirementStatus) {
+                                    lastRequirementStatus = t.getRequirementStatusId().getId();
+                                }
+                            } else {
+                                if (lastRequirementStatus > 0) {
+                                    LOG.log(Level.FINE,
+                                            "Updated Requirement status for: {0}",
+                                            t.toString());
+                                    RequirementServer temp = new RequirementServer(t);
+                                    temp.setRequirementStatusId(
+                                            new RequirementStatusJpaController(
+                                                    DataBaseManager.getEntityManagerFactory())
+                                            .findRequirementStatus(lastRequirementStatus));
+                                    temp.write2DB();
+                                    lastRequirementStatus = temp.getRequirementStatusId().getId();
+                                    counter++;
                                 }
                             }
                         }
@@ -383,7 +407,6 @@ public final class RequirementServer extends Requirement
                                 }
                             }
                         }
-                        counter = 0;
                         List<String> updated = new ArrayList<String>();
                         if (!updated.contains(newer.getUniqueId())
                                 && newer.compareTo(older) > 0
