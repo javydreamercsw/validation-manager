@@ -77,7 +77,7 @@ public class DataBaseManager {
     private static boolean demo;
     private static Long demoResetPeriod;
     private static DataBaseManager instance;
-    private static boolean versioning_enabled = true;
+    private static boolean versioning_enabled = false;
 
     /**
      * @return the versioning enabled
