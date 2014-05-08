@@ -299,7 +299,7 @@ public final class RequirementServer extends Requirement
                             r.setUniqueId(req.getUniqueId().trim());
                             r.write2DB();
                             req.setUniqueId(r.getUniqueId());
-                            LOG.log(Level.INFO, "Trimmed unique id for: {0}",
+                            LOG.log(Level.FINE, "Trimmed unique id for: {0}",
                                     r.getUniqueId());
                         }
                         //Make sure to move requirement node relationships as well
@@ -375,7 +375,7 @@ public final class RequirementServer extends Requirement
                         }
                         if (!req.getRequirementList1().isEmpty()) {
                             //Remove duplicate children (same id different versions)
-                            LOG.log(Level.INFO, "Checking children of: {0}",
+                            LOG.log(Level.FINE, "Checking children of: {0}",
                                     req.getUniqueId());
                             List<Requirement> reqs = new ArrayList<Requirement>();
                             for (Requirement child : req.getRequirementList1()) {
@@ -387,7 +387,7 @@ public final class RequirementServer extends Requirement
                                     if (inList.getUniqueId().trim().equals(child.getUniqueId().trim())) {
                                         found = true;
                                         //They are the same, keep only the newer one
-                                        LOG.log(Level.INFO, "{0} vs. {1}",
+                                        LOG.log(Level.FINE, "{0} vs. {1}",
                                                 new Object[]{inList.toString(),
                                                     child.toString()});
                                         if (inList.compareTo(child) < 0) {
@@ -408,11 +408,11 @@ public final class RequirementServer extends Requirement
                                 }
                             }
                             //Now that we cleaned the list, let's replace it with the correct ones.
-                            LOG.log(Level.INFO, "Initial amount of children: {0}",
+                            LOG.log(Level.FINE, "Initial amount of children: {0}",
                                     r.getRequirementList1().size());
                             if (LOG.isLoggable(Level.INFO)) {
                                 for (Requirement x : r.getRequirementList1()) {
-                                    LOG.fine(x.toString());
+                                    LOG.info(x.toString());
                                 }
                             }
                             //Remove the ones currently in the list
@@ -420,11 +420,11 @@ public final class RequirementServer extends Requirement
                             //Add the new ones
                             r.getRequirementList1().addAll(reqs);
                             r.write2DB();
-                            LOG.log(Level.INFO, "Updated amount of children: {0}",
+                            LOG.log(Level.FINE, "Updated amount of children: {0}",
                                     r.getRequirementList1().size());
                             if (LOG.isLoggable(Level.INFO)) {
                                 for (Requirement x : reqs) {
-                                    LOG.fine(x.toString());
+                                    LOG.info(x.toString());
                                 }
                             }
                         }
@@ -434,7 +434,7 @@ public final class RequirementServer extends Requirement
                                 && newer.getRequirementSpecNode() == null
                                 && older.getRequirementSpecNode() != null) {
                             r.copyRelationships(newer, older);
-                            LOG.log(Level.INFO,
+                            LOG.log(Level.FINE,
                                     "Updated relationships for: {0}", newer);
                             r.write2DB();
                             updated.add(r.getUniqueId().trim());
