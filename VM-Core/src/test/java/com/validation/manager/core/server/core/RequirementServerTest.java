@@ -8,6 +8,8 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.RequirementStatus;
+import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
@@ -84,7 +86,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             System.out.println("deleteRequirement");
             prepare();
             Requirement r = createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             deleteRequirement(r);
             parameters.clear();
@@ -105,7 +107,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             System.out.println("update");
             prepare();
             Requirement source = createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer instance = new RequirementServer(source);
             Requirement target = new Requirement();
@@ -113,9 +115,9 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(instance.getUniqueId(), target.getUniqueId());
             assertEquals(instance.getDescription(), target.getDescription());
             assertEquals(instance.getNotes(), target.getNotes());
-            assertEquals(instance.getRequirementTypeId().getId(), 
+            assertEquals(instance.getRequirementTypeId().getId(),
                     target.getRequirementTypeId().getId());
-            assertEquals(instance.getRequirementStatusId().getId(), 
+            assertEquals(instance.getRequirementStatusId().getId(),
                     target.getRequirementStatusId().getId());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -132,15 +134,15 @@ public class RequirementServerTest extends AbstractVMTestCase {
             System.out.println("isDuplicate");
             prepare();
             Requirement source = createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement source2 = createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             assertEquals(false, isDuplicate(source));
             assertEquals(false, isDuplicate(source2));
             Requirement source3 = createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             assertEquals(true, isDuplicate(source3));
         } catch (Exception ex) {
@@ -158,16 +160,16 @@ public class RequirementServerTest extends AbstractVMTestCase {
             System.out.println("getTestCoverage");
             prepare();
             Requirement req = createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req2 = createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req3 = createRequirement("SRS-SW-0003",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req4 = createRequirement("SRS-SW-0004",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
             assertEquals(0, rs.getTestCoverage());
@@ -317,6 +319,11 @@ public class RequirementServerTest extends AbstractVMTestCase {
         TestCase step = addStep(tc, 1, "Test", "Test");
         rs.getStepList().add(step.getStepList().get(0));
         rs.setDescription(second);
+        RequirementType originalRequirementType = rs.getRequirementTypeId();
+        RequirementSpecNode originalRequirementSpecNode
+                = rs.getRequirementSpecNode();
+        RequirementStatus originalRequirementStatusId
+                = rs.getRequirementStatusId();
         if (isVersioningEnabled()) {
             rs.write2DB();
             version++;
@@ -324,6 +331,11 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(0, rs.getMidVersion());
             assertEquals(version, rs.getMinorVersion());
             assertEquals(1, rs.getStepList().size());
+            assertEquals(originalRequirementType, rs.getRequirementTypeId());
+            assertEquals(originalRequirementSpecNode,
+                    rs.getRequirementSpecNode());
+            assertEquals(originalRequirementStatusId,
+                    rs.getRequirementStatusId());
         } else {
             rs.write2DB();
             version++;
@@ -334,9 +346,9 @@ public class RequirementServerTest extends AbstractVMTestCase {
         assertEquals(second, rs.getDescription());
         assertEquals(isVersioningEnabled() ? version + 1 : 1,
                 rs.getVersions().size());
-        System.out.println(RequirementServer.getLatestChildren(rs).size());
+        LOG.info("Versions:");
         for (Requirement r : rs.getVersions()) {
-            System.out.println(r);
+            LOG.info(r.toString());
         }
     }
 }
