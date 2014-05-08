@@ -97,6 +97,9 @@ public final class RequirementServer extends Requirement
         if (source.getRequirementStatusId() != null) {
             target.setRequirementStatusId(source.getRequirementStatusId());
         }
+        if(source.getRequirementTypeId()!=null){
+            target.setRequirementTypeId(source.getRequirementTypeId());
+        }
     }
 
     @Override
@@ -284,94 +287,121 @@ public final class RequirementServer extends Requirement
                     = Persistence.createEntityManagerFactory("VMPU", parameters);
             DataBaseManager.setEntityManagerFactory(emf);
             int counter = 0;
+            List<String> processed = new ArrayList<String>();
             for (final Requirement req : new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).findRequirementEntities()) {
-                try {
-                    //Trim the requirement unique id
-                    RequirementServer r = new RequirementServer(req);
-                    if (!r.getUniqueId().equals(req.getUniqueId().trim())) {
-                        r.setUniqueId(req.getUniqueId().trim());
-                        r.write2DB();
-                        LOG.log(Level.FINE, "Trimmed unique id for: {0}",
-                                r.getUniqueId());
-                    }
-                    if (!req.getRequirementList1().isEmpty()) {
-                        //Remove duplicate children (same id different versions)
-                        LOG.log(Level.FINE, "Checking children of: {0}",
-                                req.getUniqueId());
-                        List<Requirement> reqs = new ArrayList<Requirement>();
-                        for (Requirement child : req.getRequirementList1()) {
-                            boolean found = false;
-                            //Compare with the ones in the list
-                            ArrayList<Requirement> copiedList
-                                    = new ArrayList<Requirement>(reqs);
-                            for (Requirement inList : copiedList) {
-                                if (inList.getUniqueId().trim().equals(child.getUniqueId().trim())) {
-                                    found = true;
-                                    //They are the same, keep only the newer one
-                                    LOG.log(Level.FINE, "{0} vs. {1}",
-                                            new Object[]{inList.toString(),
-                                                child.toString()});
-                                    if (inList.compareTo(child) < 0) {
-                                        //Child is newer, replace the one in the list
-                                        LOG.fine("Replacing copy on the list with newer version.");
-                                        reqs.remove(inList);
-                                        reqs.add(child);
-                                    } else if (inList.compareTo(child) == 0) {
-                                        LOG.fine("Same version, ignore.");
-                                    } else {
-                                        LOG.fine("Newer version already in list, ignoring.");
-                                    }
+                if (req.getUniqueId().trim().equals("IMSR0001")
+                        && !processed.contains(req.getUniqueId().trim())) {
+                    processed.add(req.getUniqueId().trim());
+                    try {
+                        //Trim the requirement unique id
+                        RequirementServer r = new RequirementServer(req);
+                        if (!r.getUniqueId().equals(req.getUniqueId().trim())) {
+                            r.setUniqueId(req.getUniqueId().trim());
+                            r.write2DB();
+                            req.setUniqueId(r.getUniqueId());
+                            LOG.log(Level.INFO, "Trimmed unique id for: {0}",
+                                    r.getUniqueId());
+                        }
+                        //Make sure to move requirement node relationships as well
+                        List<Requirement> versions = r.getVersions();
+                        Requirement older = Collections.min(versions, null);
+                        Requirement newer = Collections.max(versions, null);
+                        //Copy requirement type
+                        Collections.sort(versions);
+                        int last = 0;
+                        for (Requirement t : versions) {
+                            if (t.getRequirementTypeId() != null
+                                    && t.getRequirementTypeId().getId() > last) {
+                                last = t.getRequirementTypeId().getId();
+                            } else {
+                                if (last > 0) {
+                                    LOG.log(Level.INFO,
+                                            "Updated Requirement type for: {0}",
+                                            t.toString());
+                                    RequirementServer temp = new RequirementServer(t);
+                                    temp.setRequirementTypeId(
+                                            new RequirementTypeJpaController(
+                                                    DataBaseManager.getEntityManagerFactory())
+                                            .findRequirementType(last));
+                                    temp.write2DB();
                                 }
                             }
-                            if (!found) {
-                                //Not there, add it
-                                reqs.add(child);
+                        }
+                        if (!req.getRequirementList1().isEmpty()) {
+                            //Remove duplicate children (same id different versions)
+                            LOG.log(Level.INFO, "Checking children of: {0}",
+                                    req.getUniqueId());
+                            List<Requirement> reqs = new ArrayList<Requirement>();
+                            for (Requirement child : req.getRequirementList1()) {
+                                boolean found = false;
+                                //Compare with the ones in the list
+                                ArrayList<Requirement> copiedList
+                                        = new ArrayList<Requirement>(reqs);
+                                for (Requirement inList : copiedList) {
+                                    if (inList.getUniqueId().trim().equals(child.getUniqueId().trim())) {
+                                        found = true;
+                                        //They are the same, keep only the newer one
+                                        LOG.log(Level.INFO, "{0} vs. {1}",
+                                                new Object[]{inList.toString(),
+                                                    child.toString()});
+                                        if (inList.compareTo(child) < 0) {
+                                            //Child is newer, replace the one in the list
+                                            LOG.fine("Replacing copy on the list with newer version.");
+                                            reqs.remove(inList);
+                                            reqs.add(child);
+                                        } else if (inList.compareTo(child) == 0) {
+                                            LOG.fine("Same version, ignore.");
+                                        } else {
+                                            LOG.fine("Newer version already in list, ignoring.");
+                                        }
+                                    }
+                                }
+                                if (!found) {
+                                    //Not there, add it
+                                    reqs.add(child);
+                                }
+                            }
+                            //Now that we cleaned the list, let's replace it with the correct ones.
+                            LOG.log(Level.INFO, "Initial amount of children: {0}",
+                                    r.getRequirementList1().size());
+                            if (LOG.isLoggable(Level.INFO)) {
+                                for (Requirement x : r.getRequirementList1()) {
+                                    LOG.fine(x.toString());
+                                }
+                            }
+                            //Remove the ones currently in the list
+                            r.getRequirementList1().clear();
+                            //Add the new ones
+                            r.getRequirementList1().addAll(reqs);
+                            r.write2DB();
+                            LOG.log(Level.INFO, "Updated amount of children: {0}",
+                                    r.getRequirementList1().size());
+                            if (LOG.isLoggable(Level.INFO)) {
+                                for (Requirement x : reqs) {
+                                    LOG.fine(x.toString());
+                                }
                             }
                         }
-                        //Now that we cleaned the list, let's replace it with the correct ones.
-                        LOG.log(Level.FINE, "Initial amount of children: {0}",
-                                r.getRequirementList1().size());
-                        if (LOG.isLoggable(Level.FINE)) {
-                            for (Requirement x : r.getRequirementList1()) {
-                                LOG.fine(x.toString());
-                            }
+                        counter = 0;
+                        List<String> updated = new ArrayList<String>();
+                        if (!updated.contains(newer.getUniqueId())
+                                && newer.compareTo(older) > 0
+                                && newer.getRequirementSpecNode() == null
+                                && older.getRequirementSpecNode() != null) {
+                            r.copyRelationships(newer, older);
+                            LOG.log(Level.INFO,
+                                    "Updated relationships for: {0}", newer);
+                            r.write2DB();
+                            updated.add(r.getUniqueId().trim());
+                            counter++;
                         }
-                        //Remove the ones currently in the list
-                        r.getRequirementList1().clear();
-                        //Add the new ones
-                        r.getRequirementList1().addAll(reqs);
-                        r.write2DB();
-                        LOG.log(Level.FINE, "Updated amount of children: {0}",
-                                r.getRequirementList1().size());
-                        if (LOG.isLoggable(Level.FINE)) {
-                            for (Requirement x : reqs) {
-                                LOG.fine(x.toString());
-                            }
-                        }
+                        new RequirementServer(newer).write2DB();
+                    } catch (RollbackException ex) {
+                        //Relationship already exists.
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
                     }
-                    //Make sure to move requirement node relationships as well
-                    List<Requirement> versions = r.getVersions();
-                    Requirement older = Collections.min(versions, null);
-                    Requirement newer = Collections.max(versions, null);
-                    counter = 0;
-                    List<String> updated = new ArrayList<String>();
-                    if (!updated.contains(newer.getUniqueId())
-                            && newer.compareTo(older) > 0
-                            && newer.getRequirementSpecNode() == null
-                            && older.getRequirementSpecNode() != null) {
-                        r.copyRelationships(newer, older);
-                        LOG.log(Level.FINE,
-                                "Updated relationships for: {0}", newer);
-                        r.write2DB();
-                        updated.add(r.getUniqueId().trim());
-                        counter++;
-                    }
-                    new RequirementServer(newer).write2DB();
-                } catch (RollbackException ex) {
-                    //Relationship already exists.
-                } catch (Exception ex) {
-                    Exceptions.printStackTrace(ex);
                 }
             }
             LOG.log(Level.INFO, "Fixed {0} requirement relationships.", counter);
@@ -391,7 +421,7 @@ public final class RequirementServer extends Requirement
             boolean found = false;
             for (Requirement in : toAdd) {
                 if (in.getUniqueId().trim().equals(req.getUniqueId().trim())) {
-                        //Check if we have a new version
+                    //Check if we have a new version
                     //They have the same Unique ID, so they are versions of the same requirement
                     if (in.compareTo(req) < 0) {
                         //The one in is older. Remove it and replace with the new one
@@ -400,7 +430,7 @@ public final class RequirementServer extends Requirement
                         found = true;
                     } else {
                         //The one in is either the same or greater, just keep it
-}
+                    }
                 }
             }
             if (!found) {
