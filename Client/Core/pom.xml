@@ -36,6 +36,10 @@
                     <artifactId>poi-ooxml</artifactId>
                     <groupId>org.apache.poi</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>h2</artifactId>
+                    <groupId>com.h2database</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
