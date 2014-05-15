@@ -194,7 +194,7 @@ public final class RequirementServer extends Requirement
 
     public int getTestCoverage() {
         int coverage = 0;
-        LOG.log(Level.INFO, "Getting test coverage for: {0}...",
+        LOG.log(Level.FINE, "Getting test coverage for: {0}...",
                 getUniqueId());
         update();
         List<Requirement> children = getEntity().getRequirementList1();
@@ -209,7 +209,7 @@ public final class RequirementServer extends Requirement
             //Has nothing, leave at 0.
         } else {
             //Get total of instances
-            LOG.log(Level.INFO, "Found: {0} related requirements.",
+            LOG.log(Level.FINE, "Found: {0} related requirements.",
                     children.size());
             //Check coverage for children
             for (Requirement r : children) {
@@ -241,9 +241,9 @@ public final class RequirementServer extends Requirement
     public List<Requirement> getVersions() {
         List<Requirement> versions = new ArrayList<Requirement>();
         parameters.clear();
-        parameters.put("uniqueId", getEntity().getUniqueId().trim() + "%");
-        for (Object obj : DataBaseManager.createdQuery(
-                "SELECT r FROM Requirement r WHERE r.uniqueId like :uniqueId",
+        parameters.put("uniqueId", getEntity().getUniqueId().trim());
+        for (Object obj : DataBaseManager.namedQuery(
+                "Requirement.findByUniqueId",
                 parameters)) {
             versions.add((Requirement) obj);
         }
@@ -354,7 +354,7 @@ public final class RequirementServer extends Requirement
                             }
                             //Fix spec node
                             if (t.getRequirementSpecNode() != null) {
-                                if (t.getRequirementSpecNode().getRequirementSpecNodePK() !=null) {
+                                if (t.getRequirementSpecNode().getRequirementSpecNodePK() != null) {
                                     lastNode = t.getRequirementSpecNode().getRequirementSpecNodePK();
                                 }
                             } else {
@@ -448,7 +448,7 @@ public final class RequirementServer extends Requirement
                     }
                 }
             }
-            LOG.log(Level.INFO, "Fixed {0} requirement relationships.", counter);
+            LOG.log(Level.FINE, "Fixed {0} requirement relationships.", counter);
             DataBaseManager.close();
         } else {
             LOG.severe(new StringBuilder().append("Missing parameters to be "
