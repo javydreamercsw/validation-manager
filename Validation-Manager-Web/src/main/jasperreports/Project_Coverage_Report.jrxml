@@ -14,7 +14,6 @@
 	<queryString>
 		<![CDATA[SELECT
      project.`name` AS project_name,
-     requirement.`version` AS requirement_version,
      requirement.`unique_id` AS requirement_unique_id,
      requirement.`description` AS requirement_description,
      requirement_status.`status` AS requirement_status_status,
@@ -24,23 +23,27 @@
      requirement_spec.`spec_level_id` AS requirement_spec_spec_level_id,
      requirement.`id` AS requirement_id,
      project.`id` AS project_id,
-     spec_level.`name` AS spec_level_name
+     spec_level.`name` AS spec_level_name,
+     requirement.`major_version` AS requirement_major_version,
+     requirement.`mid_version` AS requirement_mid_version,
+     requirement.`minor_version` AS requirement_minor_version
 FROM
      `requirement_status` requirement_status INNER JOIN `requirement` requirement ON requirement_status.`id` = requirement.`requirement_status_id`
      INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement.`requirement_spec_node_id` = requirement_spec_node.`id`
      AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
      INNER JOIN `requirement_spec` requirement_spec ON requirement_spec_node.`requirement_spec_id` = requirement_spec.`id`
-     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
      AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
+     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
      INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
      INNER JOIN `spec_level` spec_level ON requirement_spec.`spec_level_id` = spec_level.`id`
 WHERE
-     project.id = $P{parent_id} and requirement_status.status='general.approved'
+     project.id = $P{parent_id}
+     and requirement_status.status = 'general.approved'
 ORDER BY
-     requirement_spec.`spec_level_id` ASC, requirement_unique_id]]>
+     requirement_spec.`spec_level_id` ASC,
+     requirement_unique_id ASC]]>
 	</queryString>
 	<field name="project_name" class="java.lang.String"/>
-	<field name="requirement_version" class="java.lang.Integer"/>
 	<field name="requirement_unique_id" class="java.lang.String"/>
 	<field name="requirement_description" class="java.lang.String"/>
 	<field name="requirement_status_status" class="java.lang.String"/>
@@ -51,6 +54,9 @@ ORDER BY
 	<field name="requirement_id" class="java.lang.Integer"/>
 	<field name="project_id" class="java.lang.Integer"/>
 	<field name="spec_level_name" class="java.lang.String"/>
+	<field name="requirement_major_version" class="java.lang.Integer"/>
+	<field name="requirement_mid_version" class="java.lang.Integer"/>
+	<field name="requirement_minor_version" class="java.lang.Integer"/>
 	<group name="requirement_spec_name">
 		<groupExpression><![CDATA[$F{requirement_spec_name}]]></groupExpression>
 	</group>
