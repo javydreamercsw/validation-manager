@@ -26,6 +26,6 @@ public class Timer {
         long seconds = (timeelapsed / 1000) % 60;
         long minutes = (timeelapsed / 60000) % 60;
         return " (" + minutes + ":" + seconds
-                + ":" + milliseconds + " )";
+                + ":" + milliseconds + ")";
     }
 }
