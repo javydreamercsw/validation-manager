@@ -54,7 +54,7 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
                     }
                 }
                 if (provider != null) {
-                    image = provider.getIcon(getLookup().lookup(Requirement.class), coverage);
+                    image = provider.getIcon(((Requirement) object), coverage);
                 }
             } catch (IOException ex) {
                 LOG.log(Level.SEVERE, null, ex);
