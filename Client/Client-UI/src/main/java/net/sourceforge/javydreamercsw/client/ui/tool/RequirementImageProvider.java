@@ -4,6 +4,8 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.tool.ImageProvider;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -15,10 +17,14 @@ import org.openide.util.lookup.ServiceProvider;
 public class RequirementImageProvider implements ImageProvider<Requirement> {
 
     private static BufferedImage green, red, orange, yellow;
+    private static final Logger LOG
+            = Logger.getLogger(RequirementImageProvider.class.getSimpleName());
 
     @Override
-    public BufferedImage getIcon(Requirement e, int coverage) throws IOException {
+    public BufferedImage getIcon(Requirement req, int coverage) throws IOException {
         BufferedImage image;
+        LOG.log(Level.FINE, "Processing coverage: {0} for Requirement: {1}", 
+                new Object[]{coverage, req.getUniqueId()});
         if (coverage == 100) {
             if (green == null) {
                 green = ImageIO.read(getClass().getResource(
