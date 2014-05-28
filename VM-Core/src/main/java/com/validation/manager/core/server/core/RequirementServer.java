@@ -241,6 +241,8 @@ public final class RequirementServer extends Requirement
                     new Object[]{getUniqueId(), coverage});
             //Update the map
             coverageMap.put(getCoverageMapID(getEntity()), coverage);
+        } else {
+            coverage = coverageMap.get(getCoverageMapID(getEntity()));
         }
         //If still negative this means it is not coveed at all.
         return coverage;
@@ -362,9 +364,9 @@ public final class RequirementServer extends Requirement
                                                 DataBaseManager.nativeUpdateQuery(
                                                         "delete from requirement_has_requirement where parent_requirement_id "
                                                         + "in (select id from requirement where unique_id='"
-                                                                +temp.getUniqueId()+"')"
+                                                        + temp.getUniqueId() + "')"
                                                         + "and requirement_id in (select id from requirement where unique_id='"
-                                                                +parent.getUniqueId()+"');");
+                                                        + parent.getUniqueId() + "');");
                                                 toRemove.add(parent);
                                                 circular++;
                                             }
