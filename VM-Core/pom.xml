@@ -96,6 +96,7 @@
             <type>jar</type>
             <version>${netbeans.version}</version>
         </dependency>
+
     </dependencies>
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
