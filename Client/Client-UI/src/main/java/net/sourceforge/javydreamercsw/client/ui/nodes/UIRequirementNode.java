@@ -81,7 +81,7 @@ public class UIRequirementNode extends AbstractVMBeanNode {
                     Timer timer = new Timer();
                     coverage = new RequirementServer(getLookup().lookup(Requirement.class)).getTestCoverage();
                     timer.stop();
-                    LOG.log(Level.INFO, "Time calculating coverage for {0}: {1}",
+                    LOG.log(Level.FINE, "Time calculating coverage for {0}: {1}",
                             new Object[]{getLookup().lookup(Requirement.class).getUniqueId(),
                                 timer.elapsedTime()});
                 }
@@ -97,7 +97,7 @@ public class UIRequirementNode extends AbstractVMBeanNode {
                     image = provider.getIcon(getLookup().lookup(Requirement.class), coverage);
                 }
                 timer.stop();
-                LOG.log(Level.INFO, "Time getting icon for {0}: {1}",
+                LOG.log(Level.FINE, "Time getting icon for {0}: {1}",
                         new Object[]{getLookup().lookup(Requirement.class).getUniqueId(),
                             timer.elapsedTime()});
             } catch (IOException ex) {
