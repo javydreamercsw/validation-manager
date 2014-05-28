@@ -3,6 +3,7 @@ package net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.server.core.RequirementServer;
+import com.validation.manager.core.tool.ImageProvider;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -10,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene.AbstractHierarchyNode;
 import org.netbeans.api.visual.widget.Scene;
+import org.openide.util.Lookup;
 
 /**
  *
@@ -45,20 +46,16 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
             try {
                 int coverage
                         = new RequirementServer(((Requirement) object)).getTestCoverage();
-                if (coverage == 100) {
-                    image = ImageIO.read(getClass().getResource(
-                            "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_green.png"));
-                } else if (coverage < 100 && coverage > 50) {
-                    image = ImageIO.read(getClass().getResource(
-                            "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_yellow.png"));
-                } else if (coverage < 50 && coverage > 0) {
-                    image = ImageIO.read(getClass().getResource(
-                            "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_orange.png"));
-                } else {
-                    image = ImageIO.read(getClass().getResource(
-                            "/net/sourceforge/javydreamercsw/vm/client/hierarchy/visualizer/circle_red.png"));
+                ImageProvider provider = null;
+                for (ImageProvider p : Lookup.getDefault().lookupAll(ImageProvider.class)) {
+                    if (p.supported(((Requirement) object))) {
+                        provider = p;
+                        break;
+                    }
                 }
-
+                if (provider != null) {
+                    image = provider.getIcon(getLookup().lookup(Requirement.class), coverage);
+                }
             } catch (IOException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
