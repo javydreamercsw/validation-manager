@@ -15,8 +15,8 @@ public class Timer {
     public void stop() {
         end = System.nanoTime();
     }
-    
-    public void reset(){
+
+    public final void reset() {
         start = System.nanoTime();
     }
 
@@ -25,8 +25,7 @@ public class Timer {
         long milliseconds = timeelapsed / 1000;
         long seconds = (timeelapsed / 1000) % 60;
         long minutes = (timeelapsed / 60000) % 60;
-        return "Time Elapsed: " + timeelapsed + ", Start Time:" + start
-                + ", end Time: " + end + " (" + minutes + ":" + seconds 
+        return " (" + minutes + ":" + seconds
                 + ":" + milliseconds + " )";
     }
 }
