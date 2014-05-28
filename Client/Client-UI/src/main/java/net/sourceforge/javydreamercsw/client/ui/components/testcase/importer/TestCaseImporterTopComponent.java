@@ -22,7 +22,6 @@ import java.util.Objects;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -80,7 +79,7 @@ import org.openide.windows.TopComponent;
 public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
 
     private static final Logger LOG
-            = getLogger(TestCaseImporterTopComponent.class.getSimpleName());
+            = Logger.getLogger(TestCaseImporterTopComponent.class.getSimpleName());
     protected Test test;
     protected TestCase tc;
     protected TestPlan tp;
