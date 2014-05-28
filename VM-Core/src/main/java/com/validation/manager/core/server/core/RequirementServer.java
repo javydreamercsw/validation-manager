@@ -16,7 +16,9 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -34,6 +36,14 @@ public final class RequirementServer extends Requirement
 
     private static final Logger LOG
             = getLogger(RequirementServer.class.getSimpleName());
+    /**
+     * Having this static map reduces drastically the amount of resources used
+     * to constantly calculate test coverage. This is causing huge performance
+     * issues on the client. Basically reduces the calculation to once per
+     * requirement.
+     */
+    private static final Map<String, Integer> coverageMap
+            = new HashMap<String, Integer>();
 
     public RequirementServer(String id, String desc, RequirementSpecNodePK rsn,
             String notes, int requirementType, int requirementStatus) {
@@ -192,38 +202,55 @@ public final class RequirementServer extends Requirement
         return count > 1;
     }
 
+    private String getCoverageMapID(Requirement req) {
+        return req.getId() + "-"
+                + req.getUniqueId().trim();
+    }
+
     public int getTestCoverage() {
+        //Reset to 0 for new calculation.
         int coverage = 0;
-        LOG.log(Level.FINE, "Getting test coverage for: {0}...",
-                getUniqueId());
-        update();
-        List<Requirement> children = getEntity().getRequirementList1();
-        if (children.isEmpty()) {
-            LOG.log(Level.FINE, "No child requirements");
-            //Has test cases and no related requirements
-            if (getStepList().size() > 0) {
-                LOG.log(Level.FINE, "Found: {0} related steps.",
-                        getStepList().size());
-                coverage = 100;
+        if (!coverageMap.containsKey(getCoverageMapID(getEntity()))) {
+            LOG.log(Level.INFO, "Getting test coverage for: {0}...",
+                    getUniqueId());
+            List<Requirement> children = getEntity().getRequirementList1();
+            if (children.isEmpty()) {
+                LOG.log(Level.FINE, "No child requirements");
+                //Has test cases and no related requirements
+                if (getStepList().size() > 0) {
+                    LOG.log(Level.FINE, "Found: {0} related steps.",
+                            getStepList().size());
+                    coverage = 100;
+                }
+                //Has nothing, leave at 0.
+            } else {
+                //Get total of instances
+                LOG.log(Level.FINE, "Found: {0} related requirements.",
+                        children.size());
+                //Check coverage for children
+                for (Requirement r : children) {
+                    if (coverageMap.containsKey(getCoverageMapID(r))) {
+                        coverage += coverageMap.get(getCoverageMapID(r));
+                    } else {
+                        coverage += new RequirementServer(r).getTestCoverage();
+                    }
+                }
+                coverage /= children.size();
             }
-            //Has nothing, leave at 0.
-        } else {
-            //Get total of instances
-            LOG.log(Level.FINE, "Found: {0} related requirements.",
-                    children.size());
-            //Check coverage for children
-            for (Requirement r : children) {
-                coverage += r.getStepList().isEmpty() ? 0 : 100;
-            }
-            coverage /= children.size();
+            LOG.log(Level.FINE, "{0} Coverage: {1}",
+                    new Object[]{getUniqueId(), coverage});
+            //Update the map
+            coverageMap.put(getCoverageMapID(getEntity()), coverage);
         }
-        LOG.log(Level.FINE, "{0} Coverage: {1}",
-                new Object[]{getUniqueId(), coverage});
+        //If still negative this means it is not coveed at all.
         return coverage;
     }
 
     @Override
     public void update() {
+        //Mark it for recalculation
+        coverageMap.remove(getEntity().getId() + "-"
+                + getEntity().getUniqueId().trim());
         update(this, getEntity());
     }
 
@@ -286,7 +313,7 @@ public final class RequirementServer extends Requirement
             EntityManagerFactory emf
                     = Persistence.createEntityManagerFactory("VMPU", parameters);
             DataBaseManager.setEntityManagerFactory(emf);
-            int counter = 0;
+            int counter = 0, circular = 0;
             List<String> processed = new ArrayList<String>();
             for (final Requirement req : new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).findRequirementEntities()) {
@@ -307,22 +334,54 @@ public final class RequirementServer extends Requirement
                         Requirement older = Collections.min(versions, null);
                         Requirement newer = Collections.max(versions, null);
                         Collections.sort(versions);
-                        counter = 0;
                         int lastRequirementType = 0;
                         int lastRequirementStatus = 0;
                         RequirementSpecNodePK lastNode = null;
                         for (Requirement t : versions) {
+                            RequirementServer temp = new RequirementServer(t);
+                            //Detect circular relationships
+                            if (temp.getRequirementList().size() > 0
+                                    && temp.getRequirementList1().size() > 0) {
+                                List<Requirement> toRemove
+                                        = new ArrayList<Requirement>();
+                                //Has both children and parents
+                                LOG.log(Level.INFO,
+                                        "Inspecting {0} for circular dependencies.",
+                                        temp.getUniqueId());
+                                for (Requirement parent : temp.getRequirementList1()) {
+                                    //Check all parents of this requirement
+                                    for (Requirement child : parent.getRequirementList()) {
+                                        //Check if the parent has this requirement as a child
+                                        if (child.getUniqueId().equals(temp.getUniqueId())) {
+                                            if (!toRemove.contains(parent)) {
+                                                LOG.log(Level.INFO,
+                                                        "Circular dependency "
+                                                        + "detected between {0} and {1}",
+                                                        new Object[]{temp.getUniqueId(),
+                                                            parent.getUniqueId()});
+                                                DataBaseManager.nativeUpdateQuery(
+                                                        "delete from requirement_has_requirement where parent_requirement_id "
+                                                        + "in (select id from requirement where unique_id='"
+                                                                +temp.getUniqueId()+"')"
+                                                        + "and requirement_id in (select id from requirement where unique_id='"
+                                                                +parent.getUniqueId()+"');");
+                                                toRemove.add(parent);
+                                                circular++;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                             //Fix requirement type
-                            if (t.getRequirementTypeId() != null) {
-                                if (t.getRequirementTypeId().getId() > lastRequirementType) {
-                                    lastRequirementType = t.getRequirementTypeId().getId();
+                            if (temp.getRequirementTypeId() != null) {
+                                if (temp.getRequirementTypeId().getId() > lastRequirementType) {
+                                    lastRequirementType = temp.getRequirementTypeId().getId();
                                 }
                             } else {
                                 if (lastRequirementType > 0) {
                                     LOG.log(Level.FINE,
                                             "Updated Requirement type for: {0}",
-                                            t.toString());
-                                    RequirementServer temp = new RequirementServer(t);
+                                            temp.toString());
                                     temp.setRequirementTypeId(
                                             new RequirementTypeJpaController(
                                                     DataBaseManager.getEntityManagerFactory())
@@ -333,16 +392,15 @@ public final class RequirementServer extends Requirement
                                 }
                             }
                             //Fix requirement status
-                            if (t.getRequirementStatusId() != null) {
-                                if (t.getRequirementStatusId().getId() > lastRequirementStatus) {
-                                    lastRequirementStatus = t.getRequirementStatusId().getId();
+                            if (temp.getRequirementStatusId() != null) {
+                                if (temp.getRequirementStatusId().getId() > lastRequirementStatus) {
+                                    lastRequirementStatus = temp.getRequirementStatusId().getId();
                                 }
                             } else {
                                 if (lastRequirementStatus > 0) {
                                     LOG.log(Level.FINE,
                                             "Updated Requirement status for: {0}",
-                                            t.toString());
-                                    RequirementServer temp = new RequirementServer(t);
+                                            temp.toString());
                                     temp.setRequirementStatusId(
                                             new RequirementStatusJpaController(
                                                     DataBaseManager.getEntityManagerFactory())
@@ -353,16 +411,15 @@ public final class RequirementServer extends Requirement
                                 }
                             }
                             //Fix spec node
-                            if (t.getRequirementSpecNode() != null) {
-                                if (t.getRequirementSpecNode().getRequirementSpecNodePK() != null) {
-                                    lastNode = t.getRequirementSpecNode().getRequirementSpecNodePK();
+                            if (temp.getRequirementSpecNode() != null) {
+                                if (temp.getRequirementSpecNode().getRequirementSpecNodePK() != null) {
+                                    lastNode = temp.getRequirementSpecNode().getRequirementSpecNodePK();
                                 }
                             } else {
                                 if (lastNode != null) {
                                     LOG.log(Level.FINE,
                                             "Updated Requirement Spec node: {0}",
-                                            t.toString());
-                                    RequirementServer temp = new RequirementServer(t);
+                                            temp.toString());
                                     temp.setRequirementSpecNode(
                                             new RequirementSpecNodeJpaController(
                                                     DataBaseManager.getEntityManagerFactory())
@@ -410,7 +467,7 @@ public final class RequirementServer extends Requirement
                             //Now that we cleaned the list, let's replace it with the correct ones.
                             LOG.log(Level.FINE, "Initial amount of children: {0}",
                                     r.getRequirementList1().size());
-                            if (LOG.isLoggable(Level.INFO)) {
+                            if (LOG.isLoggable(Level.FINE)) {
                                 for (Requirement x : r.getRequirementList1()) {
                                     LOG.info(x.toString());
                                 }
@@ -422,7 +479,7 @@ public final class RequirementServer extends Requirement
                             r.write2DB();
                             LOG.log(Level.FINE, "Updated amount of children: {0}",
                                     r.getRequirementList1().size());
-                            if (LOG.isLoggable(Level.INFO)) {
+                            if (LOG.isLoggable(Level.FINE)) {
                                 for (Requirement x : reqs) {
                                     LOG.info(x.toString());
                                 }
@@ -448,7 +505,10 @@ public final class RequirementServer extends Requirement
                     }
                 }
             }
-            LOG.log(Level.FINE, "Fixed {0} requirement relationships.", counter);
+            LOG.log(Level.INFO,
+                    "Fixed {0} requirement relationships.", counter);
+            LOG.log(Level.INFO,
+                    "Fixed {0} requirement circular relationships.", circular);
             DataBaseManager.close();
         } else {
             LOG.severe(new StringBuilder().append("Missing parameters to be "
