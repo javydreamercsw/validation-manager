@@ -115,7 +115,7 @@ public class HierarchyScene extends GraphScene<Object, Object> {
     private void placeChild(Widget parent, Widget child, boolean invert) {
         Point point = new Point(getChildX(parent, child),
                 getChildY(parent, child));
-        LOG.log(Level.INFO, "Children location: {0}", point);
+        LOG.log(Level.FINE, "Children location: {0}", point);
         child.setPreferredLocation(point);
     }
 
