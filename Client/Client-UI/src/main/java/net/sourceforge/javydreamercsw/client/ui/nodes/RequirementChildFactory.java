@@ -27,6 +27,7 @@ public class RequirementChildFactory extends AbstractChildFactory
     private RequirementSpecNode node;
 //    private Integer[] ids = new Integer[0];
     private Populator pop = null;
+    private boolean done=false;
     private static final Logger LOG
             = Logger.getLogger(RequirementChildFactory.class.getSimpleName());
 
@@ -45,7 +46,6 @@ public class RequirementChildFactory extends AbstractChildFactory
             pop = new Populator(toPopulate);
             pop.start();
         }
-        boolean done = pop.done();
         if (done && pop != null) {
             pop = null;
         }
@@ -54,7 +54,6 @@ public class RequirementChildFactory extends AbstractChildFactory
 
     private class Populator extends Thread {
 
-        boolean done = false;
         private final List<Object> toPopulate;
 
         public Populator(List<Object> toPopulate) {
@@ -73,8 +72,9 @@ public class RequirementChildFactory extends AbstractChildFactory
                             .compareToIgnoreCase(((Requirement) o2).getUniqueId());
                 }
             };
-            int count = 0;
-            for (Requirement req : node.getRequirementList()) {
+            List<Requirement> requirementList = node.getRequirementList();
+            Collections.sort(requirementList, comparator);
+            for (Requirement req : requirementList) {
                 //TODO: Filter out status ids
 //            if (!new ArrayList<>(Arrays.asList(ids)).contains(req.getRequirementStatusId().getId())) {
                 if (req.getRequirementStatusId() != null
@@ -94,11 +94,6 @@ public class RequirementChildFactory extends AbstractChildFactory
                         RequirementServer rs = new RequirementServer(req);
                         Requirement max = Collections.max(rs.getVersions(), null);
                         toPopulate.add(max);
-                        count++;
-                        Collections.sort(toPopulate, comparator);
-                        if (count >= 10) {
-                            break;
-                        }
                     } else if (req.getRequirementStatusId() == null) {
                         LOG.log(Level.WARNING,
                                 "Invalid Requirement without status: {0}", req);
@@ -107,13 +102,8 @@ public class RequirementChildFactory extends AbstractChildFactory
                 for (RequirementSpecNode rsn : node.getRequirementSpecNodeList()) {
                     toPopulate.add(rsn);
                 }
-                Collections.sort(toPopulate, comparator);
                 done = true;
             }
-        }
-
-        public boolean done() {
-            return done;
         }
     }
 
