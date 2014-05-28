@@ -4,6 +4,8 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.server.core.RequirementServer;
+import com.validation.manager.core.tool.ImageProvider;
+import com.validation.manager.core.tool.Timer;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.beans.IntrospectionException;
@@ -11,11 +13,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.imageio.ImageIO;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditRequirementAction;
-import org.openide.modules.InstalledFileLocator;
-import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.InstanceContent;
 
 /**
@@ -26,6 +28,10 @@ public class UIRequirementNode extends AbstractVMBeanNode {
 
     private static BufferedImage green, red, orange, yellow;
     private final Requirement requirement;
+    private int coverage = -1;
+    private BufferedImage image = null;
+    private static final Logger LOG
+            = Logger.getLogger(UIRequirementNode.class.getSimpleName());
 
     public UIRequirementNode(Requirement req,
             RequirementTestChildFactory factory) throws IntrospectionException {
@@ -60,6 +66,7 @@ public class UIRequirementNode extends AbstractVMBeanNode {
 
     @Override
     public void refreshMyself() {
+        coverage = -1;//Reset so it is recalculated
         RequirementServer rs
                 = new RequirementServer(getLookup().lookup(Requirement.class));
         rs.update((Requirement) getBean(), rs.getEntity());
@@ -68,38 +75,34 @@ public class UIRequirementNode extends AbstractVMBeanNode {
 
     @Override
     public Image getIcon(int type) {
-        BufferedImage image = null;
-        int coverage
-                = new RequirementServer(getLookup().lookup(Requirement.class)).getTestCoverage();
-        try {
-            System.out.println(InstalledFileLocator.getDefault());
-            if (coverage == 100) {
-                if (green == null) {
-                    green = ImageIO.read(getClass().getResource(
-                            "/net/sourceforge/javydreamercsw/client/ui/circle_green.png"));
+        if (image == null || coverage < 0) {
+            try {
+                if (coverage < 0) {
+                    Timer timer = new Timer();
+                    coverage = new RequirementServer(getLookup().lookup(Requirement.class)).getTestCoverage();
+                    timer.stop();
+                    LOG.log(Level.INFO, "Time calculating coverage for {0}: {1}",
+                            new Object[]{getLookup().lookup(Requirement.class).getUniqueId(),
+                                timer.elapsedTime()});
                 }
-                image = green;
-            } else if (coverage < 100 && coverage > 50) {
-                if (yellow == null) {
-                    yellow = ImageIO.read(getClass().getResource(
-                            "/net/sourceforge/javydreamercsw/client/ui/circle_yellow.png"));
+                ImageProvider provider = null;
+                Timer timer = new Timer();
+                for (ImageProvider p : Lookup.getDefault().lookupAll(ImageProvider.class)) {
+                    if (p.supported(getLookup().lookup(Requirement.class))) {
+                        provider = p;
+                        break;
+                    }
                 }
-                image = yellow;
-            } else if (coverage < 50 && coverage > 25) {
-                if (orange == null) {
-                    orange = ImageIO.read(getClass().getResource(
-                            "/net/sourceforge/javydreamercsw/client/ui/circle_orange.png"));
+                if (provider != null) {
+                    image = provider.getIcon(getLookup().lookup(Requirement.class), coverage);
                 }
-                image = orange;
-            } else {
-                if (red == null) {
-                    red = ImageIO.read(getClass().getResource(
-                            "/net/sourceforge/javydreamercsw/client/ui/circle_red.png"));
-                }
-                image = red;
+                timer.stop();
+                LOG.log(Level.INFO, "Time getting icon for {0}: {1}",
+                        new Object[]{getLookup().lookup(Requirement.class).getUniqueId(),
+                            timer.elapsedTime()});
+            } catch (IOException ex) {
+                LOG.log(Level.SEVERE, null, ex);
             }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
         }
         return image == null ? null
                 : image.getScaledInstance(16, 16, java.awt.Image.SCALE_SMOOTH);
