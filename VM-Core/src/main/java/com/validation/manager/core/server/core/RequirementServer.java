@@ -211,7 +211,7 @@ public final class RequirementServer extends Requirement
         //Reset to 0 for new calculation.
         int coverage = 0;
         if (!coverageMap.containsKey(getCoverageMapID(getEntity()))) {
-            LOG.log(Level.INFO, "Getting test coverage for: {0}...",
+            LOG.log(Level.FINE, "Getting test coverage for: {0}...",
                     getUniqueId());
             List<Requirement> children = getEntity().getRequirementList1();
             if (children.isEmpty()) {
