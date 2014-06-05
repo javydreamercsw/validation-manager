@@ -80,7 +80,7 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>gwt-maven-plugin</artifactId>
                     <!-- Version 2.1.0-1 works at least with Vaadin 6.5 -->
-                    <version>2.6.0</version>
+                    <version>2.6.1</version>
                 </plugin>
                 <!-- A simple Jetty test server at http://localhost:8084/Validation-Manager-Web can be launched with the Maven goal jetty:run
                 and stopped with jetty:stop -->
