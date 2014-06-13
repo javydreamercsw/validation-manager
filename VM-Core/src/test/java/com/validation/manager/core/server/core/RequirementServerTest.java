@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import org.junit.Test;
+import org.openide.util.Exceptions;
 import static org.openide.util.Exceptions.printStackTrace;
 
 /**
@@ -343,6 +344,78 @@ public class RequirementServerTest extends AbstractVMTestCase {
         LOG.info("Versions:");
         for (Requirement r : rs.getVersions()) {
             LOG.info(r.toString());
+        }
+    }
+
+    /**
+     * Test of requirement coverage with versioning method, of class
+     * RequirementServer.
+     */
+    @Test
+    public void testRequirementCoverageWithVersions() {
+        try {
+            System.out.println("Requirement Coverage and Versioning");
+            prepare();
+            int version = 0;
+            //Enable versioning
+            setVersioningEnabled(true);
+            Requirement req = TestHelper.createRequirement("SRS-SW-0001",
+                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+            RequirementServer rs = new RequirementServer(req);
+            //Add a test case covering this test case
+            TestProject tp = TestHelper.createTestProject("Test Project");
+            TestHelper.addTestProjectToProject(tp, p);
+            TestPlan plan = TestHelper.createTestPlan(tp, "Plan", true, true);
+            com.validation.manager.core.db.Test test
+                    = TestHelper.createTest("Test", "Test", "Test");
+            TestHelper.addTestToPlan(plan, test);
+            TestCase tc = TestHelper.createTestCase("TC #1", valueOf("1"),
+                    "Results",
+                    test, "Summary");
+            TestCase step = TestHelper.addStep(tc, 1, "Test", "Test");
+            rs.getStepList().add(step.getStepList().get(0));
+            rs.write2DB();
+            assertEquals(0, rs.getMajorVersion());
+            assertEquals(0, rs.getMidVersion());
+            assertEquals(version, rs.getMinorVersion());
+            assertEquals(1, rs.getStepList().size());
+            assertEquals(100, rs.getTestCoverage());
+            version++;
+            //Update version and remove test coverage
+            rs.setDescription("New version");
+            rs.getStepList().clear();
+            rs.write2DB();
+            assertEquals(0, rs.getMajorVersion());
+            assertEquals(0, rs.getMidVersion());
+            assertEquals(version, rs.getMinorVersion());
+            assertEquals(0, rs.getStepList().size());
+            assertEquals(0, rs.getTestCoverage());
+            version++;
+            rs.setDescription("New version 2");
+            rs.getStepList().add(step.getStepList().get(0));
+            rs.write2DB();
+            assertEquals(0, rs.getMajorVersion());
+            assertEquals(0, rs.getMidVersion());
+            assertEquals(version, rs.getMinorVersion());
+            assertEquals(1, rs.getStepList().size());
+            assertEquals(100, rs.getTestCoverage());
+            version++;
+            //Add a parent requirement
+            Requirement p = TestHelper.createRequirement("PS-0001",
+                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+            RequirementServer parent = new RequirementServer(p);
+            parent.addChildRequirement(req);
+            parent.write2DB();
+            assertEquals(100, parent.getTestCoverage());
+            assertEquals(100, rs.getTestCoverage());
+            //Version parent
+            parent.setDescription("Version 2");
+            parent.write2DB();
+            assertEquals(100, parent.getTestCoverage());
+            assertEquals(100, rs.getTestCoverage());
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            fail();
         }
     }
 }
