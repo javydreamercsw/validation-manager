@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version last-->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Req Status Distribution" pageWidth="802" pageHeight="555" orientation="Landscape" columnWidth="802" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="5a5c1e57-493c-4372-a106-e93500c91ac2">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<parameter name="project_id" class="java.lang.String">
-		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
-	</parameter>
-	<queryString>
-		<![CDATA[SELECT
-     distinct replace(replace(replace(replace(requirement_status.`status`,'general.open','Unapproved'),'general.obsolete','Obsoleted'),'general.approved','Approved'),'general.rejected','Rejected') AS requirement_status,
-	 count(requirement_status.`status`) AS requirement_amount
-FROM
+	<parameter name="project_id" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[select requirement_status, count(*)
+from(
+select 
+distinct replace(replace(replace(replace(requirement_status.`status`,'general.open','Unapproved'),'general.obsolete','Obsoleted'),'general.approved','Approved'),'general.rejected','Rejected') AS requirement_status,
+max(requirement.id), requirement.unique_id
+ from
      `requirement_status` requirement_status INNER JOIN `requirement` requirement ON requirement_status.`id` = requirement.`requirement_status_id`
      INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement.`requirement_spec_node_id` = requirement_spec_node.`id`
      AND requirement_spec_node.`requirement_spec_spec_level_id` = requirement.`requirement_spec_node_requirement_spec_spec_level_id`
@@ -21,8 +22,9 @@ FROM
      AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
      INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
 where project.id=$P{project_id} or project.parent_project_id=$P{project_id}
-group BY
-     requirement_status ASC]]>
+group by requirement.unique_id
+)c
+group by requirement_status]]>
 	</queryString>
 	<field name="requirement_status" class="java.lang.String"/>
 	<field name="requirement_amount" class="java.lang.Long"/>
