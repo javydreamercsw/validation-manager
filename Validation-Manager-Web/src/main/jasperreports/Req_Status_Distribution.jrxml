@@ -51,7 +51,7 @@ group BY
 		<band height="299" splitType="Stretch">
 			<pie3DChart>
 				<chart>
-					<reportElement uuid="7182fd16-0c6f-4df1-8d0d-dc3e4019d328" x="0" y="0" width="401" height="298"/>
+					<reportElement x="0" y="0" width="401" height="298" uuid="7182fd16-0c6f-4df1-8d0d-dc3e4019d328"/>
 					<chartTitle>
 						<font isBold="true"/>
 						<titleExpression><![CDATA["Requirement Status Distribution"]]></titleExpression>
