@@ -2,14 +2,15 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="test" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e9603711-7847-4510-a579-bf785cc30244">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="50"/>
+	<property name="ireport.y" value="18"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Validation Manager"/>
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
 	</parameter>
 	<parameter name="project_id" class="java.lang.Integer">
 		<defaultValueExpression><![CDATA[1000]]></defaultValueExpression>
 	</parameter>
-	<queryString>
+	<queryString language="SQL">
 		<![CDATA[SELECT
      project.`id` AS project_id,
      project.`name` AS project_name,
@@ -33,7 +34,7 @@ WHERE
 	<pageHeader>
 		<band height="291" splitType="Stretch">
 			<subreport>
-				<reportElement uuid="20710f05-d98e-4cd3-baaa-152225268df7" x="400" y="0" width="402" height="291" isRemoveLineWhenBlank="true">
+				<reportElement x="400" y="0" width="402" height="291" isRemoveLineWhenBlank="true" uuid="20710f05-d98e-4cd3-baaa-152225268df7">
 					<printWhenExpression><![CDATA[$V{PAGE_NUMBER}.equals( 1 )]]></printWhenExpression>
 				</reportElement>
 				<subreportParameter name="target_project_id">
@@ -43,7 +44,7 @@ WHERE
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "Test_Coverage.jasper"]]></subreportExpression>
 			</subreport>
 			<subreport>
-				<reportElement uuid="bf87f926-67f2-4c71-9c1f-9ac906ebaedb" x="0" y="0" width="400" height="291" isRemoveLineWhenBlank="true">
+				<reportElement x="0" y="0" width="400" height="291" isRemoveLineWhenBlank="true" uuid="bf87f926-67f2-4c71-9c1f-9ac906ebaedb">
 					<printWhenExpression><![CDATA[$V{PAGE_NUMBER}.equals(1)]]></printWhenExpression>
 				</reportElement>
 				<subreportParameter name="project_id">
@@ -60,7 +61,7 @@ WHERE
 	<detail>
 		<band height="52" splitType="Stretch">
 			<subreport>
-				<reportElement uuid="cd8535d8-5f0c-43c2-87dd-60656bed52fa" x="0" y="0" width="802" height="52" isRemoveLineWhenBlank="true"/>
+				<reportElement x="0" y="0" width="802" height="52" isRemoveLineWhenBlank="true" uuid="cd8535d8-5f0c-43c2-87dd-60656bed52fa"/>
 				<subreportParameter name="SUBREPORT_DIR">
 					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
 				</subreportParameter>
@@ -78,18 +79,16 @@ WHERE
 	<pageFooter>
 		<band height="26" splitType="Stretch">
 			<textField isStretchWithOverflow="true" pattern="EEEEE dd MMMMM yyyy">
-				<reportElement uuid="23ec3312-99e0-40b1-bd71-e5c98ba202bf" x="274" y="0" width="232" height="20"/>
-				<textElement/>
+				<reportElement x="274" y="0" width="232" height="20" uuid="23ec3312-99e0-40b1-bd71-e5c98ba202bf"/>
 				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement uuid="17ed766d-2b2a-499e-a41f-710e2ed79a66" x="588" y="6" width="80" height="20"/>
+				<reportElement x="588" y="6" width="80" height="20" uuid="17ed766d-2b2a-499e-a41f-710e2ed79a66"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement uuid="40fb5b5e-78e7-43d0-94a2-8e09a7a791b5" x="668" y="6" width="40" height="20"/>
-				<textElement/>
+				<reportElement x="668" y="6" width="40" height="20" uuid="40fb5b5e-78e7-43d0-94a2-8e09a7a791b5"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>

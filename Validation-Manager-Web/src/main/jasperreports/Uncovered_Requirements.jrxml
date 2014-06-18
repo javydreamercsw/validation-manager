@@ -7,45 +7,67 @@
 		<defaultValueExpression><![CDATA[1]]></defaultValueExpression>
 	</parameter>
 	<queryString>
-		<![CDATA[select unique_id, project_name,description from(
-SELECT
-     requirement.`unique_id`, project.name as project_name, requirement.description
-FROM
-     `requirement_status` requirement_status INNER JOIN `requirement` requirement ON requirement_status.`id` = requirement.`requirement_status_id`
-     INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement.`requirement_spec_node_id` = requirement_spec_node.`id`
-     AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
-     INNER JOIN `requirement_spec` requirement_spec ON requirement_spec_node.`requirement_spec_id` = requirement_spec.`id`
-     AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
-     AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
-     INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
-     INNER JOIN `spec_level` spec_level ON requirement_spec.`spec_level_id` = spec_level.`id`
-WHERE
-     requirement_status.status='general.approved' and (project.id = $P{project_id} or parent_project_id=$P{project_id})
-ORDER BY
-     requirement_spec.`spec_level_id` ASC, unique_id
-)c
-where unique_id not in (
-SELECT
-     requirement.`unique_id`
-FROM
-     `requirement` requirement INNER JOIN `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
-     INNER JOIN `step` step ON step_has_requirement.`step_id` = step.`id`
-     AND step.`test_case_test_id` = step_has_requirement.`step_test_case_test_id`
-     AND step.`test_case_id` = step_has_requirement.`step_test_case_id`
-     INNER JOIN `test_case` test_case ON step.`test_case_id` = test_case.`id`
-     AND test_case.`test_id` = step.`test_case_test_id`
-     INNER JOIN `test_case` test_case_A ON step.`test_case_id` = test_case_A.`id`
-     AND test_case_A.`test_id` = step.`test_case_test_id`
-     INNER JOIN `test` test ON test_case_A.`test_id` = test.`id`
-     AND test.`id` = test_case.`test_id`
-     INNER JOIN `test_plan_has_test` test_plan_has_test ON test.`id` = test_plan_has_test.`test_id`
-     INNER JOIN `test_plan` test_plan ON test_plan_has_test.`test_plan_id` = test_plan.`id`
-     AND test_plan.`test_project_id` = test_plan_has_test.`test_plan_test_project_id`
-     INNER JOIN `test_project` test_project ON test_plan.`test_project_id` = test_project.`id`
-     INNER JOIN `project_has_test_project` project_has_test_project ON test_project.`id` = project_has_test_project.`test_project_id`
-     INNER JOIN `project` project ON project_has_test_project.`project_id` = project.`id`
-     INNER JOIN `requirement_status` requirement_status ON requirement_status.`id` = requirement.`requirement_status_id`
-	where (project.id = $P{project_id} or parent_project_id=$P{project_id}) and requirement_status.status='general.approved')]]>
+		<![CDATA[select
+    unique_id, project_name, description
+from
+    (SELECT
+        requirement.`unique_id`,
+            max(requirement.id) as id,
+            project.name as project_name,
+            requirement.description
+    FROM
+        `requirement_status` requirement_status
+    INNER JOIN `requirement` requirement ON requirement_status.`id` = requirement.`requirement_status_id`
+    INNER JOIN `requirement_spec_node` requirement_spec_node ON requirement.`requirement_spec_node_id` = requirement_spec_node.`id`
+        AND requirement_spec_node.`requirement_spec_id` = requirement.`requirement_spec_node_requirement_spec_id`
+    INNER JOIN `requirement_spec` requirement_spec ON requirement_spec_node.`requirement_spec_id` = requirement_spec.`id`
+        AND requirement_spec.`spec_level_id` = requirement_spec_node.`requirement_spec_spec_level_id`
+        AND requirement_spec.`project_id` = requirement_spec_node.`requirement_spec_project_id`
+    INNER JOIN `project` project ON requirement_spec.`project_id` = project.`id`
+    INNER JOIN `spec_level` spec_level ON requirement_spec.`spec_level_id` = spec_level.`id`
+    WHERE
+        requirement_status.status = 'general.approved'
+            and (project.id = $P{project_id}
+            or parent_project_id = $P{project_id})
+    group by unique_id
+    ORDER BY requirement_spec.`spec_level_id` ASC , unique_id) c
+where
+    id not in (SELECT
+            requirement.id
+        FROM
+            `requirement` requirement
+                INNER JOIN
+            `step_has_requirement` step_has_requirement ON requirement.`id` = step_has_requirement.`requirement_id`
+                INNER JOIN
+            `step` step ON step_has_requirement.`step_id` = step.`id`
+                AND step.`test_case_test_id` = step_has_requirement.`step_test_case_test_id`
+                AND step.`test_case_id` = step_has_requirement.`step_test_case_id`
+                INNER JOIN
+            `test_case` test_case ON step.`test_case_id` = test_case.`id`
+                AND test_case.`test_id` = step.`test_case_test_id`
+                INNER JOIN
+            `test_case` test_case_A ON step.`test_case_id` = test_case_A.`id`
+                AND test_case_A.`test_id` = step.`test_case_test_id`
+                INNER JOIN
+            `test` test ON test_case_A.`test_id` = test.`id`
+                AND test.`id` = test_case.`test_id`
+                INNER JOIN
+            `test_plan_has_test` test_plan_has_test ON test.`id` = test_plan_has_test.`test_id`
+                INNER JOIN
+            `test_plan` test_plan ON test_plan_has_test.`test_plan_id` = test_plan.`id`
+                AND test_plan.`test_project_id` = test_plan_has_test.`test_plan_test_project_id`
+                INNER JOIN
+            `test_project` test_project ON test_plan.`test_project_id` = test_project.`id`
+                INNER JOIN
+            `project_has_test_project` project_has_test_project ON test_project.`id` = project_has_test_project.`test_project_id`
+                INNER JOIN
+            `project` project ON project_has_test_project.`project_id` = project.`id`
+                INNER JOIN
+            `requirement_status` requirement_status ON requirement_status.`id` = requirement.`requirement_status_id`
+        where
+            (project.id = $P{project_id}
+                or parent_project_id = $P{project_id})
+                and requirement_status.status = 'general.approved')]]>
 	</queryString>
 	<field name="unique_id" class="java.lang.String">
 		<fieldDescription><![CDATA[]]></fieldDescription>
@@ -64,7 +86,7 @@ FROM
 	<title>
 		<band height="46" splitType="Stretch">
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="770ecef1-125f-413f-9259-1cdace211581" x="0" y="0" width="555" height="46"/>
+				<reportElement x="0" y="0" width="555" height="46" uuid="770ecef1-125f-413f-9259-1cdace211581"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14" isBold="true"/>
 				</textElement>
@@ -78,14 +100,14 @@ FROM
 	<columnHeader>
 		<band height="25" splitType="Stretch">
 			<staticText>
-				<reportElement uuid="1c367f4e-398c-40fe-8fed-c1fa51dcf712" x="155" y="0" width="400" height="25"/>
+				<reportElement x="155" y="0" width="400" height="25" uuid="1c367f4e-398c-40fe-8fed-c1fa51dcf712"/>
 				<textElement textAlignment="Center">
 					<font size="12" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Description]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="5fb35713-d8ff-46bc-969c-311640fc924e" x="55" y="0" width="100" height="25"/>
+				<reportElement x="55" y="0" width="100" height="25" uuid="5fb35713-d8ff-46bc-969c-311640fc924e"/>
 				<textElement textAlignment="Center">
 					<font size="12" isBold="true"/>
 				</textElement>
@@ -96,24 +118,22 @@ FROM
 	<detail>
 		<band height="22" splitType="Stretch">
 			<textField>
-				<reportElement uuid="06a1b8a5-a956-4fa7-93b0-a9980ee528fa" stretchType="RelativeToBandHeight" x="55" y="0" width="100" height="20"/>
+				<reportElement stretchType="RelativeToBandHeight" x="55" y="0" width="100" height="20" uuid="06a1b8a5-a956-4fa7-93b0-a9980ee528fa"/>
 				<textElement textAlignment="Center"/>
 				<textFieldExpression><![CDATA[$F{unique_id}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true">
-				<reportElement uuid="ecc6aef1-4ac7-439b-b6b1-ed721688ce7b" x="155" y="0" width="400" height="22"/>
-				<textElement/>
+				<reportElement x="155" y="0" width="400" height="22" uuid="ecc6aef1-4ac7-439b-b6b1-ed721688ce7b"/>
 				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement uuid="ea9e3f0d-f5d4-4a5b-8758-d723fa50f134" x="0" y="2" width="555" height="1"/>
+				<reportElement x="0" y="2" width="555" height="1" uuid="ea9e3f0d-f5d4-4a5b-8758-d723fa50f134"/>
 			</line>
 			<line>
-				<reportElement uuid="e9541ed5-3886-4db4-8691-1bc6421b363a" positionType="FixRelativeToBottom" x="0" y="21" width="555" height="1"/>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="21" width="555" height="1" uuid="e9541ed5-3886-4db4-8691-1bc6421b363a"/>
 			</line>
 			<textField>
-				<reportElement uuid="747d57b7-e277-4e4e-92cd-6564c476d1f0" x="0" y="0" width="55" height="20"/>
-				<textElement/>
+				<reportElement x="0" y="0" width="55" height="20" uuid="747d57b7-e277-4e4e-92cd-6564c476d1f0"/>
 				<textFieldExpression><![CDATA[$V{counter}]]></textFieldExpression>
 			</textField>
 		</band>
@@ -124,13 +144,12 @@ FROM
 	<pageFooter>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement uuid="0d7af932-30e0-4e5b-8061-a6f1096e18c3" x="429" y="0" width="80" height="20"/>
+				<reportElement x="429" y="0" width="80" height="20" uuid="0d7af932-30e0-4e5b-8061-a6f1096e18c3"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement uuid="f5c55c34-e16d-41ec-a8ef-60dbd992a11e" x="509" y="0" width="40" height="20"/>
-				<textElement/>
+				<reportElement x="509" y="0" width="40" height="20" uuid="f5c55c34-e16d-41ec-a8ef-60dbd992a11e"/>
 				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>
