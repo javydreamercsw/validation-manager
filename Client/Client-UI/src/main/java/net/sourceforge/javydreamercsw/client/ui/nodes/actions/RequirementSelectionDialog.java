@@ -5,12 +5,12 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
+import com.validation.manager.core.server.core.RequirementServer;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
@@ -41,6 +41,16 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
     public RequirementSelectionDialog(java.awt.Frame parent, boolean modal,
             List<Requirement> initial) {
         super(parent, modal);
+        //Make sure to remove multiple versions of requirements.
+        List<String> processed = new ArrayList<>();
+        List<Requirement> finalList = new ArrayList<>();
+        for (Requirement r : initial) {
+            if (!processed.contains(r.getUniqueId().trim())) {
+                RequirementServer rs = new RequirementServer(r);
+                finalList.add(Collections.max(rs.getVersions(), null));
+                processed.add(rs.getUniqueId().trim());
+            }
+        }
         initComponents();
         setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
         source.setCellRenderer(new InternalRenderer());
@@ -86,14 +96,6 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
             }
         });
         selection.setCellRenderer(new SelectedListCellRenderer());
-//        selection.setCellRenderer(new ListCellRenderer() {
-//            @Override
-//            public Component getListCellRendererComponent(JList list,
-//                    Object value, int index, boolean isSelected,
-//                    boolean cellHasFocus) {
-//                return new JLabel(((Requirement) ((DefaultListModel) selection.getModel()).getElementAt(index)).getUniqueId());
-//            }
-//        });
         selection.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -105,7 +107,7 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                 }
             }
         });
-        for (Requirement requirement : initial) {
+        for (Requirement requirement : finalList) {
             ((DefaultListModel) selection.getModel()).addElement(requirement);
         }
     }
@@ -271,18 +273,15 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                     = new DefaultMutableTreeNode(spec);
             for (RequirementSpecNode rsn : spec.getRequirementSpecNodeList()) {
                 List<Requirement> reqs = rsn.getRequirementList();
-                Collections.sort(reqs, new Comparator<Requirement>() {
-
-                    @Override
-                    public int compare(Requirement o1, Requirement o2) {
-                        //Sort them by unique id
-                        return o1.getUniqueId().compareToIgnoreCase(o2.getUniqueId());
+                //Make sure to remove multiple versions of requirements.
+                List<String> processed = new ArrayList<>();
+                for (Requirement r : reqs) {
+                    if (!processed.contains(r.getUniqueId().trim())) {
+                        Requirement max = Collections.max(new RequirementServer(r)
+                                .getVersions(), null);
+                        node.add(new DefaultMutableTreeNode(max));
+                        processed.add(max.getUniqueId().trim());
                     }
-                });
-                for (Requirement req : rsn.getRequirementList()) {
-                    DefaultMutableTreeNode r
-                            = new DefaultMutableTreeNode(req);
-                    node.add(r);
                 }
             }
             if (node.getChildCount() > 0) {
