@@ -52,9 +52,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vm.version>${project.version}</vm.version>
-        <vaadin.version>7.1.11</vaadin.version>
+        <vaadin.version>7.2.2</vaadin.version>
         <netbeans.version>RELEASE80</netbeans.version>
-        <jasper.reports.version>5.5.1</jasper.reports.version>
+        <jasper.reports.version>5.6.0</jasper.reports.version>
     </properties>
 
     <build>
