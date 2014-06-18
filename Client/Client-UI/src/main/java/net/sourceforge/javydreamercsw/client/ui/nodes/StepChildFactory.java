@@ -24,15 +24,17 @@ class StepChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
+        List<Requirement> finalList = new ArrayList<>();
         List<Requirement> toAdd = new ArrayList<>();
+        List<Requirement> toRemove = new ArrayList<>();
         for (Requirement r : step.getRequirementList()) {
             boolean found = false;
-            for (Requirement in : toAdd) {
+            for (Requirement in : finalList) {
                 if (r.getUniqueId().equals(in.getUniqueId())) {
                     //They have the same Unique ID, so they are versions of the same requirement
                     if (in.compareTo(r) < 0) {
                         //The one in is older. Remove it and replace with the new one
-                        toAdd.remove(in);
+                        toRemove.remove(in);
                         toAdd.add(r);
                         found = true;
                     } else {
@@ -41,10 +43,16 @@ class StepChildFactory extends AbstractChildFactory {
                 }
             }
             if (!found) {
-                toAdd.add(r);
+                finalList.add(r);
             }
         }
-        toPopulate.addAll(toAdd);
+        for (Requirement add : toAdd) {
+            finalList.add(add);
+        }
+        for (Requirement remove : toRemove) {
+            finalList.remove(remove);
+        }
+        toPopulate.addAll(finalList);
         return true;
     }
 
