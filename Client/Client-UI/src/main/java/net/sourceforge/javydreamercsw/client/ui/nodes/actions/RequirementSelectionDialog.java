@@ -34,23 +34,13 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
     private List<Requirement> requirements = new ArrayList<>();
     private final DefaultMutableTreeNode top
             = new DefaultMutableTreeNode("Available Requirements");
+    private List<Requirement> initial;
 
     /**
      * Creates new form RequirementSelectionDialog
      */
-    public RequirementSelectionDialog(java.awt.Frame parent, boolean modal,
-            List<Requirement> initial) {
+    public RequirementSelectionDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        //Make sure to remove multiple versions of requirements.
-        List<String> processed = new ArrayList<>();
-        List<Requirement> finalList = new ArrayList<>();
-        for (Requirement r : initial) {
-            if (!processed.contains(r.getUniqueId().trim())) {
-                RequirementServer rs = new RequirementServer(r);
-                finalList.add(Collections.max(rs.getVersions(), null));
-                processed.add(rs.getUniqueId().trim());
-            }
-        }
         initComponents();
         setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
         source.setCellRenderer(new InternalRenderer());
@@ -107,7 +97,15 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                 }
             }
         });
-        for (Requirement requirement : finalList) {
+    }
+
+    /**
+     * @param reqs the initial to set
+     */
+    public void setInitial(List<Requirement> reqs) {
+        this.initial = reqs;
+        ((DefaultListModel) selection.getModel()).clear();
+        for (Requirement requirement : reqs) {
             ((DefaultListModel) selection.getModel()).addElement(requirement);
         }
     }

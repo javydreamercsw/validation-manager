@@ -26,9 +26,13 @@ import org.openide.util.Utilities;
  */
 public class EditTestStepDialog extends javax.swing.JDialog {
 
-    private final List<Requirement> linkedRequirements = new ArrayList<>();
+    private static final List<Requirement> linkedRequirements
+            = new ArrayList<>();
     private final boolean edit;
     private Step step;
+    private static final RequirementSelectionDialog dialog
+            = new RequirementSelectionDialog(new javax.swing.JFrame(),
+                    true);
 
     /**
      * Creates new form EditTestStepDialog
@@ -298,9 +302,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                final RequirementSelectionDialog dialog
-                        = new RequirementSelectionDialog(new javax.swing.JFrame(),
-                                true, linkedRequirements);
+                dialog.setInitial(linkedRequirements);
                 dialog.setLocationRelativeTo(null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
