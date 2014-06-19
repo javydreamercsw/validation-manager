@@ -78,6 +78,9 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             = ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
     private final CoveringStepFactory testCaseFactory;
     private final ExplorerManager em = new ExplorerManager();
+    private static final RequirementSelectionDialog dialog
+            = new RequirementSelectionDialog(new javax.swing.JFrame(),
+                    true);
 
     public EditRequirementWindowTopComponent() {
         initComponents();
@@ -254,9 +257,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                final RequirementSelectionDialog dialog
-                        = new RequirementSelectionDialog(new javax.swing.JFrame(),
-                                true, linkedRequirements);
+                dialog.setInitial(linkedRequirements);
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
                 //Wait for the dialog to be finished
@@ -572,8 +573,8 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             //Get the selected Step
             uniqueID.setText(requirement.getUniqueId());
             //Update the linked requirements
-            List<Requirement> toAdd = 
-                    RequirementServer.getLatestChildren(requirement);
+            List<Requirement> toAdd
+                    = RequirementServer.getLatestChildren(requirement);
             for (Requirement req : toAdd) {
                 ((DefaultListModel) requirements.getModel()).addElement(req);
             }
