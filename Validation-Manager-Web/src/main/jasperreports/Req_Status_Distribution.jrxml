@@ -6,7 +6,7 @@
 	<property name="ireport.y" value="0"/>
 	<parameter name="project_id" class="java.lang.String"/>
 	<queryString language="SQL">
-		<![CDATA[select requirement_status, count(*)
+		<![CDATA[select requirement_status, count(*) as requirement_amount
 from(
 select 
 distinct replace(replace(replace(replace(requirement_status.`status`,'general.open','Unapproved'),'general.obsolete','Obsoleted'),'general.approved','Approved'),'general.rejected','Rejected') AS requirement_status,
