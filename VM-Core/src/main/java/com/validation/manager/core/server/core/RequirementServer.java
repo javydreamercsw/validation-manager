@@ -517,8 +517,10 @@ public final class RequirementServer extends Requirement
     }
 
     public static List<Requirement> getLatestChildren(Requirement parent) {
+        List<Requirement> finalList = new ArrayList<Requirement>();
         List<Requirement> children = new ArrayList<Requirement>();
         List<Requirement> toAdd = new ArrayList<Requirement>();
+        List<Requirement> toRemove = new ArrayList<Requirement>();
         for (Requirement req : parent.getRequirementList1()) {
             //Make sure to remove duplicates (versions of the same requirement)
             boolean found = false;
@@ -528,7 +530,7 @@ public final class RequirementServer extends Requirement
                     //They have the same Unique ID, so they are versions of the same requirement
                     if (in.compareTo(req) < 0) {
                         //The one in is older. Remove it and replace with the new one
-                        toAdd.remove(in);
+                        toRemove.add(in);
                         toAdd.add(req);
                         found = true;
                     } else {
@@ -537,10 +539,16 @@ public final class RequirementServer extends Requirement
                 }
             }
             if (!found) {
-                toAdd.add(req);
+                finalList.add(req);
             }
         }
-        children.addAll(toAdd);
+        for (Requirement add : toAdd) {
+            finalList.add(add);
+        }
+        for (Requirement remove : toRemove) {
+            finalList.remove(remove);
+        }
+        children.addAll(finalList);
         return children;
     }
 }
