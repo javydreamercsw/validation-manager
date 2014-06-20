@@ -257,6 +257,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
+                linkedRequirements.clear();
                 dialog.setInitial(linkedRequirements);
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
@@ -268,7 +269,6 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }
-                linkedRequirements.clear();
                 //Clear the model to catch any removals
                 ((DefaultListModel) requirements.getModel()).removeAllElements();
                 //Add the ones selected on the selection dialog.
