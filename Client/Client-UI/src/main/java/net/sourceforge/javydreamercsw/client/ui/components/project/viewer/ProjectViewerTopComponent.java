@@ -219,7 +219,7 @@ public final class ProjectViewerTopComponent extends TopComponent
                 } else if (item instanceof Requirement) {
                     Requirement req = (Requirement) item;
                     scene.clear();
-                    LOG.info(req.getUniqueId());
+                    LOG.fine(req.getUniqueId());
                     scene.addRequirement(req);
                 }
             }
@@ -262,7 +262,7 @@ public final class ProjectViewerTopComponent extends TopComponent
         }
         for (RequirementStatusFilterChangeListener sfcl : listeners) {
             sfcl.filterChange(ids.toArray(new Integer[0]));
-            LOG.log(Level.INFO, "Sending event to: {0}",
+            LOG.log(Level.FINE, "Sending event to: {0}",
                     sfcl.getClass().getSimpleName());
         }
     }

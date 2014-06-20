@@ -74,7 +74,7 @@ public class RequirementHierarchyNode extends AbstractHierarchyNode {
                 = new ArrayList<>();
         //Clear and recreate
         Requirement req = (Requirement) object;
-        LOG.log(Level.INFO, "Updating children for {0}", req.getUniqueId());
+        LOG.log(Level.FINE, "Updating children for {0}", req.getUniqueId());
         for (Requirement r : req.getRequirementList1()) {
             children.add(new RequirementHierarchyNode(r, getScene()));
         }
