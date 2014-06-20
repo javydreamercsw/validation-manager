@@ -74,6 +74,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             //Get the selected Step
             step = Utilities.actionsGlobalContext().lookup(Step.class);
             //Update the linked requirements
+            linkedRequirements.clear();
             if (step.getRequirementList() != null) {
                 for (Requirement req : step.getRequirementList()) {
                     ((DefaultListModel) requirements.getModel()).addElement(req);
