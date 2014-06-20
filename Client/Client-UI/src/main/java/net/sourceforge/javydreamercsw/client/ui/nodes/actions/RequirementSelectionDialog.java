@@ -104,6 +104,7 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
      */
     public void setInitial(List<Requirement> reqs) {
         this.initial = reqs;
+        requirements.clear();
         ((DefaultListModel) selection.getModel()).clear();
         for (Requirement requirement : reqs) {
             ((DefaultListModel) selection.getModel()).addElement(requirement);
