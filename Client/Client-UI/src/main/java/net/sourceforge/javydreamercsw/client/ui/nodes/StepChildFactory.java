@@ -34,7 +34,7 @@ class StepChildFactory extends AbstractChildFactory {
                     //They have the same Unique ID, so they are versions of the same requirement
                     if (in.compareTo(r) < 0) {
                         //The one in is older. Remove it and replace with the new one
-                        toRemove.remove(in);
+                        toRemove.add(in);
                         toAdd.add(r);
                         found = true;
                     } else {
