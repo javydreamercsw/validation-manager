@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
@@ -274,6 +275,13 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                 List<Requirement> reqs = rsn.getRequirementList();
                 //Make sure to remove multiple versions of requirements.
                 List<String> processed = new ArrayList<>();
+                Collections.sort(reqs, new Comparator<Requirement>() {
+
+                    @Override
+                    public int compare(Requirement o1, Requirement o2) {
+                        return o1.getUniqueId().trim().compareTo(o2.getUniqueId().trim());
+                    }
+                });
                 for (Requirement r : reqs) {
                     if (!processed.contains(r.getUniqueId().trim())) {
                         Requirement max = Collections.max(new RequirementServer(r)
@@ -282,6 +290,7 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
                         processed.add(max.getUniqueId().trim());
                     }
                 }
+
             }
             if (node.getChildCount() > 0) {
                 top.add(node);
