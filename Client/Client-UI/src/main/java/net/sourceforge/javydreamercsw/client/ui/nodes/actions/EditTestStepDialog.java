@@ -73,6 +73,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
         if (edit) {
             //Get the selected Step
             step = Utilities.actionsGlobalContext().lookup(Step.class);
+            assert step != null : "Unexpected null Step.";
             //Update the linked requirements
             linkedRequirements.clear();
             if (step.getRequirementList() != null) {
