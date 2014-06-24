@@ -523,15 +523,17 @@ public final class RequirementServer extends Requirement
                         }
                         StepServer ss = new StepServer(step);
                         int initial = ss.getRequirementList().size();
-                        ss.getRequirementList().clear();
-                        ss.getRequirementList().addAll(newList);
-                        int finalAmount = ss.getRequirementList().size();
-                        ss.write2DB();
-                        LOG.log(Level.INFO,
-                                "Removed duplicate requirements in: {0}",
-                                "Test Case: " + step.getTestCase().getName()
-                                + ", step " + step.getStepSequence());
-                        duplicateStepReq += initial - finalAmount;
+                        if (initial != newList.size()) {
+                            ss.getRequirementList().clear();
+                            ss.getRequirementList().addAll(newList);
+                            int finalAmount = ss.getRequirementList().size();
+                            ss.write2DB();
+                            LOG.log(Level.INFO,
+                                    "Removed duplicate requirements in: {0}",
+                                    "Test Case: " + step.getTestCase().getName()
+                                    + ", step " + step.getStepSequence());
+                            duplicateStepReq += initial - finalAmount;
+                        }
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
                     }
