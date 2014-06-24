@@ -26,7 +26,6 @@ import org.openide.util.lookup.InstanceContent;
  */
 public class UIRequirementNode extends AbstractVMBeanNode {
 
-    private static BufferedImage green, red, orange, yellow;
     private final Requirement requirement;
     private int coverage = -1;
     private BufferedImage image = null;
