@@ -196,13 +196,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(100, rs.getTestCoverage());
             //Add a related requirement
             rs.addChildRequirement(req3);
-            rs.write2DB();
             assertEquals(100, rs.getTestCoverage());
             rs.addChildRequirement(req2);
-            rs.write2DB();
             assertEquals(50, rs.getTestCoverage());
             rs.addChildRequirement(req4);
-            rs.write2DB();
             assertEquals(33, rs.getTestCoverage());
             //Add related requirements to test coverage
             RequirementServer ur = new RequirementServer(userReq);
