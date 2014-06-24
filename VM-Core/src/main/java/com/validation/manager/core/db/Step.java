@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Column;
@@ -27,15 +26,15 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "step")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Step.findAll", 
+    @NamedQuery(name = "Step.findAll",
             query = "SELECT s FROM Step s"),
-    @NamedQuery(name = "Step.findByStepSequence", 
+    @NamedQuery(name = "Step.findByStepSequence",
             query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence"),
-    @NamedQuery(name = "Step.findByTestCaseTestId", 
+    @NamedQuery(name = "Step.findByTestCaseTestId",
             query = "SELECT s FROM Step s WHERE s.stepPK.testCaseTestId = :testCaseTestId"),
-    @NamedQuery(name = "Step.findById", 
+    @NamedQuery(name = "Step.findById",
             query = "SELECT s FROM Step s WHERE s.stepPK.id = :id"),
-    @NamedQuery(name = "Step.findByTestCaseId", 
+    @NamedQuery(name = "Step.findByTestCaseId",
             query = "SELECT s FROM Step s WHERE s.stepPK.testCaseId = :testCaseId")})
 public class Step implements Serializable {
 
@@ -170,5 +169,4 @@ public class Step implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
     }
-
 }
