@@ -5,10 +5,12 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNodePK;
+import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
+import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
@@ -208,7 +210,7 @@ public final class RequirementServer extends Requirement
         //Reset to 0 for new calculation.
         int coverage = 0;
         if (!coverageMap.containsKey(getCoverageMapID(getEntity()))) {
-            LOG.log(Level.FINE, "Getting test coverage for: {0}...",
+            LOG.log(Level.INFO, "Getting test coverage for: {0}...",
                     getUniqueId());
             List<Requirement> children = getEntity().getRequirementList1();
             if (children.isEmpty()) {
@@ -504,10 +506,44 @@ public final class RequirementServer extends Requirement
                     }
                 }
             }
+            //Check Steps
+            int duplicateStepReq = 0;
+            for (final Step step : new StepJpaController(
+                    DataBaseManager.getEntityManagerFactory()).findStepEntities()) {
+                if (!step.getRequirementList().isEmpty()) {
+                    try {
+                        List<String> processedStep = new ArrayList<String>();
+                        List<Requirement> newList = new ArrayList<Requirement>();
+                        for (Requirement req : step.getRequirementList()) {
+                            if (!processedStep.contains(req.getUniqueId().trim())) {
+                                processedStep.add(req.getUniqueId().trim());
+                                RequirementServer r = new RequirementServer(req);
+                                newList.add(Collections.max(r.getVersions(), null));
+                            }
+                        }
+                        StepServer ss = new StepServer(step);
+                        int initial = ss.getRequirementList().size();
+                        ss.getRequirementList().clear();
+                        ss.getRequirementList().addAll(newList);
+                        int finalAmount = ss.getRequirementList().size();
+                        ss.write2DB();
+                        LOG.log(Level.INFO,
+                                "Removed duplicate requirements in: {0}",
+                                "Test Case: " + step.getTestCase().getName()
+                                + ", step " + step.getStepSequence());
+                        duplicateStepReq += initial - finalAmount;
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
             LOG.log(Level.INFO,
                     "Fixed {0} requirement relationships.", counter);
             LOG.log(Level.INFO,
                     "Fixed {0} requirement circular relationships.", circular);
+            LOG.log(Level.INFO,
+                    "Removed {0} multiple versions of a requirement from steps.",
+                    duplicateStepReq);
             DataBaseManager.close();
         } else {
             LOG.severe(new StringBuilder().append("Missing parameters to be "
