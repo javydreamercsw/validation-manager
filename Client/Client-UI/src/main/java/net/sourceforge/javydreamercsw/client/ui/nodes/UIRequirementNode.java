@@ -52,15 +52,8 @@ public class UIRequirementNode extends AbstractVMBeanNode {
     @Override
     public Action[] getActions(boolean b) {
         List<Action> actions = new ArrayList<>();
-        actions.addAll(Arrays.asList(super.getActions(b)));
         actions.add(new EditRequirementAction());
-        /**
-         * TODO: Need the following to accommodate Requirement revisions: 1)
-         * Blindly copy the test coverage. 2) Review the current test cases
-         * covering previous version and deciding if those still cover the
-         * requirement changes in a one by one basis. 3) Don't do anything,
-         * leaving it uncovered.
-         */
+        actions.addAll(Arrays.asList(super.getActions(b)));
         return actions.toArray(new Action[actions.size()]);
     }
 
