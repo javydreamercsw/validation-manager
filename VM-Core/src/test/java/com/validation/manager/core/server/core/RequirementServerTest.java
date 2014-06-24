@@ -254,10 +254,41 @@ public class RequirementServerTest extends AbstractVMTestCase {
             }
             //No children
             assertEquals(0, rs2.getRequirementList1().size());
+            checkCircularDependency(req);
+            checkCircularDependency(req2);
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
+    }
+    
+    private void checkCircularDependency(Requirement r){
+        RequirementServer rs= new RequirementServer(r);
+        for (Requirement t : rs.getVersions()) {
+                RequirementServer temp = new RequirementServer(t);
+                //Detect circular relationships
+                if (temp.getRequirementList().size() > 0
+                        && temp.getRequirementList1().size() > 0) {
+                    //Has both children and parents
+                    LOG.log(Level.INFO,
+                            "Inspecting {0} for circular dependencies.",
+                            temp.getUniqueId());
+                    for (Requirement parent : temp.getRequirementList1()) {
+                        //Check all parents of this requirement
+                        for (Requirement child : parent.getRequirementList()) {
+                            //Check if the parent has this requirement as a child
+                            if (child.getUniqueId().equals(temp.getUniqueId())) {
+                                LOG.log(Level.SEVERE,
+                                        "Circular dependency "
+                                        + "detected between {0} and {1}",
+                                        new Object[]{temp.getUniqueId(),
+                                            parent.getUniqueId()});
+                                fail();
+                            }
+                        }
+                    }
+                }
+            }
     }
 
     /**
@@ -345,6 +376,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
         for (Requirement r : rs.getVersions()) {
             LOG.info(r.toString());
         }
+        checkCircularDependency(req);
     }
 
     /**
@@ -401,9 +433,9 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(100, rs.getTestCoverage());
             version++;
             //Add a parent requirement
-            Requirement p = TestHelper.createRequirement("PS-0001",
+            Requirement r = TestHelper.createRequirement("PS-0001",
                     "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
-            RequirementServer parent = new RequirementServer(p);
+            RequirementServer parent = new RequirementServer(r);
             parent.addChildRequirement(req);
             parent.write2DB();
             assertEquals(100, parent.getTestCoverage());
