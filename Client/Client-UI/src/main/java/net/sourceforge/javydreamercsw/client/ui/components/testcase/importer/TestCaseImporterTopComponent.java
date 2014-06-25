@@ -561,7 +561,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                     //start the progresshandle the progress UI will show 500s after
                     ph.start(); //we must start the PH before we swith to determinate
                     int items = importedTable.getModel().getRowCount()
-                            - (header.isSelected() ? 1 : 0)-1;
+                            - (header.isSelected() ? 1 : 0) - 1;
                     LOG.log(Level.FINE, "Items to import: {0}", items);
                     ph.switchToDeterminate(items);
                     if (isImportSuccess()) {
@@ -673,10 +673,13 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                                         }
                                     }
                                     if (!found) {
-                                        //TODO: Create dummy? Error out?
-                                        LOG.log(Level.WARNING,
-                                                "Unable to find requirement: {0}",
-                                                token.trim());
+                                        if (!token.trim().toLowerCase().equals("n/a")) {
+                                            LOG.log(Level.WARNING,
+                                                    "Unable to find requirement: "
+                                                    + "{0} for step {1}",
+                                                    new Object[]{token.trim(),
+                                                        row + 1});
+                                        }
                                     }
                                 }
                             }
