@@ -26,19 +26,13 @@ import org.openide.util.Utilities;
  */
 public class EditTestStepDialog extends javax.swing.JDialog {
 
-    private static final List<Requirement> linkedRequirements
+    private final List<Requirement> linkedRequirements
             = new ArrayList<>();
     private final boolean edit;
     private Step step;
     private static final RequirementSelectionDialog dialog
             = new RequirementSelectionDialog(new javax.swing.JFrame(),
                     true);
-
-    @Override
-    public void setVisible(boolean b) {
-        linkedRequirements.clear();
-        super.setVisible(b);
-    }
 
     /**
      * Creates new form EditTestStepDialog
