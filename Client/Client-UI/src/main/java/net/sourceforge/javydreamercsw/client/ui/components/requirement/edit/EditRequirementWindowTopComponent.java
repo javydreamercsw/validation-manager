@@ -11,8 +11,6 @@ import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.server.core.RequirementServer;
-import com.validation.manager.core.tool.message.MessageHandler;
-import com.validation.manager.core.tool.message.MessageType;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -284,6 +282,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
     }//GEN-LAST:event_cancelActionPerformed
 
     private void saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveActionPerformed
+        //Check for required values.
         if (description.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "Please enter a valid description",
@@ -315,10 +314,6 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                     req = new RequirementServer(requirement);
                 }
                 //TODO: Ask via Web Service is versioning is enabled.
-                Lookup.getDefault().lookup(MessageHandler.class)
-                        .show("Relationships to other requirements and "
-                                + "test cases will be copied over.",
-                                MessageType.WARNING);
                 req.setUniqueId(uniqueID.getText().trim());
                 req.setMinorVersion(req.getMinorVersion() + 1);
             } else {
@@ -334,11 +329,6 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             req.setRequirementTypeId(((RequirementType) type.getSelectedItem()));
             req.setDescription(description.getText().trim());
             req.setNotes(notes.getText().trim());
-            try {
-                req.write2DB();
-            } catch (Exception ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
             for (Requirement child : linkedRequirements) {
                 try {
                     req.addChildRequirement(child);

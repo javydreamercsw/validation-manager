@@ -138,6 +138,12 @@
             <scope>system</scope>
             <systemPath>${java.home}/lib/jfxrt.jar</systemPath>
         </dependency>-->
+        <dependency>
+            <artifactId>org-netbeans-api-progress</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <type>jar</type>
+            <version>RELEASE80</version>
+        </dependency>
     </dependencies>
 
     <build>
