@@ -1,7 +1,5 @@
 package com.validation.manager.core.tool.step.importer;
 
-import com.validation.manager.core.tool.requirement.importer.*;
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.VMException;
@@ -9,6 +7,7 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
@@ -16,8 +15,8 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.server.core.RequirementServer;
+import com.validation.manager.core.tool.requirement.importer.*;
 import static com.validation.manager.core.tool.requirement.importer.RequirementImporter.exportTemplate;
-import com.validation.manager.test.TestHelper;
 import com.validation.manager.test.AbstractVMTestCase;
 import static com.validation.manager.test.TestHelper.addTestCaseToTest;
 import static com.validation.manager.test.TestHelper.addTestProjectToProject;
@@ -39,7 +38,6 @@ import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import static junit.framework.TestCase.assertEquals;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -55,6 +53,10 @@ public class StepImporterTest extends AbstractVMTestCase {
     }
 
     private int testImportFile(String fileName) {
+        return testImportFile(fileName, false);
+    }
+
+    private int testImportFile(String fileName, boolean check) {
         String name = StepImporterTest.class.getCanonicalName();
         Project project = createProject("Test Project", "Notes");
         name = name.substring(0, name.lastIndexOf("."));
@@ -167,6 +169,17 @@ public class StepImporterTest extends AbstractVMTestCase {
             fail();
         }
         RequirementServer rs = new RequirementServer(r);
+        int count = 1;
+        for (Step s : rs.getStepList()) {
+            if (count % 2 == 1) {
+                assertEquals(1, s.getRequirementList().size());
+            }
+            count++;
+        }
+        rs.update();
+        if (check) {
+            assertEquals(10/*Update if the excel sheets change*/, rs.getStepList().size());
+        }
         return rs.getStepList().size();
     }
 
