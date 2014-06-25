@@ -34,6 +34,12 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             = new RequirementSelectionDialog(new javax.swing.JFrame(),
                     true);
 
+    @Override
+    public void setVisible(boolean b) {
+        linkedRequirements.clear();
+        super.setVisible(b);
+    }
+
     /**
      * Creates new form EditTestStepDialog
      */
