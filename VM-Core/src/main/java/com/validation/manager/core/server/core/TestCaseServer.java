@@ -12,11 +12,9 @@ import com.validation.manager.core.db.controller.TestJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import static com.validation.manager.core.server.core.StepServer.deleteStep;
-import static com.validation.manager.core.server.fmea.RiskControlServer.deleteRiskControl;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -60,19 +58,6 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         return getTestCasePK().getId();
     }
 
-    public static void deleteTestCase(TestCase tc) throws NonexistentEntityException, IllegalOrphanException, Exception {
-        for (Iterator<Step> it = tc.getStepList().iterator(); it.hasNext();) {
-            deleteStep(it.next());
-        }
-        tc.getStepList().clear();
-        for (Iterator<RiskControl> it = tc.getRiskControlList().iterator(); it.hasNext();) {
-            deleteRiskControl(it.next());
-        }
-        tc.getRiskControlList().clear();
-        new TestCaseJpaController(getEntityManagerFactory()).edit(tc);
-        new TestCaseJpaController(getEntityManagerFactory()).destroy(tc.getTestCasePK());
-    }
-
     @Override
     public TestCase getEntity() {
         return new TestCaseJpaController(
@@ -103,22 +88,32 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         update(this, getEntity());
     }
 
-    public void addStep(int sequence, String text, String note, String criteria,
+    public Step addStep(int sequence, String text, String note, String criteria,
             List<Requirement> requirements)
             throws PreexistingEntityException, Exception {
-        StepServer s = new StepServer(getEntity(), sequence, text);
+        StepServer ss = new StepServer(getEntity(), sequence, text);
         int amount = getStepList().size();
-        s.setNotes(note);
-        s.setTestCase(getEntity());
-        s.setExpectedResult(criteria.getBytes("UTF-8"));
-        if (s.getRequirementList() == null) {
-            s.setRequirementList(new ArrayList<Requirement>());
+        ss.setNotes(note);
+        ss.setExpectedResult(criteria.getBytes("UTF-8"));
+        if (ss.getRequirementList() == null) {
+            ss.setRequirementList(new ArrayList<Requirement>());
         }
+        ss.write2DB();
+        List<String> processed = new ArrayList<String>();
         for (Requirement req : requirements) {
-            s.getRequirementList().add(req);
+            //Make sure there are no duplicate requirements in list
+            if (!processed.contains(req.getUniqueId().trim())) {
+                processed.add(req.getUniqueId().trim());
+                Requirement max = Collections.max(new RequirementServer(req).getVersions(), null);
+                ss.getRequirementList().add(max);
+                RequirementServer rs = new RequirementServer(max);
+                rs.getStepList().add(ss.getEntity());
+                rs.write2DB();
+            }
         }
-        s.write2DB();
+        ss.write2DB();
         update(this, getEntity());
         assert getStepList().size() > amount;
+        return ss.getEntity();
     }
 }
