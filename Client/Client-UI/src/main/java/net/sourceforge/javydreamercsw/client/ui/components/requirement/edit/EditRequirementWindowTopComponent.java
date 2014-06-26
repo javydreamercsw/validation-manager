@@ -329,12 +329,14 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             req.setRequirementTypeId(((RequirementType) type.getSelectedItem()));
             req.setDescription(description.getText().trim());
             req.setNotes(notes.getText().trim());
-            for (Requirement child : linkedRequirements) {
-                try {
+            try {
+                for (Requirement child : linkedRequirements) {
+
                     req.addChildRequirement(child);
-                } catch (Exception ex) {
-                    LOG.log(Level.SEVERE, null, ex);
                 }
+                req.write2DB();
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
             }
         }
         close();
