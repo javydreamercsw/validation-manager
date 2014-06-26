@@ -465,6 +465,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
 
                 @Override
                 public void taskFinished(org.openide.util.Task task) {
+                    ph.finish();
                     if (isValid()) {
                         //TODO: internationalize
                         Lookup.getDefault().lookup(MessageHandler.class)
@@ -473,7 +474,6 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                         Lookup.getDefault().lookup(MessageHandler.class)
                                 .error("Errors during document import!");
                     }
-                    ph.finish();
                 }
             });
             //start the progresshandle the progress UI will show 500s after
@@ -693,7 +693,6 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                     step_counter++;
                     tcs.addStep(step_counter, description, notes, criteria,
                             requirements);
-                    tcs.write2DB();
                 } catch (NonexistentEntityException ex) {
                     Exceptions.printStackTrace(ex);
                 } catch (Exception ex) {
