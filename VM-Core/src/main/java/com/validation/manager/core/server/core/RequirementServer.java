@@ -11,6 +11,7 @@ import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.tool.message.MessageHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.RollbackException;
 import org.openide.util.Exceptions;
+import static org.openide.util.Lookup.getDefault;
 
 /**
  *
@@ -254,13 +256,43 @@ public final class RequirementServer extends Requirement
     }
 
     public void addChildRequirement(Requirement child) throws Exception {
-        //See: http://stackoverflow.com/questions/19848505/jpa-netbeans-and-many-to-many-relationship-to-self
-        RequirementServer childS = new RequirementServer(child);
-        childS.getRequirementList().add(getEntity());
-        getRequirementList1().add(child);
-        childS.write2DB();
-        write2DB();
-        update();
+        boolean circular = false;
+        //Prevent circular dependencies
+        for (Requirement r : getRequirementList()) {
+            if (child.getUniqueId().trim().equals(r.getUniqueId().trim())) {
+                circular = true;
+                break;
+            }
+        }
+        if (!circular) {
+            for (Requirement r : getRequirementList1()) {
+                if (child.getUniqueId().trim().equals(r.getUniqueId().trim())) {
+                    circular = true;
+                    break;
+                }
+            }
+        }
+        if (!circular) {
+            //See: http://stackoverflow.com/questions/19848505/jpa-netbeans-and-many-to-many-relationship-to-self
+            RequirementServer childS = new RequirementServer(child);
+            childS.getRequirementList().add(getEntity());
+            getRequirementList1().add(child);
+            childS.write2DB();
+            write2DB();
+            update();
+        } else {
+            MessageHandler handler = getDefault().lookup(MessageHandler.class);
+            String message=new StringBuilder().append("Ignored addition of ")
+                    .append(child.getUniqueId()).append(" as a children of ")
+                    .append(getUniqueId())
+                    .append(". It would have caused a circular dependecy.")
+                    .toString();
+            if (handler != null) {
+                handler.warn(message);
+            }else{
+                LOG.warning(message);
+            }
+        }
     }
 
     @Override

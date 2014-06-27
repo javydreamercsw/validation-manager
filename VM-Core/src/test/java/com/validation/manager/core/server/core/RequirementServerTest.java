@@ -258,34 +258,34 @@ public class RequirementServerTest extends AbstractVMTestCase {
             fail();
         }
     }
-    
-    private void checkCircularDependency(Requirement r){
-        RequirementServer rs= new RequirementServer(r);
+
+    private void checkCircularDependency(Requirement r) {
+        RequirementServer rs = new RequirementServer(r);
         for (Requirement t : rs.getVersions()) {
-                RequirementServer temp = new RequirementServer(t);
-                //Detect circular relationships
-                if (temp.getRequirementList().size() > 0
-                        && temp.getRequirementList1().size() > 0) {
-                    //Has both children and parents
-                    LOG.log(Level.INFO,
-                            "Inspecting {0} for circular dependencies.",
-                            temp.getUniqueId());
-                    for (Requirement parent : temp.getRequirementList1()) {
-                        //Check all parents of this requirement
-                        for (Requirement child : parent.getRequirementList()) {
-                            //Check if the parent has this requirement as a child
-                            if (child.getUniqueId().equals(temp.getUniqueId())) {
-                                LOG.log(Level.SEVERE,
-                                        "Circular dependency "
-                                        + "detected between {0} and {1}",
-                                        new Object[]{temp.getUniqueId(),
-                                            parent.getUniqueId()});
-                                fail();
-                            }
+            RequirementServer temp = new RequirementServer(t);
+            //Detect circular relationships
+            if (temp.getRequirementList().size() > 0
+                    && temp.getRequirementList1().size() > 0) {
+                //Has both children and parents
+                LOG.log(Level.INFO,
+                        "Inspecting {0} for circular dependencies.",
+                        temp.getUniqueId());
+                for (Requirement parent : temp.getRequirementList1()) {
+                    //Check all parents of this requirement
+                    for (Requirement child : parent.getRequirementList()) {
+                        //Check if the parent has this requirement as a child
+                        if (child.getUniqueId().equals(temp.getUniqueId())) {
+                            LOG.log(Level.SEVERE,
+                                    "Circular dependency "
+                                    + "detected between {0} and {1}",
+                                    new Object[]{temp.getUniqueId(),
+                                        parent.getUniqueId()});
+                            fail();
                         }
                     }
                 }
             }
+        }
     }
 
     /**
@@ -442,6 +442,34 @@ public class RequirementServerTest extends AbstractVMTestCase {
             parent.write2DB();
             assertEquals(100, parent.getTestCoverage());
             assertEquals(100, rs.getTestCoverage());
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            fail();
+        }
+    }
+
+    /**
+     * Test of Circular Dependencies detection method, of class
+     * RequirementServer.
+     */
+    @Test
+    public void testCircularDependencies() {
+        try {
+            prepare();
+            Requirement req = TestHelper.createRequirement("SRS-SW-0001",
+                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+            Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
+                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+            RequirementServer r1 = new RequirementServer(req);
+            RequirementServer r2 = new RequirementServer(req2);
+            r1.addChildRequirement(req2);
+            assertEquals(1, r1.getRequirementList1().size());
+            assertEquals(0, r1.getRequirementList().size());
+            //Get the change above from db.
+            r2.update();
+            r2.addChildRequirement(req);
+            assertEquals(0, r2.getRequirementList1().size());
+            assertEquals(1, r2.getRequirementList().size());
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             fail();
