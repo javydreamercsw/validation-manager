@@ -282,14 +282,14 @@ public final class RequirementServer extends Requirement
             update();
         } else {
             MessageHandler handler = getDefault().lookup(MessageHandler.class);
-            String message=new StringBuilder().append("Ignored addition of ")
+            String message = new StringBuilder().append("Ignored addition of ")
                     .append(child.getUniqueId()).append(" as a children of ")
                     .append(getUniqueId())
                     .append(". It would have caused a circular dependecy.")
                     .toString();
             if (handler != null) {
                 handler.warn(message);
-            }else{
+            } else {
                 LOG.warning(message);
             }
         }
@@ -390,12 +390,13 @@ public final class RequirementServer extends Requirement
                                                         + "detected between {0} and {1}",
                                                         new Object[]{temp.getUniqueId(),
                                                             parent.getUniqueId()});
-                                                DataBaseManager.nativeUpdateQuery(
-                                                        "delete from requirement_has_requirement where parent_requirement_id "
-                                                        + "in (select id from requirement where unique_id='"
+                                                String query = "delete from requirement_has_requirement where parent_requirement_id "
+                                                        + "= (select max(id) from requirement where unique_id='"
                                                         + temp.getUniqueId() + "')"
-                                                        + "and requirement_id in (select id from requirement where unique_id='"
-                                                        + parent.getUniqueId() + "');");
+                                                        + "and requirement_id = (select max(id) from requirement where unique_id='"
+                                                        + parent.getUniqueId() + "');";
+                                                LOG.fine(query);
+                                                DataBaseManager.nativeUpdateQuery(query);
                                                 toRemove.add(parent);
                                                 circular++;
                                             }
