@@ -1,14 +1,11 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.StepPK;
 import com.validation.manager.core.db.TestCase;
-import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.controller.StepJpaController;
-import com.validation.manager.core.db.controller.VmExceptionJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 
 /**
@@ -47,15 +44,6 @@ public class StepServer extends Step implements EntityServer<Step> {
             setStepPK(temp.getStepPK());
         }
         return getStepPK().getId();
-    }
-
-    public static void deleteStep(Step s) throws NonexistentEntityException, Exception {
-        for (VmException e : s.getVmExceptionList()) {
-            new VmExceptionJpaController(getEntityManagerFactory()).destroy(e.getVmExceptionPK());
-        }
-        s.getVmExceptionList().clear();
-        new StepJpaController(getEntityManagerFactory()).edit(s);
-        new StepJpaController(getEntityManagerFactory()).destroy(s.getStepPK());
     }
 
     @Override
