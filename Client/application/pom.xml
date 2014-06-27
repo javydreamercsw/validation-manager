@@ -102,6 +102,19 @@
                     <etcConfFile>src/main/resources/customized.conf</etcConfFile>
                     <finalName>Validation Manager Admin Client ${project.version}</finalName>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>updatesite</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>autoupdate</goal>
+                        </goals>
+                        <configuration>
+                            <fileName>updates.xml</fileName>
+                            <distBase>http://eqvsrd00:7070/validation_manager</distBase>
+                        </configuration>
+                    </execution>
+                </executions> 
             </plugin>
             <!-- Permits NbModuleSuite to be run in integration-test phase: -->
             <plugin>
