@@ -17,7 +17,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -29,8 +28,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "test_project", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"name"})})
+@Table(name = "test_project")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "TestProject.findAll",
