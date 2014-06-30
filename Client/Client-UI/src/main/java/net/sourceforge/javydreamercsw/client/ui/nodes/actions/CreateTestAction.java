@@ -1,8 +1,10 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
+import com.validation.manager.core.db.TestPlan;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import org.openide.util.Utilities;
 
 /**
  *
@@ -23,6 +25,7 @@ public class CreateTestAction extends AbstractAction {
             public void run() {
                 final CreateTestDialog dialog =
                         new CreateTestDialog(new javax.swing.JFrame(), true);
+                dialog.setTestPlan(Utilities.actionsGlobalContext().lookup(TestPlan.class));
                 dialog.setLocationRelativeTo(null);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
