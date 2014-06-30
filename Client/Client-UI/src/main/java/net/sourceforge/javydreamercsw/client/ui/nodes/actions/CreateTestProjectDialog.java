@@ -145,6 +145,7 @@ public class CreateTestProjectDialog extends AbstractCreationDialog {
                 if (selectedProject == null) {
                     selectedProject = Utilities.actionsGlobalContext().lookup(Project.class);
                 }
+                assert selectedProject != null;
                 ProjectServer ps = new ProjectServer(selectedProject);
                 ps.getTestProjectList().add(tps.getEntity());
                 ps.write2DB();
