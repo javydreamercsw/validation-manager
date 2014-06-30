@@ -331,7 +331,6 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             req.setNotes(notes.getText().trim());
             try {
                 for (Requirement child : linkedRequirements) {
-
                     req.addChildRequirement(child);
                 }
                 req.write2DB();
