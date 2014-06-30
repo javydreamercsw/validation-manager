@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Test;
@@ -15,19 +14,18 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.Date;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
+public final class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
 
     public TestPlanServer(TestPlan plan) {
         TestPlanJpaController controller = new TestPlanJpaController(getEntityManagerFactory());
         TestPlan temp = controller.findTestPlan(plan.getTestPlanPK());
-        update(this, temp);
+        update(TestPlanServer.this, temp);
     }
 
     public TestPlanServer(TestProject testProject, boolean active, boolean isOpen) {
