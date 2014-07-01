@@ -561,6 +561,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                 requirement = Utilities.actionsGlobalContext()
                         .lookup(Requirement.class);
             }
+            assert requirement != null;
             //Get the selected Step
             uniqueID.setText(requirement.getUniqueId());
             //Update the linked requirements
