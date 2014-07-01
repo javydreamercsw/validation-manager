@@ -27,7 +27,7 @@ public class RequirementChildFactory extends AbstractChildFactory
     private RequirementSpecNode node;
 //    private Integer[] ids = new Integer[0];
     private Populator pop = null;
-    private boolean done=false;
+    private boolean done = false;
     private static final Logger LOG
             = Logger.getLogger(RequirementChildFactory.class.getSimpleName());
 
