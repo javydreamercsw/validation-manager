@@ -273,13 +273,11 @@ public final class RequirementServer extends Requirement
             }
         }
         if (!circular) {
-            //See: http://stackoverflow.com/questions/19848505/jpa-netbeans-and-many-to-many-relationship-to-self
-            RequirementServer childS = new RequirementServer(child);
-            childS.getRequirementList().add(getEntity());
-            getRequirementList1().add(child);
-            childS.write2DB();
-            write2DB();
-            update();
+            if (!getRequirementList1().contains(child)) {
+                getRequirementList1().add(child);
+                write2DB();
+                update();
+            }
         } else {
             MessageHandler handler = getDefault().lookup(MessageHandler.class);
             String message = new StringBuilder().append("Ignored addition of ")
@@ -346,6 +344,8 @@ public final class RequirementServer extends Requirement
             DataBaseManager.setEntityManagerFactory(emf);
             int counter = 0, circular = 0;
             List<String> processed = new ArrayList<String>();
+            LOG.log(Level.INFO, "Analyzing {0}. Please wait...",
+                    parameters.get("javax.persistence.jdbc.url"));
             for (final Requirement req : new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).findRequirementEntities()) {
                 if (!processed.contains(req.getUniqueId().trim())) {
@@ -373,8 +373,8 @@ public final class RequirementServer extends Requirement
                             //Detect circular relationships
                             if (temp.getRequirementList().size() > 0
                                     && temp.getRequirementList1().size() > 0) {
-                                List<Requirement> toRemove
-                                        = new ArrayList<Requirement>();
+                                List<String> toRemove
+                                        = new ArrayList<String>();
                                 //Has both children and parents
                                 LOG.log(Level.INFO,
                                         "Inspecting {0} for circular dependencies.",
@@ -384,20 +384,25 @@ public final class RequirementServer extends Requirement
                                     for (Requirement child : parent.getRequirementList()) {
                                         //Check if the parent has this requirement as a child
                                         if (child.getUniqueId().equals(temp.getUniqueId())) {
-                                            if (!toRemove.contains(parent)) {
+                                            if (!toRemove.contains(parent.getUniqueId())) {
                                                 LOG.log(Level.INFO,
                                                         "Circular dependency "
                                                         + "detected between {0} and {1}",
                                                         new Object[]{temp.getUniqueId(),
                                                             parent.getUniqueId()});
-                                                String query = "delete from requirement_has_requirement where parent_requirement_id "
-                                                        + "= (select max(id) from requirement where unique_id='"
-                                                        + temp.getUniqueId() + "')"
-                                                        + "and requirement_id = (select max(id) from requirement where unique_id='"
-                                                        + parent.getUniqueId() + "');";
-                                                LOG.fine(query);
-                                                DataBaseManager.nativeUpdateQuery(query);
-                                                toRemove.add(parent);
+
+                                                RequirementServer p = new RequirementServer(parent);
+                                                assert temp.getRequirementList().contains(parent);
+                                                temp.getRequirementList().remove(parent);
+                                                LOG.log(Level.INFO, "Remove link from {0} to {1}",
+                                                        new Object[]{temp.getUniqueId(),
+                                                            parent.getUniqueId()});
+                                                temp.write2DB();
+                                                temp.update();
+                                                assert !temp.getRequirementList().contains(parent);
+                                                p.update();
+                                                assert p.getRequirementList1().contains(temp);
+                                                toRemove.add(parent.getUniqueId());
                                                 circular++;
                                             }
                                         }

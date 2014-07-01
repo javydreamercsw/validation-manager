@@ -229,6 +229,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertTrue(req.getRequirementList1().isEmpty());
             //Add a child
             RequirementServer rs = new RequirementServer(req);
+            //Add a version to the requirement
+            setVersioningEnabled(true);
+            rs.setDescription("Modified requirement");
+            rs.write2DB();
             rs.addChildRequirement(req2);
             //Should have one children now
             for (Requirement r : rs.getRequirementList1()) {
