@@ -35,7 +35,6 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
     private List<Requirement> requirements = new ArrayList<>();
     private final DefaultMutableTreeNode top
             = new DefaultMutableTreeNode("Available Requirements");
-    private List<Requirement> initial;
 
     /**
      * Creates new form RequirementSelectionDialog
@@ -104,7 +103,6 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
      * @param reqs the initial to set
      */
     public void setInitial(List<Requirement> reqs) {
-        this.initial = reqs;
         requirements.clear();
         ((DefaultListModel) selection.getModel()).clear();
         for (Requirement requirement : reqs) {
