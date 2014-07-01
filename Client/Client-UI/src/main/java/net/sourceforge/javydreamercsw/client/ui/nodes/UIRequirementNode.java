@@ -12,6 +12,7 @@ import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -71,22 +72,30 @@ public class UIRequirementNode extends AbstractVMBeanNode {
             try {
                 if (coverage < 0) {
                     Timer timer = new Timer();
-                    coverage = new RequirementServer(getLookup().lookup(Requirement.class)).getTestCoverage();
+                    Requirement max
+                            = Collections.max((new RequirementServer(
+                                            getLookup().lookup(Requirement.class)))
+                                    .getVersions());
+                    coverage = new RequirementServer(max).getTestCoverage();
                     timer.stop();
                     LOG.log(Level.FINE, "Time calculating coverage for {0}: {1}",
-                            new Object[]{getLookup().lookup(Requirement.class).getUniqueId(),
+                            new Object[]{getLookup().lookup(Requirement.class)
+                                .getUniqueId(),
                                 timer.elapsedTime()});
                 }
                 ImageProvider provider = null;
                 Timer timer = new Timer();
-                for (ImageProvider p : Lookup.getDefault().lookupAll(ImageProvider.class)) {
+                for (ImageProvider p : Lookup.getDefault()
+                        .lookupAll(ImageProvider.class)) {
                     if (p.supported(getLookup().lookup(Requirement.class))) {
                         provider = p;
                         break;
                     }
                 }
                 if (provider != null) {
-                    image = provider.getIcon(getLookup().lookup(Requirement.class), coverage);
+                    image
+                            = provider.getIcon(getLookup().lookup(Requirement.class),
+                                    coverage);
                 }
                 timer.stop();
                 LOG.log(Level.FINE, "Time getting icon for {0}: {1}",
