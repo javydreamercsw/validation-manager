@@ -112,7 +112,7 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
 
                         @Override
                         public void run() {
-                            LOG.log(Level.INFO,
+                            LOG.log(Level.FINE,
                                     "Populating requirements for project: {0}",
                                     current.getName());
                             map.clear();
