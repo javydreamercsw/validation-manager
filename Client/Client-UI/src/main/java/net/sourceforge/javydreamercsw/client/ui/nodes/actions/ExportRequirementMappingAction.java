@@ -93,7 +93,7 @@ public class ExportRequirementMappingAction extends AbstractAction {
                             for (Object o : manager.getEntities()) {
                                 Requirement r = (Requirement) o;
                                 //Only export approved requirements.
-                                if (!r.getRequirementStatusId().getStatus().equals("general.approved")) {
+                                if (r.getRequirementStatusId().getStatus().equals("general.approved")) {
                                     mapping.add(r);
                                 }
                             }
