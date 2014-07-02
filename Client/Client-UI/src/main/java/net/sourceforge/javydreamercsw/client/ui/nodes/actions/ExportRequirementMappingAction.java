@@ -128,7 +128,9 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                         if (!testSb.toString().trim().isEmpty()) {
                                             testSb.append(";");
                                         }
-                                        testSb.append("Test Case: ")
+                                        testSb.append("Test: ")
+                                                .append(step.getTestCase().getTest().getName())
+                                                .append(", Test Case: ")
                                                 .append(step.getTestCase().getName())
                                                 .append(", step ")
                                                 .append(step.getStepSequence());
