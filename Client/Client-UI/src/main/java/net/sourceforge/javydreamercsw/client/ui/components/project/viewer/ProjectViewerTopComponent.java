@@ -26,7 +26,6 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
-import org.openide.explorer.view.OutlineView;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -66,7 +65,6 @@ public final class ProjectViewerTopComponent extends TopComponent
         RequirementStatusFilterChangeProvider {
 
     private final ExplorerManager em = new ExplorerManager();
-    private SubProjectChildFactory projectFactory;
     private Lookup.Result<Project> result = null;
     private Lookup.Result<Requirement> result2 = null;
     private final HierarchyScene scene;
@@ -105,20 +103,12 @@ public final class ProjectViewerTopComponent extends TopComponent
     private void initComponents() {
 
         jSplitPane2 = new javax.swing.JSplitPane();
-        jSplitPane1 = new javax.swing.JSplitPane();
-        projectPane = new OutlineView();
-        hierarchyPane = new BeanTreeView();
         jScrollPane1 = new javax.swing.JScrollPane();
         filterPane = new javax.swing.JPanel();
+        hierarchyPane = new BeanTreeView();
 
         jSplitPane2.setDividerLocation(80);
         jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-
-        jSplitPane1.setDividerLocation(300);
-        jSplitPane1.setLeftComponent(projectPane);
-        jSplitPane1.setRightComponent(hierarchyPane);
-
-        jSplitPane2.setRightComponent(jSplitPane1);
 
         filterPane.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(ProjectViewerTopComponent.class, "ProjectViewerTopComponent.filterPane.border.title"))); // NOI18N
         filterPane.setName(""); // NOI18N
@@ -126,6 +116,7 @@ public final class ProjectViewerTopComponent extends TopComponent
         jScrollPane1.setViewportView(filterPane);
 
         jSplitPane2.setTopComponent(jScrollPane1);
+        jSplitPane2.setRightComponent(hierarchyPane);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -149,9 +140,7 @@ public final class ProjectViewerTopComponent extends TopComponent
     private javax.swing.JPanel filterPane;
     private javax.swing.JScrollPane hierarchyPane;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
-    private javax.swing.JScrollPane projectPane;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
@@ -194,7 +183,6 @@ public final class ProjectViewerTopComponent extends TopComponent
                 if (item instanceof Project) {
                     try {
                         Project p = (Project) item;
-                        projectFactory = new SubProjectChildFactory(p);
                         root = new ProjectNode(p, new SubProjectChildFactory(p));
                         root.setDisplayName(p.getName());
                         getExplorerManager().setRootContext(root);

@@ -59,7 +59,7 @@ public final class ProjectExplorerComponent extends TopComponent
         add(myBeanTreeView, BorderLayout.CENTER);
         associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
                 getActionMap()));
-        RootNode root = new RootNode(new ProjectChildFactory().setShowChildren(false));
+        RootNode root = new RootNode(new ProjectChildFactory());
         getExplorerManager().setRootContext(root);
     }
 
