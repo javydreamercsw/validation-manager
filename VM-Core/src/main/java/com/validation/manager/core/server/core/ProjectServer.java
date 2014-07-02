@@ -121,8 +121,10 @@ public final class ProjectServer extends Project
     public List<Project> getChildren() {
         ArrayList<Project> children = new ArrayList<Project>();
         for (Project p : getProjects()) {
-            if (p.getParentProjectId().getId().equals(getId())) {
-                children.add(p);
+            if (p.getParentProjectId() != null) {
+                if (p.getParentProjectId().getId().equals(getId())) {
+                    children.add(p);
+                }
             }
         }
         return children;
