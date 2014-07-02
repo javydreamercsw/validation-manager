@@ -10,9 +10,9 @@ import com.validation.manager.core.server.core.RequirementServer;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -35,7 +35,7 @@ import org.openide.util.lookup.ServiceProvider;
 public class RequirementEntityManager implements VMEntityManager<Requirement>,
         LookupListener {
 
-    private Map<String, Requirement> map = new HashMap<>();
+    private Map<String, Requirement> map = new TreeMap<>();
     private Lookup.Result<Project> result = null;
     private Project current = null;
     private static final Logger LOG
@@ -49,7 +49,8 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
 
     @Override
     public boolean supportEntity(Class entity) {
-        return entity.isInstance(Requirement.class);
+        return entity.equals(Requirement.class)
+                || entity.isInstance(Requirement.class);
     }
 
     @Override
