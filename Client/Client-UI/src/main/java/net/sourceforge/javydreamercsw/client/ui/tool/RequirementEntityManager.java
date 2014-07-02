@@ -8,9 +8,11 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -71,7 +73,11 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
 
     @Override
     public Collection<Requirement> getEntities() {
-        return map.values();
+        List<Requirement> entities = new ArrayList<>();
+        for (Map.Entry<String, Requirement> entry : map.entrySet()) {
+            entities.add(entry.getValue());
+        }
+        return entities;
     }
 
     @Override
