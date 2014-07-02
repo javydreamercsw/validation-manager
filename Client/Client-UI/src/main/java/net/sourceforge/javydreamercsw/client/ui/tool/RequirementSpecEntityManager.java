@@ -34,7 +34,7 @@ import org.openide.util.lookup.ServiceProvider;
 public class RequirementSpecEntityManager implements
         VMEntityManager<RequirementSpec>, LookupListener {
 
-    private Map<String, RequirementSpec> map = new TreeMap<>();
+    private Map<Integer, RequirementSpec> map = new TreeMap<>();
     private Lookup.Result<Project> result = null;
     private static final Logger LOG
             = Logger.getLogger(RequirementSpecEntityManager.class.getSimpleName());
@@ -54,24 +54,24 @@ public class RequirementSpecEntityManager implements
 
     @Override
     public void updateEntity(RequirementSpec entity) {
-        if (map.containsKey(entity.getName())) {
+        if (map.containsKey(entity.getRequirementSpecPK().getId())) {
             RequirementSpecServer rs = new RequirementSpecServer(entity);
             rs.update();
-            map.put(entity.getName(), rs.getEntity());
+            map.put(entity.getRequirementSpecPK().getId(), rs.getEntity());
         }
     }
 
     @Override
     public void removeEntity(RequirementSpec entity) {
-        if (map.containsKey(entity.getName())) {
-            map.remove(entity.getName());
+        if (map.containsKey(entity.getRequirementSpecPK().getId())) {
+            map.remove(entity.getRequirementSpecPK().getId());
         }
     }
 
     @Override
     public Collection<RequirementSpec> getEntities() {
         List<RequirementSpec> entities = new ArrayList<>();
-        for (Map.Entry<String, RequirementSpec> entry : map.entrySet()) {
+        for (Map.Entry<Integer, RequirementSpec> entry : map.entrySet()) {
             entities.add(entry.getValue());
         }
         return entities;
@@ -79,17 +79,17 @@ public class RequirementSpecEntityManager implements
 
     @Override
     public void addEntity(RequirementSpec entity) {
-        if (!map.containsKey(entity.getName())) {
+        if (!map.containsKey(entity.getRequirementSpecPK().getId())) {
             RequirementSpecServer rs = new RequirementSpecServer(entity);
             rs.update();
-            map.put(entity.getName(), rs.getEntity());
+            map.put(entity.getRequirementSpecPK().getId(), rs.getEntity());
         }
     }
 
     @Override
     public RequirementSpec getEntity(Object entity) {
-        assert entity instanceof String : "Invalid parameter!";
-        return map.get((String) entity);
+        assert entity instanceof Integer : "Invalid parameter!";
+        return map.get((Integer) entity);
     }
 
     @Override
@@ -103,7 +103,8 @@ public class RequirementSpecEntityManager implements
                 Object item = it.next();
                 if (item instanceof Project) {
                     Project p = (Project) item;
-                    if (p != current) {
+                    //Only change when the root project changes.
+                    if (p != current && p.getParentProjectId() == null) {
                         current = p;
                         new RequirementSpecPopulatorAction().actionPerformed(null);
                     }
@@ -142,11 +143,11 @@ public class RequirementSpecEntityManager implements
                             map.clear();
                             ProjectServer ps = new ProjectServer(current);
                             List<RequirementSpec> specs = ps.getRequirementSpecList();
-                            for(Project child:ps.getChildren()){
+                            for (Project child : ps.getChildren()) {
                                 specs.addAll(child.getRequirementSpecList());
                             }
                             for (RequirementSpec spec : specs) {
-                                map.put(spec.getName(), spec);
+                                map.put(spec.getRequirementSpecPK().getId(), spec);
                             }
                         }
                     };
