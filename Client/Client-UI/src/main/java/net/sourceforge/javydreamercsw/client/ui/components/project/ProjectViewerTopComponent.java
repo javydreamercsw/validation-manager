@@ -161,42 +161,47 @@ public final class ProjectViewerTopComponent extends TopComponent
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            LOG.log(Level.INFO, "Updating stats for: {0}", current.getName());
-            ProjectServer project = new ProjectServer(current);
-            int total = 0;
-            int coverage = 0;
-            for (RequirementSpec rs : project.getRequirementSpecList()) {
-                for (RequirementSpecNode rsn : rs.getRequirementSpecNodeList()) {
-                    for (Requirement r : rsn.getRequirementList()) {
-                        coverage += new RequirementServer(r).getTestCoverage();
-                        total++;
-                    }
-                }
-            }
-            table = new Object[][]{{"Total Requirements",
-                "Coverage"},
-            {total, (coverage / total)}};
-            statTable.setModel(new javax.swing.table.DefaultTableModel(
-                    table,
-                    new String[]{
-                        "Stat", "Amount"
-                    }
-            ) {
-                Class[] types = new Class[]{
-                    java.lang.String.class, java.lang.Integer.class
-                };
-                boolean[] canEdit = new boolean[]{
-                    false, false
-                };
-
+            java.awt.EventQueue.invokeLater(new Runnable() {
                 @Override
-                public Class getColumnClass(int columnIndex) {
-                    return types[columnIndex];
-                }
+                public void run() {
+                    LOG.log(Level.INFO, "Updating stats for: {0}", current.getName());
+                    ProjectServer project = new ProjectServer(current);
+                    int total = 0;
+                    int coverage = 0;
+                    for (RequirementSpec rs : project.getRequirementSpecList()) {
+                        for (RequirementSpecNode rsn : rs.getRequirementSpecNodeList()) {
+                            for (Requirement r : rsn.getRequirementList()) {
+                                coverage += new RequirementServer(r).getTestCoverage();
+                                total++;
+                            }
+                        }
+                    }
+                    table = new Object[][]{
+                        {"Total Requirements", total},
+                        {"Coverage", (coverage / total)}};
+                    statTable.setModel(new javax.swing.table.DefaultTableModel(
+                            table,
+                            new String[]{
+                                "Stat", "Amount"
+                            }
+                    ) {
+                        Class[] types = new Class[]{
+                            java.lang.String.class, java.lang.Integer.class
+                        };
+                        boolean[] canEdit = new boolean[]{
+                            false, false
+                        };
 
-                @Override
-                public boolean isCellEditable(int rowIndex, int columnIndex) {
-                    return canEdit[columnIndex];
+                        @Override
+                        public Class getColumnClass(int columnIndex) {
+                            return types[columnIndex];
+                        }
+
+                        @Override
+                        public boolean isCellEditable(int rowIndex, int columnIndex) {
+                            return canEdit[columnIndex];
+                        }
+                    });
                 }
             });
         }
