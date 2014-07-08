@@ -74,7 +74,7 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             = Logger.getLogger(EditRequirementWindowTopComponent.class.getSimpleName());
     private static final ResourceBundle rb
             = ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
-    private final CoveringStepFactory testCaseFactory;
+    private final CoveringStepFactory testCaseFactory = null;
     private final ExplorerManager em = new ExplorerManager();
     private static final RequirementSelectionDialog dialog
             = new RequirementSelectionDialog(new javax.swing.JFrame(),
@@ -85,7 +85,9 @@ public final class EditRequirementWindowTopComponent extends TopComponent
         result.addLookupListener((EditRequirementWindowTopComponent) this);
         setName(Bundle.CTL_EditRequirementWindowTopComponent());
         setToolTipText(Bundle.HINT_EditRequirementWindowTopComponent());
-        testCaseFactory = new CoveringStepFactory();
+        //testCaseFactory = new CoveringStepFactory();
+        stepsPane.setVisible(testCaseFactory != null);
+        jLabel7.setVisible(testCaseFactory != null);
     }
 
     /**
