@@ -173,7 +173,7 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
                 Object item = it.next();
                 if (item instanceof Project) {
                     Project p = (Project) item;
-                    if (p != current) {
+                    if (p != current && p.getParentProjectId() == null) {
                         current = p;
                         new RequirementPopulatorAction().actionPerformed(null);
                     }
