@@ -13,8 +13,8 @@ import org.openide.util.Utilities;
  */
 public class EditRequirementAction extends AbstractAction {
 
-    private final EditRequirementWindowTopComponent component = 
-            new EditRequirementWindowTopComponent();
+    private static EditRequirementWindowTopComponent component
+            = new EditRequirementWindowTopComponent();
 
     public EditRequirementAction() {
         super("Edit Requirement",
@@ -23,6 +23,9 @@ public class EditRequirementAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (component == null) {
+            component = new EditRequirementWindowTopComponent();
+        }
         /* Create and display the dialog */
         component.setEdit(true);
         component.setRequirement(Utilities.actionsGlobalContext().lookup(Requirement.class));
