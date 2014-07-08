@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene;
+package net.sourceforge.javydreamercsw.client.ui.components.requirement.viewer.scene;
 
 import com.validation.manager.core.db.Requirement;
 import java.awt.Point;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene.node.RequirementHierarchyNode;
-import net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene.node.StepHierarchyNode;
+import net.sourceforge.javydreamercsw.client.ui.components.requirement.viewer.scene.node.RequirementHierarchyNode;
+import net.sourceforge.javydreamercsw.client.ui.components.requirement.viewer.scene.node.StepHierarchyNode;
 import org.netbeans.api.visual.action.ActionFactory;
 import org.netbeans.api.visual.action.SelectProvider;
 import org.netbeans.api.visual.anchor.AnchorFactory;

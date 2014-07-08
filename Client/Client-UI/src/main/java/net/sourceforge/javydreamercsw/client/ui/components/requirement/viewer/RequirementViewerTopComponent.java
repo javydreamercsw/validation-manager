@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.components.project.viewer;
+package net.sourceforge.javydreamercsw.client.ui.components.requirement.viewer;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
@@ -19,7 +19,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilterChangeListener;
 import net.sourceforge.javydreamercsw.client.ui.components.RequirementStatusFilterChangeProvider;
-import net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene.HierarchyScene;
+import net.sourceforge.javydreamercsw.client.ui.components.requirement.viewer.scene.HierarchyScene;
 import net.sourceforge.javydreamercsw.client.ui.nodes.ProjectNode;
 import net.sourceforge.javydreamercsw.client.ui.nodes.SubProjectChildFactory;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -40,27 +40,27 @@ import org.openide.windows.TopComponent;
  * Top component which displays something.
  */
 @ConvertAsProperties(
-        dtd = "-//net.sourceforge.javydreamercsw.client.ui.components.project//ProjectViewer//EN",
+        dtd = "-//net.sourceforge.javydreamercsw.client.ui.components.project//RequirementViewer//EN",
         autostore = false
 )
 @TopComponent.Description(
-        preferredID = "ProjectViewerTopComponent",
+        preferredID = "RequirementViewerTopComponent",
         iconBase = "net/sourceforge/javydreamercsw/client/ui/VSmall.png",
         persistenceType = TopComponent.PERSISTENCE_NEVER
 )
 @TopComponent.Registration(mode = "editor", openAtStartup = true)
 @TopComponent.OpenActionRegistration(
-        displayName = "#CTL_ProjectViewerAction",
-        preferredID = "ProjectViewerTopComponent"
+        displayName = "#CTL_RequirementViewerAction",
+        preferredID = "RequirementViewerTopComponent"
 )
 @Messages({
-    "CTL_ProjectViewerAction=Project Viewer",
-    "CTL_ProjectViewerTopComponent=Project Viewer",
-    "HINT_ProjectViewerTopComponent=This is a Project Viewer window",
-    "ProjectViewerTopComponent.filterPane.border.title=Requirement Filters"
+    "CTL_RequirementViewerAction=Requirement Viewer",
+    "CTL_RequirementViewerTopComponent=Requirement Viewer",
+    "HINT_RequirementViewerTopComponent=This is a Requirement Viewer window",
+    "RequirementViewerTopComponent.filterPane.border.title=Requirement Filters"
 })
 @ServiceProvider(service = RequirementStatusFilterChangeProvider.class)
-public final class ProjectViewerTopComponent extends TopComponent
+public final class RequirementViewerTopComponent extends TopComponent
         implements ExplorerManager.Provider, LookupListener, ItemListener,
         RequirementStatusFilterChangeProvider {
 
@@ -73,15 +73,15 @@ public final class ProjectViewerTopComponent extends TopComponent
     private static final ResourceBundle rb
             = ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
     private static final Logger LOG
-            = Logger.getLogger(ProjectViewerTopComponent.class.getSimpleName());
+            = Logger.getLogger(RequirementViewerTopComponent.class.getSimpleName());
     private final List<JCheckBox> filters = new ArrayList<>();
     private final List<RequirementStatusFilterChangeListener> listeners
             = new ArrayList<>();
 
-    public ProjectViewerTopComponent() {
+    public RequirementViewerTopComponent() {
         initComponents();
-        setName(Bundle.CTL_ProjectViewerTopComponent());
-        setToolTipText(Bundle.HINT_ProjectViewerTopComponent());
+        setName(Bundle.CTL_RequirementViewerTopComponent());
+        setToolTipText(Bundle.HINT_RequirementViewerTopComponent());
         scene = new HierarchyScene();
         myView = scene.createView();
         hierarchyPane.setViewportView(myView);
@@ -110,7 +110,7 @@ public final class ProjectViewerTopComponent extends TopComponent
         jSplitPane2.setDividerLocation(80);
         jSplitPane2.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
 
-        filterPane.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(ProjectViewerTopComponent.class, "ProjectViewerTopComponent.filterPane.border.title"))); // NOI18N
+        filterPane.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(RequirementViewerTopComponent.class, "RequirementViewerTopComponent.filterPane.border.title"))); // NOI18N
         filterPane.setName(""); // NOI18N
         filterPane.setLayout(new java.awt.GridLayout(0, 6, 2, 1));
         jScrollPane1.setViewportView(filterPane);
@@ -193,7 +193,7 @@ public final class ProjectViewerTopComponent extends TopComponent
                                     DataBaseManager.getEntityManagerFactory()).findRequirementStatusEntities()) {
                                 JCheckBox filter = new JCheckBox(rb.containsKey(rs.getStatus())
                                         ? rb.getString(rs.getStatus()) : rs.getStatus());
-                                filter.addItemListener((ProjectViewerTopComponent) this);
+                                filter.addItemListener((RequirementViewerTopComponent) this);
                                 //TODO: Remove when filter is working.
                                 filter.setEnabled(false);
                                 filters.add(filter);
