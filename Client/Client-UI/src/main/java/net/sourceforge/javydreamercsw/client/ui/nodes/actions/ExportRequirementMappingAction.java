@@ -98,6 +98,17 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                 }
                             }
                         }
+                        final ExportOptionsDialog dialog = new ExportOptionsDialog(new javax.swing.JFrame(), true);
+                        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                            @Override
+                            public void windowClosing(java.awt.event.WindowEvent e) {
+                                dialog.dispose();
+                            }
+                        });
+                        dialog.setVisible(true);
+                        while (dialog.isVisible()) {
+                            //Do nothing
+                        }
                         //Pick where to save the file
                         JFileChooser fc = new JFileChooser();
                         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -128,12 +139,19 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                         if (!testSb.toString().trim().isEmpty()) {
                                             testSb.append(";");
                                         }
-                                        testSb.append("Test: ")
-                                                .append(step.getTestCase().getTest().getName())
-                                                .append(", Test Case: ")
-                                                .append(step.getTestCase().getName())
-                                                .append(", step ")
-                                                .append(step.getStepSequence());
+                                        if (dialog.isUsePlan()) {
+                                            testSb.append("Test: ")
+                                                    .append(step.getTestCase().getTest().getName());
+                                        }
+                                        if (dialog.isUseTest()) {
+                                            testSb.append(", Test Case: ")
+                                                    .append(step.getTestCase().getName());
+                                        }
+                                        if (dialog.isUseStep()) {
+                                            testSb.append(", step ")
+                                                    .append(step.getStepSequence());
+                                        }
+                                        dialog.dispose();
                                     }
                                     //Now process the children
                                     for (Requirement child : r.getRequirementList1()) {

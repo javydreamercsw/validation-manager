@@ -1,6 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.api.entity.manager.VMEntityManager;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
@@ -25,6 +26,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import org.netbeans.api.annotations.common.SuppressWarnings;
+import org.openide.util.Lookup;
 
 /**
  *
@@ -263,9 +265,24 @@ public class RequirementSelectionDialog extends javax.swing.JDialog {
     }
 
     private void populateNodes() {
-        List<RequirementSpec> specs = new RequirementSpecJpaController(
-                DataBaseManager.getEntityManagerFactory())
-                .findRequirementSpecEntities();
+        VMEntityManager manager = null;
+        for (VMEntityManager m : Lookup.getDefault().lookupAll(VMEntityManager.class)) {
+            if (m.supportEntity(RequirementSpec.class)) {
+                manager = m;
+                break;
+            }
+        }
+        List<RequirementSpec> specs= new ArrayList<>();
+        if (manager == null) {
+            specs = new RequirementSpecJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findRequirementSpecEntities();
+        } else {
+            for (Object o : manager.getEntities()) {
+                RequirementSpec rs = (RequirementSpec) o;
+                specs.add(rs);
+            }
+        }
         for (RequirementSpec spec : specs) {
             DefaultMutableTreeNode node
                     = new DefaultMutableTreeNode(spec);

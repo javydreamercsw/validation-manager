@@ -102,8 +102,8 @@ public class RequirementChildFactory extends AbstractChildFactory
                 for (RequirementSpecNode rsn : node.getRequirementSpecNodeList()) {
                     toPopulate.add(rsn);
                 }
-                done = true;
             }
+             done = true;
         }
     }
 
