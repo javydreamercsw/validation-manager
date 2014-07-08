@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene;
+package net.sourceforge.javydreamercsw.client.ui.components.requirement.viewer.scene;
 
 /**
  *

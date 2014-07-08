@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene.node;
+package net.sourceforge.javydreamercsw.client.ui.components.requirement.viewer.scene.node;
 
 import com.validation.manager.core.db.Step;
 import java.awt.Image;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import net.sourceforge.javydreamercsw.client.ui.components.project.viewer.scene.AbstractHierarchyNode;
+import net.sourceforge.javydreamercsw.client.ui.components.requirement.viewer.scene.AbstractHierarchyNode;
 import org.netbeans.api.visual.widget.Scene;
 import org.openide.util.Exceptions;
 
