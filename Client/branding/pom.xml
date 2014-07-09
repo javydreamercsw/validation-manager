@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-      <groupId>net.sourceforge.javydreamercsw</groupId>
-      <artifactId>Client-parent</artifactId>
-      <version>0.2-SNAPSHOT</version>
-  </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>net.sourceforge.javydreamercsw</groupId>
+        <artifactId>Client-parent</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>vm-client-branding</artifactId>
-  <packaging>nbm</packaging>
+    <artifactId>vm-client-branding</artifactId>
+    <packaging>nbm</packaging>
 
-  <name>Branding</name>
+    <name>Branding</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.netbeans.api</groupId>
-      <artifactId>org-netbeans-api-annotations-common</artifactId>
-      <version>${netbeans.version}</version>
-    </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-annotations-common</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+    </dependencies>
 
-  <build>
-      <plugins>
+    <build>
+        <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
@@ -34,7 +34,30 @@
                     <useDefaultManifestFile>true</useDefaultManifestFile>
                 </configuration>
             </plugin>
-      </plugins>
-  </build>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>                   
+                    </execution>
+                </executions>
+                <configuration>
+                    <file>src/main/nbm-branding/core/core.jar/org/netbeans/core/startup/Bundle.properties</file>
+                    <regex>true</regex>
+                    <replacements>
+                        <replacement>
+                            <token>Client (.*)</token>
+                            <value>Client ${project.version}</value>
+                        </replacement>         
+                    </replacements>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <description>Validation Manager is a tool to handle all the cumbersome paperwork of regulated environment validations. Including Validation Plans, protocols, executions and exceptions. Keeping everything in one place and best of all paperless.</description>
 </project>
