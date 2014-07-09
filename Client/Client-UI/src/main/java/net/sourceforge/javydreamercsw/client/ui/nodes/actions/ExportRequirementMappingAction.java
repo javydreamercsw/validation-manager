@@ -105,6 +105,7 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                 dialog.dispose();
                             }
                         });
+                        dialog.setLocationRelativeTo(null);
                         dialog.setVisible(true);
                         while (dialog.isVisible()) {
                             //Do nothing
