@@ -47,7 +47,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <file>src/main/nbm-branding/core/core.jar/org/netbeans/core/startup/Bundle.properties</file>
+                    <file>${basedir}/src/main/nbm-branding/core/core.jar/org/netbeans/core/startup/Bundle.properties</file>
                     <regex>true</regex>
                     <replacements>
                         <replacement>
