@@ -34,6 +34,8 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
         ok = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle(org.openide.util.NbBundle.getMessage(ExportOptionsDialog.class, "ExportOptionsDialog.title")); // NOI18N
+        setAlwaysOnTop(true);
 
         testPlan.setSelected(true);
         org.openide.awt.Mnemonics.setLocalizedText(testPlan, org.openide.util.NbBundle.getMessage(ExportOptionsDialog.class, "ExportOptionsDialog.testPlan.text")); // NOI18N
