@@ -105,6 +105,7 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                 dialog.dispose();
                             }
                         });
+                        dialog.setIconImage(new ImageIcon("com/validation/manager/resources/icons/VMSmall.png").getImage());
                         dialog.setLocationRelativeTo(null);
                         dialog.setVisible(true);
                         while (dialog.isVisible()) {
