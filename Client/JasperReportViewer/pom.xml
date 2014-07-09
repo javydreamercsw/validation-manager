@@ -4,12 +4,13 @@
     <parent>
         <artifactId>Client-parent</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.2.0-SNAPSHOT</version>
     </parent>
 
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>JasperReportViewer</artifactId>
     <packaging>nbm</packaging>
+    <version>0.2.0-SNAPSHOT</version>
 
     <name>Jasper Report Viewer</name>
 
@@ -22,7 +23,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>JasperReport</artifactId>
-            <version>${project.version}</version>
+            <version>0.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -63,7 +64,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>VM-Core-Wrapper</artifactId>
-            <version>${project.version}</version>
+            <version>0.2.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
