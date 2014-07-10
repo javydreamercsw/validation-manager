@@ -14,7 +14,7 @@ import org.openide.util.lookup.InstanceContent;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-class StepNode extends AbstractVMBeanNode {
+public class StepNode extends AbstractVMBeanNode {
 
     public StepNode(Step step) throws IntrospectionException {
         super(step,
@@ -27,7 +27,7 @@ class StepNode extends AbstractVMBeanNode {
         Step step = getLookup().lookup(Step.class);
         return "Step # " + step.getStepSequence();
     }
-    
+
     @Override
     public Action[] getActions(boolean b) {
         List<Action> actions = new ArrayList<>();
