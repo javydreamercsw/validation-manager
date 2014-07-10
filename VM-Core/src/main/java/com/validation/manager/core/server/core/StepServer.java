@@ -1,7 +1,9 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.StepPK;
 import com.validation.manager.core.db.TestCase;
@@ -12,7 +14,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class StepServer extends Step implements EntityServer<Step> {
+public final class StepServer extends Step implements EntityServer<Step> {
 
     public StepServer(TestCase tc, int stepSequence, String text) {
         super(new StepPK(tc.getTestCasePK().getId(),
@@ -25,7 +27,7 @@ public class StepServer extends Step implements EntityServer<Step> {
 
     public StepServer(Step step) {
         super(step.getStepPK());
-        update(this, step);
+        update(StepServer.this, step);
     }
 
     @Override
@@ -36,6 +38,7 @@ public class StepServer extends Step implements EntityServer<Step> {
             Step temp = controller.findStep(getStepPK());
             update(temp, this);
             controller.edit(temp);
+            update(this, temp);
         } else {
             Step temp = new Step(getStepPK(), getStepSequence(), getText());
             update(temp, this);
@@ -62,9 +65,43 @@ public class StepServer extends Step implements EntityServer<Step> {
         target.setText(source.getText());
         target.setVmExceptionList(source.getVmExceptionList());
     }
-    
+
     @Override
     public void update() {
         update(this, getEntity());
+    }
+
+    public void addRequirement(Requirement req) throws Exception {
+        if (!getRequirementList().contains(req)
+                && !getEntity().getRequirementList().contains(req)) {
+            RequirementServer rs = new RequirementServer(req);
+            int initial = rs.getStepList().size();
+            if (!rs.getStepList().contains(getEntity())) {
+                rs.getStepList().add(getEntity());
+                rs.write2DB();
+                rs.update();
+            }
+            assert initial < rs.getStepList().size();
+            getRequirementList().add(req);
+        }
+    }
+
+    public void removeRequirement(Requirement req) throws Exception {
+        if (getRequirementList().contains(req)
+                && getEntity().getRequirementList().contains(req)) {
+            String query="delete from step_has_requirement "
+                    + "where step_id=" + getStepPK().getId()
+                    + " and step_test_case_id=" + getStepPK().getTestCaseId()
+                    + " and step_test_case_test_id=" + getStepPK().getTestCaseTestId()
+                    + " and requirement_id=" + req.getId()
+                    + " and requirement_major_version=" + req.getMajorVersion()
+                    + " and requirement_mid_version=" + req.getMidVersion()
+                    + " and requirement_minor_version=" + req.getMinorVersion();
+            DataBaseManager.nativeUpdateQuery(query);
+            RequirementServer rs= new RequirementServer(req);
+            rs.getStepList().remove(getEntity());
+            rs.write2DB();
+            getRequirementList().remove(req);
+        }
     }
 }

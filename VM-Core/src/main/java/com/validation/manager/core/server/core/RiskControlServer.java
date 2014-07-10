@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RiskControl;
@@ -9,7 +8,6 @@ import com.validation.manager.core.db.controller.RiskControlJpaController;
 import com.validation.manager.core.db.controller.RiskControlTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 
 /**
@@ -22,7 +20,14 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
         super(riskControlPK);
         setRiskControlType(new RiskControlTypeJpaController(
                 getEntityManagerFactory()).findRiskControlType(
-                riskControlPK.getRiskControlTypeId()));
+                        riskControlPK.getRiskControlTypeId()));
+    }
+
+    public RiskControlServer(RiskControl riskControl) {
+        super(riskControl.getRiskControlPK());
+        setRiskControlType(new RiskControlTypeJpaController(
+                getEntityManagerFactory()).findRiskControlType(
+                        riskControlPK.getRiskControlTypeId()));
     }
 
     public RiskControlServer(int riskControlTypeId) {
@@ -74,7 +79,7 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
         target.setRequirementList(source.getRequirementList());
         target.setRiskControlType(source.getRiskControlType());
     }
-    
+
     @Override
     public void update() {
         update(this, getEntity());
