@@ -34,7 +34,7 @@ public final class ConnectAction implements ActionListener {
         DataBaseTool.connect();
         //Initialize any EntityManager that needs it
         for (VMEntityManager m : Lookup.getDefault().lookupAll(VMEntityManager.class)) {
-            LOG.log(Level.INFO, "{0} registered!",
+            LOG.log(Level.FINE, "{0} registered!",
                     new Object[]{m.getClass().getSimpleName(),
                         m.getEntities().size()});
         }
