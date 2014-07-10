@@ -43,27 +43,27 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>vm-client-branding</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
+            <version>0.2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>H2-Driver</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
+            <version>0.2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Client-UI</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
+            <version>0.2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>JasperReportViewer</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
+            <version>0.2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>JasperReport</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
+            <version>0.2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <artifactId>MySQL-Driver</artifactId>
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>POI-Library</artifactId>
-            <version>0.2.1-SNAPSHOT</version>
+            <version>0.2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.modules</groupId>

@@ -265,8 +265,7 @@ public class TestHelper {
     public static void addRequirementToStep(Step step, Requirement req)
             throws Exception {
         StepServer ss = new StepServer(step);
-        ss.getRequirementList().add(req);
-        ss.write2DB();
+        ss.addRequirement(req);
     }
 
     public static Project addProject(Project root, String name, String notes)

@@ -125,13 +125,6 @@ public final class RequirementServer extends Requirement
                         getMajorVersion(),
                         getMidVersion(),
                         getMinorVersion() + 1);
-                /**
-                 * TODO: GUI should allow user to either: 1) Blindly copy the
-                 * test coverage. 2) Review the current test cases covering
-                 * previous version and deciding if those still cover the
-                 * requirement changes in a one by one basis. 3) Don't do
-                 * anything, leaving it uncovered.
-                 */
                 //Copy the relationships
                 copyRelationships(req, this);
                 //Store in data base.
@@ -254,7 +247,7 @@ public final class RequirementServer extends Requirement
                 + getEntity().getUniqueId().trim());
         update(this, getEntity());
     }
-
+    
     public void addChildRequirement(Requirement child) throws Exception {
         boolean circular = false;
         //Prevent circular dependencies

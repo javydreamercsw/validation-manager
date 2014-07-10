@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -277,21 +278,32 @@ public class EditTestStepDialog extends javax.swing.JDialog {
                 Exceptions.printStackTrace(ex);
             }
             try {
-                ss.write2DB();
+                List<Requirement> requirementList = new CopyOnWriteArrayList<>();
+                requirementList.addAll(ss.getRequirementList());
+                for (Requirement r : requirementList) {
+                    if (!linkedRequirements.contains(r)) {
+                        ss.removeRequirement(r);
+                    }
+                }
             } catch (NonexistentEntityException ex) {
                 Exceptions.printStackTrace(ex);
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
             //Add linked requirements
-            ss.getRequirementList().clear();
-            for (Iterator<Requirement> it = linkedRequirements.iterator(); it.hasNext();) {
-                ss.getRequirementList().add(it.next());
+            for (Iterator<Requirement> it
+                    = linkedRequirements.iterator(); it.hasNext();) {
+                try {
+                    Requirement next = it.next();
+                    if (!ss.getRequirementList().contains(next)) {
+                        ss.addRequirement(next);
+                    }
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
             try {
                 ss.write2DB();
-            } catch (NonexistentEntityException ex) {
-                Exceptions.printStackTrace(ex);
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
