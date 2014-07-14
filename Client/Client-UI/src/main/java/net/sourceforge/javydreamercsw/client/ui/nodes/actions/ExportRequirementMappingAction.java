@@ -138,20 +138,30 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                     StringBuilder testSb = new StringBuilder();
                                     //Add test directly testing the requirement itself.
                                     for (Step step : r.getStepList()) {
+                                        String temp;
                                         if (!testSb.toString().trim().isEmpty()) {
                                             testSb.append(";");
                                         }
                                         if (dialog.isUsePlan()) {
-                                            testSb.append("Test: ")
-                                                    .append(step.getTestCase().getTest().getName());
+                                            temp = "Test: "
+                                                    + step.getTestCase().getTest().getName();
+                                            if (!testSb.toString().contains(temp)) {
+                                                testSb.append(temp);
+                                            }
                                         }
                                         if (dialog.isUseTest()) {
-                                            testSb.append(", Test Case: ")
-                                                    .append(step.getTestCase().getName());
+                                            temp = ", Test Case: "
+                                                    + step.getTestCase().getName();
+                                            if (!testSb.toString().contains(temp)) {
+                                                testSb.append(temp);
+                                            }
                                         }
                                         if (dialog.isUseStep()) {
-                                            testSb.append(", step ")
-                                                    .append(step.getStepSequence());
+                                            temp = ", step "
+                                                    + step.getStepSequence();
+                                            if (!testSb.toString().contains(temp)) {
+                                                testSb.append(temp);
+                                            }
                                         }
                                         dialog.dispose();
                                     }
