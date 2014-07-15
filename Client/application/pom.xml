@@ -56,16 +56,6 @@
             <version>0.2.2-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>JasperReportViewer</artifactId>
-            <version>0.2.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>JasperReport</artifactId>
-            <version>0.2.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <artifactId>MySQL-Driver</artifactId>
             <groupId>net.sourceforge.javydreamercsw</groupId>
             <type>jar</type>
