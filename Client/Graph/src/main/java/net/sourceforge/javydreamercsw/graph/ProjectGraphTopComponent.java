@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.chart.Chart;
+import javafx.scene.layout.FlowPane;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -22,9 +23,9 @@ import org.openide.awt.ActionReference;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
-import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import org.openide.windows.TopComponent;
 
 /**
  * Top component which displays something.
@@ -106,12 +107,14 @@ public final class ProjectGraphTopComponent extends TopComponent
                     && !Objects.equals(currentProject.getId(), newProject.getId()))) {
                 currentProject = newProject;
                 //Look for providers
+                Scene scene = new Scene(new FlowPane());
                 for (ChartProvider cp : Lookup.getDefault().lookupAll(ChartProvider.class)) {
                     if (cp.supports(Project.class)) {
                         chart = cp.getChart(newProject);
-                        chartFxPanel.setScene(new Scene(chart));
+                        ((FlowPane) scene.getRoot()).getChildren().add(chart);
                     }
                 }
+                chartFxPanel.setScene(scene);
             }
         }
     }
@@ -142,7 +145,7 @@ public final class ProjectGraphTopComponent extends TopComponent
 
         chartTablePanel = new javax.swing.JPanel();
 
-        setLayout(new java.awt.GridLayout());
+        setLayout(new java.awt.GridLayout(1, 0));
 
         javax.swing.GroupLayout chartTablePanelLayout = new javax.swing.GroupLayout(chartTablePanel);
         chartTablePanel.setLayout(chartTablePanelLayout);
