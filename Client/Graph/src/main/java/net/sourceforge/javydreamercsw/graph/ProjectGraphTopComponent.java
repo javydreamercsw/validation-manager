@@ -12,7 +12,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.chart.Chart;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.TilePane;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -107,14 +107,14 @@ public final class ProjectGraphTopComponent extends TopComponent
                     && !Objects.equals(currentProject.getId(), newProject.getId()))) {
                 currentProject = newProject;
                 //Look for providers
-                Scene scene = new Scene(new FlowPane());
+                Scene scene = new Scene(new TilePane());
+                chartFxPanel.setScene(scene);
                 for (ChartProvider cp : Lookup.getDefault().lookupAll(ChartProvider.class)) {
                     if (cp.supports(Project.class)) {
                         chart = cp.getChart(newProject);
-                        ((FlowPane) scene.getRoot()).getChildren().add(chart);
+                        ((TilePane) scene.getRoot()).getChildren().add(chart);
                     }
                 }
-                chartFxPanel.setScene(scene);
             }
         }
     }
