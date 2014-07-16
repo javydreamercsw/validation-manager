@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.Action;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditRequirementSpecAction;
 import org.openide.util.lookup.InstanceContent;
 
 /**
@@ -30,7 +31,7 @@ public class UIRequirementSpecNode extends AbstractVMBeanNode {
     public Action[] getActions(boolean b) {
         List<Action> actions = new ArrayList<>();
         actions.addAll(Arrays.asList(super.getActions(b)));
-        //TODO: actions.add(new EditRequirementSpecCaseAction());
+        actions.add(new EditRequirementSpecAction());
         return actions.toArray(new Action[actions.size()]);
     }
 

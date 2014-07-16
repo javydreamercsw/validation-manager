@@ -127,18 +127,6 @@
             <version>${netbeans.version}</version>
             <type>jar</type>
         </dependency>
-        <!--<dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-libs-javafx</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>javafx</artifactId>
-            <version>2.2.4</version>
-            <scope>system</scope>
-            <systemPath>${java.home}/lib/jfxrt.jar</systemPath>
-        </dependency>-->
         <dependency>
             <artifactId>org-netbeans-api-progress</artifactId>
             <groupId>org.netbeans.api</groupId>
@@ -168,10 +156,6 @@
                     <source>1.7</source>
                     <target>1.7</target>
                     <showDeprecation>true</showDeprecation>
-                    <!-- To add Java FX to the compilation
-                    <compilerArguments>
-                        <bootclasspath>${sun.boot.class.path}${path.separator}${java.home}/lib/jfxrt.jar</bootclasspath>
-                    </compilerArguments>-->
                 </configuration>
             </plugin>
 
