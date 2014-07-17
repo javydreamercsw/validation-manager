@@ -40,6 +40,7 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
     private Map<String, Requirement> map = new TreeMap<>();
     private Lookup.Result<Project> result = null;
     private Project current = null;
+    private boolean initialized = false;
     private static final Logger LOG
             = Logger.getLogger(RequirementEntityManager.class.getSimpleName());
 
@@ -95,6 +96,11 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
         return map.get((String) entity);
     }
 
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
+
     public class RequirementPopulatorAction extends AbstractAction {
 
         private final RequestProcessor RP
@@ -119,11 +125,13 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
 
                         @Override
                         public void run() {
+                            initialized = false;
                             LOG.log(Level.FINE,
                                     "Populating requirements for project: {0}",
                                     current.getName());
                             map.clear();
                             addProjectRequirements(current);
+                            initialized = true;
                         }
                     };
                     theTask = RP.create(runnable); //the task is not started yet
