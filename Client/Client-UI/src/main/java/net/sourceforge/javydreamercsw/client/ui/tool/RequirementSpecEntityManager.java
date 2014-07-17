@@ -39,6 +39,7 @@ public class RequirementSpecEntityManager implements
     private static final Logger LOG
             = Logger.getLogger(RequirementSpecEntityManager.class.getSimpleName());
     private Project current;
+    private boolean initialized = false;
 
     public RequirementSpecEntityManager() {
         result = Utilities.actionsGlobalContext().lookupResult(Project.class);
@@ -113,6 +114,11 @@ public class RequirementSpecEntityManager implements
         }
     }
 
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
+
     public class RequirementSpecPopulatorAction extends AbstractAction {
 
         private final RequestProcessor RP
@@ -137,6 +143,7 @@ public class RequirementSpecEntityManager implements
 
                         @Override
                         public void run() {
+                            initialized = false;
                             LOG.log(Level.FINE,
                                     "Populating Specs for project: {0}",
                                     current.getName());
@@ -149,6 +156,7 @@ public class RequirementSpecEntityManager implements
                             for (RequirementSpec spec : specs) {
                                 map.put(spec.getRequirementSpecPK().getId(), spec);
                             }
+                            initialized = true;
                         }
                     };
                     theTask = RP.create(runnable); //the task is not started yet

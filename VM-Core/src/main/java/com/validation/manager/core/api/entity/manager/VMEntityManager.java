@@ -47,4 +47,10 @@ public interface VMEntityManager<T> {
      * version of each entity.
      */
     Collection<T> getEntities();
+    
+    /**
+     * Check if initialization is completed.
+     * @return True if initialization is done, false otherwise.
+     */
+    boolean isInitialized();
 }
