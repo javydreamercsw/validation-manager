@@ -197,64 +197,61 @@ public final class RequirementMappingImporterTopComponent
     }// </editor-fold>//GEN-END:initComponents
 
     private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                JFileChooser fc = new JFileChooser();
-                boolean valid = false;
-                fc.setFileFilter(new FileFilter() {
-
-                    @Override
-                    public boolean accept(File f) {
-                        return f.isDirectory()
-                                || (f.isFile()
-                                && (f.getName().endsWith(".xls")
-                                || f.getName().endsWith(".xlsx")
-                                || f.getName().endsWith(".xlsm")));
-                    }
-
-                    @Override
-                    public String getDescription() {
-                        return "Validation Manager Requirement Mapping Import Files";
-                    }
-                });
-                int returnVal = fc.showOpenDialog(new JFrame());
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    TableExtractor te = new TableExtractor(file);
-                    try {
-                        tables.clear();
-                        tables.addAll(te.extractTables());
-                        if (tables.size() > 0) {
-                            double max = Double.valueOf("" + tables.size());
-                            spinner.setModel(new SpinnerNumberModel(1.0, 1.0,
-                                    max, 1.0));
-                            spinner.setValue(1.0);
-                            LOG.log(Level.INFO, "Loaded {0} tables!",
-                                    tables.size());
-                            valid = true;
-                            displayTable(1);
-                        } else {
-                            LOG.log(Level.INFO, "Found no tables!");
-                        }
-                        for (DefaultTableModel dtm : tables) {
-                            int columns = dtm.getColumnCount();
-                            Object[] mappingRow = new Object[columns];
-                            for (int i = 0; i < columns; i++) {
-                                //Mapping row
-                                mappingRow[i] = "Select Mapping";
-                            }
-                            //Insert mapping row
-                            dtm.insertRow(0, mappingRow);
-                        }
-                    } catch (FileNotFoundException ex) {
-                        Exceptions.printStackTrace(ex);
-                    } catch (ClassNotFoundException | IOException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
+        java.awt.EventQueue.invokeLater(() -> {
+            JFileChooser fc = new JFileChooser();
+            boolean valid1 = false;
+            fc.setFileFilter(new FileFilter() {
+                
+                @Override
+                public boolean accept(File f) {
+                    return f.isDirectory()
+                            || (f.isFile()
+                            && (f.getName().endsWith(".xls")
+                            || f.getName().endsWith(".xlsx")
+                            || f.getName().endsWith(".xlsm")));
                 }
-                enableUI(valid);
+                
+                @Override
+                public String getDescription() {
+                    return "Validation Manager Requirement Mapping Import Files";
+                }
+            });
+            int returnVal = fc.showOpenDialog(new JFrame());
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                TableExtractor te = new TableExtractor(file);
+                try {
+                    tables.clear();
+                    tables.addAll(te.extractTables());
+                    if (tables.size() > 0) {
+                        double max = Double.valueOf("" + tables.size());
+                        spinner.setModel(new SpinnerNumberModel(1.0, 1.0,
+                                max, 1.0));
+                        spinner.setValue(1.0);
+                        LOG.log(Level.INFO, "Loaded {0} tables!",
+                                tables.size());
+                        valid1 = true;
+                        displayTable(1);
+                    } else {
+                        LOG.log(Level.INFO, "Found no tables!");
+                    }
+                    for (DefaultTableModel dtm : tables) {
+                        int columns = dtm.getColumnCount();
+                        Object[] mappingRow = new Object[columns];
+                        for (int i = 0; i < columns; i++) {
+                            //Mapping row
+                            mappingRow[i] = "Select Mapping";
+                        }
+                        //Insert mapping row
+                        dtm.insertRow(0, mappingRow);
+                    }
+                }catch (FileNotFoundException ex) {
+                    Exceptions.printStackTrace(ex);
+                }catch (ClassNotFoundException | IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
             }
+            enableUI(valid1);
         });
     }//GEN-LAST:event_importButtonActionPerformed
 
