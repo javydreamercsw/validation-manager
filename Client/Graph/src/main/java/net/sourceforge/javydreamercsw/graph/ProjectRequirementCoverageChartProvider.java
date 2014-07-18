@@ -4,12 +4,9 @@ import com.validation.manager.core.api.entity.manager.IProjectRequirementEntityM
 import com.validation.manager.core.api.entity.manager.VMEntityManager;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.RequirementSpec;
-import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +99,7 @@ public class ProjectRequirementCoverageChartProvider implements ChartProvider<Pr
             PieChart.Data data
                     = new PieChart.Data(entry.getKey() + " (" + entry.getValue() + ")",
                             entry.getValue());
-            pieChartData.add(data);
+                    pieChartData.add(data);
         }
         final PieChart chart = new PieChart(pieChartData);
         chart.setTitle("Project Requirement Coverage");
@@ -115,24 +112,12 @@ public class ProjectRequirementCoverageChartProvider implements ChartProvider<Pr
         LOG.log(Level.FINE, "Specs: {0}", ps.getRequirementSpecList().size());
         List<String> processed = new ArrayList<>();
         List<Requirement> requirements = new ArrayList<>();
-        if (rem == null || !(rem instanceof IProjectRequirementEntityManager)) {
-            for (RequirementSpec rspec : ps.getRequirementSpecList()) {
-                LOG.log(Level.FINE, "Nodes: {0}",
-                        rspec.getRequirementSpecNodeList().size());
-                for (RequirementSpecNode rsn : rspec.getRequirementSpecNodeList()) {
-                    LOG.log(Level.FINE, "Requirements: {0}",
-                            rsn.getRequirementList().size());
-                    for (Requirement r : rsn.getRequirementList()) {
-                        RequirementServer rs = new RequirementServer(r);
-                        Requirement max = Collections.max(rs.getVersions(), null);
-                        requirements.add(max);
-                    }
-                }
-            }
-        } else {
+        if (rem != null) {
             IProjectRequirementEntityManager irem
                     = (IProjectRequirementEntityManager) rem;
             requirements.addAll(irem.getEntities(p));
+        } else {
+            throw new RuntimeException("Unable to find a IProjectRequirementEntityManager!");
         }
         for (Requirement r : requirements) {
             //Only for the ids enabled
