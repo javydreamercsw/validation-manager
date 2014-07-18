@@ -116,12 +116,6 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>JasperReportViewer</artifactId>
-            <version>0.2.2-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-visual</artifactId>
             <version>${netbeans.version}</version>
@@ -131,6 +125,11 @@
             <artifactId>org-netbeans-api-progress</artifactId>
             <groupId>org.netbeans.api</groupId>
             <type>jar</type>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-bugtracking</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
@@ -153,8 +152,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <!-- this maven plugin does not functions with java 8 yet, passing java 7 is just fine. -->
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <showDeprecation>true</showDeprecation>
                 </configuration>
             </plugin>
