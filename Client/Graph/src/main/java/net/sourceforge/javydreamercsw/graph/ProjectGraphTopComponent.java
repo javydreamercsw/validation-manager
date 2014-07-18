@@ -11,7 +11,6 @@ import java.util.Objects;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
-import javafx.scene.chart.Chart;
 import javafx.scene.layout.TilePane;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -57,7 +56,6 @@ public final class ProjectGraphTopComponent extends TopComponent
     private static final int PANEL_WIDTH_INT = 675;
     private static final int PANEL_HEIGHT_INT = 400;
     private static JFXPanel chartFxPanel;
-    private Chart chart;
     private Lookup.Result<Project> result = null;
     private Project currentProject;
 
@@ -100,6 +98,22 @@ public final class ProjectGraphTopComponent extends TopComponent
         }
     }
 
+    class GraphRetriever extends Thread {
+
+        private final ChartProvider cp;
+
+        public GraphRetriever(ChartProvider cp) {
+            super("Chart Retriever for: " + cp.getName());
+            this.cp = cp;
+        }
+
+        @Override
+        public void run() {
+            ((TilePane) getScene().getRoot()).getChildren()
+                    .add(cp.getChart(currentProject));
+        }
+    }
+
     private void updateProject(Project newProject) {
         if (newProject != null) {
             if (currentProject == null
@@ -111,8 +125,7 @@ public final class ProjectGraphTopComponent extends TopComponent
                 chartFxPanel.setScene(scene);
                 for (ChartProvider cp : Lookup.getDefault().lookupAll(ChartProvider.class)) {
                     if (cp.supports(Project.class)) {
-                        chart = cp.getChart(newProject);
-                        ((TilePane) scene.getRoot()).getChildren().add(chart);
+                        Platform.runLater(new GraphRetriever(cp));
                     }
                 }
             }
@@ -143,6 +156,7 @@ public final class ProjectGraphTopComponent extends TopComponent
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
         chartTablePanel = new javax.swing.JPanel();
 
         setLayout(new java.awt.GridLayout(1, 0));
@@ -151,18 +165,21 @@ public final class ProjectGraphTopComponent extends TopComponent
         chartTablePanel.setLayout(chartTablePanelLayout);
         chartTablePanelLayout.setHorizontalGroup(
             chartTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 468, Short.MAX_VALUE)
+            .addGap(0, 382, Short.MAX_VALUE)
         );
         chartTablePanelLayout.setVerticalGroup(
             chartTablePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 423, Short.MAX_VALUE)
         );
 
-        add(chartTablePanel);
+        jScrollPane1.setViewportView(chartTablePanel);
+
+        add(jScrollPane1);
     }// </editor-fold>//GEN-END:initComponents
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel chartTablePanel;
+    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
     @Override
     public void componentOpened() {
