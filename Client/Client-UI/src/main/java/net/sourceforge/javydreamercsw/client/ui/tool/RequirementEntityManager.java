@@ -1,5 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.tool;
 
+import com.validation.manager.core.api.entity.manager.IProjectRequirementEntityManager;
 import com.validation.manager.core.api.entity.manager.VMEntityManager;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,9 +37,9 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = VMEntityManager.class)
 public class RequirementEntityManager implements VMEntityManager<Requirement>,
-        LookupListener {
+        LookupListener, IProjectRequirementEntityManager {
 
-    private Map<String, Requirement> map = new TreeMap<>();
+    private Map<Integer, Map<String, Requirement>> map = new TreeMap<>();
     private Lookup.Result<Project> result = null;
     private Project current = null;
     private boolean initialized = false;
@@ -58,42 +60,65 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
 
     @Override
     public void updateEntity(Requirement entity) {
-        if (map.containsKey(entity.getUniqueId())) {
+        Integer id = entity.getRequirementSpecNode().getRequirementSpec().getProject().getId();
+        if (map.containsKey(id)) {
             RequirementServer rs = new RequirementServer(entity);
             rs.update();
-            map.put(entity.getUniqueId(), Collections.max(rs.getVersions()));
+            if (map.get(id).containsKey(entity.getUniqueId())) {
+                map.get(id).put(entity.getUniqueId(), Collections.max(rs.getVersions()));
+            }
         }
     }
 
     @Override
     public void removeEntity(Requirement entity) {
-        if (map.containsKey(entity.getUniqueId())) {
-            map.remove(entity.getUniqueId());
+        Integer id = entity.getRequirementSpecNode().getRequirementSpec().getProject().getId();
+        if (map.containsKey(id)) {
+            if (map.get(id).containsKey(entity.getUniqueId())) {
+                map.get(id).remove(entity.getUniqueId());
+            }
         }
+    }
+
+    @Override
+    public Collection<Requirement> getEntities(Project p) {
+        return map.get(p.getId()).values();
     }
 
     @Override
     public Collection<Requirement> getEntities() {
         List<Requirement> entities = new ArrayList<>();
-        for (Map.Entry<String, Requirement> entry : map.entrySet()) {
-            entities.add(entry.getValue());
+        for (Entry<Integer, Map<String, Requirement>> entry : map.entrySet()) {
+            entities.addAll(entry.getValue().values());
         }
         return entities;
     }
 
     @Override
     public void addEntity(Requirement entity) {
-        if (!map.containsKey(entity.getUniqueId())) {
-            RequirementServer rs = new RequirementServer(entity);
-            rs.update();
-            map.put(entity.getUniqueId(), Collections.max(rs.getVersions()));
+        Integer id = entity.getRequirementSpecNode().getRequirementSpec().getProject().getId();
+        if (!map.containsKey(id)) {
+            map.put(id, new TreeMap<>());
+        }
+        RequirementServer rs = new RequirementServer(entity);
+        rs.update();
+        if (!map.get(id).containsKey(entity.getUniqueId())) {
+            map.get(id).put(entity.getUniqueId(), Collections.max(rs.getVersions()));
         }
     }
 
     @Override
-    public Requirement getEntity(Object entity) {
+    public Requirement getEntity(Object entity
+    ) {
+        Requirement req = null;
         assert entity instanceof String : "Invalid parameter!";
-        return map.get((String) entity);
+        for (Entry<Integer, Map<String, Requirement>> entry : map.entrySet()) {
+            if (entry.getValue().containsKey((String) entity)) {
+                req = entry.getValue().get((String) entity);
+                break;
+            }
+        }
+        return req;
     }
 
     @Override
@@ -195,7 +220,9 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
         for (RequirementSpec rs : ps.getRequirementSpecList()) {
             for (RequirementSpecNode rsn : rs.getRequirementSpecNodeList()) {
                 for (Requirement r : rsn.getRequirementList()) {
-                    addEntity(r);
+                    if (r.getRequirementStatusId().getId() == 2) {
+                        addEntity(r);
+                    }
                 }
             }
         }
