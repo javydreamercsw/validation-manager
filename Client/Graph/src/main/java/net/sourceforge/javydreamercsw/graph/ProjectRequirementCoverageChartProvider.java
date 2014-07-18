@@ -1,19 +1,20 @@
 package net.sourceforge.javydreamercsw.graph;
 
-import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.api.entity.manager.IProjectRequirementEntityManager;
+import com.validation.manager.core.api.entity.manager.VMEntityManager;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
-import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.RequirementServer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,9 +22,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.Chart;
 import javafx.scene.chart.PieChart;
-import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
 import net.sourceforge.javydreamercsw.javafx.lib.ChartProvider;
+import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -36,6 +37,8 @@ public class ProjectRequirementCoverageChartProvider implements ChartProvider<Pr
     private Properties p = new Properties();
     private final Map<Properties, Class> props = new HashMap<>();
     private Map<String, Integer> stats = new HashMap<>();
+    public static final String COVERED = "Covered", PARTIAL = "Partial",
+            UNCOVERED = "Uncovered";
     public static final String REQUIREMENT_STATUSES
             = "included-requirement-status";
     public static final String INCLUDE_SUBPROJECTS
@@ -43,8 +46,7 @@ public class ProjectRequirementCoverageChartProvider implements ChartProvider<Pr
     private List<Integer> enabledStatus = new ArrayList<>();
     private static final Logger LOG
             = Logger.getLogger(ProjectRequirementCoverageChartProvider.class.getSimpleName());
-    private static final ResourceBundle rb
-            = ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
+    private VMEntityManager rem = null;
 
     public ProjectRequirementCoverageChartProvider() {
         Properties temp = new Properties();
@@ -55,13 +57,8 @@ public class ProjectRequirementCoverageChartProvider implements ChartProvider<Pr
         temp.put(INCLUDE_SUBPROJECTS,
                 "Included Subprojects.");
         props.put(temp, Boolean.class);
-        //By default enable all statuses
-        RequirementStatusJpaController controller
-                = new RequirementStatusJpaController(
-                        DataBaseManager.getEntityManagerFactory());
-        controller.findRequirementStatusEntities().stream().forEach((rs) -> {
-            enabledStatus.add(rs.getId());
-        });
+        //By default enable only Approved
+        enabledStatus.add(2);
     }
 
     @Override
@@ -73,19 +70,42 @@ public class ProjectRequirementCoverageChartProvider implements ChartProvider<Pr
     public Chart getChart(Project entity) {
         //Reset Stats
         stats.clear();
+        //Wait for RequirementEntityManager
+        for (VMEntityManager m : Lookup.getDefault().lookupAll(VMEntityManager.class)) {
+            if (m.supportEntity(Requirement.class)) {
+                rem = m;
+                break;
+            }
+        }
+        if (rem != null) {
+            while (!rem.isInitialized()) {
+                try {
+                    //Wait
+                    LOG.fine("Waiting for Requirement Entity Manager.");
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+            LOG.fine("Done waiting for Requirement Entity Manager!");
+        }
+        //Reset stats.
+        stats.put(COVERED, 0);
+        stats.put(PARTIAL, 0);
+        stats.put(UNCOVERED, 0);
         addProjectRequirements(entity);
         ObservableList<PieChart.Data> pieChartData
                 = FXCollections.observableArrayList();
-        final Label caption = new Label("");
-        caption.setTextFill(Color.DARKORANGE);
-        caption.setStyle("-fx-font: 24 arial;");
         for (Entry<String, Integer> entry : stats.entrySet()) {
-            PieChart.Data data = new PieChart.Data(entry.getKey(),
-                    entry.getValue());
+            LOG.log(Level.INFO, "{0}: {1}",
+                    new Object[]{entry.getKey(), entry.getValue()});
+            PieChart.Data data
+                    = new PieChart.Data(entry.getKey() + " (" + entry.getValue() + ")",
+                            entry.getValue());
             pieChartData.add(data);
         }
         final PieChart chart = new PieChart(pieChartData);
-        chart.setTitle("Project Requirement Stats");
+        chart.setTitle("Project Requirement Coverage");
         return chart;
     }
 
@@ -93,22 +113,43 @@ public class ProjectRequirementCoverageChartProvider implements ChartProvider<Pr
         LOG.log(Level.FINE, "Analyzing Project: {0}", p.getName());
         ProjectServer ps = new ProjectServer(p);
         LOG.log(Level.FINE, "Specs: {0}", ps.getRequirementSpecList().size());
-        for (RequirementSpec rs : ps.getRequirementSpecList()) {
-            LOG.log(Level.FINE, "Nodes: {0}", rs.getRequirementSpecNodeList().size());
-            for (RequirementSpecNode rsn : rs.getRequirementSpecNodeList()) {
-                LOG.log(Level.FINE, "Requirements: {0}", rsn.getRequirementList().size());
-                for (Requirement r : rsn.getRequirementList()) {
-                    if (enabledStatus.contains(r.getRequirementStatusId().getId())) {
-                        String status = r.getRequirementStatusId().getStatus();
-                        if (rb.containsKey(status)) {
-                            status = rb.getString(status);
-                        }
-                        if (stats.containsKey(status)) {
-                            stats.put(status,
-                                    stats.get(status) + 1);
-                        } else {
-                            stats.put(status, 1);
-                        }
+        List<String> processed = new ArrayList<>();
+        List<Requirement> requirements = new ArrayList<>();
+        if (rem == null || !(rem instanceof IProjectRequirementEntityManager)) {
+            for (RequirementSpec rspec : ps.getRequirementSpecList()) {
+                LOG.log(Level.FINE, "Nodes: {0}",
+                        rspec.getRequirementSpecNodeList().size());
+                for (RequirementSpecNode rsn : rspec.getRequirementSpecNodeList()) {
+                    LOG.log(Level.FINE, "Requirements: {0}",
+                            rsn.getRequirementList().size());
+                    for (Requirement r : rsn.getRequirementList()) {
+                        RequirementServer rs = new RequirementServer(r);
+                        Requirement max = Collections.max(rs.getVersions(), null);
+                        requirements.add(max);
+                    }
+                }
+            }
+        } else {
+            IProjectRequirementEntityManager irem
+                    = (IProjectRequirementEntityManager) rem;
+            requirements.addAll(irem.getEntities(p));
+        }
+        for (Requirement r : requirements) {
+            //Only for the ids enabled
+            if (enabledStatus.contains(r.getRequirementStatusId().getId())) {
+                if (!processed.contains(r.getUniqueId())) {
+                    LOG.log(Level.FINE, "Processing: {0} ({1})",
+                            new Object[]{r.getUniqueId(),
+                                r.getRequirementStatusId().getStatus()});
+                    processed.add(r.getUniqueId());
+                    int testCoverage = new RequirementServer(r).getTestCoverage();
+                    LOG.log(Level.FINE, "Test Coverage: {0}", testCoverage);
+                    if (testCoverage == 100) {
+                        stats.put(COVERED, stats.get(COVERED) + 1);
+                    } else if (testCoverage > 0) {
+                        stats.put(PARTIAL, stats.get(PARTIAL) + 1);
+                    } else {
+                        stats.put(UNCOVERED, stats.get(UNCOVERED) + 1);
                     }
                 }
             }
@@ -118,16 +159,19 @@ public class ProjectRequirementCoverageChartProvider implements ChartProvider<Pr
                 addProjectRequirements(child);
             });
         }
+        LOG.log(Level.FINE, "Covered: {0}", stats.get(COVERED));
+        LOG.log(Level.FINE, "Partial: {0}", stats.get(PARTIAL));
+        LOG.log(Level.FINE, "Uncovered: {0}", stats.get(UNCOVERED));
     }
 
     @Override
     public String getName() {
-        return "Project Requirement Stats";
+        return "Project Requirement Coverage";
     }
 
     @Override
     public String getDescription() {
-        return "Shows stats of requirements for this project.";
+        return "Shows coverage of requirements for this project.";
     }
 
     @Override
