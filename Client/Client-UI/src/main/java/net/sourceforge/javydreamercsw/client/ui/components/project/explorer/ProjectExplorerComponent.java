@@ -17,9 +17,9 @@ import org.openide.explorer.view.BeanTreeView;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
-import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import org.openide.windows.TopComponent;
 
 /**
  * Top component which displays something.
@@ -49,7 +49,7 @@ public final class ProjectExplorerComponent extends TopComponent
     private static AbstractVMBeanNode currentNode;
     private static final Logger LOG
             = Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
-    private static final BeanTreeView myBeanTreeView=new BeanTreeView();
+    private static final BeanTreeView myBeanTreeView = new BeanTreeView();
 
     public ProjectExplorerComponent() {
         initComponents();
@@ -148,10 +148,11 @@ public final class ProjectExplorerComponent extends TopComponent
             LOG.log(Level.FINE, "Refreshing: {0}", currentNode);
             currentNode.refresh();
         }
-        for (RefreshableCapability rc
-                : mgr.getRootContext().getLookup().lookupAll(RefreshableCapability.class)) {
+        mgr.getRootContext().getLookup()
+                .lookupAll(RefreshableCapability.class).stream()
+                .forEach((rc) -> {
             rc.refresh();
-        }
+        });
         myBeanTreeView.expandNode(mgr.getRootContext());
     }
 
@@ -167,10 +168,11 @@ public final class ProjectExplorerComponent extends TopComponent
                 if (item instanceof AbstractVMBeanNode) {
                     AbstractVMBeanNode p = (AbstractVMBeanNode) item;
                     currentNode = p;
-                    for (RefreshableCapability refresh
-                            : currentNode.getLookup().lookupAll(RefreshableCapability.class)) {
+                    currentNode.getLookup()
+                            .lookupAll(RefreshableCapability.class).stream()
+                            .forEach((refresh) -> {
                         refresh.refresh();
-                    }
+                    });
                 }
             }
         }

@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
-import org.openide.util.Cancellable;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
@@ -72,9 +71,9 @@ public class RequirementSpecEntityManager implements
     @Override
     public Collection<RequirementSpec> getEntities() {
         List<RequirementSpec> entities = new ArrayList<>();
-        for (Map.Entry<Integer, RequirementSpec> entry : map.entrySet()) {
+        map.entrySet().stream().forEach((entry) -> {
             entities.add(entry.getValue());
-        }
+        });
         return entities;
     }
 
@@ -128,61 +127,48 @@ public class RequirementSpecEntityManager implements
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    ph = ProgressHandleFactory.createHandle("Requirement Spec Populator",
-                            new Cancellable() {
-
-                                @Override
-                                public boolean cancel() {
-                                    return handleCancel();
-                                }
-                            });
-                    Runnable runnable = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            initialized = false;
-                            LOG.log(Level.FINE,
-                                    "Populating Specs for project: {0}",
-                                    current.getName());
-                            map.clear();
-                            ProjectServer ps = new ProjectServer(current);
-                            List<RequirementSpec> specs = ps.getRequirementSpecList();
-                            for (Project child : ps.getChildren()) {
-                                specs.addAll(child.getRequirementSpecList());
-                            }
-                            for (RequirementSpec spec : specs) {
-                                map.put(spec.getRequirementSpecPK().getId(), spec);
-                            }
-                            initialized = true;
-                        }
-                    };
-                    theTask = RP.create(runnable); //the task is not started yet
-
-                    theTask.addTaskListener(new TaskListener() {
-                        public void taskFinished(RequestProcessor.Task task) {
-                            ph.finish();
-                            LOG.log(Level.FINE,
-                                    "Populating requirement specs for project: {0} done!",
-                                    current.getName());
-                        }
-
-                        @Override
-                        public void taskFinished(org.openide.util.Task task) {
-                            ph.finish();
-                            LOG.log(Level.FINE,
-                                    "Populating requirement specs for project: {0} done!",
-                                    current.getName());
-                        }
+            java.awt.EventQueue.invokeLater(() -> {
+                ph = ProgressHandleFactory.createHandle(
+                        "Requirement Spec Populator", () -> handleCancel());
+                Runnable runnable = () -> {
+                    initialized = false;
+                    LOG.log(Level.FINE,
+                            "Populating Specs for project: {0}",
+                            current.getName());
+                    map.clear();
+                    ProjectServer ps = new ProjectServer(current);
+                    List<RequirementSpec> specs = ps.getRequirementSpecList();
+                    ps.getChildren().stream().forEach((child) -> {
+                        specs.addAll(child.getRequirementSpecList());
                     });
-                    //start the progresshandle the progress UI will show 500s after
-                    ph.start();
-
-                    //this actually start the task
-                    theTask.schedule(0);
-                }
+                    specs.stream().forEach((spec) -> {
+                        map.put(spec.getRequirementSpecPK().getId(), spec);
+                    });
+                    initialized = true;
+                };
+                theTask = RP.create(runnable); //the task is not started yet
+                
+                theTask.addTaskListener(new TaskListener() {
+                    public void taskFinished(RequestProcessor.Task task) {
+                        ph.finish();
+                        LOG.log(Level.FINE,
+                                "Populating requirement specs for project: {0} done!",
+                                current.getName());
+                    }
+                    
+                    @Override
+                    public void taskFinished(org.openide.util.Task task) {
+                        ph.finish();
+                        LOG.log(Level.FINE,
+                                "Populating requirement specs for project: {0} done!",
+                                current.getName());
+                    }
+                });
+                //start the progresshandle the progress UI will show 500s after
+                ph.start();
+                
+                //this actually start the task
+                theTask.schedule(0);
             });
         }
 
