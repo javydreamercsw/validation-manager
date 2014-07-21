@@ -27,7 +27,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.table.DefaultTableModel;
 import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
 import net.sourceforge.javydreamercsw.client.ui.components.ImportMappingInterface;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -235,7 +234,7 @@ public final class RequirementMappingImporterTopComponent
                     } else {
                         LOG.log(Level.INFO, "Found no tables!");
                     }
-                    for (DefaultTableModel dtm : tables) {
+                    tables.stream().forEach((dtm) -> {
                         int columns = dtm.getColumnCount();
                         Object[] mappingRow = new Object[columns];
                         for (int i = 0; i < columns; i++) {
@@ -244,7 +243,7 @@ public final class RequirementMappingImporterTopComponent
                         }
                         //Insert mapping row
                         dtm.insertRow(0, mappingRow);
-                    }
+                    });
                 }catch (FileNotFoundException ex) {
                     Exceptions.printStackTrace(ex);
                 }catch (ClassNotFoundException | IOException ex) {
