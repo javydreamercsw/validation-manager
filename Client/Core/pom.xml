@@ -10,7 +10,7 @@
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>VM-Core-Wrapper</artifactId>
     <packaging>nbm</packaging>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.3-SNAPSHOT</version>
 
     <name>Core Wrapper</name>
 
