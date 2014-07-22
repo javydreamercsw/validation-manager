@@ -108,8 +108,7 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
     }
 
     @Override
-    public Requirement getEntity(Object entity
-    ) {
+    public Requirement getEntity(Object entity) {
         Requirement req = null;
         assert entity instanceof String : "Invalid parameter!";
         for (Entry<Integer, Map<String, Requirement>> entry : map.entrySet()) {
