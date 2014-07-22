@@ -9,7 +9,7 @@
 
     <artifactId>Client-app</artifactId>
     <packaging>nbm-application</packaging>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.3-SNAPSHOT</version>
 
     <name>Admin Client</name>
 
