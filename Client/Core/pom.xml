@@ -4,7 +4,7 @@
     <parent>
         <artifactId>Client-parent</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.2.2-SNAPSHOT</version>
+        <version>0.2.3-SNAPSHOT</version>
     </parent>
 
     <groupId>net.sourceforge.javydreamercsw</groupId>
@@ -46,12 +46,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>H2-Driver</artifactId>
-            <version>0.2.2-SNAPSHOT</version>
+            <version>0.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>POI-Library</artifactId>
-            <version>0.2.2-SNAPSHOT</version>
+            <version>0.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <artifactId>org-openide-util</artifactId>
