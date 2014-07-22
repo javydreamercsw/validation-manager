@@ -4,7 +4,7 @@
     <parent>
         <groupId>net.sourceforge.javydreamercsw</groupId>
         <artifactId>Client-parent</artifactId>
-        <version>0.2.2-SNAPSHOT</version>
+        <version>0.2.3-SNAPSHOT</version>
     </parent>
     <version>0.1.0-SNAPSHOT</version>
     <artifactId>Graph</artifactId>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>VM-Core-Wrapper</artifactId>
-            <version>0.2.2-SNAPSHOT</version>
+            <version>0.2.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>
