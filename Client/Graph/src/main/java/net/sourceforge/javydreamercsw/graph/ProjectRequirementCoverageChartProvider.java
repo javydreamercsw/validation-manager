@@ -94,7 +94,7 @@ public class ProjectRequirementCoverageChartProvider implements ChartProvider<Pr
         ObservableList<PieChart.Data> pieChartData
                 = FXCollections.observableArrayList();
         for (Entry<String, Integer> entry : stats.entrySet()) {
-            LOG.log(Level.INFO, "{0}: {1}",
+            LOG.log(Level.FINE, "{0}: {1}",
                     new Object[]{entry.getKey(), entry.getValue()});
             PieChart.Data data
                     = new PieChart.Data(entry.getKey() + " (" + entry.getValue() + ")",
