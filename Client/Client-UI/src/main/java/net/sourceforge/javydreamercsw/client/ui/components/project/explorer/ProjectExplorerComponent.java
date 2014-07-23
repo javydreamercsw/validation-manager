@@ -13,12 +13,11 @@ import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
-import org.openide.explorer.view.BeanTreeView;
 import org.openide.util.Lookup;
 import org.openide.util.LookupEvent;
-import org.openide.util.LookupListener;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.TopComponent;
 
 /**
@@ -40,8 +39,9 @@ import org.openide.windows.TopComponent;
     "CTL_ProjectExplorerTopComponent=Project Explorer",
     "HINT_ProjectExplorerTopComponent=Project Explorer Window"
 })
+@ServiceProvider(service = IProjectExplorer.class)
 public final class ProjectExplorerComponent extends TopComponent
-        implements ExplorerManager.Provider, LookupListener {
+        implements IProjectExplorer {
 
     private static final ExplorerManager mgr = new ExplorerManager();
     private static DatabaseConnection conn;
@@ -49,7 +49,8 @@ public final class ProjectExplorerComponent extends TopComponent
     private static AbstractVMBeanNode currentNode;
     private static final Logger LOG
             = Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
-    private static final BeanTreeView myBeanTreeView = new BeanTreeView();
+    private static final CustomBeanTreeView myBeanTreeView = 
+            new CustomBeanTreeView();
 
     public ProjectExplorerComponent() {
         initComponents();
