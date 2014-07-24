@@ -4,7 +4,7 @@
     <parent>
         <artifactId>Validation-Manager</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.2</version>
     </parent>
 
     <prerequisites>
@@ -14,7 +14,7 @@
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>Client-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.2</version>
 
     <name>Validation Manager Admin Client</name>
 
