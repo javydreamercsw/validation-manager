@@ -4,9 +4,9 @@
     <parent>
         <groupId>net.sourceforge.javydreamercsw</groupId>
         <artifactId>Client-parent</artifactId>
-        <version>0.2.3-SNAPSHOT</version>
+        <version>0.2</version>
     </parent>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1</version>
     <artifactId>Graph</artifactId>
     <packaging>nbm</packaging>
     <build>
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>JavaFX-Lib</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>0.1</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>VM-Core-Wrapper</artifactId>
-            <version>0.2.3-SNAPSHOT</version>
+            <version>0.2</version>
         </dependency>
     </dependencies>
 </project>
