@@ -4,12 +4,12 @@
     <parent>
         <groupId>net.sourceforge.javydreamercsw</groupId>
         <artifactId>Client-parent</artifactId>
-        <version>0.2</version>
+        <version>0.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>vm-client-branding</artifactId>
     <packaging>nbm</packaging>
-    <version>0.2</version>
+    <version>0.3-SNAPSHOT</version>
 
     <name>Branding</name>
 
