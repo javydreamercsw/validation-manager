@@ -4,13 +4,13 @@
     <parent>
         <artifactId>Client-parent</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.2</version>
+        <version>0.3-SNAPSHOT</version>
     </parent>
 
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>VM-Core-Wrapper</artifactId>
     <packaging>nbm</packaging>
-    <version>0.2</version>
+    <version>0.3-SNAPSHOT</version>
 
     <name>Core Wrapper</name>
 
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>VM-Core</artifactId>
-            <version>0.2</version>
+            <version>0.3-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>dom4j</artifactId>
@@ -46,12 +46,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>H2-Driver</artifactId>
-            <version>0.2</version>
+            <version>0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>POI-Library</artifactId>
-            <version>0.2</version>
+            <version>0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <artifactId>org-openide-util</artifactId>

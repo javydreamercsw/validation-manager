@@ -4,13 +4,13 @@
     <parent>
         <artifactId>Client-parent</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.2</version>
+        <version>0.3-SNAPSHOT</version>
     </parent>
 
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>H2-Driver</artifactId>
     <packaging>nbm</packaging>
-    <version>0.2</version>
+    <version>0.3-SNAPSHOT</version>
 
     <name>H2 Driver</name>
 
