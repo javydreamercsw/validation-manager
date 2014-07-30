@@ -28,9 +28,9 @@ public final class ProjectServer extends Project
         super(name);
         setNotes(notes);
         setId(0);
-        setProjectList(new ArrayList<Project>());
-        setRequirementSpecList(new ArrayList<RequirementSpec>());
-        setTestProjectList(new ArrayList<TestProject>());
+        setProjectList(new ArrayList<>());
+        setRequirementSpecList(new ArrayList<>());
+        setTestProjectList(new ArrayList<>());
     }
 
     public ProjectServer(int id) {
@@ -82,9 +82,7 @@ public final class ProjectServer extends Project
                 } else {
                     throw new VMException("Unable to delete project with Requirement Specifications!");
                 }
-            } catch (IllegalOrphanException ex) {
-                getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NonexistentEntityException ex) {
+            } catch (IllegalOrphanException | NonexistentEntityException ex) {
                 getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
@@ -119,7 +117,7 @@ public final class ProjectServer extends Project
     }
 
     public List<Project> getChildren() {
-        ArrayList<Project> children = new ArrayList<Project>();
+        ArrayList<Project> children = new ArrayList<>();
         for (Project p : getProjects()) {
             if (p.getParentProjectId() != null) {
                 if (p.getParentProjectId().getId().equals(getId())) {
@@ -132,7 +130,7 @@ public final class ProjectServer extends Project
 
     public static List<Requirement> getRequirements(Project p) {
         ProjectServer project = new ProjectServer(p);
-        List<Requirement> requirements = new ArrayList<Requirement>();
+        List<Requirement> requirements = new ArrayList<>();
         for (RequirementSpec rs : project.getRequirementSpecList()) {
             requirements.addAll(RequirementSpecServer.getRequirements(rs));
         }
@@ -149,7 +147,7 @@ public final class ProjectServer extends Project
 
     @Override
     public List<Project> getVersions() {
-        List<Project> versions = new ArrayList<Project>();
+        List<Project> versions = new ArrayList<>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
         for (Object obj : namedQuery("Project.findById",
@@ -163,5 +161,9 @@ public final class ProjectServer extends Project
     public boolean isChangeVersionable() {
         return !getName().equals(getEntity().getName())
                 || !getNotes().equals(getEntity().getNotes());
+    }
+
+    public void copy(Project newProject) {
+        update(this, newProject);
     }
 }
