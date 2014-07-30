@@ -9,6 +9,7 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
     private boolean usePlan = true;
     private boolean useTest = true;
     private boolean useStep = true;
+    private boolean useDescription = true;
 
     /**
      * Creates new form ExportOptionsDialog
@@ -32,6 +33,7 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
         testCase = new javax.swing.JCheckBox();
         step = new javax.swing.JCheckBox();
         ok = new javax.swing.JButton();
+        description = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(ExportOptionsDialog.class, "ExportOptionsDialog.title")); // NOI18N
@@ -70,22 +72,31 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
             }
         });
 
+        description.setSelected(true);
+        org.openide.awt.Mnemonics.setLocalizedText(description, org.openide.util.NbBundle.getMessage(ExportOptionsDialog.class, "ExportOptionsDialog.description.text")); // NOI18N
+        description.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                descriptionActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(step)
-                    .addComponent(testCase)
-                    .addComponent(jLabel1)
-                    .addComponent(testPlan))
-                .addContainerGap(242, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(ok)
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(description)
+                    .addComponent(testCase)
+                    .addComponent(step)
+                    .addComponent(jLabel1)
+                    .addComponent(testPlan))
+                .addContainerGap(242, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -94,9 +105,11 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(testPlan)
+                .addGap(8, 8, 8)
+                .addComponent(description)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(testCase)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(3, 3, 3)
                 .addComponent(step)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(ok)
@@ -122,6 +135,10 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
         useStep = step.isSelected();
     }//GEN-LAST:event_stepActionPerformed
 
+    private void descriptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_descriptionActionPerformed
+        useDescription = description.isSelected();
+    }//GEN-LAST:event_descriptionActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -145,6 +162,7 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox description;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JButton ok;
     private javax.swing.JCheckBox step;
@@ -171,5 +189,12 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
      */
     public boolean isUseStep() {
         return useStep;
+    }
+
+    /**
+     * @return the useDescription
+     */
+    public boolean isUseDescription() {
+        return useDescription;
     }
 }

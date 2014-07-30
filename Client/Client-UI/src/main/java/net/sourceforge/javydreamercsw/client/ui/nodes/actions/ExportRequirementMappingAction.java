@@ -90,6 +90,15 @@ public class ExportRequirementMappingAction extends AbstractAction {
                             }
                         }
                         if (manager != null) {
+                            while (!manager.isInitialized()) {
+                                try {
+                                    //Wait
+                                    LOG.fine("Waiting for Requirement Entity Manager.");
+                                    Thread.sleep(100);
+                                } catch (InterruptedException ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
+                            }
                             for (Object o : manager.getEntities()) {
                                 Requirement r = (Requirement) o;
                                 //Only export approved requirements.
@@ -132,7 +141,8 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                 Map<Integer, Object[]> data = new TreeMap<>();
                                 int count = 0;
                                 data.put(++count,
-                                        new Object[]{"Requirement", "Children", "Test"});
+                                        new Object[]{"Requirement",
+                                            "Description", "Children", "Test"});
                                 for (Requirement r : mapping) {
                                     StringBuilder childSb = new StringBuilder();
                                     StringBuilder testSb = new StringBuilder();
@@ -187,6 +197,7 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                                 testSb.toString()});
                                     data.put(++count,
                                             new Object[]{r.getUniqueId().trim(),
+                                                r.getDescription(),
                                                 childSb.toString(),
                                                 testSb.toString()});
                                 }
@@ -212,8 +223,6 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                         = new FileOutputStream(export)) {
                                     workbook.write(out);
                                 }
-                                Lookup.getDefault().lookup(MessageHandler.class)
-                                        .info("Mapping exported successfully!");
                                 setValid(true);
                             } catch (IOException ex) {
                                 Exceptions.printStackTrace(ex);
