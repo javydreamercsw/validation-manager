@@ -30,7 +30,7 @@ import org.openide.util.Utilities;
         preferredID = "ProjectEditorTopComponent",
         iconBase = "net/sourceforge/javydreamercsw/client/ui/VSmall.png",
         persistenceType = TopComponent.PERSISTENCE_NEVER)
-@TopComponent.Registration(mode = "editor", openAtStartup = false)
+@TopComponent.Registration(mode = "editor", openAtStartup = true)
 @TopComponent.OpenActionRegistration(
         displayName = "#CTL_ProjectEditorAction",
         preferredID = "ProjectEditorTopComponent")

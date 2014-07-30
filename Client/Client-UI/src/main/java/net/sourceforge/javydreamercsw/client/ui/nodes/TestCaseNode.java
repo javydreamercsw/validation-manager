@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestStepAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ExportTestAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportTestStepAction;
 import org.openide.util.lookup.InstanceContent;
 
@@ -36,6 +37,7 @@ class TestCaseNode extends AbstractVMBeanNode {
         actions.add(new CreateTestStepAction());
         actions.add(new EditTestCaseAction());
         actions.add(new ImportTestStepAction());
+        actions.add(new ExportTestAction());
         //TODO: actions.add(new DeleteTestStepAction());
         return actions.toArray(new Action[actions.size()]);
     }
