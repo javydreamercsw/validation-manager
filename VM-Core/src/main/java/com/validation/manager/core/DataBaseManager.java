@@ -93,6 +93,13 @@ public class DataBaseManager {
         versioning_enabled = aVersioning_enabled;
     }
 
+    /**
+     * @return the demoResetPeriod
+     */
+    public static Long getDemoResetPeriod() {
+        return demoResetPeriod;
+    }
+
     private DataBaseManager() {
     }
 
@@ -212,10 +219,10 @@ public class DataBaseManager {
                         LOG.log(Level.SEVERE, null, e);
                         demoResetPeriod = valueOf(0);
                     }
-                    if (demoResetPeriod > 0) {
+                    if (getDemoResetPeriod() > 0) {
                         LOG.log(Level.WARNING,
                                 "Instance configured as demo, database will reset"
-                                + " each {0} milliseconds", demoResetPeriod);
+                                + " each {0} milliseconds", getDemoResetPeriod());
                     }
                 }
                 final String JNDIDB = (String) ctx.lookup("java:comp/env/validation_manager/JNDIDB");
