@@ -111,7 +111,7 @@ public class DataBaseManager {
                     field.setAccessible(true);
                     TableGenerator annotation = field.getAnnotation(TableGenerator.class);
                     field.setAccessible(false);
-                    Map<String, Object> parameters = new HashMap<String, Object>();
+                    Map<String, Object> parameters = new HashMap<>();
                     String tableName = annotation.pkColumnValue();
                     parameters.put("tableName", tableName);
                     if (namedQuery("VmId.findByTableName", parameters, false).isEmpty()) {
@@ -402,9 +402,7 @@ public class DataBaseManager {
                 } else {
                     LOG.severe("Unable to convert script!");
                 }
-            } catch (IOException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            } catch (VMException ex) {
+            } catch (IOException | VMException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
@@ -414,7 +412,7 @@ public class DataBaseManager {
         InputStream in = null;
         InputStreamReader is = null;
         BufferedReader br = null;
-        ArrayList<String> statements = new ArrayList<String>();
+        ArrayList<String> statements = new ArrayList<>();
         try {
             in = relativeTo == null ? new FileInputStream(new File(filePath))
                     : relativeTo.getResourceAsStream(filePath);
@@ -427,7 +425,7 @@ public class DataBaseManager {
                 sql.append(line).append("\n");
             }
             //The list of statement types to ignore
-            ArrayList<String> ignore = new ArrayList<String>();
+            ArrayList<String> ignore = new ArrayList<>();
             ignore.add(ESqlStatementType.sstmysqlset.toString());
             ignore.add(ESqlStatementType.sstinvalid.toString());
             ignore.add(ESqlStatementType.sstmysqluse.toString());
@@ -490,16 +488,14 @@ public class DataBaseManager {
             throw new IllegalArgumentException("File cannot be written: " + aFile);
         }
         FileWriter fw = new FileWriter(aFile);
-        //use buffering
-        Writer output = new BufferedWriter(fw);
-        try {
+        try ( //use buffering
+                Writer output = new BufferedWriter(fw)) {
             //FileWriter always assumes default encoding is OK!
             for (String line : aContents) {
                 output.write(line);
                 output.write("\n");
             }
         } finally {
-            output.close();
             fw.close();
         }
     }
@@ -538,9 +534,7 @@ public class DataBaseManager {
                     //Load the H2 driver
                     forName("org.h2.Driver");
                     conn = ds.getConnection();
-                } catch (ClassNotFoundException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                } catch (SQLException ex) {
+                } catch (ClassNotFoundException | SQLException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             } else {
