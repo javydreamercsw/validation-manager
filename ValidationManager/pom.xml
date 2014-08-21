@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-    <artifactId>Validation-Manager</artifactId>
-    <groupId>net.sourceforge.javydreamercsw</groupId>
-    <version>0.1-SNAPSHOT</version>
-  </parent>
+            <artifactId>Validation-Manager</artifactId>
+            <groupId>net.sourceforge.javydreamercsw</groupId>
+            <version>0.3-SNAPSHOT</version>
+        </parent>
 	<groupId>com.validation.manager</groupId>
 	<artifactId>ValidationManager</artifactId>
 	<packaging>war</packaging>
@@ -90,12 +90,12 @@
             <version>2.0.1</version>
             <scope>compile</scope>
         </dependency>
-	 <dependency>
-	  <groupId>net.sourceforge.javydreamercsw</groupId>
-	  <artifactId>VM-Core</artifactId>
-	  <version>0.1-SNAPSHOT</version>
-	 </dependency>
-	</dependencies>
+        <dependency>
+            <groupId>net.sourceforge.javydreamercsw</groupId>
+            <artifactId>VM-Core</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
