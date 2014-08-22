@@ -1,19 +1,232 @@
-03AE562DA090867278CB9F23FE6226A1.cache.js
-user.agent opera
-
-0D52F742BEAE5F6DEB96A2E03BD9397B.cache.js
+B4D72475883613E2731EDC8DBE83AB78.cache.js
+ClientBundle.enableInlining true
+audioElementSupport maybe
+canvasElementSupport maybe
+compiler.emulatedStack false
+compiler.predeclare.cross.fragment.references false
+compiler.stackMode native
+compiler.useSourceMaps false
+compiler.useSymbolMaps false
+dragEventSupport maybe
+geolocationSupport maybe
+gwt.enableDebugId false
+gwt.forceBidi false
+gwt.logging.consoleHandler ENABLED
+gwt.logging.developmentModeHandler ENABLED
+gwt.logging.enabled TRUE
+gwt.logging.firebugHandler DISABLED
+gwt.logging.hasWidgetsHandler ENABLED
+gwt.logging.logLevel INFO
+gwt.logging.popupHandler DISABLED
+gwt.logging.simpleRemoteHandler DISABLED
+gwt.logging.systemHandler ENABLED
+gwt.suppressNonStaticFinalFieldWarnings false
+gwt.unloadEnabled false
+locale default
+modernie none
+superdevmode off
+touchEventSupport maybe
 user.agent gecko1_8
+vaadin.profiler false
+videoElementSupport maybe
+webApiUsage modern
 
-6796BE2B7690FCC33998681D74285D9C.cache.js
-user.agent ie6
+B4D72475883613E2731EDC8DBE83AB78.cache.js
+ClientBundle.enableInlining true
+audioElementSupport maybe
+canvasElementSupport maybe
+compiler.emulatedStack false
+compiler.predeclare.cross.fragment.references false
+compiler.stackMode native
+compiler.useSourceMaps false
+compiler.useSymbolMaps false
+dragEventSupport maybe
+geolocationSupport maybe
+gwt.enableDebugId false
+gwt.forceBidi false
+gwt.logging.consoleHandler ENABLED
+gwt.logging.developmentModeHandler ENABLED
+gwt.logging.enabled TRUE
+gwt.logging.firebugHandler DISABLED
+gwt.logging.hasWidgetsHandler ENABLED
+gwt.logging.logLevel INFO
+gwt.logging.popupHandler DISABLED
+gwt.logging.simpleRemoteHandler DISABLED
+gwt.logging.systemHandler ENABLED
+gwt.suppressNonStaticFinalFieldWarnings false
+gwt.unloadEnabled false
+locale default
+modernie yes
+superdevmode off
+touchEventSupport maybe
+user.agent gecko1_8
+vaadin.profiler false
+videoElementSupport maybe
+webApiUsage modern
 
-866407E0CDD4F50AFD23155F490EA0C7.cache.js
-user.agent safari
+B4D72475883613E2731EDC8DBE83AB78.cache.js
+ClientBundle.enableInlining true
+audioElementSupport maybe
+canvasElementSupport maybe
+compiler.emulatedStack false
+compiler.predeclare.cross.fragment.references false
+compiler.stackMode native
+compiler.useSourceMaps false
+compiler.useSymbolMaps false
+dragEventSupport maybe
+geolocationSupport maybe
+gwt.enableDebugId false
+gwt.forceBidi false
+gwt.logging.consoleHandler ENABLED
+gwt.logging.developmentModeHandler ENABLED
+gwt.logging.enabled TRUE
+gwt.logging.firebugHandler DISABLED
+gwt.logging.hasWidgetsHandler ENABLED
+gwt.logging.logLevel INFO
+gwt.logging.popupHandler DISABLED
+gwt.logging.simpleRemoteHandler DISABLED
+gwt.logging.systemHandler ENABLED
+gwt.suppressNonStaticFinalFieldWarnings false
+gwt.unloadEnabled false
+locale default
+modernie none
+superdevmode off
+touchEventSupport maybe
+user.agent ie10
+vaadin.profiler false
+videoElementSupport maybe
+webApiUsage modern
 
-994719E4071F011E4161FCFE199DBDE4.cache.js
-user.agent ie9
-
-FB7683D8ADF6B19D94069D74AD662316.cache.js
+B4D72475883613E2731EDC8DBE83AB78.cache.js
+ClientBundle.enableInlining true
+audioElementSupport no
+canvasElementSupport no
+compiler.emulatedStack false
+compiler.predeclare.cross.fragment.references false
+compiler.stackMode native
+compiler.useSourceMaps false
+compiler.useSymbolMaps false
+dragEventSupport no
+geolocationSupport maybe
+gwt.enableDebugId false
+gwt.forceBidi false
+gwt.logging.consoleHandler ENABLED
+gwt.logging.developmentModeHandler ENABLED
+gwt.logging.enabled TRUE
+gwt.logging.firebugHandler DISABLED
+gwt.logging.hasWidgetsHandler ENABLED
+gwt.logging.logLevel INFO
+gwt.logging.popupHandler DISABLED
+gwt.logging.simpleRemoteHandler DISABLED
+gwt.logging.systemHandler ENABLED
+gwt.suppressNonStaticFinalFieldWarnings false
+gwt.unloadEnabled false
+locale default
+modernie none
+superdevmode off
+touchEventSupport maybe
 user.agent ie8
+vaadin.profiler false
+videoElementSupport no
+webApiUsage modern
+
+B4D72475883613E2731EDC8DBE83AB78.cache.js
+ClientBundle.enableInlining true
+audioElementSupport maybe
+canvasElementSupport maybe
+compiler.emulatedStack false
+compiler.predeclare.cross.fragment.references false
+compiler.stackMode native
+compiler.useSourceMaps false
+compiler.useSymbolMaps false
+dragEventSupport maybe
+geolocationSupport maybe
+gwt.enableDebugId false
+gwt.forceBidi false
+gwt.logging.consoleHandler ENABLED
+gwt.logging.developmentModeHandler ENABLED
+gwt.logging.enabled TRUE
+gwt.logging.firebugHandler DISABLED
+gwt.logging.hasWidgetsHandler ENABLED
+gwt.logging.logLevel INFO
+gwt.logging.popupHandler DISABLED
+gwt.logging.simpleRemoteHandler DISABLED
+gwt.logging.systemHandler ENABLED
+gwt.suppressNonStaticFinalFieldWarnings false
+gwt.unloadEnabled false
+locale default
+modernie none
+superdevmode off
+touchEventSupport maybe
+user.agent ie9
+vaadin.profiler false
+videoElementSupport maybe
+webApiUsage modern
+
+B4D72475883613E2731EDC8DBE83AB78.cache.js
+ClientBundle.enableInlining true
+audioElementSupport maybe
+canvasElementSupport maybe
+compiler.emulatedStack false
+compiler.predeclare.cross.fragment.references false
+compiler.stackMode native
+compiler.useSourceMaps false
+compiler.useSymbolMaps false
+dragEventSupport maybe
+geolocationSupport maybe
+gwt.enableDebugId false
+gwt.forceBidi false
+gwt.logging.consoleHandler ENABLED
+gwt.logging.developmentModeHandler ENABLED
+gwt.logging.enabled TRUE
+gwt.logging.firebugHandler DISABLED
+gwt.logging.hasWidgetsHandler ENABLED
+gwt.logging.logLevel INFO
+gwt.logging.popupHandler DISABLED
+gwt.logging.simpleRemoteHandler DISABLED
+gwt.logging.systemHandler ENABLED
+gwt.suppressNonStaticFinalFieldWarnings false
+gwt.unloadEnabled false
+locale default
+modernie none
+superdevmode off
+touchEventSupport maybe
+user.agent opera
+vaadin.profiler false
+videoElementSupport maybe
+webApiUsage modern
+
+B4D72475883613E2731EDC8DBE83AB78.cache.js
+ClientBundle.enableInlining true
+audioElementSupport maybe
+canvasElementSupport maybe
+compiler.emulatedStack false
+compiler.predeclare.cross.fragment.references false
+compiler.stackMode native
+compiler.useSourceMaps false
+compiler.useSymbolMaps false
+dragEventSupport maybe
+geolocationSupport maybe
+gwt.enableDebugId false
+gwt.forceBidi false
+gwt.logging.consoleHandler ENABLED
+gwt.logging.developmentModeHandler ENABLED
+gwt.logging.enabled TRUE
+gwt.logging.firebugHandler DISABLED
+gwt.logging.hasWidgetsHandler ENABLED
+gwt.logging.logLevel INFO
+gwt.logging.popupHandler DISABLED
+gwt.logging.simpleRemoteHandler DISABLED
+gwt.logging.systemHandler ENABLED
+gwt.suppressNonStaticFinalFieldWarnings false
+gwt.unloadEnabled false
+locale default
+modernie none
+superdevmode off
+touchEventSupport maybe
+user.agent safari
+vaadin.profiler false
+videoElementSupport maybe
+webApiUsage modern
 
 Devmode:devmode.js
