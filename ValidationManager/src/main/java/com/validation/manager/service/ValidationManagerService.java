@@ -6,9 +6,9 @@ import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.ArrayList;
 import java.util.List;
-import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
+import javax.jws.WebService;
 
 /**
  *
@@ -24,7 +24,7 @@ public class ValidationManagerService {
      * @param password password
      * @return VmUser or null if unsuccessful
      */
-    @WebMethod(operationName = "login")
+    @WebMethod(operationName = "getVMUser")
     public VmUser login(@WebParam(name = "name") final String name,
             @WebParam(name = "password") final String password) {
         return VMUserServer.getUser(name, password, true);
@@ -52,6 +52,7 @@ public class ValidationManagerService {
     }
 
     private boolean validUser(VmUser user) {
-        return VMUserServer.validCredentials(user.getUsername(), user.getPassword(), false);
+        return VMUserServer.validCredentials(user.getUsername(), 
+                user.getPassword(), false);
     }
 }
