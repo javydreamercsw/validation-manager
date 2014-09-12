@@ -82,7 +82,8 @@ public class RequirementEntityManager implements VMEntityManager<Requirement>,
 
     @Override
     public Collection<Requirement> getEntities(Project p) {
-        return map.get(p.getId()).values();
+        Map<String, Requirement> list = map.get(p.getId());
+        return list == null ? new ArrayList<>() : list.values();
     }
 
     @Override
