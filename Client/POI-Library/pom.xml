@@ -15,7 +15,7 @@
     <name>POI Library</name>
 
     <properties>
-        <poi.version>3.10-FINAL</poi.version>
+        <poi.version>3.10.1</poi.version>
     </properties>
 
     <dependencies>
@@ -66,8 +66,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
 
