@@ -25,9 +25,9 @@ import com.validation.manager.core.server.core.VMUserServer;
 @SuppressWarnings("serial")
 public class LoginDialog extends Window {
 
-    private MainMenu menu;
+    private ValidationManagerUI menu;
 
-    public LoginDialog(MainMenu menu) {
+    public LoginDialog(ValidationManagerUI menu) {
         // New login -window in the center of the screen
         super("Account login");
         this.menu = menu;

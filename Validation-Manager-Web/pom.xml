@@ -14,7 +14,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.version>7.4.0.alpha4</vaadin.version>
+        <vaadin.version>7.3.3</vaadin.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
     </properties>
     <repositories>
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
         <!--<dependency>
@@ -116,7 +116,7 @@
             <artifactId>h2</artifactId>
             <groupId>com.h2database</groupId>
             <type>jar</type>
-            <version>1.4.180</version>
+            <version>1.4.181</version>
         </dependency>
     </dependencies>
 
