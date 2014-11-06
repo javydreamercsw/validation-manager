@@ -17,24 +17,26 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
+import org.openide.util.Exceptions;
 
 @Theme("vmtheme")
 @SuppressWarnings("serial")
-public class MainMenu extends UI {
-    
-    private static ThreadLocal<MainMenu> threadLocal = new ThreadLocal<>();
+public class ValidationManagerUI extends UI {
+
+    private static ThreadLocal<ValidationManagerUI> threadLocal = new ThreadLocal<>();
     private Tree tree;
     private Panel main;
     private ThemeResource logo = new ThemeResource("vm_logo.png");
     private ThemeResource small = new ThemeResource("VMSmall.png");
     private VmUser user = null;
     private static final Logger LOG
-            = Logger.getLogger(MainMenu.class.getSimpleName());
+            = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset;
 
     /**
@@ -51,48 +53,70 @@ public class MainMenu extends UI {
         this.user = user;
         updateScreen();
     }
-    
+
     @WebServlet(value = "/*", asyncSupported = true)
     @VaadinServletConfiguration(productionMode = false,
-            ui = MainMenu.class,
+            ui = ValidationManagerUI.class,
             widgetset = "net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet")
     public static class Servlet extends VaadinServlet {
-        
+
     }
 
     // @return the current application instance	  	
-    public static MainMenu getInstance() {
+    public static ValidationManagerUI getInstance() {
         return threadLocal.get();
     }
 
     // Set the current application instance 	
-    public static void setInstance(MainMenu application) {
+    public static void setInstance(ValidationManagerUI application) {
         threadLocal.set(application);
     }
-    
+
     private void updateScreen() {
         if (getUser() == null) {
             showLoginDialog();
         } else {
             // Have a panel to put stuff in
             VerticalLayout vl = new VerticalLayout();
-            
+
             HorizontalSplitPanel vsplit = new HorizontalSplitPanel();
             vsplit.setLocked(true);
 
             tree = new Tree("Available Projects");
-            
+
             Item root = tree.addItem("Root");
-            
+
             List<Project> projects = new ArrayList<>();
-            List<Project> all = new ProjectJpaController(DataBaseManager.getEntityManagerFactory()).findProjectEntities();
+            ProjectJpaController controller
+                    = new ProjectJpaController(DataBaseManager.getEntityManagerFactory());
+            if (DataBaseManager.isDemo()
+                    && controller.findProjectEntities().isEmpty()) {
+                try {
+                    LOG.info("Creating demo projects...");
+                    //Create some test projects
+                    Project rootProject = new Project("Demo");
+                    controller.create(rootProject);
+                    for (int i = 0; i < 5; i++) {
+                        Project temp = new Project("Sub " + (i + 1));
+                        controller.create(temp);
+                        rootProject.getProjectList().add(temp);
+                    }
+                    controller.edit(rootProject);
+                    LOG.info("Done!");
+                } catch (NonexistentEntityException ex) {
+                    Exceptions.printStackTrace(ex);
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+            List<Project> all = controller.findProjectEntities();
             for (Project p : all) {
                 if (p.getParentProjectId() == null) {
                     projects.add(p);
                 }
             }
             LOG.log(Level.INFO, "Found {0} projects!", projects.size());
-            
+
             for (Project p : projects) {
                 Item parent = tree.addItem(p.getName());
                 tree.setParent(parent, root);
@@ -120,7 +144,7 @@ public class MainMenu extends UI {
             setContent(vsplit);
         }
     }
-    
+
     @Override
     protected void init(VaadinRequest request) {
         if (reset == null && DataBaseManager.isDemo()) {
@@ -133,7 +157,7 @@ public class MainMenu extends UI {
         setInstance(this);
         updateScreen();
     }
-    
+
     private void showLoginDialog() {
         LoginDialog subwindow = new LoginDialog(this);
         subwindow.setVisible(true);

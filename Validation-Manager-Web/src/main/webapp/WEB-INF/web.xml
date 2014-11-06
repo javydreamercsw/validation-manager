@@ -31,6 +31,20 @@
         <listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
     </listener>
     <servlet>
+        <servlet-name>Vaadin Application Servlet</servlet-name>
+        <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
+        <init-param>
+            <description>Vaadin UI to display</description>
+            <param-name>UI</param-name>
+            <param-value>net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI</param-value>
+        </init-param>
+        <init-param>
+            <description>Application widgetset</description>
+            <param-name>widgetset</param-name>
+            <param-value>net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet</param-value>
+        </init-param>
+    </servlet>
+    <servlet>
         <servlet-name>VMWebService</servlet-name>
         <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
