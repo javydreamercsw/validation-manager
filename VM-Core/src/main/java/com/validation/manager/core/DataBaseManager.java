@@ -4,7 +4,6 @@ import com.googlecode.flyway.core.Flyway;
 import com.googlecode.flyway.core.api.FlywayException;
 import com.googlecode.flyway.core.api.MigrationInfo;
 import com.googlecode.flyway.core.api.MigrationState;
-import com.validation.manager.core.db.VmId;
 import com.validation.manager.core.db.controller.VmIdJpaController;
 import com.validation.manager.core.server.core.VMIdServer;
 import gudusoft.gsqlparser.EDbVendor;
@@ -137,10 +136,10 @@ public class DataBaseManager {
             if (LOG.isLoggable(Level.CONFIG)) {
                 VmIdJpaController controller = new VmIdJpaController(
                         getEntityManagerFactory());
-                for (VmId next : controller.findVmIdEntities()) {
+                controller.findVmIdEntities().stream().forEach((next) -> {
                     LOG.log(Level.CONFIG, "{0}, {1}, {2}", new Object[]{next.getId(),
                         next.getTableName(), next.getLastId()});
-                }
+                });
             }
         }
     }
@@ -231,7 +230,6 @@ public class DataBaseManager {
                 usingContext = true;
             } catch (NamingException e) {
                 LOG.log(Level.FINE, null, e);
-                demo = false;
                 if (!usingContext) {
                     LOG.log(Level.WARNING,
                             "Manually specified connection parameters. "
