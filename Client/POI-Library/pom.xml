@@ -10,7 +10,6 @@
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>POI-Library</artifactId>
     <packaging>nbm</packaging>
-    <version>0.3-SNAPSHOT</version>
 
     <name>POI Library</name>
 
