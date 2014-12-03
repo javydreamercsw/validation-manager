@@ -7,7 +7,6 @@
         <version>0.3-SNAPSHOT</version>
     </parent>
     
-    <version>0.2-SNAPSHOT</version>
     <artifactId>JavaFX-Lib</artifactId>
     <name>JavaFX Library</name>
     <packaging>nbm</packaging>
