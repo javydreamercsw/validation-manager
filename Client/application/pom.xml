@@ -85,12 +85,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>JavaFX-Lib</artifactId>
-            <version>0.2-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Graph</artifactId>
-            <version>0.2-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     
