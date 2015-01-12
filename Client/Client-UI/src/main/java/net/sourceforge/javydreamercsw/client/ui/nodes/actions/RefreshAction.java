@@ -11,6 +11,7 @@ import org.openide.nodes.Node;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RefreshAction extends AbstractAction {
+    private static final long serialVersionUID = -5763574676651998486L;
 
     private final Node node;
 
@@ -22,9 +23,8 @@ public class RefreshAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        for (RefreshableCapability rc
-                : node.getLookup().lookupAll(RefreshableCapability.class)) {
+        node.getLookup().lookupAll(RefreshableCapability.class).stream().forEach((rc) -> {
             rc.refresh();
-        }
+        });
     }
 }

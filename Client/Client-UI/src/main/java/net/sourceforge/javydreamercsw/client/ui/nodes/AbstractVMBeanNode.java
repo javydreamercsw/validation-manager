@@ -20,7 +20,6 @@ import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
-import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -59,17 +58,15 @@ public abstract class AbstractVMBeanNode extends BeanNode
                 LOG.log(Level.FINE, "{0} node expanded!", getName());
                 Set<TopComponent> opened = 
                         WindowManager.getDefault().getRegistry().getOpened();
-                for (TopComponent tc : opened) {
-                    if (tc instanceof IProjectExplorer) {
-                        try {
-                            IProjectExplorer ipe = (IProjectExplorer) tc;
-                            ipe.getExplorerManager().setSelectedNodes(
-                                    new Node[]{AbstractVMBeanNode.this});
-                        } catch (PropertyVetoException ex) {
-                            Exceptions.printStackTrace(ex);
-                        }
+                opened.stream().filter((tc) -> (tc instanceof IProjectExplorer)).forEach((tc) -> {
+                    try {
+                        IProjectExplorer ipe = (IProjectExplorer) tc;
+                        ipe.getExplorerManager().setSelectedNodes(
+                                new Node[]{AbstractVMBeanNode.this});
+                    } catch (PropertyVetoException ex) {
+                        Exceptions.printStackTrace(ex);
                     }
-                }
+                });
             }
 
             @Override
@@ -82,16 +79,13 @@ public abstract class AbstractVMBeanNode extends BeanNode
 
     @Override
     public void refresh() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                //Refresh children
-                if (factory != null) {
-                    factory.refresh();
-                }
-                //Refresh bean
-                refreshMyself();
+        SwingUtilities.invokeLater(() -> {
+            //Refresh children
+            if (factory != null) {
+                factory.refresh();
             }
+            //Refresh bean
+            refreshMyself();
         });
     }
 
