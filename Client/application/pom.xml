@@ -9,7 +9,6 @@
 
     <artifactId>Client-app</artifactId>
     <packaging>nbm-application</packaging>
-    <version>0.3-SNAPSHOT</version>
 
     <name>Admin Client</name>
 
@@ -43,34 +42,34 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>vm-client-branding</artifactId>
-            <version>0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>H2-Driver</artifactId>
-            <version>0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Client-UI</artifactId>
-            <version>0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <artifactId>MySQL-Driver</artifactId>
             <groupId>net.sourceforge.javydreamercsw</groupId>
             <type>jar</type>
-            <version>0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <artifactId>VM-Core-Wrapper</artifactId>
             <groupId>net.sourceforge.javydreamercsw</groupId>
             <type>jar</type>
-            <version>0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>POI-Library</artifactId>
-            <version>0.3-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.modules</groupId>
