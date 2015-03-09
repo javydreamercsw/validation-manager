@@ -7,4 +7,30 @@
                 <goal>nbm:build-installers</goal>
             </goals>
         </action>
+        <action>
+            <actionName>CUSTOM-Run Offline</actionName>
+            <displayName>Run Offline</displayName>
+            <goals>
+                <goal>nbm:cluster-app</goal>
+                <goal>nbm:run-platform</goal>
+                <goal>-o</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-Debug Offline</actionName>
+            <displayName>Debug Offline</displayName>
+            <goals>
+                <goal>nbm:cluster-app</goal>
+                <goal>nbm:run-platform</goal>
+                <goal>-o</goal>
+            </goals>
+            <properties>
+                <jpda.listen>true</jpda.listen>
+                <netbeans.run.params.debug></netbeans.run.params.debug>
+                <J-Xdebug></J-Xdebug>
+                <skipTests>true</skipTests>
+                <jpda.address>54943</jpda.address>
+                <file.encoding>UTF-8</file.encoding>
+            </properties>
+        </action>
     </actions>
