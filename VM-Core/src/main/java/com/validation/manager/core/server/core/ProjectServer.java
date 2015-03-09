@@ -8,7 +8,6 @@ import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
-import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -23,6 +22,7 @@ import static java.util.logging.Logger.getLogger;
  */
 public final class ProjectServer extends Project
         implements EntityServer<Project>, VersionableServer<Project> {
+    private static final long serialVersionUID = 3434510483033583117L;
 
     public ProjectServer(String name, String notes) {
         super(name);
