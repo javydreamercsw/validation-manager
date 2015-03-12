@@ -11,7 +11,6 @@ import javax.persistence.Persistence;
 import org.netbeans.api.db.explorer.DatabaseConnection;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
-import org.openide.util.Cancellable;
 import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 import org.openide.util.TaskListener;
@@ -44,37 +43,25 @@ public class DataBaseTool {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                ph = ProgressHandleFactory.createHandle(
-                        "Connecting to Database, please wait...",
-                        new Cancellable() {
-
-                            @Override
-                            public boolean cancel() {
-                                return handleCancel();
-                            }
-                        });
-                Runnable runnable = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        //Connect to database
-                        DatabaseConnection conn = ProjectExplorerComponent.getConnection();
-                        if (conn != null) {
-                            Map addedOrOverridenProperties = new HashMap();
-                            addedOrOverridenProperties.put("javax.persistence.jdbc.url",
-                                    conn.getDatabaseURL());
-                            addedOrOverridenProperties.put("javax.persistence.jdbc.password",
-                                    conn.getPassword());
-                            addedOrOverridenProperties.put("javax.persistence.jdbc.driver",
-                                    conn.getDriverClass());
-                            addedOrOverridenProperties.put("javax.persistence.jdbc.user",
-                                    conn.getUser());
-                            emf = Persistence.createEntityManagerFactory(
-                                    DataBaseManager.getPersistenceUnitName(),
-                                    addedOrOverridenProperties);
-                            DataBaseManager.setEntityManagerFactory(getEmf());
-                            ProjectExplorerComponent.refresh();
-                        }
+                ph = ProgressHandleFactory.createHandle("Connecting to Database, please wait...", () -> handleCancel());
+                Runnable runnable = () -> {
+                    //Connect to database
+                    DatabaseConnection conn = ProjectExplorerComponent.getConnection();
+                    if (conn != null) {
+                        Map addedOrOverridenProperties = new HashMap();
+                        addedOrOverridenProperties.put("javax.persistence.jdbc.url",
+                                conn.getDatabaseURL());
+                        addedOrOverridenProperties.put("javax.persistence.jdbc.password",
+                                conn.getPassword());
+                        addedOrOverridenProperties.put("javax.persistence.jdbc.driver",
+                                conn.getDriverClass());
+                        addedOrOverridenProperties.put("javax.persistence.jdbc.user",
+                                conn.getUser());
+                        emf = Persistence.createEntityManagerFactory(
+                                DataBaseManager.getPersistenceUnitName(),
+                                addedOrOverridenProperties);
+                        DataBaseManager.setEntityManagerFactory(getEmf());
+                        ProjectExplorerComponent.refresh();
                     }
                 };
                 theTask = RP.create(runnable); //the task is not started yet
