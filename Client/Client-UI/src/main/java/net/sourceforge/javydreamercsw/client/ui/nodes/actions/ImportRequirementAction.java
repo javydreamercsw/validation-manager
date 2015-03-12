@@ -8,14 +8,17 @@ import com.validation.manager.core.tool.requirement.importer.RequirementImportEx
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
+import org.openide.util.TaskListener;
 import org.openide.util.Utilities;
 
 /**
@@ -40,50 +43,85 @@ public class ImportRequirementAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(() -> {
-            final JFileChooser fc = new JFileChooser();
-            fc.addChoosableFileFilter(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return file.isDirectory() || file.getName().endsWith(".xls")
-                            || file.getName().endsWith(".xlsx");
-                }
-                
-                @Override
-                public String getDescription() {
-                    return "Excel Files";
-                }
-            });
-            fc.addChoosableFileFilter(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return file.getName().endsWith(".csv");
-                }
-                
-                @Override
-                public String getDescription() {
-                    return "Comma delimited Files";
-                }
-            });
-            int returnVal = fc.showOpenDialog(null);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                try {
-                    File file = fc.getSelectedFile();
-                    RequirementSpecNode rsns
-                            = Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class);
-                    RequirementImporter instance = new RequirementImporter(file,
-                            new RequirementSpecNodeJpaController(
-                                    DataBaseManager.getEntityManagerFactory())
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                ph = ProgressHandleFactory.createHandle("Importing Requirements, please wait...", () -> handleCancel());
+                Runnable runnable = () -> {
+                    final JFileChooser fc = new JFileChooser();
+                    fc.addChoosableFileFilter(new FileFilter() {
+                        @Override
+                        public boolean accept(File file) {
+                            return file.isDirectory() || file.getName().endsWith(".xls")
+                                    || file.getName().endsWith(".xlsx");
+                        }
+
+                        @Override
+                        public String getDescription() {
+                            return "Excel Files";
+                        }
+                    });
+                    fc.addChoosableFileFilter(new FileFilter() {
+                        @Override
+                        public boolean accept(File file) {
+                            return file.getName().endsWith(".csv");
+                        }
+
+                        @Override
+                        public String getDescription() {
+                            return "Comma delimited Files";
+                        }
+                    });
+                    int returnVal = fc.showOpenDialog(null);
+                    if (returnVal == JFileChooser.APPROVE_OPTION) {
+                        try {
+                            File file = fc.getSelectedFile();
+                            RequirementSpecNode rsns
+                                    = Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class);
+                            RequirementImporter instance = new RequirementImporter(file,
+                                    new RequirementSpecNodeJpaController(
+                                            DataBaseManager.getEntityManagerFactory())
                                     .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
-                    instance.importFile(true);
-                    instance.processImport();
-                } catch (UnsupportedOperationException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (RequirementImportException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (VMException ex) {
-                    Exceptions.printStackTrace(ex);
+                            instance.importFile(true);
+                            instance.processImport();
+                        } catch (UnsupportedOperationException ex) {
+                            Exceptions.printStackTrace(ex);
+                        } catch (RequirementImportException ex) {
+                            Exceptions.printStackTrace(ex);
+                        } catch (VMException ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
+                    }
+                };
+                theTask = RP.create(runnable); //the task is not started yet
+
+                theTask.addTaskListener(new TaskListener() {
+                    public void taskFinished(RequestProcessor.Task task) {
+                        ph.finish();
+                        LOG.log(Level.FINE,
+                                "Importing Requirements done!");
+                    }
+
+                    @Override
+                    public void taskFinished(org.openide.util.Task task) {
+                        ph.finish();
+                        LOG.log(Level.FINE,
+                                "Importing Requirements done!");
+                    }
+                });
+                //start the progresshandle the progress UI will show 500s after
+                ph.start();
+
+                //this actually start the task
+                theTask.schedule(0);
+            }
+
+            private boolean handleCancel() {
+                LOG.info("handleCancel");
+                if (null == theTask) {
+                    return false;
                 }
+                return theTask.cancel();
             }
         });
     }
