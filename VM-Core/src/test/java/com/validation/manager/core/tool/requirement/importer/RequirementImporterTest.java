@@ -1,6 +1,5 @@
 package com.validation.manager.core.tool.requirement.importer;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.VMException;
@@ -10,7 +9,6 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import static com.validation.manager.core.tool.requirement.importer.RequirementImporter.exportTemplate;
 import com.validation.manager.test.AbstractVMTestCase;
-import com.validation.manager.test.TestHelper;
 import static com.validation.manager.test.TestHelper.createProject;
 import static com.validation.manager.test.TestHelper.createRequirementSpec;
 import static com.validation.manager.test.TestHelper.createRequirementSpecNode;
@@ -23,7 +21,6 @@ import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
-import org.openide.util.Exceptions;
 import static org.openide.util.Exceptions.printStackTrace;
 
 /**
@@ -236,10 +233,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
         } catch (FileNotFoundException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        } catch (InvalidFormatException ex) {
+        } catch (IOException | InvalidFormatException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
