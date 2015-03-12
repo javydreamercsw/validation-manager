@@ -46,42 +46,47 @@ public class ImportRequirementAction extends AbstractAction {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                ph = ProgressHandleFactory.createHandle("Importing Requirements, please wait...", () -> handleCancel());
-                Runnable runnable = () -> {
-                    final JFileChooser fc = new JFileChooser();
-                    fc.addChoosableFileFilter(new FileFilter() {
-                        @Override
-                        public boolean accept(File file) {
-                            return file.isDirectory() || file.getName().endsWith(".xls")
-                                    || file.getName().endsWith(".xlsx");
-                        }
+                final JFileChooser fc = new JFileChooser();
+                fc.addChoosableFileFilter(new FileFilter() {
+                    @Override
+                    public boolean accept(File file) {
+                        return file.isDirectory() || file.getName().endsWith(".xls")
+                                || file.getName().endsWith(".xlsx");
+                    }
 
-                        @Override
-                        public String getDescription() {
-                            return "Excel Files";
-                        }
-                    });
-                    fc.addChoosableFileFilter(new FileFilter() {
-                        @Override
-                        public boolean accept(File file) {
-                            return file.getName().endsWith(".csv");
-                        }
+                    @Override
+                    public String getDescription() {
+                        return "Excel Files";
+                    }
+                });
+                fc.addChoosableFileFilter(new FileFilter() {
+                    @Override
+                    public boolean accept(File file) {
+                        return file.getName().endsWith(".csv");
+                    }
 
-                        @Override
-                        public String getDescription() {
-                            return "Comma delimited Files";
-                        }
-                    });
-                    int returnVal = fc.showOpenDialog(null);
-                    if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    @Override
+                    public String getDescription() {
+                        return "Comma delimited Files";
+                    }
+                });
+                int returnVal = fc.showOpenDialog(null);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    ph = ProgressHandleFactory.createHandle(
+                            "Importing Requirements, please wait...",
+                            () -> handleCancel());
+                    Runnable runnable = () -> {
                         try {
                             File file = fc.getSelectedFile();
                             RequirementSpecNode rsns
-                                    = Utilities.actionsGlobalContext().lookup(RequirementSpecNode.class);
-                            RequirementImporter instance = new RequirementImporter(file,
-                                    new RequirementSpecNodeJpaController(
-                                            DataBaseManager.getEntityManagerFactory())
-                                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
+                                    = Utilities.actionsGlobalContext()
+                                    .lookup(RequirementSpecNode.class);
+                            RequirementImporter instance
+                                    = new RequirementImporter(file,
+                                            new RequirementSpecNodeJpaController(
+                                                    DataBaseManager.getEntityManagerFactory())
+                                            .findRequirementSpecNode(
+                                                    rsns.getRequirementSpecNodePK()));
                             instance.importFile(true);
                             instance.processImport();
                         } catch (UnsupportedOperationException ex) {
@@ -91,29 +96,29 @@ public class ImportRequirementAction extends AbstractAction {
                         } catch (VMException ex) {
                             Exceptions.printStackTrace(ex);
                         }
-                    }
-                };
-                theTask = RP.create(runnable); //the task is not started yet
+                    };
+                    theTask = RP.create(runnable); //the task is not started yet
 
-                theTask.addTaskListener(new TaskListener() {
-                    public void taskFinished(RequestProcessor.Task task) {
-                        ph.finish();
-                        LOG.log(Level.FINE,
-                                "Importing Requirements done!");
-                    }
+                    theTask.addTaskListener(new TaskListener() {
+                        public void taskFinished(RequestProcessor.Task task) {
+                            ph.finish();
+                            LOG.log(Level.FINE,
+                                    "Importing Requirements done!");
+                        }
 
-                    @Override
-                    public void taskFinished(org.openide.util.Task task) {
-                        ph.finish();
-                        LOG.log(Level.FINE,
-                                "Importing Requirements done!");
-                    }
-                });
-                //start the progresshandle the progress UI will show 500s after
-                ph.start();
+                        @Override
+                        public void taskFinished(org.openide.util.Task task) {
+                            ph.finish();
+                            LOG.log(Level.FINE,
+                                    "Importing Requirements done!");
+                        }
+                    });
+                    //start the progresshandle the progress UI will show 500s after
+                    ph.start();
 
-                //this actually start the task
-                theTask.schedule(0);
+                    //this actually start the task
+                    theTask.schedule(0);
+                }
             }
 
             private boolean handleCancel() {
