@@ -93,9 +93,18 @@ public class UIRequirementNode extends AbstractVMBeanNode {
                     }
                 }
                 if (provider != null) {
-                    image
-                            = provider.getIcon(getLookup().lookup(Requirement.class),
-                                    coverage);
+                    switch(getLookup().lookup(Requirement.class)
+                            .getRequirementStatusId().getId()){
+                        case 3:
+                            //TODO: Obsolete
+                            break;
+                        case 4:
+                            //TODO: Rejected
+                            break;
+                        default:
+                            image = provider.getIcon(getLookup().lookup(Requirement.class),
+                                coverage);
+                    }
                 }
                 timer.stop();
                 LOG.log(Level.FINE, "Time getting icon for {0}: {1}",
