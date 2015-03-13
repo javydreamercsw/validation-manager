@@ -43,11 +43,11 @@ import static org.apache.poi.ss.usermodel.WorkbookFactory.create;
 public class StepImporter implements ImporterInterface<Step> {
 
     private final File toImport;
-    private final List<Step> steps = new ArrayList<Step>();
+    private final List<Step> steps = new ArrayList<>();
     private final TestCase tc;
     private static final Logger LOG
             = getLogger(StepImporter.class.getName());
-    private static final List<String> columns = new ArrayList<String>();
+    private static final List<String> columns = new ArrayList<>();
     private static final ResourceBundle rb
             = getBundle(
                     "com.validation.manager.resources.VMMessages", getDefault());
@@ -121,8 +121,8 @@ public class StepImporter implements ImporterInterface<Step> {
                                     .replaceAll("%c", "" + cells));
                         }
                         Step step = new Step();
-                        step.setRequirementList(new ArrayList<Requirement>());
-                        HashMap<String, Object> parameters = new HashMap<String, Object>();
+                        step.setRequirementList(new ArrayList<>());
+                        HashMap<String, Object> parameters = new HashMap<>();
                         List<Object> result;
                         LOG.log(Level.FINE, "Row: {0}", r);
                         for (int c = 0; c < cells; c++) {
@@ -271,19 +271,13 @@ public class StepImporter implements ImporterInterface<Step> {
             column++;
         }
 
-        FileOutputStream out = null;
-        try {
-            out = new FileOutputStream(template);
+        try (FileOutputStream out = new FileOutputStream(template)) {
             wb.write(out);
             out.close();
         } catch (FileNotFoundException e) {
             LOG.log(Level.SEVERE, null, e);
         } catch (IOException e) {
             LOG.log(Level.SEVERE, null, e);
-        } finally {
-            if (out != null) {
-                out.close();
-            }
         }
         return template;
     }
@@ -294,9 +288,7 @@ public class StepImporter implements ImporterInterface<Step> {
             System.out.println(file.getAbsolutePath());
         } catch (FileNotFoundException ex) {
             LOG.log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        } catch (InvalidFormatException ex) {
+        } catch (IOException | InvalidFormatException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
     }
