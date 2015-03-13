@@ -66,15 +66,11 @@ public class RequirementChildFactory extends AbstractChildFactory
 
         @Override
         public void run() {
-            Comparator<Object> comparator = new Comparator<Object>() {
-
-                @Override
-                public int compare(Object o1, Object o2) {
-                    //Sort them by unique id
-                    return ((Requirement) o1).getUniqueId()
-                            .compareToIgnoreCase(((Requirement) o2).getUniqueId());
-                }
-            };
+            Comparator<Object> comparator = (Object o1, Object o2)
+                    -> ((Requirement) o1).getUniqueId()
+                    .compareToIgnoreCase(((Requirement) o2)
+                            .getUniqueId()) //Sort them by unique id
+                    ;
             List<Requirement> requirementList = node.getRequirementList();
             Collections.sort(requirementList, comparator);
             for (Requirement req : requirementList) {
