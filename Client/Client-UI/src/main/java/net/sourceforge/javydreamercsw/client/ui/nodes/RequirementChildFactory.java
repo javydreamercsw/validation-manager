@@ -6,6 +6,8 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.server.core.RequirementServer;
 import java.beans.IntrospectionException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -25,7 +27,8 @@ public class RequirementChildFactory extends AbstractChildFactory
         implements RequirementStatusFilterChangeListener {
 
     private RequirementSpecNode node;
-//    private Integer[] ids = new Integer[0];
+    //TODO: For now ignore obsolete and rejected
+    private Integer[] ids = new Integer[]{1, 2};
     private Populator pop = null;
     private boolean done = false;
     private static final Logger LOG
@@ -75,35 +78,36 @@ public class RequirementChildFactory extends AbstractChildFactory
             List<Requirement> requirementList = node.getRequirementList();
             Collections.sort(requirementList, comparator);
             for (Requirement req : requirementList) {
-                //TODO: Filter out status ids
-//            if (!new ArrayList<>(Arrays.asList(ids)).contains(req.getRequirementStatusId().getId())) {
-                if (req.getRequirementStatusId() != null
-                        && req.getRequirementStatusId().getId() == 2) {
-                    boolean found = false;
-                    for (Object obj : toPopulate) {
-                        if (obj instanceof Requirement) {
-                            Requirement in = (Requirement) obj;
-                            if (in.getUniqueId().trim().equals(req.getUniqueId().trim())) {
-                                found = true;
-                                break;
+                if (new ArrayList<>(Arrays.asList(ids))
+                        .contains(req.getRequirementStatusId().getId())) {
+                    if (req.getRequirementStatusId() != null) {
+                        boolean found = false;
+                        for (Object obj : toPopulate) {
+                            if (obj instanceof Requirement) {
+                                Requirement in = (Requirement) obj;
+                                if (in.getUniqueId().trim()
+                                        .equals(req.getUniqueId().trim())) {
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
-                    }
-                    if (!found) {
-                        //Only add the latest version
-                        RequirementServer rs = new RequirementServer(req);
-                        Requirement max = Collections.max(rs.getVersions(), null);
-                        toPopulate.add(max);
-                    } else if (req.getRequirementStatusId() == null) {
-                        LOG.log(Level.WARNING,
-                                "Invalid Requirement without status: {0}", req);
+                        if (!found) {
+                            //Only add the latest version
+                            RequirementServer rs = new RequirementServer(req);
+                            Requirement max = Collections.max(rs.getVersions(), null);
+                            toPopulate.add(max);
+                        } else if (req.getRequirementStatusId() == null) {
+                            LOG.log(Level.WARNING,
+                                    "Invalid Requirement without status: {0}", req);
+                        }
                     }
                 }
                 for (RequirementSpecNode rsn : node.getRequirementSpecNodeList()) {
                     toPopulate.add(rsn);
                 }
             }
-             done = true;
+            done = true;
         }
     }
 
