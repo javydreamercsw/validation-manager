@@ -4,7 +4,6 @@ import com.validation.manager.core.tool.message.MessageHandler;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultCellEditor;
@@ -18,7 +17,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
@@ -32,6 +30,8 @@ import org.openide.windows.TopComponent;
 public abstract class AbstractImportTopComponent extends TopComponent
         implements ImporterInterface {
 
+    private static final long serialVersionUID = -5393804345171684006L;
+
     protected final List<DefaultTableModel> tables
             = new ArrayList<>();
     protected DefaultComboBoxModel model;
@@ -41,20 +41,17 @@ public abstract class AbstractImportTopComponent extends TopComponent
     private JDialog dialog;
 
     public AbstractImportTopComponent() {
-        Vector comboBoxItems = new Vector();
+        ArrayList comboBoxItems = new ArrayList();
         comboBoxItems.add(",");
         comboBoxItems.add(";");
         comboBoxItems.add(".");
-        setModel(new DefaultComboBoxModel(comboBoxItems));
+        setModel(new DefaultComboBoxModel(comboBoxItems.toArray()));
         init();
         getDelimiter().setSelectedIndex(0);
-        getSpinner().addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                LOG.log(Level.FINE, "Value changed to: {0}", getSpinner().getValue());
-                displayTable((int) Math.round(Double.valueOf(
-                        getSpinner().getValue().toString())));
-            }
+        getSpinner().addChangeListener((ChangeEvent e) -> {
+            LOG.log(Level.FINE, "Value changed to: {0}", getSpinner().getValue());
+            displayTable((int) Math.round(Double.valueOf(
+                    getSpinner().getValue().toString())));
         });
     }
 
@@ -123,7 +120,7 @@ public abstract class AbstractImportTopComponent extends TopComponent
         //Rebuild the table
         DefaultTableModel tableModel = tables.get(index - 1);
         int columns = tableModel.getColumnCount();
-        String[] title = new String[columns];
+        String[] title = new String[columns + 1];
         final List<TableCellEditor> editors
                 = new ArrayList<>();
         for (int i = 0; i < columns; i++) {
@@ -137,10 +134,12 @@ public abstract class AbstractImportTopComponent extends TopComponent
         }
         tableModel.setColumnIdentifiers(title);
         setImportTable(new JTable(tableModel) {
+            private static final long serialVersionUID = 7493286707609095962L;
+
             //  Determine editor to be used by row
             @Override
             public TableCellEditor getCellEditor(int row, int column) {
-                if (!editors.isEmpty() && row == 0) {
+                if (!editors.isEmpty() && row == 0 && editors.size() <= column) {
                     return (TableCellEditor) editors.get(column);
                 } else {
                     return super.getCellEditor(row, column);
