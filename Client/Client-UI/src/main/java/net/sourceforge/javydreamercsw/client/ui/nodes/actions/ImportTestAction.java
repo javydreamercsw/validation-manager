@@ -13,6 +13,8 @@ import org.openide.util.Utilities;
  */
 public class ImportTestAction extends AbstractAction {
 
+    private static final long serialVersionUID = 2518681189161437035L;
+
     public ImportTestAction() {
         super("Import From Document",
                 new ImageIcon("com/validation/manager/resources/icons/Signage/Add Square.png"));
