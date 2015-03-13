@@ -64,6 +64,8 @@ public final class RequirementViewerTopComponent extends TopComponent
         implements ExplorerManager.Provider, LookupListener, ItemListener,
         RequirementStatusFilterChangeProvider {
 
+    private static final long serialVersionUID = -4351258629805876065L;
+
     private final ExplorerManager em = new ExplorerManager();
     private Lookup.Result<Project> result = null;
     private Lookup.Result<Requirement> result2 = null;
