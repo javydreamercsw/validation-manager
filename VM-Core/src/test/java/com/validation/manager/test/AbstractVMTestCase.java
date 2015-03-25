@@ -37,7 +37,7 @@ public abstract class AbstractVMTestCase extends TestCase {
     /**
      * Parameters for queries.
      */
-    protected HashMap<String, Object> parameters = new HashMap<String, Object>();
+    protected HashMap<String, Object> parameters = new HashMap<>();
     /**
      * Query results.
      */
@@ -68,9 +68,7 @@ public abstract class AbstractVMTestCase extends TestCase {
                 conn = ds.getConnection();
                 stmt = conn.createStatement();
                 stmt.executeUpdate("DROP ALL OBJECTS DELETE FILES");
-            } catch (SQLException ex) {
-                getLogger(AbstractVMTestCase.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ClassNotFoundException ex) {
+            } catch (SQLException | ClassNotFoundException ex) {
                 getLogger(AbstractVMTestCase.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
                 try {
@@ -119,9 +117,7 @@ public abstract class AbstractVMTestCase extends TestCase {
             deleteUser(designer);
             deleteUser(tester);
             deleteUser(leader);
-        } catch (IllegalOrphanException ex) {
-            getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
-        } catch (NonexistentEntityException ex) {
+        } catch (IllegalOrphanException | NonexistentEntityException ex) {
             getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
         }
     }
