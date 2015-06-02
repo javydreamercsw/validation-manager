@@ -5,8 +5,9 @@
     <parent>
         <groupId>net.sourceforge.javydreamercsw</groupId>
         <artifactId>Validation-Manager</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0.3-SNAPSHOT</version>
     </parent>
+    <version>0.1-SNAPSHOT</version>
     <groupId>com.validation.manager</groupId>
     <artifactId>WebServiceClient</artifactId>
     <name>Web Service Client</name>
@@ -37,12 +38,13 @@
                         </goals>
                         <configuration>
                             <wsdlFiles>
-                                <wsdlFile>localhost_8080/ValidationManager/ValidationManagerService.wsdl</wsdlFile>
+                                <wsdlFile>localhost_8085/validation-manager/VMWebService.wsdl</wsdlFile>
                             </wsdlFiles>
-                            <wsdlLocation>http://localhost:8080/ValidationManager/ValidationManagerService?wsdl</wsdlLocation>
-                            <staleFile>${project.build.directory}/jaxws/stale/ValidationManagerService.stale</staleFile>
+                            <packageName>com.validation.manager.ws.client</packageName>
+                            <wsdlLocation>http://localhost:8085/validation-manager/VMWebService?wsdl</wsdlLocation>
+                            <staleFile>${project.build.directory}/jaxws/stale/VMWebService.stale</staleFile>
                         </configuration>
-                        <id>wsimport-generate-ValidationManagerService</id>
+                        <id>wsimport-generate-VMWebService</id>
                         <phase>generate-sources</phase>
                     </execution>
                 </executions>
@@ -61,6 +63,23 @@
                     <catalog>${basedir}/src/jax-ws-catalog.xml</catalog>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>src</directory>
+                            <targetPath>WEB-INF</targetPath>
+                            <includes>
+                                <include>jax-ws-catalog.xml</include>
+                                <include>wsdl/**</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -68,7 +87,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
