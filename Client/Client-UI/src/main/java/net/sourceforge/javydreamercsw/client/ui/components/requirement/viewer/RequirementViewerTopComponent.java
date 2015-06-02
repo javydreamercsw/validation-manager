@@ -209,7 +209,9 @@ public final class RequirementViewerTopComponent extends TopComponent
                 } else if (item instanceof Requirement) {
                     Requirement req = (Requirement) item;
                     scene.clear();
-                    LOG.fine(req.getUniqueId());
+                    LOG.log(Level.INFO, "Selected: {0} ({1})", 
+                            new Object[]{req.getUniqueId(),
+                            req.getId()});
                     scene.addRequirement(req);
                 }
             }

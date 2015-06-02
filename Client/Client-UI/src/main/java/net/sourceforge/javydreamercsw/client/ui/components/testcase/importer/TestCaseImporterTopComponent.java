@@ -88,6 +88,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
 
     private static final Logger LOG
             = Logger.getLogger(TestCaseImporterTopComponent.class.getSimpleName());
+    private static final long serialVersionUID = -7506655107681422195L;
     protected Test test;
     protected TestCase tc;
     protected TestPlan tp;

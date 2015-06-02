@@ -14,7 +14,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +79,7 @@ import org.openide.windows.WindowManager;
 public final class ProjectDetailsTopComponent extends TopComponent
         implements LookupListener {
 
+    private static final long serialVersionUID = -1769266654873679426L;
     private static JFXPanel chartFxPanel;
     private Lookup.Result<Project> result = null;
     private Project currentProject;
@@ -91,18 +91,15 @@ public final class ProjectDetailsTopComponent extends TopComponent
         initComponents();
         setName(Bundle.CTL_ProjectDetailsTopComponent());
         setToolTipText(Bundle.HINT_ProjectDetailsTopComponent());
-        WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
-            @Override
-            public void run() {
-                // create javafx panel for charts
-                chartFxPanel = new JFXPanel();
-                chartFxPanel.setPreferredSize(getSize());
-                //JTable
-                DecimalFormatRenderer renderer = new DecimalFormatRenderer();
-                renderer.setHorizontalAlignment(JLabel.RIGHT);
-                chartTablePanel.setLayout(new BorderLayout());
-                chartTablePanel.add(chartFxPanel, BorderLayout.CENTER);
-            }
+        WindowManager.getDefault().invokeWhenUIReady(() -> {
+            // create javafx panel for charts
+            chartFxPanel = new JFXPanel();
+            chartFxPanel.setPreferredSize(getSize());
+            //JTable
+            DecimalFormatRenderer renderer = new DecimalFormatRenderer();
+            renderer.setHorizontalAlignment(JLabel.RIGHT);
+            chartTablePanel.setLayout(new BorderLayout());
+            chartTablePanel.add(chartFxPanel, BorderLayout.CENTER);
         });
     }
 
@@ -190,6 +187,7 @@ public final class ProjectDetailsTopComponent extends TopComponent
 
         private static final DecimalFormat formatter
                 = new DecimalFormat("#.0");
+        private static final long serialVersionUID = -7787226130899799277L;
 
         @Override
         public Component getTableCellRendererComponent(JTable table,
@@ -250,13 +248,8 @@ public final class ProjectDetailsTopComponent extends TopComponent
         specs.entrySet().stream().forEach((entry) -> {
             requirements.addAll(entry.getValue());
         });
-        Collections.sort(requirements, new Comparator<Requirement>() {
-
-            @Override
-            public int compare(Requirement o1, Requirement o2) {
-                return o1.getUniqueId().compareTo(o2.getUniqueId());
-            }
-        });
+        Collections.sort(requirements, (Requirement o1, Requirement o2)
+                -> o1.getUniqueId().compareTo(o2.getUniqueId()));
         Object[][] values = new Object[requirements.size()][3];
         int i = 0;
         for (Requirement r : requirements) {
@@ -283,6 +276,7 @@ public final class ProjectDetailsTopComponent extends TopComponent
                     "Requirement", "Description", "Coverage"
                 }
         ) {
+            private static final long serialVersionUID = -6158042587124966771L;
             Class[] types = new Class[]{
                 java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
@@ -331,6 +325,8 @@ public final class ProjectDetailsTopComponent extends TopComponent
                      *fields and that will be embedded in the main table */
                     return new JTable(
                             new AbstractTableModel() {
+                                private static final long serialVersionUID = 7434377947963338162L;
+
                                 @Override
                                 public int getColumnCount() {
                                     return 1;
@@ -367,6 +363,8 @@ public final class ProjectDetailsTopComponent extends TopComponent
     }
 
     public class LineWrapCellRenderer extends JScrollPane implements TableCellRenderer {
+
+        private static final long serialVersionUID = 2766827135113284343L;
 
         @Override
         public Component getTableCellRendererComponent(

@@ -64,6 +64,7 @@ public final class RequirementMappingImporterTopComponent
     private static final Logger LOG
             = Logger.getLogger(RequirementMappingImporterTopComponent.class.getSimpleName());
     private Project project = null;
+    private static final long serialVersionUID = -9198766800998774285L;
 
     public RequirementMappingImporterTopComponent() {
         super();
