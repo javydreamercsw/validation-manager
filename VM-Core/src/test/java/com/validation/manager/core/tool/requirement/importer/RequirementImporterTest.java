@@ -40,7 +40,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
      */
     @Test
     public void testImportFileXLS() {
-        System.out.println("importFile (xls)");
+        LOG.info("importFile (xls)");
         Project project = createProject("Test Project", "Notes");
         String name = RequirementImporterTest.class.getCanonicalName();
         name = name.substring(0, name.lastIndexOf("."));
@@ -52,9 +52,9 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + getProperty("file.separator")
                 + name
                 + getProperty("file.separator") + "Reqs.xls");
-        System.out.println(file.getAbsolutePath());
+        LOG.info(file.getAbsolutePath());
         assertTrue(namedQuery("Requirement.findAll").isEmpty());
-        System.out.println("Create Requirement Spec");
+        LOG.info("Create Requirement Spec");
         RequirementSpec rss = null;
         try {
             rss = createRequirementSpec("Test", "Test",
@@ -63,7 +63,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
-        System.out.println("Create Requirement Spec Node");
+        LOG.info("Create Requirement Spec Node");
         RequirementSpecNode rsns;
         try {
             rsns = createRequirementSpecNode(
@@ -87,7 +87,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
      */
     @Test
     public void testImportFileXLSX() {
-        System.out.println("importFile (xlsx)");
+        LOG.info("importFile (xlsx)");
         Project product = createProject("Test Project", "Notes");
         String name = RequirementImporterTest.class.getCanonicalName();
         name = name.substring(0, name.lastIndexOf("."));
@@ -99,8 +99,8 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + getProperty("file.separator")
                 + name
                 + getProperty("file.separator") + "Reqs.xlsx");
-        System.out.println(file.getAbsolutePath());
-        System.out.println("Create Requirement Spec");
+        LOG.info(file.getAbsolutePath());
+        LOG.info("Create Requirement Spec");
         RequirementSpec rss = null;
         try {
             rss = createRequirementSpec("Test", "Test",
@@ -109,7 +109,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
-        System.out.println("Create Requirement Spec Node");
+        LOG.info("Create Requirement Spec Node");
         RequirementSpecNode rsns;
         try {
             rsns = createRequirementSpecNode(
@@ -129,7 +129,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
 
     @Test
     public void testImportDuplicates() {
-        System.out.println("importFile (duplicates)");
+        LOG.info("importFile (duplicates)");
         Project product = createProject("Test Project", "Notes");
         String name = RequirementImporterTest.class.getCanonicalName();
         name = name.substring(0, name.lastIndexOf("."));
@@ -141,9 +141,9 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + getProperty("file.separator")
                 + name
                 + getProperty("file.separator") + "Failure.xls");
-        System.out.println(file.getAbsolutePath());
+        LOG.info(file.getAbsolutePath());
         assertTrue(namedQuery("Requirement.findAll").isEmpty());
-        System.out.println("Create Requirement Spec");
+        LOG.info("Create Requirement Spec");
         RequirementSpec rss = null;
         try {
             rss = createRequirementSpec("Test", "Test",
@@ -152,7 +152,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
-        System.out.println("Create Requirement Spec Node");
+        LOG.info("Create Requirement Spec Node");
         RequirementSpecNode rsns = null;
         try {
             rsns = createRequirementSpecNode(
@@ -183,7 +183,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
 
     @Test
     public void testImportHeader() {
-        System.out.println("importFile (ignoring header)");
+        LOG.info("importFile (ignoring header)");
         Project product = createProject("Test Project", "Notes");
         String name = RequirementImporterTest.class.getCanonicalName();
         name = name.substring(0, name.lastIndexOf("."));
@@ -195,9 +195,9 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 + getProperty("file.separator")
                 + name
                 + getProperty("file.separator") + "Header.xlsx");
-        System.out.println(file.getAbsolutePath());
+        LOG.info(file.getAbsolutePath());
         assertTrue(namedQuery("Requirement.findAll").isEmpty());
-        System.out.println("Create Requirement Spec");
+        LOG.info("Create Requirement Spec");
         RequirementSpec rss = null;
         try {
             rss = createRequirementSpec("Test", "Test",
@@ -206,7 +206,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
-        System.out.println("Create Requirement Spec Node");
+        LOG.info("Create Requirement Spec Node");
         RequirementSpecNode rsns;
         try {
             rsns = createRequirementSpecNode(
@@ -225,7 +225,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
 
     @Test
     public void testGenerateTemplate() {
-        System.out.println("Generate template");
+        LOG.info("Generate template");
         try {
             File template = exportTemplate();
             assertTrue(template.exists());
@@ -237,5 +237,52 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
+    }
+
+    /**
+     * Load test of importFile method, of class RequirementImporter.
+     */
+    @Test
+    public void testImportFileLoadTest() {
+        LOG.info("Load Test");
+        Project product = createProject("Test Project", "Notes");
+        String name = RequirementImporterTest.class.getCanonicalName();
+        name = name.substring(0, name.lastIndexOf("."));
+        name = name.replace(".", getProperty("file.separator"));
+        File file = new File(getProperty("user.dir")
+                + getProperty("file.separator") + "src"
+                + getProperty("file.separator") + "test"
+                + getProperty("file.separator") + "java"
+                + getProperty("file.separator")
+                + name
+                + getProperty("file.separator") + "Load Test.xlsx");
+        LOG.info(file.getAbsolutePath());
+        LOG.info("Create Requirement Spec");
+        RequirementSpec rss = null;
+        try {
+            rss = createRequirementSpec("Test", "Test", product, 1);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        LOG.info("Create Requirement Spec Node");
+        RequirementSpecNode rsns;
+        try {
+            rsns = createRequirementSpecNode(
+                    rss, "Test", "Test", "Test");
+            RequirementImporter instance = new RequirementImporter(file,
+                    new RequirementSpecNodeJpaController(
+                            getEntityManagerFactory())
+                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
+            LOG.info("Loading file...");
+            instance.importFile();
+            assertTrue(instance.processImport());
+            LOG.info("Done!");
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            fail();
+        }
+        assertFalse(namedQuery("Requirement.findAll").isEmpty());
+        assertEquals(100000, namedQuery("Requirement.findAll").size());
     }
 }

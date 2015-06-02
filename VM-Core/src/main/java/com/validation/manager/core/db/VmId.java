@@ -96,5 +96,4 @@ public class VmId implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmId[ id=" + id + " ]";
     }
-
 }
