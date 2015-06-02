@@ -49,11 +49,11 @@ public class TableExtractor {
 
     private List<XWPFTable> extractTablesFromWord() throws FileNotFoundException, IOException {
         List<XWPFTable> tables;
-        //Word documents
-        InputStream fis = new FileInputStream(source);
-        XWPFDocument doc = new XWPFDocument(fis);
-        tables = doc.getTables();
-        fis.close();
+        try ( //Word documents
+                InputStream fis = new FileInputStream(source)) {
+            XWPFDocument doc = new XWPFDocument(fis);
+            tables = doc.getTables();
+        }
         return tables;
     }
 
@@ -61,7 +61,7 @@ public class TableExtractor {
         File temp = createTempFile("table", null);
         temp.createNewFile();
         temp.deleteOnExit();
-        List<DefaultTableModel> tables = new ArrayList<DefaultTableModel>();
+        List<DefaultTableModel> tables = new ArrayList<>();
         for (XWPFTable table : extractTablesFromWord()) {
             //Build the table
             int rows = table.getNumberOfRows();
@@ -105,7 +105,7 @@ public class TableExtractor {
 
     public List<DefaultTableModel> extractTables()
             throws IOException, FileNotFoundException, ClassNotFoundException {
-        List<DefaultTableModel> tables = new ArrayList<DefaultTableModel>();
+        List<DefaultTableModel> tables = new ArrayList<>();
         if (source.getName().endsWith(".doc")
                 || source.getName().endsWith(".docx")
                 || source.getName().endsWith(".docm")) {
@@ -123,7 +123,7 @@ public class TableExtractor {
             Iterator<Row> rowIterator = sheet.iterator();
             int rowNum = 0;
             int columns = 0;
-            Map<Integer, Vector> data = new HashMap<Integer, Vector>();
+            Map<Integer, Vector> data = new HashMap<>();
             while (rowIterator.hasNext()) {
                 Vector cells = new Vector();
                 Row row = rowIterator.next();
@@ -168,7 +168,7 @@ public class TableExtractor {
             Iterator<Row> rowIterator = sheet.iterator();
             int rowNum = 0;
             int columns = 0;
-            Map<Integer, Vector> data = new HashMap<Integer, Vector>();
+            Map<Integer, Vector> data = new HashMap<>();
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 Vector cells = new Vector();
@@ -214,12 +214,9 @@ public class TableExtractor {
         //use buffering
         InputStream is = new FileInputStream(writeTablesToFile());
         InputStream buffer = new BufferedInputStream(is);
-        ObjectInput input = new ObjectInputStream(buffer);
-        try {
+        try (ObjectInput input = new ObjectInputStream(buffer)) {
             //deserialize the List
             tables = (List<DefaultTableModel>) input.readObject();
-        } finally {
-            input.close();
         }
         return tables;
     }
@@ -230,12 +227,9 @@ public class TableExtractor {
         //use buffering
         InputStream is = new FileInputStream(file);
         InputStream buffer = new BufferedInputStream(is);
-        ObjectInput input = new ObjectInputStream(buffer);
-        try {
+        try (ObjectInput input = new ObjectInputStream(buffer)) {
             //deserialize the List
             tables = (List<DefaultTableModel>) input.readObject();
-        } finally {
-            input.close();
         }
         return tables;
     }

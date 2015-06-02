@@ -1,7 +1,6 @@
 package com.validation.manager.core;
 
 import static com.validation.manager.core.DataBaseManager.namedQuery;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.db.VmId;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -16,7 +15,8 @@ import javax.persistence.PrePersist;
  */
 public class VMIdGenerator {
 
-    private static final Logger LOG = getLogger(VMIdGenerator.class.getSimpleName());
+    private static final Logger LOG
+            = getLogger(VMIdGenerator.class.getSimpleName());
 
     /**
      * Just before persisting an entity.
@@ -31,13 +31,14 @@ public class VMIdGenerator {
             VmId vmId = (VmId) o;
             if (vmId.getId() == null || vmId.getId() <= 0) {
                 LOG.log(Level.FINE, "Detected: {0}, fixing id...", vmId);
-                HashMap<String, Object> parameters = new HashMap<String, Object>();
+                HashMap<String, Object> parameters = new HashMap<>();
                 int id = namedQuery("VmId.findAll").size() + 1;
                 while (vmId.getId() <= 0) {
                     parameters.put("id", id);
                     if (namedQuery("VmId.findById", parameters).isEmpty()) {
                         vmId.setId(id);
-                        LOG.log(Level.FINE, "Assigned id: {0} to {1}", new Object[]{id, vmId.getTableName()});
+                        LOG.log(Level.FINE, "Assigned id: {0} to {1}",
+                                new Object[]{id, vmId.getTableName()});
                     } else {
                         id++;
                     }

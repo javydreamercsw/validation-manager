@@ -14,6 +14,7 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
 import com.validation.manager.core.tool.message.MessageHandler;
+import com.validation.manager.core.tool.table.extractor.TableExtractor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,13 +23,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
+import javax.swing.table.DefaultTableModel;
 import static org.apache.poi.hssf.usermodel.HSSFDataFormat.getBuiltinFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -37,6 +38,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import static org.apache.poi.ss.usermodel.WorkbookFactory.create;
+import org.openide.util.Exceptions;
 import static org.openide.util.Lookup.getDefault;
 
 /**
@@ -47,11 +49,10 @@ import static org.openide.util.Lookup.getDefault;
 public class RequirementImporter implements ImporterInterface<Requirement> {
 
     private final File toImport;
-    private final ArrayList<Requirement> requirements = new ArrayList<Requirement>();
     private final RequirementSpecNode rsn;
     private static final Logger LOG
-            = getLogger(RequirementImporter.class.getName());
-    private static final List<String> columns = new ArrayList<String>();
+            = getLogger(RequirementImporter.class.getSimpleName());
+    private static final List<String> columns = new ArrayList<>();
 
     static {
         columns.add("Unique ID");
@@ -71,9 +72,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         List<Requirement> importedRequirements = null;
         try {
             importedRequirements = importFile(false);
-        } catch (UnsupportedOperationException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        } catch (VMException ex) {
+        } catch (UnsupportedOperationException | VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
         return importedRequirements;
@@ -82,8 +81,9 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     @Override
     public List<Requirement> importFile(boolean header) throws
             VMException {
-        requirements.clear();
-        List<Integer> errors = new ArrayList<Integer>();
+        List<Integer> errors = new ArrayList<>();
+        HashMap<String, Object> parameters = new HashMap<>();
+        List<Object> result;
         if (toImport == null) {
             throw new RequirementImportException(
                     "message.requirement.import.file.null");
@@ -118,7 +118,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                             break;
                         }
                         int cells = row.getPhysicalNumberOfCells();
-                        if (cells < 3) {
+                        if (cells < 2) {
                             LOG.log(Level.INFO, "Processing row: {0}", r);
                             LOG.warning(
                                     ResourceBundle.getBundle(
@@ -128,8 +128,6 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                             errors.add(r);
                         } else {
                             Requirement requirement = new Requirement();
-                            HashMap<String, Object> parameters = new HashMap<String, Object>();
-                            List<Object> result;
                             LOG.log(Level.FINE, "Row: {0}", r);
                             for (int c = 0; c < cells; c++) {
                                 Cell cell = row.getCell(c);
@@ -166,7 +164,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                         requirement.setDescription(value);
                                         break;
                                     case 2:
-                                        //Requirement type
+                                        //Optional Requirement type
                                         LOG.fine("Setting requirement type");
                                         parameters.clear();
                                         parameters.put("name", value);
@@ -176,7 +174,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                         if (result.isEmpty()) {
                                             //Assume a default
                                             parameters.clear();
-                                            parameters.put("name", "HW");
+                                            parameters.put("name", "SW");
                                             result = namedQuery(
                                                     "RequirementType.findByName",
                                                     parameters);
@@ -206,7 +204,13 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                             assert requirement.getUniqueId() != null
                                     && !requirement.getUniqueId().isEmpty() :
                                     "Invalid requirement detected!";
-                            requirements.add(requirement);
+                            try {
+                                processRequirement(requirement);
+                            } catch (NonexistentEntityException ex) {
+                                Exceptions.printStackTrace(ex);
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
                         }
                     }
                 } catch (InvalidFormatException ex) {
@@ -227,81 +231,120 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             } else if (toImport.getName().endsWith(".xml")) {
                 throw new RequirementImportException(
                         "XML importing not supported yet.");
+            } else if (toImport.getName().endsWith(".doc")
+                    || toImport.getName().endsWith(".docx")) {
+                try {
+                    TableExtractor te = new TableExtractor(toImport);
+                    List<DefaultTableModel> tables = te.extractTables();
+                    Requirement requirement = new Requirement();
+                    LOG.log(Level.INFO, "Imported {0} tables!", tables.size());
+                    int count = 1;
+                    for (DefaultTableModel model : tables) {
+                        int rows = model.getRowCount();
+                        int cols = model.getColumnCount();
+                        LOG.log(Level.INFO, "Processing table {0} with {1} "
+                                + "rows and {2} columns.",
+                                new Object[]{count, rows, cols});
+                        for (int r = 0; r < rows; r++) {
+                            for (int c = 0; c < cols; c++) {
+                                String value = (String) model.getValueAt(rows, cols);
+                                switch (c) {
+                                    case 0:
+                                        //Unique ID
+                                        LOG.fine("Setting id");
+                                        requirement.setUniqueId(value);
+                                        break;
+                                    case 1:
+                                        //Description
+                                        LOG.fine("Setting desc");
+                                        requirement.setDescription(value);
+                                        break;
+                                    case 2:
+                                        //Requirement type
+                                        LOG.fine("Setting requirement type");
+                                        parameters.clear();
+                                        parameters.put("name", value);
+                                        result = namedQuery(
+                                                "RequirementType.findByName",
+                                                parameters);
+                                        if (result.isEmpty()) {
+                                            //Assume a default
+                                            parameters.clear();
+                                            parameters.put("name", "SW");
+                                            result = namedQuery(
+                                                    "RequirementType.findByName",
+                                                    parameters);
+                                        }
+                                        requirement.setRequirementTypeId(
+                                                (RequirementType) result.get(0));
+                                        break;
+                                    case 3:
+                                        //Optional notes
+                                        LOG.fine("Setting notes");
+                                        requirement.setNotes(value);
+                                        break;
+                                    default:
+                                        throw new RuntimeException("Invalid column detected: " + c);
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException | ClassNotFoundException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             } else {
                 throw new RequirementImportException("Unsupported file format: "
                         + toImport.getName());
             }
             StringBuilder sb = new StringBuilder("Rows with erros:\n");
-            for (Integer line : errors) {
+            errors.stream().forEach((line) -> {
                 sb.append(line).append("\n");
-            }
+            });
             if (!errors.isEmpty()) {
                 getDefault().lookup(MessageHandler.class).info(sb.toString());
             }
-            for (Requirement r : requirements) {
-                LOG.log(Level.FINE, "{0}: {1}",
-                        new Object[]{r.getUniqueId(), r.getDescription()});
-            }
-            return requirements;
+            return new ArrayList<>();
         }
+    }
+
+    private boolean processRequirement(Requirement requirement)
+            throws IllegalOrphanException, NonexistentEntityException, Exception {
+        boolean result = true;
+        Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
+        List<Requirement> existing = getRequirements(project);
+        LOG.log(Level.INFO, "Processing: {0}", requirement.getUniqueId());
+        boolean exists = false;
+        for (Requirement r : existing) {
+            if (r.getUniqueId() == null) {
+                LOG.warning("Detected requirement with null unique id!");
+                new RequirementJpaController(getEntityManagerFactory()).destroy(r.getId());
+            } else {
+                if (r.getUniqueId().equals(requirement.getUniqueId())) {
+                    exists = true;
+                    result = false;
+                    break;
+                }
+            }
+        }
+        if (exists) {
+            MessageHandler handler = getDefault().lookup(MessageHandler.class);
+            if (handler != null) {
+                String error = "Requirement " + requirement.getUniqueId()
+                        + " already exists on project "
+                        + project.getName();
+                LOG.warning(error);
+                handler.error(error);
+            }
+        } else {
+            new RequirementJpaController(getEntityManagerFactory()).create(requirement);
+        }
+        return result;
     }
 
     @Override
     public boolean processImport() throws VMException {
-        boolean result = true;
-        RequirementJpaController controller = new RequirementJpaController(
-                getEntityManagerFactory());
-        for (Iterator<Requirement> it = requirements.iterator(); it.hasNext();) {
-            try {
-                Requirement requirement = it.next();
-                boolean exists = false;
-                Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
-                List<Requirement> existing = getRequirements(project);
-                for (Requirement r : existing) {
-                    if (r.getUniqueId() == null) {
-                        LOG.warning("Detected requirement with null unique id!");
-                        new RequirementJpaController(getEntityManagerFactory()).destroy(r.getId());
-                    } else {
-                        if (r.getUniqueId().equals(requirement.getUniqueId())) {
-                            exists = true;
-                            result = false;
-                            break;
-                        }
-                    }
-                }
-                if (exists) {
-                    MessageHandler handler = getDefault().lookup(MessageHandler.class);
-                    if (handler != null) {
-                        handler.error(
-                                "Requirement " + requirement.getUniqueId()
-                                + " already exists on project "
-                                + project.getName());
-                    }
-                } else {
-                    controller.create(requirement);
-                }
-            } catch (Exception ex) {
-                LOG.log(Level.SEVERE, null, ex);
-                for (Requirement requirement : requirements) {
-                    Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
-                    List<Requirement> existing = getRequirements(project);
-                    for (Requirement r : existing) {
-                        if (r.getUniqueId().equals(requirement.getUniqueId())) {
-                            try {
-                                controller.destroy(r.getId());
-                            } catch (IllegalOrphanException ex1) {
-                                LOG.log(Level.SEVERE, null, ex1);
-                            } catch (NonexistentEntityException ex1) {
-                                LOG.log(Level.SEVERE, null, ex1);
-                            }
-                            break;
-                        }
-                    }
-                }
-                throw new VMException(ex);
-            }
-        }
-        return result;
+        //Do nothing
+        return true;
     }
 
     public static File exportTemplate() throws FileNotFoundException, IOException, InvalidFormatException {
@@ -326,19 +369,13 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             column++;
         }
 
-        FileOutputStream out = null;
-        try {
-            out = new FileOutputStream(template);
+        try (FileOutputStream out = new FileOutputStream(template)) {
             wb.write(out);
             out.close();
         } catch (FileNotFoundException e) {
             LOG.log(Level.SEVERE, null, e);
         } catch (IOException e) {
             LOG.log(Level.SEVERE, null, e);
-        } finally {
-            if (out != null) {
-                out.close();
-            }
         }
         return template;
     }
@@ -347,12 +384,10 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         try {
             File file = exportTemplate();
             System.out.println(file.getAbsolutePath());
-        } catch (FileNotFoundException ex) {
-            getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException | InvalidFormatException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvalidFormatException ex) {
-            getLogger(RequirementImporter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 }
