@@ -24,16 +24,12 @@ class TestCaseChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
-        for (Step s : tc.getStepList()) {
-            if (!toPopulate.contains(s)) {
-                toPopulate.add(s);
-            }
-        }
-        for (RiskControl rc : tc.getRiskControlList()) {
-            if (!toPopulate.contains(rc)) {
-                toPopulate.add(rc);
-            }
-        }
+        tc.getStepList().stream().filter((s) -> (!toPopulate.contains(s))).forEach((s) -> {
+            toPopulate.add(s);
+        });
+        tc.getRiskControlList().stream().filter((rc) -> (!toPopulate.contains(rc))).forEach((rc) -> {
+            toPopulate.add(rc);
+        });
         return true;
     }
 

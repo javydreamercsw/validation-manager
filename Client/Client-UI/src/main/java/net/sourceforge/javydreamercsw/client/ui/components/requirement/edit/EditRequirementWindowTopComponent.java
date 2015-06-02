@@ -11,7 +11,6 @@ import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.server.core.RequirementServer;
-import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.RequirementSelectionDialog;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -62,6 +60,8 @@ import org.openide.windows.TopComponent;
 })
 public final class EditRequirementWindowTopComponent extends TopComponent
         implements LookupListener {
+
+    private static final long serialVersionUID = 1012079981234519695L;
 
     private final Lookup.Result<Requirement> result
             = Utilities.actionsGlobalContext().lookupResult(Requirement.class);
@@ -254,28 +254,25 @@ public final class EditRequirementWindowTopComponent extends TopComponent
 
     private void chooseRequirementsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chooseRequirementsActionPerformed
         /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                linkedRequirements.clear();
-                dialog.setInitial(linkedRequirements);
-                dialog.setLocationRelativeTo(null);
-                dialog.setVisible(true);
-                //Wait for the dialog to be finished
-                while (dialog.isVisible()) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                    }
-                }
-                //Clear the model to catch any removals
-                ((DefaultListModel) requirements.getModel()).removeAllElements();
-                //Add the ones selected on the selection dialog.
-                for (Requirement req : dialog.getRequirements()) {
-                    ((DefaultListModel) requirements.getModel()).addElement(req);
+        java.awt.EventQueue.invokeLater(() -> {
+            linkedRequirements.clear();
+            dialog.setInitial(linkedRequirements);
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+            //Wait for the dialog to be finished
+            while (dialog.isVisible()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
+            //Clear the model to catch any removals
+            ((DefaultListModel) requirements.getModel()).removeAllElements();
+            //Add the ones selected on the selection dialog.
+            dialog.getRequirements().stream().forEach((req) -> {
+                ((DefaultListModel) requirements.getModel()).addElement(req);
+            });
         });
     }//GEN-LAST:event_chooseRequirementsActionPerformed
 
@@ -403,6 +400,8 @@ public final class EditRequirementWindowTopComponent extends TopComponent
         RequirementTypeJpaController rtc
                 = new RequirementTypeJpaController(DataBaseManager.getEntityManagerFactory());
         requirements.setModel(new DefaultListModel() {
+            private static final long serialVersionUID = 7505612108537039595L;
+
             @Override
             public void addElement(Object obj) {
                 linkedRequirements.add((Requirement) obj);
@@ -419,16 +418,8 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                 return linkedRequirements.get(i);
             }
         });
-        requirements.setCellRenderer(new ListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList list,
-                    Object value, int index, boolean isSelected,
-                    boolean cellHasFocus) {
-
-                return new JLabel(
-                        ((Requirement) value).getUniqueId());
-            }
-        });
+        requirements.setCellRenderer((JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) -> new JLabel(
+                ((Requirement) value).getUniqueId()));
         requirements.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -441,6 +432,8 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             }
         });
         status.setModel(new DefaultComboBoxModel<RequirementStatus>() {
+            private static final long serialVersionUID = -7650392217207544245L;
+
             @Override
             public void addElement(RequirementStatus obj) {
                 if (!statuses.contains(obj)) {
@@ -483,20 +476,17 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                 return statuses.size();
             }
         });
-        status.setRenderer(new ListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList list,
-                    Object value, int index, boolean isSelected,
-                    boolean cellHasFocus) {
-                String label;
-                label = ((RequirementStatus) value).getStatus();
-                if (rb.containsKey(label)) {
-                    label = rb.getString(label);
-                }
-                return new JLabel(label);
+        status.setRenderer((JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) -> {
+            String label;
+            label = ((RequirementStatus) value).getStatus();
+            if (rb.containsKey(label)) {
+                label = rb.getString(label);
             }
+            return new JLabel(label);
         });
         type.setModel(new DefaultComboBoxModel<RequirementType>() {
+            private static final long serialVersionUID = -4372468479046320603L;
+
             @Override
             public void addElement(RequirementType obj) {
                 if (!types.contains(obj)) {
@@ -539,24 +529,20 @@ public final class EditRequirementWindowTopComponent extends TopComponent
                 return types.size();
             }
         });
-        type.setRenderer(new ListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList list,
-                    Object value, int index, boolean isSelected,
-                    boolean cellHasFocus) {
-                return new JLabel(((RequirementType) value).getName());
-            }
-        });
-        for (RequirementType rt : rtc.findRequirementTypeEntities()) {
+        type.setRenderer((JList list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus)
+                -> new JLabel(((RequirementType) value).getName()));
+        rtc.findRequirementTypeEntities().stream().forEach((rt) -> {
             ((DefaultComboBoxModel) type.getModel()).addElement(rt);
-        }
+        });
         type.setSelectedIndex(0);
         //Get statuses
         RequirementStatusJpaController rsc
-                = new RequirementStatusJpaController(DataBaseManager.getEntityManagerFactory());
-        for (RequirementStatus rs : rsc.findRequirementStatusEntities()) {
+                = new RequirementStatusJpaController(
+                        DataBaseManager.getEntityManagerFactory());
+        rsc.findRequirementStatusEntities().stream().forEach((rs) -> {
             ((DefaultComboBoxModel) status.getModel()).addElement(rs);
-        }
+        });
         status.setSelectedIndex(0);
         if (isEdit()) {
             if (requirement == null) {
@@ -569,9 +555,9 @@ public final class EditRequirementWindowTopComponent extends TopComponent
             //Update the linked requirements
             List<Requirement> toAdd
                     = RequirementServer.getLatestChildren(requirement);
-            for (Requirement req : toAdd) {
+            toAdd.stream().forEach((req) -> {
                 ((DefaultListModel) requirements.getModel()).addElement(req);
-            }
+            });
             //Update other fields
             if (requirement.getNotes() != null
                     && !requirement.getNotes().trim().isEmpty()) {
