@@ -173,7 +173,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                         .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
                 List<Requirement> imported = instance.importFile();
                 assertTrue(instance.processImport());
-                assertEquals(20, imported.size());
+                assertEquals(19, imported.size());
                 imported = instance.importFile();
                 assertTrue(instance.processImport());
                 assertEquals(0, imported.size());
