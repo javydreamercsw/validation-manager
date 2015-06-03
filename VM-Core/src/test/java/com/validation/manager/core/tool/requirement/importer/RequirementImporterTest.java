@@ -283,6 +283,6 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             fail();
         }
         assertFalse(namedQuery("Requirement.findAll").isEmpty());
-        assertEquals(100000, namedQuery("Requirement.findAll").size());
+        assertEquals(10000, namedQuery("Requirement.findAll").size());
     }
 }

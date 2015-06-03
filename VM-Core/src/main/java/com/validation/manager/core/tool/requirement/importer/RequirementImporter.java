@@ -81,6 +81,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     @Override
     public List<Requirement> importFile(boolean header) throws
             VMException {
+        List<Requirement> answer=new ArrayList<>();
         List<Integer> errors = new ArrayList<>();
         HashMap<String, Object> parameters = new HashMap<>();
         List<Object> result;
@@ -205,7 +206,9 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                     && !requirement.getUniqueId().isEmpty() :
                                     "Invalid requirement detected!";
                             try {
-                                processRequirement(requirement);
+                               if(processRequirement(requirement)){
+                                   answer.add(requirement);
+                               }
                             } catch (NonexistentEntityException ex) {
                                 Exceptions.printStackTrace(ex);
                             } catch (Exception ex) {
@@ -303,7 +306,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             if (!errors.isEmpty()) {
                 getDefault().lookup(MessageHandler.class).info(sb.toString());
             }
-            return new ArrayList<>();
+            return answer;
         }
     }
 
