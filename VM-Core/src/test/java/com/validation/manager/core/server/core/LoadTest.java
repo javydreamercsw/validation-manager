@@ -1,4 +1,4 @@
-package com.validation.manager.core.tool.requirement.importer;
+package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
@@ -10,20 +10,20 @@ import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.server.core.ProjectServer;
-import com.validation.manager.core.server.core.RequirementSpecNodeServer;
-import com.validation.manager.core.server.core.RequirementSpecServer;
+import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
+import com.validation.manager.test.AbstractVMTestCase;
 import java.io.File;
 import static java.lang.System.getProperty;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
+import org.junit.Test;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class LoadTest {
+public class LoadTest extends AbstractVMTestCase {
 
     private static final Logger LOG
             = getLogger(LoadTest.class.getName());
@@ -31,7 +31,8 @@ public class LoadTest {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    @Test
+    public void loadTest() {
         LOG.info("Load Test");
         setPersistenceUnitName("TestVMPU");
         Project product = createProject("Test Project", "Notes");
@@ -70,11 +71,12 @@ public class LoadTest {
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
-        LOG.log(Level.INFO, "Imported: {0}",
-                namedQuery("Requirement.findAll").size());
+        int imported = namedQuery("Requirement.findAll").size();
+        LOG.log(Level.INFO, "Imported: {0}", imported);
+        assertEquals(10000, imported);
     }
 
-    private static RequirementSpecNode createRequirementSpecNode(
+    private RequirementSpecNode createRequirementSpecNode(
             RequirementSpec rss, String name, String description, String scope)
             throws Exception {
         RequirementSpecNodeServer rsns = new RequirementSpecNodeServer(rss,
@@ -83,7 +85,7 @@ public class LoadTest {
         return rsns;
     }
 
-    private static RequirementSpec createRequirementSpec(String name,
+    private RequirementSpec createRequirementSpec(String name,
             String description, Project project, int specLevelId) throws Exception {
         RequirementSpecServer rss = new RequirementSpecServer(name, description,
                 project.getId(), specLevelId);
