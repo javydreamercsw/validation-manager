@@ -4,6 +4,7 @@ import static com.validation.manager.core.DataBaseManager.getEntityManagerFactor
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import static java.lang.System.getProperty;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -169,8 +171,12 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                         new RequirementSpecNodeJpaController(
                                 getEntityManagerFactory())
                         .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
-                instance.importFile();
-                assertFalse(instance.processImport());
+                List<Requirement> imported = instance.importFile();
+                assertTrue(instance.processImport());
+                assertEquals(20, imported.size());
+                imported = instance.importFile();
+                assertTrue(instance.processImport());
+                assertEquals(0, imported.size());
             } catch (RequirementImportException ex) {
                 printStackTrace(ex);
                 fail();
