@@ -14,7 +14,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.version>7.4.2</vaadin.version>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
     </properties>
     <repositories>
@@ -116,7 +115,7 @@
             <artifactId>h2</artifactId>
             <groupId>com.h2database</groupId>
             <type>jar</type>
-            <version>1.4.186</version>
+            <version>1.4.190</version>
         </dependency>
     </dependencies>
 
@@ -157,7 +156,7 @@
             <!-- directory is cleaned properly -->
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>2.6.1</version>
+                <version>3.0.0</version>
                 <configuration>
                     <filesets>
                         <fileset>
