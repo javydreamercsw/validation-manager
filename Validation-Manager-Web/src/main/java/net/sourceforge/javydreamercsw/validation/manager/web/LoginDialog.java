@@ -11,7 +11,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window;
@@ -23,9 +22,9 @@ import com.validation.manager.core.server.core.VMUserServer;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @SuppressWarnings("serial")
-public class LoginDialog extends Window {
+public final class LoginDialog extends Window {
 
-    private ValidationManagerUI menu;
+    private final ValidationManagerUI menu;
 
     public LoginDialog(ValidationManagerUI menu) {
         // New login -window in the center of the screen
@@ -58,11 +57,9 @@ public class LoginDialog extends Window {
         //Layout
         FormLayout layout = new FormLayout();
         setContent(layout);
-        Panel buttons = new Panel();
-        HorizontalLayout panellayout = new HorizontalLayout();
-        buttons.setContent(panellayout);
-        panellayout.addComponent(loginButton);
-        panellayout.addComponent(cancelButton);
+        HorizontalLayout hlayout = new HorizontalLayout();
+        hlayout.addComponent(loginButton);
+        hlayout.addComponent(cancelButton);
         layout.addComponent(name);
         layout.addComponent(password);
         name.focus();
@@ -76,10 +73,10 @@ public class LoginDialog extends Window {
         passVal.setMinLength(3);
         password.addValidator(passVal);
         password.setImmediate(true);
-        layout.addComponent(buttons);
+        layout.addComponent(hlayout);
         layout.setComponentAlignment(name, Alignment.TOP_LEFT);
         layout.setComponentAlignment(password, Alignment.MIDDLE_LEFT);
-        layout.setComponentAlignment(buttons, Alignment.MIDDLE_CENTER);
+        layout.setComponentAlignment(hlayout, Alignment.BOTTOM_LEFT);
         layout.setSpacing(true);
         layout.setMargin(true);
 
@@ -104,7 +101,7 @@ public class LoginDialog extends Window {
             VmUser user
                     = VMUserServer.getUser(name.getValue(),
                             password.getValue(), true);
-            //Set password to unencrypted to avoid passwords goig out
+            //Set password to unencrypted to avoid passwords going out
             user.setPassword(null);
             if (menu != null) {
                 menu.setUser(user);
@@ -118,6 +115,7 @@ public class LoginDialog extends Window {
                     "\nIncorrect username/password.",
                     Notification.TYPE_WARNING_MESSAGE, true)
                     .show(Page.getCurrent());
+            password.setValue("");
         }
     }
 }
