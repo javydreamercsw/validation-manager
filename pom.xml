@@ -61,10 +61,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vm.version>${project.version}</vm.version>
-        <vaadin.version>7.5.8</vaadin.version>
-        <netbeans.version>RELEASE802</netbeans.version>
+        <vaadin.version>7.6.0</vaadin.version>
+        <netbeans.version>RELEASE81</netbeans.version>
         <jasper.reports.version>5.6.0</jasper.reports.version>
         <junit.version>4.12</junit.version>
+        <mysql.version>5.1.38</mysql.version>
+        <h2.version>1.4.190</h2.version>
     </properties>
 
     <build>
