@@ -2,7 +2,6 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.data.Item;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
