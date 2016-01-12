@@ -38,7 +38,7 @@ public class ValidationManagerUI extends UI {
     private VmUser user = null;
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
-    private static VMDemoResetThread reset;
+    private static VMDemoResetThread reset = null;
     private LoginDialog subwindow = null;
 
     /**
@@ -84,9 +84,9 @@ public class ValidationManagerUI extends UI {
             HorizontalSplitPanel vsplit = new HorizontalSplitPanel();
             vsplit.setLocked(true);
 
-            tree = new Tree("Available Projects");
+            tree = new Tree();
 
-            Item root = tree.addItem("Root");
+            Item root = tree.addItem("Available Projects");
 
             List<Project> projects = new ArrayList<>();
             ProjectJpaController controller
@@ -149,14 +149,14 @@ public class ValidationManagerUI extends UI {
 
     @Override
     protected void init(VaadinRequest request) {
+        //Connect to the database defined in context.xml
+        DataBaseManager.setPersistenceUnitName("VMPUJNDI");
+        setInstance(this);
         if (reset == null && DataBaseManager.isDemo()) {
             LOG.info("Running on demo mode!");
             reset = new VMDemoResetThread();
             reset.start();
         }
-        //Connect to the database defines in context.xml
-        DataBaseManager.setPersistenceUnitName("VMPUJNDI");
-        setInstance(this);
         updateScreen();
     }
 

@@ -202,7 +202,6 @@ public class DataBaseManager {
         if (emf == null && !dbError) {
             try {
                 InitialContext ctx = new InitialContext();
-                ctx.lookup("java:/comp/env/jdbc/VMDB");
                 //Use the context defined Database connection
                 PU = (String) ctx.lookup("java:comp/env/validation-manager/JNDIDB");
                 try {
@@ -224,7 +223,7 @@ public class DataBaseManager {
                                 + " each {0} milliseconds", getDemoResetPeriod());
                     }
                 }
-                final String JNDIDB = (String) ctx.lookup("java:comp/env/validation_manager/JNDIDB");
+                final String JNDIDB = (String) ctx.lookup("java:comp/env/validation-manager/JNDIDB");
                 emf = createEntityManagerFactory(JNDIDB);
                 LOG.log(Level.INFO, "Using context defined database connection: {0}", JNDIDB);
                 usingContext = true;
