@@ -115,7 +115,7 @@
             <artifactId>h2</artifactId>
             <groupId>com.h2database</groupId>
             <type>jar</type>
-            <version>1.4.190</version>
+            <version>${h2.version}</version>
         </dependency>
     </dependencies>
 
