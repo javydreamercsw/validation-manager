@@ -74,6 +74,28 @@ public class ValidationManagerUI extends UI {
         THREAD_LOCAL.set(application);
     }
 
+    private void buildDemoTree() {
+        try {
+            ProjectJpaController controller
+                    = new ProjectJpaController(DataBaseManager.getEntityManagerFactory());
+            LOG.info("Creating demo projects...");
+            //Create some test projects
+            Project rootProject = new Project("Demo");
+            controller.create(rootProject);
+            for (int i = 0; i < 5; i++) {
+                Project temp = new Project("Sub " + (i + 1));
+                controller.create(temp);
+                rootProject.getProjectList().add(temp);
+            }
+            controller.edit(rootProject);
+            LOG.info("Done!");
+        } catch (NonexistentEntityException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
     private void updateScreen() {
         if (getUser() == null) {
             showLoginDialog();
@@ -86,30 +108,14 @@ public class ValidationManagerUI extends UI {
 
             tree = new Tree();
 
-            Item root = tree.addItem("Available Projects");
+            tree.addItem("Available Projects");
 
             List<Project> projects = new ArrayList<>();
             ProjectJpaController controller
                     = new ProjectJpaController(DataBaseManager.getEntityManagerFactory());
             if (DataBaseManager.isDemo()
                     && controller.findProjectEntities().isEmpty()) {
-                try {
-                    LOG.info("Creating demo projects...");
-                    //Create some test projects
-                    Project rootProject = new Project("Demo");
-                    controller.create(rootProject);
-                    for (int i = 0; i < 5; i++) {
-                        Project temp = new Project("Sub " + (i + 1));
-                        controller.create(temp);
-                        rootProject.getProjectList().add(temp);
-                    }
-                    controller.edit(rootProject);
-                    LOG.info("Done!");
-                } catch (NonexistentEntityException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (Exception ex) {
-                    Exceptions.printStackTrace(ex);
-                }
+                buildDemoTree();
             }
             List<Project> all = controller.findProjectEntities();
             for (Project p : all) {
@@ -120,22 +126,12 @@ public class ValidationManagerUI extends UI {
             LOG.log(Level.INFO, "Found {0} projects!", projects.size());
 
             for (Project p : projects) {
-                Item parent = tree.addItem(p.getName());
-                tree.setParent(parent, root);
+                tree.addItem(p.getName());
                 if (p.getProjectList().isEmpty()) {
                     // No subprojects
                     tree.setChildrenAllowed(p, false);
                 } else {
-                    // Add children (moons) under the planets.
-                    for (Project sub : p.getProjectList()) {
-                        // Add the item as a regular item.
-                        tree.addItem(sub.getName());
-                        // Set it to be a child.
-                        tree.setParent(sub, parent);
-                        // Make the moons look like leaves.
-                        tree.setChildrenAllowed(sub, false);
-                    }
-                    // Expand the subtree.
+                    addChildrenProjects(p);
                 }
             }
             tree.setSizeFull();
@@ -144,6 +140,22 @@ public class ValidationManagerUI extends UI {
             vsplit.setSplitPosition(25, Sizeable.UNITS_PERCENTAGE);
             vl.addComponent(vsplit);
             setContent(vsplit);
+        }
+    }
+
+    public void addChildrenProjects(Project p) {
+        // Add children (moons) under the planets.
+        for (Project sub : p.getProjectList()) {
+            // Add the item as a regular item.
+            tree.addItem(sub.getName());
+            // Set it to be a child.
+            tree.setParent(sub.getName(), p.getName());
+            if (sub.getProjectList().isEmpty()) {
+                //No children
+                tree.setChildrenAllowed(sub, false);
+            } else {
+                addChildrenProjects(sub);
+            }
         }
     }
 
@@ -168,7 +180,7 @@ public class ValidationManagerUI extends UI {
             subwindow.setResizable(false);
             subwindow.center();
             addWindow(subwindow);
-        }else{
+        } else {
             subwindow.setVisible(true);
         }
     }
