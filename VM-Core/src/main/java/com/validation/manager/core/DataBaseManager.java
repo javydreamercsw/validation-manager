@@ -69,7 +69,7 @@ public class DataBaseManager {
     private static final Logger LOG
             = getLogger(DataBaseManager.class.getSimpleName());
     private static DBState state = DBState.START_UP;
-    private static final ResourceBundle settings
+    private static final ResourceBundle SETTINGS
             = getBundle("com.validation.manager.resources.settings");
     private static boolean locked = false;
     private static boolean usingContext;
@@ -204,16 +204,16 @@ public class DataBaseManager {
                 InitialContext ctx = new InitialContext();
                 ctx.lookup("java:/comp/env/jdbc/VMDB");
                 //Use the context defined Database connection
-                PU = (String) ctx.lookup("java:comp/env/validation_manager/JNDIDB");
+                PU = (String) ctx.lookup("java:comp/env/validation-manager/JNDIDB");
                 try {
-                    demo = (Boolean) ctx.lookup("java:comp/env/validation_manager/demo");
+                    demo = (Boolean) ctx.lookup("java:comp/env/validation-manager/demo");
                 } catch (NamingException e) {
                     LOG.log(Level.SEVERE, null, e);
                     demo = false;
                 }
                 if (isDemo()) {
                     try {
-                        demoResetPeriod = (Long) ctx.lookup("java:comp/env/validation_manager/demo-period");
+                        demoResetPeriod = (Long) ctx.lookup("java:comp/env/validation-manager/demo-period");
                     } catch (NamingException e) {
                         LOG.log(Level.SEVERE, null, e);
                         demoResetPeriod = valueOf(0);
@@ -661,17 +661,17 @@ public class DataBaseManager {
     }
 
     public static String getVersion() {
-        return getVersionNumber() + ((settings.getString("version.postfix").isEmpty()
-                ? "" : " " + settings.getString("version.postfix")));
+        return getVersionNumber() + ((SETTINGS.getString("version.postfix").isEmpty()
+                ? "" : " " + SETTINGS.getString("version.postfix")));
     }
 
     public static String getVersionNumber() {
         StringBuilder version = new StringBuilder();
-        version.append(settings.getString("version.high"));
+        version.append(SETTINGS.getString("version.high"));
         version.append(".");
-        version.append(settings.getString("version.mid"));
+        version.append(SETTINGS.getString("version.mid"));
         version.append(".");
-        version.append(settings.getString("version.low"));
+        version.append(SETTINGS.getString("version.low"));
         return version.toString();
     }
 
