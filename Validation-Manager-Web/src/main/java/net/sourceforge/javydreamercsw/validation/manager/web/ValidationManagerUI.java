@@ -29,15 +29,17 @@ import org.openide.util.Exceptions;
 @SuppressWarnings("serial")
 public class ValidationManagerUI extends UI {
 
-    private static ThreadLocal<ValidationManagerUI> threadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<ValidationManagerUI> THREAD_LOCAL
+            = new ThreadLocal<>();
     private Tree tree;
     private Panel main;
-    private ThemeResource logo = new ThemeResource("vm_logo.png");
-    private ThemeResource small = new ThemeResource("VMSmall.png");
+    private final ThemeResource logo = new ThemeResource("vm_logo.png");
+    private final ThemeResource small = new ThemeResource("VMSmall.png");
     private VmUser user = null;
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset;
+    private LoginDialog subwindow = null;
 
     /**
      * @return the user
@@ -64,12 +66,12 @@ public class ValidationManagerUI extends UI {
 
     // @return the current application instance	  	
     public static ValidationManagerUI getInstance() {
-        return threadLocal.get();
+        return THREAD_LOCAL.get();
     }
 
     // Set the current application instance 	
     public static void setInstance(ValidationManagerUI application) {
-        threadLocal.set(application);
+        THREAD_LOCAL.set(application);
     }
 
     private void updateScreen() {
@@ -159,11 +161,15 @@ public class ValidationManagerUI extends UI {
     }
 
     private void showLoginDialog() {
-        LoginDialog subwindow = new LoginDialog(this);
-        subwindow.setVisible(true);
-        subwindow.setClosable(false);
-        subwindow.setResizable(false);
-        subwindow.center();
-        addWindow(subwindow);
+        if (subwindow == null) {
+            subwindow = new LoginDialog(this);
+            subwindow.setVisible(true);
+            subwindow.setClosable(false);
+            subwindow.setResizable(false);
+            subwindow.center();
+            addWindow(subwindow);
+        }else{
+            subwindow.setVisible(true);
+        }
     }
 }
