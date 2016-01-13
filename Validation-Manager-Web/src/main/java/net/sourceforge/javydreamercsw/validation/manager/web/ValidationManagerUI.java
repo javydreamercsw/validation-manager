@@ -39,7 +39,7 @@ public class ValidationManagerUI extends UI {
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset = null;
     private LoginDialog subwindow = null;
-    private final String projTreeRoot="Available Projects";
+    private final String projTreeRoot = "Available Projects";
 
     /**
      * @return the user
