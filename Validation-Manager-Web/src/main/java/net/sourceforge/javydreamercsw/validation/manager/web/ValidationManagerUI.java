@@ -39,6 +39,7 @@ public class ValidationManagerUI extends UI {
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset = null;
     private LoginDialog subwindow = null;
+    private final String projTreeRoot="Available Projects";
 
     /**
      * @return the user
@@ -107,7 +108,7 @@ public class ValidationManagerUI extends UI {
 
             tree = new Tree();
 
-            tree.addItem("Available Projects");
+            tree.addItem(projTreeRoot);
 
             List<Project> projects = new ArrayList<>();
             ProjectJpaController controller
@@ -126,9 +127,10 @@ public class ValidationManagerUI extends UI {
 
             for (Project p : projects) {
                 tree.addItem(p.getName());
+                tree.setParent(p.getName(), projTreeRoot);
                 if (p.getProjectList().isEmpty()) {
                     // No subprojects
-                    tree.setChildrenAllowed(p, false);
+                    tree.setChildrenAllowed(p.getName(), false);
                 } else {
                     addChildrenProjects(p);
                 }
