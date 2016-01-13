@@ -2,16 +2,20 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Form;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.VerticalSplitPanel;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.VmUser;
@@ -31,15 +35,15 @@ public class ValidationManagerUI extends UI {
     private static final ThreadLocal<ValidationManagerUI> THREAD_LOCAL
             = new ThreadLocal<>();
     private Tree tree;
-    private Panel main;
-    private final ThemeResource logo = new ThemeResource("vm_logo.png");
-    private final ThemeResource small = new ThemeResource("VMSmall.png");
+    private final ThemeResource logo = new ThemeResource("vm_logo.png"),
+            small = new ThemeResource("VMSmall.png");
     private VmUser user = null;
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset = null;
     private LoginDialog subwindow = null;
     private final String projTreeRoot = "Available Projects";
+    private Component right;
 
     /**
      * @return the user
@@ -98,59 +102,89 @@ public class ValidationManagerUI extends UI {
 
     private void updateScreen() {
         if (getUser() == null) {
+            setContent(new Image("Logo", logo));
             showLoginDialog();
         } else {
-            // Have a panel to put stuff in
-            VerticalLayout vl = new VerticalLayout();
+            HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
+            hsplit.setLocked(true);
+            if (tree == null) {
+                // Build the left component
+                tree = new Tree();
+                tree.addItem(projTreeRoot);
 
-            HorizontalSplitPanel vsplit = new HorizontalSplitPanel();
-            vsplit.setLocked(true);
-
-            tree = new Tree();
-
-            tree.addItem(projTreeRoot);
-
-            List<Project> projects = new ArrayList<>();
-            ProjectJpaController controller
-                    = new ProjectJpaController(DataBaseManager.getEntityManagerFactory());
-            if (DataBaseManager.isDemo()
-                    && controller.findProjectEntities().isEmpty()) {
-                buildDemoTree();
-            }
-            List<Project> all = controller.findProjectEntities();
-            for (Project p : all) {
-                if (p.getParentProjectId() == null) {
-                    projects.add(p);
+                List<Project> projects = new ArrayList<>();
+                ProjectJpaController controller
+                        = new ProjectJpaController(DataBaseManager.getEntityManagerFactory());
+                if (DataBaseManager.isDemo()
+                        && controller.findProjectEntities().isEmpty()) {
+                    buildDemoTree();
                 }
-            }
-            LOG.log(Level.INFO, "Found {0} projects!", projects.size());
-
-            for (Project p : projects) {
-                tree.addItem(p.getName());
-                tree.setParent(p.getName(), projTreeRoot);
-                if (p.getProjectList().isEmpty()) {
-                    // No subprojects
-                    tree.setChildrenAllowed(p.getName(), false);
-                } else {
-                    addChildrenProjects(p);
+                List<Project> all = controller.findProjectEntities();
+                for (Project p : all) {
+                    if (p.getParentProjectId() == null) {
+                        projects.add(p);
+                    }
                 }
+                LOG.log(Level.INFO, "Found {0} root projects!", projects.size());
+
+                for (Project p : projects) {
+                    tree.addItem(p);
+                    tree.setItemCaption(p, p.getName());
+                    tree.setParent(p, projTreeRoot);
+                    //TODO: Need to scale down icon
+                    //tree.setItemIcon(p, new ThemeResource("icons/book.svg"));
+                    if (p.getProjectList().isEmpty()) {
+                        // No subprojects
+                        tree.setChildrenAllowed(p, false);
+                    } else {
+                        addChildrenProjects(p);
+                    }
+                }
+                tree.addValueChangeListener(new ValueChangeListener() {
+                    @Override
+                    public void valueChange(Property.ValueChangeEvent event) {
+                        if (tree.getValue() instanceof Project) {
+                            Project p = (Project) tree.getValue();
+                            LOG.log(Level.INFO, "Selected: {0}", p.getName());
+                            displayProject(p);
+                        }
+                    }
+                });
+                tree.setImmediate(true);
+                tree.setSizeFull();
             }
-            tree.setSizeFull();
-            vsplit.setFirstComponent(tree);
-            vsplit.setSecondComponent(new Image("Image from file", logo));
+            hsplit.setFirstComponent(tree);
+            //Build the right component
+            VerticalSplitPanel vsplit = new VerticalSplitPanel();
+            vsplit.setFirstComponent(new Image("Logo", logo));
+            if (right != null) {
+                vsplit.setSecondComponent(right);
+            }
             vsplit.setSplitPosition(25, Sizeable.UNITS_PERCENTAGE);
-            vl.addComponent(vsplit);
-            setContent(vsplit);
+            //----------------------------------------------------------
+            hsplit.setSecondComponent(vsplit);
+            hsplit.setSplitPosition(25, Sizeable.UNITS_PERCENTAGE);
+            setContent(hsplit);
         }
     }
 
+    private void displayProject(Project p) {
+        BeanItem<Project> item = new BeanItem<>(p,
+                new String[]{"name", "notes"});
+        // Bind it to a component
+        Form form = new Form();
+        form.setItemDataSource(item);
+        right = form;
+        updateScreen();
+    }
+
     public void addChildrenProjects(Project p) {
-        // Add children (moons) under the planets.
         for (Project sub : p.getProjectList()) {
             // Add the item as a regular item.
-            tree.addItem(sub.getName());
+            tree.addItem(sub);
+            tree.setItemCaption(sub, sub.getName());
             // Set it to be a child.
-            tree.setParent(sub.getName(), p.getName());
+            tree.setParent(sub, p);
             if (sub.getProjectList().isEmpty()) {
                 //No children
                 tree.setChildrenAllowed(sub, false);
@@ -170,6 +204,7 @@ public class ValidationManagerUI extends UI {
             reset = new VMDemoResetThread();
             reset.start();
         }
+        setStyleName("black");
         updateScreen();
     }
 
