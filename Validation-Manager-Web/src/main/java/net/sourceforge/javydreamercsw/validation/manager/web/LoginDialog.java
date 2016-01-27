@@ -5,6 +5,7 @@ import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.Page;
+import com.vaadin.server.Resource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -26,9 +27,10 @@ public final class LoginDialog extends Window {
 
     private final ValidationManagerUI menu;
 
-    public LoginDialog(ValidationManagerUI menu) {
+    public LoginDialog(ValidationManagerUI menu, Resource icon) {
         // New login -window in the center of the screen
         super("Account login");
+        setIcon(icon);
         this.menu = menu;
         init();
     }
