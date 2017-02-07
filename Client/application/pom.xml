@@ -91,6 +91,16 @@
             <artifactId>Graph</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-modules-editor</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.modules</groupId>
+            <artifactId>org-netbeans-modules-editor-actions</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
     </dependencies>
     
     <build>
