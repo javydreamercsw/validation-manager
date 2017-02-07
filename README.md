@@ -7,7 +7,6 @@ Welcome to Validation Manager Repository!
 * Quick summary
 
 Validation Manager is a tool to handle all the cumbersome paperwork of regulated environment validations. Including Validation Plans, protocols, executions and exceptions. Keeping everything in one place and best of all paperless.
-* Version 0.2-Snapshot
 
 ### How do I get set up? ###
 
