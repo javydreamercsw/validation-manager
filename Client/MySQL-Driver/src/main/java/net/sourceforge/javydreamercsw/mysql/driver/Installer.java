@@ -12,29 +12,24 @@ import org.openide.windows.WindowManager;
 
 public class Installer extends ModuleInstall {
 
-    public static final String mysqlDriverClass = "com.mysql.jdbc.Driver";
-    private static final Logger LOG =
-            Logger.getLogger(Installer.class.getCanonicalName());
+    public static final String DRIVER = "com.mysql.cj.jdbc.Driver";
+    private static final Logger LOG
+            = Logger.getLogger(Installer.class.getCanonicalName());
 
     @Override
     public void restored() {
-        WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
-            @Override
-            public void run() {
-                //Check drivers
-                if (JDBCDriverManager.getDefault().getDrivers(mysqlDriverClass).length == 0) {
-                    try {
-                        LOG.fine("Registering MySQL driver!");
-                        JDBCDriverManager.getDefault().addDriver(
-                                JDBCDriver.create("mysql", "MySQL",
-                                mysqlDriverClass,
-                                new URL[]{new URL(
-                            "nbinst:/modules/ext/com.validation.manager.mysql/1/mysql/mysql-connector-java.jar")}));
-                    } catch (DatabaseException ex) {
-                        Exceptions.printStackTrace(ex);
-                    } catch (MalformedURLException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
+        WindowManager.getDefault().invokeWhenUIReady(() -> {
+            //Check drivers
+            if (JDBCDriverManager.getDefault().getDrivers(DRIVER).length == 0) {
+                try {
+                    LOG.fine("Registering MySQL driver!");
+                    JDBCDriverManager.getDefault().addDriver(
+                            JDBCDriver.create("mysql", "MySQL",
+                                    DRIVER,
+                                    new URL[]{new URL(
+                                                "nbinst:/modules/ext/com.validation.manager.mysql/1/mysql/mysql-connector-java.jar")}));
+                } catch (DatabaseException | MalformedURLException ex) {
+                    Exceptions.printStackTrace(ex);
                 }
             }
         });
