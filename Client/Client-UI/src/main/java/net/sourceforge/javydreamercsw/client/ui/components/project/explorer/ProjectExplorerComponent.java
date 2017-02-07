@@ -43,21 +43,21 @@ import org.openide.windows.TopComponent;
 public final class ProjectExplorerComponent extends TopComponent
         implements IProjectExplorer {
 
-    private static final ExplorerManager mgr = new ExplorerManager();
+    private static final ExplorerManager MGR = new ExplorerManager();
     private static DatabaseConnection conn;
     private Lookup.Result<RefreshableCapability> result = null;
     private static AbstractVMBeanNode currentNode;
     private static final Logger LOG
             = Logger.getLogger(ProjectExplorerComponent.class.getSimpleName());
-    private static final CustomBeanTreeView myBeanTreeView = 
-            new CustomBeanTreeView();
+    private static final CustomBeanTreeView BTV
+            = new CustomBeanTreeView();
 
     public ProjectExplorerComponent() {
         initComponents();
         setName(Bundle.CTL_ProjectExplorerTopComponent());
         setToolTipText(Bundle.HINT_ProjectExplorerTopComponent());
         setLayout(new BorderLayout());
-        add(myBeanTreeView, BorderLayout.CENTER);
+        add(BTV, BorderLayout.CENTER);
         associateLookup(ExplorerUtils.createLookup(getExplorerManager(),
                 getActionMap()));
         RootNode root = new RootNode(new ProjectChildFactory());
@@ -126,7 +126,7 @@ public final class ProjectExplorerComponent extends TopComponent
 
     @Override
     public ExplorerManager getExplorerManager() {
-        return mgr;
+        return MGR;
     }
 
     /**
@@ -149,12 +149,12 @@ public final class ProjectExplorerComponent extends TopComponent
             LOG.log(Level.FINE, "Refreshing: {0}", currentNode);
             currentNode.refresh();
         }
-        mgr.getRootContext().getLookup()
+        MGR.getRootContext().getLookup()
                 .lookupAll(RefreshableCapability.class).stream()
                 .forEach((rc) -> {
-            rc.refresh();
-        });
-        myBeanTreeView.expandNode(mgr.getRootContext());
+                    rc.refresh();
+                });
+        BTV.expandNode(MGR.getRootContext());
     }
 
     @Override
@@ -172,8 +172,8 @@ public final class ProjectExplorerComponent extends TopComponent
                     currentNode.getLookup()
                             .lookupAll(RefreshableCapability.class).stream()
                             .forEach((refresh) -> {
-                        refresh.refresh();
-                    });
+                                refresh.refresh();
+                            });
                 }
             }
         }
