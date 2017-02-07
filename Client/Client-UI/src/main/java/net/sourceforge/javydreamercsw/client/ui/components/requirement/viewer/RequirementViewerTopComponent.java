@@ -72,7 +72,7 @@ public final class RequirementViewerTopComponent extends TopComponent
     private final HierarchyScene scene;
     private final JComponent myView;
     private Node root = null;
-    private static final ResourceBundle rb
+    private static final ResourceBundle RB
             = ResourceBundle.getBundle("com.validation.manager.resources.VMMessages");
     private static final Logger LOG
             = Logger.getLogger(RequirementViewerTopComponent.class.getSimpleName());
@@ -193,8 +193,8 @@ public final class RequirementViewerTopComponent extends TopComponent
                             filterPane.removeAll();
                             for (RequirementStatus rs : new RequirementStatusJpaController(
                                     DataBaseManager.getEntityManagerFactory()).findRequirementStatusEntities()) {
-                                JCheckBox filter = new JCheckBox(rb.containsKey(rs.getStatus())
-                                        ? rb.getString(rs.getStatus()) : rs.getStatus());
+                                JCheckBox filter = new JCheckBox(RB.containsKey(rs.getStatus())
+                                        ? RB.getString(rs.getStatus()) : rs.getStatus());
                                 filter.addItemListener((RequirementViewerTopComponent) this);
                                 //TODO: Remove when filter is working.
                                 filter.setEnabled(false);
@@ -209,9 +209,9 @@ public final class RequirementViewerTopComponent extends TopComponent
                 } else if (item instanceof Requirement) {
                     Requirement req = (Requirement) item;
                     scene.clear();
-                    LOG.log(Level.INFO, "Selected: {0} ({1})", 
+                    LOG.log(Level.INFO, "Selected: {0} ({1})",
                             new Object[]{req.getUniqueId(),
-                            req.getId()});
+                                req.getId()});
                     scene.addRequirement(req);
                 }
             }
@@ -227,13 +227,13 @@ public final class RequirementViewerTopComponent extends TopComponent
             if (cb.isSelected()) {
                 String sourceText = cb.getText();
                 String toMatch;
-                if (sourceText.equals(rb.getString("general.approved"))) {
+                if (sourceText.equals(RB.getString("general.approved"))) {
                     toMatch = "general.approved";
-                } else if (sourceText.equals(rb.getString("general.obsolete"))) {
+                } else if (sourceText.equals(RB.getString("general.obsolete"))) {
                     toMatch = "general.obsolete";
-                } else if (sourceText.equals(rb.getString("general.rejected"))) {
+                } else if (sourceText.equals(RB.getString("general.rejected"))) {
                     toMatch = "general.rejected";
-                } else if (sourceText.equals(rb.getString("general.open"))) {
+                } else if (sourceText.equals(RB.getString("general.open"))) {
                     toMatch = "general.open";
                 } else {
                     //Not translated (i.e. custom)
