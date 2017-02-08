@@ -9,7 +9,6 @@
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <artifactId>Validation-Manager-Web</artifactId>
     <packaging>war</packaging>
-    <version>0.1-SNAPSHOT</version>
     <name>Validation Manager Web</name>
 
     <properties>
@@ -89,11 +88,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>VM-Core</artifactId>
-            <version>0.3-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.glassfish.metro</groupId>
             <artifactId>webservices-rt</artifactId>
             <version>2.3.1</version>
@@ -116,6 +110,11 @@
             <groupId>com.h2database</groupId>
             <type>jar</type>
             <version>${h2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>VM-Core</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -168,7 +167,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.0.0</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
