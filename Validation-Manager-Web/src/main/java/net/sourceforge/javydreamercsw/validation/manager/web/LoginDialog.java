@@ -41,18 +41,12 @@ public final class LoginDialog extends Window {
     TextField name = new TextField("Username");
     PasswordField password = new PasswordField("Password");
 
-    Button loginButton = new Button("Log In", new Button.ClickListener() {
-        @Override
-        public void buttonClick(ClickEvent event) {
-            tryToLogIn();
-        }
+    Button loginButton = new Button("Log In", (ClickEvent event) -> {
+        tryToLogIn();
     });
 
-    Button cancelButton = new Button("Cancel", new Button.ClickListener() {
-        @Override
-        public void buttonClick(ClickEvent event) {
-            LoginDialog.this.close();
-        }
+    Button cancelButton = new Button("Cancel", (ClickEvent event) -> {
+        LoginDialog.this.close();
     });
 
     public void init() {
@@ -115,7 +109,7 @@ public final class LoginDialog extends Window {
             }
             new Notification("Invalid credentials",
                     "\nIncorrect username/password.",
-                    Notification.TYPE_WARNING_MESSAGE, true)
+                    Notification.Type.WARNING_MESSAGE, true)
                     .show(Page.getCurrent());
             password.setValue("");
         }
