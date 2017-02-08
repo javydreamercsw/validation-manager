@@ -71,6 +71,32 @@ public class ValidationManagerUI extends UI {
         updateScreen();
     }
 
+    private void displayRequirementSpecNode(RequirementSpecNode rsn) {
+        displayRequirementSpecNode(rsn, false);
+    }
+
+    private void displayRequirementSpecNode(RequirementSpecNode rsn, boolean edit) {
+        Panel form = new Panel("Requirement Specification Node Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(rsn.getClass());
+        binder.setItemDataSource(rsn);
+        layout.addComponent(binder.buildAndBind("Name", "name"));
+        Field desc = binder.buildAndBind("Description", "description",
+                TextArea.class);
+        desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
+        desc.setSizeFull();
+        layout.addComponent(desc);
+        layout.addComponent(binder.buildAndBind("Scope", "scope"));
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        layout.setSizeFull();
+        form.setSizeFull();
+        right = form;
+        updateScreen();
+    }
+
     private void displayRequirementSpec(RequirementSpec rs) {
         displayRequirementSpec(rs, false);
     }
@@ -187,6 +213,10 @@ public class ValidationManagerUI extends UI {
                 RequirementSpec rs = (RequirementSpec) tree.getValue();
                 LOG.log(Level.INFO, "Selected: {0}", rs.getName());
                 displayRequirementSpec(rs);
+            } else if (tree.getValue() instanceof RequirementSpecNode) {
+                RequirementSpecNode rsn = (RequirementSpecNode) tree.getValue();
+                LOG.log(Level.INFO, "Selected: {0}", rsn.getName());
+                displayRequirementSpecNode(rsn);
             }
         });
         tree.setImmediate(true);
@@ -197,8 +227,6 @@ public class ValidationManagerUI extends UI {
     private Component getContentComponent() {
         HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
         hsplit.setLocked(true);
-        // Build the left component
-        //left = buildProjectTree();
         if (left != null) {
             hsplit.setFirstComponent(left);
         }
