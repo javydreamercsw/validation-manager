@@ -3,28 +3,33 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Property;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.shared.ui.combobox.FilteringMode;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Form;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +52,9 @@ public class ValidationManagerUI extends UI {
     private final String projTreeRoot = "Available Projects";
     private Component left, right;
     private final List<Project> projects = new ArrayList<>();
+    private final VaadinIcons projectIcon = VaadinIcons.RECORDS;
+    private final VaadinIcons specIcon = VaadinIcons.BOOK;
+    private final VaadinIcons requirementIcon = VaadinIcons.PIN;
 
     /**
      * @return the user
@@ -60,6 +68,33 @@ public class ValidationManagerUI extends UI {
      */
     protected void setUser(VmUser user) {
         this.user = user;
+        updateScreen();
+    }
+
+    private void displayRequirement(Requirement req) {
+        displayRequirement(req, false);
+    }
+
+    private void displayRequirement(Requirement req, boolean edit) {
+        Panel form = new Panel("Requirement Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(Requirement.class);
+        binder.setItemDataSource(req);
+        Field id = binder.buildAndBind("Requirement ID", "uniqueId");
+        layout.addComponent(id);
+        Field desc = binder.buildAndBind("Description", "description",
+                TextArea.class);
+        desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
+        desc.setSizeFull();
+        layout.addComponent(desc);
+        layout.addComponent(binder.buildAndBind("Notes", "notes"));
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        layout.setSizeFull();
+        form.setSizeFull();
+        right = form;
         updateScreen();
     }
 
@@ -108,23 +143,9 @@ public class ValidationManagerUI extends UI {
         Tree tree = new Tree();
         tree.addItem(projTreeRoot);
 
-        projects.stream().map((p) -> {
-            tree.addItem(p);
-            return p;
-        }).map((p) -> {
-            tree.setItemCaption(p, p.getName());
-            return p;
-        }).map((p) -> {
-            tree.setParent(p, projTreeRoot);
-            return p;
-        }).forEachOrdered((p) -> {
-            //TODO: Need to scale down icon
-            //tree.setItemIcon(p, new ThemeResource("icons/book.svg"));
-            if (p.getProjectList().isEmpty()) {
-                // No subprojects
-                tree.setChildrenAllowed(p, false);
-            } else {
-                addChildrenProjects(p, tree);
+        projects.forEach((p) -> {
+            if (p.getParentProjectId() == null) {
+                addProject(p, tree);
             }
         });
         tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
@@ -132,32 +153,15 @@ public class ValidationManagerUI extends UI {
                 Project p = (Project) tree.getValue();
                 LOG.log(Level.INFO, "Selected: {0}", p.getName());
                 displayProject(p);
+            } else if (tree.getValue() instanceof Requirement) {
+                Requirement req = (Requirement) tree.getValue();
+                LOG.log(Level.INFO, "Selected: {0}", req.getUniqueId());
+                displayRequirement(req);
             }
         });
         tree.setImmediate(true);
         tree.setSizeFull();
         return tree;
-    }
-
-    private ComboBox buildProjectDropDown() {
-        // Have a bean container to put the beans in
-        final BeanItemContainer<Project> container
-                = new BeanItemContainer<>(Project.class);
-        projects.forEach((p) -> {
-            container.addItem(p);
-        });
-        ComboBox cb = new ComboBox("Select Project", container);
-        cb.setFilteringMode(FilteringMode.CONTAINS);
-        cb.setItemCaptionMode(ItemCaptionMode.PROPERTY);
-        cb.setItemCaptionPropertyId("name");
-        cb.addValueChangeListener((Property.ValueChangeEvent event) -> {
-            Project p = (Project) cb.getValue();
-            LOG.log(Level.INFO, "Selected: {0}", p.getName());
-            displayProject(p);
-        });
-        //TODO: add icons
-        //cb.setItemIconPropertyId("");
-        return cb;
     }
 
     private Component getContentComponent() {
@@ -179,7 +183,6 @@ public class ValidationManagerUI extends UI {
     private Component getMenu() {
         HorizontalLayout hl = new HorizontalLayout();
         hl.addComponent(new Image("", logo));
-        hl.addComponent(buildProjectDropDown());
         return hl;
     }
 
@@ -190,7 +193,7 @@ public class ValidationManagerUI extends UI {
         } else {
             //Set up a menu header on top and the content below
             VerticalSplitPanel vs = new VerticalSplitPanel();
-            vs.setSplitPosition(15, Unit.PERCENTAGE);
+            vs.setSplitPosition(20, Unit.PERCENTAGE);
             //Set up top menu panel
             vs.setFirstComponent(getMenu());
             //Add the content
@@ -204,36 +207,94 @@ public class ValidationManagerUI extends UI {
     }
 
     private void displayProject(Project p, boolean edit) {
-        BeanItem<Project> item = new BeanItem<>(p,
-                new String[]{"name", "notes"});
         // Bind it to a component
-        Form form = new Form();
-        form.setItemDataSource(item);
-        form.setEnabled(edit);
-        left = form;
+        Panel form = new Panel("Project Detail");
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        BeanFieldGroup binder = new BeanFieldGroup(Project.class);
+        binder.setItemDataSource(p);
+        layout.addComponent(binder.buildAndBind("Name", "name"));
+        layout.addComponent(binder.buildAndBind("Notes", "notes"));
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        form.setSizeFull();
+        right = form;
         updateScreen();
     }
 
-    public void addChildrenProjects(Project p, Tree tree) {
-        p.getProjectList().stream().map((sub) -> {
-            // Add the item as a regular item.
-            tree.addItem(sub);
-            return sub;
-        }).map((sub) -> {
-            tree.setItemCaption(sub, sub.getName());
-            return sub;
-        }).map((sub) -> {
-            // Set it to be a child.
-            tree.setParent(sub, p);
-            return sub;
-        }).forEachOrdered((sub) -> {
-            if (sub.getProjectList().isEmpty()) {
-                //No children
-                tree.setChildrenAllowed(sub, false);
-            } else {
-                addChildrenProjects(sub, tree);
-            }
-        });
+    private void addRequirementSpec(RequirementSpec rs, Tree tree) {
+        // Add the item as a regular item.
+        tree.addItem(rs);
+        tree.setItemCaption(rs, rs.getName());
+        tree.setItemIcon(rs, specIcon);
+        // Set it to be a child.
+        tree.setParent(rs, rs.getProject());
+        if (rs.getRequirementSpecNodeList().isEmpty()) {
+            //No children
+            tree.setChildrenAllowed(rs, false);
+        } else {
+            rs.getRequirementSpecNodeList().forEach((rsn) -> {
+                addRequirementSpecsNode(rsn, tree);
+            });
+        }
+    }
+
+    private void addRequirementSpecsNode(RequirementSpecNode rsn, Tree tree) {
+        // Add the item as a regular item.
+        tree.addItem(rsn);
+        tree.setItemCaption(rsn, rsn.getName());
+        tree.setItemIcon(rsn, specIcon);
+        // Set it to be a child.
+        tree.setParent(rsn, rsn.getRequirementSpec());
+        if (rsn.getRequirementList().isEmpty()) {
+            //No children
+            tree.setChildrenAllowed(rsn, false);
+        } else {
+            ArrayList<Requirement> list
+                    = new ArrayList<>(rsn.getRequirementList());
+            Collections.sort(list,
+                    (Requirement o1, Requirement o2)
+                    -> o1.getUniqueId().compareTo(o2.getUniqueId()));
+            list.forEach((req) -> {
+                addRequirement(req, tree);
+            });
+        }
+    }
+
+    private void addRequirement(Requirement req, Tree tree) {
+        // Add the item as a regular item.
+        tree.addItem(req);
+        tree.setItemCaption(req, req.getUniqueId());
+        tree.setItemIcon(req, requirementIcon);
+        tree.setParent(req, req.getRequirementSpecNode());
+        //No children
+        tree.setChildrenAllowed(req, false);
+    }
+
+    public void addProject(Project p, Tree tree) {
+        tree.addItem(p);
+        tree.setItemCaption(p, p.getName());
+        tree.setParent(p, p.getParentProjectId() == null
+                ? projTreeRoot : p.getParentProjectId());
+        tree.setItemIcon(p, projectIcon);
+        boolean children = false;
+        if (!p.getProjectList().isEmpty()) {
+            p.getProjectList().forEach((sp) -> {
+                addProject(sp, tree);
+            });
+            children = true;
+        }
+        if (!p.getRequirementSpecList().isEmpty()) {
+            p.getRequirementSpecList().forEach((rs) -> {
+                addRequirementSpec(rs, tree);
+            });
+            children = true;
+        }
+        if (!children) {
+            // No subprojects
+            tree.setChildrenAllowed(p, false);
+        }
     }
 
     @Override
@@ -263,6 +324,7 @@ public class ValidationManagerUI extends UI {
                 -> (p.getParentProjectId() == null)).forEachOrdered((p) -> {
             projects.add(p);
         });
+        left = buildProjectTree();
         LOG.log(Level.INFO, "Found {0} root projects!", projects.size());
     }
 
@@ -273,6 +335,8 @@ public class ValidationManagerUI extends UI {
             subwindow.setClosable(false);
             subwindow.setResizable(false);
             subwindow.center();
+            subwindow.setWidth(25, Unit.PERCENTAGE);
+            subwindow.setHeight(25, Unit.PERCENTAGE);
             addWindow(subwindow);
         } else {
             subwindow.setVisible(true);
