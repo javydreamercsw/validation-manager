@@ -13,7 +13,8 @@ public class VMDemoResetThread extends Thread {
 
     public static VMDemoResetThread instance = null;
     public long reset_period = 86400000; //Daily
-    private static final Logger logger = Logger.getLogger(VMDemoResetThread.class.getName());
+    private static final Logger LOG
+            = Logger.getLogger(VMDemoResetThread.class.getName());
 
     @Override
     public void run() {
@@ -23,26 +24,26 @@ public class VMDemoResetThread extends Thread {
                 try {
                     try {
                         sleep(reset_period);
-                    } catch (Exception se) {
+                    } catch (InterruptedException se) {
                         break;
                     }
                     //Check again this is a demo environment, just in case
                     if (DataBaseManager.isDemo()) {
-                        logger.warning("Dropping tables...");
+                        LOG.warning("Dropping tables...");
                         DataBaseManager.nativeQuery("DROP ALL OBJECTS");
-                        logger.warning("Done!");
+                        LOG.warning("Done!");
                     }
                     //Reload the database
-                    logger.warning("Reloading DB...");
+                    LOG.warning("Reloading DB...");
                     DataBaseManager.reload(true);
-                    logger.warning("Done!");
+                    LOG.warning("Done!");
                 } catch (VMException ex) {
                     Exceptions.printStackTrace(ex);
                 }
             }
         }
     }
-    
+
     public static VMDemoResetThread getInstance() {
         if (instance == null) {
             instance = new VMDemoResetThread();
