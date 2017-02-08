@@ -116,6 +116,11 @@
             <artifactId>VM-Core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-icons</artifactId>
+            <version>2.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
