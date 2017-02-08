@@ -42,7 +42,7 @@ public class SetCharacterEncodingFilter implements Filter {
      * interpret request parameters for this request.
      *
      * @param request The servlet request we are processing
-     * @param result The servlet response we are creating
+     * @param response The servlet response we are creating
      * @param chain The filter chain we are processing
      *
      * @exception IOException if an input/output error occurs
@@ -69,6 +69,7 @@ public class SetCharacterEncodingFilter implements Filter {
      * Place this filter into service.
      *
      * @param filterConfig The filter configuration object
+     * @throws javax.servlet.ServletException
      */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -76,7 +77,7 @@ public class SetCharacterEncodingFilter implements Filter {
         this.filterConfig = filterConfig;
         this.encoding = filterConfig.getInitParameter("encoding");
         String value = filterConfig.getInitParameter("ignore");
-        this.ignore = value==null?false:value.equalsIgnoreCase("true")
+        this.ignore = value == null ? false : value.equalsIgnoreCase("true")
                 || value.equalsIgnoreCase("yes");
     }
 
@@ -92,6 +93,7 @@ public class SetCharacterEncodingFilter implements Filter {
      * filter.
      *
      * @param request The servlet request we are processing
+     * @return encoding.
      */
     protected String selectEncoding(ServletRequest request) {
         return (this.encoding);
