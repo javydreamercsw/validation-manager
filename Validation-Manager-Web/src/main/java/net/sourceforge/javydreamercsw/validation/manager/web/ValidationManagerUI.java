@@ -71,6 +71,33 @@ public class ValidationManagerUI extends UI {
         updateScreen();
     }
 
+    private void displayRequirementSpec(RequirementSpec rs) {
+        displayRequirementSpec(rs, false);
+    }
+
+    private void displayRequirementSpec(RequirementSpec rs, boolean edit) {
+        Panel form = new Panel("Requirement Specification Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(rs.getClass());
+        binder.setItemDataSource(rs);
+        layout.addComponent(binder.buildAndBind("Name", "name"));
+        Field desc = binder.buildAndBind("Description", "description",
+                TextArea.class);
+        desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
+        desc.setSizeFull();
+        layout.addComponent(desc);
+        layout.addComponent(binder.buildAndBind("Modification Date",
+                "modificationDate"));
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        layout.setSizeFull();
+        form.setSizeFull();
+        right = form;
+        updateScreen();
+    }
+
     private void displayRequirement(Requirement req) {
         displayRequirement(req, false);
     }
@@ -80,10 +107,9 @@ public class ValidationManagerUI extends UI {
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(Requirement.class);
+        BeanFieldGroup binder = new BeanFieldGroup(req.getClass());
         binder.setItemDataSource(req);
-        Field id = binder.buildAndBind("Requirement ID", "uniqueId");
-        layout.addComponent(id);
+        layout.addComponent(binder.buildAndBind("Requirement ID", "uniqueId"));
         Field desc = binder.buildAndBind("Description", "description",
                 TextArea.class);
         desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
@@ -157,6 +183,10 @@ public class ValidationManagerUI extends UI {
                 Requirement req = (Requirement) tree.getValue();
                 LOG.log(Level.INFO, "Selected: {0}", req.getUniqueId());
                 displayRequirement(req);
+            } else if (tree.getValue() instanceof RequirementSpec) {
+                RequirementSpec rs = (RequirementSpec) tree.getValue();
+                LOG.log(Level.INFO, "Selected: {0}", rs.getName());
+                displayRequirementSpec(rs);
             }
         });
         tree.setImmediate(true);
@@ -212,7 +242,7 @@ public class ValidationManagerUI extends UI {
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         FormLayout layout = new FormLayout();
         form.setContent(layout);
-        BeanFieldGroup binder = new BeanFieldGroup(Project.class);
+        BeanFieldGroup binder = new BeanFieldGroup(p.getClass());
         binder.setItemDataSource(p);
         layout.addComponent(binder.buildAndBind("Name", "name"));
         layout.addComponent(binder.buildAndBind("Notes", "notes"));
