@@ -3,10 +3,8 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.server.Sizeable;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
@@ -73,12 +71,12 @@ public class ValidationManagerUI extends UI {
 
     }
 
-    // @return the current application instance	  	
+    // @return the current application instance
     public static ValidationManagerUI getInstance() {
         return THREAD_LOCAL.get();
     }
 
-    // Set the current application instance 	
+    // Set the current application instance
     public static void setInstance(ValidationManagerUI application) {
         THREAD_LOCAL.set(application);
     }
@@ -86,7 +84,8 @@ public class ValidationManagerUI extends UI {
     private void buildDemoTree() {
         try {
             ProjectJpaController controller
-                    = new ProjectJpaController(DataBaseManager.getEntityManagerFactory());
+                    = new ProjectJpaController(DataBaseManager
+                            .getEntityManagerFactory());
             LOG.info("Creating demo projects...");
             //Create some test projects
             Project rootProject = new Project("Demo");
@@ -109,10 +108,16 @@ public class ValidationManagerUI extends UI {
         Tree tree = new Tree();
         tree.addItem(projTreeRoot);
 
-        for (Project p : projects) {
+        projects.stream().map((p) -> {
             tree.addItem(p);
+            return p;
+        }).map((p) -> {
             tree.setItemCaption(p, p.getName());
+            return p;
+        }).map((p) -> {
             tree.setParent(p, projTreeRoot);
+            return p;
+        }).forEachOrdered((p) -> {
             //TODO: Need to scale down icon
             //tree.setItemIcon(p, new ThemeResource("icons/book.svg"));
             if (p.getProjectList().isEmpty()) {
@@ -121,15 +126,12 @@ public class ValidationManagerUI extends UI {
             } else {
                 addChildrenProjects(p, tree);
             }
-        }
-        tree.addValueChangeListener(new ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                if (tree.getValue() instanceof Project) {
-                    Project p = (Project) tree.getValue();
-                    LOG.log(Level.INFO, "Selected: {0}", p.getName());
-                    displayProject(p);
-                }
+        });
+        tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
+            if (tree.getValue() instanceof Project) {
+                Project p = (Project) tree.getValue();
+                LOG.log(Level.INFO, "Selected: {0}", p.getName());
+                displayProject(p);
             }
         });
         tree.setImmediate(true);
@@ -141,22 +143,19 @@ public class ValidationManagerUI extends UI {
         // Have a bean container to put the beans in
         final BeanItemContainer<Project> container
                 = new BeanItemContainer<>(Project.class);
-        for (Project p : projects) {
+        projects.forEach((p) -> {
             container.addItem(p);
-        }
+        });
         ComboBox cb = new ComboBox("Select Project", container);
         cb.setFilteringMode(FilteringMode.CONTAINS);
         cb.setItemCaptionMode(ItemCaptionMode.PROPERTY);
         cb.setItemCaptionPropertyId("name");
-        cb.addValueChangeListener(new ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                Project p = (Project) cb.getValue();
-                LOG.log(Level.INFO, "Selected: {0}", p.getName());
-                displayProject(p);
-            }
+        cb.addValueChangeListener((Property.ValueChangeEvent event) -> {
+            Project p = (Project) cb.getValue();
+            LOG.log(Level.INFO, "Selected: {0}", p.getName());
+            displayProject(p);
         });
-        //TODO: add icons 
+        //TODO: add icons
         //cb.setItemIconPropertyId("");
         return cb;
     }
@@ -173,7 +172,7 @@ public class ValidationManagerUI extends UI {
         if (right != null) {
             hsplit.setSecondComponent(right);
         }
-        hsplit.setSplitPosition(25, Sizeable.UNITS_PERCENTAGE);
+        hsplit.setSplitPosition(25, Unit.PERCENTAGE);
         return hsplit;
     }
 
@@ -191,7 +190,7 @@ public class ValidationManagerUI extends UI {
         } else {
             //Set up a menu header on top and the content below
             VerticalSplitPanel vs = new VerticalSplitPanel();
-            vs.setSplitPosition(15, Sizeable.UNITS_PERCENTAGE);
+            vs.setSplitPosition(15, Unit.PERCENTAGE);
             //Set up top menu panel
             vs.setFirstComponent(getMenu());
             //Add the content
@@ -216,19 +215,25 @@ public class ValidationManagerUI extends UI {
     }
 
     public void addChildrenProjects(Project p, Tree tree) {
-        for (Project sub : p.getProjectList()) {
+        p.getProjectList().stream().map((sub) -> {
             // Add the item as a regular item.
             tree.addItem(sub);
+            return sub;
+        }).map((sub) -> {
             tree.setItemCaption(sub, sub.getName());
+            return sub;
+        }).map((sub) -> {
             // Set it to be a child.
             tree.setParent(sub, p);
+            return sub;
+        }).forEachOrdered((sub) -> {
             if (sub.getProjectList().isEmpty()) {
                 //No children
                 tree.setChildrenAllowed(sub, false);
             } else {
                 addChildrenProjects(sub, tree);
             }
-        }
+        });
     }
 
     @Override
@@ -247,17 +252,17 @@ public class ValidationManagerUI extends UI {
 
     private void updateProjectList() {
         ProjectJpaController controller
-                = new ProjectJpaController(DataBaseManager.getEntityManagerFactory());
+                = new ProjectJpaController(DataBaseManager
+                        .getEntityManagerFactory());
         if (DataBaseManager.isDemo()
                 && controller.findProjectEntities().isEmpty()) {
             buildDemoTree();
         }
         List<Project> all = controller.findProjectEntities();
-        for (Project p : all) {
-            if (p.getParentProjectId() == null) {
-                projects.add(p);
-            }
-        }
+        all.stream().filter((p)
+                -> (p.getParentProjectId() == null)).forEachOrdered((p) -> {
+            projects.add(p);
+        });
         LOG.log(Level.INFO, "Found {0} root projects!", projects.size());
     }
 
