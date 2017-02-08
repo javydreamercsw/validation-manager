@@ -29,7 +29,7 @@
 	}
 
 .v-vaadin-version:after {
-	content: "7.6.1";
+	content: "7.7.6";
 }
 
 .v-generated-body {
@@ -1849,6 +1849,8 @@ body .vmtheme.v-app .v-app-loading {
 }
 
 .vmtheme .v-escalator-body {
+	-ms-touch-action: none;
+	touch-action: none;
 	z-index: 0;
 	top: 0;
 }
@@ -2048,6 +2050,8 @@ body .vmtheme.v-app .v-app-loading {
 }
 
 .vmtheme .v-grid-body {
+	-ms-touch-action: none;
+	touch-action: none;
 	z-index: 0;
 	top: 0;
 }
@@ -2226,6 +2230,8 @@ body .vmtheme.v-app .v-app-loading {
 
 .vmtheme .v-grid-sidebar.v-contextmenu .v-grid-sidebar-content {
 	padding: 4px 0;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .vmtheme .v-grid-sidebar.v-contextmenu .v-grid-sidebar-content .gwt-MenuBar .gwt-MenuItem .column-hiding-toggle {
@@ -2327,6 +2333,21 @@ body .vmtheme.v-app .v-app-loading {
 	bottom: 0px;
 	cursor: col-resize;
 	z-index: 10;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.vmtheme .v-grid-column-resize-simple-indicator {
+	position: absolute;
+	width: 3px;
+	top: 0px;
+	left: 10px;
+	z-index: 9001;
+	background: #fff;
+	box-shadow: 0px 0px 5px #000;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
@@ -2476,11 +2497,11 @@ body .vmtheme.v-app .v-app-loading {
 }
 
 .v-ie8 .vmtheme .v-grid-editor-cells  > div .v-datefield-button {
-	margin-left: -30px;
+	margin-left: -37px;
 }
 
 .v-ie8 .vmtheme .v-grid-editor-cells  > div .v-filterselect-button {
-	margin-left: -27px;
+	margin-left: -25px;
 }
 
 .vmtheme .v-grid-editor-cells  > div .v-select, .vmtheme .v-grid-editor-cells  > div .v-select-select {
@@ -3127,10 +3148,29 @@ body .vmtheme.v-app .v-app-loading {
 	border-collapse: collapse;
 	border: none;
 	vertical-align: top;
+	display: block;
+	width: 100%;
+	float: left;
+	clear: both;
+}
+
+.vmtheme .v-filterselect-suggestmenu table > tbody, .vmtheme .v-filterselect-suggestmenu table > tbody > tr, .vmtheme .v-filterselect-suggestmenu table > tbody > tr > td {
+	display: block;
+	width: 100%;
+	float: left;
+	clear: both;
+	overflow-y: hidden;
 }
 
 .vmtheme .v-filterselect-suggestmenu .gwt-MenuItem {
 	white-space: nowrap;
+	padding-left: 1px;
+	padding-right: 0;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	overflow-x: hidden;
+	text-overflow: ellipsis;
 }
 
 .vmtheme .v-filterselect-suggestmenu .gwt-MenuItem .v-icon {
@@ -5698,6 +5738,10 @@ body .vmtheme.v-app .v-app-loading {
 	background: transparent;
 }
 
+.v-ie8 .vmtheme .v-grid-editor-cells > div .v-datefield-button {
+	margin-top: -2px;
+}
+
 .vmtheme .v-grid-editor-cells > div .v-filterselect {
 	overflow: hidden;
 }
@@ -6195,7 +6239,7 @@ body .vmtheme.v-app .v-app-loading {
 
 .vmtheme .v-filterselect-suggestmenu .gwt-MenuItem {
 	padding: 1px 8px;
-	height: 16px;
+	min-height: 18px;
 	user-select: none;
 	-moz-user-select: none;
 	-webkit-user-select: none;
