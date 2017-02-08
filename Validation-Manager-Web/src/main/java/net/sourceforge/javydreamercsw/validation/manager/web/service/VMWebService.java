@@ -23,10 +23,15 @@ import org.openide.util.Exceptions;
 @WebService(serviceName = "VMWebService")
 public class VMWebService {
 
-    private Map<String, Object> parameters = new HashMap<>();
+    private final Map<String, Object> parameters = new HashMap<>();
 
     /**
      * Web service operation
+     *
+     * @param username Username
+     * @param password Password
+     * @return User with provided credentials or null if invalid.
+     * @throws com.validation.manager.core.VMException
      */
     @WebMethod(operationName = "getVMUser")
     public VmUser getVMUser(@WebParam(name = "user") final String username,
@@ -64,6 +69,11 @@ public class VMWebService {
 
     /**
      * Web service operation
+     *
+     * @param project Project to retrieve
+     * @param user User requesting the information.
+     * @return Update project.
+     * @throws com.validation.manager.core.VMException
      */
     @WebMethod(operationName = "getProject")
     public Project getProject(@WebParam(name = "project") final Project project,
@@ -77,6 +87,10 @@ public class VMWebService {
 
     /**
      * Web service operation
+     *
+     * @param user User requesting the information.
+     * @return List of root projects.
+     * @throws com.validation.manager.core.VMException
      */
     @WebMethod(operationName = "getRootProjects")
     public List<Project> getRootProjects(@WebParam(name = "user") final VmUser user)
@@ -84,18 +98,23 @@ public class VMWebService {
         List<Project> projects = new ArrayList<>();
         if (isValidUser(user.getUsername(), user.getPassword()) != null) {
             ProjectJpaController controller
-                    = new ProjectJpaController(DataBaseManager.getEntityManagerFactory());
-            for (Project p : controller.findProjectEntities()) {
-                if (p.getParentProjectId() == null) {
-                    projects.add(p);
-                }
-            }
+                    = new ProjectJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+            controller.findProjectEntities().stream().filter((p)
+                    -> (p.getParentProjectId() == null)).forEachOrdered((p) -> {
+                projects.add(p);
+            });
         }
         return projects;
     }
 
     /**
      * Web service operation
+     *
+     * @param newProject Project to save.
+     * @param user User requesting the information.
+     * @return true if successful, false otherwise.
+     * @throws com.validation.manager.core.VMException
      */
     @WebMethod(operationName = "saveProject")
     public boolean saveProject(@WebParam(name = "newProject") final Project newProject,
