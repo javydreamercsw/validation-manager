@@ -2,12 +2,15 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
@@ -35,6 +38,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import org.openide.util.Exceptions;
+import org.vaadin.peter.contextmenu.ContextMenu;
+import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
+import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTreeItemEvent;
 
 @Theme("vmtheme")
 @SuppressWarnings("serial")
@@ -55,6 +61,8 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons projectIcon = VaadinIcons.RECORDS;
     private final VaadinIcons specIcon = VaadinIcons.BOOK;
     private final VaadinIcons requirementIcon = VaadinIcons.PIN;
+    private final VaadinIcons testSuiteIcon = VaadinIcons.FILE_TREE;
+    private final VaadinIcons testIcon = VaadinIcons.FILE_TEXT;
 
     /**
      * @return the user
@@ -203,25 +211,81 @@ public class ValidationManagerUI extends UI {
         tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
             if (tree.getValue() instanceof Project) {
                 Project p = (Project) tree.getValue();
-                LOG.log(Level.INFO, "Selected: {0}", p.getName());
+                LOG.log(Level.FINE, "Selected: {0}", p.getName());
                 displayProject(p);
             } else if (tree.getValue() instanceof Requirement) {
                 Requirement req = (Requirement) tree.getValue();
-                LOG.log(Level.INFO, "Selected: {0}", req.getUniqueId());
+                LOG.log(Level.FINE, "Selected: {0}", req.getUniqueId());
                 displayRequirement(req);
             } else if (tree.getValue() instanceof RequirementSpec) {
                 RequirementSpec rs = (RequirementSpec) tree.getValue();
-                LOG.log(Level.INFO, "Selected: {0}", rs.getName());
+                LOG.log(Level.FINE, "Selected: {0}", rs.getName());
                 displayRequirementSpec(rs);
             } else if (tree.getValue() instanceof RequirementSpecNode) {
                 RequirementSpecNode rsn = (RequirementSpecNode) tree.getValue();
-                LOG.log(Level.INFO, "Selected: {0}", rsn.getName());
+                LOG.log(Level.FINE, "Selected: {0}", rsn.getName());
                 displayRequirementSpecNode(rsn);
             }
         });
+        //Select item on right click as well
+        tree.addItemClickListener((ItemClickEvent event) -> {
+            if (event.getSource() == tree
+                    && event.getButton() == MouseButton.RIGHT) {
+                if (event.getItem() != null) {
+                    Item clicked = event.getItem();
+                    tree.select(event.getItemId());
+                }
+            }
+        });
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setAsContextMenuOf(tree);
+        ContextMenuOpenedListener.TreeListener treeItemListener
+                = (ContextMenuOpenedOnTreeItemEvent event) -> {
+                    contextMenu.removeAllItems();
+                    if (tree.getValue() instanceof Project) {
+                        createProjectMenu(contextMenu);
+                    } else if (tree.getValue() instanceof Requirement) {
+                        createRequirementMenu(contextMenu);
+                    } else if (tree.getValue() instanceof RequirementSpec) {
+                        createRequirementSpecMenu(contextMenu);
+                    } else if (tree.getValue() instanceof RequirementSpecNode) {
+                        createRequirementSpecNodeMenu(contextMenu);
+                    }
+                };
+        contextMenu.addContextMenuTreeListener(treeItemListener);
         tree.setImmediate(true);
         tree.setSizeFull();
         return tree;
+    }
+
+    private void createProjectMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Sub Project", VaadinIcons.PLUS);
+        ContextMenu.ContextMenuItem createSpec
+                = menu.addItem("Create Requirement Spec", specIcon);
+        ContextMenu.ContextMenuItem createTest
+                = menu.addItem("Create Test Suite", testSuiteIcon);
+        ContextMenu.ContextMenuItem edit
+                = menu.addItem("Edit Project", VaadinIcons.EDIT);
+    }
+
+    private void createRequirementMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem edit
+                = menu.addItem("Edit Requirement", VaadinIcons.EDIT);
+    }
+
+    private void createRequirementSpecMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Requirement", VaadinIcons.PLUS);
+        ContextMenu.ContextMenuItem edit
+                = menu.addItem("Edit Requirement Spec", VaadinIcons.EDIT);
+    }
+
+    private void createRequirementSpecNodeMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Requirement Spec", VaadinIcons.PLUS);
+        ContextMenu.ContextMenuItem edit
+                = menu.addItem("Edit Requirement Spec Node", VaadinIcons.EDIT);
     }
 
     private Component getContentComponent() {
@@ -383,7 +447,7 @@ public class ValidationManagerUI extends UI {
             projects.add(p);
         });
         left = buildProjectTree();
-        LOG.log(Level.INFO, "Found {0} root projects!", projects.size());
+        LOG.log(Level.FINE, "Found {0} root projects!", projects.size());
     }
 
     private void showLoginDialog() {
