@@ -5,18 +5,22 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
@@ -63,6 +67,7 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons requirementIcon = VaadinIcons.PIN;
     private final VaadinIcons testSuiteIcon = VaadinIcons.FILE_TREE;
     private final VaadinIcons testIcon = VaadinIcons.FILE_TEXT;
+    private final Tree tree = new Tree();
 
     /**
      * @return the user
@@ -200,7 +205,7 @@ public class ValidationManagerUI extends UI {
     }
 
     private Tree buildProjectTree() {
-        Tree tree = new Tree();
+        tree.removeAllItems();
         tree.addItem(projTreeRoot);
 
         projects.forEach((p) -> {
@@ -250,23 +255,46 @@ public class ValidationManagerUI extends UI {
                         createRequirementSpecMenu(contextMenu);
                     } else if (tree.getValue() instanceof RequirementSpecNode) {
                         createRequirementSpecNodeMenu(contextMenu);
+                    } else {
+                        //We are at the root
+                        createRootMenu(contextMenu);
                     }
                 };
         contextMenu.addContextMenuTreeListener(treeItemListener);
         tree.setImmediate(true);
+        tree.expandItem(projTreeRoot);
         tree.setSizeFull();
         return tree;
     }
 
+    private void createRootMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Project", projectIcon);
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayProject(new Project(), true);
+                });
+    }
+
     private void createProjectMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Sub Project", VaadinIcons.PLUS);
+                = menu.addItem("Create Sub Project", projectIcon);
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    Project project = new Project();
+                    project.setParentProjectId((Project) tree.getValue());
+                    displayProject(project, true);
+                });
         ContextMenu.ContextMenuItem createSpec
                 = menu.addItem("Create Requirement Spec", specIcon);
         ContextMenu.ContextMenuItem createTest
                 = menu.addItem("Create Test Suite", testSuiteIcon);
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Project", VaadinIcons.EDIT);
+        edit.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayProject((Project) tree.getValue(), true);
+                });
     }
 
     private void createRequirementMenu(ContextMenu menu) {
@@ -276,9 +304,9 @@ public class ValidationManagerUI extends UI {
 
     private void createRequirementSpecMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Requirement", VaadinIcons.PLUS);
+                = menu.addItem("Create Requirement", requirementIcon);
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Requirement Spec", VaadinIcons.EDIT);
+                = menu.addItem("Edit Requirement Spec", specIcon);
     }
 
     private void createRequirementSpecNodeMenu(ContextMenu menu) {
@@ -336,8 +364,44 @@ public class ValidationManagerUI extends UI {
         form.setContent(layout);
         BeanFieldGroup binder = new BeanFieldGroup(p.getClass());
         binder.setItemDataSource(p);
-        layout.addComponent(binder.buildAndBind("Name", "name"));
-        layout.addComponent(binder.buildAndBind("Notes", "notes"));
+        Field<?> name = binder.buildAndBind("Name", "name");
+        Field<?> notes = binder.buildAndBind("Notes", "notes");
+        layout.addComponent(name);
+        layout.addComponent(notes);
+        if (edit) {
+            if (p.getId() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    p.setName(name.getValue().toString());
+                    p.setNotes(notes.getValue().toString());
+                    new ProjectJpaController(DataBaseManager
+                            .getEntityManagerFactory()).create(p);
+                    form.setVisible(false);
+                    //Recreate the tree to show the addition
+                    updateProjectList();
+                    buildProjectTree();
+                    displayProject(p, false);
+                    updateScreen();
+                });
+                layout.addComponent(save);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        binder.commit();
+                    } catch (FieldGroup.CommitException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(update);
+            }
+        }
+        binder.setBuffered(true);
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
         form.setSizeFull();
@@ -431,6 +495,7 @@ public class ValidationManagerUI extends UI {
         }
         updateProjectList();
         updateScreen();
+        Page.getCurrent().setTitle("Validation Manager");
     }
 
     private void updateProjectList() {
@@ -442,6 +507,7 @@ public class ValidationManagerUI extends UI {
             buildDemoTree();
         }
         List<Project> all = controller.findProjectEntities();
+        projects.clear();
         all.stream().filter((p)
                 -> (p.getParentProjectId() == null)).forEachOrdered((p) -> {
             projects.add(p);
