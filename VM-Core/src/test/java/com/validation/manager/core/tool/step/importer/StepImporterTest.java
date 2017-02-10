@@ -143,11 +143,14 @@ public class StepImporterTest extends AbstractVMTestCase {
         Requirement r = null;
         try {
             RequirementSpec rs
-                    = createRequirementSpec("Test Spec", "Description", project, 1);
+                    = createRequirementSpec("Test Spec", "Description",
+                            project, 1);
             RequirementSpecNode rsn
-                    = createRequirementSpecNode(rs, "Root", "Description", "Scope");
+                    = createRequirementSpecNode(rs, "Root", "Description",
+                            "Scope");
             r = createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsn.getRequirementSpecNodePK(), "Notes", 1, 1);
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
+                    "Notes", 1, 1);
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -160,7 +163,7 @@ public class StepImporterTest extends AbstractVMTestCase {
                 StepImporter instance = new StepImporter(file,
                         new TestCaseJpaController(
                                 getEntityManagerFactory())
-                        .findTestCase(tc.getTestCasePK()));
+                                .findTestCase(tc.getTestCasePK()));
                 instance.importFile(true);
                 instance.processImport();
             }
@@ -178,7 +181,8 @@ public class StepImporterTest extends AbstractVMTestCase {
         }
         rs.update();
         if (check) {
-            assertEquals(10/*Update if the excel sheets change*/, rs.getStepList().size());
+            assertEquals(10/*Update if the excel sheets change*/,
+                    rs.getStepList().size());
         }
         return rs.getStepList().size();
     }
@@ -223,10 +227,7 @@ public class StepImporterTest extends AbstractVMTestCase {
         } catch (FileNotFoundException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        } catch (InvalidFormatException ex) {
+        } catch (IOException | InvalidFormatException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
