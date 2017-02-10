@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -66,7 +65,7 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
             fail();
         }
         System.out.println("Create Requirements");
-        List<Requirement> requirements = new ArrayList<Requirement>();
+        List<Requirement> requirements = new ArrayList<>();
         int requirementAmount = 15;
         for (int i = 0; i < requirementAmount; i++) {
             try {
