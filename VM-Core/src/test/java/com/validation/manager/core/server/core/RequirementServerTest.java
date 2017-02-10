@@ -235,24 +235,24 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.write2DB();
             rs.addChildRequirement(req2);
             //Should have one children now
-            for (Requirement r : rs.getRequirementList1()) {
+            rs.getRequirementList1().forEach((r) -> {
                 LOG.info(r.getUniqueId());
-            }
+            });
             assertEquals(1, rs.getRequirementList1().size());
-            for (Requirement r : rs.getRequirementList()) {
+            rs.getRequirementList().forEach((r) -> {
                 LOG.info(r.getUniqueId());
-            }
+            });
             //No parents
             assertEquals(0, rs.getRequirementList().size());
             RequirementServer rs2 = new RequirementServer(req2);
-            for (Requirement r : rs2.getRequirementList()) {
+            rs2.getRequirementList().forEach((r) -> {
                 LOG.info(r.getUniqueId());
-            }
+            });
             //One parent
             assertEquals(1, rs2.getRequirementList().size());
-            for (Requirement r : rs2.getRequirementList1()) {
+            rs2.getRequirementList1().forEach((r) -> {
                 LOG.info(r.getUniqueId());
-            }
+            });
             //No children
             assertEquals(0, rs2.getRequirementList1().size());
             checkCircularDependency(req);
@@ -265,31 +265,32 @@ public class RequirementServerTest extends AbstractVMTestCase {
 
     private void checkCircularDependency(Requirement r) {
         RequirementServer rs = new RequirementServer(r);
-        for (Requirement t : rs.getVersions()) {
-            RequirementServer temp = new RequirementServer(t);
-            //Detect circular relationships
-            if (temp.getRequirementList().size() > 0
-                    && temp.getRequirementList1().size() > 0) {
-                //Has both children and parents
-                LOG.log(Level.INFO,
-                        "Inspecting {0} for circular dependencies.",
-                        temp.getUniqueId());
-                for (Requirement parent : temp.getRequirementList1()) {
-                    //Check all parents of this requirement
-                    for (Requirement child : parent.getRequirementList()) {
-                        //Check if the parent has this requirement as a child
-                        if (child.getUniqueId().equals(temp.getUniqueId())) {
+        rs.getVersions().stream().map((t)
+                -> new RequirementServer(t)).filter((temp)
+                -> (temp.getRequirementList().size() > 0
+                && temp.getRequirementList1().size() > 0)).map((temp) -> {
+            //Has both children and parents
+            LOG.log(Level.INFO,
+                    "Inspecting {0} for circular dependencies.",
+                    temp.getUniqueId());
+            return temp;
+        }).forEachOrdered((temp) -> {
+            temp.getRequirementList1().forEach((parent) -> {
+                //Check all parents of this requirement
+                parent.getRequirementList().stream().filter((child)
+                        -> (child.getUniqueId().equals(temp.getUniqueId())))
+                        .map((_item) -> {
                             LOG.log(Level.SEVERE,
                                     "Circular dependency "
                                     + "detected between {0} and {1}",
                                     new Object[]{temp.getUniqueId(),
                                         parent.getUniqueId()});
-                            fail();
-                        }
-                    }
-                }
-            }
-        }
+                            return _item;
+                        }).forEachOrdered((_item) -> {
+                    fail();
+                }); //Check if the parent has this requirement as a child
+            });
+        }); //Detect circular relationships
     }
 
     /**
@@ -374,9 +375,9 @@ public class RequirementServerTest extends AbstractVMTestCase {
         assertEquals(isVersioningEnabled() ? version + 1 : 1,
                 rs.getVersions().size());
         LOG.info("Versions:");
-        for (Requirement r : rs.getVersions()) {
+        rs.getVersions().forEach((r) -> {
             LOG.info(r.toString());
-        }
+        });
         checkCircularDependency(req);
     }
 

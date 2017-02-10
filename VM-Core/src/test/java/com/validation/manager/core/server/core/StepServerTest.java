@@ -29,8 +29,6 @@ public class StepServerTest extends AbstractVMTestCase {
             RequirementSpec mainSpec
                     = TestHelper.createRequirementSpec("Spec", "Desc", root, 1);
             System.out.println("Create Spec for sub project.");
-            RequirementSpec spec = TestHelper.createRequirementSpec("Spec 2",
-                    "Desc", root, 1);
             RequirementSpecNode node = TestHelper.createRequirementSpecNode(mainSpec,
                     "Requirement Doc", "Desc", "Scope");
             Requirement req = TestHelper.createRequirement("REQ-001", "Desc",
@@ -48,8 +46,8 @@ public class StepServerTest extends AbstractVMTestCase {
             TestHelper.addRequirementToStep(step, req);
             new TestCaseServer(tc).write2DB();
             StepServer ss = new StepServer(step);
-            RequirementServer rs= new RequirementServer(req);
-            RequirementServer rs2= new RequirementServer(req2);
+            RequirementServer rs = new RequirementServer(req);
+            RequirementServer rs2 = new RequirementServer(req2);
             assertEquals(1, ss.getRequirementList().size());
             assertEquals(1, rs.getStepList().size());
             //Try adding the same requirement

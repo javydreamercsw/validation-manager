@@ -58,18 +58,23 @@ public abstract class AbstractVMTestCase extends TestCase {
             Connection conn = null;
             Statement stmt = null;
             try {
-                Map<String, Object> properties = getEntityManagerFactory().getProperties();
+                Map<String, Object> properties = getEntityManagerFactory()
+                        .getProperties();
                 DataSource ds = new JdbcDataSource();
-                ((JdbcDataSource) ds).setPassword((String) properties.get("javax.persistence.jdbc.password"));
-                ((JdbcDataSource) ds).setUser((String) properties.get("javax.persistence.jdbc.user"));
-                ((JdbcDataSource) ds).setURL((String) properties.get("javax.persistence.jdbc.url"));
+                ((JdbcDataSource) ds).setPassword((String) properties
+                        .get("javax.persistence.jdbc.password"));
+                ((JdbcDataSource) ds).setUser((String) properties
+                        .get("javax.persistence.jdbc.user"));
+                ((JdbcDataSource) ds).setURL((String) properties
+                        .get("javax.persistence.jdbc.url"));
                 //Load the H2 driver
                 forName("org.h2.Driver");
                 conn = ds.getConnection();
                 stmt = conn.createStatement();
                 stmt.executeUpdate("DROP ALL OBJECTS DELETE FILES");
             } catch (SQLException | ClassNotFoundException ex) {
-                getLogger(AbstractVMTestCase.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(AbstractVMTestCase.class.getName()).log(Level.SEVERE,
+                        null, ex);
             } finally {
                 try {
                     if (stmt != null) {
@@ -97,18 +102,23 @@ public abstract class AbstractVMTestCase extends TestCase {
             VMUserServer temp = new VMUserServer("test1",
                     "password", "test@test.com", "first", "last");
             temp.write2DB();
-            designer = new VmUserJpaController(getEntityManagerFactory()).findVmUser(temp.getId());
+            designer = new VmUserJpaController(getEntityManagerFactory())
+                    .findVmUser(temp.getId());
             temp = new VMUserServer("test2",
                     "password", "test@test.com", "first", "last");
             temp.write2DB();
-            tester = new VmUserJpaController(getEntityManagerFactory()).findVmUser(temp.getId());
+            tester = new VmUserJpaController(getEntityManagerFactory())
+                    .findVmUser(temp.getId());
             temp = new VMUserServer("test3",
                     encrypt("password"), "test@test.com", "first", "last");
             temp.write2DB();
-            leader = new VmUserJpaController(getEntityManagerFactory()).findVmUser(temp.getId());
-            getLogger(TestProjectTest.class.getSimpleName()).log(Level.INFO, "Done!");
+            leader = new VmUserJpaController(getEntityManagerFactory())
+                    .findVmUser(temp.getId());
+            getLogger(TestProjectTest.class.getSimpleName()).log(Level.INFO,
+                    "Done!");
         } catch (Exception ex) {
-            getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
+            getLogger(AbstractVMTestCase.class.getSimpleName())
+                    .log(Level.SEVERE, null, ex);
         }
     }
 
@@ -118,7 +128,8 @@ public abstract class AbstractVMTestCase extends TestCase {
             deleteUser(tester);
             deleteUser(leader);
         } catch (IllegalOrphanException | NonexistentEntityException ex) {
-            getLogger(AbstractVMTestCase.class.getSimpleName()).log(Level.SEVERE, null, ex);
+            getLogger(AbstractVMTestCase.class.getSimpleName())
+                    .log(Level.SEVERE, null, ex);
         }
     }
 }

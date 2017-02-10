@@ -44,7 +44,8 @@ public class ProjectServerTest extends AbstractVMTestCase {
             assertEquals(0, ProjectServer.getRequirements(root).size());
             sub = TestHelper.addProject(root, "Sub", "Notes");
             System.out.println("Create Spec for sub project.");
-            RequirementSpec spec = TestHelper.createRequirementSpec("Spec 2", "Desc", sub, 1);
+            RequirementSpec spec = TestHelper.createRequirementSpec("Spec 2",
+                    "Desc", sub, 1);
             RequirementSpecNode node = TestHelper.createRequirementSpecNode(mainSpec,
                     "Requirement Doc", "Desc", "Scope");
             Requirement req1 = TestHelper.createRequirement("REQ-001", "Desc",

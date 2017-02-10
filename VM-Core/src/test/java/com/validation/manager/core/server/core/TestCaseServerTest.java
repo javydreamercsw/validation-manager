@@ -37,6 +37,8 @@ public class TestCaseServerTest extends AbstractVMTestCase {
 
     /**
      * Test of addStep method, of class TestCaseServer.
+     *
+     * @throws java.lang.Exception
      */
     @Test
     public void testAddStep() throws Exception {
@@ -73,11 +75,12 @@ public class TestCaseServerTest extends AbstractVMTestCase {
                 "Expected Results", test, /*user,*/ "Summary");
         TestCaseServer tcs = new TestCaseServer(tc);
         //Add steps
-        List<Requirement> reqs = new ArrayList<Requirement>();
+        List<Requirement> reqs = new ArrayList<>();
         reqs.add(r);
         for (int i = 1; i < 6; i++) {
             LOG.info(MessageFormat.format("Adding step: {0}", i));
-            Step step = tcs.addStep(i, "Step " + i, "Note " + i, "Criteria " + i, reqs);
+            Step step = tcs.addStep(i, "Step " + i, "Note " + i,
+                    "Criteria " + i, reqs);
             assertEquals(1, new StepServer(step).getRequirementList().size());
             tcs.update();
             assertEquals(i, tcs.getStepList().size());
