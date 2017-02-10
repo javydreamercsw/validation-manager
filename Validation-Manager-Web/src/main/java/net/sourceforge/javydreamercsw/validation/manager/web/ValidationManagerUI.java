@@ -6,6 +6,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
@@ -14,6 +15,7 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
@@ -32,11 +34,16 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.RequirementSpecPK;
+import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
+import com.validation.manager.core.db.controller.RequirementSpecJpaController;
+import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -121,14 +128,92 @@ public class ValidationManagerUI extends UI {
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(rs.getClass());
         binder.setItemDataSource(rs);
-        layout.addComponent(binder.buildAndBind("Name", "name"));
+        Field<?> name = binder.buildAndBind("Name", "name");
+        layout.addComponent(name);
         Field desc = binder.buildAndBind("Description", "description",
                 TextArea.class);
-        desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
         desc.setSizeFull();
         layout.addComponent(desc);
-        layout.addComponent(binder.buildAndBind("Modification Date",
-                "modificationDate"));
+        Field<?> date = binder.buildAndBind("Modification Date",
+                "modificationDate");
+        layout.addComponent(date);
+        date.setEnabled(false);
+        Field<?> version = binder.buildAndBind("Version", "version");
+        layout.addComponent(version);
+        version.setEnabled(false);
+        SpecLevelJpaController controller
+                = new SpecLevelJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        List<SpecLevel> levels = controller.findSpecLevelEntities();
+        BeanItemContainer<SpecLevel> specLevelContainer
+                = new BeanItemContainer<>(SpecLevel.class, levels);
+        ComboBox level = new ComboBox("Spec Level");
+        level.setItemCaptionPropertyId("name");
+        level.setContainerDataSource(specLevelContainer);
+        binder.bind(level, "specLevel");
+        layout.addComponent(level);
+        if (edit) {
+            if (rs.getRequirementSpecPK() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        rs.setName(name.getValue().toString());
+                        rs.setModificationDate(new Date());
+                        rs.setSpecLevel((SpecLevel) level.getValue());
+                        rs.setProject(((Project) tree.getValue()));
+                        rs.setVersion(1);
+                        rs.setRequirementSpecPK(new RequirementSpecPK(
+                                rs.getProject().getId(),
+                                rs.getSpecLevel().getId()));
+                        new RequirementSpecJpaController(DataBaseManager
+                                .getEntityManagerFactory()).create(rs);
+                        form.setVisible(false);
+                        //Recreate the tree to show the addition
+                        updateProjectList();
+                        buildProjectTree();
+                        displayRequirementSpec(rs, false);
+                        updateScreen();
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error creating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(save);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        rs.setName(name.getValue().toString());
+                        rs.setModificationDate(new Date());
+                        rs.setSpecLevel((SpecLevel) level.getValue());
+                        rs.setVersion(rs.getVersion() + 1);
+                        new RequirementSpecJpaController(DataBaseManager
+                                .getEntityManagerFactory()).edit(rs);
+                        displayRequirementSpec(rs, true);
+                    } catch (FieldGroup.CommitException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (NonexistentEntityException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(update);
+            }
+        }
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
         layout.setSizeFull();
@@ -287,6 +372,12 @@ public class ValidationManagerUI extends UI {
                 });
         ContextMenu.ContextMenuItem createSpec
                 = menu.addItem("Create Requirement Spec", specIcon);
+        createSpec.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    RequirementSpec rs = new RequirementSpec();
+                    rs.setProject((Project) tree.getValue());
+                    displayRequirementSpec(rs, true);
+                });
         ContextMenu.ContextMenuItem createTest
                 = menu.addItem("Create Test Suite", testSuiteIcon);
         ContextMenu.ContextMenuItem edit
@@ -307,6 +398,11 @@ public class ValidationManagerUI extends UI {
                 = menu.addItem("Create Requirement", requirementIcon);
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Requirement Spec", specIcon);
+        edit.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayRequirementSpec((RequirementSpec) tree.getValue(),
+                            true);
+                });
     }
 
     private void createRequirementSpecNodeMenu(ContextMenu menu) {
