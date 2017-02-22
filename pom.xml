@@ -12,6 +12,10 @@
         <artifactId>oss-parent</artifactId>
         <version>9</version>
     </parent>
+    
+    <prerequisites>
+        <maven>[3.3.0)</maven>
+    </prerequisites>
 
     <name>Validation Manager</name>
     <url>https://sourceforge.net/projects/validationmgr/</url>
@@ -61,14 +65,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vm.version>${project.version}</vm.version>
-        <vaadin.version>7.6.1</vaadin.version>
+        <vaadin.version>7.7.7</vaadin.version>
         <netbeans.version>RELEASE802</netbeans.version>
         <jasper.reports.version>5.6.0</jasper.reports.version>
         <junit.version>4.12</junit.version>
-        <mysql.version>5.1.38</mysql.version>
-        <h2.version>1.4.191</h2.version>
+        <mysql.version>6.0.5</mysql.version>
+        <h2.version>1.4.193</h2.version>
     </properties>
-
+    
     <build>
         <pluginManagement>
             <plugins>
