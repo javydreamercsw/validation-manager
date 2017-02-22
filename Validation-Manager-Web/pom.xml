@@ -98,13 +98,6 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
-            <groupId>eviware</groupId>
-            <artifactId>soapui</artifactId>
-            <version>3.6.1</version>
-            <scope>test</scope>
-            <type>jar</type>
-        </dependency>-->
         <dependency>
             <artifactId>h2</artifactId>
             <groupId>com.h2database</groupId>
