@@ -61,6 +61,9 @@ public class TestPlan extends VMAuditedObject implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private TestProject testProject;
+    @Size(max = 255)
+    @Column(name = "name")
+    private String name;
     @OneToMany(mappedBy = "testPlan")
     private List<TestPlan> testPlanList;
     @JoinColumns({
@@ -194,5 +197,19 @@ public class TestPlan extends VMAuditedObject implements Serializable {
 
     public void setIsOpen(boolean isOpen) {
         this.isOpen = isOpen;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 }
