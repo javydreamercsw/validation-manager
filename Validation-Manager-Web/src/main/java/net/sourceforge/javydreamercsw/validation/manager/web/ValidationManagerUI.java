@@ -36,7 +36,11 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecPK;
 import com.validation.manager.core.db.SpecLevel;
+import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.TestProjectJpaController;
+import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
@@ -153,6 +157,174 @@ public class ValidationManagerUI extends UI {
                         new RequirementSpecNodeJpaController(DataBaseManager
                                 .getEntityManagerFactory()).edit(rsn);
                         displayRequirementSpecNode(rsn, true);
+                    } catch (FieldGroup.CommitException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (NonexistentEntityException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(update);
+            }
+        }
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        layout.setSizeFull();
+        form.setSizeFull();
+        right = form;
+        updateScreen();
+    }
+
+    private void displayTestPlan(TestPlan tp) {
+        displayTestPlan(tp, false);
+    }
+
+    private void displayTestPlan(TestPlan tp, boolean edit) {
+        Panel form = new Panel("Test Plan Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(tp.getClass());
+        binder.setItemDataSource(tp);
+        Field<?> name = binder.buildAndBind("Name", "name");
+        layout.addComponent(name);
+        Field<?> notes = binder.buildAndBind("Notes", "notes");
+        layout.addComponent(notes);
+        Field<?> active = binder.buildAndBind("Active", "active");
+        layout.addComponent(active);
+        Field<?> open = binder.buildAndBind("Open", "isOpen");
+        layout.addComponent(open);
+        if (edit) {
+            if (tp.getTestPlanPK() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        tp.setName(name.getValue().toString());
+                        tp.setNotes(notes.getValue().toString());
+                        tp.setActive((Boolean) active.getValue());
+                        tp.setIsOpen((Boolean) open.getValue());
+                        new TestPlanJpaController(DataBaseManager
+                                .getEntityManagerFactory()).create(tp);
+                        form.setVisible(false);
+                        //Recreate the tree to show the addition
+                        updateProjectList();
+                        buildProjectTree();
+                        displayTestPlan(tp, false);
+                        updateScreen();
+                        buildProjectTree();
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error creating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(save);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        tp.setName(name.getValue().toString());
+                        tp.setNotes(notes.getValue().toString());
+                        tp.setActive((Boolean) open.getValue());
+                        tp.setIsOpen((Boolean) open.getValue());
+                        new TestPlanJpaController(DataBaseManager
+                                .getEntityManagerFactory()).edit(tp);
+                        displayTestPlan(tp, true);
+                    } catch (FieldGroup.CommitException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (NonexistentEntityException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(update);
+            }
+        }
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        layout.setSizeFull();
+        form.setSizeFull();
+        right = form;
+        updateScreen();
+    }
+
+    private void displayTestProject(TestProject tp) {
+        displayTestProject(tp, false);
+    }
+
+    private void displayTestProject(TestProject tp, boolean edit) {
+        Panel form = new Panel("Test Project Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(tp.getClass());
+        binder.setItemDataSource(tp);
+        Field<?> name = binder.buildAndBind("Name", "name");
+        layout.addComponent(name);
+        Field<?> notes = binder.buildAndBind("Notes", "notes");
+        layout.addComponent(notes);
+        Field<?> active = binder.buildAndBind("Active", "active");
+        layout.addComponent(active);
+        if (edit) {
+            if (tp.getId() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        tp.setName(name.getValue().toString());
+                        tp.setNotes(notes.getValue().toString());
+                        tp.setActive((Boolean) active.getValue());
+                        new TestProjectJpaController(DataBaseManager
+                                .getEntityManagerFactory()).create(tp);
+                        form.setVisible(false);
+                        //Recreate the tree to show the addition
+                        updateProjectList();
+                        buildProjectTree();
+                        displayTestProject(tp, false);
+                        updateScreen();
+                        buildProjectTree();
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error creating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(save);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        tp.setName(name.getValue().toString());
+                        tp.setNotes(notes.getValue().toString());
+                        tp.setActive((Boolean) active.getValue());
+                        new TestProjectJpaController(DataBaseManager
+                                .getEntityManagerFactory()).edit(tp);
+                        displayTestProject(tp, true);
                     } catch (FieldGroup.CommitException ex) {
                         Exceptions.printStackTrace(ex);
                         Notification.show("Error updating record!",
@@ -398,6 +570,14 @@ public class ValidationManagerUI extends UI {
                 RequirementSpecNode rsn = (RequirementSpecNode) tree.getValue();
                 LOG.log(Level.FINE, "Selected: {0}", rsn.getName());
                 displayRequirementSpecNode(rsn);
+            } else if (tree.getValue() instanceof TestProject) {
+                TestProject tp = (TestProject) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
+                displayTestProject(tp);
+            } else if (tree.getValue() instanceof TestPlan) {
+                TestPlan tp = (TestPlan) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
+                displayTestPlan(tp);
             }
         });
         //Select item on right click as well
@@ -423,6 +603,8 @@ public class ValidationManagerUI extends UI {
                         createRequirementSpecMenu(contextMenu);
                     } else if (tree.getValue() instanceof RequirementSpecNode) {
                         createRequirementSpecNodeMenu(contextMenu);
+                    } else if (tree.getValue() instanceof TestProject) {
+                        createTestProjectMenu(contextMenu);
                     } else {
                         //We are at the root
                         createRootMenu(contextMenu);
@@ -469,6 +651,13 @@ public class ValidationManagerUI extends UI {
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject((Project) tree.getValue(), true);
                 });
+        createTest.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    TestProject tp = new TestProject();
+                    tp.setProjectList(new ArrayList<>());
+                    tp.getProjectList().add((Project) tree.getValue());
+                    displayTestProject(tp, true);
+                });
     }
 
     private void createRequirementMenu(ContextMenu menu) {
@@ -509,6 +698,23 @@ public class ValidationManagerUI extends UI {
                     Requirement r = new Requirement();
                     r.setRequirementSpecNode((RequirementSpecNode) tree.getValue());
                     displayRequirement(r, true);
+                });
+    }
+
+    private void createTestProjectMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Test Plan", VaadinIcons.PLUS);
+        ContextMenu.ContextMenuItem edit
+                = menu.addItem("Edit Test Project", VaadinIcons.EDIT);
+        edit.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayTestProject((TestProject) tree.getValue(), true);
+                });
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    TestPlan tp = new TestPlan();
+                    tp.setTestProject((TestProject) tree.getValue());
+                    displayTestPlan(tp, true);
                 });
     }
 
@@ -644,6 +850,28 @@ public class ValidationManagerUI extends UI {
         }
     }
 
+    private void addTestProject(TestProject tp, Tree tree) {
+        tree.addItem(tp);
+        tree.setItemCaption(tp, tp.getName());
+        tree.setItemIcon(tp, testSuiteIcon);
+        tree.setParent(tp, tp.getProjectList().get(0));
+        boolean children = false;
+        if (!tp.getTestPlanList().isEmpty()) {
+            tp.getTestPlanList().forEach((plan) -> {
+                addTestPlan(plan, tree);
+            });
+            children = true;
+        }
+        tree.setChildrenAllowed(tp, children);
+    }
+
+    private void addTestPlan(TestPlan tp, Tree tree) {
+        tree.addItem(tp);
+        tree.setItemCaption(tp, tp.getName());
+        tree.setItemIcon(tp, testIcon);
+        tree.setParent(tp, tp.getTestProject());
+    }
+
     private void addRequirement(Requirement req, Tree tree) {
         // Add the item as a regular item.
         tree.addItem(req);
@@ -670,6 +898,12 @@ public class ValidationManagerUI extends UI {
         if (!p.getRequirementSpecList().isEmpty()) {
             p.getRequirementSpecList().forEach((rs) -> {
                 addRequirementSpec(rs, tree);
+            });
+            children = true;
+        }
+        if (!p.getTestProjectList().isEmpty()) {
+            p.getTestProjectList().forEach((tp) -> {
+                addTestProject(tp, tree);
             });
             children = true;
         }
