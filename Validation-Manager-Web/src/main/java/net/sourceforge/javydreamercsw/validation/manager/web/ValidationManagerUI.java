@@ -41,6 +41,9 @@ import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.RequirementServer;
+import com.validation.manager.core.server.core.RequirementSpecNodeServer;
+import com.validation.manager.core.server.core.RequirementSpecServer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -248,14 +251,6 @@ public class ValidationManagerUI extends UI {
         updateScreen();
     }
 
-    @WebServlet(value = "/*", asyncSupported = true)
-    @VaadinServletConfiguration(productionMode = false,
-            ui = ValidationManagerUI.class,
-            widgetset = "net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet")
-    public static class Servlet extends VaadinServlet {
-
-    }
-
     // @return the current application instance
     public static ValidationManagerUI getInstance() {
         return THREAD_LOCAL.get();
@@ -278,8 +273,10 @@ public class ValidationManagerUI extends UI {
             for (int i = 0; i < 5; i++) {
                 Project temp = new Project("Sub " + (i + 1));
                 controller.create(temp);
+                addDemoProjectRequirements(temp);
                 rootProject.getProjectList().add(temp);
             }
+            addDemoProjectRequirements(rootProject);
             controller.edit(rootProject);
             LOG.info("Done!");
         } catch (NonexistentEntityException ex) {
@@ -287,6 +284,31 @@ public class ValidationManagerUI extends UI {
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
+    }
+
+    private void addDemoProjectRequirements(Project p) throws Exception {
+        for (int i = 0; i < 5; i++) {
+            //Create a spec
+            RequirementSpecServer temp = new RequirementSpecServer("Spec " + i,
+                    "Description " + i, p.getId(), 1);
+            temp.write2DB();
+
+            RequirementSpecNodeServer node = temp.addSpecNode("Node " + i,
+                    "Description " + i, "Scope " + i);
+            for (int y = 0; y < 5; y++) {
+                RequirementServer req
+                        = new RequirementServer("Requirement " + y,
+                                "Description " + y,
+                                node.getRequirementSpecNodePK(), "Notes",
+                                1, 1);
+                req.write2DB();
+                node.getRequirementList().add(req.getEntity());
+            }
+            node.write2DB();
+            p.getRequirementSpecList().add(temp.getEntity());
+        }
+        new ProjectJpaController(DataBaseManager
+                .getEntityManagerFactory()).edit(p);
     }
 
     private Tree buildProjectTree() {
@@ -625,5 +647,13 @@ public class ValidationManagerUI extends UI {
         } else {
             subwindow.setVisible(true);
         }
+    }
+
+    @WebServlet(value = "/*", asyncSupported = true)
+    @VaadinServletConfiguration(productionMode = false,
+            ui = ValidationManagerUI.class,
+            widgetset = "net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet")
+    public static class Servlet extends VaadinServlet {
+
     }
 }
