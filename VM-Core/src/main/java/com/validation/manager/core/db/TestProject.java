@@ -32,12 +32,12 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "TestProject.findAll",
-            query = "SELECT t FROM TestProject t"),
-    @NamedQuery(name = "TestProject.findById",
-            query = "SELECT t FROM TestProject t WHERE t.id = :id"),
-    @NamedQuery(name = "TestProject.findByActive",
-            query = "SELECT t FROM TestProject t WHERE t.active = :active"),
-    @NamedQuery(name = "TestProject.findByName",
+            query = "SELECT t FROM TestProject t")
+    ,@NamedQuery(name = "TestProject.findById",
+            query = "SELECT t FROM TestProject t WHERE t.id = :id")
+    ,@NamedQuery(name = "TestProject.findByActive",
+            query = "SELECT t FROM TestProject t WHERE t.active = :active")
+    ,@NamedQuery(name = "TestProject.findByName",
             query = "SELECT t FROM TestProject t WHERE t.name = :name")})
 public class TestProject extends Versionable implements Serializable {
 
@@ -53,8 +53,10 @@ public class TestProject extends Versionable implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "active")
-    private Boolean active;
+    private boolean active;
     @Size(max = 255)
     @Column(name = "name")
     private String name;
@@ -74,14 +76,6 @@ public class TestProject extends Versionable implements Serializable {
 
     public TestProject(String name, boolean active) {
         this.name = name;
-        this.active = active;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
         this.active = active;
     }
 
@@ -162,4 +156,11 @@ public class TestProject extends Versionable implements Serializable {
         return "com.validation.manager.core.db.TestProject[ id=" + getId() + " ]";
     }
 
+    public boolean getActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 }

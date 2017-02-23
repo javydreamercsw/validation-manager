@@ -17,13 +17,12 @@ import java.util.List;
 import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class InvestigationJpaController implements Serializable {
 
@@ -36,7 +35,7 @@ public class InvestigationJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Investigation investigation) throws PreexistingEntityException, Exception {
+    public void create(Investigation investigation) {
         if (investigation.getVmExceptionList() == null) {
             investigation.setVmExceptionList(new ArrayList<VmException>());
         }
@@ -74,11 +73,6 @@ public class InvestigationJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findInvestigation(investigation.getId()) != null) {
-                throw new PreexistingEntityException("Investigation " + investigation + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

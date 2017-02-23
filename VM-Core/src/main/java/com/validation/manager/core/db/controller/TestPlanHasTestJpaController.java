@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class TestPlanHasTestJpaController implements Serializable {
 
@@ -39,8 +39,8 @@ public class TestPlanHasTestJpaController implements Serializable {
         if (testPlanHasTest.getTestPlanHasTestPK() == null) {
             testPlanHasTest.setTestPlanHasTestPK(new TestPlanHasTestPK());
         }
-        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         testPlanHasTest.getTestPlanHasTestPK().setTestId(testPlanHasTest.getTest().getId());
+        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         testPlanHasTest.getTestPlanHasTestPK().setTestPlanId(testPlanHasTest.getTestPlan().getTestPlanPK().getId());
         EntityManager em = null;
         try {
@@ -79,8 +79,8 @@ public class TestPlanHasTestJpaController implements Serializable {
     }
 
     public void edit(TestPlanHasTest testPlanHasTest) throws NonexistentEntityException, Exception {
-        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         testPlanHasTest.getTestPlanHasTestPK().setTestId(testPlanHasTest.getTest().getId());
+        testPlanHasTest.getTestPlanHasTestPK().setTestPlanTestProjectId(testPlanHasTest.getTestPlan().getTestPlanPK().getTestProjectId());
         testPlanHasTest.getTestPlanHasTestPK().setTestPlanId(testPlanHasTest.getTestPlan().getTestPlanPK().getId());
         EntityManager em = null;
         try {

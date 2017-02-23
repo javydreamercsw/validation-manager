@@ -3,6 +3,7 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -16,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -29,19 +31,19 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "requirement_spec")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RequirementSpec.findAll", 
-            query = "SELECT r FROM RequirementSpec r"),
-    @NamedQuery(name = "RequirementSpec.findByModificationDate", 
-            query = "SELECT r FROM RequirementSpec r WHERE r.modificationDate = :modificationDate"),
-    @NamedQuery(name = "RequirementSpec.findByName", 
-            query = "SELECT r FROM RequirementSpec r WHERE r.name = :name"),
-    @NamedQuery(name = "RequirementSpec.findByVersion", 
-            query = "SELECT r FROM RequirementSpec r WHERE r.version = :version"),
-    @NamedQuery(name = "RequirementSpec.findById", 
-            query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.id = :id"),
-    @NamedQuery(name = "RequirementSpec.findByProjectId", 
-            query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.projectId = :projectId"),
-    @NamedQuery(name = "RequirementSpec.findBySpecLevelId",
+    @NamedQuery(name = "RequirementSpec.findAll",
+            query = "SELECT r FROM RequirementSpec r")
+    ,@NamedQuery(name = "RequirementSpec.findByModificationDate",
+            query = "SELECT r FROM RequirementSpec r WHERE r.modificationDate = :modificationDate")
+    ,@NamedQuery(name = "RequirementSpec.findByName",
+            query = "SELECT r FROM RequirementSpec r WHERE r.name = :name")
+    ,@NamedQuery(name = "RequirementSpec.findByVersion",
+            query = "SELECT r FROM RequirementSpec r WHERE r.version = :version")
+    ,@NamedQuery(name = "RequirementSpec.findById",
+            query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.id = :id")
+    ,@NamedQuery(name = "RequirementSpec.findByProjectId",
+            query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.projectId = :projectId")
+    ,@NamedQuery(name = "RequirementSpec.findBySpecLevelId",
             query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.specLevelId = :specLevelId")})
 public class RequirementSpec implements Serializable {
 
@@ -58,8 +60,10 @@ public class RequirementSpec implements Serializable {
     @Size(max = 255)
     @Column(name = "name")
     private String name;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "version")
-    private Integer version;
+    private int version;
     @JoinColumn(name = "spec_level_id", referencedColumnName = "id",
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
@@ -122,14 +126,6 @@ public class RequirementSpec implements Serializable {
         this.name = name;
     }
 
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
     public SpecLevel getSpecLevel() {
         return specLevel;
     }
@@ -170,12 +166,23 @@ public class RequirementSpec implements Serializable {
             return false;
         }
         RequirementSpec other = (RequirementSpec) object;
-        return (this.requirementSpecPK != null || other.requirementSpecPK == null) && (this.requirementSpecPK == null || this.requirementSpecPK.equals(other.requirementSpecPK));
+        return (this.requirementSpecPK != null
+                || other.requirementSpecPK == null)
+                && (this.requirementSpecPK == null
+                || this.requirementSpecPK.equals(other.requirementSpecPK));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementSpec[ requirementSpecPK=" + requirementSpecPK + " ]";
+        return "com.validation.manager.core.db.RequirementSpec[ requirementSpecPK="
+                + requirementSpecPK + " ]";
     }
 
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
 }

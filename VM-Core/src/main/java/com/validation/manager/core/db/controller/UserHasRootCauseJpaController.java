@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class UserHasRootCauseJpaController implements Serializable {
 
@@ -39,9 +39,9 @@ public class UserHasRootCauseJpaController implements Serializable {
         if (userHasRootCause.getUserHasRootCausePK() == null) {
             userHasRootCause.setUserHasRootCausePK(new UserHasRootCausePK());
         }
+        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
-        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -79,9 +79,9 @@ public class UserHasRootCauseJpaController implements Serializable {
     }
 
     public void edit(UserHasRootCause userHasRootCause) throws NonexistentEntityException, Exception {
+        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseRootCauseTypeId(userHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
         userHasRootCause.getUserHasRootCausePK().setRootCauseId(userHasRootCause.getRootCause().getRootCausePK().getId());
-        userHasRootCause.getUserHasRootCausePK().setUserId(userHasRootCause.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

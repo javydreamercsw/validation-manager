@@ -2,6 +2,7 @@ package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -13,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -27,14 +29,14 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Step.findAll",
-            query = "SELECT s FROM Step s"),
-    @NamedQuery(name = "Step.findByStepSequence",
-            query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence"),
-    @NamedQuery(name = "Step.findByTestCaseTestId",
-            query = "SELECT s FROM Step s WHERE s.stepPK.testCaseTestId = :testCaseTestId"),
-    @NamedQuery(name = "Step.findById",
-            query = "SELECT s FROM Step s WHERE s.stepPK.id = :id"),
-    @NamedQuery(name = "Step.findByTestCaseId",
+            query = "SELECT s FROM Step s")
+    ,@NamedQuery(name = "Step.findByStepSequence",
+            query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence")
+    ,@NamedQuery(name = "Step.findByTestCaseTestId",
+            query = "SELECT s FROM Step s WHERE s.stepPK.testCaseTestId = :testCaseTestId")
+    ,@NamedQuery(name = "Step.findById",
+            query = "SELECT s FROM Step s WHERE s.stepPK.id = :id")
+    ,@NamedQuery(name = "Step.findByTestCaseId",
             query = "SELECT s FROM Step s WHERE s.stepPK.testCaseId = :testCaseId")})
 public class Step implements Serializable {
 
@@ -42,24 +44,31 @@ public class Step implements Serializable {
     @EmbeddedId
     protected StepPK stepPK;
     @Lob
-    @Column(name = "expected_result")
-    private byte[] expectedResult;
-    @Lob
     @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "step_sequence")
-    private Integer stepSequence;
+    private int stepSequence;
+    @Basic(optional = false)
+    @NotNull
     @Lob
     @Column(name = "text")
     private byte[] text;
+    @Lob
+    @Column(name = "expected_result")
+    private byte[] expectedResult;
     @ManyToMany(mappedBy = "stepList")
     private List<VmException> vmExceptionList;
     @ManyToMany(mappedBy = "stepList")
     private List<Requirement> requirementList;
     @JoinColumns({
-        @JoinColumn(name = "test_case_id", referencedColumnName = "id", insertable = false, updatable = false),
-        @JoinColumn(name = "test_case_test_id", referencedColumnName = "test_id", insertable = false, updatable = false)})
+        @JoinColumn(name = "test_case_id", referencedColumnName = "id",
+                insertable = false, updatable = false)
+        ,@JoinColumn(name = "test_case_test_id",
+                referencedColumnName = "test_id", insertable = false,
+                updatable = false)})
     @ManyToOne(optional = false)
     private TestCase testCase;
 
@@ -112,14 +121,6 @@ public class Step implements Serializable {
         this.stepSequence = stepSequence;
     }
 
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
-    }
-
     @XmlTransient
     @JsonIgnore
     public List<VmException> getVmExceptionList() {
@@ -162,11 +163,24 @@ public class Step implements Serializable {
             return false;
         }
         Step other = (Step) object;
-        return (this.stepPK != null || other.stepPK == null) && (this.stepPK == null || this.stepPK.equals(other.stepPK));
+        return (this.stepPK != null || other.stepPK == null)
+                && (this.stepPK == null || this.stepPK.equals(other.stepPK));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
+    }
+
+    public void setStepSequence(int stepSequence) {
+        this.stepSequence = stepSequence;
+    }
+
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
     }
 }

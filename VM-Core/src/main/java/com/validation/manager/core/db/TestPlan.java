@@ -3,6 +3,7 @@ package com.validation.manager.core.db;
 import com.validation.manager.core.VMAuditedObject;
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -15,6 +16,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -28,25 +30,29 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "test_plan")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "TestPlan.findAll", 
-            query = "SELECT t FROM TestPlan t"),
-    @NamedQuery(name = "TestPlan.findByActive", 
-            query = "SELECT t FROM TestPlan t WHERE t.active = :active"),
-    @NamedQuery(name = "TestPlan.findByIsOpen", 
-            query = "SELECT t FROM TestPlan t WHERE t.isOpen = :isOpen"),
-    @NamedQuery(name = "TestPlan.findById",
-            query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.id = :id"),
-    @NamedQuery(name = "TestPlan.findByTestProjectId", 
+    @NamedQuery(name = "TestPlan.findAll",
+            query = "SELECT t FROM TestPlan t")
+    ,@NamedQuery(name = "TestPlan.findByActive",
+            query = "SELECT t FROM TestPlan t WHERE t.active = :active")
+    ,@NamedQuery(name = "TestPlan.findByIsOpen",
+            query = "SELECT t FROM TestPlan t WHERE t.isOpen = :isOpen")
+    ,@NamedQuery(name = "TestPlan.findById",
+            query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.id = :id")
+    ,@NamedQuery(name = "TestPlan.findByTestProjectId",
             query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.testProjectId = :testProjectId")})
 public class TestPlan extends VMAuditedObject implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected TestPlanPK testPlanPK;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "active")
-    private Boolean active;
+    private boolean active;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "is_open")
-    private Boolean isOpen;
+    private boolean isOpen;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "notes")
@@ -58,8 +64,9 @@ public class TestPlan extends VMAuditedObject implements Serializable {
     @OneToMany(mappedBy = "testPlan")
     private List<TestPlan> testPlanList;
     @JoinColumns({
-        @JoinColumn(name = "regression_test_plan_id", referencedColumnName = "id"),
-        @JoinColumn(name = "regression_test_plan_test_project_id", 
+        @JoinColumn(name = "regression_test_plan_id", referencedColumnName = "id")
+        ,
+        @JoinColumn(name = "regression_test_plan_test_project_id",
                 referencedColumnName = "test_project_id")})
     @ManyToOne
     private TestPlan testPlan;
@@ -88,14 +95,6 @@ public class TestPlan extends VMAuditedObject implements Serializable {
 
     public void setTestPlanPK(TestPlanPK testPlanPK) {
         this.testPlanPK = testPlanPK;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
     }
 
     public Boolean getIsOpen() {
@@ -174,12 +173,26 @@ public class TestPlan extends VMAuditedObject implements Serializable {
             return false;
         }
         TestPlan other = (TestPlan) object;
-        return (this.testPlanPK != null || other.testPlanPK == null) && (this.testPlanPK == null || this.testPlanPK.equals(other.testPlanPK));
+        return (this.testPlanPK != null || other.testPlanPK == null)
+                && (this.testPlanPK == null
+                || this.testPlanPK.equals(other.testPlanPK));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.TestPlan[ testPlanPK=" + testPlanPK + " ]";
+        return "com.validation.manager.core.db.TestPlan[ testPlanPK="
+                + testPlanPK + " ]";
     }
 
+    public boolean getActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public void setIsOpen(boolean isOpen) {
+        this.isOpen = isOpen;
+    }
 }

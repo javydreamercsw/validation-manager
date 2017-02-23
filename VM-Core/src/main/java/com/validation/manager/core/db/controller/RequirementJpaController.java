@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db.controller;
 
 import java.io.Serializable;
@@ -14,15 +19,15 @@ import java.util.List;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.RequirementHasException;
+import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RequirementJpaController implements Serializable {
 
@@ -35,7 +40,7 @@ public class RequirementJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Requirement requirement) throws PreexistingEntityException, Exception {
+    public void create(Requirement requirement) {
         if (requirement.getRequirementList() == null) {
             requirement.setRequirementList(new ArrayList<Requirement>());
         }
@@ -50,6 +55,9 @@ public class RequirementJpaController implements Serializable {
         }
         if (requirement.getRequirementHasExceptionList() == null) {
             requirement.setRequirementHasExceptionList(new ArrayList<RequirementHasException>());
+        }
+        if (requirement.getVmExceptionList() == null) {
+            requirement.setVmExceptionList(new ArrayList<VmException>());
         }
         EntityManager em = null;
         try {
@@ -100,6 +108,12 @@ public class RequirementJpaController implements Serializable {
                 attachedRequirementHasExceptionList.add(requirementHasExceptionListRequirementHasExceptionToAttach);
             }
             requirement.setRequirementHasExceptionList(attachedRequirementHasExceptionList);
+            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
+            for (VmException vmExceptionListVmExceptionToAttach : requirement.getVmExceptionList()) {
+                vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
+                attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
+            }
+            requirement.setVmExceptionList(attachedVmExceptionList);
             em.persist(requirement);
             if (requirementTypeId != null) {
                 requirementTypeId.getRequirementList().add(requirement);
@@ -138,12 +152,11 @@ public class RequirementJpaController implements Serializable {
                     oldRequirementOfRequirementHasExceptionListRequirementHasException = em.merge(oldRequirementOfRequirementHasExceptionListRequirementHasException);
                 }
             }
-            em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findRequirement(requirement.getId()) != null) {
-                throw new PreexistingEntityException("Requirement " + requirement + " already exists.", ex);
+            for (VmException vmExceptionListVmException : requirement.getVmExceptionList()) {
+                vmExceptionListVmException.getRequirementList().add(requirement);
+                vmExceptionListVmException = em.merge(vmExceptionListVmException);
             }
-            throw ex;
+            em.getTransaction().commit();
         } finally {
             if (em != null) {
                 em.close();
@@ -173,6 +186,8 @@ public class RequirementJpaController implements Serializable {
             List<RiskControl> riskControlListNew = requirement.getRiskControlList();
             List<RequirementHasException> requirementHasExceptionListOld = persistentRequirement.getRequirementHasExceptionList();
             List<RequirementHasException> requirementHasExceptionListNew = requirement.getRequirementHasExceptionList();
+            List<VmException> vmExceptionListOld = persistentRequirement.getVmExceptionList();
+            List<VmException> vmExceptionListNew = requirement.getVmExceptionList();
             List<String> illegalOrphanMessages = null;
             for (RequirementHasException requirementHasExceptionListOldRequirementHasException : requirementHasExceptionListOld) {
                 if (!requirementHasExceptionListNew.contains(requirementHasExceptionListOldRequirementHasException)) {
@@ -232,6 +247,13 @@ public class RequirementJpaController implements Serializable {
             }
             requirementHasExceptionListNew = attachedRequirementHasExceptionListNew;
             requirement.setRequirementHasExceptionList(requirementHasExceptionListNew);
+            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
+            for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
+                vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
+                attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
+            }
+            vmExceptionListNew = attachedVmExceptionListNew;
+            requirement.setVmExceptionList(vmExceptionListNew);
             requirement = em.merge(requirement);
             if (requirementTypeIdOld != null && !requirementTypeIdOld.equals(requirementTypeIdNew)) {
                 requirementTypeIdOld.getRequirementList().remove(requirement);
@@ -316,6 +338,18 @@ public class RequirementJpaController implements Serializable {
                     }
                 }
             }
+            for (VmException vmExceptionListOldVmException : vmExceptionListOld) {
+                if (!vmExceptionListNew.contains(vmExceptionListOldVmException)) {
+                    vmExceptionListOldVmException.getRequirementList().remove(requirement);
+                    vmExceptionListOldVmException = em.merge(vmExceptionListOldVmException);
+                }
+            }
+            for (VmException vmExceptionListNewVmException : vmExceptionListNew) {
+                if (!vmExceptionListOld.contains(vmExceptionListNewVmException)) {
+                    vmExceptionListNewVmException.getRequirementList().add(requirement);
+                    vmExceptionListNewVmException = em.merge(vmExceptionListNewVmException);
+                }
+            }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -390,6 +424,11 @@ public class RequirementJpaController implements Serializable {
             for (RiskControl riskControlListRiskControl : riskControlList) {
                 riskControlListRiskControl.getRequirementList().remove(requirement);
                 riskControlListRiskControl = em.merge(riskControlListRiskControl);
+            }
+            List<VmException> vmExceptionList = requirement.getVmExceptionList();
+            for (VmException vmExceptionListVmException : vmExceptionList) {
+                vmExceptionListVmException.getRequirementList().remove(requirement);
+                vmExceptionListVmException = em.merge(vmExceptionListVmException);
             }
             em.remove(requirement);
             em.getTransaction().commit();

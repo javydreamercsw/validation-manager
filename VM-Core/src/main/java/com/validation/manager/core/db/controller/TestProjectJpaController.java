@@ -18,13 +18,12 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class TestProjectJpaController implements Serializable {
 
@@ -37,7 +36,7 @@ public class TestProjectJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(TestProject testProject) throws PreexistingEntityException, Exception {
+    public void create(TestProject testProject) {
         if (testProject.getProjectList() == null) {
             testProject.setProjectList(new ArrayList<Project>());
         }
@@ -93,11 +92,6 @@ public class TestProjectJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findTestProject(testProject.getId()) != null) {
-                throw new PreexistingEntityException("TestProject " + testProject + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

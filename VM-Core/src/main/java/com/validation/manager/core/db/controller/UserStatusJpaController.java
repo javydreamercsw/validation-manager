@@ -13,7 +13,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -21,7 +20,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class UserStatusJpaController implements Serializable {
 
@@ -34,7 +33,7 @@ public class UserStatusJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(UserStatus userStatus) throws PreexistingEntityException, Exception {
+    public void create(UserStatus userStatus) {
         if (userStatus.getVmUserList() == null) {
             userStatus.setVmUserList(new ArrayList<VmUser>());
         }
@@ -59,11 +58,6 @@ public class UserStatusJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findUserStatus(userStatus.getId()) != null) {
-                throw new PreexistingEntityException("UserStatus " + userStatus + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

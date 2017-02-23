@@ -14,7 +14,6 @@ import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.UserAssigment;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -22,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class AssignmentStatusJpaController implements Serializable {
 
@@ -35,7 +34,7 @@ public class AssignmentStatusJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(AssignmentStatus assignmentStatus) throws PreexistingEntityException, Exception {
+    public void create(AssignmentStatus assignmentStatus) {
         if (assignmentStatus.getUserAssigmentList() == null) {
             assignmentStatus.setUserAssigmentList(new ArrayList<UserAssigment>());
         }
@@ -60,11 +59,6 @@ public class AssignmentStatusJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findAssignmentStatus(assignmentStatus.getId()) != null) {
-                throw new PreexistingEntityException("AssignmentStatus " + assignmentStatus + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

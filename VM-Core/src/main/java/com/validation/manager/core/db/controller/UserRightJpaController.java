@@ -13,7 +13,6 @@ import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.UserRight;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -21,7 +20,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class UserRightJpaController implements Serializable {
 
@@ -34,7 +33,7 @@ public class UserRightJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(UserRight userRight) throws PreexistingEntityException, Exception {
+    public void create(UserRight userRight) {
         if (userRight.getRoleList() == null) {
             userRight.setRoleList(new ArrayList<Role>());
         }
@@ -54,11 +53,6 @@ public class UserRightJpaController implements Serializable {
                 roleListRole = em.merge(roleListRole);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findUserRight(userRight.getId()) != null) {
-                throw new PreexistingEntityException("UserRight " + userRight + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

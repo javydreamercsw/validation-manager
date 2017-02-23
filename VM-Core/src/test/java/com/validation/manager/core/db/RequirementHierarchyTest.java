@@ -6,6 +6,7 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
+import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.SpecLevelServer;
 import com.validation.manager.test.AbstractVMTestCase;
@@ -99,14 +100,26 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         System.out.println("Done!");
         System.out.println("Adding requirements to spec nodes");
         try {
-            productSpec.addSpecNode("Node 1", "description", "scope",
-                    requirements.subList(0, 5));
+            RequirementSpecNodeServer n1
+                    = productSpec.addSpecNode("Node 1", "description", "scope");
+            requirements.subList(0, 5).forEach((r) -> {
+                n1.getRequirementList().add(r);
+            });
+            n1.write2DB();
             assertEquals(1, productSpec.getRequirementSpecNodeList().size());
-            archSpec.addSpecNode("Node 2", "description", "scope",
-                    requirements.subList(5, 10));
+            RequirementSpecNodeServer n2
+                    = archSpec.addSpecNode("Node 2", "description", "scope");
+            requirements.subList(5, 10).forEach((r) -> {
+                n2.getRequirementList().add(r);
+            });
+            n2.write2DB();
             assertEquals(1, archSpec.getRequirementSpecNodeList().size());
-            swSpec.addSpecNode("Node 3", "description", "scope",
-                    requirements.subList(10, 15));
+            RequirementSpecNodeServer n3
+                    = swSpec.addSpecNode("Node 3", "description", "scope");
+            requirements.subList(10, 15).forEach((r) -> {
+                n3.getRequirementList().add(r);
+            });
+            n3.write2DB();
             assertEquals(1, swSpec.getRequirementSpecNodeList().size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -133,24 +146,25 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         try {
             assertTrue(sl.write2DB() > 0);
         } catch (IllegalOrphanException ex) {
-            getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         } catch (NonexistentEntityException ex) {
-            getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         } catch (Exception ex) {
-            getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
         return sl;
     }
 
     private RequirementSpecServer createRequirementSpec(String name, SpecLevelServer sl) {
-        RequirementSpecServer rss = new RequirementSpecServer(name, "description", project.getId(), sl.getId());
+        RequirementSpecServer rss = new RequirementSpecServer(name,
+                "description", project.getId(), sl.getId());
         try {
             rss.write2DB();
         } catch (Exception ex) {
-            getLogger(RequirementHierarchyTest.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
         return rss;

@@ -17,13 +17,12 @@ import java.util.List;
 import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class TestJpaController implements Serializable {
 
@@ -36,7 +35,7 @@ public class TestJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Test test) throws PreexistingEntityException, Exception {
+    public void create(Test test) {
         if (test.getTestCaseList() == null) {
             test.setTestCaseList(new ArrayList<TestCase>());
         }
@@ -79,11 +78,6 @@ public class TestJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findTest(test.getId()) != null) {
-                throw new PreexistingEntityException("Test " + test + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();
