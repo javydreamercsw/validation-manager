@@ -26,20 +26,25 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "requirement_spec_node")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RequirementSpecNode.findAll", 
-            query = "SELECT r FROM RequirementSpecNode r"),
-    @NamedQuery(name = "RequirementSpecNode.findByName", 
-            query = "SELECT r FROM RequirementSpecNode r WHERE r.name = :name"),
-    @NamedQuery(name = "RequirementSpecNode.findByParentRequirementSpecNodeRequirementSpecId", 
-            query = "SELECT r FROM RequirementSpecNode r WHERE r.parentRequirementSpecNodeRequirementSpecId = :parentRequirementSpecNodeRequirementSpecId"),
-    @NamedQuery(name = "RequirementSpecNode.findById", 
-            query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.id = :id"),
-    @NamedQuery(name = "RequirementSpecNode.findByRequirementSpecProjectId", 
-            query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.requirementSpecProjectId = :requirementSpecProjectId"),
-    @NamedQuery(name = "RequirementSpecNode.findByRequirementSpecSpecLevelId", 
-            query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.requirementSpecSpecLevelId = :requirementSpecSpecLevelId"),
-    @NamedQuery(name = "RequirementSpecNode.findByRequirementSpecId", 
-            query = "SELECT r FROM RequirementSpecNode r WHERE r.requirementSpecNodePK.requirementSpecId = :requirementSpecId")})
+    @NamedQuery(name = "RequirementSpecNode.findAll",
+            query = "SELECT r FROM RequirementSpecNode r")
+    ,@NamedQuery(name = "RequirementSpecNode.findByName",
+            query = "SELECT r FROM RequirementSpecNode r WHERE r.name = :name")
+    ,@NamedQuery(name = "RequirementSpecNode.findById",
+            query = "SELECT r FROM RequirementSpecNode r WHERE "
+            + "r.requirementSpecNodePK.id = :id")
+    ,@NamedQuery(name = "RequirementSpecNode.findByRequirementSpecProjectId",
+            query = "SELECT r FROM RequirementSpecNode r WHERE "
+            + "r.requirementSpecNodePK.requirementSpecProjectId = "
+            + ":requirementSpecProjectId")
+    ,@NamedQuery(name = "RequirementSpecNode.findByRequirementSpecSpecLevelId",
+            query = "SELECT r FROM RequirementSpecNode r WHERE "
+            + "r.requirementSpecNodePK.requirementSpecSpecLevelId = "
+            + ":requirementSpecSpecLevelId")
+    ,@NamedQuery(name = "RequirementSpecNode.findByRequirementSpecId",
+            query = "SELECT r FROM RequirementSpecNode r WHERE "
+            + "r.requirementSpecNodePK.requirementSpecId = "
+            + ":requirementSpecId")})
 public class RequirementSpecNode implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -52,8 +57,6 @@ public class RequirementSpecNode implements Serializable {
     @Size(max = 255)
     @Column(name = "name")
     private String name;
-    @Column(name = "parent_requirement_spec_node_requirement_spec_id")
-    private Integer parentRequirementSpecNodeRequirementSpecId;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "scope")
@@ -61,23 +64,23 @@ public class RequirementSpecNode implements Serializable {
     @OneToMany(mappedBy = "requirementSpecNode")
     private List<RequirementSpecNode> requirementSpecNodeList;
     @JoinColumns({
-        @JoinColumn(name = "requirement_spec_node_id", referencedColumnName = "id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_project_id", 
-                referencedColumnName = "requirement_spec_project_id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id", 
-                referencedColumnName = "requirement_spec_spec_level_id"),
-        @JoinColumn(name = "requirement_spec_node_requirement_spec_id", 
+        @JoinColumn(name = "requirement_spec_node_id", referencedColumnName = "id")
+        ,@JoinColumn(name = "requirement_spec_node_requirement_spec_project_id",
+                referencedColumnName = "requirement_spec_project_id")
+        ,@JoinColumn(name = "requirement_spec_node_requirement_spec_spec_level_id",
+                referencedColumnName = "requirement_spec_spec_level_id")
+        ,@JoinColumn(name = "requirement_spec_node_requirement_spec_id",
                 referencedColumnName = "requirement_spec_id")})
     @ManyToOne
     private RequirementSpecNode requirementSpecNode;
     @JoinColumns({
-        @JoinColumn(name = "requirement_spec_id", referencedColumnName = "id", 
-                insertable = false, updatable = false),
-        @JoinColumn(name = "requirement_spec_project_id", 
+        @JoinColumn(name = "requirement_spec_id", referencedColumnName = "id",
+                insertable = false, updatable = false)
+        ,@JoinColumn(name = "requirement_spec_project_id",
                 referencedColumnName = "project_id", insertable = false,
-                updatable = false),
-        @JoinColumn(name = "requirement_spec_spec_level_id", 
-                referencedColumnName = "spec_level_id", insertable = false, 
+                updatable = false)
+        ,@JoinColumn(name = "requirement_spec_spec_level_id",
+                referencedColumnName = "spec_level_id", insertable = false,
                 updatable = false)})
     @ManyToOne(optional = false)
     private RequirementSpec requirementSpec;
@@ -131,16 +134,6 @@ public class RequirementSpecNode implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Integer getParentRequirementSpecNodeRequirementSpecId() {
-        return parentRequirementSpecNodeRequirementSpecId;
-    }
-
-    public void setParentRequirementSpecNodeRequirementSpecId(
-            Integer parentRequirementSpecNodeRequirementSpecId) {
-        this.parentRequirementSpecNodeRequirementSpecId = 
-                parentRequirementSpecNodeRequirementSpecId;
     }
 
     public String getScope() {
@@ -201,9 +194,9 @@ public class RequirementSpecNode implements Serializable {
             return false;
         }
         RequirementSpecNode other = (RequirementSpecNode) object;
-        return (this.requirementSpecNodePK != null 
-                || other.requirementSpecNodePK == null) 
-                && (this.requirementSpecNodePK == null 
+        return (this.requirementSpecNodePK != null
+                || other.requirementSpecNodePK == null)
+                && (this.requirementSpecNodePK == null
                 || this.requirementSpecNodePK.equals(other.requirementSpecNodePK));
     }
 

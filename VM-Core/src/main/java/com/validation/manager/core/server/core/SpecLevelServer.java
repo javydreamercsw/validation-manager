@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.SpecLevel;
@@ -14,6 +13,17 @@ import java.util.List;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel> {
+
+    public SpecLevelServer(int id) {
+        //Retrieve from db
+        setId(0);
+        SpecLevel sl = new SpecLevelJpaController(
+                getEntityManagerFactory()).findSpecLevel(id);
+        if (sl != null) {
+            setId(id);
+            update(this, sl);
+        }
+    }
 
     public SpecLevelServer(String name, String description) {
         super(name, description);
@@ -59,7 +69,7 @@ public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel
             target.setRequirementSpecList(source.getRequirementSpecList());
         }
     }
-    
+
     @Override
     public void update() {
         update(this, getEntity());

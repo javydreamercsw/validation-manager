@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.validation.manager.core.db.controller;
 
 import java.io.Serializable;
@@ -23,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RequirementHasExceptionJpaController implements Serializable {
 
@@ -41,8 +40,8 @@ public class RequirementHasExceptionJpaController implements Serializable {
             requirementHasException.setRequirementHasExceptionPK(new RequirementHasExceptionPK());
         }
         requirementHasException.getRequirementHasExceptionPK().setVmExceptionReporterId(requirementHasException.getVmException().getVmExceptionPK().getReporterId());
-        requirementHasException.getRequirementHasExceptionPK().setRequirementId(requirementHasException.getRequirement().getId());
         requirementHasException.getRequirementHasExceptionPK().setVmExceptionId(requirementHasException.getVmException().getVmExceptionPK().getId());
+        requirementHasException.getRequirementHasExceptionPK().setRequirementId(requirementHasException.getRequirement().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -90,8 +89,8 @@ public class RequirementHasExceptionJpaController implements Serializable {
 
     public void edit(RequirementHasException requirementHasException) throws NonexistentEntityException, Exception {
         requirementHasException.getRequirementHasExceptionPK().setVmExceptionReporterId(requirementHasException.getVmException().getVmExceptionPK().getReporterId());
-        requirementHasException.getRequirementHasExceptionPK().setRequirementId(requirementHasException.getRequirement().getId());
         requirementHasException.getRequirementHasExceptionPK().setVmExceptionId(requirementHasException.getVmException().getVmExceptionPK().getId());
+        requirementHasException.getRequirementHasExceptionPK().setRequirementId(requirementHasException.getRequirement().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -238,5 +237,5 @@ public class RequirementHasExceptionJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

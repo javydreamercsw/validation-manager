@@ -1,12 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -18,6 +14,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -30,20 +27,28 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "risk_item")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RiskItem.findAll", query = "SELECT r FROM RiskItem r"),
-    @NamedQuery(name = "RiskItem.findBySequence", query = "SELECT r FROM RiskItem r WHERE r.sequence = :sequence"),
-    @NamedQuery(name = "RiskItem.findByVersion", query = "SELECT r FROM RiskItem r WHERE r.version = :version"),
-    @NamedQuery(name = "RiskItem.findById", query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.id = :id"),
-    @NamedQuery(name = "RiskItem.findByFMEAid", query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAid = :fMEAid")})
+    @NamedQuery(name = "RiskItem.findAll", query = "SELECT r FROM RiskItem r")
+    ,@NamedQuery(name = "RiskItem.findBySequence",
+            query = "SELECT r FROM RiskItem r WHERE r.sequence = :sequence")
+    ,@NamedQuery(name = "RiskItem.findByVersion",
+            query = "SELECT r FROM RiskItem r WHERE r.version = :version")
+    ,@NamedQuery(name = "RiskItem.findById",
+            query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.id = :id")
+    ,@NamedQuery(name = "RiskItem.findByFMEAid",
+            query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAid = :fMEAid")})
 public class RiskItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RiskItemPK riskItemPK;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "sequence")
-    private Integer sequence;
+    private int sequence;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "version")
-    private Integer version;
+    private int version;
     @ManyToMany(mappedBy = "riskItemList")
     private List<FailureMode> failureModeList;
     @ManyToMany(mappedBy = "riskItemList")
@@ -83,22 +88,6 @@ public class RiskItem implements Serializable {
 
     public void setRiskItemPK(RiskItemPK riskItemPK) {
         this.riskItemPK = riskItemPK;
-    }
-
-    public Integer getSequence() {
-        return sequence;
-    }
-
-    public void setSequence(Integer sequence) {
-        this.sequence = sequence;
-    }
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
     }
 
     @XmlTransient
@@ -189,6 +178,22 @@ public class RiskItem implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RiskItem[ riskItemPK=" + riskItemPK + " ]";
+    }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 
 }

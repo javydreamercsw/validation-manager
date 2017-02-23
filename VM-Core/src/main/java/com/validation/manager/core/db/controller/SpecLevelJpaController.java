@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.validation.manager.core.db.controller;
 
 import java.io.Serializable;
@@ -22,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class SpecLevelJpaController implements Serializable {
 
@@ -200,5 +199,5 @@ public class SpecLevelJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

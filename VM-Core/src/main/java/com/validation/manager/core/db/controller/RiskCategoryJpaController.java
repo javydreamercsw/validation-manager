@@ -17,13 +17,12 @@ import java.util.List;
 import com.validation.manager.core.db.RiskItemHasRiskCategory;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RiskCategoryJpaController implements Serializable {
 
@@ -36,7 +35,7 @@ public class RiskCategoryJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(RiskCategory riskCategory) throws PreexistingEntityException, Exception {
+    public void create(RiskCategory riskCategory) {
         if (riskCategory.getFmeaList() == null) {
             riskCategory.setFmeaList(new ArrayList<Fmea>());
         }
@@ -74,11 +73,6 @@ public class RiskCategoryJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findRiskCategory(riskCategory.getId()) != null) {
-                throw new PreexistingEntityException("RiskCategory " + riskCategory + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

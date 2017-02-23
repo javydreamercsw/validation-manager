@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Requirement;
@@ -29,16 +28,23 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         setName(name);
         setRequirementSpec(rs);
         setRequirementSpecNode(null);
-        setRequirementSpecNodeList(new ArrayList<RequirementSpecNode>());
+        setRequirementSpecNodeList(new ArrayList<>());
         setRequirementSpec(
                 new RequirementSpecJpaController(
-                getEntityManagerFactory())
-                .findRequirementSpec(rs.getRequirementSpecPK()));
+                        getEntityManagerFactory())
+                        .findRequirementSpec(rs.getRequirementSpecPK()));
     }
 
     public RequirementSpecNodeServer(RequirementSpecNode rsn) {
         super(rsn.getRequirementSpecNodePK());
         update(this, rsn);
+    }
+
+    public RequirementSpecNodeServer(int requirementSpecId,
+            int requirementSpecProjectId, int requirementSpecSpecLevelId) {
+        super(requirementSpecId, requirementSpecProjectId,
+                requirementSpecSpecLevelId);
+        update(this, getEntity());
     }
 
     @Override
@@ -90,7 +96,7 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
         }
         return requirements;
     }
-    
+
     @Override
     public void update() {
         update(this, getEntity());

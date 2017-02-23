@@ -7,7 +7,6 @@ package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -19,7 +18,7 @@ import javax.persistence.criteria.Root;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class VmSettingJpaController implements Serializable {
 
@@ -32,18 +31,13 @@ public class VmSettingJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(VmSetting vmSetting) throws PreexistingEntityException, Exception {
+    public void create(VmSetting vmSetting) {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             em.persist(vmSetting);
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findVmSetting(vmSetting.getId()) != null) {
-                throw new PreexistingEntityException("VmSetting " + vmSetting + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

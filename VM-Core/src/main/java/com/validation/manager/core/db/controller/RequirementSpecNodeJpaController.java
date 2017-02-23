@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db.controller;
 
 import java.io.Serializable;
@@ -18,7 +23,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RequirementSpecNodeJpaController implements Serializable {
 
@@ -42,8 +47,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
             requirementSpecNode.setRequirementList(new ArrayList<Requirement>());
         }
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
-        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -112,8 +117,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
 
     public void edit(RequirementSpecNode requirementSpecNode) throws NonexistentEntityException, Exception {
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
-        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         EntityManager em = null;
         try {
             em = getEntityManager();

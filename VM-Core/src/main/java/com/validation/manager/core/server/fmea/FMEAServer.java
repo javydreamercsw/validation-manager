@@ -3,7 +3,7 @@ package com.validation.manager.core.server.fmea;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Fmea;
-import com.validation.manager.core.db.controller.FMEAJpaController;
+import com.validation.manager.core.db.controller.FmeaJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.logging.Level;
@@ -24,15 +24,15 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         if (getId() > 0) {
-            Fmea fmea = new FMEAJpaController(
+            Fmea fmea = new FmeaJpaController(
                     getEntityManagerFactory()).findFmea(getId());
             update(fmea, this);
-            new FMEAJpaController(
+            new FmeaJpaController(
                     getEntityManagerFactory()).edit(fmea);
         } else {
             Fmea fmea = new Fmea(getName());
             update(fmea, this);
-            new FMEAJpaController(
+            new FmeaJpaController(
                     getEntityManagerFactory()).create(fmea);
             setId(fmea.getId());
         }
@@ -42,12 +42,10 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
     public static boolean deleteFMEA(int id) {
         boolean result = false;
         try {
-            new FMEAJpaController(
+            new FmeaJpaController(
                     getEntityManagerFactory()).destroy(id);
             result = true;
-        } catch (NonexistentEntityException ex) {
-            getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalOrphanException ex) {
+        } catch (NonexistentEntityException | IllegalOrphanException ex) {
             getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
@@ -55,7 +53,7 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
 
     @Override
     public Fmea getEntity() {
-        return new FMEAJpaController(
+        return new FmeaJpaController(
                 getEntityManagerFactory()).findFmea(getId());
     }
 

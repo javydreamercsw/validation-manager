@@ -137,11 +137,11 @@ public class TestHelper {
             String expectedResults, Test test, /*VmUser user,*/ String summary)
             throws PreexistingEntityException, Exception {
         TestCaseServer tc = new TestCaseServer(name, test.getId(), version, new Date());
-        tc.setExpectedResults(expectedResults);
+        tc.setExpectedResults(expectedResults.getBytes("UTF-8"));
         tc.setTest(test);
 //        tc.setVmUserId(user);
         tc.setActive(true);
-        tc.setExpectedResults(expectedResults);
+        tc.setExpectedResults(expectedResults.getBytes("UTF-8"));
         tc.setIsOpen(true);
         tc.setSummary(summary.getBytes());
         TestCaseJpaController controller = new TestCaseJpaController(

@@ -41,20 +41,26 @@ public final class RequirementServer extends Requirement
      * issues on the client. Basically reduces the calculation to once per
      * requirement.
      */
-    private static final Map<String, Integer> coverageMap
+    private static final Map<String, Integer> COVERAGE_MAP
             = new HashMap<String, Integer>();
 
     public RequirementServer(String id, String desc, RequirementSpecNodePK rsn,
             String notes, int requirementType, int requirementStatus) {
         setNotes(notes);
-        setRequirementSpecNode(
-                new RequirementSpecNodeJpaController(DataBaseManager.getEntityManagerFactory()).findRequirementSpecNode(rsn));
+        if (rsn != null) {
+            setRequirementSpecNode(
+                    new RequirementSpecNodeJpaController(DataBaseManager
+                            .getEntityManagerFactory())
+                            .findRequirementSpecNode(rsn));
+        }
         setUniqueId(id);
         setDescription(desc);
         setRequirementStatusId(new RequirementStatusJpaController(
-                DataBaseManager.getEntityManagerFactory()).findRequirementStatus(requirementStatus));
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirementStatus(requirementStatus));
         setRequirementTypeId(new RequirementTypeJpaController(
-                DataBaseManager.getEntityManagerFactory()).findRequirementType(requirementType));
+                DataBaseManager.getEntityManagerFactory())
+                .findRequirementType(requirementType));
     }
 
     public static void deleteRequirement(Requirement r)
@@ -152,7 +158,7 @@ public final class RequirementServer extends Requirement
     public Requirement getEntity() {
         return new RequirementJpaController(
                 DataBaseManager.getEntityManagerFactory()).findRequirement(
-                        getId());
+                getId());
     }
 
     @Override
@@ -202,7 +208,7 @@ public final class RequirementServer extends Requirement
     public int getTestCoverage() {
         //Reset to 0 for new calculation.
         int coverage = 0;
-        if (!coverageMap.containsKey(getCoverageMapID(getEntity()))) {
+        if (!COVERAGE_MAP.containsKey(getCoverageMapID(getEntity()))) {
             LOG.log(Level.FINE, "Getting test coverage for: {0}...",
                     getUniqueId());
             List<Requirement> children = getEntity().getRequirementList1();
@@ -221,8 +227,8 @@ public final class RequirementServer extends Requirement
                         children.size());
                 //Check coverage for children
                 for (Requirement r : children) {
-                    if (coverageMap.containsKey(getCoverageMapID(r))) {
-                        coverage += coverageMap.get(getCoverageMapID(r));
+                    if (COVERAGE_MAP.containsKey(getCoverageMapID(r))) {
+                        coverage += COVERAGE_MAP.get(getCoverageMapID(r));
                     } else {
                         coverage += new RequirementServer(r).getTestCoverage();
                     }
@@ -232,9 +238,9 @@ public final class RequirementServer extends Requirement
             LOG.log(Level.FINE, "{0} Coverage: {1}",
                     new Object[]{getUniqueId(), coverage});
             //Update the map
-            coverageMap.put(getCoverageMapID(getEntity()), coverage);
+            COVERAGE_MAP.put(getCoverageMapID(getEntity()), coverage);
         } else {
-            coverage = coverageMap.get(getCoverageMapID(getEntity()));
+            coverage = COVERAGE_MAP.get(getCoverageMapID(getEntity()));
         }
         //If still negative this means it is not coveed at all.
         return coverage;
@@ -243,11 +249,11 @@ public final class RequirementServer extends Requirement
     @Override
     public void update() {
         //Mark it for recalculation
-        coverageMap.remove(getEntity().getId() + "-"
+        COVERAGE_MAP.remove(getEntity().getId() + "-"
                 + getEntity().getUniqueId().trim());
         update(this, getEntity());
     }
-    
+
     public void addChildRequirement(Requirement child) throws Exception {
         boolean circular = false;
         //Prevent circular dependencies
@@ -288,14 +294,14 @@ public final class RequirementServer extends Requirement
 
     @Override
     public List<Requirement> getVersions() {
-        List<Requirement> versions = new ArrayList<Requirement>();
+        List<Requirement> versions = new ArrayList<>();
         parameters.clear();
         parameters.put("uniqueId", getEntity().getUniqueId().trim());
-        for (Object obj : DataBaseManager.namedQuery(
+        DataBaseManager.namedQuery(
                 "Requirement.findByUniqueId",
-                parameters)) {
-            versions.add((Requirement) obj);
-        }
+                parameters).forEach((obj) -> {
+                    versions.add((Requirement) obj);
+                });
         return versions;
     }
 
@@ -312,11 +318,11 @@ public final class RequirementServer extends Requirement
         return !description.equals(getDescription())
                 || !notes.equals(getNotes())
                 || !getEntity().getUniqueId().trim()
-                .equals(getUniqueId().trim());
+                        .equals(getUniqueId().trim());
     }
 
     public static void main(String[] args) {
-        List<String> params = new ArrayList<String>();
+        List<String> params = new ArrayList<>();
         params.add("javax.persistence.jdbc.url");
         params.add("javax.persistence.jdbc.password");
         params.add("javax.persistence.jdbc.driver");
@@ -336,7 +342,7 @@ public final class RequirementServer extends Requirement
                     = Persistence.createEntityManagerFactory("VMPU", parameters);
             DataBaseManager.setEntityManagerFactory(emf);
             int counter = 0, circular = 0;
-            List<String> processed = new ArrayList<String>();
+            List<String> processed = new ArrayList<>();
             LOG.log(Level.INFO, "Analyzing {0}. Please wait...",
                     parameters.get("javax.persistence.jdbc.url"));
             for (final Requirement req : new RequirementJpaController(
@@ -367,7 +373,7 @@ public final class RequirementServer extends Requirement
                             if (temp.getRequirementList().size() > 0
                                     && temp.getRequirementList1().size() > 0) {
                                 List<String> toRemove
-                                        = new ArrayList<String>();
+                                        = new ArrayList<>();
                                 //Has both children and parents
                                 LOG.log(Level.INFO,
                                         "Inspecting {0} for circular dependencies.",
@@ -415,7 +421,7 @@ public final class RequirementServer extends Requirement
                                     temp.setRequirementTypeId(
                                             new RequirementTypeJpaController(
                                                     DataBaseManager.getEntityManagerFactory())
-                                            .findRequirementType(lastRequirementType));
+                                                    .findRequirementType(lastRequirementType));
                                     temp.write2DB();
                                     lastRequirementType = temp.getRequirementTypeId().getId();
                                     counter++;
@@ -434,7 +440,7 @@ public final class RequirementServer extends Requirement
                                     temp.setRequirementStatusId(
                                             new RequirementStatusJpaController(
                                                     DataBaseManager.getEntityManagerFactory())
-                                            .findRequirementStatus(lastRequirementStatus));
+                                                    .findRequirementStatus(lastRequirementStatus));
                                     temp.write2DB();
                                     lastRequirementStatus = temp.getRequirementStatusId().getId();
                                     counter++;
@@ -453,7 +459,7 @@ public final class RequirementServer extends Requirement
                                     temp.setRequirementSpecNode(
                                             new RequirementSpecNodeJpaController(
                                                     DataBaseManager.getEntityManagerFactory())
-                                            .findRequirementSpecNode(lastNode));
+                                                    .findRequirementSpecNode(lastNode));
                                     temp.write2DB();
                                     lastNode = temp.getRequirementSpecNode().getRequirementSpecNodePK();
                                     counter++;
@@ -464,12 +470,12 @@ public final class RequirementServer extends Requirement
                             //Remove duplicate children (same id different versions)
                             LOG.log(Level.FINE, "Checking children of: {0}",
                                     req.getUniqueId());
-                            List<Requirement> reqs = new ArrayList<Requirement>();
-                            for (Requirement child : req.getRequirementList1()) {
+                            List<Requirement> reqs = new ArrayList<>();
+                            req.getRequirementList1().forEach((child) -> {
                                 boolean found = false;
                                 //Compare with the ones in the list
                                 ArrayList<Requirement> copiedList
-                                        = new ArrayList<Requirement>(reqs);
+                                        = new ArrayList<>(reqs);
                                 for (Requirement inList : copiedList) {
                                     if (inList.getUniqueId().trim().equals(child.getUniqueId().trim())) {
                                         found = true;
@@ -493,14 +499,14 @@ public final class RequirementServer extends Requirement
                                     //Not there, add it
                                     reqs.add(child);
                                 }
-                            }
+                            });
                             //Now that we cleaned the list, let's replace it with the correct ones.
                             LOG.log(Level.FINE, "Initial amount of children: {0}",
                                     r.getRequirementList1().size());
                             if (LOG.isLoggable(Level.FINE)) {
-                                for (Requirement x : r.getRequirementList1()) {
+                                r.getRequirementList1().forEach((x) -> {
                                     LOG.info(x.toString());
-                                }
+                                });
                             }
                             //Remove the ones currently in the list
                             r.getRequirementList1().clear();
@@ -510,12 +516,12 @@ public final class RequirementServer extends Requirement
                             LOG.log(Level.FINE, "Updated amount of children: {0}",
                                     r.getRequirementList1().size());
                             if (LOG.isLoggable(Level.FINE)) {
-                                for (Requirement x : reqs) {
+                                reqs.forEach((x) -> {
                                     LOG.info(x.toString());
-                                }
+                                });
                             }
                         }
-                        List<String> updated = new ArrayList<String>();
+                        List<String> updated = new ArrayList<>();
                         if (!updated.contains(newer.getUniqueId())
                                 && newer.compareTo(older) > 0
                                 && newer.getRequirementSpecNode() == null
@@ -548,11 +554,11 @@ public final class RequirementServer extends Requirement
     }
 
     public static List<Requirement> getLatestChildren(Requirement parent) {
-        List<Requirement> finalList = new ArrayList<Requirement>();
-        List<Requirement> children = new ArrayList<Requirement>();
-        List<Requirement> toAdd = new ArrayList<Requirement>();
-        List<Requirement> toRemove = new ArrayList<Requirement>();
-        for (Requirement req : parent.getRequirementList1()) {
+        List<Requirement> finalList = new ArrayList<>();
+        List<Requirement> children = new ArrayList<>();
+        List<Requirement> toAdd = new ArrayList<>();
+        List<Requirement> toRemove = new ArrayList<>();
+        parent.getRequirementList1().forEach((req) -> {
             //Make sure to remove duplicates (versions of the same requirement)
             boolean found = false;
             for (Requirement in : toAdd) {
@@ -572,13 +578,13 @@ public final class RequirementServer extends Requirement
             if (!found) {
                 finalList.add(req);
             }
-        }
-        for (Requirement add : toAdd) {
+        });
+        toAdd.forEach((add) -> {
             finalList.add(add);
-        }
-        for (Requirement remove : toRemove) {
+        });
+        toRemove.forEach((remove) -> {
             finalList.remove(remove);
-        }
+        });
         children.addAll(finalList);
         return children;
     }

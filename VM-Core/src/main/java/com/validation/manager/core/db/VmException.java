@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -36,12 +31,20 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "vm_exception")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "VmException.findAll", query = "SELECT v FROM VmException v"),
-    @NamedQuery(name = "VmException.findByCloseDate", query = "SELECT v FROM VmException v WHERE v.closeDate = :closeDate"),
-    @NamedQuery(name = "VmException.findByReportDate", query = "SELECT v FROM VmException v WHERE v.reportDate = :reportDate"),
-    @NamedQuery(name = "VmException.findById", query = "SELECT v FROM VmException v WHERE v.vmExceptionPK.id = :id"),
-    @NamedQuery(name = "VmException.findByReporterId", query = "SELECT v FROM VmException v WHERE v.vmExceptionPK.reporterId = :reporterId")})
+    @NamedQuery(name = "VmException.findAll",
+            query = "SELECT v FROM VmException v")
+    ,@NamedQuery(name = "VmException.findByCloseDate",
+            query = "SELECT v FROM VmException v WHERE v.closeDate = :closeDate")
+    ,@NamedQuery(name = "VmException.findByReportDate",
+            query = "SELECT v FROM VmException v WHERE v.reportDate = :reportDate")
+    ,@NamedQuery(name = "VmException.findById",
+            query = "SELECT v FROM VmException v WHERE v.vmExceptionPK.id = :id")
+    ,@NamedQuery(name = "VmException.findByReporterId",
+            query = "SELECT v FROM VmException v WHERE v.vmExceptionPK.reporterId = :reporterId")})
 public class VmException implements Serializable {
+
+    @ManyToMany(mappedBy = "vmExceptionList")
+    private List<Requirement> requirementList;
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
@@ -59,27 +62,34 @@ public class VmException implements Serializable {
     @ManyToMany(mappedBy = "vmExceptionList")
     private List<CorrectiveAction> correctiveActionList;
     @JoinTable(name = "step_has_exception", joinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "step_test_case_test_id", referencedColumnName = "test_case_test_id"),
-        @JoinColumn(name = "step_id", referencedColumnName = "id"),
-        @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id")})
+        @JoinColumn(name = "exception_id", referencedColumnName = "id")
+        ,@JoinColumn(name = "exception_reporter_id",
+                referencedColumnName = "reporter_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "step_test_case_test_id",
+                referencedColumnName = "test_case_test_id")
+        ,@JoinColumn(name = "step_id", referencedColumnName = "id")
+        ,@JoinColumn(name = "step_test_case_id",
+                referencedColumnName = "test_case_id")})
     @ManyToMany
     private List<Step> stepList;
     @JoinTable(name = "exception_has_root_cause", joinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "root_cause_id", referencedColumnName = "id"),
-        @JoinColumn(name = "root_cause_root_cause_type_id", referencedColumnName = "root_cause_type_id")})
+        @JoinColumn(name = "exception_id", referencedColumnName = "id")
+        , @JoinColumn(name = "exception_reporter_id",
+                referencedColumnName = "reporter_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "root_cause_id", referencedColumnName = "id")
+        ,@JoinColumn(name = "root_cause_root_cause_type_id",
+                referencedColumnName = "root_cause_type_id")})
     @ManyToMany
     private List<RootCause> rootCauseList;
     @JoinTable(name = "exception_has_investigation", joinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id")
+        ,@JoinColumn(name = "exception_reporter_id",
+                referencedColumnName = "reporter_id")}, inverseJoinColumns = {
         @JoinColumn(name = "investigation_id", referencedColumnName = "id")})
     @ManyToMany
     private List<Investigation> investigationList;
-    @JoinColumn(name = "reporter_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "reporter_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmException")
@@ -94,7 +104,8 @@ public class VmException implements Serializable {
         this.vmExceptionPK = vmExceptionPK;
     }
 
-    public VmException(VmExceptionPK vmExceptionPK, Date reportDate, String description) {
+    public VmException(VmExceptionPK vmExceptionPK, Date reportDate,
+            String description) {
         this.vmExceptionPK = vmExceptionPK;
         this.reportDate = reportDate;
         this.description = description;
@@ -218,12 +229,25 @@ public class VmException implements Serializable {
             return false;
         }
         VmException other = (VmException) object;
-        return (this.vmExceptionPK != null || other.vmExceptionPK == null) && (this.vmExceptionPK == null || this.vmExceptionPK.equals(other.vmExceptionPK));
+        return (this.vmExceptionPK != null || other.vmExceptionPK == null)
+                && (this.vmExceptionPK == null
+                || this.vmExceptionPK.equals(other.vmExceptionPK));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.VmException[ vmExceptionPK=" + vmExceptionPK + " ]";
+        return "com.validation.manager.core.db.VmException[ vmExceptionPK="
+                + vmExceptionPK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Requirement> getRequirementList() {
+        return requirementList;
+    }
+
+    public void setRequirementList(List<Requirement> requirementList) {
+        this.requirementList = requirementList;
     }
 
 }

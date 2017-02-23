@@ -19,6 +19,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -54,6 +56,18 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "VmUser.findByUsername",
             query = "SELECT v FROM VmUser v WHERE v.username = :username")})
 public class VmUser extends Login implements Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "last_modified")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastModified;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "attempts")
+    private int attempts;
+    @ManyToMany(mappedBy = "vmUserList")
+    private List<RootCause> rootCauseList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -326,6 +340,32 @@ public class VmUser extends Login implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.VmUser[ id=" + getId() + " ]";
+    }
+
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    public int getAttempts() {
+        return attempts;
+    }
+
+    public void setAttempts(int attempts) {
+        this.attempts = attempts;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RootCause> getRootCauseList() {
+        return rootCauseList;
+    }
+
+    public void setRootCauseList(List<RootCause> rootCauseList) {
+        this.rootCauseList = rootCauseList;
     }
 
 }

@@ -19,13 +19,12 @@ import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RoleJpaController implements Serializable {
 
@@ -38,7 +37,7 @@ public class RoleJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Role role) throws PreexistingEntityException, Exception {
+    public void create(Role role) {
         if (role.getVmUserList() == null) {
             role.setVmUserList(new ArrayList<VmUser>());
         }
@@ -107,11 +106,6 @@ public class RoleJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findRole(role.getId()) != null) {
-                throw new PreexistingEntityException("Role " + role + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

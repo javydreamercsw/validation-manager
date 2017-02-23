@@ -16,13 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class CorrectiveActionJpaController implements Serializable {
 
@@ -35,7 +34,7 @@ public class CorrectiveActionJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(CorrectiveAction correctiveAction) throws PreexistingEntityException, Exception {
+    public void create(CorrectiveAction correctiveAction) {
         if (correctiveAction.getVmExceptionList() == null) {
             correctiveAction.setVmExceptionList(new ArrayList<VmException>());
         }
@@ -68,11 +67,6 @@ public class CorrectiveActionJpaController implements Serializable {
                 vmUserListVmUser = em.merge(vmUserListVmUser);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findCorrectiveAction(correctiveAction.getId()) != null) {
-                throw new PreexistingEntityException("CorrectiveAction " + correctiveAction + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();
