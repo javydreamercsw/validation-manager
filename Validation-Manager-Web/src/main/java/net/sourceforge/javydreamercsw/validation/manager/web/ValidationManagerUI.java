@@ -40,6 +40,7 @@ import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
+import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
@@ -98,20 +99,80 @@ public class ValidationManagerUI extends UI {
         displayRequirementSpecNode(rsn, false);
     }
 
-    private void displayRequirementSpecNode(RequirementSpecNode rsn, boolean edit) {
+    private void displayRequirementSpecNode(RequirementSpecNode rsn,
+            boolean edit) {
         Panel form = new Panel("Requirement Specification Node Detail");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(rsn.getClass());
         binder.setItemDataSource(rsn);
-        layout.addComponent(binder.buildAndBind("Name", "name"));
+        Field<?> name = binder.buildAndBind("Name", "name");
+        layout.addComponent(name);
         Field desc = binder.buildAndBind("Description", "description",
                 TextArea.class);
         desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
         desc.setSizeFull();
         layout.addComponent(desc);
-        layout.addComponent(binder.buildAndBind("Scope", "scope"));
+        Field<?> scope = binder.buildAndBind("Scope", "scope");
+        layout.addComponent(scope);
+        if (edit) {
+            if (rsn.getRequirementSpecNodePK() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        rsn.setName(name.getValue().toString());
+                        rsn.setDescription(desc.getValue().toString());
+                        rsn.setScope(scope.getValue().toString());
+                        rsn.setRequirementSpec((RequirementSpec) tree.getValue());
+                        new RequirementSpecNodeJpaController(DataBaseManager
+                                .getEntityManagerFactory()).create(rsn);
+                        form.setVisible(false);
+                        //Recreate the tree to show the addition
+                        updateProjectList();
+                        buildProjectTree();
+                        displayRequirementSpecNode(rsn, true);
+                        updateScreen();
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error creating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(save);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        rsn.setName(name.getValue().toString());
+                        rsn.setDescription(desc.getValue().toString());
+                        rsn.setScope(scope.getValue().toString());
+                        new RequirementSpecNodeJpaController(DataBaseManager
+                                .getEntityManagerFactory()).edit(rsn);
+                        displayRequirementSpecNode(rsn, true);
+                    } catch (FieldGroup.CommitException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (NonexistentEntityException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(update);
+            }
+        }
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
         layout.setSizeFull();
@@ -417,13 +478,19 @@ public class ValidationManagerUI extends UI {
 
     private void createRequirementSpecMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Requirement", requirementIcon);
+                = menu.addItem("Create Requirement Spec Node", specIcon);
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Requirement Spec", specIcon);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayRequirementSpec((RequirementSpec) tree.getValue(),
                             true);
+                });
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    RequirementSpecNode rs = new RequirementSpecNode();
+                    rs.setRequirementSpec((RequirementSpec) tree.getValue());
+                    displayRequirementSpecNode(rs, true);
                 });
     }
 
@@ -432,6 +499,17 @@ public class ValidationManagerUI extends UI {
                 = menu.addItem("Create Requirement Spec", VaadinIcons.PLUS);
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Requirement Spec Node", VaadinIcons.EDIT);
+        edit.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayRequirementSpecNode((RequirementSpecNode) tree.getValue(),
+                            true);
+                });
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    Requirement r = new Requirement();
+                    r.setRequirementSpecNode((RequirementSpecNode) tree.getValue());
+                    displayRequirement(r, true);
+                });
     }
 
     private Component getContentComponent() {
