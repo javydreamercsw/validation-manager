@@ -123,29 +123,6 @@
 
     <build>
         <plugins>
-            <!--<plugin>
-                <groupId>eviware</groupId>
-                <artifactId>maven-soapui-plugin</artifactId>
-                <version>4.0.1</version>
-                <configuration>
-                    <projectFile>test/src/test/soapUI/CarMaintenance-soapui-project.xml</projectFile>
-                    <outputFolder>./test/target/soapUI</outputFolder>
-                    <junitReport>true</junitReport>
-                    <printReport>true</printReport>
-                    <projectProperties>
-                        <value>addedFuel=17</value>
-                        <value>expectedFuel=17</value>
-                    </projectProperties>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
