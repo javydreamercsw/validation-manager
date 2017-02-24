@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Role;
@@ -10,7 +9,6 @@ import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.UserTestPlanRoleJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 
 /**

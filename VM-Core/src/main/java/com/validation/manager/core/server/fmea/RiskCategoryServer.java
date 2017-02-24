@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.fmea;
 
-import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RiskCategory;
