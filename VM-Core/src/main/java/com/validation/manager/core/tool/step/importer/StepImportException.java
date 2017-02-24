@@ -1,6 +1,5 @@
 package com.validation.manager.core.tool.step.importer;
 
-import java.util.Locale;
 import static java.util.Locale.getDefault;
 import java.util.ResourceBundle;
 import static java.util.ResourceBundle.getBundle;
