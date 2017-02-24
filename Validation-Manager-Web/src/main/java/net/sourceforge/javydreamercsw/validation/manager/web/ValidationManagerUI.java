@@ -2,12 +2,12 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.event.ItemClickEvent;
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
@@ -15,17 +15,17 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
-import com.vaadin.v7.ui.HorizontalLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.Tree;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
@@ -36,6 +36,7 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecPK;
 import com.validation.manager.core.db.SpecLevel;
+import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmUser;
@@ -45,10 +46,12 @@ import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
+import com.validation.manager.core.db.controller.TestJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
+import com.validation.manager.core.server.core.TestProjectServer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -81,6 +84,7 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons specIcon = VaadinIcons.BOOK;
     private final VaadinIcons requirementIcon = VaadinIcons.PIN;
     private final VaadinIcons testSuiteIcon = VaadinIcons.FILE_TREE;
+    private final VaadinIcons testPlanIcon = VaadinIcons.FILE_TREE_SUB;
     private final VaadinIcons testIcon = VaadinIcons.FILE_TEXT;
     private final Tree tree = new Tree();
 
@@ -157,6 +161,92 @@ public class ValidationManagerUI extends UI {
                         new RequirementSpecNodeJpaController(DataBaseManager
                                 .getEntityManagerFactory()).edit(rsn);
                         displayRequirementSpecNode(rsn, true);
+                    } catch (FieldGroup.CommitException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (NonexistentEntityException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(update);
+            }
+        }
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        layout.setSizeFull();
+        form.setSizeFull();
+        right = form;
+        updateScreen();
+    }
+
+    private void displayTest(Test t) {
+        displayTest(t, false);
+    }
+
+    private void displayTest(Test t, boolean edit) {
+        Panel form = new Panel("Test Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(t.getClass());
+        binder.setItemDataSource(t);
+        Field<?> name = binder.buildAndBind("Name", "name");
+        layout.addComponent(name);
+        Field<?> notes = binder.buildAndBind("Notes", "notes");
+        layout.addComponent(notes);
+        Field<?> purpose = binder.buildAndBind("Purpose", "purpose");
+        layout.addComponent(purpose);
+        Field<?> scope = binder.buildAndBind("Scope", "scope");
+        layout.addComponent(scope);
+        if (edit) {
+            if (t.getId() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        t.setName(name.getValue().toString());
+                        t.setNotes(notes.getValue().toString());
+                        t.setPurpose(purpose.getValue().toString());
+                        t.setScope(scope.getValue().toString());
+                        new TestJpaController(DataBaseManager
+                                .getEntityManagerFactory()).create(t);
+                        form.setVisible(false);
+                        //Recreate the tree to show the addition
+                        updateProjectList();
+                        buildProjectTree();
+                        displayTest(t, false);
+                        updateScreen();
+                        buildProjectTree();
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error creating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(save);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        t.setName(name.getValue().toString());
+                        t.setNotes(notes.getValue().toString());
+                        t.setPurpose(purpose.getValue().toString());
+                        t.setScope(scope.getValue().toString());
+                        new TestJpaController(DataBaseManager
+                                .getEntityManagerFactory()).edit(t);
+                        displayTest(t, true);
                     } catch (FieldGroup.CommitException ex) {
                         Exceptions.printStackTrace(ex);
                         Notification.show("Error updating record!",
@@ -507,6 +597,7 @@ public class ValidationManagerUI extends UI {
                 Project temp = new Project("Sub " + (i + 1));
                 controller.create(temp);
                 addDemoProjectRequirements(temp);
+                addDemoProjectTestProject(temp);
                 rootProject.getProjectList().add(temp);
             }
             addDemoProjectRequirements(rootProject);
@@ -578,6 +669,10 @@ public class ValidationManagerUI extends UI {
                 TestPlan tp = (TestPlan) tree.getValue();
                 LOG.log(Level.FINE, "Selected: {0}", tp.getName());
                 displayTestPlan(tp);
+            } else if (tree.getValue() instanceof Test) {
+                Test tp = (Test) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
+                displayTest(tp);
             }
         });
         //Select item on right click as well
@@ -870,6 +965,17 @@ public class ValidationManagerUI extends UI {
         tree.setItemCaption(tp, tp.getName());
         tree.setItemIcon(tp, testIcon);
         tree.setParent(tp, tp.getTestProject());
+        if (!tp.getTestPlanHasTestList().isEmpty()) {
+            tp.getTestPlanHasTestList().forEach((tpht) -> {
+                addTest(tpht.getTest(), tree);
+            });
+        }
+    }
+
+    private void addTest(Test t, Tree tree) {
+        tree.addItem(t);
+        tree.setItemCaption(t, t.getName());
+        tree.setItemIcon(t, testIcon);
     }
 
     private void addRequirement(Requirement req, Tree tree) {
@@ -959,6 +1065,18 @@ public class ValidationManagerUI extends UI {
         } else {
             subwindow.setVisible(true);
         }
+    }
+
+    private void addDemoProjectTestProject(Project temp) {
+        TestProjectServer tp = new TestProjectServer("Test Project", true);
+        tp.setName("Test Project");
+        tp.setNotes("Notes");
+        tp.setActive(true);
+        temp.setTestProjectList(new ArrayList<>());
+        temp.getTestProjectList().add(tp);
+        //Add the test structure
+
+        //Save it
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
