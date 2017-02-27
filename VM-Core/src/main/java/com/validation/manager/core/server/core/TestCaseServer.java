@@ -3,7 +3,6 @@ package com.validation.manager.core.server.core;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCasePK;
@@ -72,9 +71,9 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         target.setAuthorId(source.getAuthorId());
         target.setExpectedResults(source.getExpectedResults());
         target.setRiskControlList(source.getRiskControlList() == null
-                ? new ArrayList<RiskControl>() : source.getRiskControlList());
+                ? new ArrayList<>() : source.getRiskControlList());
         target.setStepList(source.getStepList() == null
-                ? new ArrayList<Step>() : source.getStepList());
+                ? new ArrayList<>() : source.getStepList());
         target.setIsOpen(source.getIsOpen());
         target.setSummary(source.getSummary());
         target.setTest(source.getTest());
@@ -96,19 +95,23 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         ss.setNotes(note);
         ss.setExpectedResult(criteria.getBytes("UTF-8"));
         if (ss.getRequirementList() == null) {
-            ss.setRequirementList(new ArrayList<Requirement>());
+            ss.setRequirementList(new ArrayList<>());
         }
         ss.write2DB();
-        List<String> processed = new ArrayList<String>();
-        for (Requirement req : requirements) {
-            //Make sure there are no duplicate requirements in list
-            if (!processed.contains(req.getUniqueId().trim())) {
-                processed.add(req.getUniqueId().trim());
-                Requirement max = Collections.max(new RequirementServer(req).getVersions(), null);
-                ss.getRequirementList().add(max);
-                RequirementServer rs = new RequirementServer(max);
-                rs.getStepList().add(ss.getEntity());
-                rs.write2DB();
+        List<String> processed = new ArrayList<>();
+        if (requirements != null) {
+            for (Requirement req : requirements) {
+                //Make sure there are no duplicate requirements in list
+                if (!processed.contains(req.getUniqueId().trim())) {
+                    processed.add(req.getUniqueId().trim());
+                    Requirement max
+                            = Collections.max(new RequirementServer(req)
+                                    .getVersions(), null);
+                    ss.getRequirementList().add(max);
+                    RequirementServer rs = new RequirementServer(max);
+                    rs.getStepList().add(ss.getEntity());
+                    rs.write2DB();
+                }
             }
         }
         ss.write2DB();
