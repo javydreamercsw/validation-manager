@@ -30,6 +30,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.DemoBuilder;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -48,10 +49,6 @@ import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.TestJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.server.core.RequirementServer;
-import com.validation.manager.core.server.core.RequirementSpecNodeServer;
-import com.validation.manager.core.server.core.RequirementSpecServer;
-import com.validation.manager.core.server.core.TestProjectServer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -586,53 +583,12 @@ public class ValidationManagerUI extends UI {
 
     private void buildDemoTree() {
         try {
-            ProjectJpaController controller
-                    = new ProjectJpaController(DataBaseManager
-                            .getEntityManagerFactory());
-            LOG.info("Creating demo projects...");
-            //Create some test projects
-            Project rootProject = new Project("Demo");
-            controller.create(rootProject);
-            for (int i = 0; i < 5; i++) {
-                Project temp = new Project("Sub " + (i + 1));
-                controller.create(temp);
-                addDemoProjectRequirements(temp);
-                addDemoProjectTestProject(temp);
-                rootProject.getProjectList().add(temp);
-            }
-            addDemoProjectRequirements(rootProject);
-            controller.edit(rootProject);
-            LOG.info("Done!");
+            DemoBuilder.buildDemoProject();
         } catch (NonexistentEntityException ex) {
             Exceptions.printStackTrace(ex);
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
-    }
-
-    private void addDemoProjectRequirements(Project p) throws Exception {
-        for (int i = 0; i < 5; i++) {
-            //Create a spec
-            RequirementSpecServer temp = new RequirementSpecServer("Spec " + i,
-                    "Description " + i, p.getId(), 1);
-            temp.write2DB();
-
-            RequirementSpecNodeServer node = temp.addSpecNode("Node " + i,
-                    "Description " + i, "Scope " + i);
-            for (int y = 0; y < 5; y++) {
-                RequirementServer req
-                        = new RequirementServer("Requirement " + y,
-                                "Description " + y,
-                                node.getRequirementSpecNodePK(), "Notes",
-                                1, 1);
-                req.write2DB();
-                node.getRequirementList().add(req.getEntity());
-            }
-            node.write2DB();
-            p.getRequirementSpecList().add(temp.getEntity());
-        }
-        new ProjectJpaController(DataBaseManager
-                .getEntityManagerFactory()).edit(p);
     }
 
     private Tree buildProjectTree() {
@@ -1065,18 +1021,6 @@ public class ValidationManagerUI extends UI {
         } else {
             subwindow.setVisible(true);
         }
-    }
-
-    private void addDemoProjectTestProject(Project temp) {
-        TestProjectServer tp = new TestProjectServer("Test Project", true);
-        tp.setName("Test Project");
-        tp.setNotes("Notes");
-        tp.setActive(true);
-        temp.setTestProjectList(new ArrayList<>());
-        temp.getTestProjectList().add(tp);
-        //Add the test structure
-
-        //Save it
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
