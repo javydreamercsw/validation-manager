@@ -4,17 +4,23 @@
 package com.validation.manager.core;
 
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.controller.ProjectJpaController;
+import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
+import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
 import com.validation.manager.core.server.core.TestServer;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -54,8 +60,9 @@ public class DemoBuilder {
                     "Description " + i, "Scope " + i);
             for (int y = 0; y < 5; y++) {
                 RequirementServer req
-                        = new RequirementServer("Requirement " + y,
-                                "Description " + y,
+                        = new RequirementServer("Requirement "
+                                + (y + 1) * (i + 1),
+                                "Description " + (y + 1) * (i + 1),
                                 node.getRequirementSpecNodePK(), "Notes",
                                 1, 1);
                 req.write2DB();
@@ -86,6 +93,20 @@ public class DemoBuilder {
                     "Scope " + (i + 1));
             ts.setNotes("Notes " + (i + 1));
             ts.write2DB();
+            //Add steps
+            TestCaseServer tcs = new TestCaseServer("Test Case #" + 1,
+                    new Date());
+            tcs.write2DB();
+            for (int j = 0; j < 5; j++) {
+                List<Requirement> requirements
+                        = new RequirementJpaController(DataBaseManager
+                                .getEntityManagerFactory())
+                                .findRequirementEntities().subList(j * 5,
+                                        j * 5 + 5);
+                tcs.addStep(j, "Step #" + (j + 1), "Note", "Criteria",
+                        requirements);
+            }
+            tcs.write2DB();
             tps.addTest(ts.getEntity());
         }
         ProjectServer ps = new ProjectServer(p);
@@ -93,5 +114,14 @@ public class DemoBuilder {
         ps.getTestProjectList().add(tp.getEntity());
         //Save it
         ps.write2DB();
+    }
+
+    public static void main(String[] args) {
+        try {
+            DataBaseManager.setPersistenceUnitName("TestVMPU");
+            buildDemoProject();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 }

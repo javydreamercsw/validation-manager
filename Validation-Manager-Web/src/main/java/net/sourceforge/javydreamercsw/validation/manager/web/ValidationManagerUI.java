@@ -39,15 +39,16 @@ import com.validation.manager.core.db.RequirementSpecPK;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.controller.TestProjectJpaController;
-import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
-import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
+import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.TestJpaController;
+import com.validation.manager.core.db.controller.TestPlanJpaController;
+import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -923,15 +924,16 @@ public class ValidationManagerUI extends UI {
         tree.setParent(tp, tp.getTestProject());
         if (!tp.getTestPlanHasTestList().isEmpty()) {
             tp.getTestPlanHasTestList().forEach((tpht) -> {
-                addTest(tpht.getTest(), tree);
+                addTest(tpht, tree);
             });
         }
     }
 
-    private void addTest(Test t, Tree tree) {
-        tree.addItem(t);
-        tree.setItemCaption(t, t.getName());
-        tree.setItemIcon(t, testIcon);
+    private void addTest(TestPlanHasTest t, Tree tree) {
+        tree.addItem(t.getTest());
+        tree.setItemCaption(t.getTest(), t.getTest().getName());
+        tree.setItemIcon(t.getTest(), testIcon);
+        tree.setParent(t.getTest(), t.getTestPlan());
     }
 
     private void addRequirement(Requirement req, Tree tree) {

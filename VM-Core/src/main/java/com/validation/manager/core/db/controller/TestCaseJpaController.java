@@ -5,24 +5,24 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.Test;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.RiskControl;
-import java.util.ArrayList;
-import java.util.List;
 import com.validation.manager.core.db.Step;
+import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCasePK;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -44,10 +44,10 @@ public class TestCaseJpaController implements Serializable {
             testCase.setTestCasePK(new TestCasePK());
         }
         if (testCase.getRiskControlList() == null) {
-            testCase.setRiskControlList(new ArrayList<RiskControl>());
+            testCase.setRiskControlList(new ArrayList<>());
         }
         if (testCase.getStepList() == null) {
-            testCase.setStepList(new ArrayList<Step>());
+            testCase.setStepList(new ArrayList<>());
         }
         testCase.getTestCasePK().setTestId(testCase.getTest().getId());
         EntityManager em = null;
@@ -64,13 +64,13 @@ public class TestCaseJpaController implements Serializable {
                 authorId = em.getReference(authorId.getClass(), authorId.getId());
                 testCase.setAuthorId(authorId);
             }
-            List<RiskControl> attachedRiskControlList = new ArrayList<RiskControl>();
+            List<RiskControl> attachedRiskControlList = new ArrayList<>();
             for (RiskControl riskControlListRiskControlToAttach : testCase.getRiskControlList()) {
                 riskControlListRiskControlToAttach = em.getReference(riskControlListRiskControlToAttach.getClass(), riskControlListRiskControlToAttach.getRiskControlPK());
                 attachedRiskControlList.add(riskControlListRiskControlToAttach);
             }
             testCase.setRiskControlList(attachedRiskControlList);
-            List<Step> attachedStepList = new ArrayList<Step>();
+            List<Step> attachedStepList = new ArrayList<>();
             for (Step stepListStepToAttach : testCase.getStepList()) {
                 stepListStepToAttach = em.getReference(stepListStepToAttach.getClass(), stepListStepToAttach.getStepPK());
                 attachedStepList.add(stepListStepToAttach);

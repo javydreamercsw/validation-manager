@@ -136,7 +136,7 @@ public class TestHelper {
     public static TestCase createTestCase(String name, short version,
             String expectedResults, Test test, /*VmUser user,*/ String summary)
             throws PreexistingEntityException, Exception {
-        TestCaseServer tc = new TestCaseServer(name, test.getId(), version, new Date());
+        TestCaseServer tc = new TestCaseServer(name, new Date());
         tc.setExpectedResults(expectedResults.getBytes("UTF-8"));
         tc.setTest(test);
 //        tc.setVmUserId(user);
