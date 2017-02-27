@@ -84,6 +84,7 @@ public class DemoBuilder {
             TestServer ts = new TestServer("Test #" + (i + 1),
                     "Purpose " + (i + 1),
                     "Scope " + (i + 1));
+            ts.setNotes("Notes " + (i + 1));
             ts.write2DB();
             tps.addTest(ts.getEntity());
         }
