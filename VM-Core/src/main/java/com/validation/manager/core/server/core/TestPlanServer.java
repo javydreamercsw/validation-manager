@@ -12,6 +12,7 @@ import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
@@ -23,7 +24,8 @@ import static java.util.logging.Logger.getLogger;
 public final class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
 
     public TestPlanServer(TestPlan plan) {
-        TestPlanJpaController controller = new TestPlanJpaController(getEntityManagerFactory());
+        TestPlanJpaController controller
+                = new TestPlanJpaController(getEntityManagerFactory());
         TestPlan temp = controller.findTestPlan(plan.getTestPlanPK());
         update(TestPlanServer.this, temp);
     }
@@ -32,6 +34,9 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
             boolean isOpen) {
         super(testProject, active, isOpen);
         setTestProject(testProject);
+        setTestPlanHasTestList(new ArrayList<>());
+        setTestPlanList(new ArrayList<>());
+        setUserTestPlanRoleList(new ArrayList<>());
     }
 
     @Override
@@ -69,7 +74,7 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
             TestPlanHasTest tpht = new TestPlanHasTest(
                     new TestPlanHasTestPK(getTestPlanPK().getId(),
                             getTestPlanPK().getTestProjectId(), test.getId()),
-                    new Date(), 1);
+                    new Date(), getTestPlanHasTestList().size() + 1);
             tpht.setTest(test);
             tpht.setTestPlan(new TestPlanJpaController(getEntityManagerFactory())
                     .findTestPlan(getTestPlanPK()));
@@ -104,6 +109,7 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
         target.setTestPlanList(source.getTestPlanList());
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setTestPlanPK(source.getTestPlanPK());
+        target.setTestPlan(source.getTestPlan());
     }
 
     @Override
