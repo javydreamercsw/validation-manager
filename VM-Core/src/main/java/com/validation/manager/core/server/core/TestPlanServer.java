@@ -110,6 +110,7 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setTestPlanPK(source.getTestPlanPK());
         target.setTestPlan(source.getTestPlan());
+        target.setName(source.getName());
     }
 
     @Override
