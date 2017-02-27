@@ -1,9 +1,9 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -18,7 +18,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -42,13 +41,11 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")
     ,@NamedQuery(name = "TestCase.findByName",
             query = "SELECT t FROM TestCase t WHERE t.name = :name")
-    ,@NamedQuery(name = "TestCase.findByVersion",
-            query = "SELECT t FROM TestCase t WHERE t.version = :version")
     ,@NamedQuery(name = "TestCase.findById",
             query = "SELECT t FROM TestCase t WHERE t.testCasePK.id = :id")
     ,@NamedQuery(name = "TestCase.findByTestId",
             query = "SELECT t FROM TestCase t WHERE t.testCasePK.testId = :testId")})
-public class TestCase implements Serializable {
+public class TestCase extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
@@ -58,10 +55,6 @@ public class TestCase implements Serializable {
     @Column(name = "creation_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "version")
-    private short version;
     @Lob
     @Column(name = "summary")
     private byte[] summary;
@@ -75,7 +68,8 @@ public class TestCase implements Serializable {
     private String name;
     @ManyToMany(mappedBy = "testCaseList")
     private List<RiskControl> riskControlList;
-    @JoinColumn(name = "test_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "test_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Test test;
     @JoinColumn(name = "author_id", referencedColumnName = "id")
@@ -91,10 +85,14 @@ public class TestCase implements Serializable {
         this.testCasePK = testCasePK;
     }
 
-    public TestCase(String name, TestCasePK testCasePK, short version, Date creationDate) {
+    public TestCase(String name, TestCasePK testCasePK, Date creationDate) {
         this.name = name;
         this.testCasePK = testCasePK;
-        this.version = version;
+        this.creationDate = creationDate;
+    }
+
+    public TestCase(String name, Date creationDate) {
+        this.name = name;
         this.creationDate = creationDate;
     }
 
@@ -202,14 +200,6 @@ public class TestCase implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.TestCase[ testCasePK="
                 + testCasePK + " ]";
-    }
-
-    public short getVersion() {
-        return version;
-    }
-
-    public void setVersion(short version) {
-        this.version = version;
     }
 
     public byte[] getSummary() {

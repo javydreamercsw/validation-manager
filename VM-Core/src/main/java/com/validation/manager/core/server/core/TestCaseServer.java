@@ -7,7 +7,6 @@ import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
-import com.validation.manager.core.db.controller.TestJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
@@ -34,9 +33,8 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         update((TestCaseServer) this, tc);
     }
 
-    public TestCaseServer(String name, int testCaseId, short version, Date creationDate) {
-        super(name, new TestCasePK(testCaseId), version, creationDate);
-        setTest(new TestJpaController(getEntityManagerFactory()).findTest(testCaseId));
+    public TestCaseServer(String name, Date creationDate) {
+        super(name, creationDate);
     }
 
     @Override
@@ -44,15 +42,16 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
             NonexistentEntityException, Exception {
         TestCaseJpaController controller
                 = new TestCaseJpaController(getEntityManagerFactory());
-        if (controller.findTestCase(getTestCasePK()) != null || getTestCasePK().getId() > 0) {
+        if (getTestCasePK() != null
+                && (controller.findTestCase(getTestCasePK()) != null
+                || getTestCasePK().getId() > 0)) {
             TestCase temp = controller.findTestCase(getTestCasePK());
             update(temp, this);
             controller.edit(temp);
         } else {
-            TestCase temp = new TestCase(getName(), getTestCasePK(),
-                    getVersion(), getCreationDate());
-            update(temp, this);
+            TestCase temp = new TestCase(getName(), getCreationDate());
             controller.create(temp);
+            update();
         }
         return getTestCasePK().getId();
     }
@@ -77,7 +76,6 @@ public final class TestCaseServer extends TestCase implements EntityServer<TestC
         target.setIsOpen(source.getIsOpen());
         target.setSummary(source.getSummary());
         target.setTest(source.getTest());
-        target.setVersion(source.getVersion());
         target.setTestCasePK(source.getTestCasePK());
         target.setName(source.getName());
     }
