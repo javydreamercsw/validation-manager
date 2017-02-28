@@ -58,13 +58,15 @@ public class RiskControlServer extends RiskControl
 
     @Override
     public void update(RiskControl target, RiskControl source) {
-        target.setRequirementList(source.getRequirementList());
+        target.setRiskControlHasRequirementList(source
+                .getRiskControlHasRequirementList());
         target.setRiskControlType(source.getRiskControlType());
         target.setRiskItemList(source.getRiskItemList());
         target.setRiskItemList1(source.getRiskItemList1());
-        target.setTestCaseList(source.getTestCaseList());
+        target.setRiskControlHasTestCaseList(source
+                .getRiskControlHasTestCaseList());
     }
-    
+
     @Override
     public void update() {
         update(this, getEntity());

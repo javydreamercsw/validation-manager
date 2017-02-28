@@ -4,20 +4,25 @@ import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -25,7 +30,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_case")
@@ -33,62 +38,70 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "TestCase.findAll",
             query = "SELECT t FROM TestCase t")
-    ,@NamedQuery(name = "TestCase.findByActive",
-            query = "SELECT t FROM TestCase t WHERE t.active = :active")
-    ,@NamedQuery(name = "TestCase.findByCreationDate",
-            query = "SELECT t FROM TestCase t WHERE t.creationDate = :creationDate")
-    ,@NamedQuery(name = "TestCase.findByIsOpen",
-            query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")
-    ,@NamedQuery(name = "TestCase.findByName",
+    , @NamedQuery(name = "TestCase.findById",
+            query = "SELECT t FROM TestCase t WHERE t.id = :id")
+    , @NamedQuery(name = "TestCase.findByName",
             query = "SELECT t FROM TestCase t WHERE t.name = :name")
-    ,@NamedQuery(name = "TestCase.findById",
-            query = "SELECT t FROM TestCase t WHERE t.testCasePK.id = :id")
-    ,@NamedQuery(name = "TestCase.findByTestId",
-            query = "SELECT t FROM TestCase t WHERE t.testCasePK.testId = :testId")})
+    , @NamedQuery(name = "TestCase.findByCreationDate",
+            query = "SELECT t FROM TestCase t WHERE t.creationDate = :creationDate")
+    , @NamedQuery(name = "TestCase.findByActive",
+            query = "SELECT t FROM TestCase t WHERE t.active = :active")
+    , @NamedQuery(name = "TestCase.findByIsOpen",
+            query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
 public class TestCase extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected TestCasePK testCasePK;
-    @Column(name = "active")
-    private Boolean active;
-    @Column(name = "creation_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date creationDate;
+    @Id
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "TestCase_IDGEN")
+    @TableGenerator(name = "TestCase_IDGEN", table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "test_case",
+            initialValue = 1000,
+            allocationSize = 1)
+    private Integer id;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "name")
+    private String name;
     @Lob
     @Column(name = "summary")
     private byte[] summary;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "creation_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creationDate;
+    @Column(name = "active")
+    private Boolean active;
+    @Column(name = "is_open")
+    private Boolean isOpen;
     @Lob
     @Column(name = "expected_results")
     private byte[] expectedResults;
-    @Column(name = "is_open")
-    private Boolean isOpen;
-    @Size(max = 255)
-    @Column(name = "name")
-    private String name;
-    @ManyToMany(mappedBy = "testCaseList")
-    private List<RiskControl> riskControlList;
-    @JoinColumn(name = "test_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Test test;
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
-    @ManyToOne
-    private VmUser authorId;
+    @JoinTable(name = "test_plan_has_test_case", joinColumns = {
+        @JoinColumn(name = "test_case_id", referencedColumnName = "id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "test_plan_id", referencedColumnName = "id")
+                , @JoinColumn(name = "test_plan_test_project_id",
+                        referencedColumnName = "test_project_id")})
+    @ManyToMany
+    private List<TestPlan> testPlanList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "testCase")
+    private List<RiskControlHasTestCase> riskControlHasTestCaseList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testCase")
     private List<Step> stepList;
 
     public TestCase() {
     }
 
-    public TestCase(TestCasePK testCasePK) {
-        this.testCasePK = testCasePK;
-    }
-
-    public TestCase(String name, TestCasePK testCasePK, Date creationDate) {
-        this.name = name;
-        this.testCasePK = testCasePK;
-        this.creationDate = creationDate;
+    public TestCase(int id) {
+        this.id = id;
     }
 
     public TestCase(String name, Date creationDate) {
@@ -96,41 +109,12 @@ public class TestCase extends Versionable implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public TestCase(String name, int testId) {
-        this.testCasePK = new TestCasePK(testId);
-        this.name = name;
+    public Integer getId() {
+        return id;
     }
 
-    public TestCasePK getTestCasePK() {
-        return testCasePK;
-    }
-
-    public void setTestCasePK(TestCasePK testCasePK) {
-        this.testCasePK = testCasePK;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public Boolean getIsOpen() {
-        return isOpen;
-    }
-
-    public void setIsOpen(Boolean isOpen) {
-        this.isOpen = isOpen;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -141,30 +125,64 @@ public class TestCase extends Versionable implements Serializable {
         this.name = name;
     }
 
+    public byte[] getSummary() {
+        return summary;
+    }
+
+    public void setSummary(byte[] summary) {
+        this.summary = summary;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Boolean getIsOpen() {
+        return isOpen;
+    }
+
+    public void setIsOpen(Boolean isOpen) {
+        this.isOpen = isOpen;
+    }
+
+    public byte[] getExpectedResults() {
+        return expectedResults;
+    }
+
+    public void setExpectedResults(byte[] expectedResults) {
+        this.expectedResults = expectedResults;
+    }
+
     @XmlTransient
     @JsonIgnore
-    public List<RiskControl> getRiskControlList() {
-        return riskControlList;
+    public List<TestPlan> getTestPlanList() {
+        return testPlanList;
     }
 
-    public void setRiskControlList(List<RiskControl> riskControlList) {
-        this.riskControlList = riskControlList;
+    public void setTestPlanList(List<TestPlan> testPlanList) {
+        this.testPlanList = testPlanList;
     }
 
-    public Test getTest() {
-        return test;
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskControlHasTestCase> getRiskControlHasTestCaseList() {
+        return riskControlHasTestCaseList;
     }
 
-    public void setTest(Test test) {
-        this.test = test;
-    }
-
-    public VmUser getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(VmUser authorId) {
-        this.authorId = authorId;
+    public void setRiskControlHasTestCaseList(List<RiskControlHasTestCase> riskControlHasTestCaseList) {
+        this.riskControlHasTestCaseList = riskControlHasTestCaseList;
     }
 
     @XmlTransient
@@ -180,7 +198,7 @@ public class TestCase extends Versionable implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (testCasePK != null ? testCasePK.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -191,30 +209,12 @@ public class TestCase extends Versionable implements Serializable {
             return false;
         }
         TestCase other = (TestCase) object;
-        return (this.testCasePK != null || other.testCasePK == null)
-                && (this.testCasePK == null
-                || this.testCasePK.equals(other.testCasePK));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.TestCase[ testCasePK="
-                + testCasePK + " ]";
-    }
-
-    public byte[] getSummary() {
-        return summary;
-    }
-
-    public void setSummary(byte[] summary) {
-        this.summary = summary;
-    }
-
-    public byte[] getExpectedResults() {
-        return expectedResults;
-    }
-
-    public void setExpectedResults(byte[] expectedResults) {
-        this.expectedResults = expectedResults;
+        return "com.validation.manager.core.db.TestCase[ id=" + id + " ]";
     }
 }

@@ -23,7 +23,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "risk_category")
@@ -31,14 +31,14 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "RiskCategory.findAll",
             query = "SELECT r FROM RiskCategory r")
-    ,@NamedQuery(name = "RiskCategory.findById",
+    , @NamedQuery(name = "RiskCategory.findById",
             query = "SELECT r FROM RiskCategory r WHERE r.id = :id")
-    ,@NamedQuery(name = "RiskCategory.findByMaximum",
-            query = "SELECT r FROM RiskCategory r WHERE r.maximum = :maximum")
-    ,@NamedQuery(name = "RiskCategory.findByMinimum",
+    , @NamedQuery(name = "RiskCategory.findByName",
+            query = "SELECT r FROM RiskCategory r WHERE r.name = :name")
+    , @NamedQuery(name = "RiskCategory.findByMinimum",
             query = "SELECT r FROM RiskCategory r WHERE r.minimum = :minimum")
-    ,@NamedQuery(name = "RiskCategory.findByName",
-            query = "SELECT r FROM RiskCategory r WHERE r.name = :name")})
+    , @NamedQuery(name = "RiskCategory.findByMaximum",
+            query = "SELECT r FROM RiskCategory r WHERE r.maximum = :maximum")})
 public class RiskCategory implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -51,9 +51,13 @@ public class RiskCategory implements Serializable {
             allocationSize = 1,
             initialValue = 1000)
     @Basic(optional = false)
-    @NotNull
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
+    @Column(name = "name")
+    private String name;
     @Basic(optional = false)
     @NotNull
     @Column(name = "minimum")
@@ -62,9 +66,6 @@ public class RiskCategory implements Serializable {
     @NotNull
     @Column(name = "maximum")
     private int maximum;
-    @Size(max = 255)
-    @Column(name = "name")
-    private String name;
     @ManyToMany(mappedBy = "riskCategoryList")
     private List<Fmea> fmeaList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskCategory")
@@ -93,6 +94,22 @@ public class RiskCategory implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getMinimum() {
+        return minimum;
+    }
+
+    public void setMinimum(int minimum) {
+        this.minimum = minimum;
+    }
+
+    public int getMaximum() {
+        return maximum;
+    }
+
+    public void setMaximum(int maximum) {
+        this.maximum = maximum;
     }
 
     @XmlTransient
@@ -129,28 +146,12 @@ public class RiskCategory implements Serializable {
             return false;
         }
         RiskCategory other = (RiskCategory) object;
-        return (this.id != null || other.id == null)
-                && (this.id == null || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RiskCategory[ id=" + id + " ]";
-    }
-
-    public int getMinimum() {
-        return minimum;
-    }
-
-    public void setMinimum(int minimum) {
-        this.minimum = minimum;
-    }
-
-    public int getMaximum() {
-        return maximum;
-    }
-
-    public void setMaximum(int maximum) {
-        this.maximum = maximum;
     }
 }

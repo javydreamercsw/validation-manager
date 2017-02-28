@@ -2,7 +2,7 @@ package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.CascadeType;
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -13,8 +13,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -22,7 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "root_cause")
@@ -30,9 +30,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "RootCause.findAll",
             query = "SELECT r FROM RootCause r")
-    ,@NamedQuery(name = "RootCause.findById",
+    , @NamedQuery(name = "RootCause.findById",
             query = "SELECT r FROM RootCause r WHERE r.rootCausePK.id = :id")
-    ,@NamedQuery(name = "RootCause.findByRootCauseTypeId",
+    , @NamedQuery(name = "RootCause.findByRootCauseTypeId",
             query = "SELECT r FROM RootCause r WHERE "
             + "r.rootCausePK.rootCauseTypeId = :rootCauseTypeId")})
 public class RootCause implements Serializable {
@@ -40,26 +40,26 @@ public class RootCause implements Serializable {
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected RootCausePK rootCausePK;
+    @Basic(optional = false)
+    @NotNull
     @Lob
     @Size(max = 2147483647)
     @Column(name = "details")
     private String details;
     @ManyToMany(mappedBy = "rootCauseList")
     private List<VmException> vmExceptionList;
-    @JoinColumn(name = "root_cause_type_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private RootCauseType rootCauseType;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "rootCause")
-    private List<UserHasRootCause> userHasRootCauseList;
     @JoinTable(name = "root_cause_has_user", joinColumns = {
         @JoinColumn(name = "root_cause_id", referencedColumnName = "id")
-        ,@JoinColumn(name = "root_cause_root_cause_type_id",
+        , @JoinColumn(name = "root_cause_root_cause_type_id",
                 referencedColumnName = "root_cause_type_id")},
             inverseJoinColumns = {
                 @JoinColumn(name = "vm_user_id", referencedColumnName = "id")})
     @ManyToMany
     private List<VmUser> vmUserList;
+    @JoinColumn(name = "root_cause_type_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private RootCauseType rootCauseType;
 
     public RootCause() {
     }
@@ -103,22 +103,22 @@ public class RootCause implements Serializable {
         this.vmExceptionList = vmExceptionList;
     }
 
+    @XmlTransient
+    @JsonIgnore
+    public List<VmUser> getVmUserList() {
+        return vmUserList;
+    }
+
+    public void setVmUserList(List<VmUser> vmUserList) {
+        this.vmUserList = vmUserList;
+    }
+
     public RootCauseType getRootCauseType() {
         return rootCauseType;
     }
 
     public void setRootCauseType(RootCauseType rootCauseType) {
         this.rootCauseType = rootCauseType;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<UserHasRootCause> getUserHasRootCauseList() {
-        return userHasRootCauseList;
-    }
-
-    public void setUserHasRootCauseList(List<UserHasRootCause> userHasRootCauseList) {
-        this.userHasRootCauseList = userHasRootCauseList;
     }
 
     @Override
@@ -135,24 +135,14 @@ public class RootCause implements Serializable {
             return false;
         }
         RootCause other = (RootCause) object;
-        return (this.rootCausePK != null || other.rootCausePK == null)
-                && (this.rootCausePK == null
-                || this.rootCausePK.equals(other.rootCausePK));
+        return !((this.rootCausePK == null && other.rootCausePK != null)
+                || (this.rootCausePK != null
+                && !this.rootCausePK.equals(other.rootCausePK)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RootCause[ rootCausePK="
                 + rootCausePK + " ]";
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmUser> getVmUserList() {
-        return vmUserList;
-    }
-
-    public void setVmUserList(List<VmUser> vmUserList) {
-        this.vmUserList = vmUserList;
     }
 }

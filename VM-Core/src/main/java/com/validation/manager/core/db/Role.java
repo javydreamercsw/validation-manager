@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -31,15 +26,17 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "role")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Role.findAll", query = "SELECT r FROM Role r"),
-    @NamedQuery(name = "Role.findById", query = "SELECT r FROM Role r WHERE r.id = :id"),
-    @NamedQuery(name = "Role.findByDescription", query = "SELECT r FROM Role r WHERE r.description = :description")})
+    @NamedQuery(name = "Role.findAll", query = "SELECT r FROM Role r")
+    , @NamedQuery(name = "Role.findById",
+            query = "SELECT r FROM Role r WHERE r.id = :id")
+    , @NamedQuery(name = "Role.findByDescription",
+            query = "SELECT r FROM Role r WHERE r.description = :description")})
 public class Role implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -55,16 +52,19 @@ public class Role implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Size(max = 255)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "description")
     private String description;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 65535)
     @Column(name = "notes")
     private String notes;
     @JoinTable(name = "user_has_role", joinColumns = {
-        @JoinColumn(name = "role_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "user_id", referencedColumnName = "id")})
+        @JoinColumn(name = "role_id", referencedColumnName = "id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "user_id", referencedColumnName = "id")})
     @ManyToMany
     private List<VmUser> vmUserList;
     @ManyToMany(mappedBy = "roleList")
@@ -159,12 +159,12 @@ public class Role implements Serializable {
             return false;
         }
         Role other = (Role) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Role[ id=" + id + " ]";
     }
-
 }

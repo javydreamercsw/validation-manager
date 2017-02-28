@@ -15,7 +15,6 @@ import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
-import com.validation.manager.core.server.core.TestServer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -88,11 +87,6 @@ public class DemoBuilder {
         tps.setNotes("Notes");
         tps.write2DB();
         for (int i = 0; i < 5; i++) {
-            TestServer ts = new TestServer("Test #" + (i + 1),
-                    "Purpose " + (i + 1),
-                    "Scope " + (i + 1));
-            ts.setNotes("Notes " + (i + 1));
-            ts.write2DB();
             //Add steps
             TestCaseServer tcs = new TestCaseServer("Test Case #" + 1,
                     new Date());
@@ -107,7 +101,7 @@ public class DemoBuilder {
                         requirements);
             }
             tcs.write2DB();
-            tps.addTest(ts.getEntity());
+            tps.addTestCase(tcs.getEntity());
         }
         ProjectServer ps = new ProjectServer(p);
         ps.setTestProjectList(new ArrayList<>());

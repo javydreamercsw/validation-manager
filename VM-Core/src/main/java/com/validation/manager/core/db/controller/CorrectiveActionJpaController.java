@@ -11,10 +11,10 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.VmException;
+import com.validation.manager.core.db.VmUser;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -35,36 +35,36 @@ public class CorrectiveActionJpaController implements Serializable {
     }
 
     public void create(CorrectiveAction correctiveAction) {
-        if (correctiveAction.getVmExceptionList() == null) {
-            correctiveAction.setVmExceptionList(new ArrayList<VmException>());
-        }
         if (correctiveAction.getVmUserList() == null) {
             correctiveAction.setVmUserList(new ArrayList<VmUser>());
+        }
+        if (correctiveAction.getVmExceptionList() == null) {
+            correctiveAction.setVmExceptionList(new ArrayList<VmException>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
-            for (VmException vmExceptionListVmExceptionToAttach : correctiveAction.getVmExceptionList()) {
-                vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
-            }
-            correctiveAction.setVmExceptionList(attachedVmExceptionList);
             List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
             for (VmUser vmUserListVmUserToAttach : correctiveAction.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
             }
             correctiveAction.setVmUserList(attachedVmUserList);
-            em.persist(correctiveAction);
-            for (VmException vmExceptionListVmException : correctiveAction.getVmExceptionList()) {
-                vmExceptionListVmException.getCorrectiveActionList().add(correctiveAction);
-                vmExceptionListVmException = em.merge(vmExceptionListVmException);
+            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
+            for (VmException vmExceptionListVmExceptionToAttach : correctiveAction.getVmExceptionList()) {
+                vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
+                attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
             }
+            correctiveAction.setVmExceptionList(attachedVmExceptionList);
+            em.persist(correctiveAction);
             for (VmUser vmUserListVmUser : correctiveAction.getVmUserList()) {
                 vmUserListVmUser.getCorrectiveActionList().add(correctiveAction);
                 vmUserListVmUser = em.merge(vmUserListVmUser);
+            }
+            for (VmException vmExceptionListVmException : correctiveAction.getVmExceptionList()) {
+                vmExceptionListVmException.getCorrectiveActionList().add(correctiveAction);
+                vmExceptionListVmException = em.merge(vmExceptionListVmException);
             }
             em.getTransaction().commit();
         } finally {
@@ -80,17 +80,10 @@ public class CorrectiveActionJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             CorrectiveAction persistentCorrectiveAction = em.find(CorrectiveAction.class, correctiveAction.getId());
-            List<VmException> vmExceptionListOld = persistentCorrectiveAction.getVmExceptionList();
-            List<VmException> vmExceptionListNew = correctiveAction.getVmExceptionList();
             List<VmUser> vmUserListOld = persistentCorrectiveAction.getVmUserList();
             List<VmUser> vmUserListNew = correctiveAction.getVmUserList();
-            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
-            for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
-                vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
-            }
-            vmExceptionListNew = attachedVmExceptionListNew;
-            correctiveAction.setVmExceptionList(vmExceptionListNew);
+            List<VmException> vmExceptionListOld = persistentCorrectiveAction.getVmExceptionList();
+            List<VmException> vmExceptionListNew = correctiveAction.getVmExceptionList();
             List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
@@ -98,19 +91,14 @@ public class CorrectiveActionJpaController implements Serializable {
             }
             vmUserListNew = attachedVmUserListNew;
             correctiveAction.setVmUserList(vmUserListNew);
+            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
+            for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
+                vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
+                attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
+            }
+            vmExceptionListNew = attachedVmExceptionListNew;
+            correctiveAction.setVmExceptionList(vmExceptionListNew);
             correctiveAction = em.merge(correctiveAction);
-            for (VmException vmExceptionListOldVmException : vmExceptionListOld) {
-                if (!vmExceptionListNew.contains(vmExceptionListOldVmException)) {
-                    vmExceptionListOldVmException.getCorrectiveActionList().remove(correctiveAction);
-                    vmExceptionListOldVmException = em.merge(vmExceptionListOldVmException);
-                }
-            }
-            for (VmException vmExceptionListNewVmException : vmExceptionListNew) {
-                if (!vmExceptionListOld.contains(vmExceptionListNewVmException)) {
-                    vmExceptionListNewVmException.getCorrectiveActionList().add(correctiveAction);
-                    vmExceptionListNewVmException = em.merge(vmExceptionListNewVmException);
-                }
-            }
             for (VmUser vmUserListOldVmUser : vmUserListOld) {
                 if (!vmUserListNew.contains(vmUserListOldVmUser)) {
                     vmUserListOldVmUser.getCorrectiveActionList().remove(correctiveAction);
@@ -121,6 +109,18 @@ public class CorrectiveActionJpaController implements Serializable {
                 if (!vmUserListOld.contains(vmUserListNewVmUser)) {
                     vmUserListNewVmUser.getCorrectiveActionList().add(correctiveAction);
                     vmUserListNewVmUser = em.merge(vmUserListNewVmUser);
+                }
+            }
+            for (VmException vmExceptionListOldVmException : vmExceptionListOld) {
+                if (!vmExceptionListNew.contains(vmExceptionListOldVmException)) {
+                    vmExceptionListOldVmException.getCorrectiveActionList().remove(correctiveAction);
+                    vmExceptionListOldVmException = em.merge(vmExceptionListOldVmException);
+                }
+            }
+            for (VmException vmExceptionListNewVmException : vmExceptionListNew) {
+                if (!vmExceptionListOld.contains(vmExceptionListNewVmException)) {
+                    vmExceptionListNewVmException.getCorrectiveActionList().add(correctiveAction);
+                    vmExceptionListNewVmException = em.merge(vmExceptionListNewVmException);
                 }
             }
             em.getTransaction().commit();
@@ -152,15 +152,15 @@ public class CorrectiveActionJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The correctiveAction with id " + id + " no longer exists.", enfe);
             }
-            List<VmException> vmExceptionList = correctiveAction.getVmExceptionList();
-            for (VmException vmExceptionListVmException : vmExceptionList) {
-                vmExceptionListVmException.getCorrectiveActionList().remove(correctiveAction);
-                vmExceptionListVmException = em.merge(vmExceptionListVmException);
-            }
             List<VmUser> vmUserList = correctiveAction.getVmUserList();
             for (VmUser vmUserListVmUser : vmUserList) {
                 vmUserListVmUser.getCorrectiveActionList().remove(correctiveAction);
                 vmUserListVmUser = em.merge(vmUserListVmUser);
+            }
+            List<VmException> vmExceptionList = correctiveAction.getVmExceptionList();
+            for (VmException vmExceptionListVmException : vmExceptionList) {
+                vmExceptionListVmException.getCorrectiveActionList().remove(correctiveAction);
+                vmExceptionListVmException = em.merge(vmExceptionListVmException);
             }
             em.remove(correctiveAction);
             em.getTransaction().commit();

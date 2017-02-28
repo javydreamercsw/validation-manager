@@ -8,10 +8,8 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.CorrectiveAction;
 import com.validation.manager.core.db.Role;
-import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.UserAssigment;
 import com.validation.manager.core.db.UserHasInvestigation;
-import com.validation.manager.core.db.UserHasRootCause;
 import com.validation.manager.core.db.UserModifiedRecord;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserTestProjectRole;
@@ -19,10 +17,8 @@ import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.CorrectiveActionJpaController;
 import com.validation.manager.core.db.controller.RoleJpaController;
-import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.UserAssigmentJpaController;
 import com.validation.manager.core.db.controller.UserHasInvestigationJpaController;
-import com.validation.manager.core.db.controller.UserHasRootCauseJpaController;
 import com.validation.manager.core.db.controller.UserModifiedRecordJpaController;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.UserTestPlanRoleJpaController;
@@ -232,28 +228,11 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                 password = getPassword().replaceAll("'", "\\\\'");
             }
             VmUser vmu = controller.findVmUser(getId());
-            vmu.setAttempts(getAttempts());
-            vmu.setEmail(getEmail().replaceAll("'", "\\\\'"));
-            vmu.setLastName(getLastName().replaceAll("'", "\\\\'"));
-            vmu.setLastModified(getLastModified());
-            vmu.setFirstName(getFirstName().replaceAll("'", "\\\\'"));
-            vmu.setUserStatusId(getUserStatusId());
-            vmu.setUsername(getUsername().replaceAll("'", "\\\\'"));
+            update(vmu, this);
             vmu.setPassword(password);
             vmu.setModificationReason(getModificationReason() == null
                     ? "audit.general.modified" : getModificationReason());
-            vmu.setModifierId(getModifierId());
             vmu.setModificationTime(new Timestamp(new Date().getTime()));
-            vmu.setRoleList(getRoleList());
-            vmu.setCorrectiveActionList(getCorrectiveActionList());
-            vmu.setTestCaseList(getTestCaseList());
-            vmu.setUserAssigmentList(getUserAssigmentList());
-            vmu.setUserAssigmentList1(getUserAssigmentList1());
-            vmu.setUserHasInvestigationList(getUserHasInvestigationList());
-            vmu.setUserHasRootCauseList(getUserHasRootCauseList());
-            vmu.setUserTestPlanRoleList(getUserTestPlanRoleList());
-            vmu.setUserTestProjectRoleList(getUserTestProjectRoleList());
-            vmu.setVmExceptionList(getVmExceptionList());
             controller.edit(vmu);
         } else {
             VmUser vmu = new VmUser(
@@ -263,7 +242,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                     getLastName().replaceAll("'", "\\\\'"), getLocale(),
                     getLastModified(), new UserStatusJpaController(
                             getEntityManagerFactory())
-                    .findUserStatus(1), getAttempts());
+                            .findUserStatus(1), getAttempts());
             update(vmu, this);
             controller.create(vmu);
             setId(vmu.getId());
@@ -275,13 +254,13 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
 
 //create complete list of users
     public static ArrayList<VMUserServer> getVMUsers() {
-        ArrayList<VMUserServer> coreUsers = new ArrayList<VMUserServer>();
+        ArrayList<VMUserServer> coreUsers = new ArrayList<>();
         try {
             result = createdQuery(
                     "Select x from VMUser x order by x.username");
-            for (Object o : result) {
+            result.forEach((o) -> {
                 coreUsers.add(new VMUserServer((VmUser) o));
-            }
+            });
         } catch (Exception e) {
             coreUsers.clear();
         }
@@ -325,7 +304,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                             - u.getLastModified().getTime();
                     if (diff / (1000 * 60 * 60 * 24)
                             > getSetting("password.unusable_period")
-                            .getIntVal()) {
+                                    .getIntVal()) {
                         passwordIsUsable = false;
                     }
                 }
@@ -364,10 +343,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                     new RoleJpaController(
                             getEntityManagerFactory()).destroy(r.getId());
                 }
-                for (TestCase tc : user.getTestCaseList()) {
-                    new TestCaseJpaController(
-                            getEntityManagerFactory()).destroy(tc.getTestCasePK());
-                }
                 for (UserAssigment ua : user.getUserAssigmentList()) {
                     new UserAssigmentJpaController(
                             getEntityManagerFactory()).destroy(ua.getUserAssigmentPK());
@@ -379,10 +354,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                 for (UserHasInvestigation i : user.getUserHasInvestigationList()) {
                     new UserHasInvestigationJpaController(
                             getEntityManagerFactory()).destroy(i.getUserHasInvestigationPK());
-                }
-                for (UserHasRootCause rc : user.getUserHasRootCauseList()) {
-                    new UserHasRootCauseJpaController(
-                            getEntityManagerFactory()).destroy(rc.getUserHasRootCausePK());
                 }
                 for (UserModifiedRecord rc : user.getUserModifiedRecordList()) {
                     new UserModifiedRecordJpaController(
@@ -406,9 +377,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                         parameters).get(0);
                 new VmUserJpaController(
                         getEntityManagerFactory()).destroy(user.getId());
-            } catch (NonexistentEntityException ex) {
-                getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalOrphanException ex) {
+            } catch (NonexistentEntityException | IllegalOrphanException ex) {
                 getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -483,18 +452,15 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         target.setUserStatusId(source.getUserStatusId());
         target.setRoleList(source.getRoleList());
         target.setCorrectiveActionList(source.getCorrectiveActionList());
-        target.setTestCaseList(source.getTestCaseList());
         target.setUserAssigmentList(source.getUserAssigmentList());
         target.setUserAssigmentList1(source.getUserAssigmentList1());
         target.setUserHasInvestigationList(source.getUserHasInvestigationList());
-        target.setUserHasRootCauseList(source.getUserHasRootCauseList());
+        target.setRootCauseList(source.getRootCauseList());
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setUserTestProjectRoleList(source.getUserTestProjectRoleList());
         target.setVmExceptionList(source.getVmExceptionList());
         target.setId(source.getId());
-        target.setMajorVersion(source.getMajorVersion());
-        target.setMidVersion(source.getMidVersion());
-        target.setMinorVersion(source.getMinorVersion());
+        super.update(target, source);
     }
 
     @Override
@@ -504,13 +470,13 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
 
     @Override
     public List<VmUser> getVersions() {
-        List<VmUser> versions = new ArrayList<VmUser>();
+        List<VmUser> versions = new ArrayList<>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
-        for (Object obj : namedQuery("VmUser.findById",
-                parameters)) {
-            versions.add((VmUser) obj);
-        }
+        namedQuery("VmUser.findById",
+                parameters).forEach((obj) -> {
+                    versions.add((VmUser) obj);
+                });
         return versions;
     }
 

@@ -21,21 +21,22 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "risk_item")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RiskItem.findAll", query = "SELECT r FROM RiskItem r")
-    ,@NamedQuery(name = "RiskItem.findBySequence",
-            query = "SELECT r FROM RiskItem r WHERE r.sequence = :sequence")
-    ,@NamedQuery(name = "RiskItem.findByVersion",
-            query = "SELECT r FROM RiskItem r WHERE r.version = :version")
-    ,@NamedQuery(name = "RiskItem.findById",
+    @NamedQuery(name = "RiskItem.findAll",
+            query = "SELECT r FROM RiskItem r")
+    , @NamedQuery(name = "RiskItem.findById",
             query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.id = :id")
-    ,@NamedQuery(name = "RiskItem.findByFMEAid",
-            query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAid = :fMEAid")})
+    , @NamedQuery(name = "RiskItem.findByFMEAid",
+            query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAid = :fMEAid")
+    , @NamedQuery(name = "RiskItem.findBySequence",
+            query = "SELECT r FROM RiskItem r WHERE r.sequence = :sequence")
+    , @NamedQuery(name = "RiskItem.findByVersion",
+            query = "SELECT r FROM RiskItem r WHERE r.version = :version")})
 public class RiskItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -52,14 +53,15 @@ public class RiskItem implements Serializable {
     @ManyToMany(mappedBy = "riskItemList")
     private List<FailureMode> failureModeList;
     @ManyToMany(mappedBy = "riskItemList")
-    private List<RiskControl> riskControlList;
+    private List<Hazard> hazardList;
     @ManyToMany(mappedBy = "riskItemList")
-    private List<Cause> causeList;
+    private List<RiskControl> riskControlList;
     @ManyToMany(mappedBy = "riskItemList1")
     private List<RiskControl> riskControlList1;
     @ManyToMany(mappedBy = "riskItemList")
-    private List<Hazard> hazardList;
-    @JoinColumn(name = "FMEA_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private List<Cause> causeList;
+    @JoinColumn(name = "FMEA_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Fmea fmea;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskItem")
@@ -90,6 +92,22 @@ public class RiskItem implements Serializable {
         this.riskItemPK = riskItemPK;
     }
 
+    public int getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
     @XmlTransient
     @JsonIgnore
     public List<FailureMode> getFailureModeList() {
@@ -98,6 +116,16 @@ public class RiskItem implements Serializable {
 
     public void setFailureModeList(List<FailureMode> failureModeList) {
         this.failureModeList = failureModeList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Hazard> getHazardList() {
+        return hazardList;
+    }
+
+    public void setHazardList(List<Hazard> hazardList) {
+        this.hazardList = hazardList;
     }
 
     @XmlTransient
@@ -112,16 +140,6 @@ public class RiskItem implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<Cause> getCauseList() {
-        return causeList;
-    }
-
-    public void setCauseList(List<Cause> causeList) {
-        this.causeList = causeList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
     public List<RiskControl> getRiskControlList1() {
         return riskControlList1;
     }
@@ -132,12 +150,12 @@ public class RiskItem implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<Hazard> getHazardList() {
-        return hazardList;
+    public List<Cause> getCauseList() {
+        return causeList;
     }
 
-    public void setHazardList(List<Hazard> hazardList) {
-        this.hazardList = hazardList;
+    public void setCauseList(List<Cause> causeList) {
+        this.causeList = causeList;
     }
 
     public Fmea getFmea() {
@@ -172,28 +190,14 @@ public class RiskItem implements Serializable {
             return false;
         }
         RiskItem other = (RiskItem) object;
-        return (this.riskItemPK != null || other.riskItemPK == null) && (this.riskItemPK == null || this.riskItemPK.equals(other.riskItemPK));
+        return !((this.riskItemPK == null && other.riskItemPK != null)
+                || (this.riskItemPK != null
+                && !this.riskItemPK.equals(other.riskItemPK)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RiskItem[ riskItemPK=" + riskItemPK + " ]";
+        return "com.validation.manager.core.db.RiskItem[ riskItemPK="
+                + riskItemPK + " ]";
     }
-
-    public int getSequence() {
-        return sequence;
-    }
-
-    public void setSequence(int sequence) {
-        this.sequence = sequence;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
 }

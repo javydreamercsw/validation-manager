@@ -25,15 +25,18 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "hazard")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Hazard.findAll", query = "SELECT h FROM Hazard h"),
-    @NamedQuery(name = "Hazard.findById", query = "SELECT h FROM Hazard h WHERE h.id = :id"),
-    @NamedQuery(name = "Hazard.findByName", query = "SELECT h FROM Hazard h WHERE h.name = :name")})
+    @NamedQuery(name = "Hazard.findAll",
+            query = "SELECT h FROM Hazard h")
+    , @NamedQuery(name = "Hazard.findById",
+            query = "SELECT h FROM Hazard h WHERE h.id = :id")
+    , @NamedQuery(name = "Hazard.findByName",
+            query = "SELECT h FROM Hazard h WHERE h.name = :name")})
 public class Hazard extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -46,20 +49,25 @@ public class Hazard extends Versionable implements Serializable {
             allocationSize = 1,
             initialValue = 1000)
     @Basic(optional = false)
-    @NotNull
     @Column(name = "id")
     private Integer id;
-    @Lob
-    @Size(max = 2147483647)
-    @Column(name = "description")
-    private String description;
-    @Size(max = 255)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Size(min = 1, max = 65535)
+    @Column(name = "description")
+    private String description;
     @JoinTable(name = "risk_item_has_hazard", joinColumns = {
-        @JoinColumn(name = "hazard_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")})
+        @JoinColumn(name = "hazard_id", referencedColumnName = "id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
+                , @JoinColumn(name = "risk_item_FMEA_id",
+                        referencedColumnName = "FMEA_id")})
     @ManyToMany
     private List<RiskItem> riskItemList;
 
@@ -79,20 +87,20 @@ public class Hazard extends Versionable implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @XmlTransient
@@ -119,7 +127,8 @@ public class Hazard extends Versionable implements Serializable {
             return false;
         }
         Hazard other = (Hazard) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override

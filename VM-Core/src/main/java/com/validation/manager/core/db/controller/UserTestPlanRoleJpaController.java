@@ -10,8 +10,8 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserTestPlanRolePK;
@@ -40,23 +40,23 @@ public class UserTestPlanRoleJpaController implements Serializable {
         if (userTestPlanRole.getUserTestPlanRolePK() == null) {
             userTestPlanRole.setUserTestPlanRolePK(new UserTestPlanRolePK());
         }
-        userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
         userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
+        userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
         userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            VmUser vmUser = userTestPlanRole.getVmUser();
-            if (vmUser != null) {
-                vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
-                userTestPlanRole.setVmUser(vmUser);
-            }
             TestPlan testPlan = userTestPlanRole.getTestPlan();
             if (testPlan != null) {
                 testPlan = em.getReference(testPlan.getClass(), testPlan.getTestPlanPK());
                 userTestPlanRole.setTestPlan(testPlan);
+            }
+            VmUser vmUser = userTestPlanRole.getVmUser();
+            if (vmUser != null) {
+                vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
+                userTestPlanRole.setVmUser(vmUser);
             }
             Role role = userTestPlanRole.getRole();
             if (role != null) {
@@ -64,13 +64,13 @@ public class UserTestPlanRoleJpaController implements Serializable {
                 userTestPlanRole.setRole(role);
             }
             em.persist(userTestPlanRole);
-            if (vmUser != null) {
-                vmUser.getUserTestPlanRoleList().add(userTestPlanRole);
-                vmUser = em.merge(vmUser);
-            }
             if (testPlan != null) {
                 testPlan.getUserTestPlanRoleList().add(userTestPlanRole);
                 testPlan = em.merge(testPlan);
+            }
+            if (vmUser != null) {
+                vmUser.getUserTestPlanRoleList().add(userTestPlanRole);
+                vmUser = em.merge(vmUser);
             }
             if (role != null) {
                 role.getUserTestPlanRoleList().add(userTestPlanRole);
@@ -90,8 +90,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
     }
 
     public void edit(UserTestPlanRole userTestPlanRole) throws NonexistentEntityException, Exception {
-        userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
         userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
+        userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
         userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
         EntityManager em = null;
@@ -99,33 +99,25 @@ public class UserTestPlanRoleJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             UserTestPlanRole persistentUserTestPlanRole = em.find(UserTestPlanRole.class, userTestPlanRole.getUserTestPlanRolePK());
-            VmUser vmUserOld = persistentUserTestPlanRole.getVmUser();
-            VmUser vmUserNew = userTestPlanRole.getVmUser();
             TestPlan testPlanOld = persistentUserTestPlanRole.getTestPlan();
             TestPlan testPlanNew = userTestPlanRole.getTestPlan();
+            VmUser vmUserOld = persistentUserTestPlanRole.getVmUser();
+            VmUser vmUserNew = userTestPlanRole.getVmUser();
             Role roleOld = persistentUserTestPlanRole.getRole();
             Role roleNew = userTestPlanRole.getRole();
-            if (vmUserNew != null) {
-                vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
-                userTestPlanRole.setVmUser(vmUserNew);
-            }
             if (testPlanNew != null) {
                 testPlanNew = em.getReference(testPlanNew.getClass(), testPlanNew.getTestPlanPK());
                 userTestPlanRole.setTestPlan(testPlanNew);
+            }
+            if (vmUserNew != null) {
+                vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
+                userTestPlanRole.setVmUser(vmUserNew);
             }
             if (roleNew != null) {
                 roleNew = em.getReference(roleNew.getClass(), roleNew.getId());
                 userTestPlanRole.setRole(roleNew);
             }
             userTestPlanRole = em.merge(userTestPlanRole);
-            if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
-                vmUserOld.getUserTestPlanRoleList().remove(userTestPlanRole);
-                vmUserOld = em.merge(vmUserOld);
-            }
-            if (vmUserNew != null && !vmUserNew.equals(vmUserOld)) {
-                vmUserNew.getUserTestPlanRoleList().add(userTestPlanRole);
-                vmUserNew = em.merge(vmUserNew);
-            }
             if (testPlanOld != null && !testPlanOld.equals(testPlanNew)) {
                 testPlanOld.getUserTestPlanRoleList().remove(userTestPlanRole);
                 testPlanOld = em.merge(testPlanOld);
@@ -133,6 +125,14 @@ public class UserTestPlanRoleJpaController implements Serializable {
             if (testPlanNew != null && !testPlanNew.equals(testPlanOld)) {
                 testPlanNew.getUserTestPlanRoleList().add(userTestPlanRole);
                 testPlanNew = em.merge(testPlanNew);
+            }
+            if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
+                vmUserOld.getUserTestPlanRoleList().remove(userTestPlanRole);
+                vmUserOld = em.merge(vmUserOld);
+            }
+            if (vmUserNew != null && !vmUserNew.equals(vmUserOld)) {
+                vmUserNew.getUserTestPlanRoleList().add(userTestPlanRole);
+                vmUserNew = em.merge(vmUserNew);
             }
             if (roleOld != null && !roleOld.equals(roleNew)) {
                 roleOld.getUserTestPlanRoleList().remove(userTestPlanRole);
@@ -171,15 +171,15 @@ public class UserTestPlanRoleJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userTestPlanRole with id " + id + " no longer exists.", enfe);
             }
-            VmUser vmUser = userTestPlanRole.getVmUser();
-            if (vmUser != null) {
-                vmUser.getUserTestPlanRoleList().remove(userTestPlanRole);
-                vmUser = em.merge(vmUser);
-            }
             TestPlan testPlan = userTestPlanRole.getTestPlan();
             if (testPlan != null) {
                 testPlan.getUserTestPlanRoleList().remove(userTestPlanRole);
                 testPlan = em.merge(testPlan);
+            }
+            VmUser vmUser = userTestPlanRole.getVmUser();
+            if (vmUser != null) {
+                vmUser.getUserTestPlanRoleList().remove(userTestPlanRole);
+                vmUser = em.merge(vmUser);
             }
             Role role = userTestPlanRole.getRole();
             if (role != null) {

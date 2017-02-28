@@ -10,12 +10,12 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestPlanPK;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.TestPlanHasTest;
-import com.validation.manager.core.db.TestPlanPK;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -25,7 +25,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author javydreamercsw
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class TestPlanJpaController implements Serializable {
 
@@ -42,11 +42,11 @@ public class TestPlanJpaController implements Serializable {
         if (testPlan.getTestPlanPK() == null) {
             testPlan.setTestPlanPK(new TestPlanPK());
         }
+        if (testPlan.getTestCaseList() == null) {
+            testPlan.setTestCaseList(new ArrayList<TestCase>());
+        }
         if (testPlan.getTestPlanList() == null) {
             testPlan.setTestPlanList(new ArrayList<TestPlan>());
-        }
-        if (testPlan.getTestPlanHasTestList() == null) {
-            testPlan.setTestPlanHasTestList(new ArrayList<TestPlanHasTest>());
         }
         if (testPlan.getUserTestPlanRoleList() == null) {
             testPlan.setUserTestPlanRoleList(new ArrayList<UserTestPlanRole>());
@@ -56,28 +56,28 @@ public class TestPlanJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            TestProject testProject = testPlan.getTestProject();
-            if (testProject != null) {
-                testProject = em.getReference(testProject.getClass(), testProject.getId());
-                testPlan.setTestProject(testProject);
-            }
             TestPlan testPlanRel = testPlan.getTestPlan();
             if (testPlanRel != null) {
                 testPlanRel = em.getReference(testPlanRel.getClass(), testPlanRel.getTestPlanPK());
                 testPlan.setTestPlan(testPlanRel);
             }
+            TestProject testProject = testPlan.getTestProject();
+            if (testProject != null) {
+                testProject = em.getReference(testProject.getClass(), testProject.getId());
+                testPlan.setTestProject(testProject);
+            }
+            List<TestCase> attachedTestCaseList = new ArrayList<TestCase>();
+            for (TestCase testCaseListTestCaseToAttach : testPlan.getTestCaseList()) {
+                testCaseListTestCaseToAttach = em.getReference(testCaseListTestCaseToAttach.getClass(), testCaseListTestCaseToAttach.getId());
+                attachedTestCaseList.add(testCaseListTestCaseToAttach);
+            }
+            testPlan.setTestCaseList(attachedTestCaseList);
             List<TestPlan> attachedTestPlanList = new ArrayList<TestPlan>();
             for (TestPlan testPlanListTestPlanToAttach : testPlan.getTestPlanList()) {
                 testPlanListTestPlanToAttach = em.getReference(testPlanListTestPlanToAttach.getClass(), testPlanListTestPlanToAttach.getTestPlanPK());
                 attachedTestPlanList.add(testPlanListTestPlanToAttach);
             }
             testPlan.setTestPlanList(attachedTestPlanList);
-            List<TestPlanHasTest> attachedTestPlanHasTestList = new ArrayList<TestPlanHasTest>();
-            for (TestPlanHasTest testPlanHasTestListTestPlanHasTestToAttach : testPlan.getTestPlanHasTestList()) {
-                testPlanHasTestListTestPlanHasTestToAttach = em.getReference(testPlanHasTestListTestPlanHasTestToAttach.getClass(), testPlanHasTestListTestPlanHasTestToAttach.getTestPlanHasTestPK());
-                attachedTestPlanHasTestList.add(testPlanHasTestListTestPlanHasTestToAttach);
-            }
-            testPlan.setTestPlanHasTestList(attachedTestPlanHasTestList);
             List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<UserTestPlanRole>();
             for (UserTestPlanRole userTestPlanRoleListUserTestPlanRoleToAttach : testPlan.getUserTestPlanRoleList()) {
                 userTestPlanRoleListUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListUserTestPlanRoleToAttach.getUserTestPlanRolePK());
@@ -85,13 +85,17 @@ public class TestPlanJpaController implements Serializable {
             }
             testPlan.setUserTestPlanRoleList(attachedUserTestPlanRoleList);
             em.persist(testPlan);
+            if (testPlanRel != null) {
+                testPlanRel.getTestPlanList().add(testPlan);
+                testPlanRel = em.merge(testPlanRel);
+            }
             if (testProject != null) {
                 testProject.getTestPlanList().add(testPlan);
                 testProject = em.merge(testProject);
             }
-            if (testPlanRel != null) {
-                testPlanRel.getTestPlanList().add(testPlan);
-                testPlanRel = em.merge(testPlanRel);
+            for (TestCase testCaseListTestCase : testPlan.getTestCaseList()) {
+                testCaseListTestCase.getTestPlanList().add(testPlan);
+                testCaseListTestCase = em.merge(testCaseListTestCase);
             }
             for (TestPlan testPlanListTestPlan : testPlan.getTestPlanList()) {
                 TestPlan oldTestPlanOfTestPlanListTestPlan = testPlanListTestPlan.getTestPlan();
@@ -100,15 +104,6 @@ public class TestPlanJpaController implements Serializable {
                 if (oldTestPlanOfTestPlanListTestPlan != null) {
                     oldTestPlanOfTestPlanListTestPlan.getTestPlanList().remove(testPlanListTestPlan);
                     oldTestPlanOfTestPlanListTestPlan = em.merge(oldTestPlanOfTestPlanListTestPlan);
-                }
-            }
-            for (TestPlanHasTest testPlanHasTestListTestPlanHasTest : testPlan.getTestPlanHasTestList()) {
-                TestPlan oldTestPlanOfTestPlanHasTestListTestPlanHasTest = testPlanHasTestListTestPlanHasTest.getTestPlan();
-                testPlanHasTestListTestPlanHasTest.setTestPlan(testPlan);
-                testPlanHasTestListTestPlanHasTest = em.merge(testPlanHasTestListTestPlanHasTest);
-                if (oldTestPlanOfTestPlanHasTestListTestPlanHasTest != null) {
-                    oldTestPlanOfTestPlanHasTestListTestPlanHasTest.getTestPlanHasTestList().remove(testPlanHasTestListTestPlanHasTest);
-                    oldTestPlanOfTestPlanHasTestListTestPlanHasTest = em.merge(oldTestPlanOfTestPlanHasTestListTestPlanHasTest);
                 }
             }
             for (UserTestPlanRole userTestPlanRoleListUserTestPlanRole : testPlan.getUserTestPlanRoleList()) {
@@ -140,25 +135,17 @@ public class TestPlanJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             TestPlan persistentTestPlan = em.find(TestPlan.class, testPlan.getTestPlanPK());
-            TestProject testProjectOld = persistentTestPlan.getTestProject();
-            TestProject testProjectNew = testPlan.getTestProject();
             TestPlan testPlanRelOld = persistentTestPlan.getTestPlan();
             TestPlan testPlanRelNew = testPlan.getTestPlan();
+            TestProject testProjectOld = persistentTestPlan.getTestProject();
+            TestProject testProjectNew = testPlan.getTestProject();
+            List<TestCase> testCaseListOld = persistentTestPlan.getTestCaseList();
+            List<TestCase> testCaseListNew = testPlan.getTestCaseList();
             List<TestPlan> testPlanListOld = persistentTestPlan.getTestPlanList();
             List<TestPlan> testPlanListNew = testPlan.getTestPlanList();
-            List<TestPlanHasTest> testPlanHasTestListOld = persistentTestPlan.getTestPlanHasTestList();
-            List<TestPlanHasTest> testPlanHasTestListNew = testPlan.getTestPlanHasTestList();
             List<UserTestPlanRole> userTestPlanRoleListOld = persistentTestPlan.getUserTestPlanRoleList();
             List<UserTestPlanRole> userTestPlanRoleListNew = testPlan.getUserTestPlanRoleList();
             List<String> illegalOrphanMessages = null;
-            for (TestPlanHasTest testPlanHasTestListOldTestPlanHasTest : testPlanHasTestListOld) {
-                if (!testPlanHasTestListNew.contains(testPlanHasTestListOldTestPlanHasTest)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain TestPlanHasTest " + testPlanHasTestListOldTestPlanHasTest + " since its testPlan field is not nullable.");
-                }
-            }
             for (UserTestPlanRole userTestPlanRoleListOldUserTestPlanRole : userTestPlanRoleListOld) {
                 if (!userTestPlanRoleListNew.contains(userTestPlanRoleListOldUserTestPlanRole)) {
                     if (illegalOrphanMessages == null) {
@@ -170,14 +157,21 @@ public class TestPlanJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            if (testProjectNew != null) {
-                testProjectNew = em.getReference(testProjectNew.getClass(), testProjectNew.getId());
-                testPlan.setTestProject(testProjectNew);
-            }
             if (testPlanRelNew != null) {
                 testPlanRelNew = em.getReference(testPlanRelNew.getClass(), testPlanRelNew.getTestPlanPK());
                 testPlan.setTestPlan(testPlanRelNew);
             }
+            if (testProjectNew != null) {
+                testProjectNew = em.getReference(testProjectNew.getClass(), testProjectNew.getId());
+                testPlan.setTestProject(testProjectNew);
+            }
+            List<TestCase> attachedTestCaseListNew = new ArrayList<TestCase>();
+            for (TestCase testCaseListNewTestCaseToAttach : testCaseListNew) {
+                testCaseListNewTestCaseToAttach = em.getReference(testCaseListNewTestCaseToAttach.getClass(), testCaseListNewTestCaseToAttach.getId());
+                attachedTestCaseListNew.add(testCaseListNewTestCaseToAttach);
+            }
+            testCaseListNew = attachedTestCaseListNew;
+            testPlan.setTestCaseList(testCaseListNew);
             List<TestPlan> attachedTestPlanListNew = new ArrayList<TestPlan>();
             for (TestPlan testPlanListNewTestPlanToAttach : testPlanListNew) {
                 testPlanListNewTestPlanToAttach = em.getReference(testPlanListNewTestPlanToAttach.getClass(), testPlanListNewTestPlanToAttach.getTestPlanPK());
@@ -185,13 +179,6 @@ public class TestPlanJpaController implements Serializable {
             }
             testPlanListNew = attachedTestPlanListNew;
             testPlan.setTestPlanList(testPlanListNew);
-            List<TestPlanHasTest> attachedTestPlanHasTestListNew = new ArrayList<TestPlanHasTest>();
-            for (TestPlanHasTest testPlanHasTestListNewTestPlanHasTestToAttach : testPlanHasTestListNew) {
-                testPlanHasTestListNewTestPlanHasTestToAttach = em.getReference(testPlanHasTestListNewTestPlanHasTestToAttach.getClass(), testPlanHasTestListNewTestPlanHasTestToAttach.getTestPlanHasTestPK());
-                attachedTestPlanHasTestListNew.add(testPlanHasTestListNewTestPlanHasTestToAttach);
-            }
-            testPlanHasTestListNew = attachedTestPlanHasTestListNew;
-            testPlan.setTestPlanHasTestList(testPlanHasTestListNew);
             List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<UserTestPlanRole>();
             for (UserTestPlanRole userTestPlanRoleListNewUserTestPlanRoleToAttach : userTestPlanRoleListNew) {
                 userTestPlanRoleListNewUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListNewUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListNewUserTestPlanRoleToAttach.getUserTestPlanRolePK());
@@ -200,6 +187,14 @@ public class TestPlanJpaController implements Serializable {
             userTestPlanRoleListNew = attachedUserTestPlanRoleListNew;
             testPlan.setUserTestPlanRoleList(userTestPlanRoleListNew);
             testPlan = em.merge(testPlan);
+            if (testPlanRelOld != null && !testPlanRelOld.equals(testPlanRelNew)) {
+                testPlanRelOld.getTestPlanList().remove(testPlan);
+                testPlanRelOld = em.merge(testPlanRelOld);
+            }
+            if (testPlanRelNew != null && !testPlanRelNew.equals(testPlanRelOld)) {
+                testPlanRelNew.getTestPlanList().add(testPlan);
+                testPlanRelNew = em.merge(testPlanRelNew);
+            }
             if (testProjectOld != null && !testProjectOld.equals(testProjectNew)) {
                 testProjectOld.getTestPlanList().remove(testPlan);
                 testProjectOld = em.merge(testProjectOld);
@@ -208,13 +203,17 @@ public class TestPlanJpaController implements Serializable {
                 testProjectNew.getTestPlanList().add(testPlan);
                 testProjectNew = em.merge(testProjectNew);
             }
-            if (testPlanRelOld != null && !testPlanRelOld.equals(testPlanRelNew)) {
-                testPlanRelOld.getTestPlanList().remove(testPlan);
-                testPlanRelOld = em.merge(testPlanRelOld);
+            for (TestCase testCaseListOldTestCase : testCaseListOld) {
+                if (!testCaseListNew.contains(testCaseListOldTestCase)) {
+                    testCaseListOldTestCase.getTestPlanList().remove(testPlan);
+                    testCaseListOldTestCase = em.merge(testCaseListOldTestCase);
+                }
             }
-            if (testPlanRelNew != null && !testPlanRelNew.equals(testPlanRelOld)) {
-                testPlanRelNew.getTestPlanList().add(testPlan);
-                testPlanRelNew = em.merge(testPlanRelNew);
+            for (TestCase testCaseListNewTestCase : testCaseListNew) {
+                if (!testCaseListOld.contains(testCaseListNewTestCase)) {
+                    testCaseListNewTestCase.getTestPlanList().add(testPlan);
+                    testCaseListNewTestCase = em.merge(testCaseListNewTestCase);
+                }
             }
             for (TestPlan testPlanListOldTestPlan : testPlanListOld) {
                 if (!testPlanListNew.contains(testPlanListOldTestPlan)) {
@@ -230,17 +229,6 @@ public class TestPlanJpaController implements Serializable {
                     if (oldTestPlanOfTestPlanListNewTestPlan != null && !oldTestPlanOfTestPlanListNewTestPlan.equals(testPlan)) {
                         oldTestPlanOfTestPlanListNewTestPlan.getTestPlanList().remove(testPlanListNewTestPlan);
                         oldTestPlanOfTestPlanListNewTestPlan = em.merge(oldTestPlanOfTestPlanListNewTestPlan);
-                    }
-                }
-            }
-            for (TestPlanHasTest testPlanHasTestListNewTestPlanHasTest : testPlanHasTestListNew) {
-                if (!testPlanHasTestListOld.contains(testPlanHasTestListNewTestPlanHasTest)) {
-                    TestPlan oldTestPlanOfTestPlanHasTestListNewTestPlanHasTest = testPlanHasTestListNewTestPlanHasTest.getTestPlan();
-                    testPlanHasTestListNewTestPlanHasTest.setTestPlan(testPlan);
-                    testPlanHasTestListNewTestPlanHasTest = em.merge(testPlanHasTestListNewTestPlanHasTest);
-                    if (oldTestPlanOfTestPlanHasTestListNewTestPlanHasTest != null && !oldTestPlanOfTestPlanHasTestListNewTestPlanHasTest.equals(testPlan)) {
-                        oldTestPlanOfTestPlanHasTestListNewTestPlanHasTest.getTestPlanHasTestList().remove(testPlanHasTestListNewTestPlanHasTest);
-                        oldTestPlanOfTestPlanHasTestListNewTestPlanHasTest = em.merge(oldTestPlanOfTestPlanHasTestListNewTestPlanHasTest);
                     }
                 }
             }
@@ -285,13 +273,6 @@ public class TestPlanJpaController implements Serializable {
                 throw new NonexistentEntityException("The testPlan with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
-            List<TestPlanHasTest> testPlanHasTestListOrphanCheck = testPlan.getTestPlanHasTestList();
-            for (TestPlanHasTest testPlanHasTestListOrphanCheckTestPlanHasTest : testPlanHasTestListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This TestPlan (" + testPlan + ") cannot be destroyed since the TestPlanHasTest " + testPlanHasTestListOrphanCheckTestPlanHasTest + " in its testPlanHasTestList field has a non-nullable testPlan field.");
-            }
             List<UserTestPlanRole> userTestPlanRoleListOrphanCheck = testPlan.getUserTestPlanRoleList();
             for (UserTestPlanRole userTestPlanRoleListOrphanCheckUserTestPlanRole : userTestPlanRoleListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
@@ -302,15 +283,20 @@ public class TestPlanJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
+            TestPlan testPlanRel = testPlan.getTestPlan();
+            if (testPlanRel != null) {
+                testPlanRel.getTestPlanList().remove(testPlan);
+                testPlanRel = em.merge(testPlanRel);
+            }
             TestProject testProject = testPlan.getTestProject();
             if (testProject != null) {
                 testProject.getTestPlanList().remove(testPlan);
                 testProject = em.merge(testProject);
             }
-            TestPlan testPlanRel = testPlan.getTestPlan();
-            if (testPlanRel != null) {
-                testPlanRel.getTestPlanList().remove(testPlan);
-                testPlanRel = em.merge(testPlanRel);
+            List<TestCase> testCaseList = testPlan.getTestCaseList();
+            for (TestCase testCaseListTestCase : testCaseList) {
+                testCaseListTestCase.getTestPlanList().remove(testPlan);
+                testCaseListTestCase = em.merge(testCaseListTestCase);
             }
             List<TestPlan> testPlanList = testPlan.getTestPlanList();
             for (TestPlan testPlanListTestPlan : testPlanList) {

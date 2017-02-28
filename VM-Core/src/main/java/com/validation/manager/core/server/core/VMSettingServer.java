@@ -60,11 +60,11 @@ public class VMSettingServer extends VmSetting
 
     @SuppressWarnings("unchecked")
     public static ArrayList<VmSetting> getSettings() {
-        ArrayList<VmSetting> settings = new ArrayList<VmSetting>();
+        ArrayList<VmSetting> settings = new ArrayList<>();
         result = namedQuery("VmSetting.findAll");
-        for (Object o : result) {
+        result.forEach((o) -> {
             settings.add((VmSetting) o);
-        }
+        });
         return settings;
     }
 
@@ -114,18 +114,18 @@ public class VMSettingServer extends VmSetting
 
     @Override
     public List<VmSetting> getVersions() {
-        List<VmSetting> versions = new ArrayList<VmSetting>();
+        List<VmSetting> versions = new ArrayList<>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
-        for (Object obj : namedQuery("VmSetting.findById",
-                parameters)) {
-            versions.add((VmSetting) obj);
-        }
+        namedQuery("VmSetting.findById",
+                parameters).forEach((obj) -> {
+                    versions.add((VmSetting) obj);
+                });
         return versions;
     }
 
     @Override
     public boolean isChangeVersionable() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

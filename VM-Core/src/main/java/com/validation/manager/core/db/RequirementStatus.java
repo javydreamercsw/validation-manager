@@ -3,6 +3,7 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,19 +22,19 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "requirement_status")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "RequirementStatus.findAll",
-            query = "SELECT r FROM RequirementStatus r"),
-    @NamedQuery(name = "RequirementStatus.findById",
-            query = "SELECT r FROM RequirementStatus r WHERE r.id = :id"),
-    @NamedQuery(name = "RequirementStatus.findByStatus",
+            query = "SELECT r FROM RequirementStatus r")
+    , @NamedQuery(name = "RequirementStatus.findById",
+            query = "SELECT r FROM RequirementStatus r WHERE r.id = :id")
+    , @NamedQuery(name = "RequirementStatus.findByStatus",
             query = "SELECT r FROM RequirementStatus r WHERE r.status = :status")})
-public class RequirementStatus /*extends Versionable*/ implements Serializable {
+public class RequirementStatus implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -45,13 +46,14 @@ public class RequirementStatus /*extends Versionable*/ implements Serializable {
             allocationSize = 1,
             initialValue = 1000)
     @Basic(optional = false)
-    @NotNull
     @Column(name = "id")
     private Integer id;
-    @Size(max = 255)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "status")
     private String status;
-    @OneToMany(mappedBy = "requirementStatusId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementStatusId")
     private List<Requirement> requirementList;
 
     public RequirementStatus() {
@@ -90,7 +92,7 @@ public class RequirementStatus /*extends Versionable*/ implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (getId() != null ? getId().hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -101,13 +103,13 @@ public class RequirementStatus /*extends Versionable*/ implements Serializable {
             return false;
         }
         RequirementStatus other = (RequirementStatus) object;
-        return (this.getId() != null || other.getId() == null)
-                && (this.getId() == null || this.getId().equals(other.getId()));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RequirementStatus[ id="
-                + getId() + " ]";
+        return "com.validation.manager.core.db.RequirementStatus[ id=" + id + " ]";
     }
+
 }

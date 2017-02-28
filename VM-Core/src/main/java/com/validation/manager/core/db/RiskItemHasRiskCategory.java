@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "risk_item_has_risk_category")
@@ -24,17 +24,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "RiskItemHasRiskCategory.findAll",
             query = "SELECT r FROM RiskItemHasRiskCategory r")
-    ,@NamedQuery(name = "RiskItemHasRiskCategory.findByValue",
-            query = "SELECT r FROM RiskItemHasRiskCategory r WHERE r.value = :value")
-    ,@NamedQuery(name = "RiskItemHasRiskCategory.findByRiskitemFMEAid",
-            query = "SELECT r FROM RiskItemHasRiskCategory r WHERE "
-            + "r.riskItemHasRiskCategoryPK.riskitemFMEAid = :riskitemFMEAid")
-    ,@NamedQuery(name = "RiskItemHasRiskCategory.findByRiskItemId",
+    , @NamedQuery(name = "RiskItemHasRiskCategory.findByRiskItemId",
             query = "SELECT r FROM RiskItemHasRiskCategory r WHERE "
             + "r.riskItemHasRiskCategoryPK.riskItemId = :riskItemId")
-    ,@NamedQuery(name = "RiskItemHasRiskCategory.findByRiskCategoryId",
+    , @NamedQuery(name = "RiskItemHasRiskCategory.findByRiskitemFMEAid",
             query = "SELECT r FROM RiskItemHasRiskCategory r WHERE "
-            + "r.riskItemHasRiskCategoryPK.riskCategoryId = :riskCategoryId")})
+            + "r.riskItemHasRiskCategoryPK.riskitemFMEAid = :riskitemFMEAid")
+    , @NamedQuery(name = "RiskItemHasRiskCategory.findByRiskCategoryId",
+            query = "SELECT r FROM RiskItemHasRiskCategory r WHERE "
+            + "r.riskItemHasRiskCategoryPK.riskCategoryId = :riskCategoryId")
+    , @NamedQuery(name = "RiskItemHasRiskCategory.findByValue",
+            query = "SELECT r FROM RiskItemHasRiskCategory r WHERE r.value = :value")})
 public class RiskItemHasRiskCategory implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -44,19 +44,18 @@ public class RiskItemHasRiskCategory implements Serializable {
     @NotNull
     @Column(name = "value")
     private int value;
-    @JoinColumns({
-        @JoinColumn(name = "risk_item_id", referencedColumnName = "id",
-                insertable = false, updatable = false)
-        ,
-        @JoinColumn(name = "risk_item_FMEA_id",
-                referencedColumnName = "FMEA_id", insertable = false,
-                updatable = false)})
-    @ManyToOne(optional = false)
-    private RiskItem riskItem;
     @JoinColumn(name = "risk_category_id", referencedColumnName = "id",
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private RiskCategory riskCategory;
+    @JoinColumns({
+        @JoinColumn(name = "risk_item_id", referencedColumnName = "id",
+                insertable = false, updatable = false)
+        , @JoinColumn(name = "risk_item_FMEA_id",
+                referencedColumnName = "FMEA_id", insertable = false,
+                updatable = false)})
+    @ManyToOne(optional = false)
+    private RiskItem riskItem;
 
     public RiskItemHasRiskCategory() {
     }
@@ -86,12 +85,12 @@ public class RiskItemHasRiskCategory implements Serializable {
         this.riskItemHasRiskCategoryPK = riskItemHasRiskCategoryPK;
     }
 
-    public RiskItem getRiskItem() {
-        return riskItem;
+    public int getValue() {
+        return value;
     }
 
-    public void setRiskItem(RiskItem riskItem) {
-        this.riskItem = riskItem;
+    public void setValue(int value) {
+        this.value = value;
     }
 
     public RiskCategory getRiskCategory() {
@@ -100,6 +99,14 @@ public class RiskItemHasRiskCategory implements Serializable {
 
     public void setRiskCategory(RiskCategory riskCategory) {
         this.riskCategory = riskCategory;
+    }
+
+    public RiskItem getRiskItem() {
+        return riskItem;
+    }
+
+    public void setRiskItem(RiskItem riskItem) {
+        this.riskItem = riskItem;
     }
 
     @Override
@@ -117,23 +124,15 @@ public class RiskItemHasRiskCategory implements Serializable {
             return false;
         }
         RiskItemHasRiskCategory other = (RiskItemHasRiskCategory) object;
-        return (this.riskItemHasRiskCategoryPK != null
-                || other.riskItemHasRiskCategoryPK == null)
-                && (this.riskItemHasRiskCategoryPK == null
-                || this.riskItemHasRiskCategoryPK.equals(other.riskItemHasRiskCategoryPK));
+        return !((this.riskItemHasRiskCategoryPK == null
+                && other.riskItemHasRiskCategoryPK != null)
+                || (this.riskItemHasRiskCategoryPK != null
+                && !this.riskItemHasRiskCategoryPK.equals(other.riskItemHasRiskCategoryPK)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RiskItemHasRiskCategory[ "
                 + "riskItemHasRiskCategoryPK=" + riskItemHasRiskCategoryPK + " ]";
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
     }
 }

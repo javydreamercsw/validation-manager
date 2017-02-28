@@ -17,7 +17,6 @@ import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
-import static java.lang.Short.valueOf;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -163,12 +162,9 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
             assertEquals(0, rs.getTestCoverage());
-            //Add a test case
-            com.validation.manager.core.db.Test test
-                    = TestHelper.createTest("Test", "Purpose", "Scope");
             //Create Test Case
-            TestCase tc = TestHelper.createTestCase("Dummy", new Short("1"),
-                    "Expected Results", test, /*user,*/ "Summary");
+            TestCase tc = TestHelper.createTestCase("Dummy",
+                    "Expected Results", "Summary");
             //Add steps
             int i = 1;
             for (; i < 6; i++) {
@@ -188,10 +184,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
             TestProject tp = TestHelper.createTestProject("Test Project");
             //Create test plan
             TestPlan plan = TestHelper.createTestPlan(tp, "Notes", true, true);
-            //Add test case to test
-            TestHelper.addTestCaseToTest(test, tc);
             //Add test to plan
-            TestHelper.addTestToPlan(plan, test);
+            TestHelper.addTestCaseToPlan(plan, tc);
             rs.update();
             assertEquals(100, rs.getTestCoverage());
             //Add a related requirement
@@ -338,12 +332,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
         TestProject tp = TestHelper.createTestProject("Test Project");
         TestHelper.addTestProjectToProject(tp, p);
         TestPlan plan = TestHelper.createTestPlan(tp, "Plan", true, true);
-        com.validation.manager.core.db.Test test
-                = TestHelper.createTest("Test", "Test", "Test");
-        TestHelper.addTestToPlan(plan, test);
-        TestCase tc = TestHelper.createTestCase("TC #1", valueOf("1"),
+        TestCase tc = TestHelper.createTestCase("TC #1",
                 "Results",
-                test, "Summary");
+                "Summary");
+        TestHelper.addTestCaseToPlan(plan, tc);
         TestCase step = TestHelper.addStep(tc, 1, "Test", "Test");
         rs.getStepList().add(step.getStepList().get(0));
         rs.setDescription(second);
@@ -400,12 +392,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
             TestProject tp = TestHelper.createTestProject("Test Project");
             TestHelper.addTestProjectToProject(tp, p);
             TestPlan plan = TestHelper.createTestPlan(tp, "Plan", true, true);
-            com.validation.manager.core.db.Test test
-                    = TestHelper.createTest("Test", "Test", "Test");
-            TestHelper.addTestToPlan(plan, test);
-            TestCase tc = TestHelper.createTestCase("TC #1", valueOf("1"),
+            TestCase tc = TestHelper.createTestCase("TC #1",
                     "Results",
-                    test, "Summary");
+                    "Summary");
+            TestHelper.addTestCaseToPlan(plan, tc);
             TestCase step = TestHelper.addStep(tc, 1, "Test", "Test");
             rs.getStepList().add(step.getStepList().get(0));
             rs.write2DB();

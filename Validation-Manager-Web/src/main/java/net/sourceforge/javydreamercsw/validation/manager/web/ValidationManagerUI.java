@@ -37,16 +37,15 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecPK;
 import com.validation.manager.core.db.SpecLevel;
-import com.validation.manager.core.db.Test;
+import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
-import com.validation.manager.core.db.controller.TestJpaController;
+import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -187,11 +186,11 @@ public class ValidationManagerUI extends UI {
         updateScreen();
     }
 
-    private void displayTest(Test t) {
-        displayTest(t, false);
+    private void displayTestCase(TestCase t) {
+        displayTestCase(t, false);
     }
 
-    private void displayTest(Test t, boolean edit) {
+    private void displayTestCase(TestCase t, boolean edit) {
         Panel form = new Panel("Test Detail");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
@@ -200,12 +199,14 @@ public class ValidationManagerUI extends UI {
         binder.setItemDataSource(t);
         Field<?> name = binder.buildAndBind("Name", "name");
         layout.addComponent(name);
-        Field<?> notes = binder.buildAndBind("Notes", "notes");
-        layout.addComponent(notes);
-        Field<?> purpose = binder.buildAndBind("Purpose", "purpose");
-        layout.addComponent(purpose);
-        Field<?> scope = binder.buildAndBind("Scope", "scope");
-        layout.addComponent(scope);
+        Field<?> summary = binder.buildAndBind("Summary", "summary");
+        layout.addComponent(summary);
+        Field<?> creation = binder.buildAndBind("Created on", "creation_date");
+        layout.addComponent(creation);
+        Field<?> active = binder.buildAndBind("Active", "active");
+        layout.addComponent(active);
+        Field<?> open = binder.buildAndBind("Open", "open");
+        layout.addComponent(open);
         if (edit) {
             if (t.getId() == null) {
                 //Creating a new one
@@ -213,16 +214,17 @@ public class ValidationManagerUI extends UI {
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
                         t.setName(name.getValue().toString());
-                        t.setNotes(notes.getValue().toString());
-                        t.setPurpose(purpose.getValue().toString());
-                        t.setScope(scope.getValue().toString());
-                        new TestJpaController(DataBaseManager
+                        t.setSummary(summary.getValue().toString().getBytes("UTF-8"));
+                        t.setCreationDate((Date) creation.getValue());
+                        t.setActive((Boolean) active.getValue());
+                        t.setIsOpen((Boolean) open.getValue());
+                        new TestCaseJpaController(DataBaseManager
                                 .getEntityManagerFactory()).create(t);
                         form.setVisible(false);
                         //Recreate the tree to show the addition
                         updateProjectList();
                         buildProjectTree();
-                        displayTest(t, false);
+                        displayTestCase(t, false);
                         updateScreen();
                         buildProjectTree();
                     } catch (Exception ex) {
@@ -239,12 +241,13 @@ public class ValidationManagerUI extends UI {
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         t.setName(name.getValue().toString());
-                        t.setNotes(notes.getValue().toString());
-                        t.setPurpose(purpose.getValue().toString());
-                        t.setScope(scope.getValue().toString());
-                        new TestJpaController(DataBaseManager
+                        t.setSummary(summary.getValue().toString().getBytes("UTF-8"));
+                        t.setCreationDate((Date) creation.getValue());
+                        t.setActive((Boolean) active.getValue());
+                        t.setIsOpen((Boolean) open.getValue());
+                        new TestCaseJpaController(DataBaseManager
                                 .getEntityManagerFactory()).edit(t);
-                        displayTest(t, true);
+                        displayTestCase(t, true);
                     } catch (FieldGroup.CommitException ex) {
                         Exceptions.printStackTrace(ex);
                         Notification.show("Error updating record!",
@@ -626,10 +629,10 @@ public class ValidationManagerUI extends UI {
                 TestPlan tp = (TestPlan) tree.getValue();
                 LOG.log(Level.FINE, "Selected: {0}", tp.getName());
                 displayTestPlan(tp);
-            } else if (tree.getValue() instanceof Test) {
-                Test tp = (Test) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
-                displayTest(tp);
+            } else if (tree.getValue() instanceof TestCase) {
+                TestCase tc = (TestCase) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", tc.getName());
+                displayTestCase(tc);
             }
         });
         //Select item on right click as well
@@ -922,18 +925,18 @@ public class ValidationManagerUI extends UI {
         tree.setItemCaption(tp, tp.getName());
         tree.setItemIcon(tp, testIcon);
         tree.setParent(tp, tp.getTestProject());
-        if (!tp.getTestPlanHasTestList().isEmpty()) {
-            tp.getTestPlanHasTestList().forEach((tpht) -> {
-                addTest(tpht, tree);
+        if (!tp.getTestCaseList().isEmpty()) {
+            tp.getTestCaseList().forEach((tc) -> {
+                addTestCase(tc, tp, tree);
             });
         }
     }
 
-    private void addTest(TestPlanHasTest t, Tree tree) {
-        tree.addItem(t.getTest());
-        tree.setItemCaption(t.getTest(), t.getTest().getName());
-        tree.setItemIcon(t.getTest(), testIcon);
-        tree.setParent(t.getTest(), t.getTestPlan());
+    private void addTestCase(TestCase t, TestPlan plan, Tree tree) {
+        tree.addItem(t);
+        tree.setItemCaption(t, t.getName());
+        tree.setItemIcon(t, testIcon);
+        tree.setParent(t, plan);
     }
 
     private void addRequirement(Requirement req, Tree tree) {

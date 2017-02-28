@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -25,19 +24,19 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "failure_mode")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "FailureMode.findAll", 
-            query = "SELECT f FROM FailureMode f"),
-    @NamedQuery(name = "FailureMode.findById", 
-            query = "SELECT f FROM FailureMode f WHERE f.id = :id"),
-    @NamedQuery(name = "FailureMode.findByName", 
+    @NamedQuery(name = "FailureMode.findAll",
+            query = "SELECT f FROM FailureMode f")
+    , @NamedQuery(name = "FailureMode.findById",
+            query = "SELECT f FROM FailureMode f WHERE f.id = :id")
+    , @NamedQuery(name = "FailureMode.findByName",
             query = "SELECT f FROM FailureMode f WHERE f.name = :name")})
-public class FailureMode extends Versionable implements Serializable {
+public class FailureMode implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -49,20 +48,25 @@ public class FailureMode extends Versionable implements Serializable {
             allocationSize = 1,
             initialValue = 1000)
     @Basic(optional = false)
-    @NotNull
     @Column(name = "id")
     private Integer id;
-    @Lob
-    @Size(max = 2147483647)
-    @Column(name = "description")
-    private String description;
-    @Size(max = 255)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Size(min = 1, max = 65535)
+    @Column(name = "description")
+    private String description;
     @JoinTable(name = "risk_item_has_failure_mode", joinColumns = {
-        @JoinColumn(name = "failure_mode_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "risk_item_id", referencedColumnName = "id"),
-        @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")})
+        @JoinColumn(name = "failure_mode_id", referencedColumnName = "id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
+                , @JoinColumn(name = "risk_item_FMEA_id",
+                        referencedColumnName = "FMEA_id")})
     @ManyToMany
     private List<RiskItem> riskItemList;
 
@@ -82,20 +86,20 @@ public class FailureMode extends Versionable implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @XmlTransient
@@ -122,7 +126,8 @@ public class FailureMode extends Versionable implements Serializable {
             return false;
         }
         FailureMode other = (FailureMode) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override

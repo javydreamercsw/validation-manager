@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -28,11 +23,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "attachment")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Attachment.findAll", query = "SELECT a FROM Attachment a")
-    , @NamedQuery(name = "Attachment.findById", query = "SELECT a FROM Attachment a WHERE a.attachmentPK.id = :id")
-    , @NamedQuery(name = "Attachment.findByAttachmentTypeId", query = "SELECT a FROM Attachment a WHERE a.attachmentPK.attachmentTypeId = :attachmentTypeId")
-    , @NamedQuery(name = "Attachment.findByStringValue", query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue")
-    , @NamedQuery(name = "Attachment.findByAttachmentcol", query = "SELECT a FROM Attachment a WHERE a.attachmentcol = :attachmentcol")})
+    @NamedQuery(name = "Attachment.findAll",
+            query = "SELECT a FROM Attachment a")
+    , @NamedQuery(name = "Attachment.findById",
+            query = "SELECT a FROM Attachment a WHERE a.attachmentPK.id = :id")
+    , @NamedQuery(name = "Attachment.findByAttachmentTypeId",
+            query = "SELECT a FROM Attachment a WHERE a.attachmentPK.attachmentTypeId = :attachmentTypeId")
+    , @NamedQuery(name = "Attachment.findByStringValue",
+            query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue")
+    , @NamedQuery(name = "Attachment.findByAttachmentcol",
+            query = "SELECT a FROM Attachment a WHERE a.attachmentcol = :attachmentcol")})
 public class Attachment implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -55,7 +55,8 @@ public class Attachment implements Serializable {
     @Size(max = 255)
     @Column(name = "attachmentcol")
     private String attachmentcol;
-    @JoinColumn(name = "attachment_type_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "attachment_type_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private AttachmentType attachmentType;
 
@@ -138,15 +139,15 @@ public class Attachment implements Serializable {
             return false;
         }
         Attachment other = (Attachment) object;
-        if ((this.attachmentPK == null && other.attachmentPK != null) || (this.attachmentPK != null && !this.attachmentPK.equals(other.attachmentPK))) {
-            return false;
-        }
-        return true;
+        return !((this.attachmentPK == null && other.attachmentPK != null)
+                || (this.attachmentPK != null
+                && !this.attachmentPK.equals(other.attachmentPK)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Attachment[ attachmentPK=" + attachmentPK + " ]";
+        return "com.validation.manager.core.db.Attachment[ attachmentPK="
+                + attachmentPK + " ]";
     }
 
 }

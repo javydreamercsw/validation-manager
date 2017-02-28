@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -27,21 +26,21 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "fmea")
+@Table(name = "FMEA")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Fmea.findAll", 
-            query = "SELECT f FROM Fmea f"),
-    @NamedQuery(name = "Fmea.findById", 
-            query = "SELECT f FROM Fmea f WHERE f.id = :id"),
-    @NamedQuery(name = "Fmea.findByDescription", 
-            query = "SELECT f FROM Fmea f WHERE f.description = :description"),
-    @NamedQuery(name = "Fmea.findByName", 
-            query = "SELECT f FROM Fmea f WHERE f.name = :name")})
-public class Fmea extends Versionable implements Serializable {
+    @NamedQuery(name = "Fmea.findAll",
+            query = "SELECT f FROM Fmea f")
+    , @NamedQuery(name = "Fmea.findById",
+            query = "SELECT f FROM Fmea f WHERE f.id = :id")
+    , @NamedQuery(name = "Fmea.findByName",
+            query = "SELECT f FROM Fmea f WHERE f.name = :name")
+    , @NamedQuery(name = "Fmea.findByDescription",
+            query = "SELECT f FROM Fmea f WHERE f.description = :description")})
+public class Fmea implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -56,25 +55,27 @@ public class Fmea extends Versionable implements Serializable {
             initialValue = 1000)
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "name")
+    private String name;
     @Size(max = 255)
     @Column(name = "description")
     private String description;
-    @Size(max = 255)
-    @Column(name = "name")
-    private String name;
-    @JoinTable(name = "fmea_has_risk_category", joinColumns = {
+    @JoinTable(name = "FMEA_has_risk_category", joinColumns = {
         @JoinColumn(name = "FMEA_id", referencedColumnName = "id")},
             inverseJoinColumns = {
-        @JoinColumn(name = "risk_category_id", referencedColumnName = "id")})
+                @JoinColumn(name = "risk_category_id", referencedColumnName = "id")})
     @ManyToMany
     private List<RiskCategory> riskCategoryList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fmea")
-    private List<RiskItem> riskItemList;
     @OneToMany(mappedBy = "parent")
     private List<Fmea> fmeaList;
     @JoinColumn(name = "parent", referencedColumnName = "id")
     @ManyToOne
     private Fmea parent;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fmea")
+    private List<RiskItem> riskItemList;
 
     public Fmea() {
     }
@@ -91,20 +92,20 @@ public class Fmea extends Versionable implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @XmlTransient
@@ -115,16 +116,6 @@ public class Fmea extends Versionable implements Serializable {
 
     public void setRiskCategoryList(List<RiskCategory> riskCategoryList) {
         this.riskCategoryList = riskCategoryList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskItem> getRiskItemList() {
-        return riskItemList;
-    }
-
-    public void setRiskItemList(List<RiskItem> riskItemList) {
-        this.riskItemList = riskItemList;
     }
 
     @XmlTransient
@@ -145,6 +136,16 @@ public class Fmea extends Versionable implements Serializable {
         this.parent = parent;
     }
 
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskItem> getRiskItemList() {
+        return riskItemList;
+    }
+
+    public void setRiskItemList(List<RiskItem> riskItemList) {
+        this.riskItemList = riskItemList;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -159,12 +160,12 @@ public class Fmea extends Versionable implements Serializable {
             return false;
         }
         Fmea other = (Fmea) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return (this.id != null || other.id == null) && (this.id == null
+                || this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Fmea[ id=" + id + " ]";
     }
-
 }

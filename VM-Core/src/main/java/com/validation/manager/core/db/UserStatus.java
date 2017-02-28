@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,16 +22,20 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "user_status")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "UserStatus.findAll", query = "SELECT u FROM UserStatus u"),
-    @NamedQuery(name = "UserStatus.findById", query = "SELECT u FROM UserStatus u WHERE u.id = :id"),
-    @NamedQuery(name = "UserStatus.findByDescription", query = "SELECT u FROM UserStatus u WHERE u.description = :description"),
-    @NamedQuery(name = "UserStatus.findByStatus", query = "SELECT u FROM UserStatus u WHERE u.status = :status")})
+    @NamedQuery(name = "UserStatus.findAll",
+            query = "SELECT u FROM UserStatus u")
+    , @NamedQuery(name = "UserStatus.findById",
+            query = "SELECT u FROM UserStatus u WHERE u.id = :id")
+    , @NamedQuery(name = "UserStatus.findByStatus",
+            query = "SELECT u FROM UserStatus u WHERE u.status = :status")
+    , @NamedQuery(name = "UserStatus.findByDescription",
+            query = "SELECT u FROM UserStatus u WHERE u.description = :description")})
 public class UserStatus implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -52,13 +52,15 @@ public class UserStatus implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "status")
+    private String status;
     @Size(max = 255)
     @Column(name = "description")
     private String description;
-    @Size(max = 255)
-    @Column(name = "status")
-    private String status;
-    @OneToMany(mappedBy = "userStatusId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userStatusId")
     private List<VmUser> vmUserList;
 
     public UserStatus() {
@@ -76,20 +78,20 @@ public class UserStatus implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @XmlTransient
@@ -116,12 +118,12 @@ public class UserStatus implements Serializable {
             return false;
         }
         UserStatus other = (UserStatus) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserStatus[ id=" + id + " ]";
     }
-
 }

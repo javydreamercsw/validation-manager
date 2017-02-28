@@ -12,6 +12,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementType;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class RequirementTypeJpaController implements Serializable {
         }
     }
 
-    public void edit(RequirementType requirementType) throws NonexistentEntityException, Exception {
+    public void edit(RequirementType requirementType) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -73,6 +74,18 @@ public class RequirementTypeJpaController implements Serializable {
             RequirementType persistentRequirementType = em.find(RequirementType.class, requirementType.getId());
             List<Requirement> requirementListOld = persistentRequirementType.getRequirementList();
             List<Requirement> requirementListNew = requirementType.getRequirementList();
+            List<String> illegalOrphanMessages = null;
+            for (Requirement requirementListOldRequirement : requirementListOld) {
+                if (!requirementListNew.contains(requirementListOldRequirement)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Requirement " + requirementListOldRequirement + " since its requirementTypeId field is not nullable.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
             List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
             for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
                 requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getId());
@@ -81,12 +94,6 @@ public class RequirementTypeJpaController implements Serializable {
             requirementListNew = attachedRequirementListNew;
             requirementType.setRequirementList(requirementListNew);
             requirementType = em.merge(requirementType);
-            for (Requirement requirementListOldRequirement : requirementListOld) {
-                if (!requirementListNew.contains(requirementListOldRequirement)) {
-                    requirementListOldRequirement.setRequirementTypeId(null);
-                    requirementListOldRequirement = em.merge(requirementListOldRequirement);
-                }
-            }
             for (Requirement requirementListNewRequirement : requirementListNew) {
                 if (!requirementListOld.contains(requirementListNewRequirement)) {
                     RequirementType oldRequirementTypeIdOfRequirementListNewRequirement = requirementListNewRequirement.getRequirementTypeId();
@@ -115,7 +122,7 @@ public class RequirementTypeJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -127,10 +134,16 @@ public class RequirementTypeJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The requirementType with id " + id + " no longer exists.", enfe);
             }
-            List<Requirement> requirementList = requirementType.getRequirementList();
-            for (Requirement requirementListRequirement : requirementList) {
-                requirementListRequirement.setRequirementTypeId(null);
-                requirementListRequirement = em.merge(requirementListRequirement);
+            List<String> illegalOrphanMessages = null;
+            List<Requirement> requirementListOrphanCheck = requirementType.getRequirementList();
+            for (Requirement requirementListOrphanCheckRequirement : requirementListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This RequirementType (" + requirementType + ") cannot be destroyed since the Requirement " + requirementListOrphanCheckRequirement + " in its requirementList field has a non-nullable requirementTypeId field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             em.remove(requirementType);
             em.getTransaction().commit();

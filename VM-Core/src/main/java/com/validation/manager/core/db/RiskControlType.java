@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -28,20 +23,24 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "risk_control_type")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RiskControlType.findAll", query = "SELECT r FROM RiskControlType r"),
-    @NamedQuery(name = "RiskControlType.findById", query = "SELECT r FROM RiskControlType r WHERE r.id = :id"),
-    @NamedQuery(name = "RiskControlType.findByName", query = "SELECT r FROM RiskControlType r WHERE r.name = :name")})
+    @NamedQuery(name = "RiskControlType.findAll",
+            query = "SELECT r FROM RiskControlType r")
+    , @NamedQuery(name = "RiskControlType.findById",
+            query = "SELECT r FROM RiskControlType r WHERE r.id = :id")
+    , @NamedQuery(name = "RiskControlType.findByName",
+            query = "SELECT r FROM RiskControlType r WHERE r.name = :name")})
 public class RiskControlType implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "RiskControlTypeGen")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "RiskControlTypeGen")
     @TableGenerator(name = "RiskControlTypeGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -49,16 +48,19 @@ public class RiskControlType implements Serializable {
             allocationSize = 1,
             initialValue = 1000)
     @Basic(optional = false)
-    @NotNull
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "name")
+    private String name;
+    @Basic(optional = false)
+    @NotNull
     @Lob
     @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
-    @Size(max = 255)
-    @Column(name = "name")
-    private String name;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskControlType")
     private List<RiskControl> riskControlList;
 
@@ -78,20 +80,20 @@ public class RiskControlType implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @XmlTransient
@@ -118,7 +120,10 @@ public class RiskControlType implements Serializable {
             return false;
         }
         RiskControlType other = (RiskControlType) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
     }
 
     @Override

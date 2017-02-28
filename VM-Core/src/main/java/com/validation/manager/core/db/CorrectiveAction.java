@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -29,14 +24,16 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "corrective_action")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "CorrectiveAction.findAll", query = "SELECT c FROM CorrectiveAction c"),
-    @NamedQuery(name = "CorrectiveAction.findById", query = "SELECT c FROM CorrectiveAction c WHERE c.id = :id")})
+    @NamedQuery(name = "CorrectiveAction.findAll",
+            query = "SELECT c FROM CorrectiveAction c")
+    , @NamedQuery(name = "CorrectiveAction.findById",
+            query = "SELECT c FROM CorrectiveAction c WHERE c.id = :id")})
 public class CorrectiveAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -52,21 +49,26 @@ public class CorrectiveAction implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
     @Lob
-    @Size(max = 2147483647)
+    @Size(min = 1, max = 65535)
     @Column(name = "details")
     private String details;
-    @JoinTable(name = "exception_has_corrective_action", joinColumns = {
-        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id"),
-        @JoinColumn(name = "exception_reporter_id", referencedColumnName = "reporter_id")})
-    @ManyToMany
-    private List<VmException> vmExceptionList;
     @JoinTable(name = "user_has_corrective_action", joinColumns = {
-        @JoinColumn(name = "corrective_action_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "corrective_action_id",
+                referencedColumnName = "id")}, inverseJoinColumns = {
         @JoinColumn(name = "user_id", referencedColumnName = "id")})
     @ManyToMany
     private List<VmUser> vmUserList;
+    @JoinTable(name = "exception_has_corrective_action", joinColumns = {
+        @JoinColumn(name = "corrective_action_id",
+                referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "exception_id", referencedColumnName = "id")
+        , @JoinColumn(name = "exception_reporter_id",
+                referencedColumnName = "reporter_id")})
+    @ManyToMany
+    private List<VmException> vmExceptionList;
 
     public CorrectiveAction() {
     }
@@ -93,22 +95,22 @@ public class CorrectiveAction implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
     public List<VmUser> getVmUserList() {
         return vmUserList;
     }
 
     public void setVmUserList(List<VmUser> vmUserList) {
         this.vmUserList = vmUserList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<VmException> getVmExceptionList() {
+        return vmExceptionList;
+    }
+
+    public void setVmExceptionList(List<VmException> vmExceptionList) {
+        this.vmExceptionList = vmExceptionList;
     }
 
     @Override
@@ -125,12 +127,12 @@ public class CorrectiveAction implements Serializable {
             return false;
         }
         CorrectiveAction other = (CorrectiveAction) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.CorrectiveAction[ id=" + id + " ]";
     }
-
 }

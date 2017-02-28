@@ -1,12 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -17,48 +13,68 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "user_modified_record")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "UserModifiedRecord.findAll", query = "SELECT u FROM UserModifiedRecord u"),
-    @NamedQuery(name = "UserModifiedRecord.findByModifiedDate", query = "SELECT u FROM UserModifiedRecord u WHERE u.modifiedDate = :modifiedDate"),
-    @NamedQuery(name = "UserModifiedRecord.findByReason", query = "SELECT u FROM UserModifiedRecord u WHERE u.reason = :reason"),
-    @NamedQuery(name = "UserModifiedRecord.findByRecordId", query = "SELECT u FROM UserModifiedRecord u WHERE u.userModifiedRecordPK.recordId = :recordId"),
-    @NamedQuery(name = "UserModifiedRecord.findByUserId", query = "SELECT u FROM UserModifiedRecord u WHERE u.userModifiedRecordPK.userId = :userId")})
+    @NamedQuery(name = "UserModifiedRecord.findAll",
+            query = "SELECT u FROM UserModifiedRecord u")
+    , @NamedQuery(name = "UserModifiedRecord.findByUserId",
+            query = "SELECT u FROM UserModifiedRecord u WHERE "
+            + "u.userModifiedRecordPK.userId = :userId")
+    , @NamedQuery(name = "UserModifiedRecord.findByRecordId",
+            query = "SELECT u FROM UserModifiedRecord u WHERE "
+            + "u.userModifiedRecordPK.recordId = :recordId")
+    , @NamedQuery(name = "UserModifiedRecord.findByModifiedDate",
+            query = "SELECT u FROM UserModifiedRecord u WHERE "
+            + "u.modifiedDate = :modifiedDate")
+    , @NamedQuery(name = "UserModifiedRecord.findByReason",
+            query = "SELECT u FROM UserModifiedRecord u WHERE "
+            + "u.reason = :reason")})
 public class UserModifiedRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected UserModifiedRecordPK userModifiedRecordPK;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "modified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;
-    @Size(max = 255)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "reason")
     private String reason;
-    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
 
     public UserModifiedRecord() {
     }
 
-    public UserModifiedRecord(int user_id) {
-        this.userModifiedRecordPK = new UserModifiedRecordPK(user_id);
+    public UserModifiedRecord(UserModifiedRecordPK userModifiedRecordPK) {
+        this.userModifiedRecordPK = userModifiedRecordPK;
     }
 
-    public UserModifiedRecord(int user_id, Date modifiedDate, String reason) {
-        this.userModifiedRecordPK = new UserModifiedRecordPK(user_id);
+    public UserModifiedRecord(UserModifiedRecordPK userModifiedRecordPK,
+            Date modifiedDate, String reason) {
+        this.userModifiedRecordPK = userModifiedRecordPK;
         this.modifiedDate = modifiedDate;
         this.reason = reason;
+    }
+
+    public UserModifiedRecord(int userId, int recordId) {
+        this.userModifiedRecordPK = new UserModifiedRecordPK(userId, recordId);
     }
 
     public UserModifiedRecordPK getUserModifiedRecordPK() {
@@ -96,7 +112,8 @@ public class UserModifiedRecord implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (userModifiedRecordPK != null ? userModifiedRecordPK.hashCode() : 0);
+        hash += (userModifiedRecordPK != null
+                ? userModifiedRecordPK.hashCode() : 0);
         return hash;
     }
 
@@ -107,15 +124,15 @@ public class UserModifiedRecord implements Serializable {
             return false;
         }
         UserModifiedRecord other = (UserModifiedRecord) object;
-        if ((this.userModifiedRecordPK == null && other.userModifiedRecordPK != null) || (this.userModifiedRecordPK != null && !this.userModifiedRecordPK.equals(other.userModifiedRecordPK))) {
-            return false;
-        }
-        return true;
+        return !((this.userModifiedRecordPK == null
+                && other.userModifiedRecordPK != null)
+                || (this.userModifiedRecordPK != null
+                && !this.userModifiedRecordPK.equals(other.userModifiedRecordPK)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.UserModifiedRecord[ userModifiedRecordPK=" + userModifiedRecordPK + " ]";
+        return "com.validation.manager.core.db.UserModifiedRecord[ "
+                + "userModifiedRecordPK=" + userModifiedRecordPK + " ]";
     }
-
 }

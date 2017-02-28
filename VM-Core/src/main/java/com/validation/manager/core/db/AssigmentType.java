@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -28,21 +23,25 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "assigment_type")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "AssigmentType.findAll", query = "SELECT a FROM AssigmentType a"),
-    @NamedQuery(name = "AssigmentType.findById", query = "SELECT a FROM AssigmentType a WHERE a.id = :id"),
-    @NamedQuery(name = "AssigmentType.findByFkTable", query = "SELECT a FROM AssigmentType a WHERE a.fkTable = :fkTable")})
+    @NamedQuery(name = "AssigmentType.findAll",
+            query = "SELECT a FROM AssigmentType a")
+    , @NamedQuery(name = "AssigmentType.findById",
+            query = "SELECT a FROM AssigmentType a WHERE a.id = :id")
+    , @NamedQuery(name = "AssigmentType.findByFkTable",
+            query = "SELECT a FROM AssigmentType a WHERE a.fkTable = :fkTable")})
 public class AssigmentType implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "Assignment_Type_IDGEN")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "Assignment_Type_IDGEN")
     @TableGenerator(name = "Assignment_Type_IDGEN", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -52,13 +51,15 @@ public class AssigmentType implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "fk_table")
+    private String fkTable;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
-    @Size(max = 255)
-    @Column(name = "fk_table")
-    private String fkTable;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assigmentType")
     private List<UserAssigment> userAssigmentList;
 
@@ -77,20 +78,20 @@ public class AssigmentType implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getFkTable() {
         return fkTable;
     }
 
     public void setFkTable(String fkTable) {
         this.fkTable = fkTable;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @XmlTransient
@@ -117,7 +118,8 @@ public class AssigmentType implements Serializable {
             return false;
         }
         AssigmentType other = (AssigmentType) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return (this.id != null || other.id == null)
+                && (this.id == null || this.id.equals(other.id));
     }
 
     @Override

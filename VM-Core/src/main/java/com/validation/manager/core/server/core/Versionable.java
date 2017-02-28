@@ -4,6 +4,9 @@ import com.validation.manager.core.VMAuditedObject;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -13,6 +16,8 @@ import javax.validation.constraints.NotNull;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @MappedSuperclass
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "VERSIONABLE_TYPE")
 public class Versionable extends VMAuditedObject implements Serializable,
         Comparable<Versionable> {
 
@@ -32,14 +37,6 @@ public class Versionable extends VMAuditedObject implements Serializable,
     @Min(1)
     @Column(name = "minor_version")
     private int minorVersion;
-//    @Basic(optional = false)
-//    @Column(name = "last_modified", insertable = false, updatable = false,
-//            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-//    @Temporal(TemporalType.TIMESTAMP)
-//    private Date lastModified;
-//    @Basic(optional = false)
-//    @Column(name = "updated_by")
-//    private int updatedBy;
 
     public Versionable() {
     }
@@ -118,32 +115,11 @@ public class Versionable extends VMAuditedObject implements Serializable,
         //Everything the same
         return 0;
     }
-//
-//    /**
-//     * @return the lastModified
-//     */
-//    public Date getLastModified() {
-//        return lastModified;
-//}
-//
-//    /**
-//     * @param lastModified the lastModified to set
-//     */
-//    public void setLastModified(Date lastModified) {
-//        this.lastModified = lastModified;
-//    }
-//
-//    /**
-//     * @return the updatedBy
-//     */
-//    public int getUpdatedBy() {
-//        return updatedBy;
-//    }
-//
-//    /**
-//     * @param updatedBy the updatedBy to set
-//     */
-//    public void setUpdatedBy(int updatedBy) {
-//        this.updatedBy = updatedBy;
-//    }
+
+    public void update(Versionable target, Versionable source) {
+        target.setMajorVersion(source.getMajorVersion());
+        target.setMidVersion(source.getMidVersion());
+        target.setMinorVersion(source.getMinorVersion());
+        super.update(target, source);
+    }
 }
