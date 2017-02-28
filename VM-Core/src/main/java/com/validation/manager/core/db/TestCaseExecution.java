@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -21,14 +16,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_case_execution")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "TestCaseExecution.findAll", query = "SELECT t FROM TestCaseExecution t"),
-    @NamedQuery(name = "TestCaseExecution.findById", query = "SELECT t FROM TestCaseExecution t WHERE t.id = :id")})
+    @NamedQuery(name = "TestCaseExecution.findAll",
+            query = "SELECT t FROM TestCaseExecution t")
+    , @NamedQuery(name = "TestCaseExecution.findById",
+            query = "SELECT t FROM TestCaseExecution t WHERE t.id = :id")})
 public class TestCaseExecution implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -70,12 +67,12 @@ public class TestCaseExecution implements Serializable {
             return false;
         }
         TestCaseExecution other = (TestCaseExecution) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCaseExecution[ id=" + id + " ]";
     }
-
 }

@@ -11,13 +11,11 @@ import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import static com.validation.manager.test.TestHelper.addRequirementToStep;
 import static com.validation.manager.test.TestHelper.addStep;
-import static com.validation.manager.test.TestHelper.addTestCaseToTest;
-import static com.validation.manager.test.TestHelper.addTestToPlan;
+import static com.validation.manager.test.TestHelper.addTestCaseToPlan;
 import static com.validation.manager.test.TestHelper.createProject;
 import static com.validation.manager.test.TestHelper.createRequirement;
 import static com.validation.manager.test.TestHelper.createRequirementSpec;
 import static com.validation.manager.test.TestHelper.createRequirementSpecNode;
-import static com.validation.manager.test.TestHelper.createTest;
 import static com.validation.manager.test.TestHelper.createTestCase;
 import static com.validation.manager.test.TestHelper.createTestPlan;
 import static com.validation.manager.test.TestHelper.createTestProject;
@@ -85,15 +83,11 @@ public class ProjectTest extends AbstractVMTestCase {
                 fail();
             }
             Requirement r = createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(), 
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
-            //Create Test
-            com.validation.manager.core.db.Test test
-                    = createTest("Test #1", "Testing",
-                            "Test #1 scope");
             //Create Test Case
-            TestCase tc = createTestCase("Dummy", new Short("1"),
-                    "Expected Results", test, /*user,*/ "Summary");
+            TestCase tc = createTestCase("Dummy", "Expected Results",
+                    "Summary");
             //Add steps
             for (int i = 1; i < 6; i++) {
                 LOG.info(MessageFormat.format("Adding step: {0}", i));
@@ -107,10 +101,8 @@ public class ProjectTest extends AbstractVMTestCase {
             TestProject tp = createTestProject("Test Project");
             //Create test plan
             TestPlan plan = createTestPlan(tp, "Notes", true, true);
-            //Add test case to test
-            addTestCaseToTest(test, tc);
             //Add test to plan
-            addTestToPlan(plan, test);
+            addTestCaseToPlan(plan, tc);
             assertEquals(1, getRequirements(project.getEntity()).size());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);

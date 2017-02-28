@@ -9,19 +9,14 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecNodePK;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.Step;
-import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestPlanHasTest;
-import com.validation.manager.core.db.TestPlanHasTestPK;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
-import com.validation.manager.core.db.controller.TestJpaController;
-import com.validation.manager.core.db.controller.TestPlanHasTestJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
@@ -40,9 +35,9 @@ import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
-import com.validation.manager.core.server.core.TestServer;
 import com.validation.manager.core.server.core.UserTestPlanRoleServer;
 import com.validation.manager.core.server.core.VMUserServer;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
@@ -122,24 +117,12 @@ public class TestHelper {
                 getEntityManagerFactory()).findProject(p.getId()) == null);
     }
 
-    public static Test createTest(String name, String purpose,
-            String scope) throws PreexistingEntityException, Exception {
-        TestServer t = new TestServer(name, purpose, scope);
-        t.setNotes("Notes");
-        t.write2DB();
-        assertTrue(new TestJpaController(
-                getEntityManagerFactory()).findTest(t.getId()) != null);
-        return new TestJpaController(
-                getEntityManagerFactory()).findTest(t.getId());
-    }
-
-    public static TestCase createTestCase(String name, short version,
-            String expectedResults, Test test, /*VmUser user,*/ String summary)
+    public static TestCase createTestCase(String name,
+            String expectedResults, String summary)
             throws PreexistingEntityException, Exception {
         TestCaseServer tc = new TestCaseServer(name, new Date());
         tc.setExpectedResults(expectedResults.getBytes("UTF-8"));
-        tc.setTest(test);
-//        tc.setVmUserId(user);
+        tc.setRiskControlHasTestCaseList(new ArrayList<>());
         tc.setActive(true);
         tc.setExpectedResults(expectedResults.getBytes("UTF-8"));
         tc.setIsOpen(true);
@@ -147,7 +130,7 @@ public class TestHelper {
         TestCaseJpaController controller = new TestCaseJpaController(
                 getEntityManagerFactory());
         tc.write2DB();
-        return controller.findTestCase(tc.getTestCasePK());
+        return controller.findTestCase(tc.getId());
     }
 
     public static Requirement createRequirement(String id, String desc,
@@ -175,16 +158,17 @@ public class TestHelper {
     }
 
     public static TestCase addStep(TestCase tc, int sequence,
-            String text, String note) throws PreexistingEntityException, Exception {
+            String text, String note) throws PreexistingEntityException,
+            Exception {
         StepServer s = new StepServer(tc, sequence, text);
         int amount = tc.getStepList().size();
         s.setNotes(note);
         s.write2DB();
-        TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
+        TestCaseServer tcs = new TestCaseServer(tc.getId());
         assertEquals(amount + 1, tcs.getStepList().size());
         return new TestCaseJpaController(
                 getEntityManagerFactory())
-                .findTestCase(tc.getTestCasePK());
+                .findTestCase(tc.getId());
     }
 
     public static TestProject createTestProject(String name)
@@ -207,31 +191,13 @@ public class TestHelper {
                 .findTestPlan(plan.getTestPlanPK());
     }
 
-    public static void addTestCaseToTest(Test test, TestCase tc)
-            throws IllegalOrphanException, NonexistentEntityException, Exception {
-        TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
-        tcs.setTest(test);
-        tcs.write2DB();
-        TestServer t = new TestServer(test.getId());
-        t.getTestCaseList().add(tc);
-        t.write2DB();
-    }
-
-    public static void addTestToPlan(TestPlan plan, Test test)
+    public static void addTestCaseToPlan(TestPlan plan, TestCase testCase)
             throws PreexistingEntityException, Exception {
-        int testInPlan = plan.getTestPlanHasTestList().size();
+        int testInPlan = plan.getTestCaseList().size();
         TestPlanServer tps = new TestPlanServer(plan);
-        TestPlanHasTest tpht = new TestPlanHasTest(
-                new TestPlanHasTestPK(plan.getTestPlanPK().getId(),
-                        plan.getTestPlanPK().getTestProjectId(), test.getId()),
-                new Date(), 1);
-        tpht.setTest(test);
-        tpht.setTestPlan(plan);
-        new TestPlanHasTestJpaController(
-                getEntityManagerFactory()).create(tpht);
-        tps.getTestPlanHasTestList().add(tpht);
+        tps.getTestCaseList().add(testCase);
         tps.write2DB();
-        assertTrue(tps.getTestPlanHasTestList().size() > testInPlan);
+        assertTrue(tps.getTestCaseList().size() > testInPlan);
     }
 
     public static RequirementSpec createRequirementSpec(String name,

@@ -10,10 +10,10 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.Investigation;
 import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.UserHasInvestigationPK;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.List;
@@ -45,24 +45,24 @@ public class UserHasInvestigationJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            VmUser vmUser = userHasInvestigation.getVmUser();
-            if (vmUser != null) {
-                vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
-                userHasInvestigation.setVmUser(vmUser);
-            }
             Investigation investigation = userHasInvestigation.getInvestigation();
             if (investigation != null) {
                 investigation = em.getReference(investigation.getClass(), investigation.getId());
                 userHasInvestigation.setInvestigation(investigation);
             }
-            em.persist(userHasInvestigation);
+            VmUser vmUser = userHasInvestigation.getVmUser();
             if (vmUser != null) {
-                vmUser.getUserHasInvestigationList().add(userHasInvestigation);
-                vmUser = em.merge(vmUser);
+                vmUser = em.getReference(vmUser.getClass(), vmUser.getId());
+                userHasInvestigation.setVmUser(vmUser);
             }
+            em.persist(userHasInvestigation);
             if (investigation != null) {
                 investigation.getUserHasInvestigationList().add(userHasInvestigation);
                 investigation = em.merge(investigation);
+            }
+            if (vmUser != null) {
+                vmUser.getUserHasInvestigationList().add(userHasInvestigation);
+                vmUser = em.merge(vmUser);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -85,27 +85,19 @@ public class UserHasInvestigationJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             UserHasInvestigation persistentUserHasInvestigation = em.find(UserHasInvestigation.class, userHasInvestigation.getUserHasInvestigationPK());
-            VmUser vmUserOld = persistentUserHasInvestigation.getVmUser();
-            VmUser vmUserNew = userHasInvestigation.getVmUser();
             Investigation investigationOld = persistentUserHasInvestigation.getInvestigation();
             Investigation investigationNew = userHasInvestigation.getInvestigation();
-            if (vmUserNew != null) {
-                vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
-                userHasInvestigation.setVmUser(vmUserNew);
-            }
+            VmUser vmUserOld = persistentUserHasInvestigation.getVmUser();
+            VmUser vmUserNew = userHasInvestigation.getVmUser();
             if (investigationNew != null) {
                 investigationNew = em.getReference(investigationNew.getClass(), investigationNew.getId());
                 userHasInvestigation.setInvestigation(investigationNew);
             }
+            if (vmUserNew != null) {
+                vmUserNew = em.getReference(vmUserNew.getClass(), vmUserNew.getId());
+                userHasInvestigation.setVmUser(vmUserNew);
+            }
             userHasInvestigation = em.merge(userHasInvestigation);
-            if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
-                vmUserOld.getUserHasInvestigationList().remove(userHasInvestigation);
-                vmUserOld = em.merge(vmUserOld);
-            }
-            if (vmUserNew != null && !vmUserNew.equals(vmUserOld)) {
-                vmUserNew.getUserHasInvestigationList().add(userHasInvestigation);
-                vmUserNew = em.merge(vmUserNew);
-            }
             if (investigationOld != null && !investigationOld.equals(investigationNew)) {
                 investigationOld.getUserHasInvestigationList().remove(userHasInvestigation);
                 investigationOld = em.merge(investigationOld);
@@ -113,6 +105,14 @@ public class UserHasInvestigationJpaController implements Serializable {
             if (investigationNew != null && !investigationNew.equals(investigationOld)) {
                 investigationNew.getUserHasInvestigationList().add(userHasInvestigation);
                 investigationNew = em.merge(investigationNew);
+            }
+            if (vmUserOld != null && !vmUserOld.equals(vmUserNew)) {
+                vmUserOld.getUserHasInvestigationList().remove(userHasInvestigation);
+                vmUserOld = em.merge(vmUserOld);
+            }
+            if (vmUserNew != null && !vmUserNew.equals(vmUserOld)) {
+                vmUserNew.getUserHasInvestigationList().add(userHasInvestigation);
+                vmUserNew = em.merge(vmUserNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -143,15 +143,15 @@ public class UserHasInvestigationJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userHasInvestigation with id " + id + " no longer exists.", enfe);
             }
-            VmUser vmUser = userHasInvestigation.getVmUser();
-            if (vmUser != null) {
-                vmUser.getUserHasInvestigationList().remove(userHasInvestigation);
-                vmUser = em.merge(vmUser);
-            }
             Investigation investigation = userHasInvestigation.getInvestigation();
             if (investigation != null) {
                 investigation.getUserHasInvestigationList().remove(userHasInvestigation);
                 investigation = em.merge(investigation);
+            }
+            VmUser vmUser = userHasInvestigation.getVmUser();
+            if (vmUser != null) {
+                vmUser.getUserHasInvestigationList().remove(userHasInvestigation);
+                vmUser = em.merge(vmUser);
             }
             em.remove(userHasInvestigation);
             em.getTransaction().commit();

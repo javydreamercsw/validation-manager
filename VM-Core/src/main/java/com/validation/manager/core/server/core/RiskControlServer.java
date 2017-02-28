@@ -6,6 +6,7 @@ import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.RiskControlPK;
 import com.validation.manager.core.db.controller.RiskControlJpaController;
 import com.validation.manager.core.db.controller.RiskControlTypeJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
@@ -20,24 +21,26 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
         super(riskControlPK);
         setRiskControlType(new RiskControlTypeJpaController(
                 getEntityManagerFactory()).findRiskControlType(
-                        riskControlPK.getRiskControlTypeId()));
+                riskControlPK.getRiskControlTypeId()));
     }
 
     public RiskControlServer(RiskControl riskControl) {
         super(riskControl.getRiskControlPK());
         setRiskControlType(new RiskControlTypeJpaController(
                 getEntityManagerFactory()).findRiskControlType(
-                        riskControlPK.getRiskControlTypeId()));
+                riskControlPK.getRiskControlTypeId()));
     }
 
     public RiskControlServer(int riskControlTypeId) {
         super(new RiskControlPK(riskControlTypeId));
-        setRiskControlType(new RiskControlTypeJpaController(getEntityManagerFactory()).findRiskControlType(riskControlTypeId));
+        setRiskControlType(new RiskControlTypeJpaController(
+                getEntityManagerFactory()).findRiskControlType(riskControlTypeId));
     }
 
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
-        RiskControlJpaController controller = new RiskControlJpaController(getEntityManagerFactory());
+        RiskControlJpaController controller
+                = new RiskControlJpaController(getEntityManagerFactory());
         if (getRiskControlPK().getId() > 0) {
             RiskControl target = controller.findRiskControl(getRiskControlPK());
             update(target, this);
@@ -57,7 +60,7 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
                     getEntityManagerFactory())
                     .destroy(rc.getRiskControlPK());
             return true;
-        } catch (NonexistentEntityException ex) {
+        } catch (NonexistentEntityException | IllegalOrphanException ex) {
             getLogger(RiskControlServer.class.getName()).log(
                     Level.SEVERE, null, ex);
         }
@@ -73,10 +76,12 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
 
     @Override
     public void update(RiskControl target, RiskControl source) {
+        target.setRiskControlHasRequirementList(source
+                .getRiskControlHasRequirementList());
+        target.setRiskControlHasTestCaseList(source
+                .getRiskControlHasTestCaseList());
         target.setRiskItemList(source.getRiskItemList());
         target.setRiskItemList1(source.getRiskItemList1());
-        target.setTestCaseList(source.getTestCaseList());
-        target.setRequirementList(source.getRequirementList());
         target.setRiskControlType(source.getRiskControlType());
     }
 

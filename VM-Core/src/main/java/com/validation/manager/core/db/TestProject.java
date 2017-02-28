@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -25,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_project")
@@ -33,14 +32,15 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "TestProject.findAll",
             query = "SELECT t FROM TestProject t")
-    ,@NamedQuery(name = "TestProject.findById",
+    , @NamedQuery(name = "TestProject.findById",
             query = "SELECT t FROM TestProject t WHERE t.id = :id")
-    ,@NamedQuery(name = "TestProject.findByActive",
-            query = "SELECT t FROM TestProject t WHERE t.active = :active")
-    ,@NamedQuery(name = "TestProject.findByName",
-            query = "SELECT t FROM TestProject t WHERE t.name = :name")})
-public class TestProject extends Versionable implements Serializable {
+    , @NamedQuery(name = "TestProject.findByName",
+            query = "SELECT t FROM TestProject t WHERE t.name = :name")
+    , @NamedQuery(name = "TestProject.findByActive",
+            query = "SELECT t FROM TestProject t WHERE t.active = :active")})
+public class TestProject implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "TestProjectGen")
     @TableGenerator(name = "TestProjectGen", table = "vm_id",
@@ -55,11 +55,13 @@ public class TestProject extends Versionable implements Serializable {
     private Integer id;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "active")
-    private boolean active;
-    @Size(max = 255)
+    @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "active")
+    private boolean active;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "notes")
@@ -79,12 +81,28 @@ public class TestProject extends Versionable implements Serializable {
         this.active = active;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean getActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public String getNotes() {
@@ -103,14 +121,6 @@ public class TestProject extends Versionable implements Serializable {
 
     public void setProjectList(List<Project> projectList) {
         this.projectList = projectList;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     @XmlTransient
@@ -136,7 +146,7 @@ public class TestProject extends Versionable implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (getId() != null ? getId().hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
@@ -147,20 +157,12 @@ public class TestProject extends Versionable implements Serializable {
             return false;
         }
         TestProject other = (TestProject) object;
-        return (this.getId() != null || other.getId() == null)
-                && (this.getId() == null || this.getId().equals(other.getId()));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.TestProject[ id=" + getId() + " ]";
-    }
-
-    public boolean getActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
+        return "com.validation.manager.core.db.TestProject[ id=" + id + " ]";
     }
 }

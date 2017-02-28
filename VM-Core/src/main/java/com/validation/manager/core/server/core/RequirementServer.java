@@ -85,10 +85,9 @@ public final class RequirementServer extends Requirement
     }
 
     private void copyRelationships(Requirement target, Requirement source) {
-        if (source.getRequirementHasExceptionList() != null) {
-            target.getRequirementHasExceptionList().clear();
-            target.getRequirementHasExceptionList()
-                    .addAll(source.getRequirementHasExceptionList());
+        if (source.getVmExceptionList() != null) {
+            target.getVmExceptionList().clear();
+            target.getVmExceptionList().addAll(source.getVmExceptionList());
         }
         if (source.getRequirementList() != null) {
             target.getRequirementList().clear();
@@ -98,9 +97,10 @@ public final class RequirementServer extends Requirement
             target.getRequirementList1().clear();
             target.getRequirementList1().addAll(source.getRequirementList1());
         }
-        if (source.getRiskControlList() != null) {
-            target.getRiskControlList().clear();
-            target.getRiskControlList().addAll(source.getRiskControlList());
+        if (source.getRiskControlHasRequirementList() != null) {
+            target.getRiskControlHasRequirementList().clear();
+            target.getRiskControlHasRequirementList()
+                    .addAll(source.getRiskControlHasRequirementList());
         }
         if (source.getStepList() != null) {
             target.getStepList().clear();
@@ -121,7 +121,7 @@ public final class RequirementServer extends Requirement
     public int write2DB() throws Exception {
         //Make sure unique id is trimmed
         setUniqueId(getUniqueId().trim());
-        if (getId() > 0) {
+        if (getId() != null && getId() > 0) {
             //Check what has changed, if is only relationshipd, don't version
             //Get the one from DB
             if (DataBaseManager.isVersioningEnabled() && isChangeVersionable()) {
@@ -174,7 +174,9 @@ public final class RequirementServer extends Requirement
         target.setRequirementList1(source.getRequirementList1());
         target.setRequirementStatusId(source.getRequirementStatusId());
         target.setRequirementTypeId(source.getRequirementTypeId());
-        target.setRiskControlList(source.getRiskControlList());
+        target.setVmExceptionList(source.getVmExceptionList());
+        target.setRiskControlHasRequirementList(source
+                .getRiskControlHasRequirementList());
         target.setStepList(source.getStepList());
         target.setUniqueId(source.getUniqueId());
         target.setId(source.getId());

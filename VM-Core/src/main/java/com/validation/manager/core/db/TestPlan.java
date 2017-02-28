@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.VMAuditedObject;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -11,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -24,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_plan")
@@ -32,19 +32,30 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "TestPlan.findAll",
             query = "SELECT t FROM TestPlan t")
-    ,@NamedQuery(name = "TestPlan.findByActive",
-            query = "SELECT t FROM TestPlan t WHERE t.active = :active")
-    ,@NamedQuery(name = "TestPlan.findByIsOpen",
-            query = "SELECT t FROM TestPlan t WHERE t.isOpen = :isOpen")
-    ,@NamedQuery(name = "TestPlan.findById",
+    , @NamedQuery(name = "TestPlan.findById",
             query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.id = :id")
-    ,@NamedQuery(name = "TestPlan.findByTestProjectId",
-            query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.testProjectId = :testProjectId")})
-public class TestPlan extends VMAuditedObject implements Serializable {
+    , @NamedQuery(name = "TestPlan.findByTestProjectId",
+            query = "SELECT t FROM TestPlan t WHERE t.testPlanPK.testProjectId = :testProjectId")
+    , @NamedQuery(name = "TestPlan.findByName",
+            query = "SELECT t FROM TestPlan t WHERE t.name = :name")
+    , @NamedQuery(name = "TestPlan.findByActive",
+            query = "SELECT t FROM TestPlan t WHERE t.active = :active")
+    , @NamedQuery(name = "TestPlan.findByIsOpen",
+            query = "SELECT t FROM TestPlan t WHERE t.isOpen = :isOpen")})
+public class TestPlan implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected TestPlanPK testPlanPK;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "name")
+    private String name;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "notes")
+    private String notes;
     @Basic(optional = false)
     @NotNull
     @Column(name = "active")
@@ -53,28 +64,21 @@ public class TestPlan extends VMAuditedObject implements Serializable {
     @NotNull
     @Column(name = "is_open")
     private boolean isOpen;
-    @Lob
-    @Size(max = 2147483647)
-    @Column(name = "notes")
-    private String notes;
+    @ManyToMany(mappedBy = "testPlanList")
+    private List<TestCase> testCaseList;
+    @OneToMany(mappedBy = "testPlan")
+    private List<TestPlan> testPlanList;
+    @JoinColumns({
+        @JoinColumn(name = "regression_test_plan_id",
+                referencedColumnName = "id")
+        , @JoinColumn(name = "regression_test_plan_test_project_id",
+                referencedColumnName = "test_project_id")})
+    @ManyToOne
+    private TestPlan testPlan;
     @JoinColumn(name = "test_project_id", referencedColumnName = "id",
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private TestProject testProject;
-    @Size(max = 255)
-    @Column(name = "name")
-    private String name;
-    @OneToMany(mappedBy = "testPlan")
-    private List<TestPlan> testPlanList;
-    @JoinColumns({
-        @JoinColumn(name = "regression_test_plan_id", referencedColumnName = "id")
-        ,
-        @JoinColumn(name = "regression_test_plan_test_project_id",
-                referencedColumnName = "test_project_id")})
-    @ManyToOne
-    private TestPlan testPlan;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "testPlan")
-    private List<TestPlanHasTest> testPlanHasTestList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testPlan")
     private List<UserTestPlanRole> userTestPlanRoleList;
 
@@ -100,12 +104,12 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         this.testPlanPK = testPlanPK;
     }
 
-    public Boolean getIsOpen() {
-        return isOpen;
+    public String getName() {
+        return name;
     }
 
-    public void setIsOpen(Boolean isOpen) {
-        this.isOpen = isOpen;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getNotes() {
@@ -116,12 +120,30 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         this.notes = notes;
     }
 
-    public TestProject getTestProject() {
-        return testProject;
+    public boolean getActive() {
+        return active;
     }
 
-    public void setTestProject(TestProject testProject) {
-        this.testProject = testProject;
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean getIsOpen() {
+        return isOpen;
+    }
+
+    public void setIsOpen(boolean isOpen) {
+        this.isOpen = isOpen;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<TestCase> getTestCaseList() {
+        return testCaseList;
+    }
+
+    public void setTestCaseList(List<TestCase> testCaseList) {
+        this.testCaseList = testCaseList;
     }
 
     @XmlTransient
@@ -142,14 +164,12 @@ public class TestPlan extends VMAuditedObject implements Serializable {
         this.testPlan = testPlan;
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<TestPlanHasTest> getTestPlanHasTestList() {
-        return testPlanHasTestList;
+    public TestProject getTestProject() {
+        return testProject;
     }
 
-    public void setTestPlanHasTestList(List<TestPlanHasTest> testPlanHasTestList) {
-        this.testPlanHasTestList = testPlanHasTestList;
+    public void setTestProject(TestProject testProject) {
+        this.testProject = testProject;
     }
 
     @XmlTransient
@@ -176,40 +196,14 @@ public class TestPlan extends VMAuditedObject implements Serializable {
             return false;
         }
         TestPlan other = (TestPlan) object;
-        return (this.testPlanPK != null || other.testPlanPK == null)
-                && (this.testPlanPK == null
-                || this.testPlanPK.equals(other.testPlanPK));
+        return !((this.testPlanPK == null && other.testPlanPK != null)
+                || (this.testPlanPK != null
+                && !this.testPlanPK.equals(other.testPlanPK)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestPlan[ testPlanPK="
                 + testPlanPK + " ]";
-    }
-
-    public boolean getActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public void setIsOpen(boolean isOpen) {
-        this.isOpen = isOpen;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 }

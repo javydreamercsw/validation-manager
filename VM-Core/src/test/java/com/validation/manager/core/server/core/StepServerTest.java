@@ -35,12 +35,9 @@ public class StepServerTest extends AbstractVMTestCase {
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
             Requirement req2 = TestHelper.createRequirement("REQ-002", "Desc",
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
-            //Add a test case
-            com.validation.manager.core.db.Test test
-                    = TestHelper.createTest("Test", "Purpose", "Scope");
             //Create Test Case
-            TestCase tc = TestHelper.createTestCase("Dummy", new Short("1"),
-                    "Expected Results", test, /*user,*/ "Summary");
+            TestCase tc = TestHelper.createTestCase("Dummy",
+                    "Expected Results", "Summary");
             tc = TestHelper.addStep(tc, 1, "Step " + 1, "Note " + 1);
             Step step = tc.getStepList().get(0);
             TestHelper.addRequirementToStep(step, req);

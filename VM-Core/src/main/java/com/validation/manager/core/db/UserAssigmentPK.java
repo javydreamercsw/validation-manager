@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -16,13 +11,14 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class UserAssigmentPK implements Serializable {
 
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "UserAssignmentGEN")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "UserAssignmentGEN")
     @TableGenerator(name = "UserAssignmentGEN",
             table = "vm_id",
             pkColumnName = "table_name",
@@ -39,17 +35,18 @@ public class UserAssigmentPK implements Serializable {
     private int assignerId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "assignment_status_id")
-    private int assignmentStatusId;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "assigment_type_id")
     private int assigmentTypeId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "assignment_status_id")
+    private int assignmentStatusId;
 
     public UserAssigmentPK() {
     }
 
-    public UserAssigmentPK(int assignerId, int assigmentTypeId, int assignmentStatusId) {
+    public UserAssigmentPK(int assignerId, int assigmentTypeId,
+            int assignmentStatusId) {
         this.assignerId = assignerId;
         this.assigmentTypeId = assigmentTypeId;
         this.assignmentStatusId = assignmentStatusId;
@@ -71,14 +68,6 @@ public class UserAssigmentPK implements Serializable {
         this.assignerId = assignerId;
     }
 
-    public int getAssignmentStatusId() {
-        return assignmentStatusId;
-    }
-
-    public void setAssignmentStatusId(int assignmentStatusId) {
-        this.assignmentStatusId = assignmentStatusId;
-    }
-
     public int getAssigmentTypeId() {
         return assigmentTypeId;
     }
@@ -87,13 +76,21 @@ public class UserAssigmentPK implements Serializable {
         this.assigmentTypeId = assigmentTypeId;
     }
 
+    public int getAssignmentStatusId() {
+        return assignmentStatusId;
+    }
+
+    public void setAssignmentStatusId(int assignmentStatusId) {
+        this.assignmentStatusId = assignmentStatusId;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
         hash += (int) id;
         hash += (int) assignerId;
-        hash += (int) assignmentStatusId;
         hash += (int) assigmentTypeId;
+        hash += (int) assignmentStatusId;
         return hash;
     }
 
@@ -110,15 +107,17 @@ public class UserAssigmentPK implements Serializable {
         if (this.assignerId != other.assignerId) {
             return false;
         }
-        if (this.assignmentStatusId != other.assignmentStatusId) {
+        if (this.assigmentTypeId != other.assigmentTypeId) {
             return false;
         }
-        return this.assigmentTypeId == other.assigmentTypeId;
+        return this.assignmentStatusId == other.assignmentStatusId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.UserAssigmentPK[ id=" + id + ", assignerId=" + assignerId + ", assignmentStatusId=" + assignmentStatusId + ", assigmentTypeId=" + assigmentTypeId + " ]";
+        return "com.validation.manager.core.db.UserAssigmentPK[ id=" + id
+                + ", assignerId=" + assignerId + ", assigmentTypeId="
+                + assigmentTypeId + ", assignmentStatusId="
+                + assignmentStatusId + " ]";
     }
-
 }

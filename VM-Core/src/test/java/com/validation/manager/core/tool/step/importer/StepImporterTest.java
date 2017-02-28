@@ -8,24 +8,22 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.Step;
+import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.tool.requirement.importer.*;
 import static com.validation.manager.core.tool.requirement.importer.RequirementImporter.exportTemplate;
 import com.validation.manager.test.AbstractVMTestCase;
-import static com.validation.manager.test.TestHelper.addTestCaseToTest;
+import static com.validation.manager.test.TestHelper.addTestCaseToPlan;
 import static com.validation.manager.test.TestHelper.addTestProjectToProject;
-import static com.validation.manager.test.TestHelper.addTestToPlan;
 import static com.validation.manager.test.TestHelper.createProject;
 import static com.validation.manager.test.TestHelper.createRequirement;
 import static com.validation.manager.test.TestHelper.createRequirementSpec;
 import static com.validation.manager.test.TestHelper.createRequirementSpecNode;
-import static com.validation.manager.test.TestHelper.createTest;
 import static com.validation.manager.test.TestHelper.createTestCase;
 import static com.validation.manager.test.TestHelper.createTestPlan;
 import static com.validation.manager.test.TestHelper.createTestProject;
@@ -99,42 +97,25 @@ public class StepImporterTest extends AbstractVMTestCase {
             fail();
         }
         System.out.println("Create Test");
-        com.validation.manager.core.db.Test test = null;
+        TestCase test = null;
         try {
-            test = createTest("Test", "", "");
+            test = createTestCase("Test", "", "");
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
         System.out.println("Add Test to Plan");
         try {
-            addTestToPlan(plan, test);
-        } catch (PreexistingEntityException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
+            addTestCaseToPlan(plan, test);
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-
         }
         System.out.println("Create Test Case");
         com.validation.manager.core.db.TestCase tc = null;
         try {
-            tc = createTestCase("Dummy", new Short("1"),
-                    "Test Case", test, "Test Summary");
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        System.out.println("Add Test Case to Test");
-        try {
-            addTestCaseToTest(test, tc);
-        } catch (IllegalOrphanException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        } catch (NonexistentEntityException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
+            tc = createTestCase("Dummy",
+                    "Test Case", "Test Summary");
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -163,7 +144,7 @@ public class StepImporterTest extends AbstractVMTestCase {
                 StepImporter instance = new StepImporter(file,
                         new TestCaseJpaController(
                                 getEntityManagerFactory())
-                                .findTestCase(tc.getTestCasePK()));
+                                .findTestCase(tc.getId()));
                 instance.importFile(true);
                 instance.processImport();
             }

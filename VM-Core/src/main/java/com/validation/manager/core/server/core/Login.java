@@ -77,4 +77,12 @@ public class Login extends Versionable implements Serializable {
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
     }
+
+    @Override
+    public void update(Versionable target, Versionable source) {
+        target.setMajorVersion(source.getMajorVersion());
+        target.setMidVersion(source.getMidVersion());
+        target.setMinorVersion(source.getMinorVersion());
+        super.update(target, source);
+    }
 }

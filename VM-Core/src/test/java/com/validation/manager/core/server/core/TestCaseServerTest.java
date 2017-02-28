@@ -11,7 +11,6 @@ import com.validation.manager.test.TestHelper;
 import static com.validation.manager.test.TestHelper.createRequirement;
 import static com.validation.manager.test.TestHelper.createRequirementSpec;
 import static com.validation.manager.test.TestHelper.createRequirementSpecNode;
-import static com.validation.manager.test.TestHelper.createTest;
 import static com.validation.manager.test.TestHelper.createTestCase;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -66,13 +65,9 @@ public class TestCaseServerTest extends AbstractVMTestCase {
         Requirement r = createRequirement("SRS-SW-0001",
                 "Sample requirement", rsns.getRequirementSpecNodePK(),
                 "Notes", 1, 1);
-        //Create Test
-        com.validation.manager.core.db.Test test
-                = createTest("Test #1", "Testing",
-                        "Test #1 scope");
         //Create Test Case
-        TestCase tc = createTestCase("Dummy", new Short("1"),
-                "Expected Results", test, /*user,*/ "Summary");
+        TestCase tc = createTestCase("Dummy",
+                "Expected Results", "Summary");
         TestCaseServer tcs = new TestCaseServer(tc);
         //Add steps
         List<Requirement> reqs = new ArrayList<>();

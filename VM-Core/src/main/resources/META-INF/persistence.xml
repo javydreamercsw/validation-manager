@@ -4,6 +4,8 @@
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>com.validation.manager.core.db.AssigmentType</class>
     <class>com.validation.manager.core.db.AssignmentStatus</class>
+    <class>com.validation.manager.core.db.Attachment</class>
+    <class>com.validation.manager.core.db.AttachmentType</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
     <class>com.validation.manager.core.db.FailureMode</class>
@@ -12,14 +14,14 @@
     <class>com.validation.manager.core.db.Investigation</class>
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
-    <class>com.validation.manager.core.db.RequirementHasException</class>
-    <class>com.validation.manager.core.db.RequirementHasRequirement</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
     <class>com.validation.manager.core.db.RequirementStatus</class>
     <class>com.validation.manager.core.db.RequirementType</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
+    <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
+    <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
     <class>com.validation.manager.core.db.RiskControlType</class>
     <class>com.validation.manager.core.db.RiskItem</class>
     <class>com.validation.manager.core.db.RiskItemHasRiskCategory</class>
@@ -28,15 +30,12 @@
     <class>com.validation.manager.core.db.RootCauseType</class>
     <class>com.validation.manager.core.db.SpecLevel</class>
     <class>com.validation.manager.core.db.Step</class>
-    <class>com.validation.manager.core.db.Test</class>
     <class>com.validation.manager.core.db.TestCase</class>
     <class>com.validation.manager.core.db.TestCaseExecution</class>
     <class>com.validation.manager.core.db.TestPlan</class>
-    <class>com.validation.manager.core.db.TestPlanHasTest</class>
     <class>com.validation.manager.core.db.TestProject</class>
     <class>com.validation.manager.core.db.UserAssigment</class>
     <class>com.validation.manager.core.db.UserHasInvestigation</class>
-    <class>com.validation.manager.core.db.UserHasRootCause</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
     <class>com.validation.manager.core.db.UserRight</class>
     <class>com.validation.manager.core.db.UserStatus</class>
@@ -61,6 +60,8 @@
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>com.validation.manager.core.db.AssigmentType</class>
     <class>com.validation.manager.core.db.AssignmentStatus</class>
+    <class>com.validation.manager.core.db.Attachment</class>
+    <class>com.validation.manager.core.db.AttachmentType</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
     <class>com.validation.manager.core.db.FailureMode</class>
@@ -69,13 +70,14 @@
     <class>com.validation.manager.core.db.Investigation</class>
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
-    <class>com.validation.manager.core.db.RequirementHasException</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
     <class>com.validation.manager.core.db.RequirementStatus</class>
     <class>com.validation.manager.core.db.RequirementType</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
+    <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
+    <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
     <class>com.validation.manager.core.db.RiskControlType</class>
     <class>com.validation.manager.core.db.RiskItem</class>
     <class>com.validation.manager.core.db.RiskItemHasRiskCategory</class>
@@ -84,15 +86,12 @@
     <class>com.validation.manager.core.db.RootCauseType</class>
     <class>com.validation.manager.core.db.SpecLevel</class>
     <class>com.validation.manager.core.db.Step</class>
-    <class>com.validation.manager.core.db.Test</class>
     <class>com.validation.manager.core.db.TestCase</class>
     <class>com.validation.manager.core.db.TestCaseExecution</class>
     <class>com.validation.manager.core.db.TestPlan</class>
-    <class>com.validation.manager.core.db.TestPlanHasTest</class>
     <class>com.validation.manager.core.db.TestProject</class>
     <class>com.validation.manager.core.db.UserAssigment</class>
     <class>com.validation.manager.core.db.UserHasInvestigation</class>
-    <class>com.validation.manager.core.db.UserHasRootCause</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
     <class>com.validation.manager.core.db.UserRight</class>
     <class>com.validation.manager.core.db.UserStatus</class>
@@ -119,6 +118,8 @@
     <jta-data-source>java:comp/env/jdbc/VMDB</jta-data-source>
     <class>com.validation.manager.core.db.AssigmentType</class>
     <class>com.validation.manager.core.db.AssignmentStatus</class>
+    <class>com.validation.manager.core.db.Attachment</class>
+    <class>com.validation.manager.core.db.AttachmentType</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
     <class>com.validation.manager.core.db.FailureMode</class>
@@ -127,14 +128,14 @@
     <class>com.validation.manager.core.db.Investigation</class>
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
-    <class>com.validation.manager.core.db.RequirementHasException</class>
-    <class>com.validation.manager.core.db.RequirementHasRequirement</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
     <class>com.validation.manager.core.db.RequirementStatus</class>
     <class>com.validation.manager.core.db.RequirementType</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
+    <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
+    <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
     <class>com.validation.manager.core.db.RiskControlType</class>
     <class>com.validation.manager.core.db.RiskItem</class>
     <class>com.validation.manager.core.db.RiskItemHasRiskCategory</class>
@@ -143,15 +144,12 @@
     <class>com.validation.manager.core.db.RootCauseType</class>
     <class>com.validation.manager.core.db.SpecLevel</class>
     <class>com.validation.manager.core.db.Step</class>
-    <class>com.validation.manager.core.db.Test</class>
     <class>com.validation.manager.core.db.TestCase</class>
     <class>com.validation.manager.core.db.TestCaseExecution</class>
     <class>com.validation.manager.core.db.TestPlan</class>
-    <class>com.validation.manager.core.db.TestPlanHasTest</class>
     <class>com.validation.manager.core.db.TestProject</class>
     <class>com.validation.manager.core.db.UserAssigment</class>
     <class>com.validation.manager.core.db.UserHasInvestigation</class>
-    <class>com.validation.manager.core.db.UserHasRootCause</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
     <class>com.validation.manager.core.db.UserRight</class>
     <class>com.validation.manager.core.db.UserStatus</class>

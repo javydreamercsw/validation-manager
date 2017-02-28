@@ -2,17 +2,21 @@ package com.validation.manager.core;
 
 import com.validation.manager.core.adapter.TimestampAdapter;
 import java.sql.Timestamp;
+import javax.persistence.MappedSuperclass;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
+@MappedSuperclass
 public class VMAuditedObject implements AuditedObject {
 
     private boolean auditable = true;
     private String reason;
-    /**Default to Admin*/
+    /**
+     * Default to Admin
+     */
     private int modifierId = 1;
     @XmlJavaTypeAdapter(TimestampAdapter.class)
     private Timestamp modDate;
@@ -60,5 +64,18 @@ public class VMAuditedObject implements AuditedObject {
      */
     public void setAuditable(boolean auditable) {
         this.auditable = auditable;
+    }
+
+    /**
+     * Update the fields.
+     *
+     * @param target target object
+     * @param source source object
+     */
+    public void update(VMAuditedObject target, VMAuditedObject source) {
+        target.setAuditable(source.isAuditable());
+        target.setModificationReason(source.getModificationReason());
+        target.setModificationTime(source.getModificationTime());
+        target.setModifierId(source.getModifierId());
     }
 }

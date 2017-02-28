@@ -10,9 +10,9 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecPK;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -51,15 +51,15 @@ public class RequirementSpecJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            SpecLevel specLevel = requirementSpec.getSpecLevel();
-            if (specLevel != null) {
-                specLevel = em.getReference(specLevel.getClass(), specLevel.getId());
-                requirementSpec.setSpecLevel(specLevel);
-            }
             Project project = requirementSpec.getProject();
             if (project != null) {
                 project = em.getReference(project.getClass(), project.getId());
                 requirementSpec.setProject(project);
+            }
+            SpecLevel specLevel = requirementSpec.getSpecLevel();
+            if (specLevel != null) {
+                specLevel = em.getReference(specLevel.getClass(), specLevel.getId());
+                requirementSpec.setSpecLevel(specLevel);
             }
             List<RequirementSpecNode> attachedRequirementSpecNodeList = new ArrayList<RequirementSpecNode>();
             for (RequirementSpecNode requirementSpecNodeListRequirementSpecNodeToAttach : requirementSpec.getRequirementSpecNodeList()) {
@@ -68,13 +68,13 @@ public class RequirementSpecJpaController implements Serializable {
             }
             requirementSpec.setRequirementSpecNodeList(attachedRequirementSpecNodeList);
             em.persist(requirementSpec);
-            if (specLevel != null) {
-                specLevel.getRequirementSpecList().add(requirementSpec);
-                specLevel = em.merge(specLevel);
-            }
             if (project != null) {
                 project.getRequirementSpecList().add(requirementSpec);
                 project = em.merge(project);
+            }
+            if (specLevel != null) {
+                specLevel.getRequirementSpecList().add(requirementSpec);
+                specLevel = em.merge(specLevel);
             }
             for (RequirementSpecNode requirementSpecNodeListRequirementSpecNode : requirementSpec.getRequirementSpecNodeList()) {
                 RequirementSpec oldRequirementSpecOfRequirementSpecNodeListRequirementSpecNode = requirementSpecNodeListRequirementSpecNode.getRequirementSpec();
@@ -106,10 +106,10 @@ public class RequirementSpecJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             RequirementSpec persistentRequirementSpec = em.find(RequirementSpec.class, requirementSpec.getRequirementSpecPK());
-            SpecLevel specLevelOld = persistentRequirementSpec.getSpecLevel();
-            SpecLevel specLevelNew = requirementSpec.getSpecLevel();
             Project projectOld = persistentRequirementSpec.getProject();
             Project projectNew = requirementSpec.getProject();
+            SpecLevel specLevelOld = persistentRequirementSpec.getSpecLevel();
+            SpecLevel specLevelNew = requirementSpec.getSpecLevel();
             List<RequirementSpecNode> requirementSpecNodeListOld = persistentRequirementSpec.getRequirementSpecNodeList();
             List<RequirementSpecNode> requirementSpecNodeListNew = requirementSpec.getRequirementSpecNodeList();
             List<String> illegalOrphanMessages = null;
@@ -124,13 +124,13 @@ public class RequirementSpecJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            if (specLevelNew != null) {
-                specLevelNew = em.getReference(specLevelNew.getClass(), specLevelNew.getId());
-                requirementSpec.setSpecLevel(specLevelNew);
-            }
             if (projectNew != null) {
                 projectNew = em.getReference(projectNew.getClass(), projectNew.getId());
                 requirementSpec.setProject(projectNew);
+            }
+            if (specLevelNew != null) {
+                specLevelNew = em.getReference(specLevelNew.getClass(), specLevelNew.getId());
+                requirementSpec.setSpecLevel(specLevelNew);
             }
             List<RequirementSpecNode> attachedRequirementSpecNodeListNew = new ArrayList<RequirementSpecNode>();
             for (RequirementSpecNode requirementSpecNodeListNewRequirementSpecNodeToAttach : requirementSpecNodeListNew) {
@@ -140,14 +140,6 @@ public class RequirementSpecJpaController implements Serializable {
             requirementSpecNodeListNew = attachedRequirementSpecNodeListNew;
             requirementSpec.setRequirementSpecNodeList(requirementSpecNodeListNew);
             requirementSpec = em.merge(requirementSpec);
-            if (specLevelOld != null && !specLevelOld.equals(specLevelNew)) {
-                specLevelOld.getRequirementSpecList().remove(requirementSpec);
-                specLevelOld = em.merge(specLevelOld);
-            }
-            if (specLevelNew != null && !specLevelNew.equals(specLevelOld)) {
-                specLevelNew.getRequirementSpecList().add(requirementSpec);
-                specLevelNew = em.merge(specLevelNew);
-            }
             if (projectOld != null && !projectOld.equals(projectNew)) {
                 projectOld.getRequirementSpecList().remove(requirementSpec);
                 projectOld = em.merge(projectOld);
@@ -155,6 +147,14 @@ public class RequirementSpecJpaController implements Serializable {
             if (projectNew != null && !projectNew.equals(projectOld)) {
                 projectNew.getRequirementSpecList().add(requirementSpec);
                 projectNew = em.merge(projectNew);
+            }
+            if (specLevelOld != null && !specLevelOld.equals(specLevelNew)) {
+                specLevelOld.getRequirementSpecList().remove(requirementSpec);
+                specLevelOld = em.merge(specLevelOld);
+            }
+            if (specLevelNew != null && !specLevelNew.equals(specLevelOld)) {
+                specLevelNew.getRequirementSpecList().add(requirementSpec);
+                specLevelNew = em.merge(specLevelNew);
             }
             for (RequirementSpecNode requirementSpecNodeListNewRequirementSpecNode : requirementSpecNodeListNew) {
                 if (!requirementSpecNodeListOld.contains(requirementSpecNodeListNewRequirementSpecNode)) {
@@ -207,15 +207,15 @@ public class RequirementSpecJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            SpecLevel specLevel = requirementSpec.getSpecLevel();
-            if (specLevel != null) {
-                specLevel.getRequirementSpecList().remove(requirementSpec);
-                specLevel = em.merge(specLevel);
-            }
             Project project = requirementSpec.getProject();
             if (project != null) {
                 project.getRequirementSpecList().remove(requirementSpec);
                 project = em.merge(project);
+            }
+            SpecLevel specLevel = requirementSpec.getSpecLevel();
+            if (specLevel != null) {
+                specLevel.getRequirementSpecList().remove(requirementSpec);
+                specLevel = em.merge(specLevel);
             }
             em.remove(requirementSpec);
             em.getTransaction().commit();

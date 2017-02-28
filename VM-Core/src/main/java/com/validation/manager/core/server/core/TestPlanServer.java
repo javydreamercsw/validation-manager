@@ -2,18 +2,14 @@ package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
-import com.validation.manager.core.db.Test;
+import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestPlanHasTest;
-import com.validation.manager.core.db.TestPlanHasTestPK;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.controller.TestPlanHasTestJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 
@@ -34,9 +30,9 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
             boolean isOpen) {
         super(testProject, active, isOpen);
         setTestProject(testProject);
-        setTestPlanHasTestList(new ArrayList<>());
         setTestPlanList(new ArrayList<>());
         setUserTestPlanRoleList(new ArrayList<>());
+        setTestCaseList(new ArrayList<>());
     }
 
     @Override
@@ -69,18 +65,9 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
         return true;
     }
 
-    public boolean addTest(Test test) {
+    public boolean addTestCase(TestCase test) {
         try {
-            TestPlanHasTest tpht = new TestPlanHasTest(
-                    new TestPlanHasTestPK(getTestPlanPK().getId(),
-                            getTestPlanPK().getTestProjectId(), test.getId()),
-                    new Date(), getTestPlanHasTestList().size() + 1);
-            tpht.setTest(test);
-            tpht.setTestPlan(new TestPlanJpaController(getEntityManagerFactory())
-                    .findTestPlan(getTestPlanPK()));
-            new TestPlanHasTestJpaController(getEntityManagerFactory())
-                    .create(tpht);
-            getTestPlanHasTestList().add(tpht);
+            getTestCaseList().add(test);
             write2DB();
             return true;
         } catch (PreexistingEntityException ex) {
@@ -105,7 +92,7 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
         target.setActive(source.getActive());
         target.setIsOpen(source.getIsOpen());
         target.setNotes(source.getNotes());
-        target.setTestPlanHasTestList(source.getTestPlanHasTestList());
+        target.setTestCaseList(source.getTestCaseList());
         target.setTestPlanList(source.getTestPlanList());
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setTestPlanPK(source.getTestPlanPK());

@@ -86,14 +86,14 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
     }
 
     public static Collection<? extends Requirement> getRequirements(RequirementSpecNode rsn) {
-        List<Requirement> requirements = new ArrayList<Requirement>();
+        List<Requirement> requirements = new ArrayList<>();
         RequirementSpecNodeServer rsns = new RequirementSpecNodeServer(rsn);
-        for (Requirement rs : rsns.getRequirementList()) {
+        rsns.getRequirementList().forEach((rs) -> {
             requirements.add(rs);
-        }
-        for (RequirementSpecNode sub : rsns.getRequirementSpecNodeList()) {
+        });
+        rsns.getRequirementSpecNodeList().forEach((sub) -> {
             requirements.addAll(getRequirements(sub));
-        }
+        });
         return requirements;
     }
 

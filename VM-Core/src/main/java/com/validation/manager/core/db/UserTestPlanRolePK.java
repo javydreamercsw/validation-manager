@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -13,10 +8,11 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class UserTestPlanRolePK implements Serializable {
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "test_plan_id")
@@ -37,7 +33,8 @@ public class UserTestPlanRolePK implements Serializable {
     public UserTestPlanRolePK() {
     }
 
-    public UserTestPlanRolePK(int testPlanId, int testPlanTestProjectId, int userId, int roleId) {
+    public UserTestPlanRolePK(int testPlanId, int testPlanTestProjectId,
+            int userId, int roleId) {
         this.testPlanId = testPlanId;
         this.testPlanTestProjectId = testPlanTestProjectId;
         this.userId = userId;
@@ -110,7 +107,8 @@ public class UserTestPlanRolePK implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.UserTestPlanRolePK[ testPlanId=" + testPlanId + ", testPlanTestProjectId=" + testPlanTestProjectId + ", userId=" + userId + ", roleId=" + roleId + " ]";
+        return "com.validation.manager.core.db.UserTestPlanRolePK[ testPlanId="
+                + testPlanId + ", testPlanTestProjectId=" + testPlanTestProjectId
+                + ", userId=" + userId + ", roleId=" + roleId + " ]";
     }
-
 }

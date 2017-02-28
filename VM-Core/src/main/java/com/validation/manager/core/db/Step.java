@@ -7,7 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -22,7 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "step")
@@ -30,23 +30,17 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @NamedQueries({
     @NamedQuery(name = "Step.findAll",
             query = "SELECT s FROM Step s")
-    ,@NamedQuery(name = "Step.findByStepSequence",
-            query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence")
-    ,@NamedQuery(name = "Step.findByTestCaseTestId",
-            query = "SELECT s FROM Step s WHERE s.stepPK.testCaseTestId = :testCaseTestId")
-    ,@NamedQuery(name = "Step.findById",
+    , @NamedQuery(name = "Step.findById",
             query = "SELECT s FROM Step s WHERE s.stepPK.id = :id")
-    ,@NamedQuery(name = "Step.findByTestCaseId",
-            query = "SELECT s FROM Step s WHERE s.stepPK.testCaseId = :testCaseId")})
+    , @NamedQuery(name = "Step.findByTestCaseId",
+            query = "SELECT s FROM Step s WHERE s.stepPK.testCaseId = :testCaseId")
+    , @NamedQuery(name = "Step.findByStepSequence",
+            query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence")})
 public class Step implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected StepPK stepPK;
-    @Lob
-    @Size(max = 2147483647)
-    @Column(name = "notes")
-    private String notes;
     @Basic(optional = false)
     @NotNull
     @Column(name = "step_sequence")
@@ -59,16 +53,23 @@ public class Step implements Serializable {
     @Lob
     @Column(name = "expected_result")
     private byte[] expectedResult;
-    @ManyToMany(mappedBy = "stepList")
-    private List<VmException> vmExceptionList;
+    @Lob
+    @Size(max = 2147483647)
+    @Column(name = "notes")
+    private String notes;
     @ManyToMany(mappedBy = "stepList")
     private List<Requirement> requirementList;
-    @JoinColumns({
-        @JoinColumn(name = "test_case_id", referencedColumnName = "id",
-                insertable = false, updatable = false)
-        ,@JoinColumn(name = "test_case_test_id",
-                referencedColumnName = "test_id", insertable = false,
-                updatable = false)})
+    @JoinTable(name = "step_has_vm_exception", joinColumns = {
+        @JoinColumn(name = "step_id", referencedColumnName = "id")
+        , @JoinColumn(name = "step_test_case_id",
+                referencedColumnName = "test_case_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "vm_exception_id", referencedColumnName = "id")
+        , @JoinColumn(name = "vm_exception_reporter_id",
+                referencedColumnName = "reporter_id")})
+    @ManyToMany
+    private List<VmException> vmExceptionList;
+    @JoinColumn(name = "test_case_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private TestCase testCase;
 
@@ -85,8 +86,8 @@ public class Step implements Serializable {
         this.text = text;
     }
 
-    public Step(int testCaseId, int testCaseTestId) {
-        this.stepPK = new StepPK(testCaseId, testCaseTestId);
+    public Step(int testCaseId) {
+        this.stepPK = new StepPK(testCaseId);
     }
 
     public StepPK getStepPK() {
@@ -95,6 +96,22 @@ public class Step implements Serializable {
 
     public void setStepPK(StepPK stepPK) {
         this.stepPK = stepPK;
+    }
+
+    public int getStepSequence() {
+        return stepSequence;
+    }
+
+    public void setStepSequence(int stepSequence) {
+        this.stepSequence = stepSequence;
+    }
+
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
     }
 
     public byte[] getExpectedResult() {
@@ -113,12 +130,14 @@ public class Step implements Serializable {
         this.notes = notes;
     }
 
-    public Integer getStepSequence() {
-        return stepSequence;
+    @XmlTransient
+    @JsonIgnore
+    public List<Requirement> getRequirementList() {
+        return requirementList;
     }
 
-    public void setStepSequence(Integer stepSequence) {
-        this.stepSequence = stepSequence;
+    public void setRequirementList(List<Requirement> requirementList) {
+        this.requirementList = requirementList;
     }
 
     @XmlTransient
@@ -129,16 +148,6 @@ public class Step implements Serializable {
 
     public void setVmExceptionList(List<VmException> vmExceptionList) {
         this.vmExceptionList = vmExceptionList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<Requirement> getRequirementList() {
-        return requirementList;
-    }
-
-    public void setRequirementList(List<Requirement> requirementList) {
-        this.requirementList = requirementList;
     }
 
     public TestCase getTestCase() {
@@ -163,24 +172,12 @@ public class Step implements Serializable {
             return false;
         }
         Step other = (Step) object;
-        return (this.stepPK != null || other.stepPK == null)
-                && (this.stepPK == null || this.stepPK.equals(other.stepPK));
+        return !((this.stepPK == null && other.stepPK != null)
+                || (this.stepPK != null && !this.stepPK.equals(other.stepPK)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
-    }
-
-    public void setStepSequence(int stepSequence) {
-        this.stepSequence = stepSequence;
-    }
-
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
     }
 }

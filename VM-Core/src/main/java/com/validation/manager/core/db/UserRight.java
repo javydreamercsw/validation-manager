@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -28,15 +23,18 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "user_right")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "UserRight.findAll", query = "SELECT u FROM UserRight u"),
-    @NamedQuery(name = "UserRight.findById", query = "SELECT u FROM UserRight u WHERE u.id = :id"),
-    @NamedQuery(name = "UserRight.findByDescription", query = "SELECT u FROM UserRight u WHERE u.description = :description")})
+    @NamedQuery(name = "UserRight.findAll",
+            query = "SELECT u FROM UserRight u")
+    , @NamedQuery(name = "UserRight.findById",
+            query = "SELECT u FROM UserRight u WHERE u.id = :id")
+    , @NamedQuery(name = "UserRight.findByDescription",
+            query = "SELECT u FROM UserRight u WHERE u.description = :description")})
 public class UserRight implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,19 +51,27 @@ public class UserRight implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Size(max = 255)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "description")
     private String description;
     @JoinTable(name = "role_has_right", joinColumns = {
-        @JoinColumn(name = "right_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "role_id", referencedColumnName = "id")})
+        @JoinColumn(name = "right_id", referencedColumnName = "id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "role_id", referencedColumnName = "id")})
     @ManyToMany
     private List<Role> roleList;
 
     public UserRight() {
     }
 
-    public UserRight(String description) {
+    public UserRight(Integer id) {
+        this.id = id;
+    }
+
+    public UserRight(Integer id, String description) {
+        this.id = id;
         this.description = description;
     }
 
@@ -109,12 +115,12 @@ public class UserRight implements Serializable {
             return false;
         }
         UserRight other = (UserRight) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.UserRight[ id=" + id + " ]";
     }
-
 }

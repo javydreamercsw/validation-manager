@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -31,10 +26,14 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "attachment_type")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "AttachmentType.findAll", query = "SELECT a FROM AttachmentType a")
-    , @NamedQuery(name = "AttachmentType.findById", query = "SELECT a FROM AttachmentType a WHERE a.id = :id")
-    , @NamedQuery(name = "AttachmentType.findByFkTable", query = "SELECT a FROM AttachmentType a WHERE a.fkTable = :fkTable")
-    , @NamedQuery(name = "AttachmentType.findByType", query = "SELECT a FROM AttachmentType a WHERE a.type = :type")})
+    @NamedQuery(name = "AttachmentType.findAll",
+            query = "SELECT a FROM AttachmentType a")
+    , @NamedQuery(name = "AttachmentType.findById",
+            query = "SELECT a FROM AttachmentType a WHERE a.id = :id")
+    , @NamedQuery(name = "AttachmentType.findByFkTable",
+            query = "SELECT a FROM AttachmentType a WHERE a.fkTable = :fkTable")
+    , @NamedQuery(name = "AttachmentType.findByType",
+            query = "SELECT a FROM AttachmentType a WHERE a.type = :type")})
 public class AttachmentType implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -129,10 +128,8 @@ public class AttachmentType implements Serializable {
             return false;
         }
         AttachmentType other = (AttachmentType) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override

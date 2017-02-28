@@ -25,22 +25,23 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "investigation")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Investigation.findAll", 
-            query = "SELECT i FROM Investigation i"),
-    @NamedQuery(name = "Investigation.findById", 
+    @NamedQuery(name = "Investigation.findAll",
+            query = "SELECT i FROM Investigation i")
+    , @NamedQuery(name = "Investigation.findById",
             query = "SELECT i FROM Investigation i WHERE i.id = :id")})
 public class Investigation extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "InvestigationGen")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "InvestigationGen")
     @TableGenerator(name = "InvestigationGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -50,8 +51,10 @@ public class Investigation extends Versionable implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
+    @Basic(optional = false)
+    @NotNull
     @Lob
-    @Size(max = 2147483647)
+    @Size(min = 1, max = 65535)
     @Column(name = "description")
     private String description;
     @ManyToMany(mappedBy = "investigationList")
@@ -116,7 +119,8 @@ public class Investigation extends Versionable implements Serializable {
             return false;
         }
         Investigation other = (Investigation) object;
-        return (this.id != null || other.id == null) && (this.id == null || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
