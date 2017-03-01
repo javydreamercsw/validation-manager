@@ -51,22 +51,24 @@ public class DemoBuilder {
     }
 
     private static void addDemoProjectRequirements(Project p) throws Exception {
+        int count = 1;
         for (int i = 0; i < 5; i++) {
             //Create a spec
-            RequirementSpecServer temp = new RequirementSpecServer("Spec " + i,
-                    "Description " + i, p.getId(), 1);
+            RequirementSpecServer temp = new RequirementSpecServer("Spec "
+                    + (i + 1), "Description " + (i + 1), p.getId(), 1);
             temp.write2DB();
-            RequirementSpecNodeServer node = temp.addSpecNode("Node " + i,
-                    "Description " + i, "Scope " + i);
+            RequirementSpecNodeServer node = temp.addSpecNode("Node " + (i + 1),
+                    "Description " + (i + 1), "Scope " + (i + 1));
             for (int y = 0; y < 5; y++) {
                 RequirementServer req
                         = new RequirementServer("Requirement "
-                                + (y + 1) * (i + 1),
-                                "Description " + (y + 1) * (i + 1),
+                                + count,
+                                "Description " + count,
                                 node.getRequirementSpecNodePK(), "Notes",
                                 1, 1);
                 req.write2DB();
                 node.getRequirementList().add(req.getEntity());
+                count++;
             }
             node.write2DB();
             p.getRequirementSpecList().add(temp.getEntity());
