@@ -26,7 +26,6 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -91,7 +90,7 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons testPlanIcon = VaadinIcons.FILE_TREE_SMALL;
     private final VaadinIcons testIcon = VaadinIcons.FILE_TEXT;
     private final VaadinIcons stepIcon = VaadinIcons.FILE_TREE_SUB;
-    private final Tree tree = new Tree();
+    private Tree tree;
 
     /**
      * @return the user
@@ -144,7 +143,7 @@ public class ValidationManagerUI extends UI {
                         form.setVisible(false);
                         //Recreate the tree to show the addition
                         updateProjectList();
-                        buildProjectTree();
+                        buildProjectTree(rsn);
                         displayRequirementSpecNode(rsn, true);
                         updateScreen();
                     } catch (Exception ex) {
@@ -207,11 +206,11 @@ public class ValidationManagerUI extends UI {
         binder.setItemDataSource(s);
         Field<?> sequence = binder.buildAndBind("Sequence", "stepSequence");
         layout.addComponent(sequence);
-        TextField text = new TextField("Text");
+        TextArea text = new TextArea("Text");
         text.setConverter(new ByteToStringConverter());
         binder.bind(text, "text");
         layout.addComponent(text);
-        TextField result = new TextField("Expected Result");
+        TextArea result = new TextArea("Expected Result");
         result.setConverter(new ByteToStringConverter());
         binder.bind(result, "expectedResult");
         layout.addComponent(result);
@@ -225,8 +224,10 @@ public class ValidationManagerUI extends UI {
                     try {
                         s.setExpectedResult(result.getValue()
                                 .getBytes("UTF-8"));
-                        s.setNotes(notes.getValue().toString());
-                        s.setStepSequence(Integer.parseInt(sequence.getValue().toString()));
+                        s.setNotes(notes.getValue() == null ? "null"
+                                : notes.getValue().toString());
+                        s.setStepSequence(Integer.parseInt(sequence
+                                .getValue().toString()));
                         s.setTestCase((TestCase) tree.getValue());
                         s.setText(text.getValue().getBytes("UTF-8"));
                         new StepJpaController(DataBaseManager
@@ -234,10 +235,9 @@ public class ValidationManagerUI extends UI {
                         form.setVisible(false);
                         //Recreate the tree to show the addition
                         updateProjectList();
-                        buildProjectTree();
                         displayStep(s);
+                        buildProjectTree(s);
                         updateScreen();
-                        buildProjectTree();
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
                         Notification.show("Error creating record!",
@@ -290,7 +290,7 @@ public class ValidationManagerUI extends UI {
         binder.setItemDataSource(t);
         Field<?> name = binder.buildAndBind("Name", "name");
         layout.addComponent(name);
-        TextField summary = new TextField("Summary");
+        TextArea summary = new TextArea("Summary");
         summary.setConverter(new ByteToStringConverter());
         binder.bind(summary, "summary");
         layout.addComponent(summary);
@@ -316,10 +316,9 @@ public class ValidationManagerUI extends UI {
                         form.setVisible(false);
                         //Recreate the tree to show the addition
                         updateProjectList();
-                        buildProjectTree();
+                        buildProjectTree(t);
                         displayTestCase(t, false);
                         updateScreen();
-                        buildProjectTree();
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
                         Notification.show("Error creating record!",
@@ -403,10 +402,9 @@ public class ValidationManagerUI extends UI {
                         form.setVisible(false);
                         //Recreate the tree to show the addition
                         updateProjectList();
-                        buildProjectTree();
+                        buildProjectTree(tp);
                         displayTestPlan(tp, false);
                         updateScreen();
-                        buildProjectTree();
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
                         Notification.show("Error creating record!",
@@ -486,7 +484,7 @@ public class ValidationManagerUI extends UI {
                         form.setVisible(false);
                         //Recreate the tree to show the addition
                         updateProjectList();
-                        buildProjectTree();
+                        buildProjectTree(tp);
                         displayTestProject(tp, false);
                         updateScreen();
                     } catch (Exception ex) {
@@ -590,7 +588,7 @@ public class ValidationManagerUI extends UI {
                         form.setVisible(false);
                         //Recreate the tree to show the addition
                         updateProjectList();
-                        buildProjectTree();
+                        buildProjectTree(rs);
                         displayRequirementSpec(rs, false);
                         updateScreen();
                     } catch (Exception ex) {
@@ -687,90 +685,28 @@ public class ValidationManagerUI extends UI {
         }
     }
 
-    private Tree buildProjectTree() {
+    private void buildProjectTree() {
+        buildProjectTree(null);
+    }
+
+    private void buildProjectTree(Object item) {
         tree.removeAllItems();
         tree.addItem(projTreeRoot);
-
         projects.forEach((p) -> {
             if (p.getParentProjectId() == null) {
                 addProject(p, tree);
             }
         });
-        tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
-            if (tree.getValue() instanceof Project) {
-                Project p = (Project) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", p.getName());
-                displayProject(p);
-            } else if (tree.getValue() instanceof Requirement) {
-                Requirement req = (Requirement) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", req.getUniqueId());
-                displayRequirement(req);
-            } else if (tree.getValue() instanceof RequirementSpec) {
-                RequirementSpec rs = (RequirementSpec) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", rs.getName());
-                displayRequirementSpec(rs);
-            } else if (tree.getValue() instanceof RequirementSpecNode) {
-                RequirementSpecNode rsn = (RequirementSpecNode) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", rsn.getName());
-                displayRequirementSpecNode(rsn);
-            } else if (tree.getValue() instanceof TestProject) {
-                TestProject tp = (TestProject) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
-                displayTestProject(tp);
-            } else if (tree.getValue() instanceof TestPlan) {
-                TestPlan tp = (TestPlan) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
-                displayTestPlan(tp);
-            } else if (tree.getValue() instanceof TestCase) {
-                TestCase tc = (TestCase) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", tc.getName());
-                displayTestCase(tc);
-            } else if (tree.getValue() instanceof Step) {
-                Step step = (Step) tree.getValue();
-                LOG.log(Level.FINE, "Selected: Step #{0}",
-                        step.getStepSequence());
-                displayStep(step);
+        if (item == null) {
+            tree.expandItem(projTreeRoot);
+        } else {
+            tree.select(item);
+            Object parent = tree.getParent(item);
+            while (parent != null) {
+                tree.expandItem(parent);
+                parent = tree.getParent(parent);
             }
-        });
-        //Select item on right click as well
-        tree.addItemClickListener((ItemClickEvent event) -> {
-            if (event.getSource() == tree
-                    && event.getButton() == MouseButton.RIGHT) {
-                if (event.getItem() != null) {
-                    Item clicked = event.getItem();
-                    tree.select(event.getItemId());
-                }
-            }
-        });
-        ContextMenu contextMenu = new ContextMenu();
-        contextMenu.setAsContextMenuOf(tree);
-        ContextMenuOpenedListener.TreeListener treeItemListener
-                = (ContextMenuOpenedOnTreeItemEvent event) -> {
-                    contextMenu.removeAllItems();
-                    if (tree.getValue() instanceof Project) {
-                        createProjectMenu(contextMenu);
-                    } else if (tree.getValue() instanceof Requirement) {
-                        createRequirementMenu(contextMenu);
-                    } else if (tree.getValue() instanceof RequirementSpec) {
-                        createRequirementSpecMenu(contextMenu);
-                    } else if (tree.getValue() instanceof RequirementSpecNode) {
-                        createRequirementSpecNodeMenu(contextMenu);
-                    } else if (tree.getValue() instanceof TestProject) {
-                        createTestProjectMenu(contextMenu);
-                    } else if (tree.getValue() instanceof Step) {
-                        createStepMenu(contextMenu);
-                    } else if (tree.getValue() instanceof TestCase) {
-                        createTestCaseMenu(contextMenu);
-                    } else {
-                        //We are at the root
-                        createRootMenu(contextMenu);
-                    }
-                };
-        contextMenu.addContextMenuTreeListener(treeItemListener);
-        tree.setImmediate(true);
-        tree.expandItem(projTreeRoot);
-        tree.setSizeFull();
-        return tree;
+        }
     }
 
     private void createRootMenu(ContextMenu menu) {
@@ -868,8 +804,10 @@ public class ValidationManagerUI extends UI {
                 });
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    TestCase tc = (TestCase) tree.getValue();
                     Step s = new Step();
-                    s.setTestCase((TestCase) tree.getValue());
+                    s.setStepSequence(tc.getStepList().size() + 1);
+                    s.setTestCase(tc);
                     displayStep(s, true);
                 });
     }
@@ -964,7 +902,7 @@ public class ValidationManagerUI extends UI {
                     form.setVisible(false);
                     //Recreate the tree to show the addition
                     updateProjectList();
-                    buildProjectTree();
+                    buildProjectTree(p);
                     displayProject(p, false);
                     updateScreen();
                 });
@@ -1130,6 +1068,81 @@ public class ValidationManagerUI extends UI {
             reset = new VMDemoResetThread();
             reset.start();
         }
+        tree = new Tree();
+        tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
+            if (tree.getValue() instanceof Project) {
+                Project p = (Project) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", p.getName());
+                displayProject(p);
+            } else if (tree.getValue() instanceof Requirement) {
+                Requirement req = (Requirement) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", req.getUniqueId());
+                displayRequirement(req);
+            } else if (tree.getValue() instanceof RequirementSpec) {
+                RequirementSpec rs = (RequirementSpec) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", rs.getName());
+                displayRequirementSpec(rs);
+            } else if (tree.getValue() instanceof RequirementSpecNode) {
+                RequirementSpecNode rsn = (RequirementSpecNode) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", rsn.getName());
+                displayRequirementSpecNode(rsn);
+            } else if (tree.getValue() instanceof TestProject) {
+                TestProject tp = (TestProject) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
+                displayTestProject(tp);
+            } else if (tree.getValue() instanceof TestPlan) {
+                TestPlan tp = (TestPlan) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
+                displayTestPlan(tp);
+            } else if (tree.getValue() instanceof TestCase) {
+                TestCase tc = (TestCase) tree.getValue();
+                LOG.log(Level.FINE, "Selected: {0}", tc.getName());
+                displayTestCase(tc);
+            } else if (tree.getValue() instanceof Step) {
+                Step step = (Step) tree.getValue();
+                LOG.log(Level.FINE, "Selected: Step #{0}",
+                        step.getStepSequence());
+                displayStep(step);
+            }
+        });
+        //Select item on right click as well
+        tree.addItemClickListener((ItemClickEvent event) -> {
+            if (event.getSource() == tree
+                    && event.getButton() == MouseButton.RIGHT) {
+                if (event.getItem() != null) {
+                    Item clicked = event.getItem();
+                    tree.select(event.getItemId());
+                }
+            }
+        });
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setAsContextMenuOf(tree);
+        ContextMenuOpenedListener.TreeListener treeItemListener
+                = (ContextMenuOpenedOnTreeItemEvent event) -> {
+                    contextMenu.removeAllItems();
+                    if (tree.getValue() instanceof Project) {
+                        createProjectMenu(contextMenu);
+                    } else if (tree.getValue() instanceof Requirement) {
+                        createRequirementMenu(contextMenu);
+                    } else if (tree.getValue() instanceof RequirementSpec) {
+                        createRequirementSpecMenu(contextMenu);
+                    } else if (tree.getValue() instanceof RequirementSpecNode) {
+                        createRequirementSpecNodeMenu(contextMenu);
+                    } else if (tree.getValue() instanceof TestProject) {
+                        createTestProjectMenu(contextMenu);
+                    } else if (tree.getValue() instanceof Step) {
+                        createStepMenu(contextMenu);
+                    } else if (tree.getValue() instanceof TestCase) {
+                        createTestCaseMenu(contextMenu);
+                    } else if (tree.getValue() instanceof String) {
+                        //We are at the root
+                        createRootMenu(contextMenu);
+                    }
+                };
+        contextMenu.addContextMenuTreeListener(treeItemListener);
+        tree.setImmediate(true);
+        tree.expandItem(projTreeRoot);
+        tree.setSizeFull();
         updateProjectList();
         updateScreen();
         Page.getCurrent().setTitle("Validation Manager");
@@ -1149,7 +1162,8 @@ public class ValidationManagerUI extends UI {
                 -> (p.getParentProjectId() == null)).forEachOrdered((p) -> {
             projects.add(p);
         });
-        left = buildProjectTree();
+        buildProjectTree();
+        left = tree;
         LOG.log(Level.FINE, "Found {0} root projects!", projects.size());
     }
 
@@ -1183,6 +1197,9 @@ public class ValidationManagerUI extends UI {
                 Class<? extends byte[]> targetType,
                 Locale locale) throws ConversionException {
             try {
+                if (value == null) {
+                    value = "null";
+                }
                 return value.getBytes("UTF-8");
             } catch (UnsupportedEncodingException ex) {
                 Exceptions.printStackTrace(ex);
@@ -1194,7 +1211,7 @@ public class ValidationManagerUI extends UI {
         public String convertToPresentation(byte[] value,
                 Class<? extends String> targetType, Locale locale)
                 throws ConversionException {
-            return value == null ? null : new String(value, StandardCharsets.UTF_8);
+            return value == null ? "null" : new String(value, StandardCharsets.UTF_8);
         }
 
         @Override
