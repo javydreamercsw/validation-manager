@@ -7,7 +7,6 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -22,6 +21,7 @@ import static java.util.logging.Logger.getLogger;
  */
 public final class ProjectServer extends Project
         implements EntityServer<Project>, VersionableServer<Project> {
+
     private static final long serialVersionUID = 3434510483033583117L;
 
     public ProjectServer(String name, String notes) {
@@ -46,7 +46,8 @@ public final class ProjectServer extends Project
     }
 
     @Override
-    public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public int write2DB() throws IllegalOrphanException,
+            NonexistentEntityException, Exception {
         Project p;
         if (getId() > 0) {
             //Check what has changed, if is only relationshipd, don't version
@@ -61,7 +62,8 @@ public final class ProjectServer extends Project
                 new ProjectJpaController(getEntityManagerFactory()).create(p);
                 update(this, p);
             } else {
-                p = new ProjectJpaController(getEntityManagerFactory()).findProject(getId());
+                p = new ProjectJpaController(getEntityManagerFactory())
+                        .findProject(getId());
                 update(p, this);
                 new ProjectJpaController(getEntityManagerFactory()).edit(p);
             }
@@ -78,7 +80,8 @@ public final class ProjectServer extends Project
         if (p.getProjectList().isEmpty()) {
             try {
                 if (p.getRequirementSpecList().isEmpty()) {
-                    new ProjectJpaController(getEntityManagerFactory()).destroy(p.getId());
+                    new ProjectJpaController(getEntityManagerFactory())
+                            .destroy(p.getId());
                 } else {
                     throw new VMException("Unable to delete project with Requirement Specifications!");
                 }
@@ -92,7 +95,8 @@ public final class ProjectServer extends Project
 
     @Override
     public Project getEntity() {
-        return new ProjectJpaController(getEntityManagerFactory()).findProject(getId());
+        return new ProjectJpaController(getEntityManagerFactory())
+                .findProject(getId());
     }
 
     private void update(Project target, Project source, boolean copyId) {
@@ -113,30 +117,30 @@ public final class ProjectServer extends Project
     }
 
     public static List<Project> getProjects() {
-        return new ProjectJpaController(getEntityManagerFactory()).findProjectEntities();
+        return new ProjectJpaController(getEntityManagerFactory())
+                .findProjectEntities();
     }
 
     public List<Project> getChildren() {
         ArrayList<Project> children = new ArrayList<>();
-        for (Project p : getProjects()) {
-            if (p.getParentProjectId() != null) {
-                if (p.getParentProjectId().getId().equals(getId())) {
+        getProjects().stream().filter((p)
+                -> (p.getParentProjectId() != null)).filter((p)
+                -> (p.getParentProjectId().getId().equals(getId())))
+                .forEachOrdered((p) -> {
                     children.add(p);
-                }
-            }
-        }
+                });
         return children;
     }
 
     public static List<Requirement> getRequirements(Project p) {
         ProjectServer project = new ProjectServer(p);
-        List<Requirement> requirements = new ArrayList<>();
-        for (RequirementSpec rs : project.getRequirementSpecList()) {
+        ArrayList<Requirement> requirements = new ArrayList<>();
+        project.getRequirementSpecList().forEach((rs) -> {
             requirements.addAll(RequirementSpecServer.getRequirements(rs));
-        }
-        for (Project sp : project.getProjectList()) {
+        });
+        project.getProjectList().forEach((sp) -> {
             requirements.addAll(getRequirements(sp));
-        }
+        });
         return requirements;
     }
 
@@ -150,10 +154,10 @@ public final class ProjectServer extends Project
         List<Project> versions = new ArrayList<>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
-        for (Object obj : namedQuery("Project.findById",
-                parameters)) {
-            versions.add((Project) obj);
-        }
+        namedQuery("Project.findById",
+                parameters).forEach((obj) -> {
+                    versions.add((Project) obj);
+                });
         return versions;
     }
 
