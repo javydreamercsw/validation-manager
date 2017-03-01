@@ -39,6 +39,7 @@ public class DemoBuilder {
         controller.create(rootProject);
         for (int i = 0; i < 5; i++) {
             Project temp = new Project("Sub " + (i + 1));
+            temp.setParentProjectId(rootProject);
             controller.create(temp);
             addDemoProjectRequirements(temp);
             addDemoProjectTestProject(temp);
