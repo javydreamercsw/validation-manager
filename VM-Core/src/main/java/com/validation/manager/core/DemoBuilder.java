@@ -97,7 +97,7 @@ public class DemoBuilder {
                                 .getEntityManagerFactory())
                                 .findRequirementEntities().subList(j * 5,
                                         j * 5 + 5);
-                tcs.addStep(j, "Step #" + (j + 1), "Note", "Criteria",
+                tcs.addStep((j + 1), "Step #" + (j + 1), "Note", "Criteria",
                         requirements);
             }
             tcs.write2DB();
