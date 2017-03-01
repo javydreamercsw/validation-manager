@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import static java.util.ResourceBundle.getBundle;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -195,15 +196,22 @@ public class DataBaseManager {
                 }
                 if (isDemo()) {
                     try {
-                        demoResetPeriod = (Long) ctx.lookup("java:comp/env/validation-manager/demo-period");
+                        demoResetPeriod = (Long) ctx
+                                .lookup("java:comp/env/validation-manager/demo-period");
                     } catch (NamingException e) {
                         LOG.log(Level.SEVERE, null, e);
                         demoResetPeriod = valueOf(0);
                     }
                     if (getDemoResetPeriod() > 0) {
+                        Long millis = getDemoResetPeriod();
+                        String format = String.format("%02d min, %02d sec",
+                                TimeUnit.MILLISECONDS.toMinutes(millis),
+                                TimeUnit.MILLISECONDS.toSeconds(millis)
+                                - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+                        );
                         LOG.log(Level.WARNING,
                                 "Instance configured as demo, database will reset"
-                                + " each {0} milliseconds", getDemoResetPeriod());
+                                + " each {0}", format);
                     }
                 }
                 final String JNDIDB = (String) ctx.lookup("java:comp/env/validation-manager/JNDIDB");
