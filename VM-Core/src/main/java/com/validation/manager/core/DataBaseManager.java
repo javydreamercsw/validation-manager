@@ -6,30 +6,15 @@ import com.googlecode.flyway.core.api.MigrationInfo;
 import com.googlecode.flyway.core.api.MigrationState;
 import com.validation.manager.core.db.controller.VmIdJpaController;
 import com.validation.manager.core.server.core.VMIdServer;
-import gudusoft.gsqlparser.EDbVendor;
-import gudusoft.gsqlparser.ESqlStatementType;
-import gudusoft.gsqlparser.TGSqlParser;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Writer;
 import static java.lang.Class.forName;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.valueOf;
-import static java.lang.System.getProperty;
 import static java.lang.Thread.sleep;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -49,8 +34,6 @@ import javax.persistence.EntityTransaction;
 import static javax.persistence.Persistence.createEntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.TableGenerator;
-import javax.persistence.metamodel.EmbeddableType;
-import javax.persistence.metamodel.EntityType;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 
@@ -149,12 +132,12 @@ public class DataBaseManager {
             LOG.log(Level.FINE,
                     "Creating ids to work around eclipse issue "
                     + "(https://bugs.eclipse.org/bugs/show_bug.cgi?id=366852)...");
-            for (EmbeddableType et : getEntityManager().getMetamodel().getEmbeddables()) {
+            getEntityManager().getMetamodel().getEmbeddables().forEach((et) -> {
                 processFields(et.getJavaType().getDeclaredFields());
-            }
-            for (EntityType et : getEntityManager().getMetamodel().getEntities()) {
+            });
+            getEntityManager().getMetamodel().getEntities().forEach((et) -> {
                 processFields(et.getBindableJavaType().getDeclaredFields());
-            }
+            });
             LOG.log(Level.FINE, "Done!");
         }
     }
@@ -374,135 +357,6 @@ public class DataBaseManager {
 
     public static EntityTransaction getTransaction() {
         return getEntityManager().getTransaction();
-    }
-
-    public static void main(String[] args) {
-        //Used to update the init script
-        //Get the MySQL script file
-        File script = new File(new File(getProperty("user.dir")).getParent()
-                + getProperty("file.separator")
-                + "DB" + getProperty("file.separator")
-                + "VM.sql");
-        if (script.exists()) {
-            try {
-                ArrayList<String> contents = readFileAsString(script.getAbsolutePath(), null);
-                if (!contents.isEmpty()) {
-                    //Create the init.sql file
-                    File initFile = new File(getProperty("user.dir")
-                            + getProperty("file.separator") + "src"
-                            + getProperty("file.separator") + "main"
-                            + getProperty("file.separator") + "resources"
-                            + getProperty("file.separator") + "com"
-                            + getProperty("file.separator") + "validation"
-                            + getProperty("file.separator") + "manager"
-                            + getProperty("file.separator") + "core"
-                            + getProperty("file.separator") + "db"
-                            + getProperty("file.separator") + "script"
-                            + getProperty("file.separator") + "init.sql");
-                    if (initFile.exists()) {
-                        initFile.delete();
-                    }
-                    initFile.createNewFile();
-                    setContents(initFile, contents);
-                } else {
-                    LOG.severe("Unable to convert script!");
-                }
-            } catch (IOException | VMException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
-    protected static ArrayList<String> readFileAsString(String filePath, Class relativeTo) throws java.io.IOException, VMException {
-        InputStream in = null;
-        InputStreamReader is = null;
-        BufferedReader br = null;
-        ArrayList<String> statements = new ArrayList<>();
-        try {
-            in = relativeTo == null ? new FileInputStream(new File(filePath))
-                    : relativeTo.getResourceAsStream(filePath);
-            is = new InputStreamReader(in, "utf8");
-            br = new BufferedReader(is);
-            String line;
-            StringBuilder sql = new StringBuilder();
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                sql.append(line).append("\n");
-            }
-            //The list of statement types to ignore
-            ArrayList<String> ignore = new ArrayList<>();
-            ignore.add(ESqlStatementType.sstmysqlset.toString());
-            ignore.add(ESqlStatementType.sstinvalid.toString());
-            ignore.add(ESqlStatementType.sstmysqluse.toString());
-            ignore.add(ESqlStatementType.sstmysqldroptable.toString());
-            ignore.add(ESqlStatementType.sstcreatetable.toString());
-            ignore.add(ESqlStatementType.sstmysqlsetautocommit.toString());
-            ignore.add(ESqlStatementType.sstmysqlcommit.toString());
-            ignore.add(ESqlStatementType.sstmysqlstarttransaction.toString());
-            //-------------------------------------
-            if (!sql.toString().isEmpty()) {
-                TGSqlParser sqlparser = new TGSqlParser(EDbVendor.dbvmysql);
-                sqlparser.sqltext = sql.toString();
-                //Check statements for correctness first
-                sqlparser.parse();
-                //Everything fine, keep going
-                for (int i = 0; i < sqlparser.sqlstatements.size(); i++) {
-                    if (!ignore.contains(sqlparser.sqlstatements.get(i).sqlstatementtype.toString())) {
-                        statements.add(sqlparser.sqlstatements.get(i).toString().replaceAll("`validation_manager`.", ""));
-                    }
-                }
-            }
-        } finally {
-            if (br != null) {
-                br.close();
-            }
-            if (is != null) {
-                is.close();
-            }
-            if (in != null) {
-                in.close();
-            }
-        }
-        return statements;
-    }
-
-    /**
-     * Change the contents of text file in its entirety, overwriting any
-     * existing text.
-     *
-     * This style of implementation throws all exceptions to the caller.
-     *
-     * @param aFile is an existing file which can be written to.
-     * @param aContents contents to set
-     * @throws IllegalArgumentException if param does not comply.
-     * @throws FileNotFoundException if the file does not exist.
-     * @throws IOException if problem encountered during write.
-     */
-    static public void setContents(File aFile, ArrayList<String> aContents)
-            throws FileNotFoundException, IOException {
-        if (aFile == null) {
-            throw new IllegalArgumentException("File should not be null.");
-        }
-        if (!aFile.exists()) {
-            throw new FileNotFoundException("File does not exist: " + aFile);
-        }
-        if (!aFile.isFile()) {
-            throw new IllegalArgumentException("Should not be a directory: " + aFile);
-        }
-        if (!aFile.canWrite()) {
-            throw new IllegalArgumentException("File cannot be written: " + aFile);
-        }
-        FileWriter fw = new FileWriter(aFile);
-        try ( //use buffering
-                Writer output = new BufferedWriter(fw)) {
-            //FileWriter always assumes default encoding is OK!
-            for (String line : aContents) {
-                output.write(line);
-                output.write("\n");
-            }
-        } finally {
-            fw.close();
-        }
     }
 
     public static void reload() throws VMException {
