@@ -1059,6 +1059,7 @@ public class ValidationManagerUI extends UI {
         tree.setItemCaption(s, "Step # " + s.getStepSequence());
         tree.setItemIcon(s, stepIcon);
         tree.setParent(s, s.getTestCase());
+        tree.setChildrenAllowed(s, false);
     }
 
     private void addRequirement(Requirement req, Tree tree) {
