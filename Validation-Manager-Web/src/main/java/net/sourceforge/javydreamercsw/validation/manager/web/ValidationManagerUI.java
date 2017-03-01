@@ -7,6 +7,7 @@ import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.converter.Converter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
@@ -25,6 +26,7 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -37,6 +39,7 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecPK;
 import com.validation.manager.core.db.SpecLevel;
+import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
@@ -45,14 +48,18 @@ import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
+import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
@@ -81,8 +88,9 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons specIcon = VaadinIcons.BOOK;
     private final VaadinIcons requirementIcon = VaadinIcons.PIN;
     private final VaadinIcons testSuiteIcon = VaadinIcons.FILE_TREE;
-    private final VaadinIcons testPlanIcon = VaadinIcons.FILE_TREE_SUB;
+    private final VaadinIcons testPlanIcon = VaadinIcons.FILE_TREE_SMALL;
     private final VaadinIcons testIcon = VaadinIcons.FILE_TEXT;
+    private final VaadinIcons stepIcon = VaadinIcons.FILE_TREE_SUB;
     private final Tree tree = new Tree();
 
     /**
@@ -186,6 +194,89 @@ public class ValidationManagerUI extends UI {
         updateScreen();
     }
 
+    private void displayStep(Step s) {
+        displayStep(s, false);
+    }
+
+    private void displayStep(Step s, boolean edit) {
+        Panel form = new Panel("Step Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
+        binder.setItemDataSource(s);
+        Field<?> sequence = binder.buildAndBind("Sequence", "stepSequence");
+        layout.addComponent(sequence);
+        TextField text = new TextField("Text");
+        text.setConverter(new ByteToStringConverter());
+        binder.bind(text, "text");
+        layout.addComponent(text);
+        TextField result = new TextField("Expected Result");
+        result.setConverter(new ByteToStringConverter());
+        binder.bind(result, "expectedResult");
+        layout.addComponent(result);
+        Field<?> notes = binder.buildAndBind("Notes", "notes");
+        layout.addComponent(notes);
+        if (edit) {
+            if (s.getStepPK() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        s.setExpectedResult(result.getValue()
+                                .getBytes("UTF-8"));
+                        s.setNotes(notes.getValue().toString());
+                        s.setStepSequence(Integer.parseInt(sequence.getValue().toString()));
+                        s.setTestCase((TestCase) tree.getValue());
+                        s.setText(text.getValue().getBytes("UTF-8"));
+                        new StepJpaController(DataBaseManager
+                                .getEntityManagerFactory()).create(s);
+                        form.setVisible(false);
+                        //Recreate the tree to show the addition
+                        updateProjectList();
+                        buildProjectTree();
+                        displayStep(s);
+                        updateScreen();
+                        buildProjectTree();
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error creating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(save);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        s.setExpectedResult(result.getValue()
+                                .getBytes("UTF-8"));
+                        s.setNotes(notes.getValue().toString());
+                        s.setStepSequence(Integer.parseInt(sequence.getValue().toString()));
+                        s.setText(text.getValue().getBytes("UTF-8"));
+                        new StepJpaController(DataBaseManager
+                                .getEntityManagerFactory()).edit(s);
+                        displayStep(s, true);
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(update);
+            }
+        }
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        layout.setSizeFull();
+        form.setSizeFull();
+        right = form;
+        updateScreen();
+    }
+
     private void displayTestCase(TestCase t) {
         displayTestCase(t, false);
     }
@@ -199,13 +290,15 @@ public class ValidationManagerUI extends UI {
         binder.setItemDataSource(t);
         Field<?> name = binder.buildAndBind("Name", "name");
         layout.addComponent(name);
-        Field<?> summary = binder.buildAndBind("Summary", "summary");
+        TextField summary = new TextField("Summary");
+        summary.setConverter(new ByteToStringConverter());
+        binder.bind(summary, "summary");
         layout.addComponent(summary);
-        Field<?> creation = binder.buildAndBind("Created on", "creation_date");
+        Field<?> creation = binder.buildAndBind("Created on", "creationDate");
         layout.addComponent(creation);
         Field<?> active = binder.buildAndBind("Active", "active");
         layout.addComponent(active);
-        Field<?> open = binder.buildAndBind("Open", "open");
+        Field<?> open = binder.buildAndBind("Open", "isOpen");
         layout.addComponent(open);
         if (edit) {
             if (t.getId() == null) {
@@ -214,7 +307,7 @@ public class ValidationManagerUI extends UI {
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
                         t.setName(name.getValue().toString());
-                        t.setSummary(summary.getValue().toString().getBytes("UTF-8"));
+                        t.setSummary(summary.getValue().getBytes("UTF-8"));
                         t.setCreationDate((Date) creation.getValue());
                         t.setActive((Boolean) active.getValue());
                         t.setIsOpen((Boolean) open.getValue());
@@ -241,7 +334,7 @@ public class ValidationManagerUI extends UI {
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         t.setName(name.getValue().toString());
-                        t.setSummary(summary.getValue().toString().getBytes("UTF-8"));
+                        t.setSummary(summary.getValue().getBytes("UTF-8"));
                         t.setCreationDate((Date) creation.getValue());
                         t.setActive((Boolean) active.getValue());
                         t.setIsOpen((Boolean) open.getValue());
@@ -396,7 +489,6 @@ public class ValidationManagerUI extends UI {
                         buildProjectTree();
                         displayTestProject(tp, false);
                         updateScreen();
-                        buildProjectTree();
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
                         Notification.show("Error creating record!",
@@ -633,6 +725,11 @@ public class ValidationManagerUI extends UI {
                 TestCase tc = (TestCase) tree.getValue();
                 LOG.log(Level.FINE, "Selected: {0}", tc.getName());
                 displayTestCase(tc);
+            } else if (tree.getValue() instanceof Step) {
+                Step step = (Step) tree.getValue();
+                LOG.log(Level.FINE, "Selected: Step #{0}",
+                        step.getStepSequence());
+                displayStep(step);
             }
         });
         //Select item on right click as well
@@ -660,6 +757,10 @@ public class ValidationManagerUI extends UI {
                         createRequirementSpecNodeMenu(contextMenu);
                     } else if (tree.getValue() instanceof TestProject) {
                         createTestProjectMenu(contextMenu);
+                    } else if (tree.getValue() instanceof Step) {
+                        createStepMenu(contextMenu);
+                    } else if (tree.getValue() instanceof TestCase) {
+                        createTestCaseMenu(contextMenu);
                     } else {
                         //We are at the root
                         createRootMenu(contextMenu);
@@ -753,6 +854,32 @@ public class ValidationManagerUI extends UI {
                     Requirement r = new Requirement();
                     r.setRequirementSpecNode((RequirementSpecNode) tree.getValue());
                     displayRequirement(r, true);
+                });
+    }
+
+    private void createTestCaseMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Step", VaadinIcons.PLUS);
+        ContextMenu.ContextMenuItem edit
+                = menu.addItem("Edit Test Case", VaadinIcons.EDIT);
+        edit.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayTestCase((TestCase) tree.getValue(), true);
+                });
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    Step s = new Step();
+                    s.setTestCase((TestCase) tree.getValue());
+                    displayStep(s, true);
+                });
+    }
+
+    private void createStepMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem edit
+                = menu.addItem("Edit Step", VaadinIcons.EDIT);
+        edit.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayStep((Step) tree.getValue(), true);
                 });
     }
 
@@ -923,7 +1050,7 @@ public class ValidationManagerUI extends UI {
     private void addTestPlan(TestPlan tp, Tree tree) {
         tree.addItem(tp);
         tree.setItemCaption(tp, tp.getName());
-        tree.setItemIcon(tp, testIcon);
+        tree.setItemIcon(tp, testPlanIcon);
         tree.setParent(tp, tp.getTestProject());
         if (!tp.getTestCaseList().isEmpty()) {
             tp.getTestCaseList().forEach((tc) -> {
@@ -937,6 +1064,19 @@ public class ValidationManagerUI extends UI {
         tree.setItemCaption(t, t.getName());
         tree.setItemIcon(t, testIcon);
         tree.setParent(t, plan);
+        List<Step> stepList = t.getStepList();
+        Collections.sort(stepList, (Step o1, Step o2)
+                -> o1.getStepSequence() - o2.getStepSequence());
+        stepList.forEach((s) -> {
+            addStep(s, tree);
+        });
+    }
+
+    private void addStep(Step s, Tree tree) {
+        tree.addItem(s);
+        tree.setItemCaption(s, "Step # " + s.getStepSequence());
+        tree.setItemIcon(s, stepIcon);
+        tree.setParent(s, s.getTestCase());
     }
 
     private void addRequirement(Requirement req, Tree tree) {
@@ -1034,5 +1174,37 @@ public class ValidationManagerUI extends UI {
             widgetset = "net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet")
     public static class Servlet extends VaadinServlet {
 
+    }
+
+    private static class ByteToStringConverter implements Converter<String, byte[]> {
+
+        @Override
+        public byte[] convertToModel(String value,
+                Class<? extends byte[]> targetType,
+                Locale locale) throws ConversionException {
+            try {
+                return value.getBytes("UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            return null;
+        }
+
+        @Override
+        public String convertToPresentation(byte[] value,
+                Class<? extends String> targetType, Locale locale)
+                throws ConversionException {
+            return value == null ? null : new String(value, StandardCharsets.UTF_8);
+        }
+
+        @Override
+        public Class<byte[]> getModelType() {
+            return byte[].class;
+        }
+
+        @Override
+        public Class<String> getPresentationType() {
+            return String.class;
+        }
     }
 }
