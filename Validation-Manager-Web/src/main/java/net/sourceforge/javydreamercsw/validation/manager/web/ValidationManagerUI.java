@@ -7,14 +7,20 @@ import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.event.ItemClickEvent;
+import com.vaadin.event.Transferable;
+import com.vaadin.event.dd.DragAndDropEvent;
+import com.vaadin.event.dd.DropHandler;
+import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
+import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
@@ -27,6 +33,9 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.Tree.TreeDragMode;
+import com.vaadin.ui.Tree.TreeDropCriterion;
+import com.vaadin.ui.Tree.TreeTargetDetails;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -59,9 +68,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
@@ -1114,6 +1127,167 @@ public class ValidationManagerUI extends UI {
             reset.start();
         }
         tree = new Tree();
+        // Set the tree in drag source mode
+        tree.setDragMode(TreeDragMode.NODE);
+        // Allow the tree to receive drag drops and handle them
+        tree.setDropHandler(new DropHandler() {
+            @Override
+            public AcceptCriterion getAcceptCriterion() {
+                TreeDropCriterion criterion = new TreeDropCriterion() {
+                    @Override
+                    protected Set<Object> getAllowedItemIds(
+                            DragAndDropEvent dragEvent, Tree tree) {
+                        HashSet<Object> allowed = new HashSet<>();
+                        tree.getItemIds().stream().filter((itemId)
+                                -> (itemId instanceof Step)).forEachOrdered((itemId) -> {
+                            allowed.add(itemId);
+                        });
+                        return allowed;
+                    }
+                };
+                return criterion;
+            }
+
+            @Override
+            public void drop(DragAndDropEvent event) {
+                // Wrapper for the object that is dragged
+                Transferable t = event.getTransferable();
+
+                // Make sure the drag source is the same tree
+                if (t.getSourceComponent() != tree) {
+                    return;
+                }
+
+                TreeTargetDetails target
+                        = (TreeTargetDetails) event.getTargetDetails();
+
+                // Get ids of the dragged item and the target item
+                Object sourceItemId = t.getData("itemId");
+                Object targetItemId = target.getItemIdOver();
+
+                LOG.log(Level.INFO, "Source: {0}", sourceItemId);
+                LOG.log(Level.INFO, "Target: {0}", targetItemId);
+
+                // On which side of the target the item was dropped
+                VerticalDropLocation location = target.getDropLocation();
+
+                HierarchicalContainer container
+                        = (HierarchicalContainer) tree.getContainerDataSource();
+
+                if (null != location) // Drop right on an item -> make it a child
+                {
+                    switch (location) {
+
+                        case MIDDLE:
+                            if (tree.areChildrenAllowed(targetItemId)) {
+                                tree.setParent(sourceItemId, targetItemId);
+                            }
+                            break;
+                        case TOP: {
+                            //for Steps we need to update the sequence number
+                            if (sourceItemId instanceof Step && targetItemId instanceof Step) {
+                                Step targetItem = (Step) targetItemId;
+                                Step sourceItem = (Step) sourceItemId;
+                                StepJpaController stepController
+                                        = new StepJpaController(DataBaseManager.getEntityManagerFactory());
+//                                TestCaseJpaController tcController
+//                                        = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
+                                boolean valid = false;
+                                if (targetItem.getTestCase().equals(sourceItem.getTestCase())) {
+                                    //Same Test Case, just re-arrange
+                                    LOG.info("Same Test Case!");
+                                    SortedMap<Integer, Step> map = new TreeMap<>();
+                                    targetItem.getTestCase().getStepList().forEach((s) -> {
+                                        map.put(s.getStepSequence(), s);
+                                    });
+                                    //Now swap the two that switched
+                                    swapValues(map, sourceItem.getStepSequence(),
+                                            targetItem.getStepSequence());
+                                    //Now update the sequence numbers
+                                    int count = 0;
+                                    for (Entry<Integer, Step> entry : map.entrySet()) {
+                                        entry.getValue().setStepSequence(++count);
+                                        try {
+                                            stepController.edit(entry.getValue());
+                                        } catch (Exception ex) {
+                                            Exceptions.printStackTrace(ex);
+                                        }
+                                    }
+                                    valid = true;
+                                } else {
+                                    //Diferent Test Case
+                                    LOG.info("Different Test Case!");
+//                                    //Remove from source test case
+//                                    SortedMap<Integer, Step> map = new TreeMap<>();
+//                                    sourceItem.getTestCase().getStepList().forEach((s) -> {
+//                                        map.put(s.getStepSequence(), s);
+//                                    });
+//                                    //Now swap the two that switched
+//                                    //First we remove the one from the source Test Case
+//                                    Step removed = map.remove(sourceItem.getStepSequence() - 1);
+//                                    sourceItem.getTestCase().getStepList().remove(removed);
+//                                    removed.setTestCase(targetItem.getTestCase());
+//                                    try {
+//                                        stepController.edit(removed);
+//                                        tcController.edit(sourceItem.getTestCase());
+//                                    } catch (NonexistentEntityException ex) {
+//                                        Exceptions.printStackTrace(ex);
+//                                    } catch (Exception ex) {
+//                                        Exceptions.printStackTrace(ex);
+//                                    }
+//                                    //Now update the sequence numbers
+//                                    int count = 0;
+//                                    for (Entry<Integer, Step> entry : map.entrySet()) {
+//                                        entry.getValue().setStepSequence(++count);
+//                                        try {
+//                                            stepController.edit(entry.getValue());
+//                                        } catch (Exception ex) {
+//                                            Exceptions.printStackTrace(ex);
+//                                        }
+//                                    }
+//                                    //And add it to the target test Case
+//                                    SortedMap<Integer, Step> map2 = new TreeMap<>();
+//                                    targetItem.getTestCase().getStepList().forEach((s) -> {
+//                                        map2.put(s.getStepSequence(), s);
+//                                    });
+//                                    map2.put(targetItem.getStepSequence() - 1, removed);
+//                                    count = 0;
+//                                    for (Entry<Integer, Step> entry : map2.entrySet()) {
+//                                        entry.getValue().setStepSequence(++count);
+//                                        try {
+//                                            stepController.edit(entry.getValue());
+//                                        } catch (Exception ex) {
+//                                            Exceptions.printStackTrace(ex);
+//                                        }
+//                                    }
+//                                    //Add it to the Test Case
+//                                    targetItem.getTestCase().getStepList().add(removed);
+                                }
+                                if (valid) {
+                                    // Drop at the top of a subtree -> make it previous
+                                    Object parentId = container.getParent(targetItemId);
+                                    container.setParent(sourceItemId, parentId);
+                                    container.moveAfterSibling(sourceItemId, targetItemId);
+                                    container.moveAfterSibling(targetItemId, sourceItemId);
+                                    buildProjectTree(targetItem);
+                                    updateScreen();
+                                }
+                            }
+                            break;
+                        }
+                        case BOTTOM: {
+                            // Drop below another item -> make it next
+                            Object parentId = container.getParent(targetItemId);
+                            container.setParent(sourceItemId, parentId);
+                            container.moveAfterSibling(sourceItemId, targetItemId);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
         tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
             if (tree.getValue() instanceof Project) {
                 Project p = (Project) tree.getValue();
@@ -1191,6 +1365,13 @@ public class ValidationManagerUI extends UI {
         updateProjectList();
         updateScreen();
         Page.getCurrent().setTitle("Validation Manager");
+    }
+
+    private static <V> void swapValues(SortedMap m, int i0, int i1) {
+        Object first = m.get(i0);
+        Object second = m.get(i1);
+        m.put(i0, second);
+        m.put(i1, first);
     }
 
     private void updateProjectList() {
