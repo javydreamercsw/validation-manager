@@ -27,6 +27,7 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
@@ -52,6 +53,7 @@ import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.ProjectServer;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -59,6 +61,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
@@ -189,7 +192,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = form;
+        right = new Panel(form);
         updateScreen();
     }
 
@@ -216,6 +219,27 @@ public class ValidationManagerUI extends UI {
         layout.addComponent(result);
         Field<?> notes = binder.buildAndBind("Notes", "notes");
         layout.addComponent(notes);
+        tree.select(s);
+        Project p = getParentProject();
+        List<Requirement> reqs = ProjectServer.getRequirements(p);
+        Collections.sort(reqs, (Requirement o1, Requirement o2)
+                -> o1.getUniqueId().compareTo(o2.getUniqueId()));
+        BeanItemContainer<Requirement> requirementContainer
+                = new BeanItemContainer<>(Requirement.class, reqs);
+        TwinColSelect requirements
+                = new TwinColSelect("Linked Requirements");
+        requirements.setItemCaptionPropertyId("uniqueId");
+        requirements.setContainerDataSource(requirementContainer);
+        requirements.setRows(5);
+        requirements.setLeftColumnCaption("Available Requirements");
+        requirements.setRightColumnCaption("Linked Requirements");
+        if (s.getRequirementList() != null) {
+            s.getRequirementList().forEach((r) -> {
+                requirements.select(r);
+            });
+        }
+        requirements.setEnabled(edit);
+        layout.addComponent(requirements);
         if (edit) {
             if (s.getStepPK() == null) {
                 //Creating a new one
@@ -230,6 +254,13 @@ public class ValidationManagerUI extends UI {
                                 .getValue().toString()));
                         s.setTestCase((TestCase) tree.getValue());
                         s.setText(text.getValue().getBytes("UTF-8"));
+                        if (s.getRequirementList() == null) {
+                            s.setRequirementList(new ArrayList<>());
+                        }
+                        s.getRequirementList().clear();
+                        ((Set<Requirement>) requirements.getValue()).forEach((r) -> {
+                            s.getRequirementList().add(r);
+                        });
                         new StepJpaController(DataBaseManager
                                 .getEntityManagerFactory()).create(s);
                         form.setVisible(false);
@@ -256,6 +287,13 @@ public class ValidationManagerUI extends UI {
                         s.setNotes(notes.getValue().toString());
                         s.setStepSequence(Integer.parseInt(sequence.getValue().toString()));
                         s.setText(text.getValue().getBytes("UTF-8"));
+                        if (s.getRequirementList() == null) {
+                            s.setRequirementList(new ArrayList<>());
+                        }
+                        s.getRequirementList().clear();
+                        ((Set<Requirement>) requirements.getValue()).forEach((r) -> {
+                            s.getRequirementList().add(r);
+                        });
                         new StepJpaController(DataBaseManager
                                 .getEntityManagerFactory()).edit(s);
                         displayStep(s, true);
@@ -273,7 +311,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = form;
+        right = new Panel(form);
         updateScreen();
     }
 
@@ -364,7 +402,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = form;
+        right = new Panel(form);
         updateScreen();
     }
 
@@ -449,7 +487,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = form;
+        right = new Panel(form);
         updateScreen();
     }
 
@@ -530,7 +568,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = form;
+        right = new Panel(form);
         updateScreen();
     }
 
@@ -635,7 +673,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = form;
+        right = new Panel(form);
         updateScreen();
     }
 
@@ -661,7 +699,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = form;
+        right = new Panel(form);
         updateScreen();
     }
 
@@ -842,10 +880,16 @@ public class ValidationManagerUI extends UI {
         HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
         hsplit.setLocked(true);
         if (left != null) {
+            if (!(left instanceof Panel)) {
+                left = new Panel(left);
+            }
             hsplit.setFirstComponent(left);
         }
         //Build the right component
         if (right != null) {
+            if (!(right instanceof Panel)) {
+                right = new Panel(right);
+            }
             hsplit.setSecondComponent(right);
         }
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
@@ -1163,7 +1207,7 @@ public class ValidationManagerUI extends UI {
             projects.add(p);
         });
         buildProjectTree();
-        left = tree;
+        left = new Panel(tree);
         LOG.log(Level.FINE, "Found {0} root projects!", projects.size());
     }
 
@@ -1180,6 +1224,18 @@ public class ValidationManagerUI extends UI {
         } else {
             subwindow.setVisible(true);
         }
+    }
+
+    private Project getParentProject() {
+        Object current = tree.getValue();
+        Project result = null;
+        while (current != null && !(current instanceof Project)) {
+            current = tree.getParent(current);
+        }
+        if (current instanceof Project) {
+            result = (Project) current;
+        }
+        return result;
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
