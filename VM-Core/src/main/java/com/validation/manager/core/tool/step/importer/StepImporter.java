@@ -1,14 +1,14 @@
 package com.validation.manager.core.tool.step.importer;
 
-import com.validation.manager.core.ImporterInterface;
-import com.validation.manager.core.tool.requirement.importer.*;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
+import com.validation.manager.core.ImporterInterface;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.StepJpaController;
+import com.validation.manager.core.tool.requirement.importer.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -47,17 +47,17 @@ public class StepImporter implements ImporterInterface<Step> {
     private final TestCase tc;
     private static final Logger LOG
             = getLogger(StepImporter.class.getName());
-    private static final List<String> columns = new ArrayList<>();
-    private static final ResourceBundle rb
+    private static final List<String> COLUMNS = new ArrayList<>();
+    private static final ResourceBundle RB
             = getBundle(
                     "com.validation.manager.resources.VMMessages", getDefault());
 
     static {
-        columns.add("Sequence");
-        columns.add("Text");
-        columns.add("Related Requirements (Optional)");
-        columns.add("Expected Result (Optional)");
-        columns.add("Notes (Optional)");
+        COLUMNS.add("Sequence");
+        COLUMNS.add("Text");
+        COLUMNS.add("Related Requirements (Optional)");
+        COLUMNS.add("Expected Result (Optional)");
+        COLUMNS.add("Notes (Optional)");
     }
 
     public StepImporter(File toImport, TestCase tc) {
@@ -117,8 +117,8 @@ public class StepImporter implements ImporterInterface<Step> {
                         }
                         if (cells < 2) {
                             throw new TestImportException(
-                                    rb.getString("message.step.import.missing.column")
-                                    .replaceAll("%c", "" + cells));
+                                    RB.getString("message.step.import.missing.column")
+                                            .replaceAll("%c", "" + cells));
                         }
                         Step step = new Step();
                         step.setRequirementList(new ArrayList<>());
@@ -152,7 +152,7 @@ public class StepImporter implements ImporterInterface<Step> {
                                         Integer val
                                                 = value.contains(".")
                                                 ? valueOf(value.substring(0,
-                                                                value.indexOf(".")))
+                                                        value.indexOf(".")))
                                                 : valueOf(value);
                                         step.setStepSequence(val);
                                     }
@@ -207,11 +207,7 @@ public class StepImporter implements ImporterInterface<Step> {
                         step.setTestCase(tc);
                         steps.add(step);
                     }
-                } catch (InvalidFormatException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                } catch (FileNotFoundException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
+                } catch (InvalidFormatException | IOException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 } finally {
                     try {
@@ -264,7 +260,7 @@ public class StepImporter implements ImporterInterface<Step> {
         f.setColor((short) Font.COLOR_NORMAL);
         cs.setFont(f);
         Row newRow = sheet.createRow(0);
-        for (String label : columns) {
+        for (String label : COLUMNS) {
             Cell newCell = newRow.createCell(column);
             newCell.setCellStyle(cs);
             newCell.setCellValue(label);

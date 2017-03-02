@@ -10,11 +10,11 @@ import static java.util.ResourceBundle.getBundle;
  */
 public class StepImportException extends Exception {
 
-    private static ResourceBundle rb =
-            getBundle(
-            "com.validation.manager.resources.VMMessages", getDefault());
+    private static final ResourceBundle RB
+            = getBundle("com.validation.manager.resources.VMMessages",
+                    getDefault());
 
     public StepImportException(String message) {
-        super(rb.containsKey(message) ? rb.getString(message) : message);
+        super(RB.containsKey(message) ? RB.getString(message) : message);
     }
 }
