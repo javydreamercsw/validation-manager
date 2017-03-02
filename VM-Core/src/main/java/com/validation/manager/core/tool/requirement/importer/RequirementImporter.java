@@ -52,13 +52,13 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     private final RequirementSpecNode rsn;
     private static final Logger LOG
             = getLogger(RequirementImporter.class.getSimpleName());
-    private static final List<String> columns = new ArrayList<>();
+    private static final List<String> COLUMNS = new ArrayList<>();
 
     static {
-        columns.add("Unique ID");
-        columns.add("Description");
-        columns.add("Requirement Type");
-        columns.add("Notes");
+        COLUMNS.add("Unique ID");
+        COLUMNS.add("Description");
+        COLUMNS.add("Requirement Type");
+        COLUMNS.add("Notes");
     }
 
     public RequirementImporter(File toImport, RequirementSpecNode rsn) {
@@ -81,7 +81,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     @Override
     public List<Requirement> importFile(boolean header) throws
             VMException {
-        List<Requirement> answer=new ArrayList<>();
+        List<Requirement> answer = new ArrayList<>();
         List<Integer> errors = new ArrayList<>();
         HashMap<String, Object> parameters = new HashMap<>();
         List<Object> result;
@@ -206,9 +206,9 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                     && !requirement.getUniqueId().isEmpty() :
                                     "Invalid requirement detected!";
                             try {
-                               if(processRequirement(requirement)){
-                                   answer.add(requirement);
-                               }
+                                if (processRequirement(requirement)) {
+                                    answer.add(requirement);
+                                }
                             } catch (NonexistentEntityException ex) {
                                 Exceptions.printStackTrace(ex);
                             } catch (Exception ex) {
@@ -216,11 +216,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                             }
                         }
                     }
-                } catch (InvalidFormatException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                } catch (FileNotFoundException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
+                } catch (InvalidFormatException | IOException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 } finally {
                     try {
@@ -365,7 +361,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         f.setColor((short) Font.COLOR_NORMAL);
         cs.setFont(f);
         Row newRow = sheet.createRow(0);
-        for (String label : columns) {
+        for (String label : COLUMNS) {
             Cell newCell = newRow.createCell(column);
             newCell.setCellStyle(cs);
             newCell.setCellValue(label);
