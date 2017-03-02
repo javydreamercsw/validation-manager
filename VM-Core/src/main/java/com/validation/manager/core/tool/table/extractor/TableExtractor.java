@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -47,7 +46,8 @@ public class TableExtractor {
         this.source = source;
     }
 
-    private List<XWPFTable> extractTablesFromWord() throws FileNotFoundException, IOException {
+    private List<XWPFTable> extractTablesFromWord() throws
+            FileNotFoundException, IOException {
         List<XWPFTable> tables;
         try ( //Word documents
                 InputStream fis = new FileInputStream(source)) {
@@ -123,9 +123,9 @@ public class TableExtractor {
             Iterator<Row> rowIterator = sheet.iterator();
             int rowNum = 0;
             int columns = 0;
-            Map<Integer, Vector> data = new HashMap<>();
+            Map<Integer, ArrayList<Object>> data = new HashMap<>();
             while (rowIterator.hasNext()) {
-                Vector cells = new Vector();
+                ArrayList<Object> cells = new ArrayList<>();
                 Row row = rowIterator.next();
                 Iterator<Cell> cellIterator = row.cellIterator();
                 while (cellIterator.hasNext()) {
@@ -168,10 +168,10 @@ public class TableExtractor {
             Iterator<Row> rowIterator = sheet.iterator();
             int rowNum = 0;
             int columns = 0;
-            Map<Integer, Vector> data = new HashMap<>();
+            Map<Integer, ArrayList<Object>> data = new HashMap<>();
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
-                Vector cells = new Vector();
+                ArrayList<Object> cells = new ArrayList<>();
                 Iterator<Cell> cellIterator = row.cellIterator();
                 while (cellIterator.hasNext()) {
                     Cell cell = cellIterator.next();
@@ -213,19 +213,6 @@ public class TableExtractor {
         List<DefaultTableModel> tables;
         //use buffering
         InputStream is = new FileInputStream(writeTablesToFile());
-        InputStream buffer = new BufferedInputStream(is);
-        try (ObjectInput input = new ObjectInputStream(buffer)) {
-            //deserialize the List
-            tables = (List<DefaultTableModel>) input.readObject();
-        }
-        return tables;
-    }
-
-    private List<DefaultTableModel> extractTablesFromExcel(File file)
-            throws FileNotFoundException, IOException, ClassNotFoundException {
-        List<DefaultTableModel> tables;
-        //use buffering
-        InputStream is = new FileInputStream(file);
         InputStream buffer = new BufferedInputStream(is);
         try (ObjectInput input = new ObjectInputStream(buffer)) {
             //deserialize the List
