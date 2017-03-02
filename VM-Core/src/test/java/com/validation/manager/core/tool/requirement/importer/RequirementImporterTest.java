@@ -73,7 +73,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             RequirementImporter instance = new RequirementImporter(file,
                     new RequirementSpecNodeJpaController(
                             getEntityManagerFactory())
-                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
+                            .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
             //It has headers
             instance.importFile(true);
             assertTrue(instance.processImport());
@@ -119,7 +119,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             RequirementImporter instance = new RequirementImporter(file,
                     new RequirementSpecNodeJpaController(
                             getEntityManagerFactory())
-                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
+                            .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
             instance.importFile();
             assertTrue(instance.processImport());
         } catch (Exception ex) {
@@ -170,7 +170,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 RequirementImporter instance = new RequirementImporter(file,
                         new RequirementSpecNodeJpaController(
                                 getEntityManagerFactory())
-                        .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
+                                .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
                 List<Requirement> imported = instance.importFile();
                 assertTrue(instance.processImport());
                 assertEquals(19, imported.size());
@@ -220,7 +220,7 @@ public class RequirementImporterTest extends AbstractVMTestCase {
             RequirementImporter instance = new RequirementImporter(file,
                     new RequirementSpecNodeJpaController(
                             getEntityManagerFactory())
-                    .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
+                            .findRequirementSpecNode(rsns.getRequirementSpecNodePK()));
             assertTrue(instance.importFile(true).size() == 20);
             assertTrue(instance.processImport());
         } catch (Exception ex) {
