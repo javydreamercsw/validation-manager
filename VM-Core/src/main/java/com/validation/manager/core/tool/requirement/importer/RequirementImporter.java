@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,6 +54,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     private static final Logger LOG
             = getLogger(RequirementImporter.class.getSimpleName());
     private static final List<String> COLUMNS = new ArrayList<>();
+    private final Map<String, Requirement> queue = new HashMap<>();
 
     static {
         COLUMNS.add("Unique ID");
@@ -69,9 +71,9 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
 
     @Override
     public List<Requirement> importFile() throws RequirementImportException {
-        List<Requirement> importedRequirements = null;
+        List<Requirement> importedRequirements = new ArrayList<>();
         try {
-            importedRequirements = importFile(false);
+            importedRequirements.addAll(importFile(false));
         } catch (UnsupportedOperationException | VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
@@ -81,7 +83,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     @Override
     public List<Requirement> importFile(boolean header) throws
             VMException {
-        List<Requirement> answer = new ArrayList<>();
+        queue.clear();
         List<Integer> errors = new ArrayList<>();
         HashMap<String, Object> parameters = new HashMap<>();
         List<Object> result;
@@ -206,12 +208,12 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                     && !requirement.getUniqueId().isEmpty() :
                                     "Invalid requirement detected!";
                             try {
-                                if (processRequirement(requirement)) {
-                                    answer.add(requirement);
+                                if (!exists(requirement)
+                                        && !queue.containsKey(requirement.getUniqueId())) {
+                                    queue.put(requirement.getUniqueId(),
+                                            requirement);
                                 }
-                            } catch (NonexistentEntityException ex) {
-                                Exceptions.printStackTrace(ex);
-                            } catch (Exception ex) {
+                            } catch (IllegalOrphanException | NonexistentEntityException ex) {
                                 Exceptions.printStackTrace(ex);
                             }
                         }
@@ -302,30 +304,38 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             if (!errors.isEmpty()) {
                 getDefault().lookup(MessageHandler.class).info(sb.toString());
             }
-            return answer;
+            return new ArrayList(queue.values());
         }
     }
 
-    private boolean processRequirement(Requirement requirement)
-            throws IllegalOrphanException, NonexistentEntityException, Exception {
-        boolean result = true;
-        Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
+    public boolean exists(Requirement requirement) throws
+            IllegalOrphanException, NonexistentEntityException {
+        Project project = requirement.getRequirementSpecNode()
+                .getRequirementSpec().getProject();
         List<Requirement> existing = getRequirements(project);
         LOG.log(Level.INFO, "Processing: {0}", requirement.getUniqueId());
         boolean exists = false;
         for (Requirement r : existing) {
             if (r.getUniqueId() == null) {
                 LOG.warning("Detected requirement with null unique id!");
-                new RequirementJpaController(getEntityManagerFactory()).destroy(r.getId());
+                new RequirementJpaController(getEntityManagerFactory())
+                        .destroy(r.getId());
             } else {
                 if (r.getUniqueId().equals(requirement.getUniqueId())) {
                     exists = true;
-                    result = false;
                     break;
                 }
             }
         }
-        if (exists) {
+        return exists;
+    }
+
+    private boolean processRequirement(Requirement requirement)
+            throws IllegalOrphanException, NonexistentEntityException, Exception {
+        boolean result = true;
+        Project project = requirement.getRequirementSpecNode()
+                .getRequirementSpec().getProject();
+        if (exists(requirement)) {
             MessageHandler handler = getDefault().lookup(MessageHandler.class);
             if (handler != null) {
                 String error = "Requirement " + requirement.getUniqueId()
@@ -334,19 +344,32 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                 LOG.warning(error);
                 handler.error(error);
             }
+            result = false;
         } else {
-            new RequirementJpaController(getEntityManagerFactory()).create(requirement);
+            new RequirementJpaController(getEntityManagerFactory())
+                    .create(requirement);
         }
         return result;
     }
 
     @Override
     public boolean processImport() throws VMException {
-        //Do nothing
-        return true;
+        try {
+            for (Requirement r : queue.values()) {
+                processRequirement(r);
+            }
+            queue.clear();
+            return true;
+        } catch (NonexistentEntityException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return false;
     }
 
-    public static File exportTemplate() throws FileNotFoundException, IOException, InvalidFormatException {
+    public static File exportTemplate() throws FileNotFoundException,
+            IOException, InvalidFormatException {
         File template = new File("Template.xls");
         template.createNewFile();
         org.apache.poi.ss.usermodel.Workbook wb = new HSSFWorkbook();
