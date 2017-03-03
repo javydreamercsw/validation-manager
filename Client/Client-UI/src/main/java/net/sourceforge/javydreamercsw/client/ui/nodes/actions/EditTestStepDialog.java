@@ -6,7 +6,6 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
-import java.awt.Component;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,7 +16,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.ListCellRenderer;
 import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
 
@@ -31,7 +29,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             = new ArrayList<>();
     private final boolean edit;
     private Step step;
-    private static final RequirementSelectionDialog dialog
+    private static final RequirementSelectionDialog DIALOG
             = new RequirementSelectionDialog(new javax.swing.JFrame(),
                     true);
 
@@ -60,17 +58,10 @@ public class EditTestStepDialog extends javax.swing.JDialog {
                 return linkedRequirements.get(i);
             }
         });
-        requirements.setCellRenderer(new ListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList list,
-                    Object value, int index, boolean isSelected,
-                    boolean cellHasFocus) {
-
-                return new JLabel(
-                        ((Requirement) ((DefaultListModel) requirements.getModel())
-                        .getElementAt(index)).getUniqueId());
-            }
-        });
+        requirements.setCellRenderer((JList list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus) -> new JLabel(
+                ((Requirement) ((DefaultListModel) requirements.getModel())
+                        .getElementAt(index)).getUniqueId()));
         if (edit) {
             //Get the selected Step
             step = Utilities.actionsGlobalContext().lookup(Step.class);
@@ -78,9 +69,9 @@ public class EditTestStepDialog extends javax.swing.JDialog {
             //Update the linked requirements
             linkedRequirements.clear();
             if (step.getRequirementList() != null) {
-                for (Requirement req : step.getRequirementList()) {
+                step.getRequirementList().forEach((req) -> {
                     ((DefaultListModel) requirements.getModel()).addElement(req);
-                }
+                });
             }
             //Update other fields
             if (step.getNotes() != null && !step.getNotes().trim().isEmpty()) {
@@ -259,7 +250,7 @@ public class EditTestStepDialog extends javax.swing.JDialog {
                 ss = new StepServer(Utilities.actionsGlobalContext().lookup(Step.class));
             } else {
                 tc = Utilities.actionsGlobalContext().lookup(TestCase.class);
-                TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
+                TestCaseServer tcs = new TestCaseServer(tc.getId());
                 ss = new StepServer(tc,
                         tcs.getStepList() == null ? 1 : tcs.getStepList().size() + 1, //Add at the end by default
                         text.getText().trim());
@@ -313,34 +304,31 @@ public class EditTestStepDialog extends javax.swing.JDialog {
 
     private void chooseRequirementsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chooseRequirementsActionPerformed
         /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                dialog.setInitial(linkedRequirements);
-                dialog.setLocationRelativeTo(null);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        dialog.dispose();
-                    }
-                });
-                dialog.setVisible(true);
-                //Wait for the dialog to be finished
-                while (dialog.isVisible()) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
+        java.awt.EventQueue.invokeLater(() -> {
+            DIALOG.setInitial(linkedRequirements);
+            DIALOG.setLocationRelativeTo(null);
+            DIALOG.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    DIALOG.dispose();
                 }
-                linkedRequirements.clear();
-                //Clear the model to catch any removals
-                ((DefaultListModel) requirements.getModel()).removeAllElements();
-                //Add the ones selected on the selection dialog.
-                for (Requirement req : dialog.getRequirements()) {
-                    ((DefaultListModel) requirements.getModel()).addElement(req);
+            });
+            DIALOG.setVisible(true);
+            //Wait for the dialog to be finished
+            while (DIALOG.isVisible()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
                 }
             }
+            linkedRequirements.clear();
+            //Clear the model to catch any removals
+            ((DefaultListModel) requirements.getModel()).removeAllElements();
+            //Add the ones selected on the selection dialog.
+            DIALOG.getRequirements().forEach((req) -> {
+                ((DefaultListModel) requirements.getModel()).addElement(req);
+            });
         });
     }//GEN-LAST:event_chooseRequirementsActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

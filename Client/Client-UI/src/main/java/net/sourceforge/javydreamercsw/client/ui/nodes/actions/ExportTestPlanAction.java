@@ -3,8 +3,8 @@ package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 import com.validation.manager.core.api.entity.manager.VMEntityManager;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
-import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.tool.message.MessageHandler;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -38,7 +38,7 @@ import org.openide.util.Utilities;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class ExportTestAction extends AbstractAction {
+public class ExportTestPlanAction extends AbstractAction {
 
     private final RequestProcessor RP
             = new RequestProcessor("Test Exporter", 1, true);
@@ -46,10 +46,10 @@ public class ExportTestAction extends AbstractAction {
     private ProgressHandle ph;
     boolean valid = false;
     private static final Logger LOG
-            = Logger.getLogger(ExportTestAction.class.getSimpleName());
+            = Logger.getLogger(ExportTestPlanAction.class.getSimpleName());
 
-    public ExportTestAction() {
-        super("Export Test",
+    public ExportTestPlanAction() {
+        super("Export Test Plan",
                 new ImageIcon("com/validation/manager/resources/icons/Signage/Add Square.png"));
     }
 
@@ -57,24 +57,24 @@ public class ExportTestAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
-            Test test = Utilities.actionsGlobalContext().lookup(Test.class);
+            TestPlan tp = Utilities.actionsGlobalContext().lookup(TestPlan.class);
 
             @Override
             public void run() {
                 ph = ProgressHandleFactory.createHandle("Test Exporter",
                         new Cancellable() {
 
-                            @Override
-                            public boolean cancel() {
-                                return handleCancel();
-                            }
-                        });
+                    @Override
+                    public boolean cancel() {
+                        return handleCancel();
+                    }
+                });
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
-                        Test test = Utilities.actionsGlobalContext().lookup(Test.class);
                         VMEntityManager manager = null;
-                        for (VMEntityManager m : Lookup.getDefault().lookupAll(VMEntityManager.class)) {
+                        for (VMEntityManager m : Lookup.getDefault()
+                                .lookupAll(VMEntityManager.class)) {
                             if (m.supportEntity(Requirement.class)) {
                                 manager = m;
                                 break;
@@ -108,20 +108,20 @@ public class ExportTestAction extends AbstractAction {
                                     }
                                     export.createNewFile();
                                     //Now export
-                                    if (test != null) {
+                                    if (tp != null) {
                                         HSSFWorkbook workbook
                                                 = new HSSFWorkbook();
                                         List<TestCase> testCaseList
-                                                = test.getTestCaseList();
+                                                = tp.getTestCaseList();
                                         //Get progress state
                                         int total = 0;
-                                        for (TestCase tc : testCaseList) {
-                                            total += tc.getStepList().size();
-                                        }
+                                        total = testCaseList.stream().map((tc)
+                                                -> tc.getStepList().size())
+                                                .reduce(total, Integer::sum);
                                         ph.switchToDeterminate(total);
                                         int progress = 0;
                                         for (TestCase tc : testCaseList) {
-                                            ph.setDisplayName("Exporting test Case: " + tc.getName());
+                                            ph.setDisplayName("Exporting Test Case: " + tc.getName());
                                             //Name can't have '/' on name
                                             String name = tc.getName()
                                                     .trim().replaceAll("/", "-");
@@ -225,7 +225,7 @@ public class ExportTestAction extends AbstractAction {
                             //TODO: internationalize
                             Lookup.getDefault().lookup(MessageHandler.class)
                                     .plain("Test "
-                                            + (test == null ? "" : test.getName())
+                                            + (tp == null ? "" : tp.getName())
                                             + " export completed succesfully!");
                         } else {
                             Lookup.getDefault().lookup(MessageHandler.class)

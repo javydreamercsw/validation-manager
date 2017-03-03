@@ -1,10 +1,8 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
 import com.validation.manager.core.db.Project;
-import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.server.core.RequirementSpecServer;
-import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
@@ -14,7 +12,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementSpecDialog extends AbstractCreationDialog {
+public final class RequirementSpecDialog extends AbstractCreationDialog {
 
     /**
      * Creates new form RequirementSpecDialog
@@ -165,7 +163,7 @@ public class RequirementSpecDialog extends AbstractCreationDialog {
         }
         try {
             //Add default node
-            rss.addSpecNode("Root", "", "", new ArrayList<Requirement>());
+            rss.addSpecNode("Root", "", "");
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
