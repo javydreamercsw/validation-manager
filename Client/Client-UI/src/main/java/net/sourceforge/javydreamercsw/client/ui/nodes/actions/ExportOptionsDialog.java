@@ -7,7 +7,7 @@ package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 public class ExportOptionsDialog extends javax.swing.JDialog {
 
     private boolean usePlan = true;
-    private boolean useTest = true;
+    private boolean useTestCase = true;
     private boolean useStep = true;
     private boolean useDescription = true;
 
@@ -84,19 +84,21 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(ok)
-                .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(description)
-                    .addComponent(testCase)
-                    .addComponent(step)
-                    .addComponent(jLabel1)
-                    .addComponent(testPlan))
-                .addContainerGap(242, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(step)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(ok))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(description)
+                            .addComponent(testCase)
+                            .addComponent(jLabel1)
+                            .addComponent(testPlan))
+                        .addGap(0, 236, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -109,11 +111,15 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
                 .addComponent(description)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(testCase)
-                .addGap(3, 3, 3)
-                .addComponent(step)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(ok)
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                        .addComponent(ok)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(step)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         pack();
@@ -128,7 +134,7 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_testPlanActionPerformed
 
     private void testCaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testCaseActionPerformed
-        useTest = testCase.isSelected();
+        useTestCase = testCase.isSelected();
     }//GEN-LAST:event_testCaseActionPerformed
 
     private void stepActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stepActionPerformed
@@ -146,7 +152,7 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -178,10 +184,10 @@ public class ExportOptionsDialog extends javax.swing.JDialog {
     }
 
     /**
-     * @return the useTest
+     * @return the useTestCase
      */
-    public boolean isUseTest() {
-        return useTest;
+    public boolean isUseTestCase() {
+        return useTestCase;
     }
 
     /**
