@@ -38,6 +38,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
 import static org.apache.poi.ss.usermodel.WorkbookFactory.create;
 import org.openide.util.Exceptions;
 import static org.openide.util.Lookup.getDefault;
@@ -55,6 +56,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             = getLogger(RequirementImporter.class.getSimpleName());
     private static final List<String> COLUMNS = new ArrayList<>();
     private final Map<String, Requirement> queue = new HashMap<>();
+    private InputStream inp;
 
     static {
         COLUMNS.add("Unique ID");
@@ -67,6 +69,16 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         assert rsn != null : "Requirement Spec Node is null?";
         this.toImport = toImport;
         this.rsn = rsn;
+    }
+
+    public Workbook loadFile() throws FileNotFoundException,
+            IOException, InvalidFormatException {
+        if (toImport != null && toImport.exists()) {
+            inp = new FileInputStream(toImport);
+            Workbook wb = create(inp);
+            return wb;
+        }
+        return null;
     }
 
     @Override
@@ -97,11 +109,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             //Excel support
             if (toImport.getName().endsWith(".xls")
                     || toImport.getName().endsWith(".xlsx")) {
-                InputStream inp = null;
                 try {
-                    inp = new FileInputStream(toImport);
-                    org.apache.poi.ss.usermodel.Workbook wb
-                            = create(inp);
+                    Workbook wb = loadFile();
                     org.apache.poi.ss.usermodel.Sheet sheet = wb.getSheetAt(0);
                     int rows = sheet.getPhysicalNumberOfRows();
                     int r = 0;
