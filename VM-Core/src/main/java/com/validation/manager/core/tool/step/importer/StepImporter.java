@@ -3,7 +3,6 @@ package com.validation.manager.core.tool.step.importer;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.ImporterInterface;
-import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
@@ -223,7 +222,7 @@ public class StepImporter implements ImporterInterface<Step> {
     }
 
     @Override
-    public boolean processImport() throws VMException {
+    public boolean processImport() throws TestCaseImportException {
         boolean result = false;
         for (Step step : steps) {
             try {
@@ -232,7 +231,7 @@ public class StepImporter implements ImporterInterface<Step> {
                         .create(step);
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
-                throw new VMException(ex);
+                throw new TestCaseImportException(ex);
             }
         }
         return result;
