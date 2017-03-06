@@ -146,6 +146,16 @@ public class StepImporter implements ImporterInterface<Step> {
                                                 ? valueOf(value.substring(0,
                                                         value.indexOf(".")))
                                                 : valueOf(value);
+                                        if (!tc.getStepList().isEmpty()) {
+                                            int max = 0;
+                                            for (Step s : tc.getStepList()) {
+                                                if (s.getStepSequence() > max) {
+                                                    max = s.getStepSequence();
+                                                }
+                                            }
+                                            //Make sure there isn't one on that sequence already
+                                            val += max;
+                                        }
                                         step.setStepSequence(val);
                                     }
                                     break;
