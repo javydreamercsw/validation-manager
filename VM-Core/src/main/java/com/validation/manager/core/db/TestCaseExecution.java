@@ -1,7 +1,9 @@
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,10 +11,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -27,6 +32,9 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "TestCaseExecution.findById",
             query = "SELECT t FROM TestCaseExecution t WHERE t.id = :id")})
 public class TestCaseExecution implements Serializable {
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "testCaseExecution")
+    private List<ExecutionStep> executionStepList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -74,5 +82,15 @@ public class TestCaseExecution implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCaseExecution[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
+    }
+
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
     }
 }

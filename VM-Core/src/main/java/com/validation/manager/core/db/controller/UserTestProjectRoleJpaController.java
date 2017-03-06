@@ -40,8 +40,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
         if (userTestProjectRole.getUserTestProjectRolePK() == null) {
             userTestProjectRole.setUserTestProjectRolePK(new UserTestProjectRolePK());
         }
-        userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         EntityManager em = null;
         try {
@@ -89,8 +89,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
     }
 
     public void edit(UserTestProjectRole userTestProjectRole) throws NonexistentEntityException, Exception {
-        userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         EntityManager em = null;
         try {

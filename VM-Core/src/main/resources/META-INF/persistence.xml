@@ -8,6 +8,8 @@
     <class>com.validation.manager.core.db.AttachmentType</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.ExecutionResult</class>
+    <class>com.validation.manager.core.db.ExecutionStep</class>
     <class>com.validation.manager.core.db.FailureMode</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
@@ -64,6 +66,8 @@
     <class>com.validation.manager.core.db.AttachmentType</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.ExecutionResult</class>
+    <class>com.validation.manager.core.db.ExecutionStep</class>
     <class>com.validation.manager.core.db.FailureMode</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
@@ -122,6 +126,8 @@
     <class>com.validation.manager.core.db.AttachmentType</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.ExecutionResult</class>
+    <class>com.validation.manager.core.db.ExecutionStep</class>
     <class>com.validation.manager.core.db.FailureMode</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>

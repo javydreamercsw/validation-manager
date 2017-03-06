@@ -50,6 +50,13 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
 public class TestCase extends Versionable implements Serializable {
 
+    @Lob
+    @Column(name = "summary")
+    private byte[] summary;
+    @Lob
+    @Column(name = "expected_results")
+    private byte[] expectedResults;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -69,9 +76,6 @@ public class TestCase extends Versionable implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
-    @Lob
-    @Column(name = "summary")
-    private byte[] summary;
     @Basic(optional = false)
     @NotNull
     @Column(name = "creation_date")
@@ -81,9 +85,6 @@ public class TestCase extends Versionable implements Serializable {
     private Boolean active;
     @Column(name = "is_open")
     private Boolean isOpen;
-    @Lob
-    @Column(name = "expected_results")
-    private byte[] expectedResults;
     @JoinTable(name = "test_plan_has_test_case", joinColumns = {
         @JoinColumn(name = "test_case_id", referencedColumnName = "id")},
             inverseJoinColumns = {
@@ -123,14 +124,6 @@ public class TestCase extends Versionable implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public byte[] getSummary() {
-        return summary;
-    }
-
-    public void setSummary(byte[] summary) {
-        this.summary = summary;
     }
 
     public Date getCreationDate() {
@@ -216,5 +209,13 @@ public class TestCase extends Versionable implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCase[ id=" + id + " ]";
+    }
+
+    public byte[] getSummary() {
+        return summary;
+    }
+
+    public void setSummary(byte[] summary) {
+        this.summary = summary;
     }
 }
