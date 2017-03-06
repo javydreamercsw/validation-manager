@@ -50,22 +50,26 @@ public class DemoBuilder {
         LOG.info("Done!");
     }
 
-    private static void addDemoProjectRequirements(Project p) throws Exception {
+    private static void addDemoProjectRequirements(Project p)
+            throws Exception {
         int count = 1;
         for (int i = 0; i < 5; i++) {
             //Create a spec
-            RequirementSpecServer temp = new RequirementSpecServer("Spec "
-                    + (i + 1), "Description " + (i + 1), p.getId(), 1);
+            RequirementSpecServer temp
+                    = new RequirementSpecServer("Spec "
+                            + (i + 1), "Description " + (i + 1),
+                            p.getId(), 1);
             temp.write2DB();
-            RequirementSpecNodeServer node = temp.addSpecNode("Node " + (i + 1),
-                    "Description " + (i + 1), "Scope " + (i + 1));
+            RequirementSpecNodeServer node
+                    = temp.addSpecNode("Node " + (i + 1),
+                            "Description " + (i + 1), "Scope " + (i + 1));
             for (int y = 0; y < 5; y++) {
                 RequirementServer req
                         = new RequirementServer("Requirement "
                                 + count,
                                 "Description " + count,
-                                node.getRequirementSpecNodePK(), "Notes",
-                                1, 1);
+                                node.getRequirementSpecNodePK(),
+                                "Notes", 1, 1);
                 req.write2DB();
                 node.getRequirementList().add(req.getEntity());
                 count++;
@@ -79,28 +83,33 @@ public class DemoBuilder {
 
     private static void addDemoProjectTestProject(Project p) throws
             NonexistentEntityException, Exception {
-        TestProjectServer tp = new TestProjectServer("Test Project", true);
+        TestProjectServer tp
+                = new TestProjectServer("Test Project", true);
         tp.setName("Test Project");
         tp.setNotes("Notes");
         tp.setActive(true);
         tp.write2DB();
         //Add the test structur
-        TestPlanServer tps = new TestPlanServer(tp.getEntity(), true, true);
+        TestPlanServer tps = new TestPlanServer(tp.getEntity(),
+                true, true);
         tps.setName("Test Plan #1");
         tps.setNotes("Notes");
         tps.write2DB();
         for (int i = 0; i < 5; i++) {
             //Add steps
-            TestCaseServer tcs = new TestCaseServer("Test Case #" + i,
-                    new Date());
+            TestCaseServer tcs
+                    = new TestCaseServer("Test Case #"
+                            + (i + 1),
+                            new Date());
             tcs.write2DB();
             for (int j = 0; j < 5; j++) {
                 List<Requirement> requirements
                         = new RequirementJpaController(DataBaseManager
                                 .getEntityManagerFactory())
-                                .findRequirementEntities().subList(j * 5,
-                                        j * 5 + 5);
-                tcs.addStep((j + 1), "Step #" + (j + 1), "Note", "Criteria",
+                                .findRequirementEntities()
+                                .subList(j * 5, j * 5 + 5);
+                tcs.addStep((j + 1), "Step #" + (j + 1), "Note",
+                        "Criteria",
                         requirements);
             }
             tcs.write2DB();
