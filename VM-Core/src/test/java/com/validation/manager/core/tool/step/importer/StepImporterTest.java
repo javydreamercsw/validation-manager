@@ -175,7 +175,7 @@ public class StepImporterTest extends AbstractVMTestCase {
     public void testImportFilesXLS() {
         System.out.println("importFile (xls)");
         int initial = namedQuery("Requirement.findAll").size();
-        assertTrue(testImportFile("Reqs.xls") > initial);
+        assertTrue(testImportFile("Steps.xls") > initial);
         assertTrue(initial < namedQuery("Requirement.findAll").size());
     }
 
@@ -194,7 +194,7 @@ public class StepImporterTest extends AbstractVMTestCase {
     @Test
     public void testImportFileXLSX() {
         System.out.println("importFile (xlsx)");
-        assertTrue(testImportFile("Reqs.xlsx") > 0);
+        assertTrue(testImportFile("Steps.xlsx") > 0);
         assertFalse(namedQuery("Step.findAll").isEmpty());
     }
 
