@@ -8,7 +8,6 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.StepJpaController;
-import com.validation.manager.core.tool.requirement.importer.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -67,25 +66,19 @@ public class StepImporter implements ImporterInterface<Step> {
 
     @Override
     public List<Step> importFile() throws
-            RequirementImportException {
-        List<Step> importedSteps = null;
-        try {
-            importedSteps = importFile(false);
-        } catch (TestImportException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
-        return importedSteps;
+            TestCaseImportException {
+        return importFile(false);
     }
 
     @Override
     public List<Step> importFile(boolean header) throws
-            TestImportException {
+            TestCaseImportException {
         steps.clear();
         if (toImport == null) {
-            throw new TestImportException(
+            throw new TestCaseImportException(
                     "message.step.import.file.null");
         } else if (!toImport.exists()) {
-            throw new TestImportException(
+            throw new TestCaseImportException(
                     "message.step.import.file.invalid");
         } else {
             //Excel support
@@ -116,7 +109,7 @@ public class StepImporter implements ImporterInterface<Step> {
                             break;
                         }
                         if (cells < 2) {
-                            throw new TestImportException(
+                            throw new TestCaseImportException(
                                     RB.getString("message.step.import.missing.column")
                                             .replaceAll("%c", "" + cells));
                         }
@@ -219,10 +212,10 @@ public class StepImporter implements ImporterInterface<Step> {
                     }
                 }
             } else if (toImport.getName().endsWith(".xml")) {
-                throw new TestImportException(
+                throw new TestCaseImportException(
                         "XML importing not supported yet.");
             } else {
-                throw new TestImportException("Unsupported file format: "
+                throw new TestCaseImportException("Unsupported file format: "
                         + toImport.getName());
             }
             return steps;
