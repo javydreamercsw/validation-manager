@@ -340,7 +340,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     }
 
     private boolean processRequirement(Requirement requirement)
-            throws IllegalOrphanException, NonexistentEntityException, Exception {
+            throws IllegalOrphanException, NonexistentEntityException,
+            Exception {
         boolean result = true;
         Project project = requirement.getRequirementSpecNode()
                 .getRequirementSpec().getProject();
@@ -362,7 +363,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     }
 
     @Override
-    public boolean processImport() throws VMException {
+    public boolean processImport() throws RequirementImportException {
         try {
             for (Requirement r : queue.values()) {
                 processRequirement(r);
@@ -371,10 +372,11 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             return true;
         } catch (NonexistentEntityException ex) {
             Exceptions.printStackTrace(ex);
+            throw new RequirementImportException(ex.getLocalizedMessage());
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
+            throw new RequirementImportException(ex.getLocalizedMessage());
         }
-        return false;
     }
 
     public static File exportTemplate() throws FileNotFoundException,
