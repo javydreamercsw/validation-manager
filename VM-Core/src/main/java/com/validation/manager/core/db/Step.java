@@ -3,6 +3,7 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -13,6 +14,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -38,13 +40,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence")})
 public class Step implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected StepPK stepPK;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "step_sequence")
-    private int stepSequence;
     @Basic(optional = false)
     @NotNull
     @Lob
@@ -53,6 +48,16 @@ public class Step implements Serializable {
     @Lob
     @Column(name = "expected_result")
     private byte[] expectedResult;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
+    private List<ExecutionStep> executionStepList;
+
+    private static final long serialVersionUID = 1L;
+    @EmbeddedId
+    protected StepPK stepPK;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "step_sequence")
+    private int stepSequence;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "notes")
@@ -104,14 +109,6 @@ public class Step implements Serializable {
 
     public void setStepSequence(int stepSequence) {
         this.stepSequence = stepSequence;
-    }
-
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
     }
 
     public byte[] getExpectedResult() {
@@ -179,5 +176,23 @@ public class Step implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
+    }
+
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
+    }
+
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
     }
 }
