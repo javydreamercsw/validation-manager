@@ -24,10 +24,12 @@ class TestCaseChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
-        tc.getStepList().stream().filter((s) -> (!toPopulate.contains(s))).forEach((s) -> {
+        tc.getStepList().stream().filter((s)
+                -> (!toPopulate.contains(s))).forEach((s) -> {
             toPopulate.add(s);
         });
-        tc.getRiskControlList().stream().filter((rc) -> (!toPopulate.contains(rc))).forEach((rc) -> {
+        tc.getRiskControlHasTestCaseList().stream().filter((rc)
+                -> (!toPopulate.contains(rc))).forEach((rc) -> {
             toPopulate.add(rc);
         });
         return true;
@@ -58,8 +60,9 @@ class TestCaseChildFactory extends AbstractChildFactory {
 
     @Override
     protected void updateBean() {
-        TestCaseJpaController controller =
-                new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
-        tc = controller.findTestCase(tc.getTestCasePK());
+        TestCaseJpaController controller
+                = new TestCaseJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        tc = controller.findTestCase(tc.getId());
     }
 }

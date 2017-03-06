@@ -22,6 +22,7 @@ import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
@@ -38,7 +39,10 @@ import com.vaadin.ui.Tree.TreeDropCriterion;
 import com.vaadin.ui.Tree.TreeTargetDetails;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Upload;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
@@ -63,6 +67,11 @@ import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
+import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
+import com.validation.manager.core.tool.step.importer.StepImporter;
+import com.validation.manager.core.tool.step.importer.TestCaseImportException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -78,6 +87,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
+import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
 import org.openide.util.Exceptions;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
@@ -106,6 +116,7 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons testPlanIcon = VaadinIcons.FILE_TREE_SMALL;
     private final VaadinIcons testIcon = VaadinIcons.FILE_TEXT;
     private final VaadinIcons stepIcon = VaadinIcons.FILE_TREE_SUB;
+    private final VaadinIcons importIcon = VaadinIcons.ARROW_CIRCLE_UP_O;
     private Tree tree;
 
     /**
@@ -842,6 +853,57 @@ public class ValidationManagerUI extends UI {
                     r.setRequirementSpecNode((RequirementSpecNode) tree.getValue());
                     displayRequirement(r, true);
                 });
+        ContextMenu.ContextMenuItem importRequirement
+                = menu.addItem("Import Requirements", importIcon);
+        importRequirement.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    // Create a sub-window and set the content
+                    Window subWindow = new Window("Import Requirements");
+                    VerticalLayout subContent = new VerticalLayout();
+                    subWindow.setContent(subContent);
+
+                    //Add a checkbox to know if file has headers or not
+                    CheckBox cb = new CheckBox("File has header row?");
+
+                    FileUploader receiver = new FileUploader();
+                    Upload upload
+                    = new Upload("Upload Excel Spreadsheet here", receiver);
+                    upload.addSucceededListener((Upload.SucceededEvent event1) -> {
+                        try {
+                            subWindow.close();
+                            //TODO: Display the excel file (partially), map columns and import
+                            //Process the file
+                            RequirementImporter importer
+                                    = new RequirementImporter(receiver.getFile(),
+                                            (RequirementSpecNode) tree.getValue());
+
+                            importer.importFile(cb.getValue());
+                            importer.processImport();
+                            buildProjectTree(tree.getValue());
+                            updateScreen();
+                        } catch (RequirementImportException ex) {
+                            LOG.log(Level.SEVERE, "Error processing import!",
+                                    ex);
+                            Notification.show("Importing unsuccessful!",
+                                    Notification.Type.ERROR_MESSAGE);
+                        }
+                    });
+                    upload.addFailedListener((Upload.FailedEvent event1) -> {
+                        LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
+                                event1.getReason());
+                        Notification.show("Upload unsuccessful!",
+                                Notification.Type.ERROR_MESSAGE);
+                        subWindow.close();
+                    });
+                    subContent.addComponent(cb);
+                    subContent.addComponent(upload);
+
+                    // Center it in the browser window
+                    subWindow.center();
+
+                    // Open it in the UI
+                    addWindow(subWindow);
+                });
     }
 
     private void createTestCaseMenu(ContextMenu menu) {
@@ -860,6 +922,72 @@ public class ValidationManagerUI extends UI {
                     s.setStepSequence(tc.getStepList().size() + 1);
                     s.setTestCase(tc);
                     displayStep(s, true);
+                });
+        ContextMenu.ContextMenuItem importRequirement
+                = menu.addItem("Import Steps", importIcon);
+        importRequirement.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    // Create a sub-window and set the content
+                    Window subWindow = new Window("Import Test Case Steps");
+                    VerticalLayout subContent = new VerticalLayout();
+                    subWindow.setContent(subContent);
+
+                    //Add a checkbox to know if file has headers or not
+                    CheckBox cb = new CheckBox("File has header row?");
+
+                    FileUploader receiver = new FileUploader();
+                    Upload upload
+                    = new Upload("Upload Excel Spreadsheet here", receiver);
+                    upload.addSucceededListener((Upload.SucceededEvent event1) -> {
+                        try {
+                            subWindow.close();
+                            //TODO: Display the excel file (partially), map columns and import
+                            //Process the file
+                            TestCase tc = (TestCase) tree.getValue();
+                            StepImporter importer
+                                    = new StepImporter(receiver.getFile(), tc);
+                            importer.importFile(cb.getValue());
+                            importer.processImport();
+                            SortedMap<Integer, Step> map = new TreeMap<>();
+                            tc.getStepList().forEach((s) -> {
+                                map.put(s.getStepSequence(), s);
+                            });
+                            //Now update the sequence numbers
+                            int count = 0;
+                            for (Entry<Integer, Step> entry : map.entrySet()) {
+                                entry.getValue().setStepSequence(++count);
+                                try {
+                                    new StepJpaController(DataBaseManager
+                                            .getEntityManagerFactory())
+                                            .edit(entry.getValue());
+                                } catch (Exception ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
+                            }
+                            buildProjectTree(new TestCaseServer(tc.getId()).getEntity());
+                            updateScreen();
+                        } catch (TestCaseImportException ex) {
+                            LOG.log(Level.SEVERE, "Error processing import!",
+                                    ex);
+                            Notification.show("Importing unsuccessful!",
+                                    Notification.Type.ERROR_MESSAGE);
+                        }
+                    });
+                    upload.addFailedListener((Upload.FailedEvent event1) -> {
+                        LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
+                                event1.getReason());
+                        Notification.show("Upload unsuccessful!",
+                                Notification.Type.ERROR_MESSAGE);
+                        subWindow.close();
+                    });
+                    subContent.addComponent(cb);
+                    subContent.addComponent(upload);
+
+                    // Center it in the browser window
+                    subWindow.center();
+
+                    // Open it in the UI
+                    addWindow(subWindow);
                 });
     }
 
@@ -1389,7 +1517,7 @@ public class ValidationManagerUI extends UI {
             projects.add(p);
         });
         buildProjectTree();
-        left = new Panel(tree);
+        left = new HorizontalLayout(tree);
         LOG.log(Level.FINE, "Found {0} root projects!", projects.size());
     }
 

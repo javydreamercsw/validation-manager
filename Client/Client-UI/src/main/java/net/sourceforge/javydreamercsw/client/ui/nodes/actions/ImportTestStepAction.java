@@ -1,6 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
@@ -64,7 +65,7 @@ public class ImportTestStepAction extends AbstractAction {
                         StepImporter instance = new StepImporter(file,
                                 new TestCaseJpaController(
                                         DataBaseManager.getEntityManagerFactory())
-                                .findTestCase(tc.getTestCasePK()));
+                                        .findTestCase(tc.getId()));
                         instance.importFile(true);
                         //TODO: allow cancelling, specially if an error was displayed.
                         instance.processImport();
@@ -72,7 +73,7 @@ public class ImportTestStepAction extends AbstractAction {
                         Exceptions.printStackTrace(ex);
                     } catch (RequirementImportException ex) {
                         Exceptions.printStackTrace(ex);
-                    } catch (Exception ex) {
+                    } catch (VMException ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 }

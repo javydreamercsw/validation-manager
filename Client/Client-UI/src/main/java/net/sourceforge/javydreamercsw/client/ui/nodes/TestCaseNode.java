@@ -9,7 +9,7 @@ import java.util.List;
 import javax.swing.Action;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.CreateTestStepAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.EditTestCaseAction;
-import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ExportTestAction;
+import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ExportTestPlanAction;
 import net.sourceforge.javydreamercsw.client.ui.nodes.actions.ImportTestStepAction;
 import org.openide.util.lookup.InstanceContent;
 
@@ -37,15 +37,15 @@ class TestCaseNode extends AbstractVMBeanNode {
         actions.add(new CreateTestStepAction());
         actions.add(new EditTestCaseAction());
         actions.add(new ImportTestStepAction());
-        actions.add(new ExportTestAction());
+        actions.add(new ExportTestPlanAction());
         //TODO: actions.add(new DeleteTestStepAction());
         return actions.toArray(new Action[actions.size()]);
     }
 
     @Override
     public void refreshMyself() {
-        TestCaseServer rs =
-                new TestCaseServer(getLookup().lookup(TestCase.class).getTestCasePK());
+        TestCaseServer rs
+                = new TestCaseServer(getLookup().lookup(TestCase.class).getId());
         rs.update((TestCase) getBean(), rs.getEntity());
         setDisplayName(((TestCase) getBean()).getName());
     }

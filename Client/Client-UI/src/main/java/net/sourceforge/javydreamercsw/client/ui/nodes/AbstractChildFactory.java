@@ -6,7 +6,6 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.Step;
-import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
@@ -37,8 +36,8 @@ public abstract class AbstractChildFactory extends ChildFactory<Object> {
             if (key instanceof Project) {
                 Project project = (Project) key;
                 return new ProjectNode(project,
-                        isShowChildren() ? 
-                                new SubProjectChildFactory(project) : null);
+                        isShowChildren()
+                                ? new SubProjectChildFactory(project) : null);
             } else if (key instanceof RequirementSpec) {
                 RequirementSpec rs = (RequirementSpec) key;
                 return new UIRequirementSpecNode(rs);
@@ -47,7 +46,7 @@ public abstract class AbstractChildFactory extends ChildFactory<Object> {
                 return new UITestProjectNode(tp);
             } else if (key instanceof Requirement) {
                 Requirement req = (Requirement) key;
-                return new UIRequirementNode(req, 
+                return new UIRequirementNode(req,
                         new RequirementTestChildFactory(req));
             } else if (key instanceof RequirementSpecNode) {
                 RequirementSpecNode rs = (RequirementSpecNode) key;
@@ -61,9 +60,6 @@ public abstract class AbstractChildFactory extends ChildFactory<Object> {
             } else if (key instanceof TestCase) {
                 TestCase tc = (TestCase) key;
                 return new TestCaseNode(tc);
-            } else if (key instanceof Test) {
-                Test t = (Test) key;
-                return new TestNode(t);
             } else if (key instanceof TestPlan) {
                 TestPlan plan = (TestPlan) key;
                 return new TestPlanNode(plan);

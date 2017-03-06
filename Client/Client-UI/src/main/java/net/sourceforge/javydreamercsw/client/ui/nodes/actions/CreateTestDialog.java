@@ -1,11 +1,12 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import com.validation.manager.core.db.Test;
+import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
-import com.validation.manager.core.server.core.TestServer;
+import java.util.Date;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
@@ -22,7 +23,7 @@ import org.openide.util.Utilities;
 })
 public class CreateTestDialog extends AbstractCreationDialog {
 
-    private Test test;
+    private TestCase tc;
     private TestPlan plan;
 
     /**
@@ -178,18 +179,18 @@ public class CreateTestDialog extends AbstractCreationDialog {
         } else {
             try {
                 //Everything valid, continue
-                TestServer ts = new TestServer(name.getText().trim(),
-                        purpose.getText().trim(),
-                        scope.getText().trim());
+                TestCaseServer tcs = new TestCaseServer(name.getText().trim(),
+                        new Date());
                 //Create the test
-                ts.write2DB();
+                tcs.write2DB();
                 TestPlanServer tps
                         = new TestPlanServer(getTestPlan() == null
-                                ? Utilities.actionsGlobalContext().lookup(TestPlan.class) : getTestPlan());
-                tps.addTest(ts.getEntity());
+                                ? Utilities.actionsGlobalContext()
+                                        .lookup(TestPlan.class) : getTestPlan());
+                tps.addTestCase(tcs.getEntity());
                 //Add it to the test plan
                 tps.write2DB();
-                test = ts.getEntity();
+                tc = tcs.getEntity();
                 ProjectExplorerComponent.refresh();
             } catch (IllegalOrphanException ex) {
                 Exceptions.printStackTrace(ex);
@@ -220,8 +221,8 @@ public class CreateTestDialog extends AbstractCreationDialog {
     /**
      * @return the test
      */
-    public Test getTest() {
-        return test;
+    public TestCase getTest() {
+        return tc;
     }
 
     /**
