@@ -1,5 +1,6 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Requirement;
@@ -21,6 +22,14 @@ public final class StepServer extends Step implements EntityServer<Step> {
         if (getTestCase() == null) {
             throw new RuntimeException("Provided TestCase that doesn't exist in the database yet!");
         }
+    }
+
+    public StepServer(StepPK stepPK) {
+        super(stepPK);
+        update(StepServer.this,
+                new StepJpaController(DataBaseManager
+                        .getEntityManagerFactory())
+                        .findStep(stepPK));
     }
 
     public StepServer(Step step) {
@@ -62,6 +71,7 @@ public final class StepServer extends Step implements EntityServer<Step> {
         target.setTestCase(source.getTestCase());
         target.setText(source.getText());
         target.setVmExceptionList(source.getVmExceptionList());
+        target.setExecutionStepList(source.getExecutionStepList());
     }
 
     @Override

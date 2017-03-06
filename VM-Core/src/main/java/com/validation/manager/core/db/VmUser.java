@@ -19,6 +19,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -55,6 +57,18 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     , @NamedQuery(name = "VmUser.findByAttempts",
             query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts")})
 public class VmUser extends Login implements Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "last_modified")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastModified;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "attempts")
+    private int attempts;
+    @OneToMany(mappedBy = "vmUserId")
+    private List<ExecutionStep> executionStepList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -330,5 +344,31 @@ public class VmUser extends Login implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.VmUser[ id=" + id + " ]";
+    }
+
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    public int getAttempts() {
+        return attempts;
+    }
+
+    public void setAttempts(int attempts) {
+        this.attempts = attempts;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
+    }
+
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
     }
 }
