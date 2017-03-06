@@ -12,9 +12,10 @@ import static java.util.ResourceBundle.getBundle;
 public class VMException extends Exception {
 
     private String vm_message = "";
-    private static ResourceBundle rb =
-            getBundle(
-            "com.validation.manager.resources.VMMessages", getDefault());
+    protected static ResourceBundle rb
+            = getBundle(
+                    "com.validation.manager.resources.VMMessages",
+                    getDefault());
 
     public VMException() {
         super();
@@ -25,9 +26,9 @@ public class VMException extends Exception {
     }
 
     public VMException(List<String> messages) {
-        for (String s : messages) {
+        messages.forEach((s) -> {
             vm_message += s + "\n";
-        }
+        });
     }
 
     public VMException(Throwable cause) {
@@ -36,6 +37,7 @@ public class VMException extends Exception {
 
     @Override
     public String toString() {
-        return vm_message.isEmpty() ? super.getLocalizedMessage() : vm_message;
+        return vm_message.isEmpty() ? super.getLocalizedMessage()
+                : vm_message;
     }
 }
