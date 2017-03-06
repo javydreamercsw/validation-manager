@@ -73,11 +73,11 @@ public class ExportRequirementMappingAction extends AbstractAction {
                 ph = ProgressHandleFactory.createHandle("Requirement Mapping Exporter",
                         new Cancellable() {
 
-                            @Override
-                            public boolean cancel() {
-                                return handleCancel();
-                            }
-                        });
+                    @Override
+                    public boolean cancel() {
+                        return handleCancel();
+                    }
+                });
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
@@ -154,12 +154,12 @@ public class ExportRequirementMappingAction extends AbstractAction {
                                         }
                                         if (dialog.isUsePlan()) {
                                             temp = "Test: "
-                                                    + step.getTestCase().getTest().getName();
+                                                    + step.getTestCase().getName();
                                             if (!testSb.toString().contains(temp)) {
                                                 testSb.append(temp);
                                             }
                                         }
-                                        if (dialog.isUseTest()) {
+                                        if (dialog.isUseTestCase()) {
                                             temp = ", Test Case: "
                                                     + step.getTestCase().getName();
                                             if (!testSb.toString().contains(temp)) {

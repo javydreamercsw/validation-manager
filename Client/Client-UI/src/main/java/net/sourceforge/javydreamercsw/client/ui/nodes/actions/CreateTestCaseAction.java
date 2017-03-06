@@ -1,6 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import com.validation.manager.core.db.Test;
+import com.validation.manager.core.db.TestCase;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -20,22 +20,19 @@ public class CreateTestCaseAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                final EditTestCaseDialog dialog
-                        = new EditTestCaseDialog(new javax.swing.JFrame(),
-                                true, false);
-                dialog.setTest(Utilities.actionsGlobalContext().lookup(Test.class));
-                dialog.setLocationRelativeTo(null);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        dialog.dispose();
-                    }
-                });
-                dialog.setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            final EditTestCaseDialog dialog
+                    = new EditTestCaseDialog(new javax.swing.JFrame(),
+                            true, false);
+            dialog.setTestCase(Utilities.actionsGlobalContext().lookup(TestCase.class));
+            dialog.setLocationRelativeTo(null);
+            dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosing(java.awt.event.WindowEvent e) {
+                    dialog.dispose();
+                }
+            });
+            dialog.setVisible(true);
         });
     }
 }

@@ -2,11 +2,8 @@ package net.sourceforge.javydreamercsw.client.ui.components.testcase.importer;
 
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestPlanHasTest;
-import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
@@ -37,7 +34,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.table.DefaultTableModel;
 import net.sourceforge.javydreamercsw.client.ui.components.AbstractImportTopComponent;
 import net.sourceforge.javydreamercsw.client.ui.components.ImportMappingInterface;
 import static net.sourceforge.javydreamercsw.client.ui.components.testcase.importer.Bundle.CTL_TestCaseImporterTopComponent;
@@ -89,7 +85,6 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
     private static final Logger LOG
             = Logger.getLogger(TestCaseImporterTopComponent.class.getSimpleName());
     private static final long serialVersionUID = -7506655107681422195L;
-    protected Test test;
     protected TestCase tc;
     protected TestPlan tp;
 
@@ -270,7 +265,6 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         enableUI(false);
         tables.clear();
         tc = null;
-        test = null;
     }
 
     void writeProperties(java.util.Properties p) {
@@ -345,10 +339,6 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         return saveButton;
     }
 
-    public void setTest(Test test) {
-        this.test = test;
-    }
-
     /**
      * Recursive method to find root project from the current project.
      *
@@ -371,12 +361,13 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             toAdd.add(root);
         }
         //Add child projects
-        for (Project sub : root.getProjectList()) {
-            if (!toAdd.contains(sub)) {
-                toAdd.add(sub);
-                getSubProjects(sub, toAdd);
-            }
-        }
+        root.getProjectList().stream().filter((sub)
+                -> (!toAdd.contains(sub))).map((sub) -> {
+            toAdd.add(sub);
+            return sub;
+        }).forEachOrdered((sub) -> {
+            getSubProjects(sub, toAdd);
+        });
     }
 
     private final class ImportAction implements ActionListener {
@@ -392,11 +383,11 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             ph = ProgressHandleFactory.createHandle("Test Case Document Importer",
                     new Cancellable() {
 
-                        @Override
-                        public boolean cancel() {
-                            return handleCancel();
-                        }
-                    });
+                @Override
+                public boolean cancel() {
+                    return handleCancel();
+                }
+            });
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -438,7 +429,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                             } else {
                                 LOG.log(Level.FINE, "Found no tables!");
                             }
-                            for (DefaultTableModel dtm : tables) {
+                            tables.forEach((dtm) -> {
                                 int columns = dtm.getColumnCount();
                                 Object[] mappingRow = new Object[columns];
                                 for (int i = 0; i < columns; i++) {
@@ -447,7 +438,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                                 }
                                 //Insert mapping row
                                 dtm.insertRow(0, mappingRow);
-                            }
+                            });
                         } catch (FileNotFoundException ex) {
                             Exceptions.printStackTrace(ex);
                         } catch (ClassNotFoundException | IOException ex) {
@@ -520,11 +511,11 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
             ph = ProgressHandleFactory.createHandle("Test Case Importer",
                     new Cancellable() {
 
-                        @Override
-                        public boolean cancel() {
-                            return handleCancel();
-                        }
-                    });
+                @Override
+                public boolean cancel() {
+                    return handleCancel();
+                }
+            });
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -538,7 +529,7 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
                         setDialog(new EditTestCaseDialog(new javax.swing.JFrame(),
                                 true, false));
                         getDialog().setLocationRelativeTo(null);
-                        ((EditTestCaseDialog) getDialog()).setTest(test);
+                        ((EditTestCaseDialog) getDialog()).setTestCase(tc);
                         getDialog().addWindowListener(new java.awt.event.WindowAdapter() {
                             @Override
                             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -608,21 +599,19 @@ public class TestCaseImporterTopComponent extends AbstractImportTopComponent {
         private void process(List<String> mapping) {
             List<Project> projects = new ArrayList<>();
             //Add projects that has this test on their plans
-            for (TestPlanHasTest tpht : test.getTestPlanHasTestList()) {
-                tpht.getTestPlan().getTestProject();
-                for (Project p : ProjectServer.getProjects()) {
-                    for (TestProject temp : p.getTestProjectList()) {
-                        if (Objects.equals(temp.getId(),
-                                tpht.getTestPlan().getTestProject().getId())) {
-                            LOG.log(Level.FINE, "Project ID: {0}", p.getId());
-                            if (!projects.contains(p)) {
-                                projects.add(p);
-                                getSubProjects(getRootProject(p), projects);
-                            }
-                        }
-                    }
-                }
-            }
+            ProjectServer.getProjects().forEach((p) -> {
+                p.getTestProjectList().stream().filter((temp)
+                        -> (Objects.equals(temp.getId(),
+                                tp.getTestProject().getId()))).map((_item) -> {
+                    LOG.log(Level.FINE, "Project ID: {0}", p.getId());
+                    return _item;
+                }).filter((_item) -> (!projects.contains(p))).map((_item) -> {
+                    projects.add(p);
+                    return _item;
+                }).forEachOrdered((_item) -> {
+                    getSubProjects(getRootProject(p), projects);
+                });
+            });
             TestCaseServer tcs = new TestCaseServer(tc);
             //We got the created test, now let's import the rest.
             //Start on second row as first one is the mapping row.

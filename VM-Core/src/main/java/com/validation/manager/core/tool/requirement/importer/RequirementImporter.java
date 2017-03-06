@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,6 +38,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
 import static org.apache.poi.ss.usermodel.WorkbookFactory.create;
 import org.openide.util.Exceptions;
 import static org.openide.util.Lookup.getDefault;
@@ -52,13 +54,15 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
     private final RequirementSpecNode rsn;
     private static final Logger LOG
             = getLogger(RequirementImporter.class.getSimpleName());
-    private static final List<String> columns = new ArrayList<>();
+    private static final List<String> COLUMNS = new ArrayList<>();
+    private final Map<String, Requirement> queue = new HashMap<>();
+    private InputStream inp;
 
     static {
-        columns.add("Unique ID");
-        columns.add("Description");
-        columns.add("Requirement Type");
-        columns.add("Notes");
+        COLUMNS.add("Unique ID");
+        COLUMNS.add("Description");
+        COLUMNS.add("Requirement Type");
+        COLUMNS.add("Notes");
     }
 
     public RequirementImporter(File toImport, RequirementSpecNode rsn) {
@@ -67,11 +71,21 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         this.rsn = rsn;
     }
 
+    public Workbook loadFile() throws FileNotFoundException,
+            IOException, InvalidFormatException {
+        if (toImport != null && toImport.exists()) {
+            inp = new FileInputStream(toImport);
+            Workbook wb = create(inp);
+            return wb;
+        }
+        return null;
+    }
+
     @Override
     public List<Requirement> importFile() throws RequirementImportException {
-        List<Requirement> importedRequirements = null;
+        List<Requirement> importedRequirements = new ArrayList<>();
         try {
-            importedRequirements = importFile(false);
+            importedRequirements.addAll(importFile(false));
         } catch (UnsupportedOperationException | VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
@@ -80,8 +94,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
 
     @Override
     public List<Requirement> importFile(boolean header) throws
-            VMException {
-        List<Requirement> answer=new ArrayList<>();
+            RequirementImportException {
+        queue.clear();
         List<Integer> errors = new ArrayList<>();
         HashMap<String, Object> parameters = new HashMap<>();
         List<Object> result;
@@ -95,11 +109,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             //Excel support
             if (toImport.getName().endsWith(".xls")
                     || toImport.getName().endsWith(".xlsx")) {
-                InputStream inp = null;
                 try {
-                    inp = new FileInputStream(toImport);
-                    org.apache.poi.ss.usermodel.Workbook wb
-                            = create(inp);
+                    Workbook wb = loadFile();
                     org.apache.poi.ss.usermodel.Sheet sheet = wb.getSheetAt(0);
                     int rows = sheet.getPhysicalNumberOfRows();
                     int r = 0;
@@ -206,21 +217,17 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                     && !requirement.getUniqueId().isEmpty() :
                                     "Invalid requirement detected!";
                             try {
-                               if(processRequirement(requirement)){
-                                   answer.add(requirement);
-                               }
-                            } catch (NonexistentEntityException ex) {
-                                Exceptions.printStackTrace(ex);
-                            } catch (Exception ex) {
+                                if (!exists(requirement)
+                                        && !queue.containsKey(requirement.getUniqueId())) {
+                                    queue.put(requirement.getUniqueId(),
+                                            requirement);
+                                }
+                            } catch (IllegalOrphanException | NonexistentEntityException ex) {
                                 Exceptions.printStackTrace(ex);
                             }
                         }
                     }
-                } catch (InvalidFormatException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                } catch (FileNotFoundException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
+                } catch (InvalidFormatException | IOException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 } finally {
                     try {
@@ -306,30 +313,39 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             if (!errors.isEmpty()) {
                 getDefault().lookup(MessageHandler.class).info(sb.toString());
             }
-            return answer;
+            return new ArrayList(queue.values());
         }
     }
 
-    private boolean processRequirement(Requirement requirement)
-            throws IllegalOrphanException, NonexistentEntityException, Exception {
-        boolean result = true;
-        Project project = requirement.getRequirementSpecNode().getRequirementSpec().getProject();
+    public boolean exists(Requirement requirement) throws
+            IllegalOrphanException, NonexistentEntityException {
+        Project project = requirement.getRequirementSpecNode()
+                .getRequirementSpec().getProject();
         List<Requirement> existing = getRequirements(project);
         LOG.log(Level.INFO, "Processing: {0}", requirement.getUniqueId());
         boolean exists = false;
         for (Requirement r : existing) {
             if (r.getUniqueId() == null) {
                 LOG.warning("Detected requirement with null unique id!");
-                new RequirementJpaController(getEntityManagerFactory()).destroy(r.getId());
+                new RequirementJpaController(getEntityManagerFactory())
+                        .destroy(r.getId());
             } else {
                 if (r.getUniqueId().equals(requirement.getUniqueId())) {
                     exists = true;
-                    result = false;
                     break;
                 }
             }
         }
-        if (exists) {
+        return exists;
+    }
+
+    private boolean processRequirement(Requirement requirement)
+            throws IllegalOrphanException, NonexistentEntityException,
+            Exception {
+        boolean result = true;
+        Project project = requirement.getRequirementSpecNode()
+                .getRequirementSpec().getProject();
+        if (exists(requirement)) {
             MessageHandler handler = getDefault().lookup(MessageHandler.class);
             if (handler != null) {
                 String error = "Requirement " + requirement.getUniqueId()
@@ -338,19 +354,33 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                 LOG.warning(error);
                 handler.error(error);
             }
+            result = false;
         } else {
-            new RequirementJpaController(getEntityManagerFactory()).create(requirement);
+            new RequirementJpaController(getEntityManagerFactory())
+                    .create(requirement);
         }
         return result;
     }
 
     @Override
-    public boolean processImport() throws VMException {
-        //Do nothing
-        return true;
+    public boolean processImport() throws RequirementImportException {
+        try {
+            for (Requirement r : queue.values()) {
+                processRequirement(r);
+            }
+            queue.clear();
+            return true;
+        } catch (NonexistentEntityException ex) {
+            Exceptions.printStackTrace(ex);
+            throw new RequirementImportException(ex.getLocalizedMessage());
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            throw new RequirementImportException(ex.getLocalizedMessage());
+        }
     }
 
-    public static File exportTemplate() throws FileNotFoundException, IOException, InvalidFormatException {
+    public static File exportTemplate() throws FileNotFoundException,
+            IOException, InvalidFormatException {
         File template = new File("Template.xls");
         template.createNewFile();
         org.apache.poi.ss.usermodel.Workbook wb = new HSSFWorkbook();
@@ -365,7 +395,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         f.setColor((short) Font.COLOR_NORMAL);
         cs.setFont(f);
         Row newRow = sheet.createRow(0);
-        for (String label : columns) {
+        for (String label : COLUMNS) {
             Cell newCell = newRow.createCell(column);
             newCell.setCellStyle(cs);
             newCell.setCellValue(label);

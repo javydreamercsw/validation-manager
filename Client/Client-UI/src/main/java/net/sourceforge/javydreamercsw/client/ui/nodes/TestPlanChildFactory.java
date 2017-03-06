@@ -1,9 +1,8 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes;
 
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.db.Test;
+import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestPlanHasTest;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import java.beans.IntrospectionException;
 import java.util.List;
@@ -24,9 +23,9 @@ class TestPlanChildFactory extends AbstractChildFactory {
 
     @Override
     protected boolean createKeys(List<Object> toPopulate) {
-        for (TestPlanHasTest tpht : tp.getTestPlanHasTestList()) {
-            toPopulate.add(tpht.getTest());
-        }
+        tp.getTestCaseList().forEach((tc) -> {
+            toPopulate.add(tc);
+        });
         return true;
     }
 
@@ -38,9 +37,9 @@ class TestPlanChildFactory extends AbstractChildFactory {
     @Override
     protected Node createNodeForKey(Object key) {
         try {
-            if (key instanceof Test) {
-                Test test = (Test) key;
-                return new TestNode(test);
+            if (key instanceof TestCase) {
+                TestCase test = (TestCase) key;
+                return new TestCaseNode(test);
             } else {
                 return null;
             }
@@ -53,7 +52,8 @@ class TestPlanChildFactory extends AbstractChildFactory {
     @Override
     protected void updateBean() {
         TestPlanJpaController controller
-                = new TestPlanJpaController(DataBaseManager.getEntityManagerFactory());
+                = new TestPlanJpaController(DataBaseManager
+                        .getEntityManagerFactory());
         tp = controller.findTestPlan(tp.getTestPlanPK());
     }
 }

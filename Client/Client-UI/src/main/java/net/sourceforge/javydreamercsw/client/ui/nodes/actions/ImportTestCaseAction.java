@@ -1,6 +1,6 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import com.validation.manager.core.db.Test;
+import com.validation.manager.core.db.TestPlan;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -23,9 +23,9 @@ public class ImportTestCaseAction extends AbstractAction {
         /* Create and display the dialog */
         TestCaseImporterTopComponent component
                 = new TestCaseImporterTopComponent();
-        Test test = Utilities.actionsGlobalContext().lookup(Test.class);
+        TestPlan test = Utilities.actionsGlobalContext().lookup(TestPlan.class);
         assert test != null;
-        component.setTest(test);
+        component.setTestPlan(test);
         component.open();
         component.requestActive();
     }

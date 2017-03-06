@@ -1,10 +1,7 @@
 package net.sourceforge.javydreamercsw.client.ui.nodes.actions;
 
-import com.validation.manager.core.VMException;
-import com.validation.manager.core.db.Test;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.server.core.TestCaseServer;
-import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Date;
 import net.sourceforge.javydreamercsw.client.ui.components.project.explorer.ProjectExplorerComponent;
 import org.openide.util.Exceptions;
@@ -18,7 +15,6 @@ public class EditTestCaseDialog extends javax.swing.JDialog {
 
     private final boolean edit;
     private TestCase tc;
-    private Test test = null;
 
     /**
      * Creates new form EditTestCaseDialog
@@ -111,23 +107,12 @@ public class EditTestCaseDialog extends javax.swing.JDialog {
                 tcs.write2DB();
                 tc = tcs.getEntity();
             } else {
-                if (test == null) {
-                    test = Utilities.actionsGlobalContext().lookup(Test.class);
-                }
-                if (test == null) {
-                    throw new VMException("Unable to get a valid Test!");
-                }
                 TestCaseServer tcs = new TestCaseServer(
                         testCaseName.getText().trim(),
-                        test.getTestCaseList() == null ? 0
-                        : test.getTestCaseList().size() + 1,
-                        new Short("1"),
                         new Date());
                 //TODO: Use logged user instead
-                tcs.setAuthorId(new VMUserServer(1).getEntity());
                 tcs.setActive(true);
                 tcs.setIsOpen(true);
-                tcs.setTest(test);
                 tcs.write2DB();
                 tc = tcs.getEntity();
             }
@@ -156,17 +141,7 @@ public class EditTestCaseDialog extends javax.swing.JDialog {
         return tc;
     }
 
-    /**
-     * @return the test
-     */
-    public Test getTest() {
-        return test;
-    }
-
-    /**
-     * @param test the test to set
-     */
-    public void setTest(Test test) {
-        this.test = test;
+    public void setTestCase(TestCase tc) {
+        this.tc = tc;
     }
 }
