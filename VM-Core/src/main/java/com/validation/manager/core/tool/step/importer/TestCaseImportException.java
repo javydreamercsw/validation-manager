@@ -11,4 +11,8 @@ public class TestCaseImportException extends VMException {
     public TestCaseImportException(String message) {
         super(message);
     }
+
+    public TestCaseImportException(Throwable cause) {
+        super(cause);
+    }
 }
