@@ -91,7 +91,7 @@ public class DemoBuilder {
         tps.write2DB();
         for (int i = 0; i < 5; i++) {
             //Add steps
-            TestCaseServer tcs = new TestCaseServer("Test Case #" + 1,
+            TestCaseServer tcs = new TestCaseServer("Test Case #" + i,
                     new Date());
             tcs.write2DB();
             for (int j = 0; j < 5; j++) {
