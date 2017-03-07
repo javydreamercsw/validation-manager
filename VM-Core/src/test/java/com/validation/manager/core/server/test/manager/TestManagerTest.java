@@ -198,18 +198,24 @@ public class TestManagerTest extends AbstractVMTestCase {
                 assertNotNull(temp.getExecutionEnd());
                 assertNotNull(temp.getExecutionTime());
                 assertNotNull(temp.getResultId());
-                System.out.println("Step: " + temp.getStep().getStepSequence());
-                System.out.println("Assigned: " + temp.getAssignedTime());
-                System.out.println("Started: " + temp.getExecutionStart());
-                System.out.println("Completed: " + temp.getExecutionEnd());
+                System.out.println("Step: "
+                        + temp.getStep().getStepSequence());
+                System.out.println("Assigned: "
+                        + temp.getAssignedTime());
+                System.out.println("Started: "
+                        + temp.getExecutionStart());
+                System.out.println("Completed: "
+                        + temp.getExecutionEnd());
                 long timeelapsed = temp.getExecutionTime();
                 long milliseconds = timeelapsed / 1000;
                 long seconds = (timeelapsed / 1000) % 60;
                 long minutes = (timeelapsed / 60000) % 60;
-                System.out.println("Elapsed time: " + " (" + minutes + ":" + seconds
+                System.out.println("Elapsed time: " + " ("
+                        + minutes + ":" + seconds
                         + ":" + milliseconds + ")");
                 System.out.println("Comments: " + temp.getComment());
-                System.out.println("Result: " + temp.getResultId().getResultName());
+                System.out.println("Result: "
+                        + temp.getResultId().getResultName());
                 System.out.println("Executed by: "
                         + temp.getVmUserId().getFirstName() + " "
                         + temp.getVmUserId().getLastName());
