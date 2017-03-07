@@ -6,6 +6,7 @@ import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.server.core.StepServer;
+import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
 import java.util.Arrays;
@@ -25,9 +26,11 @@ public class TestManagerTest extends AbstractVMTestCase {
     public void testCreateTestExecutionFromPlan() {
         System.out.println("createTestExecutionFromPlan");
         try {
-            TestProject tp = TestHelper.createTestProject("Test Project");
-            TestPlan plan = TestHelper.createTestPlan(tp,
+            TestProject tp
+                    = TestHelper.createTestProject("Test Project");
+            TestPlan p = TestHelper.createTestPlan(tp,
                     "Notes", true, true);
+            TestPlanServer plan = new TestPlanServer(p);
             TestManager instance = new TestManager();
             TestCase tc = TestHelper.createTestCase("Sample",
                     "Pass", "Summary");
@@ -35,8 +38,12 @@ public class TestManagerTest extends AbstractVMTestCase {
                 tc = TestHelper.addStep(tc, (i + 1), "Text "
                         + (i + 1), "Note " + (i + 1));
             }
+            plan.getTestCaseList().add(tc);
+            plan.write2DB();
             TestCaseExecution r
-                    = instance.createTestExecutionFromPlan(Arrays.asList(plan));
+                    = instance.createTestExecutionFromPlan(Arrays
+                            .asList(new TestPlanServer(plan.getEntity())
+                                    .getEntity()));
             assertEquals(tc.getStepList().size(),
                     r.getExecutionStepList().size());
             for (Step s : tc.getStepList()) {
