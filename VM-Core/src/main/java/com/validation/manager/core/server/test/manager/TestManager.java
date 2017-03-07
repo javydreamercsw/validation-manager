@@ -12,6 +12,7 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
+import java.util.ArrayList;
 import java.util.List;
 import org.openide.util.Exceptions;
 
@@ -28,8 +29,15 @@ public class TestManager {
      * @return created execution.
      */
     public TestCaseExecution createTestExecutionFromPlan(List<TestPlan> plans) {
-
-        return null;
+        ArrayList<Step> steps = new ArrayList<>();
+        plans.forEach((tp) -> {
+            tp.getTestCaseList().forEach((tc) -> {
+                tc.getStepList().forEach((s) -> {
+                    steps.add(s);
+                });
+            });
+        });
+        return createTestExecutionFromStep(steps);
     }
 
     /**
@@ -39,8 +47,13 @@ public class TestManager {
      * @return created execution.
      */
     public TestCaseExecution createTestExecutionFromTestCase(List<TestCase> testCases) {
-
-        return null;
+        ArrayList<Step> steps = new ArrayList<>();
+        testCases.forEach((tc) -> {
+            tc.getStepList().forEach((s) -> {
+                steps.add(s);
+            });
+        });
+        return createTestExecutionFromStep(steps);
     }
 
     /**
