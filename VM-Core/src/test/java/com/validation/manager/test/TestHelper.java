@@ -165,6 +165,7 @@ public class TestHelper {
         s.setNotes(note);
         s.write2DB();
         TestCaseServer tcs = new TestCaseServer(tc.getId());
+        tcs.write2DB();
         assertEquals(amount + 1, tcs.getStepList().size());
         return new TestCaseJpaController(
                 getEntityManagerFactory())
