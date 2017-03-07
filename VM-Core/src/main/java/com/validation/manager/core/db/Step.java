@@ -111,14 +111,6 @@ public class Step implements Serializable {
         this.stepSequence = stepSequence;
     }
 
-    public byte[] getExpectedResult() {
-        return expectedResult;
-    }
-
-    public void setExpectedResult(byte[] expectedResult) {
-        this.expectedResult = expectedResult;
-    }
-
     public String getNotes() {
         return notes;
     }
@@ -178,14 +170,6 @@ public class Step implements Serializable {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
     }
 
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
-    }
-
     @XmlTransient
     @JsonIgnore
     public List<ExecutionStep> getExecutionStepList() {
@@ -194,5 +178,21 @@ public class Step implements Serializable {
 
     public void setExecutionStepList(List<ExecutionStep> executionStepList) {
         this.executionStepList = executionStepList;
+    }
+
+    public byte[] getExpectedResult() {
+        return expectedResult;
+    }
+
+    public void setExpectedResult(byte[] expectedResult) {
+        this.expectedResult = expectedResult;
+    }
+
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
     }
 }
