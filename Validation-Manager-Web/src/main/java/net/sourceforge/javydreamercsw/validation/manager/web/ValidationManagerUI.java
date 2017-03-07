@@ -20,6 +20,7 @@ import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
+import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -32,6 +33,7 @@ import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.TreeDragMode;
@@ -356,7 +358,10 @@ public class ValidationManagerUI extends UI {
         summary.setConverter(new ByteToStringConverter());
         binder.bind(summary, "summary");
         layout.addComponent(summary);
-        Field<?> creation = binder.buildAndBind("Created on", "creationDate");
+        PopupDateField creation = new PopupDateField("Created on");
+        creation.setResolution(Resolution.SECOND);
+        creation.setDateFormat("MM-dd-yyyy hh:hh:ss");
+        binder.bind(creation, "creationDate");
         layout.addComponent(creation);
         Field<?> active = binder.buildAndBind("Active", "active");
         layout.addComponent(active);
@@ -423,6 +428,7 @@ public class ValidationManagerUI extends UI {
             }
         }
         binder.setReadOnly(!edit);
+        creation.setEnabled(false);
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
@@ -777,6 +783,26 @@ public class ValidationManagerUI extends UI {
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject(new Project(), true);
+                });
+    }
+
+    private void createTestPlanMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Test Case", specIcon);
+        ContextMenu.ContextMenuItem edit
+                = menu.addItem("Edit Test Plan", specIcon);
+        edit.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayTestPlan((TestPlan) tree.getValue(),
+                            true);
+                });
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    TestCase tc = new TestCase();
+                    tc.setTestPlanList(new ArrayList<>());
+                    tc.getTestPlanList().add((TestPlan) tree.getValue());
+                    tc.setCreationDate(new Date());
+                    displayTestCase(tc, true);
                 });
     }
 
@@ -1484,6 +1510,8 @@ public class ValidationManagerUI extends UI {
                     } else if (tree.getValue() instanceof String) {
                         //We are at the root
                         createRootMenu(contextMenu);
+                    } else if (tree.getValue() instanceof TestPlan) {
+                        createTestPlanMenu(contextMenu);
                     }
                 };
         contextMenu.addContextMenuTreeListener(treeItemListener);
