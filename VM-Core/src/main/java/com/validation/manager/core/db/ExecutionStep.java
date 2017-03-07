@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -12,6 +7,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -29,12 +25,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "execution_step")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "ExecutionStep.findAll", query = "SELECT e FROM ExecutionStep e")
-    , @NamedQuery(name = "ExecutionStep.findByTestCaseExecutionId", query = "SELECT e FROM ExecutionStep e WHERE e.executionStepPK.testCaseExecutionId = :testCaseExecutionId")
-    , @NamedQuery(name = "ExecutionStep.findByStepId", query = "SELECT e FROM ExecutionStep e WHERE e.executionStepPK.stepId = :stepId")
-    , @NamedQuery(name = "ExecutionStep.findByStepTestCaseId", query = "SELECT e FROM ExecutionStep e WHERE e.executionStepPK.stepTestCaseId = :stepTestCaseId")
-    , @NamedQuery(name = "ExecutionStep.findByExecutionTime", query = "SELECT e FROM ExecutionStep e WHERE e.executionTime = :executionTime")
-    , @NamedQuery(name = "ExecutionStep.findByComment", query = "SELECT e FROM ExecutionStep e WHERE e.comment = :comment")})
+    @NamedQuery(name = "ExecutionStep.findAll",
+            query = "SELECT e FROM ExecutionStep e")
+    , @NamedQuery(name = "ExecutionStep.findByTestCaseExecutionId",
+            query = "SELECT e FROM ExecutionStep e WHERE "
+            + "e.executionStepPK.testCaseExecutionId "
+            + "= :testCaseExecutionId")
+    , @NamedQuery(name = "ExecutionStep.findByStepId",
+            query = "SELECT e FROM ExecutionStep e WHERE "
+            + "e.executionStepPK.stepId = :stepId")
+    , @NamedQuery(name = "ExecutionStep.findByStepTestCaseId",
+            query = "SELECT e FROM ExecutionStep e WHERE "
+            + "e.executionStepPK.stepTestCaseId = :stepTestCaseId")
+    , @NamedQuery(name = "ExecutionStep.findByExecutionTime",
+            query = "SELECT e FROM ExecutionStep e WHERE "
+            + "e.executionTime = :executionTime")
+    , @NamedQuery(name = "ExecutionStep.findByComment",
+            query = "SELECT e FROM ExecutionStep e WHERE "
+            + "e.comment = :comment")})
 public class ExecutionStep implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -43,7 +51,8 @@ public class ExecutionStep implements Serializable {
     @Column(name = "execution_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date executionTime;
-    @Size(max = 45)
+    @Lob
+    @Size(max = 65535)
     @Column(name = "comment")
     private String comment;
     @JoinColumn(name = "result_id", referencedColumnName = "id")
