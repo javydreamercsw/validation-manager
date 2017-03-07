@@ -54,7 +54,7 @@ public class TestHelper {
     public static VmUser createUser(String name, String pass, String email,
             String first, String last) throws Exception {
         VMUserServer temp = new VMUserServer(name,
-                pass, first, email, last);
+                pass, first, last, email);
         temp.setUserStatusId(new UserStatusJpaController(
                 getEntityManagerFactory()).findUserStatus(1));
         temp.write2DB();
