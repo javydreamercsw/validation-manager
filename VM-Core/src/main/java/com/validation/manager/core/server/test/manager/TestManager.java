@@ -9,10 +9,12 @@ import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.openide.util.Exceptions;
 
@@ -91,5 +93,43 @@ public class TestManager {
             }
         });
         return result;
+    }
+
+    /**
+     * Assign user to the specified steps.
+     *
+     * @param assignee User to be assigned to.
+     * @param assigner User assigning the step.
+     * @param steps Steps to assign.
+     * @throws java.lang.Exception
+     */
+    public void assignUser(VmUser assignee, VmUser assigner,
+            List<ExecutionStep> steps) throws Exception {
+        ExecutionStepJpaController controller
+                = new ExecutionStepJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        for (ExecutionStep es : steps) {
+            es.setVmUserId(assignee);
+            es.setAssignedTime(new Date());
+            es.setAssignedByUserId(assigner.getId());
+            controller.edit(es);
+        }
+    }
+
+    /**
+     * Update the DAO
+     *
+     * @param r
+     */
+    public void update(TestCaseExecution r) {
+        TestCaseExecutionJpaController controller
+                = new TestCaseExecutionJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        update(r, controller.findTestCaseExecution(r.getId()));
+    }
+
+    private void update(TestCaseExecution target,
+            TestCaseExecution source) {
+        target.setExecutionStepList(source.getExecutionStepList());
     }
 }
