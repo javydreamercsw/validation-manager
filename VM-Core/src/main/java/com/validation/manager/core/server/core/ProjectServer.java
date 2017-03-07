@@ -109,6 +109,7 @@ public final class ProjectServer extends Project
         if (copyId) {
             target.setId(source.getId());
         }
+        super.update(target, source);
     }
 
     @Override

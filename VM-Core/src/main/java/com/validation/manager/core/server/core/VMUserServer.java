@@ -192,7 +192,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                     getEntityManagerFactory())
                     .findUserStatus(1));
             setAttempts(0);
-            setModificationReason("audit.user.account.aged");
+            setReason("audit.user.account.aged");
             setChange(true);
         }
         //Increase login attempts
@@ -230,8 +230,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             VmUser vmu = controller.findVmUser(getId());
             update(vmu, this);
             vmu.setPassword(password);
-            vmu.setModificationReason(getModificationReason() == null
-                    ? "audit.general.modified" : getModificationReason());
+            vmu.setReason(getReason() == null
+                    ? "audit.general.modified" : getReason());
             vmu.setModificationTime(new Timestamp(new Date().getTime()));
             controller.edit(vmu);
         } else {
@@ -248,7 +248,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             setId(vmu.getId());
         }
         setChange(false);
-        setModificationReason("");
+        setReason("");
         return getId();
     }
 
