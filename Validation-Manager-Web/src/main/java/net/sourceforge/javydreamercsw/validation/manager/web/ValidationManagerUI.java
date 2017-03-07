@@ -31,9 +31,12 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
+import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.TreeDragMode;
@@ -53,12 +56,12 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecPK;
+import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
@@ -70,6 +73,7 @@ import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import com.validation.manager.core.tool.step.importer.StepImporter;
@@ -103,13 +107,14 @@ public class ValidationManagerUI extends UI {
             = new ThreadLocal<>();
     private final ThemeResource logo = new ThemeResource("vm_logo.png"),
             small = new ThemeResource("VMSmall.png");
-    private VmUser user = null;
+    private VMUserServer user = null;
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset = null;
     private LoginDialog subwindow = null;
     private final String projTreeRoot = "Available Projects";
-    private Component left, right;
+    private Component left;
+    private final TabSheet right = new TabSheet();
     private final List<Project> projects = new ArrayList<>();
     private final VaadinIcons projectIcon = VaadinIcons.RECORDS;
     private final VaadinIcons specIcon = VaadinIcons.BOOK;
@@ -120,18 +125,19 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons stepIcon = VaadinIcons.FILE_TREE_SUB;
     private final VaadinIcons importIcon = VaadinIcons.ARROW_CIRCLE_UP_O;
     private Tree tree;
+    private Tab admin, tester, designer;
 
     /**
      * @return the user
      */
-    protected VmUser getUser() {
+    protected VMUserServer getUser() {
         return user;
     }
 
     /**
      * @param user the user to set
      */
-    protected void setUser(VmUser user) {
+    protected void setUser(VMUserServer user) {
         this.user = user;
         updateScreen();
     }
@@ -218,8 +224,15 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = new Panel(form);
+        setTabContent(admin, form);
         updateScreen();
+    }
+
+    private void setTabContent(Tab target, Component content) {
+        Layout l = (Layout) right.getTab(right.getTabPosition(target))
+                .getComponent();
+        l.removeAllComponents();
+        l.addComponent(content);
     }
 
     private void displayStep(Step s) {
@@ -337,7 +350,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = new Panel(form);
+        setTabContent(admin, form);
         updateScreen();
     }
 
@@ -386,7 +399,7 @@ public class ValidationManagerUI extends UI {
                         buildProjectTree(t);
                         displayTestCase(t, false);
                         updateScreen();
-                    } catch (Exception ex) {
+                    } catch (UnsupportedEncodingException ex) {
                         Exceptions.printStackTrace(ex);
                         Notification.show("Error creating record!",
                                 ex.getLocalizedMessage(),
@@ -432,7 +445,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = new Panel(form);
+        setTabContent(admin, form);
         updateScreen();
     }
 
@@ -517,7 +530,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = new Panel(form);
+        setTabContent(admin, form);
         updateScreen();
     }
 
@@ -598,7 +611,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = new Panel(form);
+        setTabContent(admin, form);
         updateScreen();
     }
 
@@ -703,7 +716,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = new Panel(form);
+        setTabContent(admin, form);
         updateScreen();
     }
 
@@ -729,7 +742,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        right = new Panel(form);
+        setTabContent(admin, form);
         updateScreen();
     }
 
@@ -762,6 +775,7 @@ public class ValidationManagerUI extends UI {
         tree.addItem(projTreeRoot);
         projects.forEach((p) -> {
             if (p.getParentProjectId() == null) {
+                //TODO: Check if you have permissions on project to see it.
                 addProject(p, tree);
             }
         });
@@ -1054,8 +1068,38 @@ public class ValidationManagerUI extends UI {
         }
         //Build the right component
         if (right != null) {
-            if (!(right instanceof Panel)) {
-                right = new Panel(right);
+            //This is a tabbed pane. Enable/Disable the panes based on role
+            if (getUser() != null) {
+                TabSheet tab = (TabSheet) right;
+                user.update();//Get any recent changes
+                boolean isAdmin = false;
+                boolean isTester = false;
+                boolean isDesigner = true;
+                for (Role r : user.getRoleList()) {
+                    switch (r.getDescription()) {
+                        case "admin":
+                            isAdmin = true;
+                            break;
+                        case "tester":
+                            isTester = true;
+                            break;
+                        case "test.designer":
+                            isDesigner = true;
+                            break;
+                    }
+                }
+                if (admin == null) {
+                    admin = tab.addTab(new VerticalLayout(), "Admin");
+                }
+                if (tester == null) {
+                    tester = tab.addTab(new VerticalLayout(), "Tester");
+                }
+                if (designer == null) {
+                    designer = tab.addTab(new VerticalLayout(), "Test Designer");
+                }
+                admin.setVisible(isAdmin);
+                tester.setVisible(isAdmin || isTester);
+                designer.setVisible(isAdmin || isDesigner);
             }
             hsplit.setSecondComponent(right);
         }
@@ -1138,7 +1182,7 @@ public class ValidationManagerUI extends UI {
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
         form.setSizeFull();
-        right = form;
+        setTabContent(admin, form);
         updateScreen();
     }
 
