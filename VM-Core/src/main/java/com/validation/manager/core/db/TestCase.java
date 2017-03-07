@@ -150,14 +150,6 @@ public class TestCase extends Versionable implements Serializable {
         this.isOpen = isOpen;
     }
 
-    public byte[] getExpectedResults() {
-        return expectedResults;
-    }
-
-    public void setExpectedResults(byte[] expectedResults) {
-        this.expectedResults = expectedResults;
-    }
-
     @XmlTransient
     @JsonIgnore
     public List<TestPlan> getTestPlanList() {
@@ -209,6 +201,14 @@ public class TestCase extends Versionable implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCase[ id=" + id + " ]";
+    }
+
+    public byte[] getExpectedResults() {
+        return expectedResults;
+    }
+
+    public void setExpectedResults(byte[] expectedResults) {
+        this.expectedResults = expectedResults;
     }
 
     public byte[] getSummary() {

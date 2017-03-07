@@ -45,12 +45,14 @@ import javax.xml.bind.annotation.XmlRootElement;
             + "e.comment = :comment")})
 public class ExecutionStep implements Serializable {
 
+    @Column(name = "assigned_by_user_id")
+    private Integer assignedByUserId;
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected ExecutionStepPK executionStepPK;
     @Column(name = "execution_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date executionTime;
+    private long executionTime;
     @Lob
     @Size(max = 65535)
     @Column(name = "comment")
@@ -62,13 +64,27 @@ public class ExecutionStep implements Serializable {
     @ManyToOne
     private VmUser vmUserId;
     @JoinColumns({
-        @JoinColumn(name = "step_id", referencedColumnName = "id", insertable = false, updatable = false)
-        , @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id", insertable = false, updatable = false)})
+        @JoinColumn(name = "step_id", referencedColumnName = "id",
+                insertable = false, updatable = false)
+        , @JoinColumn(name = "step_test_case_id",
+                referencedColumnName = "test_case_id",
+                insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private Step step;
-    @JoinColumn(name = "test_case_execution_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "test_case_execution_id",
+            referencedColumnName = "id", insertable = false,
+            updatable = false)
     @ManyToOne(optional = false)
     private TestCaseExecution testCaseExecution;
+    @Column(name = "execution_start")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date executionStart;
+    @Column(name = "execution_end")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date executionEnd;
+    @Column(name = "assigned_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date assignedTime;
 
     public ExecutionStep() {
     }
@@ -89,11 +105,11 @@ public class ExecutionStep implements Serializable {
         this.executionStepPK = executionStepPK;
     }
 
-    public Date getExecutionTime() {
+    public long getExecutionTime() {
         return executionTime;
     }
 
-    public void setExecutionTime(Date executionTime) {
+    public void setExecutionTime(long executionTime) {
         this.executionTime = executionTime;
     }
 
@@ -151,10 +167,10 @@ public class ExecutionStep implements Serializable {
             return false;
         }
         ExecutionStep other = (ExecutionStep) object;
-        if ((this.executionStepPK == null && other.executionStepPK != null) || (this.executionStepPK != null && !this.executionStepPK.equals(other.executionStepPK))) {
-            return false;
-        }
-        return true;
+        return !((this.executionStepPK == null
+                && other.executionStepPK != null)
+                || (this.executionStepPK != null
+                && !this.executionStepPK.equals(other.executionStepPK)));
     }
 
     @Override
@@ -162,4 +178,35 @@ public class ExecutionStep implements Serializable {
         return "com.validation.manager.core.db.ExecutionStep[ executionStepPK=" + executionStepPK + " ]";
     }
 
+    public Date getExecutionStart() {
+        return executionStart;
+    }
+
+    public void setExecutionStart(Date executionStart) {
+        this.executionStart = executionStart;
+    }
+
+    public Date getExecutionEnd() {
+        return executionEnd;
+    }
+
+    public void setExecutionEnd(Date executionEnd) {
+        this.executionEnd = executionEnd;
+    }
+
+    public Date getAssignedTime() {
+        return assignedTime;
+    }
+
+    public void setAssignedTime(Date assignedTime) {
+        this.assignedTime = assignedTime;
+    }
+
+    public Integer getAssignedByUserId() {
+        return assignedByUserId;
+    }
+
+    public void setAssignedByUserId(Integer assignedByUserId) {
+        this.assignedByUserId = assignedByUserId;
+    }
 }
