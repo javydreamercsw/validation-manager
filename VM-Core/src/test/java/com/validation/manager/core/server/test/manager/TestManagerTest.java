@@ -4,10 +4,11 @@ import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
-import java.util.List;
+import java.util.Arrays;
 import org.junit.Test;
 import org.openide.util.Exceptions;
 
@@ -23,9 +24,29 @@ public class TestManagerTest extends AbstractVMTestCase {
     @Test
     public void testCreateTestExecutionFromPlan() {
         System.out.println("createTestExecutionFromPlan");
-        List<TestPlan> plans = null;
-        TestManager instance = new TestManager();
-
+        try {
+            TestProject tp = TestHelper.createTestProject("Test Project");
+            TestPlan plan = TestHelper.createTestPlan(tp,
+                    "Notes", true, true);
+            TestManager instance = new TestManager();
+            TestCase tc = TestHelper.createTestCase("Sample",
+                    "Pass", "Summary");
+            for (int i = 0; i < 5; i++) {
+                tc = TestHelper.addStep(tc, (i + 1), "Text "
+                        + (i + 1), "Note " + (i + 1));
+            }
+            TestCaseExecution r
+                    = instance.createTestExecutionFromPlan(Arrays.asList(plan));
+            assertEquals(tc.getStepList().size(),
+                    r.getExecutionStepList().size());
+            for (Step s : tc.getStepList()) {
+                assertEquals(1, new StepServer(s)
+                        .getExecutionStepList().size());
+            }
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            fail();
+        }
     }
 
     /**
@@ -34,8 +55,26 @@ public class TestManagerTest extends AbstractVMTestCase {
     @Test
     public void testCreateTestExecutionFromTestCase() {
         System.out.println("createTestExecutionFromTestCase");
-        List<TestCase> testCases = null;
-        TestManager instance = new TestManager();
+        try {
+            TestManager instance = new TestManager();
+            TestCase tc = TestHelper.createTestCase("Sample",
+                    "Pass", "Summary");
+            for (int i = 0; i < 5; i++) {
+                tc = TestHelper.addStep(tc, (i + 1), "Text "
+                        + (i + 1), "Note " + (i + 1));
+            }
+            TestCaseExecution r
+                    = instance.createTestExecutionFromTestCase(Arrays.asList(tc));
+            assertEquals(tc.getStepList().size(),
+                    r.getExecutionStepList().size());
+            for (Step s : tc.getStepList()) {
+                assertEquals(1, new StepServer(s)
+                        .getExecutionStepList().size());
+            }
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            fail();
+        }
     }
 
     /**
