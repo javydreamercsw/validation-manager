@@ -1,9 +1,14 @@
 package com.validation.manager.core;
 
-import com.validation.manager.core.adapter.TimestampAdapter;
-import java.sql.Timestamp;
+import java.util.Date;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Lob;
 import javax.persistence.MappedSuperclass;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -12,22 +17,32 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @MappedSuperclass
 public class VMAuditedObject implements AuditedObject {
 
-    private boolean auditable = true;
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Size(max = 2147483647)
+    @Column(name = "reason")
     private String reason;
     /**
      * Default to Admin
      */
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "modifier_id")
     private int modifierId = 1;
-    @XmlJavaTypeAdapter(TimestampAdapter.class)
-    private Timestamp modDate;
+    @Basic(optional = false)
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "modification_time")
+    private Date modificationTime;
 
     @Override
-    public void setModificationReason(String r) {
+    public void setReason(String r) {
         this.reason = r;
     }
 
     @Override
-    public String getModificationReason() {
+    public String getReason() {
         return reason;
     }
 
@@ -37,33 +52,18 @@ public class VMAuditedObject implements AuditedObject {
     }
 
     @Override
-    public int getModifierId() {
+    public Integer getModifierId() {
         return modifierId;
     }
 
     @Override
-    @XmlJavaTypeAdapter(TimestampAdapter.class)
-    public Timestamp getModificationTime() {
-        return modDate;
+    public Date getModificationTime() {
+        return modificationTime;
     }
 
     @Override
-    public void setModificationTime(Timestamp d) {
-        this.modDate = d;
-    }
-
-    /**
-     * @return the auditable
-     */
-    public boolean isAuditable() {
-        return auditable;
-    }
-
-    /**
-     * @param auditable the auditable to set
-     */
-    public void setAuditable(boolean auditable) {
-        this.auditable = auditable;
+    public void setModificationTime(Date d) {
+        this.modificationTime = d;
     }
 
     /**
@@ -73,8 +73,7 @@ public class VMAuditedObject implements AuditedObject {
      * @param source source object
      */
     public void update(VMAuditedObject target, VMAuditedObject source) {
-        target.setAuditable(source.isAuditable());
-        target.setModificationReason(source.getModificationReason());
+        target.setReason(source.getReason());
         target.setModificationTime(source.getModificationTime());
         target.setModifierId(source.getModifierId());
     }

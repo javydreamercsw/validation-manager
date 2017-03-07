@@ -2,6 +2,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.VMAuditedObject;
 import java.io.Serializable;
+import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -26,48 +27,52 @@ public class Versionable extends VMAuditedObject implements Serializable,
     @NotNull
     @Min(0)
     @Column(name = "major_version")
-    private int majorVersion;
+    private Integer majorVersion;
     @Basic(optional = false)
     @NotNull
     @Min(0)
     @Column(name = "mid_version")
-    private int midVersion;
+    private Integer midVersion;
     @Basic(optional = false)
     @NotNull
     @Min(1)
     @Column(name = "minor_version")
-    private int minorVersion;
+    private Integer minorVersion;
 
     public Versionable() {
+        majorVersion = 0;
+        midVersion = 0;
+        minorVersion = 1;
     }
 
-    public Versionable(int majorVersion, int midVersion, int minorVersion) {
+    public Versionable(int majorVersion, int midVersion,
+            int minorVersion) {
         this.majorVersion = majorVersion;
         this.midVersion = midVersion;
         this.minorVersion = minorVersion;
     }
 
-    public int getMajorVersion() {
+    public Integer getMajorVersion() {
         return majorVersion;
     }
 
-    public void setMajorVersion(int majorVersion) {
+    public void setMajorVersion(Integer majorVersion) {
         this.majorVersion = majorVersion;
     }
 
-    public int getMidVersion() {
+    public Integer getMidVersion() {
         return midVersion;
     }
 
-    public void setMidVersion(int midVersion) {
+    public void setMidVersion(Integer midVersion) {
         this.midVersion = midVersion;
     }
 
-    public int getMinorVersion() {
+    public Integer getMinorVersion() {
         return minorVersion;
     }
 
-    public void setMinorVersion(int minorVersion) {
+    public void setMinorVersion(Integer minorVersion) {
         this.minorVersion = minorVersion;
     }
 
@@ -82,7 +87,7 @@ public class Versionable extends VMAuditedObject implements Serializable,
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        // TODO: Warning - this method won't work in the case the versionableId fields are not set
         if (!(object instanceof Versionable)) {
             return false;
         }
@@ -100,17 +105,15 @@ public class Versionable extends VMAuditedObject implements Serializable,
         if (getMajorVersion() > o.getMajorVersion()) {
             return 1;
         } else if (getMajorVersion() < o.getMajorVersion()) {
-            return -1;
+            return getMajorVersion() - o.getMajorVersion();
         }//Same major version
-        else if (getMidVersion() > o.getMidVersion()) {
-            return 1;
-        } else if (getMidVersion() < o.getMidVersion()) {
-            return -1;
+        else if (!Objects.equals(getMidVersion(),
+                o.getMidVersion())) {
+            return getMidVersion() - o.getMidVersion();
         } //Same mid version
-        else if (getMinorVersion() > o.getMinorVersion()) {
-            return 1;
-        } else if (getMinorVersion() < o.getMinorVersion()) {
-            return -1;
+        else if (!Objects.equals(getMinorVersion(),
+                o.getMinorVersion())) {
+            return getMinorVersion() - o.getMinorVersion();
         }
         //Everything the same
         return 0;

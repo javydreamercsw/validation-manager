@@ -73,6 +73,7 @@ public final class RequirementServer extends Requirement
     }
 
     public RequirementServer(Requirement r) {
+        super();
         RequirementJpaController controller
                 = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
         Requirement requirement = controller.findRequirement(r.getId());
@@ -183,6 +184,7 @@ public final class RequirementServer extends Requirement
         target.setMajorVersion(source.getMajorVersion());
         target.setMidVersion(source.getMidVersion());
         target.setMinorVersion(source.getMinorVersion());
+        super.update(target, source);
     }
 
     public static boolean isDuplicate(Requirement req) {
