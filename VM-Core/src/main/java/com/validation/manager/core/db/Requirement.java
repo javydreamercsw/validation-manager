@@ -116,6 +116,7 @@ public class Requirement extends Versionable implements Serializable {
     private List<RiskControlHasRequirement> riskControlHasRequirementList;
 
     public Requirement() {
+        super();
     }
 
     public Requirement(String uniqueId, String description) {
