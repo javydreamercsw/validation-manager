@@ -1,8 +1,9 @@
+/*Add user status*/
 INSERT INTO `user_status` (`id`, `status`, `description`) VALUES (1, 'user.status.active', 'user.status.active.desc');
 INSERT INTO `user_status` (`id`, `status`, `description`) VALUES (2, 'user.status.inactive', 'user.status.inactive.desc');
 INSERT INTO `user_status` (`id`, `status`, `description`) VALUES (3, 'user.status.locked', 'user.status.locked.desc');
 INSERT INTO `user_status` (`id`, `status`, `description`) VALUES (4, 'user.status.aged', 'user.status.aged.desc');
-INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `locale`, `user_status_id`) VALUES (1, 'admin', '21232f297a57a5a743894a0e4a801fc3', '', 'System', 'Administrator', 'en', 1);
+/*Add roles*/
 INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (1, 'reserved1', 'reserver.desc');
 INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (2, 'reserved2', 'reserved2.desc');
 INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (3, 'none', 'none.desc');
@@ -12,6 +13,7 @@ INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (6, 'senior.tester'
 INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (7, 'tester', 'tester.desc');
 INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (8, 'admin', 'admin.desc');
 INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (9, 'leader', 'leader.desc');
+/*Add user rights*/
 INSERT INTO `user_right` (`id`, `description`) VALUES (1, 'testplan.execute');
 INSERT INTO `user_right` (`id`, `description`) VALUES (2, 'testplan.create.build');
 INSERT INTO `user_right` (`id`, `description`) VALUES (3, 'testplan.metrics');
@@ -27,6 +29,7 @@ INSERT INTO `user_right` (`id`, `description`) VALUES (12, 'testplan.create');
 INSERT INTO `user_right` (`id`, `description`) VALUES (13, 'events.view');
 INSERT INTO `user_right` (`id`, `description`) VALUES (14, 'events.management');
 INSERT INTO `user_right` (`id`, `description`) VALUES (15, 'system.configuration');
+/*Set rights per role*/
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 1);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 2);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 3);
@@ -68,27 +71,32 @@ INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 7);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 8);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 9);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 12);
-INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (1, 8);
+/*Add assignment types*/
 INSERT INTO `assigment_type` (`id`, `fk_table`, `description`) VALUES (1, 'test_plan_has_test', 'testcase.execution');
 INSERT INTO `assigment_type` (`id`, `fk_table`, `description`) VALUES (2, 'test_case', 'testcase.review');
+/*Add assignment statuses*/
 INSERT INTO `assignment_status` (`id`, `name`, `description`) VALUES (1, 'assignment.status.open', 'assignment.status.open.desc');
 INSERT INTO `assignment_status` (`id`, `name`, `description`) VALUES (2, 'assignment.status.closed', 'assignment.status.closed.desc');
 INSERT INTO `assignment_status` (`id`, `name`, `description`) VALUES (3, 'assignment.status.completed', 'assignment.status.completed.desc');
 INSERT INTO `assignment_status` (`id`, `name`, `description`) VALUES (4, 'assignment.status..todo.urgent', 'assignment.status.todo.urgent.desc');
 INSERT INTO `assignment_status` (`id`, `name`, `description`) VALUES (5, 'assignment.status.todo', 'assignment.status.todo.desc');
+/*Add requirement types*/
 INSERT INTO `requirement_type` (`id`, `name`, `description`) VALUES (1, 'HW', 'Hardware');
 INSERT INTO `requirement_type` (`id`, `name`, `description`) VALUES (2, 'SW', 'Software');
 INSERT INTO `requirement_type` (`id`, `name`, `description`) VALUES (3, 'Labeling', 'Labeling requirements');
 INSERT INTO `requirement_type` (`id`, `name`, `description`) VALUES (4, 'Standards', 'Testing related to applicable standards');
+/*Add requirement statuses*/
 INSERT INTO `requirement_status` (`id`, `status`) VALUES (1, 'general.open');
 INSERT INTO `requirement_status` (`id`, `status`) VALUES (2, 'general.approved');
 INSERT INTO `requirement_status` (`id`, `status`) VALUES (3, 'general.obsolete');
 INSERT INTO `requirement_status` (`id`, `status`) VALUES (4, 'general.rejected');
+/*Add Spec levels*/
 INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (1, 'User Need', 'Higher level of requirements.');
 INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (2, 'Requirements', 'Detailed version of the User Needs. Usually the lowest level of requirement for non-software projects.');
 INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (3, 'System Design', 'Systems design is the phase where system engineers analyze and understand the business of the proposed system by studying the user requirements document.');
 INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (4, 'Architecture Design', 'List of modules, brief functionality of each module, their interface relationships, dependencies, database tables, architecture diagrams, technology details etc.');
 INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (5, 'Module Design', 'The designed system is broken up into smaller units or modules and each of them is explained so that the programmer can start coding directly.');
+/*Add settings*/
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (4, 'password.aging', 0, 90, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (5, 'password.attempts', 0, 3, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (6, 'password.unusable_period', 0, 365, '0', NULL);
@@ -96,3 +104,6 @@ INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `s
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (2, 'version.mid', 0, 0, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (3, 'version.low', 0, 1, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (7, 'version.postfix', 0, 0, '0', 'Alpha');
+/*Add Admin user*/
+INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `locale`, `user_status_id`) VALUES (1, 'admin', '21232f297a57a5a743894a0e4a801fc3', '', 'System', 'Administrator', 'en', 1);
+INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (1, 8);
