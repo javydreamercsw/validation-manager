@@ -16,3 +16,5 @@ INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `las
 INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (5, 6);
 INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `locale`, `user_status_id`) VALUES (6, 'leader', 'c444858e0aaeb727da73d2eae62321ad', '', 'Lead', 'Tester', 'en', 1);
 INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (6, 9);
+/*Update version*/
+UPDATE `vm_setting` SET `int_val` = 2 WHERE id = 3;
