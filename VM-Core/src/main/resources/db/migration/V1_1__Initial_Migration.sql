@@ -91,11 +91,11 @@ INSERT INTO `requirement_status` (`id`, `status`) VALUES (2, 'general.approved')
 INSERT INTO `requirement_status` (`id`, `status`) VALUES (3, 'general.obsolete');
 INSERT INTO `requirement_status` (`id`, `status`) VALUES (4, 'general.rejected');
 /*Add Spec levels*/
-INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (1, 'User Need', 'Higher level of requirements.');
-INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (2, 'Requirements', 'Detailed version of the User Needs. Usually the lowest level of requirement for non-software projects.');
-INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (3, 'System Design', 'Systems design is the phase where system engineers analyze and understand the business of the proposed system by studying the user requirements document.');
-INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (4, 'Architecture Design', 'List of modules, brief functionality of each module, their interface relationships, dependencies, database tables, architecture diagrams, technology details etc.');
-INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (5, 'Module Design', 'The designed system is broken up into smaller units or modules and each of them is explained so that the programmer can start coding directly.');
+INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (1, 'spec.level.user.need', 'spec.level.user.need.desc');
+INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (2, 'spec.level.requirement', 'spec.level.requirement.desc');
+INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (3, 'spec.level.system', 'spec.level.system.desc');
+INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (4, 'spec.level.arch', 'spec.level.arch.desc');
+INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (5, 'spec.level.module', 'spec.level.module.desc');
 /*Add settings*/
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (4, 'password.aging', 0, 90, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (5, 'password.attempts', 0, 3, '0', NULL);
