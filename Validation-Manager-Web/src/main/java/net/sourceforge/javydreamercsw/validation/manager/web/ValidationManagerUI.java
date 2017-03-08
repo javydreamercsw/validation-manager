@@ -58,7 +58,6 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecPK;
-import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
@@ -130,6 +129,7 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons importIcon = VaadinIcons.ARROW_CIRCLE_UP_O;
     private Tree tree;
     private Tab admin, tester, designer, demo;
+    private final List<String> roles = new ArrayList<>();
 
     /**
      * @return the user
@@ -760,7 +760,7 @@ public class ValidationManagerUI extends UI {
         THREAD_LOCAL.set(application);
     }
 
-    private void buildDemoTree() {
+    private static void buildDemoTree() {
         try {
             DemoBuilder.buildDemoProject();
         } catch (NonexistentEntityException ex) {
@@ -827,6 +827,7 @@ public class ValidationManagerUI extends UI {
     private void createProjectMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
                 = menu.addItem("Create Sub Project", projectIcon);
+        create.setEnabled(isAdmin());
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     Project project = new Project();
@@ -1076,24 +1077,12 @@ public class ValidationManagerUI extends UI {
         if (right != null) {
             //This is a tabbed pane. Enable/Disable the panes based on role
             TabSheet tab = (TabSheet) right;
-            boolean isAdmin = false;
-            boolean isTester = false;
-            boolean isDesigner = false;
             if (getUser() != null) {
+                roles.clear();
                 user.update();//Get any recent changes
-                for (Role r : user.getRoleList()) {
-                    switch (r.getDescription()) {
-                        case "admin":
-                            isAdmin = true;
-                            break;
-                        case "tester":
-                            isTester = true;
-                            break;
-                        case "test.designer":
-                            isDesigner = true;
-                            break;
-                    }
-                }
+                user.getRoleList().forEach((r) -> {
+                    roles.add(r.getRoleName());
+                });
             }
             if (demo == null && DataBaseManager.isDemo()) {
                 VerticalLayout layout = new VerticalLayout();
@@ -1140,9 +1129,9 @@ public class ValidationManagerUI extends UI {
             if (designer == null) {
                 designer = tab.addTab(new VerticalLayout(), "Test Designer");
             }
-            admin.setVisible(isAdmin);
-            tester.setVisible(isAdmin || isTester);
-            designer.setVisible(isAdmin || isDesigner);
+            admin.setVisible(isAdmin());
+            tester.setVisible(isAdmin() || isTester());
+            designer.setVisible(isAdmin() || isDesigner());
             hsplit.setSecondComponent(right);
         }
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
@@ -1660,12 +1649,46 @@ public class ValidationManagerUI extends UI {
         return result;
     }
 
+    private boolean isRequirementManager() {
+        return roles.contains("requirement.manager");
+    }
+
+    private boolean isSeniorTester() {
+        return roles.contains("senior.tester");
+    }
+
+    private boolean isLeader() {
+        return roles.contains("leader");
+    }
+
+    private boolean isAdmin() {
+        return roles.contains("admin");
+    }
+
+    private boolean isTester() {
+        return roles.contains("tester");
+    }
+
+    private boolean isDesigner() {
+        return roles.contains("teste.designer");
+    }
+
     @WebServlet(value = "/*", asyncSupported = true)
     @VaadinServletConfiguration(productionMode = false,
             ui = ValidationManagerUI.class,
             widgetset = "net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet")
     public static class Servlet extends VaadinServlet {
 
+        public Servlet() {
+            ProjectJpaController controller
+                    = new ProjectJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+
+            if (DataBaseManager.isDemo()
+                    && controller.findProjectEntities().isEmpty()) {
+                buildDemoTree();
+            }
+        }
     }
 
     private static class ByteToStringConverter implements Converter<String, byte[]> {
