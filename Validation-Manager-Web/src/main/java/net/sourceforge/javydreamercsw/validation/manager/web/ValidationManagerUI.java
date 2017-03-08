@@ -640,9 +640,6 @@ public class ValidationManagerUI extends UI {
                 "modificationDate");
         layout.addComponent(date);
         date.setEnabled(false);
-        Field<?> version = binder.buildAndBind("Version", "version");
-        layout.addComponent(version);
-        version.setEnabled(false);
         SpecLevelJpaController controller
                 = new SpecLevelJpaController(DataBaseManager
                         .getEntityManagerFactory());
@@ -796,6 +793,7 @@ public class ValidationManagerUI extends UI {
     private void createRootMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
                 = menu.addItem("Create Project", projectIcon);
+        create.setEnabled(checkRight("product.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject(new Project(), true);
@@ -805,8 +803,10 @@ public class ValidationManagerUI extends UI {
     private void createTestPlanMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
                 = menu.addItem("Create Test Case", specIcon);
+        create.setEnabled(checkRight("testplan.planning"));
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Test Plan", specIcon);
+        edit.setEnabled(checkRight("testplan.planning"));
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayTestPlan((TestPlan) tree.getValue(),
@@ -825,7 +825,7 @@ public class ValidationManagerUI extends UI {
     private void createProjectMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
                 = menu.addItem("Create Sub Project", projectIcon);
-        create.setEnabled(isAdmin());
+        create.setEnabled(checkRight("requirement.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     Project project = new Project();
@@ -834,6 +834,7 @@ public class ValidationManagerUI extends UI {
                 });
         ContextMenu.ContextMenuItem createSpec
                 = menu.addItem("Create Requirement Spec", specIcon);
+        createSpec.setEnabled(checkRight("requirement.modify"));
         createSpec.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     RequirementSpec rs = new RequirementSpec();
@@ -842,12 +843,14 @@ public class ValidationManagerUI extends UI {
                 });
         ContextMenu.ContextMenuItem createTest
                 = menu.addItem("Create Test Suite", testSuiteIcon);
+        createTest.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Project", VaadinIcons.EDIT);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject((Project) tree.getValue(), true);
                 });
+        edit.setEnabled(checkRight("product.modify"));
         createTest.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     TestProject tp = new TestProject();
@@ -865,6 +868,7 @@ public class ValidationManagerUI extends UI {
     private void createRequirementSpecMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
                 = menu.addItem("Create Requirement Spec Node", specIcon);
+        create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Requirement Spec", specIcon);
         edit.addItemClickListener(
@@ -872,6 +876,7 @@ public class ValidationManagerUI extends UI {
                     displayRequirementSpec((RequirementSpec) tree.getValue(),
                             true);
                 });
+        edit.setEnabled(checkRight("requirement.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     RequirementSpecNode rs = new RequirementSpecNode();
@@ -883,6 +888,7 @@ public class ValidationManagerUI extends UI {
     private void createRequirementSpecNodeMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
                 = menu.addItem("Create Requirement Spec", VaadinIcons.PLUS);
+        create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Requirement Spec Node", VaadinIcons.EDIT);
         edit.addItemClickListener(
@@ -890,6 +896,7 @@ public class ValidationManagerUI extends UI {
                     displayRequirementSpecNode((RequirementSpecNode) tree.getValue(),
                             true);
                 });
+        edit.setEnabled(checkRight("requirement.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     Requirement r = new Requirement();
@@ -898,6 +905,7 @@ public class ValidationManagerUI extends UI {
                 });
         ContextMenu.ContextMenuItem importRequirement
                 = menu.addItem("Import Requirements", importIcon);
+        importRequirement.setEnabled(checkRight("requirement.modify"));
         importRequirement.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     // Create a sub-window and set the content
@@ -952,12 +960,14 @@ public class ValidationManagerUI extends UI {
     private void createTestCaseMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
                 = menu.addItem("Create Step", VaadinIcons.PLUS);
+        create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Test Case", VaadinIcons.EDIT);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayTestCase((TestCase) tree.getValue(), true);
                 });
+        edit.setEnabled(checkRight("testcase.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     TestCase tc = (TestCase) tree.getValue();
@@ -966,9 +976,10 @@ public class ValidationManagerUI extends UI {
                     s.setTestCase(tc);
                     displayStep(s, true);
                 });
-        ContextMenu.ContextMenuItem importRequirement
+        ContextMenu.ContextMenuItem importSteps
                 = menu.addItem("Import Steps", importIcon);
-        importRequirement.addItemClickListener(
+        importSteps.setEnabled(checkRight("requirement.modify"));
+        importSteps.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     // Create a sub-window and set the content
                     Window subWindow = new Window("Import Test Case Steps");
@@ -1041,13 +1052,16 @@ public class ValidationManagerUI extends UI {
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayStep((Step) tree.getValue(), true);
                 });
+        edit.setEnabled(checkRight("testcase.modify"));
     }
 
     private void createTestProjectMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
                 = menu.addItem("Create Test Plan", VaadinIcons.PLUS);
+        create.setEnabled(checkRight("testplan.planning"));
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Test Project", VaadinIcons.EDIT);
+        edit.setEnabled(checkRight("testplan.planning"));
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayTestProject((TestProject) tree.getValue(), true);
@@ -1127,9 +1141,9 @@ public class ValidationManagerUI extends UI {
             if (designer == null) {
                 designer = tab.addTab(new VerticalLayout(), "Test Designer");
             }
-            admin.setVisible(isAdmin());
-            tester.setVisible(isAdmin() || isTester());
-            designer.setVisible(isAdmin() || isDesigner());
+            admin.setVisible(checkRight("system.configuration"));
+            tester.setVisible(checkRight("testplan.execute"));
+            designer.setVisible(checkRight("testplan.planning"));
             hsplit.setSecondComponent(right);
         }
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
@@ -1346,10 +1360,13 @@ public class ValidationManagerUI extends UI {
         //Connect to the database defined in context.xml
         DataBaseManager.setPersistenceUnitName("VMPUJNDI");
         setInstance(this);
-        if (reset == null && DataBaseManager.isDemo()) {
-            LOG.info("Running on demo mode!");
-            reset = new VMDemoResetThread();
-            reset.start();
+        ProjectJpaController controller
+                = new ProjectJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+
+        if (DataBaseManager.isDemo()
+                && controller.findProjectEntities().isEmpty()) {
+            buildDemoTree();
         }
         tree = new Tree();
         // Set the tree in drag source mode
@@ -1647,28 +1664,33 @@ public class ValidationManagerUI extends UI {
         return result;
     }
 
-    private boolean isRequirementManager() {
-        return roles.contains("requirement.manager");
+    private boolean checkAnyRights(List<String> rights) {
+        boolean result = false;
+        if (rights.stream().anyMatch((r) -> (checkRight(r)))) {
+            return true;
+        }
+        return result;
     }
 
-    private boolean isSeniorTester() {
-        return roles.contains("senior.tester");
+    private boolean checkAllRights(List<String> rights) {
+        boolean result = true;
+        for (String r : rights) {
+            if (!checkRight(r)) {
+                result = false;
+                break;
+            }
+        }
+        return result;
     }
 
-    private boolean isLeader() {
-        return roles.contains("leader");
-    }
-
-    private boolean isAdmin() {
-        return roles.contains("admin");
-    }
-
-    private boolean isTester() {
-        return roles.contains("tester");
-    }
-
-    private boolean isDesigner() {
-        return roles.contains("teste.designer");
+    private boolean checkRight(String right) {
+        if (user != null) {
+            user.update();
+            return user.getRoleList().stream().anyMatch((r)
+                    -> (r.getUserRightList().stream().anyMatch((ur)
+                            -> (ur.getDescription().equals(right)))));
+        }
+        return false;
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
@@ -1678,13 +1700,10 @@ public class ValidationManagerUI extends UI {
     public static class Servlet extends VaadinServlet {
 
         public Servlet() {
-            ProjectJpaController controller
-                    = new ProjectJpaController(DataBaseManager
-                            .getEntityManagerFactory());
-
-            if (DataBaseManager.isDemo()
-                    && controller.findProjectEntities().isEmpty()) {
-                buildDemoTree();
+            if (reset == null && DataBaseManager.isDemo()) {
+                LOG.info("Running on demo mode!");
+                reset = new VMDemoResetThread();
+                reset.start();
             }
         }
     }
