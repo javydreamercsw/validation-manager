@@ -64,6 +64,7 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
+import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
@@ -730,16 +731,50 @@ public class ValidationManagerUI extends UI {
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(req.getClass());
         binder.setItemDataSource(req);
-        layout.addComponent(binder.buildAndBind("Requirement ID", "uniqueId"));
+        Field<?> id = binder.buildAndBind("Requirement ID", "uniqueId");
+        layout.addComponent(id);
         Field desc = binder.buildAndBind("Description", "description",
                 TextArea.class);
         desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
         desc.setSizeFull();
         layout.addComponent(desc);
         layout.addComponent(binder.buildAndBind("Notes", "notes"));
+        if (edit) {
+            if (req.getId() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    req.setUniqueId(id.getValue().toString());
+                    req.setDescription(desc.getValue().toString());
+                    new RequirementJpaController(DataBaseManager
+                            .getEntityManagerFactory()).create(req);
+                    form.setVisible(false);
+                    //Recreate the tree to show the addition
+                    updateProjectList();
+                    buildProjectTree(req);
+                    displayRequirement(req, false);
+                    updateScreen();
+                });
+                layout.addComponent(save);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        binder.commit();
+                    } catch (FieldGroup.CommitException ex) {
+                        Exceptions.printStackTrace(ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                layout.addComponent(update);
+            }
+        }
+        binder.setBuffered(true);
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
-        layout.setSizeFull();
         form.setSizeFull();
         setTabContent(admin, form);
         updateScreen();
@@ -863,6 +898,12 @@ public class ValidationManagerUI extends UI {
     private void createRequirementMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Requirement", VaadinIcons.EDIT);
+        edit.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayRequirement((Requirement) tree.getValue(),
+                            true);
+                });
+        edit.setEnabled(checkRight("requirement.modify"));
     }
 
     private void createRequirementSpecMenu(ContextMenu menu) {
