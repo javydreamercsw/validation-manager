@@ -22,6 +22,7 @@ import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
@@ -31,6 +32,7 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
@@ -70,10 +72,12 @@ import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
+import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.VMUserServer;
+import com.validation.manager.core.tool.MD5;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import com.validation.manager.core.tool.step.importer.StepImporter;
@@ -125,7 +129,7 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons stepIcon = VaadinIcons.FILE_TREE_SUB;
     private final VaadinIcons importIcon = VaadinIcons.ARROW_CIRCLE_UP_O;
     private Tree tree;
-    private Tab admin, tester, designer;
+    private Tab admin, tester, designer, demo;
 
     /**
      * @return the user
@@ -1064,17 +1068,19 @@ public class ValidationManagerUI extends UI {
             if (!(left instanceof Panel)) {
                 left = new Panel(left);
             }
-            hsplit.setFirstComponent(left);
+            if (user != null) {
+                hsplit.setFirstComponent(left);
+            }
         }
         //Build the right component
         if (right != null) {
             //This is a tabbed pane. Enable/Disable the panes based on role
+            TabSheet tab = (TabSheet) right;
+            boolean isAdmin = false;
+            boolean isTester = false;
+            boolean isDesigner = false;
             if (getUser() != null) {
-                TabSheet tab = (TabSheet) right;
                 user.update();//Get any recent changes
-                boolean isAdmin = false;
-                boolean isTester = false;
-                boolean isDesigner = true;
                 for (Role r : user.getRoleList()) {
                     switch (r.getDescription()) {
                         case "admin":
@@ -1088,19 +1094,55 @@ public class ValidationManagerUI extends UI {
                             break;
                     }
                 }
-                if (admin == null) {
-                    admin = tab.addTab(new VerticalLayout(), "Admin");
-                }
-                if (tester == null) {
-                    tester = tab.addTab(new VerticalLayout(), "Tester");
-                }
-                if (designer == null) {
-                    designer = tab.addTab(new VerticalLayout(), "Test Designer");
-                }
-                admin.setVisible(isAdmin);
-                tester.setVisible(isAdmin || isTester);
-                designer.setVisible(isAdmin || isDesigner);
             }
+            if (demo == null && DataBaseManager.isDemo()) {
+                VerticalLayout layout = new VerticalLayout();
+                VmUserJpaController controller
+                        = new VmUserJpaController(DataBaseManager
+                                .getEntityManagerFactory());
+                layout.addComponent(new Label("<h1>Welcome to "
+                        + "Validation Manager Demo instance</h1>",
+                        ContentMode.HTML));
+                layout.addComponent(new Label("Below you can find the "
+                        + "various accounts that exist in the demo so "
+                        + "you can explore."));
+                StringBuilder sb = new StringBuilder("<ul>");
+                controller.findVmUserEntities().stream().filter((u)
+                        -> (u.getId() < 1000)).forEachOrdered((u) -> {
+                    try {
+                        //Default accounts
+                        if (u.getPassword().equals(MD5
+                                .encrypt(u.getUsername()))) {
+                            sb.append("<li><b>User name:</b> ")
+                                    .append(u.getUsername())
+                                    .append(", <b>Password:</b> ")
+                                    .append(u.getUsername())
+                                    .append(" <b>Role</b>: ")
+                                    .append(u.getRoleList().get(0)
+                                            .getDescription())
+                                    .append("</li>");
+                        }
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                });
+                sb.append("</ul>");
+                layout.addComponent(new Label(sb.toString(),
+                        ContentMode.HTML));
+                demo = tab.addTab(layout, "Demo");
+            }
+            if (admin == null) {
+                admin = tab.addTab(new VerticalLayout(), "Admin");
+            }
+            if (tester == null) {
+                tester = tab.addTab(new VerticalLayout(), "Tester");
+            }
+            if (designer == null) {
+                designer = tab.addTab(new VerticalLayout(), "Test Designer");
+            }
+            admin.setVisible(isAdmin);
+            tester.setVisible(isAdmin || isTester);
+            designer.setVisible(isAdmin || isDesigner);
             hsplit.setSecondComponent(right);
         }
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
@@ -1114,18 +1156,16 @@ public class ValidationManagerUI extends UI {
     }
 
     private void updateScreen() {
+        //Set up a menu header on top and the content below
+        VerticalSplitPanel vs = new VerticalSplitPanel();
+        vs.setSplitPosition(20, Unit.PERCENTAGE);
+        //Set up top menu panel
+        vs.setFirstComponent(getMenu());
+        //Add the content
+        vs.setSecondComponent(getContentComponent());
+        setContent(vs);
         if (getUser() == null) {
-            setContent(new Image("", logo));
             showLoginDialog();
-        } else {
-            //Set up a menu header on top and the content below
-            VerticalSplitPanel vs = new VerticalSplitPanel();
-            vs.setSplitPosition(20, Unit.PERCENTAGE);
-            //Set up top menu panel
-            vs.setFirstComponent(getMenu());
-            //Add the content
-            vs.setSecondComponent(getContentComponent());
-            setContent(vs);
         }
     }
 
