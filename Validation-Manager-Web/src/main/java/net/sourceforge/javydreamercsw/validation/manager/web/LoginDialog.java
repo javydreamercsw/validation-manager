@@ -100,7 +100,7 @@ public final class LoginDialog extends Window {
             //Set password to unencrypted to avoid passwords going out
             user.setPassword(null);
             if (menu != null) {
-                menu.setUser(user);
+                menu.setUser(new VMUserServer(user));
             }
             close();
         } else {
