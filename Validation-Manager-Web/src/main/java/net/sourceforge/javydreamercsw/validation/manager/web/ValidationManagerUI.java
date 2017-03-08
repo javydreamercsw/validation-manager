@@ -664,7 +664,6 @@ public class ValidationManagerUI extends UI {
                         rs.setModificationDate(new Date());
                         rs.setSpecLevel((SpecLevel) level.getValue());
                         rs.setProject(((Project) tree.getValue()));
-                        rs.setVersion(1);
                         rs.setRequirementSpecPK(new RequirementSpecPK(
                                 rs.getProject().getId(),
                                 rs.getSpecLevel().getId()));
@@ -692,7 +691,6 @@ public class ValidationManagerUI extends UI {
                         rs.setName(name.getValue().toString());
                         rs.setModificationDate(new Date());
                         rs.setSpecLevel((SpecLevel) level.getValue());
-                        rs.setVersion(rs.getVersion() + 1);
                         new RequirementSpecJpaController(DataBaseManager
                                 .getEntityManagerFactory()).edit(rs);
                         displayRequirementSpec(rs, true);
