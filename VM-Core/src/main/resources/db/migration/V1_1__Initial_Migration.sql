@@ -29,6 +29,7 @@ INSERT INTO `user_right` (`id`, `description`) VALUES (12, 'testplan.create');
 INSERT INTO `user_right` (`id`, `description`) VALUES (13, 'events.view');
 INSERT INTO `user_right` (`id`, `description`) VALUES (14, 'events.management');
 INSERT INTO `user_right` (`id`, `description`) VALUES (15, 'system.configuration');
+INSERT INTO `user_right` (`id`, `description`) VALUES (16, 'project.viewer');
 /*Set rights per role*/
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 1);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 2);
