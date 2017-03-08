@@ -129,7 +129,7 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons stepIcon = VaadinIcons.FILE_TREE_SUB;
     private final VaadinIcons importIcon = VaadinIcons.ARROW_CIRCLE_UP_O;
     private Tree tree;
-    private Tab admin, tester, designer, demo;
+    private Tab main, tester, designer, demo;
     private final List<String> roles = new ArrayList<>();
 
     /**
@@ -229,15 +229,24 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        setTabContent(admin, form);
+        setTabContent(main, form, "requirement.view");
         updateScreen();
     }
 
-    private void setTabContent(Tab target, Component content) {
-        Layout l = (Layout) right.getTab(right.getTabPosition(target))
-                .getComponent();
+    private void setTabContent(Tab target, Component content,
+            String permission) {
+        Layout l = (Layout) target.getComponent();
         l.removeAllComponents();
         l.addComponent(content);
+        if (permission != null && !permission.isEmpty()) {
+            //Hide tab based on permissions
+            target.setVisible(checkRight(permission));
+        }
+        right.setSelectedTab(target);
+    }
+
+    private void setTabContent(Tab target, Component content) {
+        setTabContent(target, content, null);
     }
 
     private void displayStep(Step s) {
@@ -355,7 +364,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        setTabContent(admin, form);
+        setTabContent(main, form, "testcase.view");
         updateScreen();
     }
 
@@ -450,7 +459,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        setTabContent(admin, form);
+        setTabContent(main, form, "testcase.view");
         updateScreen();
     }
 
@@ -535,7 +544,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        setTabContent(admin, form);
+        setTabContent(main, form, "testcase.view");
         updateScreen();
     }
 
@@ -616,7 +625,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        setTabContent(admin, form);
+        setTabContent(main, form, "testcase.view");
         updateScreen();
     }
 
@@ -716,7 +725,7 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        setTabContent(admin, form);
+        setTabContent(main, form, "requirement.view");
         updateScreen();
     }
 
@@ -776,7 +785,7 @@ public class ValidationManagerUI extends UI {
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
         form.setSizeFull();
-        setTabContent(admin, form);
+        setTabContent(main, form, "requirement.view");
         updateScreen();
     }
 
@@ -1137,6 +1146,15 @@ public class ValidationManagerUI extends UI {
                     roles.add(r.getRoleName());
                 });
             }
+            if (main == null) {
+                main = tab.addTab(new VerticalLayout(), "Main");
+            }
+            if (tester == null) {
+                tester = tab.addTab(new VerticalLayout(), "Tester");
+            }
+            if (designer == null) {
+                designer = tab.addTab(new VerticalLayout(), "Test Designer");
+            }
             if (demo == null && DataBaseManager.isDemo()) {
                 VerticalLayout layout = new VerticalLayout();
                 VmUserJpaController controller
@@ -1173,16 +1191,7 @@ public class ValidationManagerUI extends UI {
                         ContentMode.HTML));
                 demo = tab.addTab(layout, "Demo");
             }
-            if (admin == null) {
-                admin = tab.addTab(new VerticalLayout(), "Admin");
-            }
-            if (tester == null) {
-                tester = tab.addTab(new VerticalLayout(), "Tester");
-            }
-            if (designer == null) {
-                designer = tab.addTab(new VerticalLayout(), "Test Designer");
-            }
-            admin.setVisible(checkRight("system.configuration"));
+            main.setVisible(user != null);
             tester.setVisible(checkRight("testplan.execute"));
             designer.setVisible(checkRight("testplan.planning"));
             hsplit.setSecondComponent(right);
@@ -1264,7 +1273,7 @@ public class ValidationManagerUI extends UI {
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
         form.setSizeFull();
-        setTabContent(admin, form);
+        setTabContent(main, form, "project.view");
         updateScreen();
     }
 
