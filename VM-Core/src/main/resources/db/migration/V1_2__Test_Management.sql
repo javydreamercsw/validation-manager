@@ -1,3 +1,5 @@
+/*New Roles*/
+UPDATE `role` SET `role_name` = 'requirement.manager', `description` = 'requirement.manager.desc' WHERE id = 1;
 /*Add default test results*/
 INSERT INTO `execution_result` (`id`, `result_name`) VALUES (1, 'result.pass');
 INSERT INTO `execution_result` (`id`, `result_name`) VALUES (2, 'result.fail');
