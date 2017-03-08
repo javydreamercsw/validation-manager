@@ -97,12 +97,12 @@ INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (3, 'spec.level.sy
 INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (4, 'spec.level.arch', 'spec.level.arch.desc');
 INSERT INTO `spec_level` (`id`, `name`, `description`) VALUES (5, 'spec.level.module', 'spec.level.module.desc');
 /*Add settings*/
-INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (4, 'password.aging', 0, 90, '0', NULL);
-INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (5, 'password.attempts', 0, 3, '0', NULL);
-INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (6, 'password.unusable_period', 0, 365, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (1, 'version.high', 0, 0, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (2, 'version.mid', 0, 0, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (3, 'version.low', 0, 1, '0', NULL);
+INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (4, 'password.aging', 0, 90, '0', NULL);
+INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (5, 'password.attempts', 0, 3, '0', NULL);
+INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (6, 'password.unusable_period', 0, 365, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (7, 'version.postfix', 0, 0, '0', 'Alpha');
 /*Add Admin user*/
 INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `locale`, `user_status_id`) VALUES (1, 'admin', '21232f297a57a5a743894a0e4a801fc3', '', 'System', 'Administrator', 'en', 1);
