@@ -6,6 +6,7 @@ import com.googlecode.flyway.core.api.MigrationInfo;
 import com.googlecode.flyway.core.api.MigrationState;
 import com.validation.manager.core.db.controller.VmIdJpaController;
 import com.validation.manager.core.server.core.VMIdServer;
+import com.validation.manager.core.server.core.VMSettingServer;
 import static java.lang.Class.forName;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.valueOf;
@@ -20,8 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
-import static java.util.ResourceBundle.getBundle;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -53,8 +52,6 @@ public class DataBaseManager {
     private static final Logger LOG
             = getLogger(DataBaseManager.class.getSimpleName());
     private static DBState state = DBState.START_UP;
-    private static final ResourceBundle SETTINGS
-            = getBundle("com.validation.manager.resources.settings");
     private static boolean locked = false;
     private static boolean usingContext;
     private static boolean demo;
@@ -522,17 +519,21 @@ public class DataBaseManager {
     }
 
     public static String getVersion() {
-        return getVersionNumber() + ((SETTINGS.getString("version.postfix").isEmpty()
-                ? "" : " " + SETTINGS.getString("version.postfix")));
+        return getVersionNumber()
+                + ((VMSettingServer.getSetting("version.postfix")
+                        .getStringVal().isEmpty()
+                        ? "" : " "
+                        + VMSettingServer.getSetting("version.postfix")
+                                .getStringVal()));
     }
 
     public static String getVersionNumber() {
         StringBuilder version = new StringBuilder();
-        version.append(SETTINGS.getString("version.high"));
+        version.append(VMSettingServer.getSetting("version.high").getIntVal());
         version.append(".");
-        version.append(SETTINGS.getString("version.mid"));
+        version.append(VMSettingServer.getSetting("version.mid").getIntVal());
         version.append(".");
-        version.append(SETTINGS.getString("version.low"));
+        version.append(VMSettingServer.getSetting("version.low").getIntVal());
         return version.toString();
     }
 
