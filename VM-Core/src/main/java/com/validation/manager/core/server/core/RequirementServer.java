@@ -123,15 +123,18 @@ public final class RequirementServer extends Requirement
         //Make sure unique id is trimmed
         setUniqueId(getUniqueId().trim());
         if (getId() != null && getId() > 0) {
-            //Check what has changed, if is only relationshipd, don't version
+            //Check what has changed, if is only relationship, don't version
             //Get the one from DB
-            if (DataBaseManager.isVersioningEnabled() && isChangeVersionable()) {
+            if (DataBaseManager.isVersioningEnabled()
+                    && isChangeVersionable()) {
                 //One exists already, need to make a copy of the requirement
-                Requirement req = new Requirement(getUniqueId(), getDescription(),
-                        getNotes(),
-                        getMajorVersion(),
-                        getMidVersion(),
-                        getMinorVersion() + 1);
+                Requirement req
+                        = new Requirement(getUniqueId(),
+                                getDescription(),
+                                getNotes(),
+                                getMajorVersion(),
+                                getMidVersion(),
+                                getMinorVersion() + 1);
                 //Copy the relationships
                 copyRelationships(req, this);
                 //Store in data base.
@@ -298,9 +301,11 @@ public final class RequirementServer extends Requirement
 
     @Override
     public List<Requirement> getVersions() {
-        List<Requirement> versions = new ArrayList<>();
+        List<Requirement> versions
+                = new ArrayList<>();
         parameters.clear();
-        parameters.put("uniqueId", getEntity().getUniqueId().trim());
+        parameters.put("uniqueId", getEntity()
+                .getUniqueId().trim());
         DataBaseManager.namedQuery(
                 "Requirement.findByUniqueId",
                 parameters).forEach((obj) -> {
