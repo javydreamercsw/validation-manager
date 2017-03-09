@@ -58,11 +58,13 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecPK;
+import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.UserRight;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
@@ -118,7 +120,7 @@ public class ValidationManagerUI extends UI {
     private LoginDialog subwindow = null;
     private final String projTreeRoot = "Available Projects";
     private Component left;
-    private final TabSheet right = new TabSheet();
+    private final TabSheet tabSheet = new TabSheet();
     private final List<Project> projects = new ArrayList<>();
     private final VaadinIcons projectIcon = VaadinIcons.RECORDS;
     private final VaadinIcons specIcon = VaadinIcons.BOOK;
@@ -230,7 +232,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "requirement.view");
-        updateScreen();
     }
 
     private void setTabContent(Tab target, Component content,
@@ -240,9 +241,12 @@ public class ValidationManagerUI extends UI {
         l.addComponent(content);
         if (permission != null && !permission.isEmpty()) {
             //Hide tab based on permissions
-            target.setVisible(checkRight(permission));
+            boolean viewable = checkRight(permission);
+            if (viewable != target.isVisible()) {
+                target.setVisible(viewable);
+            }
         }
-        right.setSelectedTab(target);
+        tabSheet.setSelectedTab(target);
     }
 
     private void setTabContent(Tab target, Component content) {
@@ -365,7 +369,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "testcase.view");
-        updateScreen();
     }
 
     private void displayTestCase(TestCase t) {
@@ -460,7 +463,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "testcase.view");
-        updateScreen();
     }
 
     private void displayTestPlan(TestPlan tp) {
@@ -545,7 +547,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "testcase.view");
-        updateScreen();
     }
 
     private void displayTestProject(TestProject tp) {
@@ -626,7 +627,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "testcase.view");
-        updateScreen();
     }
 
     private void displayRequirementSpec(RequirementSpec rs) {
@@ -726,7 +726,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "requirement.view");
-        updateScreen();
     }
 
     private void displayRequirement(Requirement req) {
@@ -786,7 +785,6 @@ public class ValidationManagerUI extends UI {
         binder.bindMemberFields(form);
         form.setSizeFull();
         setTabContent(main, form, "requirement.view");
-        updateScreen();
     }
 
     // @return the current application instance
@@ -1136,24 +1134,15 @@ public class ValidationManagerUI extends UI {
             }
         }
         //Build the right component
-        if (right != null) {
-            //This is a tabbed pane. Enable/Disable the panes based on role
-            TabSheet tab = (TabSheet) right;
-            if (getUser() != null) {
-                roles.clear();
-                user.update();//Get any recent changes
-                user.getRoleList().forEach((r) -> {
-                    roles.add(r.getRoleName());
-                });
-            }
+        if (hsplit.getSecondComponent() == null) {
             if (main == null) {
-                main = tab.addTab(new VerticalLayout(), "Main");
+                main = tabSheet.addTab(new VerticalLayout(), "Main");
             }
             if (tester == null) {
-                tester = tab.addTab(new VerticalLayout(), "Tester");
+                tester = tabSheet.addTab(new VerticalLayout(), "Tester");
             }
             if (designer == null) {
-                designer = tab.addTab(new VerticalLayout(), "Test Designer");
+                designer = tabSheet.addTab(new VerticalLayout(), "Test Designer");
             }
             if (demo == null && DataBaseManager.isDemo()) {
                 VerticalLayout layout = new VerticalLayout();
@@ -1189,12 +1178,26 @@ public class ValidationManagerUI extends UI {
                 sb.append("</ul>");
                 layout.addComponent(new Label(sb.toString(),
                         ContentMode.HTML));
-                demo = tab.addTab(layout, "Demo");
+                demo = tabSheet.addTab(layout, "Demo");
             }
+            hsplit.setSecondComponent(tabSheet);
+        }
+        //This is a tabbed pane. Enable/Disable the panes based on role
+        if (getUser() != null) {
+            roles.clear();
+            user.update();//Get any recent changes
+            user.getRoleList().forEach((r) -> {
+                roles.add(r.getRoleName());
+            });
+        }
+        if (main != null) {
             main.setVisible(user != null);
+        }
+        if (tester != null) {
             tester.setVisible(checkRight("testplan.execute"));
+        }
+        if (designer != null) {
             designer.setVisible(checkRight("testplan.planning"));
-            hsplit.setSecondComponent(right);
         }
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
         return hsplit;
@@ -1273,8 +1276,7 @@ public class ValidationManagerUI extends UI {
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
         form.setSizeFull();
-        setTabContent(main, form, "project.view");
-        updateScreen();
+        setTabContent(main, form, "project.viewer");
     }
 
     private void addRequirementSpec(RequirementSpec rs, Tree tree) {
@@ -1736,9 +1738,13 @@ public class ValidationManagerUI extends UI {
     private boolean checkRight(String right) {
         if (user != null) {
             user.update();
-            return user.getRoleList().stream().anyMatch((r)
-                    -> (r.getUserRightList().stream().anyMatch((ur)
-                            -> (ur.getDescription().equals(right)))));
+            for (Role r : user.getRoleList()) {
+                for (UserRight ur : r.getUserRightList()) {
+                    if (ur.getDescription().equals(right)) {
+                        return true;
+                    }
+                }
+            }
         }
         return false;
     }
@@ -1758,7 +1764,8 @@ public class ValidationManagerUI extends UI {
         }
     }
 
-    private static class ByteToStringConverter implements Converter<String, byte[]> {
+    private static class ByteToStringConverter
+            implements Converter<String, byte[]> {
 
         @Override
         public byte[] convertToModel(String value,
