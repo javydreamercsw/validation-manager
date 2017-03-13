@@ -50,7 +50,4 @@ public class VMDemoResetThread extends Thread {
         }
         return instance;
     }
-
-    VMDemoResetThread() {
-    }
 }
