@@ -4,14 +4,17 @@
  */
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.AuditedObject;
 import com.validation.manager.core.DataBaseManager;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityTransaction;
+import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.eclipse.persistence.sessions.CopyGroup;
@@ -27,8 +30,20 @@ public class VersionListener {
     //Class and a list of keys already processed.
     private final Map<Class, List<Object>> PROCESSED = new HashMap<>();
 
-    @PreUpdate
-    public synchronized void onChange(Object entity) {
+    @PrePersist
+    public synchronized void onCreation(Object entity) {
+        //Handle audit
+        if (entity instanceof AuditedObject) {
+            AuditedObject ao = (AuditedObject) entity;
+            if (ao.getModifierId() == null) {
+                //By default blame system
+                ao.setModifierId(1);
+            }
+            if (ao.getReason() == null) {
+                ao.setReason("audit.general.creation");
+            }
+            ao.setModificationTime(new Date());
+        }
         if (entity instanceof Versionable) {
             if (DataBaseManager.isVersioningEnabled()) {
                 Versionable versionable = (Versionable) entity;
@@ -42,6 +57,28 @@ public class VersionListener {
                 if (versionable.getMinorVersion() == null) {
                     versionable.setMinorVersion(1);
                 }
+            }
+        }
+    }
+
+    @PreUpdate
+    public synchronized void onChange(Object entity) {
+        //Handle audit
+        if (entity instanceof AuditedObject) {
+            AuditedObject ao = (AuditedObject) entity;
+            if (ao.getModifierId() == null) {
+                //By default blame system
+                ao.setModifierId(1);
+            }
+            if (ao.getReason() == null) {
+                ao.setReason("audit.general.modified");
+            }
+            ao.setModificationTime(new Date());
+        }
+        //Handle versioning
+        if (entity instanceof Versionable) {
+            if (DataBaseManager.isVersioningEnabled()) {
+                Versionable versionable = (Versionable) entity;
                 if (versionable.isChangeVersionable()
                         && !PROCESSED.containsKey(versionable.getClass())
                         || (PROCESSED.containsKey(versionable.getClass())
