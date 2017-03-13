@@ -39,6 +39,9 @@ public class Versionable extends VMAuditedObject
     @Min(1)
     @Column(name = "minor_version")
     private Integer minorVersion;
+    @Basic(optional = false)
+    @Column(name = "dirty")
+    private boolean dirty = true;
 
     public Versionable() {
         majorVersion = 0;
@@ -124,5 +127,19 @@ public class Versionable extends VMAuditedObject
         target.setMidVersion(source.getMidVersion());
         target.setMinorVersion(source.getMinorVersion());
         super.update(target, source);
+    }
+
+    /**
+     * @return the dirty
+     */
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    /**
+     * @param dirty the dirty to set
+     */
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
     }
 }
