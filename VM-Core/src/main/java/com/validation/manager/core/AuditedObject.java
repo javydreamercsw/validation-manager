@@ -49,4 +49,13 @@ public interface AuditedObject {
      * @param d Modification date
      */
     public void setModificationTime(Date d);
+
+    /**
+     * Check if the changes in the entity should be versionable or not. Useful
+     * to avoid versioning changes in relationships, etc that don't modify the
+     * entity.
+     *
+     * @return true if should be versioned.
+     */
+    boolean isChangeVersionable();
 }

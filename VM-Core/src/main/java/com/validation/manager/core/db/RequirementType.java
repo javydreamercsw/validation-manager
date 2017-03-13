@@ -1,5 +1,6 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -35,13 +36,16 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     , @NamedQuery(name = "RequirementType.findByName",
             query = "SELECT r FROM RequirementType r WHERE r.name = :name")
     , @NamedQuery(name = "RequirementType.findByDescription",
-            query = "SELECT r FROM RequirementType r WHERE r.description = :description")})
-public class RequirementType implements Serializable {
+            query = "SELECT r FROM RequirementType r WHERE "
+            + "r.description = :description")})
+public class RequirementType extends Versionable
+        implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "ReqTypeGen")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "ReqTypeGen")
     @TableGenerator(name = "ReqType", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -63,9 +67,11 @@ public class RequirementType implements Serializable {
     private List<Requirement> requirementList;
 
     public RequirementType() {
+        super();
     }
 
     public RequirementType(String name) {
+        super();
         this.name = name;
     }
 

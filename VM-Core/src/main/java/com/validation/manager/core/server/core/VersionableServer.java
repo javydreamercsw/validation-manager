@@ -15,12 +15,4 @@ public interface VersionableServer<T> {
      * @return
      */
     List<T> getVersions();
-    
-    /**
-     * Check if the changes in the entity should be versionable or not.
-     * Useful to avoid versioning changes in relationships, etc 
-     * that don't modify the entity.
-     * @return 
-     */
-    boolean isChangeVersionable();
 }
