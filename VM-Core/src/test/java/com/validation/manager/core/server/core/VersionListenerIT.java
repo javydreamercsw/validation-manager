@@ -50,6 +50,7 @@ public class VersionListenerIT extends AbstractVMTestCase {
         for (Requirement r : controller.findRequirementEntities()) {
             assertNotNull(r.getModificationTime());
             assertNotNull(r.getDescription());
+            assertEquals(x == 0, r.isDirty());
             if (x > 0) {
                 //First one is the oldest one (version 0.0.max+1)
                 if (prev != null) {

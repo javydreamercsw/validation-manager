@@ -57,6 +57,7 @@ public class VersionListener {
                 if (versionable.getMinorVersion() == null) {
                     versionable.setMinorVersion(1);
                 }
+                versionable.setDirty(false);
             }
         }
     }
@@ -104,6 +105,7 @@ public class VersionListener {
                                 entity.toString());
                         //Copy the current state to keep it in history.
                         Versionable clone = cloneEntity(original);
+                        clone.setDirty(false);
                         LOG.log(Level.FINE, "Clone: {0}",
                                 clone.toString());
                         DataBaseManager.getEntityManager().persist(clone);
@@ -120,6 +122,7 @@ public class VersionListener {
                                 .getIdentifier(versionable));
                         //Create the new version
                         versionable.setMinorVersion(clone.getMinorVersion() + 1);
+                        versionable.setDirty(true);
                         DataBaseManager.getEntityManager().merge(versionable);
                         t.commit();
                     } catch (Exception ex) {
