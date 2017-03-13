@@ -48,10 +48,11 @@ public class VersionListenerIT extends AbstractVMTestCase {
         Requirement prev = null;
         int x = 0;
         for (Requirement r : controller.findRequirementEntities()) {
+            assertNotNull(r.getModificationTime());
+            assertNotNull(r.getDescription());
             if (x > 0) {
                 //First one is the oldest one (version 0.0.max+1)
                 if (prev != null) {
-                    System.out.println("Comparing: " + r + "\n with:" + prev);
                     assertTrue(r.compareTo(prev) > 0);
                 }
                 prev = r;
