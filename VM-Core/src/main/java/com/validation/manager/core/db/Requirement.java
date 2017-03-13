@@ -1,5 +1,7 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,7 +49,8 @@ public class Requirement extends Versionable implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "ReqGen")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "ReqGen")
     @TableGenerator(name = "ReqGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -274,7 +277,11 @@ public class Requirement extends Versionable implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Requirement[ id=" + getId() + " ]";
+        return "com.validation.manager.core.db.Requirement[ id=" + getId()
+                + ", uniqueId=" + getUniqueId()
+                + ", description=" + getDescription()
+                + super.toString()
+                + " ]";
     }
 
     /**
@@ -289,5 +296,29 @@ public class Requirement extends Versionable implements Serializable {
      */
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean isChangeVersionable() {
+        RequirementJpaController controller
+                = new RequirementJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        Requirement rs = controller.findRequirement(getId());
+        if (rs != null) {
+            String desc = rs.getDescription();
+            if (desc == null) {
+                desc = "";
+            }
+            String n = rs.getNotes();
+            if (n == null) {
+                n = "";
+            }
+            return !desc.equals(getDescription())
+                    || !n.equals(getNotes())
+                    || !rs.getUniqueId().trim()
+                            .equals(getUniqueId().trim());
+        }
+        //Is a new entity, nothing to do
+        return false;
     }
 }

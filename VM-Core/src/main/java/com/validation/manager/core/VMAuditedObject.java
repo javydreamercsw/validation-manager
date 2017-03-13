@@ -15,7 +15,7 @@ import javax.validation.constraints.Size;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @MappedSuperclass
-public class VMAuditedObject implements AuditedObject {
+public abstract class VMAuditedObject implements AuditedObject {
 
     @Basic(optional = false)
     @NotNull
@@ -72,9 +72,15 @@ public class VMAuditedObject implements AuditedObject {
      * @param target target object
      * @param source source object
      */
-    public void update(VMAuditedObject target, VMAuditedObject source) {
+    public void update(VMAuditedObject target,
+            VMAuditedObject source) {
         target.setReason(source.getReason());
         target.setModificationTime(source.getModificationTime());
         target.setModifierId(source.getModifierId());
+    }
+
+    @Override
+    public boolean isChangeVersionable() {
+        return true;
     }
 }

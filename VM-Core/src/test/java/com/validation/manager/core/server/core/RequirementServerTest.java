@@ -399,9 +399,11 @@ public class RequirementServerTest extends AbstractVMTestCase {
             TestCase step = TestHelper.addStep(tc, 1, "Test", "Test");
             rs.getStepList().add(step.getStepList().get(0));
             rs.write2DB();
-            assertEquals(0, (int) rs.getMajorVersion());
-            assertEquals(0, (int) rs.getMidVersion());
-            assertEquals(version, (int) rs.getMinorVersion());
+            Requirement last = rs.getVersions()
+                    .get(rs.getVersions().size() - 1);
+            assertEquals(0, (int) last.getMajorVersion());
+            assertEquals(0, (int) last.getMidVersion());
+            assertEquals(version, (int) last.getMinorVersion());
             assertEquals(1, rs.getStepList().size());
             assertEquals(100, rs.getTestCoverage());
             version++;
@@ -409,18 +411,23 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.setDescription("New version");
             rs.getStepList().clear();
             rs.write2DB();
-            assertEquals(0, (int) rs.getMajorVersion());
-            assertEquals(0, (int) rs.getMidVersion());
-            assertEquals(version, (int) rs.getMinorVersion());
+            last = rs.getVersions()
+                    .get(rs.getVersions().size() - 1);
+            assertEquals(0, (int) last.getMajorVersion());
+            assertEquals(0, (int) last.getMidVersion());
+            assertEquals(version, (int) last.getMinorVersion());
             assertEquals(0, rs.getStepList().size());
             assertEquals(0, rs.getTestCoverage());
             version++;
+            rs = new RequirementServer(last);
             rs.setDescription("New version 2");
             rs.getStepList().add(step.getStepList().get(0));
             rs.write2DB();
-            assertEquals(0, (int) rs.getMajorVersion());
-            assertEquals(0, (int) rs.getMidVersion());
-            assertEquals(version, (int) rs.getMinorVersion());
+            last = rs.getVersions()
+                    .get(rs.getVersions().size() - 1);
+            assertEquals(0, (int) last.getMajorVersion());
+            assertEquals(0, (int) last.getMidVersion());
+            assertEquals(version, (int) last.getMinorVersion());
             assertEquals(1, rs.getStepList().size());
             assertEquals(100, rs.getTestCoverage());
             version++;

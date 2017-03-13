@@ -72,17 +72,23 @@ public final class RequirementServer extends Requirement
         }
     }
 
-    public RequirementServer(Requirement r) {
+    public RequirementServer(int id) {
         super();
         RequirementJpaController controller
-                = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
-        Requirement requirement = controller.findRequirement(r.getId());
+                = new RequirementJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        Requirement requirement = controller.findRequirement(id);
         if (requirement != null) {
             update((RequirementServer) this, requirement);
         } else {
-            throw new RuntimeException("Unable to find requirement with id: "
-                    + r.getId());
+            throw new RuntimeException("Unable to find "
+                    + "requirement with id: "
+                    + id);
         }
+    }
+
+    public RequirementServer(Requirement r) {
+        this(r.getId());
     }
 
     private void copyRelationships(Requirement target, Requirement source) {
@@ -123,25 +129,6 @@ public final class RequirementServer extends Requirement
         //Make sure unique id is trimmed
         setUniqueId(getUniqueId().trim());
         if (getId() != null && getId() > 0) {
-            //Check what has changed, if is only relationship, don't version
-            //Get the one from DB
-            if (DataBaseManager.isVersioningEnabled()
-                    && isChangeVersionable()) {
-                //One exists already, need to make a copy of the requirement
-                Requirement req
-                        = new Requirement(getUniqueId(),
-                                getDescription(),
-                                getNotes(),
-                                getMajorVersion(),
-                                getMidVersion(),
-                                getMinorVersion() + 1);
-                //Copy the relationships
-                copyRelationships(req, this);
-                //Store in data base.
-                new RequirementJpaController(
-                        DataBaseManager.getEntityManagerFactory()).create(req);
-                update(this, req);
-            }
             Requirement req = new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory())
                     .findRequirement(getId());
@@ -312,22 +299,6 @@ public final class RequirementServer extends Requirement
                     versions.add((Requirement) obj);
                 });
         return versions;
-    }
-
-    @Override
-    public boolean isChangeVersionable() {
-        String description = getEntity().getDescription();
-        if (description == null) {
-            description = "";
-        }
-        String notes = getEntity().getNotes();
-        if (notes == null) {
-            notes = "";
-        }
-        return !description.equals(getDescription())
-                || !notes.equals(getNotes())
-                || !getEntity().getUniqueId().trim()
-                        .equals(getUniqueId().trim());
     }
 
     public static void main(String[] args) {
