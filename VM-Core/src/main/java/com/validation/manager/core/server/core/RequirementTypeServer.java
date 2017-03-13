@@ -3,7 +3,6 @@ package com.validation.manager.core.server.core;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
-import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import java.util.ArrayList;
@@ -21,14 +20,14 @@ public final class RequirementTypeServer extends RequirementType
         RequirementType temp
                 = new RequirementTypeJpaController(
                         getEntityManagerFactory())
-                .findRequirementType(rt.getId());
+                        .findRequirementType(rt.getId());
         update((RequirementType) this, temp);
     }
 
     public RequirementTypeServer(String name) {
         super(name);
         setId(0);
-        setRequirementList(new ArrayList<Requirement>());
+        setRequirementList(new ArrayList<>());
     }
 
     @Override
@@ -82,18 +81,13 @@ public final class RequirementTypeServer extends RequirementType
 
     @Override
     public List<RequirementType> getVersions() {
-       List<RequirementType> versions = new ArrayList<RequirementType>();
+        List<RequirementType> versions = new ArrayList<>();
         parameters.clear();
         parameters.put("id", getEntity().getId());
-        for (Object obj : namedQuery("RequirementType.findById",
-                parameters)) {
-            versions.add((RequirementType) obj);
-        }
+        namedQuery("RequirementType.findById",
+                parameters).forEach((obj) -> {
+                    versions.add((RequirementType) obj);
+                });
         return versions;
-    }
-
-    @Override
-    public boolean isChangeVersionable() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

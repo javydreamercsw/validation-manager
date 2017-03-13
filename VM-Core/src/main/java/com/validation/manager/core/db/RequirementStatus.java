@@ -1,5 +1,7 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.server.core.RequirementStatusServer;
+import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -34,11 +36,13 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT r FROM RequirementStatus r WHERE r.id = :id")
     , @NamedQuery(name = "RequirementStatus.findByStatus",
             query = "SELECT r FROM RequirementStatus r WHERE r.status = :status")})
-public class RequirementStatus implements Serializable {
+public class RequirementStatus extends Versionable
+        implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "ReqStatusGen")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "ReqStatusGen")
     @TableGenerator(name = "ReqStatusGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -112,4 +116,9 @@ public class RequirementStatus implements Serializable {
         return "com.validation.manager.core.db.RequirementStatus[ id=" + id + " ]";
     }
 
+    @Override
+    public boolean isChangeVersionable() {
+        RequirementStatusServer rs = new RequirementStatusServer(getId());
+        return !getStatus().equals(rs.getEntity().getStatus());
+    }
 }
