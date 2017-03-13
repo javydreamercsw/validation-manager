@@ -97,7 +97,7 @@ public class Versionable extends VMAuditedObject
 
     @Override
     public String toString() {
-        return "Version [ " + majorVersion
+        return ", Version [ " + majorVersion
                 + "." + midVersion + "." + minorVersion + " ]";
     }
 
