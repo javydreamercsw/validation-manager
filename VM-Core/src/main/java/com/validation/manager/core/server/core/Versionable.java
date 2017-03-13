@@ -19,7 +19,8 @@ import javax.validation.constraints.NotNull;
 @MappedSuperclass
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "VERSIONABLE_TYPE")
-public class Versionable extends VMAuditedObject implements Serializable,
+public class Versionable extends VMAuditedObject
+        implements Serializable,
         Comparable<Versionable> {
 
     private static final long serialVersionUID = 1L;
@@ -102,9 +103,8 @@ public class Versionable extends VMAuditedObject implements Serializable,
 
     @Override
     public int compareTo(Versionable o) {
-        if (getMajorVersion() > o.getMajorVersion()) {
-            return 1;
-        } else if (getMajorVersion() < o.getMajorVersion()) {
+        if (!Objects.equals(getMajorVersion(),
+                o.getMajorVersion())) {
             return getMajorVersion() - o.getMajorVersion();
         }//Same major version
         else if (!Objects.equals(getMidVersion(),
