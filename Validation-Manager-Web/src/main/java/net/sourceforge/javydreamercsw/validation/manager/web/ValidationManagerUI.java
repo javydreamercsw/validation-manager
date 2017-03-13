@@ -149,10 +149,6 @@ public class ValidationManagerUI extends UI {
         updateScreen();
     }
 
-    private void displayRequirementSpecNode(RequirementSpecNode rsn) {
-        displayRequirementSpecNode(rsn, false);
-    }
-
     private void displayRequirementSpecNode(RequirementSpecNode rsn,
             boolean edit) {
         Panel form = new Panel("Requirement Specification Node Detail");
@@ -170,6 +166,15 @@ public class ValidationManagerUI extends UI {
         layout.addComponent(desc);
         Field<?> scope = binder.buildAndBind("Scope", "scope");
         layout.addComponent(scope);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (rsn.getRequirementSpecNodePK() == null) {
+                displayObject(rsn.getRequirementSpec());
+            } else {
+                displayObject(rsn, false);
+            }
+        });
         if (edit) {
             if (rsn.getRequirementSpecNodePK() == null) {
                 //Creating a new one
@@ -186,7 +191,7 @@ public class ValidationManagerUI extends UI {
                         //Recreate the tree to show the addition
                         updateProjectList();
                         buildProjectTree(rsn);
-                        displayRequirementSpecNode(rsn, true);
+                        displayObject(rsn, true);
                         updateScreen();
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
@@ -195,7 +200,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(save);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             } else {
                 //Editing existing one
                 Button update = new Button("Update");
@@ -224,7 +232,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(update);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             }
         }
         binder.setReadOnly(!edit);
@@ -253,10 +264,6 @@ public class ValidationManagerUI extends UI {
         setTabContent(target, content, null);
     }
 
-    private void displayStep(Step s) {
-        displayStep(s, false);
-    }
-
     private void displayStep(Step s, boolean edit) {
         Panel form = new Panel("Step Detail");
         FormLayout layout = new FormLayout();
@@ -274,7 +281,10 @@ public class ValidationManagerUI extends UI {
         result.setConverter(new ByteToStringConverter());
         binder.bind(result, "expectedResult");
         layout.addComponent(result);
-        Field<?> notes = binder.buildAndBind("Notes", "notes");
+        Field notes = binder.buildAndBind("Notes", "notes",
+                TextArea.class);
+        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
+        notes.setSizeFull();
         layout.addComponent(notes);
         tree.select(s);
         Project p = getParentProject();
@@ -297,13 +307,22 @@ public class ValidationManagerUI extends UI {
         }
         requirements.setEnabled(edit);
         layout.addComponent(requirements);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (s.getStepPK() == null) {
+                displayObject(tree.getValue());
+            } else {
+                displayObject(s, false);
+            }
+        });
         if (edit) {
             if (s.getStepPK() == null) {
                 //Creating a new one
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
-                        s.setExpectedResult(result.getValue()
+                        s.setExpectedResult(((TextArea) result).getValue()
                                 .getBytes("UTF-8"));
                         s.setNotes(notes.getValue() == null ? "null"
                                 : notes.getValue().toString());
@@ -323,7 +342,7 @@ public class ValidationManagerUI extends UI {
                         form.setVisible(false);
                         //Recreate the tree to show the addition
                         updateProjectList();
-                        displayStep(s);
+                        displayObject(s);
                         buildProjectTree(s);
                         updateScreen();
                     } catch (Exception ex) {
@@ -333,13 +352,16 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(save);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             } else {
                 //Editing existing one
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
-                        s.setExpectedResult(result.getValue()
+                        s.setExpectedResult(((TextArea) result).getValue()
                                 .getBytes("UTF-8"));
                         s.setNotes(notes.getValue().toString());
                         s.setStepSequence(Integer.parseInt(sequence.getValue().toString()));
@@ -361,7 +383,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(update);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             }
         }
         binder.setReadOnly(!edit);
@@ -369,10 +394,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "testcase.view");
-    }
-
-    private void displayTestCase(TestCase t) {
-        displayTestCase(t, false);
     }
 
     private void displayTestCase(TestCase t, boolean edit) {
@@ -397,6 +418,15 @@ public class ValidationManagerUI extends UI {
         layout.addComponent(active);
         Field<?> open = binder.buildAndBind("Open", "isOpen");
         layout.addComponent(open);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (t.getId() == null) {
+                displayObject(tree.getValue());
+            } else {
+                displayObject(t, false);
+            }
+        });
         if (edit) {
             if (t.getId() == null) {
                 //Creating a new one
@@ -408,6 +438,7 @@ public class ValidationManagerUI extends UI {
                         t.setCreationDate((Date) creation.getValue());
                         t.setActive((Boolean) active.getValue());
                         t.setIsOpen((Boolean) open.getValue());
+                        t.getTestPlanList().add((TestPlan) tree.getValue());
                         new TestCaseJpaController(DataBaseManager
                                 .getEntityManagerFactory()).create(t);
                         form.setVisible(false);
@@ -423,7 +454,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(save);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             } else {
                 //Editing existing one
                 Button update = new Button("Update");
@@ -454,7 +488,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(update);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             }
         }
         binder.setReadOnly(!edit);
@@ -463,10 +500,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "testcase.view");
-    }
-
-    private void displayTestPlan(TestPlan tp) {
-        displayTestPlan(tp, false);
     }
 
     private void displayTestPlan(TestPlan tp, boolean edit) {
@@ -478,12 +511,24 @@ public class ValidationManagerUI extends UI {
         binder.setItemDataSource(tp);
         Field<?> name = binder.buildAndBind("Name", "name");
         layout.addComponent(name);
-        Field<?> notes = binder.buildAndBind("Notes", "notes");
+        Field notes = binder.buildAndBind("Notes", "notes",
+                TextArea.class);
+        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
+        notes.setSizeFull();
         layout.addComponent(notes);
         Field<?> active = binder.buildAndBind("Active", "active");
         layout.addComponent(active);
         Field<?> open = binder.buildAndBind("Open", "isOpen");
         layout.addComponent(open);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (tp.getTestPlanPK() == null) {
+                displayObject(tree.getValue());
+            } else {
+                displayObject(tp, false);
+            }
+        });
         if (edit) {
             if (tp.getTestPlanPK() == null) {
                 //Creating a new one
@@ -509,7 +554,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(save);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             } else {
                 //Editing existing one
                 Button update = new Button("Update");
@@ -539,7 +587,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(update);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             }
         }
         binder.setReadOnly(!edit);
@@ -547,10 +598,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "testcase.view");
-    }
-
-    private void displayTestProject(TestProject tp) {
-        displayTestProject(tp, false);
     }
 
     private void displayTestProject(TestProject tp, boolean edit) {
@@ -562,10 +609,22 @@ public class ValidationManagerUI extends UI {
         binder.setItemDataSource(tp);
         Field<?> name = binder.buildAndBind("Name", "name");
         layout.addComponent(name);
-        Field<?> notes = binder.buildAndBind("Notes", "notes");
+        Field notes = binder.buildAndBind("Notes", "notes",
+                TextArea.class);
+        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
+        notes.setSizeFull();
         layout.addComponent(notes);
         Field<?> active = binder.buildAndBind("Active", "active");
         layout.addComponent(active);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (tp.getId() == null) {
+                displayObject(tree.getValue());
+            } else {
+                displayObject(tp, false);
+            }
+        });
         if (edit) {
             if (tp.getId() == null) {
                 //Creating a new one
@@ -590,7 +649,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(save);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             } else {
                 //Editing existing one
                 Button update = new Button("Update");
@@ -619,7 +681,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(update);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             }
         }
         binder.setReadOnly(!edit);
@@ -627,10 +692,6 @@ public class ValidationManagerUI extends UI {
         layout.setSizeFull();
         form.setSizeFull();
         setTabContent(main, form, "testcase.view");
-    }
-
-    private void displayRequirementSpec(RequirementSpec rs) {
-        displayRequirementSpec(rs, false);
     }
 
     private void displayRequirementSpec(RequirementSpec rs, boolean edit) {
@@ -661,6 +722,15 @@ public class ValidationManagerUI extends UI {
         level.setContainerDataSource(specLevelContainer);
         binder.bind(level, "specLevel");
         layout.addComponent(level);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (rs.getRequirementSpecPK() == null) {
+                displayObject(rs.getProject());
+            } else {
+                displayObject(rs, false);
+            }
+        });
         if (edit) {
             if (rs.getRequirementSpecPK() == null) {
                 //Creating a new one
@@ -680,7 +750,7 @@ public class ValidationManagerUI extends UI {
                         //Recreate the tree to show the addition
                         updateProjectList();
                         buildProjectTree(rs);
-                        displayRequirementSpec(rs, false);
+                        displayObject(rs, true);
                         updateScreen();
                     } catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
@@ -689,7 +759,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(save);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             } else {
                 //Editing existing one
                 Button update = new Button("Update");
@@ -718,7 +791,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(update);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             }
         }
         binder.setReadOnly(!edit);
@@ -728,8 +804,45 @@ public class ValidationManagerUI extends UI {
         setTabContent(main, form, "requirement.view");
     }
 
-    private void displayRequirement(Requirement req) {
-        displayRequirement(req, false);
+    private void displayObject(Object item) {
+        displayObject(item, false);
+    }
+
+    private void displayObject(Object item, boolean edit) {
+        if (item instanceof Project) {
+            Project p = (Project) item;
+            LOG.log(Level.FINE, "Selected: {0}", p.getName());
+            displayProject(p, edit);
+        } else if (item instanceof Requirement) {
+            Requirement req = (Requirement) item;
+            LOG.log(Level.FINE, "Selected: {0}", req.getUniqueId());
+            displayRequirement(req, edit);
+        } else if (item instanceof RequirementSpec) {
+            RequirementSpec rs = (RequirementSpec) item;
+            LOG.log(Level.FINE, "Selected: {0}", rs.getName());
+            displayRequirementSpec(rs, edit);
+        } else if (item instanceof RequirementSpecNode) {
+            RequirementSpecNode rsn = (RequirementSpecNode) item;
+            LOG.log(Level.FINE, "Selected: {0}", rsn.getName());
+            displayRequirementSpecNode(rsn, edit);
+        } else if (item instanceof TestProject) {
+            TestProject tp = (TestProject) item;
+            LOG.log(Level.FINE, "Selected: {0}", tp.getName());
+            displayTestProject(tp, edit);
+        } else if (item instanceof TestPlan) {
+            TestPlan tp = (TestPlan) item;
+            LOG.log(Level.FINE, "Selected: {0}", tp.getName());
+            displayTestPlan(tp, edit);
+        } else if (item instanceof TestCase) {
+            TestCase tc = (TestCase) item;
+            LOG.log(Level.FINE, "Selected: {0}", tc.getName());
+            displayTestCase(tc, edit);
+        } else if (item instanceof Step) {
+            Step step = (Step) item;
+            LOG.log(Level.FINE, "Selected: Step #{0}",
+                    step.getStepSequence());
+            displayStep(step, edit);
+        }
     }
 
     private void displayRequirement(Requirement req, boolean edit) {
@@ -746,30 +859,48 @@ public class ValidationManagerUI extends UI {
         desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
         desc.setSizeFull();
         layout.addComponent(desc);
-        layout.addComponent(binder.buildAndBind("Notes", "notes"));
+        Field notes = binder.buildAndBind("Notes", "notes",
+                TextArea.class);
+        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
+        notes.setSizeFull();
+        layout.addComponent(notes);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (req.getId() == null) {
+                displayObject(req.getRequirementSpecNode());
+            } else {
+                displayRequirement(req, false);
+            }
+        });
         if (edit) {
             if (req.getId() == null) {
                 //Creating a new one
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
                     req.setUniqueId(id.getValue().toString());
-                    req.setDescription(desc.getValue().toString());
+                    req.setDescription(notes.getValue().toString());
+                    req.setRequirementSpecNode((RequirementSpecNode) tree.getValue());
                     new RequirementJpaController(DataBaseManager
                             .getEntityManagerFactory()).create(req);
                     form.setVisible(false);
                     //Recreate the tree to show the addition
-                    updateProjectList();
                     buildProjectTree(req);
-                    displayRequirement(req, false);
-                    updateScreen();
+                    displayObject(req, true);
                 });
-                layout.addComponent(save);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             } else {
                 //Editing existing one
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         binder.commit();
+                        //Recreate the tree to show the addition
+                        buildProjectTree(req);
+                        displayRequirement(req, false);
                     } catch (FieldGroup.CommitException ex) {
                         Exceptions.printStackTrace(ex);
                         Notification.show("Error updating record!",
@@ -777,7 +908,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(update);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             }
         }
         binder.setBuffered(true);
@@ -820,6 +954,10 @@ public class ValidationManagerUI extends UI {
                 addProject(p, tree);
             }
         });
+        showItemInTree(item);
+    }
+
+    private void showItemInTree(Object item) {
         if (item == null) {
             tree.expandItem(projTreeRoot);
         } else {
@@ -1223,10 +1361,6 @@ public class ValidationManagerUI extends UI {
         }
     }
 
-    private void displayProject(Project p) {
-        displayProject(p, false);
-    }
-
     private void displayProject(Project p, boolean edit) {
         // Bind it to a component
         Panel form = new Panel("Project Detail");
@@ -1236,9 +1370,22 @@ public class ValidationManagerUI extends UI {
         BeanFieldGroup binder = new BeanFieldGroup(p.getClass());
         binder.setItemDataSource(p);
         Field<?> name = binder.buildAndBind("Name", "name");
-        Field<?> notes = binder.buildAndBind("Notes", "notes");
+        Field notes = binder.buildAndBind("Notes", "notes",
+                TextArea.class);
+        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
+        notes.setSizeFull();
+        layout.addComponent(notes);
         layout.addComponent(name);
         layout.addComponent(notes);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (p.getId() == null) {
+                displayObject(tree.getValue());
+            } else {
+                displayObject(p, false);
+            }
+        });
         if (edit) {
             if (p.getId() == null) {
                 //Creating a new one
@@ -1255,7 +1402,10 @@ public class ValidationManagerUI extends UI {
                     displayProject(p, false);
                     updateScreen();
                 });
-                layout.addComponent(save);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             } else {
                 //Editing existing one
                 Button update = new Button("Update");
@@ -1269,7 +1419,10 @@ public class ValidationManagerUI extends UI {
                                 Notification.Type.ERROR_MESSAGE);
                     }
                 });
-                layout.addComponent(update);
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
             }
         }
         binder.setBuffered(true);
@@ -1583,40 +1736,7 @@ public class ValidationManagerUI extends UI {
             }
         });
         tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
-            if (tree.getValue() instanceof Project) {
-                Project p = (Project) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", p.getName());
-                displayProject(p);
-            } else if (tree.getValue() instanceof Requirement) {
-                Requirement req = (Requirement) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", req.getUniqueId());
-                displayRequirement(req);
-            } else if (tree.getValue() instanceof RequirementSpec) {
-                RequirementSpec rs = (RequirementSpec) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", rs.getName());
-                displayRequirementSpec(rs);
-            } else if (tree.getValue() instanceof RequirementSpecNode) {
-                RequirementSpecNode rsn = (RequirementSpecNode) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", rsn.getName());
-                displayRequirementSpecNode(rsn);
-            } else if (tree.getValue() instanceof TestProject) {
-                TestProject tp = (TestProject) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
-                displayTestProject(tp);
-            } else if (tree.getValue() instanceof TestPlan) {
-                TestPlan tp = (TestPlan) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", tp.getName());
-                displayTestPlan(tp);
-            } else if (tree.getValue() instanceof TestCase) {
-                TestCase tc = (TestCase) tree.getValue();
-                LOG.log(Level.FINE, "Selected: {0}", tc.getName());
-                displayTestCase(tc);
-            } else if (tree.getValue() instanceof Step) {
-                Step step = (Step) tree.getValue();
-                LOG.log(Level.FINE, "Selected: Step #{0}",
-                        step.getStepSequence());
-                displayStep(step);
-            }
+            displayObject(tree.getValue());
         });
         //Select item on right click as well
         tree.addItemClickListener((ItemClickEvent event) -> {
