@@ -65,6 +65,7 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.UserRight;
+import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
@@ -78,6 +79,7 @@ import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.server.core.VMSettingServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.core.tool.MD5;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
@@ -93,6 +95,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -131,8 +134,10 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons stepIcon = VaadinIcons.FILE_TREE_SUB;
     private final VaadinIcons importIcon = VaadinIcons.ARROW_CIRCLE_UP_O;
     private Tree tree;
-    private Tab main, tester, designer, demo;
+    private Tab main, tester, designer, demo, admin;
     private final List<String> roles = new ArrayList<>();
+    final ResourceBundle rb = ResourceBundle.getBundle(
+            "com.validation.manager.resources.VMMessages");
 
     /**
      * @return the user
@@ -845,6 +850,64 @@ public class ValidationManagerUI extends UI {
         }
     }
 
+    private Component displaySetting(VmSetting s) {
+        Panel form = new Panel("Setting Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
+        binder.setItemDataSource(s);
+        Field<?> id = binder.buildAndBind("Setting", "setting");
+        layout.addComponent(id);
+        Field bool = binder.buildAndBind("Boolean Value", "boolVal");
+        bool.setSizeFull();
+        layout.addComponent(bool);
+        Field integerVal = binder.buildAndBind("Integer Value", "intVal");
+        integerVal.setSizeFull();
+        layout.addComponent(integerVal);
+        Field longVal = binder.buildAndBind("Long Value", "longVal");
+        longVal.setSizeFull();
+        layout.addComponent(longVal);
+        Field stringVal = binder.buildAndBind("String Value", "stringVal",
+                TextArea.class);
+        stringVal.setStyleName(ValoTheme.TEXTAREA_LARGE);
+        stringVal.setSizeFull();
+        layout.addComponent(stringVal);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+        });
+        //Editing existing one
+        Button update = new Button("Update");
+        update.addClickListener((Button.ClickEvent event) -> {
+            try {
+                binder.commit();
+                displaySetting(s);
+            } catch (FieldGroup.CommitException ex) {
+                Exceptions.printStackTrace(ex);
+                Notification.show("Error updating record!",
+                        ex.getLocalizedMessage(),
+                        Notification.Type.ERROR_MESSAGE);
+            }
+        });
+        boolean blocked = !s.getSetting().startsWith("version.");
+        if (blocked) {
+            HorizontalLayout hl = new HorizontalLayout();
+            hl.addComponent(update);
+            hl.addComponent(cancel);
+            layout.addComponent(hl);
+        }
+        binder.setBuffered(true);
+        binder.setReadOnly(false);
+        binder.bindMemberFields(form);
+        //The version settigns are not modifiable from the GUI
+        binder.setEnabled(blocked);
+        //Id is always blocked.
+        id.setEnabled(false);
+        form.setSizeFull();
+        return form;
+    }
+
     private void displayRequirement(Requirement req, boolean edit) {
         Panel form = new Panel("Requirement Detail");
         FormLayout layout = new FormLayout();
@@ -1260,6 +1323,10 @@ public class ValidationManagerUI extends UI {
                 });
     }
 
+    private String translate(String mess) {
+        return rb.containsKey(mess) ? rb.getString(mess) : mess;
+    }
+
     private Component getContentComponent() {
         HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
         hsplit.setLocked(true);
@@ -1281,6 +1348,33 @@ public class ValidationManagerUI extends UI {
             }
             if (designer == null) {
                 designer = tabSheet.addTab(new VerticalLayout(), "Test Designer");
+            }
+            if (admin == null) {
+                TabSheet adminSheet = new TabSheet();
+                VerticalLayout layout = new VerticalLayout();
+                //Build setting tab
+                VerticalLayout sl = new VerticalLayout();
+                HorizontalSplitPanel split = new HorizontalSplitPanel();
+                sl.addComponent(split);
+                //Build left side
+                Tree sTree = new Tree("Settings");
+                adminSheet.addTab(sl, "Settings");
+                VMSettingServer.getSettings().stream().map((s) -> {
+                    sTree.addItem(s);
+                    sTree.setChildrenAllowed(s, false);
+                    return s;
+                }).forEachOrdered((s) -> {
+                    sTree.setItemCaption(s, translate(s.getSetting()));
+                });
+                split.setFirstComponent(sTree);
+                layout.addComponent(adminSheet);
+                admin = tabSheet.addTab(layout, "Admin");
+                sTree.addValueChangeListener((Property.ValueChangeEvent event) -> {
+                    if (sTree.getValue() instanceof VmSetting) {
+                        split.setSecondComponent(
+                                displaySetting((VmSetting) sTree.getValue()));
+                    }
+                });
             }
             if (demo == null && DataBaseManager.isDemo()) {
                 VerticalLayout layout = new VerticalLayout();
@@ -1332,10 +1426,17 @@ public class ValidationManagerUI extends UI {
             main.setVisible(user != null);
         }
         if (tester != null) {
-            tester.setVisible(checkRight("testplan.execute"));
+            tester.setVisible(((Layout) tester.getComponent())
+                    .getComponentCount() > 0
+                    && checkRight("testplan.execute"));
         }
         if (designer != null) {
-            designer.setVisible(checkRight("testplan.planning"));
+            designer.setVisible(((Layout) designer.getComponent())
+                    .getComponentCount() > 0
+                    && checkRight("testplan.planning"));
+        }
+        if (admin != null) {
+            admin.setVisible(checkRight("system.configuration"));
         }
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
         return hsplit;
