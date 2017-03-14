@@ -97,14 +97,6 @@ public final class StepServer extends Step implements EntityServer<Step> {
     public void removeRequirement(Requirement req) throws Exception {
         if (getRequirementList().contains(req)
                 && getEntity().getRequirementList().contains(req)) {
-//            String query = "delete from step_has_requirement "
-//                    + "where step_id=" + getStepPK().getId()
-//                    + " and step_test_case_id=" + getStepPK().getTestCaseId()
-//                    + " and requirement_id=" + req.getId()
-//                    + " and major_version=" + req.getMajorVersion()
-//                    + " and mid_version=" + req.getMidVersion()
-//                    + " and minor_version=" + req.getMinorVersion();
-//            DataBaseManager.nativeUpdateQuery(query);
             RequirementServer rs = new RequirementServer(req);
             rs.getStepList().remove(getEntity());
             rs.write2DB();

@@ -1,5 +1,4 @@
-syntax: glob
-target/*
+**/target/*
 m2/*
 *.jasper
 VM-Core/data/*
@@ -10,4 +9,3 @@ VM-Core/data/*
 \.conflict\~$
 Client/application/jdbc_mysql___eqvsrd00_3306_valid.xml
 Client/application/jdbc_h2_file___validation_manage.xml
-VM-Core/src/test/java/com/validation/manager/core/server/core/VersionableTest.java

@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -48,7 +47,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT t FROM TestCase t WHERE t.active = :active")
     , @NamedQuery(name = "TestCase.findByIsOpen",
             query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
-public class TestCase extends Versionable implements Serializable {
+public class TestCase implements Serializable {
 
     @Lob
     @Column(name = "summary")

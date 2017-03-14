@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -40,7 +39,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT p FROM Project p WHERE p.id = :id")
     , @NamedQuery(name = "Project.findByName",
             query = "SELECT p FROM Project p WHERE p.name = :name")})
-public class Project extends Versionable implements Serializable {
+public class Project implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id

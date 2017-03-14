@@ -42,7 +42,7 @@ public enum DBState {
      */
     UPDATING("message.update.db");
     private final String mess;
-    private static ResourceBundle lrb = ResourceBundle.getBundle(
+    private static final ResourceBundle lrb = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages");
 
     DBState(String mess) {

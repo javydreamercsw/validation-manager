@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -35,7 +34,7 @@ import javax.xml.bind.annotation.XmlRootElement;
             query = "SELECT v FROM VmSetting v WHERE v.boolVal = :boolVal")
     , @NamedQuery(name = "VmSetting.findByIntVal",
             query = "SELECT v FROM VmSetting v WHERE v.intVal = :intVal")})
-public class VmSetting extends Versionable implements Serializable {
+public class VmSetting implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id

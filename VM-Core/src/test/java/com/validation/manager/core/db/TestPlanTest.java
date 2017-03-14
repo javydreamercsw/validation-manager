@@ -7,6 +7,7 @@ import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import static com.validation.manager.test.TestHelper.addUserTestPlanRole;
 import java.util.logging.Level;
@@ -70,19 +71,21 @@ public class TestPlanTest extends AbstractVMTestCase {
         try {
             createTestUsers();
             System.out.println("Create Test Plan");
-            tpl = new TestPlan(tp, true, true);
-            new TestPlanJpaController(getEntityManagerFactory()).create(tpl);
-            assertTrue(tpl.getTestPlanPK().getId() > 0);
+            TestPlanServer tps = new TestPlanServer(tp, true, true);
+            tps.write2DB();
+            assertTrue(tps.getTestPlanPK().getId() > 0);
             //Assign roles
-            addUserTestPlanRole(tpl, designer,
+            addUserTestPlanRole(tps.getEntity(), designer,
                     new RoleJpaController(getEntityManagerFactory())
                             .findRole(4));
-            addUserTestPlanRole(tpl, leader,
+            addUserTestPlanRole(tps.getEntity(), leader,
                     new RoleJpaController(getEntityManagerFactory())
                             .findRole(9));
-            addUserTestPlanRole(tpl, tester,
+            addUserTestPlanRole(tps.getEntity(), tester,
                     new RoleJpaController(getEntityManagerFactory())
                             .findRole(7));
+            tps.update();
+            assertEquals(3, tps.getUserTestPlanRoleList().size());
         } catch (PreexistingEntityException ex) {
             getLogger(TestPlanTest.class.getSimpleName()).log(Level.SEVERE,
                     null, ex);

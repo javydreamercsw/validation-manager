@@ -39,6 +39,7 @@ import com.validation.manager.core.server.core.UserTestPlanRoleServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import static org.junit.Assert.assertEquals;
@@ -71,6 +72,15 @@ public class TestHelper {
 
     public static void addUserTestPlanRole(TestPlan tpl, VmUser user, Role role)
             throws PreexistingEntityException, Exception {
+        TestPlanServer tps = new TestPlanServer(tpl);
+        for (UserTestPlanRole utpr : tps.getUserTestPlanRoleList()) {
+            if (utpr.getTestPlan().getTestPlanPK().equals(tpl.getTestPlanPK())
+                    && Objects.equals(utpr.getVmUser().getId(), user.getId())
+                    && Objects.equals(utpr.getRole().getId(), role.getId())) {
+                //We have already this role.
+                return;
+            }
+        }
         UserTestPlanRoleServer temp = new UserTestPlanRoleServer(tpl, user, role);
         temp.write2DB();
         UserTestPlanRole utpr = new UserTestPlanRoleJpaController(
