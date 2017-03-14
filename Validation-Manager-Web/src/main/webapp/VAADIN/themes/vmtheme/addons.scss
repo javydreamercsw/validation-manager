@@ -15,3 +15,33 @@
 	@include contextmenu;
 }
 
+
+/* Provided by vaadin-icons-2.0.0.jar */
+@import "../../../VAADIN/addons/vaadin-icons/vaadin-icons.scss";
+
+
+/* Provided by contextmenu-4.5.jar */
+@import "../../../VAADIN/themes/contextmenu/contextmenu.scss";
+
+
+/* Import and include this mixin into your project theme to include the addon themes */
+@mixin addons {
+	@include vaadin-icons;
+	@include contextmenu;
+}
+
+
+/* Provided by vaadin-icons-3.0.1.jar */
+@import "../../../VAADIN/addons/vaadin-icons/vaadin-icons.scss";
+
+
+/* Provided by contextmenu-4.5.jar */
+@import "../../../VAADIN/themes/contextmenu/contextmenu.scss";
+
+
+/* Import and include this mixin into your project theme to include the addon themes */
+@mixin addons {
+	@include vaadin-icons;
+	@include contextmenu;
+}
+
