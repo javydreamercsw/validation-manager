@@ -171,9 +171,6 @@ public final class RequirementServer extends Requirement
         target.setStepList(source.getStepList());
         target.setUniqueId(source.getUniqueId());
         target.setId(source.getId());
-        target.setMajorVersion(source.getMajorVersion());
-        target.setMidVersion(source.getMidVersion());
-        target.setMinorVersion(source.getMinorVersion());
         super.update(target, source);
     }
 

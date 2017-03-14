@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -38,8 +37,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     , @NamedQuery(name = "RequirementType.findByDescription",
             query = "SELECT r FROM RequirementType r WHERE "
             + "r.description = :description")})
-public class RequirementType extends Versionable
-        implements Serializable {
+public class RequirementType implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id

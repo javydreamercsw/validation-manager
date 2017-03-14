@@ -77,7 +77,6 @@ public final class TestCaseServer extends TestCase
         target.setId(source.getId());
         target.setName(source.getName());
         target.setIsOpen(source.getIsOpen());
-        super.update(target, source);
     }
 
     @Override

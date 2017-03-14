@@ -40,8 +40,8 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
             riskItemHasRiskCategory.setRiskItemHasRiskCategoryPK(new RiskItemHasRiskCategoryPK());
         }
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
-        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
+        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -80,8 +80,8 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
 
     public void edit(RiskItemHasRiskCategory riskItemHasRiskCategory) throws NonexistentEntityException, Exception {
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
-        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
+        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

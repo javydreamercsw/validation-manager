@@ -115,7 +115,6 @@ public final class RequirementSpecServer extends RequirementSpec
         target.setModificationDate(source.getModificationDate());
         target.setRequirementSpecNodeList(source.getRequirementSpecNodeList());
         target.setRequirementSpecPK(source.getRequirementSpecPK());
-        super.update(target, source);
     }
 
     public static List<Requirement> getRequirements(RequirementSpec spec) {

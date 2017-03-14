@@ -1,7 +1,6 @@
 package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
@@ -50,23 +49,10 @@ public final class ProjectServer extends Project
             NonexistentEntityException, Exception {
         Project p;
         if (getId() > 0) {
-            //Check what has changed, if is only relationshipd, don't version
-            //Get the one from DB
-            if (isVersioningEnabled() && isChangeVersionable()) {
-                p = new Project(getName());
-                update(p, this, false);
-                p.setMajorVersion(getMajorVersion());
-                p.setMidVersion(getMidVersion());
-                p.setMinorVersion(getMinorVersion() + 1);
-                //Store in data base.
-                new ProjectJpaController(getEntityManagerFactory()).create(p);
-                update(this, p);
-            } else {
-                p = new ProjectJpaController(getEntityManagerFactory())
-                        .findProject(getId());
-                update(p, this);
-                new ProjectJpaController(getEntityManagerFactory()).edit(p);
-            }
+            p = new ProjectJpaController(getEntityManagerFactory())
+                    .findProject(getId());
+            update(p, this);
+            new ProjectJpaController(getEntityManagerFactory()).edit(p);
         } else {
             p = new Project(getName());
             update(p, this);
@@ -109,7 +95,6 @@ public final class ProjectServer extends Project
         if (copyId) {
             target.setId(source.getId());
         }
-        super.update(target, source);
     }
 
     @Override
@@ -160,12 +145,6 @@ public final class ProjectServer extends Project
                     versions.add((Project) obj);
                 });
         return versions;
-    }
-
-    @Override
-    public boolean isChangeVersionable() {
-        return !getName().equals(getEntity().getName())
-                || !getNotes().equals(getEntity().getNotes());
     }
 
     public void copy(Project newProject) {

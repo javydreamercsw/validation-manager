@@ -1,7 +1,6 @@
 package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RequirementStatus;
@@ -13,7 +12,7 @@ import java.util.List;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementStatusServer extends RequirementStatus
+public final class RequirementStatusServer extends RequirementStatus
         implements EntityServer<RequirementStatus>,
         VersionableServer<RequirementStatus> {
 
@@ -34,21 +33,9 @@ public class RequirementStatusServer extends RequirementStatus
                 = new RequirementStatusJpaController(
                         getEntityManagerFactory());
         if (getId() > 0) {
-            if (isVersioningEnabled() && isChangeVersionable()) {
-                p = new RequirementStatus();
-                if (p.getClass().isInstance(Versionable.class)) {
-                    Versionable vTarget = Versionable.class.cast(p);
-                    Versionable vSource = Versionable.class.cast(this);
-                    vTarget.setMajorVersion(vSource.getMajorVersion());
-                    vTarget.setMidVersion(vSource.getMidVersion());
-                    vTarget.setMinorVersion(vSource.getMinorVersion() + 1);
-                }
-                update(this, p);
-            } else {
-                p = controller.findRequirementStatus(getId());
-                update(p, this);
-                controller.edit(p);
-            }
+            p = controller.findRequirementStatus(getId());
+            update(p, this);
+            controller.edit(p);
         } else {
             p = new RequirementStatus(getStatus());
             update(p, this);
