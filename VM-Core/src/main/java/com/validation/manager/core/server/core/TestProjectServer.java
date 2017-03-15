@@ -11,7 +11,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestProjectServer extends TestProject
+public final class TestProjectServer extends TestProject
         implements EntityServer<TestProject> {
 
     public TestProjectServer(String name, boolean active) {
@@ -20,14 +20,16 @@ public class TestProjectServer extends TestProject
     }
 
     public TestProjectServer(TestProject tp) {
-        update(this, tp);
+        update(TestProjectServer.this, tp);
     }
 
     @Override
-    public int write2DB() throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public int write2DB() throws IllegalOrphanException,
+            NonexistentEntityException, Exception {
         TestProject tp;
         if (getId() > 0) {
-            tp = new TestProjectJpaController(getEntityManagerFactory()).findTestProject(getId());
+            tp = new TestProjectJpaController(getEntityManagerFactory())
+                    .findTestProject(getId());
             update(tp, this);
             new TestProjectJpaController(getEntityManagerFactory()).edit(tp);
         } else {
@@ -52,6 +54,9 @@ public class TestProjectServer extends TestProject
         target.setName(source.getName());
         target.setNotes(source.getNotes());
         target.setId(source.getId());
+        target.setProjectList(source.getProjectList());
+        target.setTestPlanList(source.getTestPlanList());
+        target.setUserTestProjectRoleList(source.getUserTestProjectRoleList());
     }
 
     @Override

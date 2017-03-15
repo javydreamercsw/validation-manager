@@ -20,18 +20,18 @@ public class UserTestPlanRoleServer extends UserTestPlanRole
 
     public UserTestPlanRoleServer(TestPlan tpl, VmUser user, Role role) {
         super(tpl, user, role);
-        setTestPlan(tpl);
-        setVmUser(user);
-        setRole(role);
     }
 
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
-        UserTestPlanRoleJpaController controller = 
-                new UserTestPlanRoleJpaController(getEntityManagerFactory());
-        UserTestPlanRole temp = new UserTestPlanRole(getTestPlan(), getVmUser(), getRole());
-        update(temp, this);
-        controller.create(temp);
+        UserTestPlanRoleJpaController controller
+                = new UserTestPlanRoleJpaController(getEntityManagerFactory());
+        if (controller.findUserTestPlanRole(getUserTestPlanRolePK()) == null) {
+            UserTestPlanRole temp = new UserTestPlanRole(getTestPlan(), getVmUser(),
+                    getRole());
+            controller.create(temp);
+            update(this, temp);
+        }
         return getUserTestPlanRolePK().getTestPlanTestProjectId();
     }
 
@@ -60,8 +60,9 @@ public class UserTestPlanRoleServer extends UserTestPlanRole
         target.setRole(source.getRole());
         target.setTestPlan(source.getTestPlan());
         target.setVmUser(source.getVmUser());
+        target.setUserTestPlanRolePK(source.getUserTestPlanRolePK());
     }
-    
+
     @Override
     public void update() {
         update(this, getEntity());
