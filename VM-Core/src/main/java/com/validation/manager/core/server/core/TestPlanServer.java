@@ -2,22 +2,30 @@ package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.UserTestPlanRole;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public final class TestPlanServer extends TestPlan implements EntityServer<TestPlan> {
+public final class TestPlanServer extends TestPlan
+        implements EntityServer<TestPlan> {
+
+    private final static Logger LOG
+            = Logger.getLogger(TestPlanServer.class.getName());
 
     public TestPlanServer(TestPlan plan) {
         TestPlanJpaController controller
@@ -59,7 +67,7 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
             new TestPlanJpaController(getEntityManagerFactory())
                     .destroy(tp.getTestPlanPK());
         } catch (IllegalOrphanException | NonexistentEntityException ex) {
-            getLogger(TestPlanServer.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             return false;
         }
         return true;
@@ -71,19 +79,16 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
             write2DB();
             return true;
         } catch (PreexistingEntityException ex) {
-            getLogger(TestPlanServer.class.getName()).log(Level.SEVERE,
-                    null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            getLogger(TestPlanServer.class.getName()).log(Level.SEVERE,
-                    null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
         return false;
     }
 
     @Override
     public TestPlan getEntity() {
-        return new TestPlanJpaController(
-                getEntityManagerFactory())
+        return new TestPlanJpaController(getEntityManagerFactory())
                 .findTestPlan(getTestPlanPK());
     }
 
@@ -103,5 +108,23 @@ public final class TestPlanServer extends TestPlan implements EntityServer<TestP
     @Override
     public void update() {
         update(this, getEntity());
+    }
+
+    public void addUserTestPlanRole(VmUser user, Role role) throws Exception {
+        for (UserTestPlanRole utpr : getUserTestPlanRoleList()) {
+            if (utpr.getTestPlan().getTestPlanPK().equals(getTestPlanPK())
+                    && Objects.equals(utpr.getVmUser().getId(), user.getId())
+                    && Objects.equals(utpr.getRole().getId(), role.getId())) {
+                //We have already this role.
+                return;
+            }
+        }
+        UserTestPlanRoleServer temp = new UserTestPlanRoleServer(getEntity(),
+                user, role);
+        if (temp.getEntity() == null) {
+            temp.write2DB();
+        }
+        getUserTestPlanRoleList().add(temp.getEntity());
+        write2DB();
     }
 }

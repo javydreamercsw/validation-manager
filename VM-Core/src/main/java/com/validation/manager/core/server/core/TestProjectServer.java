@@ -1,9 +1,14 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.UserTestProjectRole;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
+import com.validation.manager.core.db.controller.UserTestProjectRoleJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 
@@ -62,5 +67,23 @@ public final class TestProjectServer extends TestProject
     @Override
     public void update() {
         update(this, getEntity());
+    }
+
+    public UserTestProjectRole addUserTestProjectRole(TestProject tp, VmUser user, Role role)
+            throws Exception {
+        UserTestProjectRole temp = new UserTestProjectRole(tp.getId(),
+                user.getId(), role.getId());
+        temp.setVmUser(user);
+        temp.setRole(role);
+        temp.setTestProject(tp);
+        UserTestProjectRoleJpaController controller
+                = new UserTestProjectRoleJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        if (controller.findUserTestProjectRole(temp
+                .getUserTestProjectRolePK()) == null) {
+            controller.create(temp);
+            update();
+        }
+        return temp;
     }
 }
