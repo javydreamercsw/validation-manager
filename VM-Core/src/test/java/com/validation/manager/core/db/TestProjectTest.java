@@ -2,15 +2,12 @@ package com.validation.manager.core.db;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.db.controller.RoleJpaController;
-import com.validation.manager.core.db.controller.UserTestProjectRoleJpaController;
-import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.server.core.TestProjectServer;
 import com.validation.manager.test.AbstractVMTestCase;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -19,78 +16,44 @@ import org.junit.Test;
  */
 public class TestProjectTest extends AbstractVMTestCase {
 
-    private TestProjectServer tp;
     private static final Logger LOG
             = Logger.getLogger(TestProjectTest.class.getSimpleName());
 
-    @Override
-    public void setUp() {
-        try {
-            super.setUp();
-            createTestUsers();
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-    }
-
     @Test
+    @Ignore
     @SuppressWarnings("unchecked")
     public void testCreateTestProject() {
+        createTestUsers();
         try {
             LOG.log(Level.INFO, "Create Test Project");
             parameters.clear();
             parameters.put("name", "Test Project");
-            tp = new TestProjectServer("Test Project", true);
+            TestProjectServer tp = new TestProjectServer("Test Project", true);
             tp.write2DB();
             assertTrue(tp.getId() >= 0);
-            assignRolesForTestProject();
+            assignRolesForTestProject(tp);
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
     }
 
-    private void assignRolesForTestProject() {
+    private void assignRolesForTestProject(TestProjectServer tp) {
         try {
             LOG.log(Level.INFO, "Assigning roles");
-            ArrayList<UserTestProjectRole> roles = new ArrayList<>();
             //Designer role
-            UserTestProjectRole temp = new UserTestProjectRole(tp.getId(),
-                    designer.getId(), 4);
-            temp.setVmUser(designer);
-            temp.setRole(new RoleJpaController(getEntityManagerFactory())
-                    .findRole(4));
-            temp.setTestProject(tp.getEntity());
-            new UserTestProjectRoleJpaController(getEntityManagerFactory())
-                    .create(temp);
-            roles.add(temp);
-            designer.setUserTestProjectRoleList((List) roles);
-            new VmUserJpaController(getEntityManagerFactory()).edit(designer);
-            roles.clear();
+            tp.addUserTestProjectRole(tp.getEntity(), designer,
+                    new RoleJpaController(getEntityManagerFactory())
+                            .findRole(4));
             //Tester role
-            temp = new UserTestProjectRole(tp.getId(), tester.getId(), 7);
-            temp.setVmUser(tester);
-            temp.setRole(new RoleJpaController(getEntityManagerFactory())
-                    .findRole(7));
-            temp.setTestProject(tp.getEntity());
-            new UserTestProjectRoleJpaController(getEntityManagerFactory())
-                    .create(temp);
-            roles.add(temp);
-            tester.setUserTestProjectRoleList((List) roles);
-            new VmUserJpaController(getEntityManagerFactory()).edit(tester);
-            roles.clear();
+            tp.addUserTestProjectRole(tp.getEntity(), tester,
+                    new RoleJpaController(getEntityManagerFactory())
+                            .findRole(7));
             //Leader role
-            temp = new UserTestProjectRole(tp.getId(), leader.getId(), 9);
-            temp.setVmUser(leader);
-            temp.setRole(new RoleJpaController(getEntityManagerFactory())
-                    .findRole(9));
-            temp.setTestProject(tp.getEntity());
-            new UserTestProjectRoleJpaController(getEntityManagerFactory())
-                    .create(temp);
-            roles.add(temp);
-            leader.setUserTestProjectRoleList((List) roles);
-            new VmUserJpaController(getEntityManagerFactory()).edit(leader);
+            tp.addUserTestProjectRole(tp.getEntity(), leader,
+                    new RoleJpaController(getEntityManagerFactory())
+                            .findRole(9));
+            assertEquals(3, tp.getUserTestProjectRoleList().size());
         } catch (PreexistingEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
