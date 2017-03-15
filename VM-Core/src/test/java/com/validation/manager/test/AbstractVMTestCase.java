@@ -2,7 +2,6 @@ package com.validation.manager.test;
 
 import com.validation.manager.core.DBState;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.db.TestProjectTest;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.sql.DataSource;
 import junit.framework.TestCase;
 import org.h2.jdbcx.JdbcDataSource;
@@ -56,6 +54,7 @@ public abstract class AbstractVMTestCase extends TestCase {
     @After
     protected void tearDown() throws Exception {
         LOG.info("Deleting database!");
+        deleteTestUsers();
         Connection conn = null;
         Statement stmt = null;
         try {
@@ -75,7 +74,7 @@ public abstract class AbstractVMTestCase extends TestCase {
             stmt = conn.createStatement();
             stmt.executeUpdate("DROP ALL OBJECTS DELETE FILES");
         } catch (SQLException | ClassNotFoundException ex) {
-            getLogger(AbstractVMTestCase.class.getName()).log(Level.SEVERE,
+            LOG.log(Level.SEVERE,
                     null, ex);
         } finally {
             try {
@@ -94,6 +93,7 @@ public abstract class AbstractVMTestCase extends TestCase {
             }
         }
         DataBaseManager.close();
+        LOG.info("Done!");
     }
 
     protected void createTestUsers() {
@@ -116,11 +116,9 @@ public abstract class AbstractVMTestCase extends TestCase {
             leader = new VmUserJpaController(DataBaseManager
                     .getEntityManagerFactory())
                     .findVmUser(temp.getId());
-            getLogger(TestProjectTest.class.getSimpleName()).log(Level.INFO,
-                    "Done!");
+            LOG.log(Level.INFO, "Done!");
         } catch (Exception ex) {
-            getLogger(AbstractVMTestCase.class.getSimpleName())
-                    .log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -129,9 +127,11 @@ public abstract class AbstractVMTestCase extends TestCase {
             deleteUser(designer);
             deleteUser(tester);
             deleteUser(leader);
+            designer = null;
+            tester = null;
+            leader = null;
         } catch (IllegalOrphanException | NonexistentEntityException ex) {
-            getLogger(AbstractVMTestCase.class.getSimpleName())
-                    .log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 }
