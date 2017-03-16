@@ -2,7 +2,6 @@ package com.validation.manager.core.tool.requirement.importer;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
-import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -178,9 +177,6 @@ public class RequirementImporterTest extends AbstractVMTestCase {
                 assertTrue(instance.processImport());
                 assertEquals(0, imported.size());
             } catch (RequirementImportException ex) {
-                printStackTrace(ex);
-                fail();
-            } catch (VMException ex) {
                 printStackTrace(ex);
                 fail();
             }
