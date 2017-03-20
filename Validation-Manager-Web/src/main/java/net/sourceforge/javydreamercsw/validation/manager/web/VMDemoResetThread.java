@@ -2,8 +2,8 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -38,7 +38,7 @@ public class VMDemoResetThread extends Thread {
                     DataBaseManager.reload(true);
                     LOG.warning("Done!");
                 } catch (VMException ex) {
-                    Exceptions.printStackTrace(ex);
+                   LOG.log(Level.SEVERE, null, ex);
                 }
             }
         }

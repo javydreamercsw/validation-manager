@@ -58,13 +58,11 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementSpecPK;
-import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.UserRight;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
@@ -103,7 +101,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
-import org.openide.util.Exceptions;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTreeItemEvent;
@@ -199,7 +196,7 @@ public class ValidationManagerUI extends UI {
                         displayObject(rsn, true);
                         updateScreen();
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error creating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -221,17 +218,17 @@ public class ValidationManagerUI extends UI {
                                 .getEntityManagerFactory()).edit(rsn);
                         displayRequirementSpecNode(rsn, true);
                     } catch (FieldGroup.CommitException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (NonexistentEntityException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -351,7 +348,7 @@ public class ValidationManagerUI extends UI {
                         buildProjectTree(s);
                         updateScreen();
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error creating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -382,7 +379,7 @@ public class ValidationManagerUI extends UI {
                                 .getEntityManagerFactory()).edit(s);
                         displayStep(s, true);
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -453,7 +450,7 @@ public class ValidationManagerUI extends UI {
                         displayTestCase(t, false);
                         updateScreen();
                     } catch (UnsupportedEncodingException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error creating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -477,17 +474,17 @@ public class ValidationManagerUI extends UI {
                                 .getEntityManagerFactory()).edit(t);
                         displayTestCase(t, true);
                     } catch (FieldGroup.CommitException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (NonexistentEntityException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -553,7 +550,7 @@ public class ValidationManagerUI extends UI {
                         displayTestPlan(tp, false);
                         updateScreen();
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error creating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -576,17 +573,17 @@ public class ValidationManagerUI extends UI {
                                 .getEntityManagerFactory()).edit(tp);
                         displayTestPlan(tp, true);
                     } catch (FieldGroup.CommitException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (NonexistentEntityException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -648,7 +645,7 @@ public class ValidationManagerUI extends UI {
                         displayTestProject(tp, false);
                         updateScreen();
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error creating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -670,17 +667,17 @@ public class ValidationManagerUI extends UI {
                                 .getEntityManagerFactory()).edit(tp);
                         displayTestProject(tp, true);
                     } catch (FieldGroup.CommitException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (NonexistentEntityException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -758,7 +755,7 @@ public class ValidationManagerUI extends UI {
                         displayObject(rs, true);
                         updateScreen();
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error creating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -780,17 +777,17 @@ public class ValidationManagerUI extends UI {
                                 .getEntityManagerFactory()).edit(rs);
                         displayRequirementSpec(rs, true);
                     } catch (FieldGroup.CommitException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (NonexistentEntityException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -884,7 +881,7 @@ public class ValidationManagerUI extends UI {
                 binder.commit();
                 displaySetting(s);
             } catch (FieldGroup.CommitException ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.SEVERE, null, ex);
                 Notification.show("Error updating record!",
                         ex.getLocalizedMessage(),
                         Notification.Type.ERROR_MESSAGE);
@@ -965,7 +962,7 @@ public class ValidationManagerUI extends UI {
                         buildProjectTree(req);
                         displayRequirement(req, false);
                     } catch (FieldGroup.CommitException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -998,9 +995,9 @@ public class ValidationManagerUI extends UI {
         try {
             DemoBuilder.buildDemoProject();
         } catch (NonexistentEntityException ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1264,7 +1261,7 @@ public class ValidationManagerUI extends UI {
                                             .getEntityManagerFactory())
                                             .edit(entry.getValue());
                                 } catch (Exception ex) {
-                                    Exceptions.printStackTrace(ex);
+                                    LOG.log(Level.SEVERE, null, ex);
                                 }
                             }
                             buildProjectTree(new TestCaseServer(tc.getId()).getEntity());
@@ -1404,7 +1401,7 @@ public class ValidationManagerUI extends UI {
                                     .append("</li>");
                         }
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
                 });
                 sb.append("</ul>");
@@ -1514,7 +1511,7 @@ public class ValidationManagerUI extends UI {
                     try {
                         binder.commit();
                     } catch (FieldGroup.CommitException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
@@ -1758,7 +1755,7 @@ public class ValidationManagerUI extends UI {
                                         try {
                                             stepController.edit(entry.getValue());
                                         } catch (Exception ex) {
-                                            Exceptions.printStackTrace(ex);
+                                            LOG.log(Level.SEVERE, null, ex);
                                         }
                                     }
                                     valid = true;
@@ -1779,9 +1776,9 @@ public class ValidationManagerUI extends UI {
 //                                        stepController.edit(removed);
 //                                        tcController.edit(sourceItem.getTestCase());
 //                                    } catch (NonexistentEntityException ex) {
-//                                        Exceptions.printStackTrace(ex);
+//                                         LOG.log(Level.SEVERE, null, ex);
 //                                    } catch (Exception ex) {
-//                                        Exceptions.printStackTrace(ex);
+//                                         LOG.log(Level.SEVERE, null, ex);
 //                                    }
 //                                    //Now update the sequence numbers
 //                                    int count = 0;
@@ -1790,7 +1787,7 @@ public class ValidationManagerUI extends UI {
 //                                        try {
 //                                            stepController.edit(entry.getValue());
 //                                        } catch (Exception ex) {
-//                                            Exceptions.printStackTrace(ex);
+//                                             LOG.log(Level.SEVERE, null, ex);
 //                                        }
 //                                    }
 //                                    //And add it to the target test Case
@@ -1805,7 +1802,7 @@ public class ValidationManagerUI extends UI {
 //                                        try {
 //                                            stepController.edit(entry.getValue());
 //                                        } catch (Exception ex) {
-//                                            Exceptions.printStackTrace(ex);
+//                                             LOG.log(Level.SEVERE, null, ex);
 //                                        }
 //                                    }
 //                                    //Add it to the Test Case
@@ -1959,12 +1956,10 @@ public class ValidationManagerUI extends UI {
     private boolean checkRight(String right) {
         if (user != null) {
             user.update();
-            for (Role r : user.getRoleList()) {
-                for (UserRight ur : r.getUserRightList()) {
-                    if (ur.getDescription().equals(right)) {
-                        return true;
-                    }
-                }
+            if (user.getRoleList().stream().anyMatch((r)
+                    -> (r.getUserRightList().stream().anyMatch((ur)
+                            -> (ur.getDescription().equals(right)))))) {
+                return true;
             }
         }
         return false;
@@ -1998,7 +1993,7 @@ public class ValidationManagerUI extends UI {
                 }
                 return value.getBytes("UTF-8");
             } catch (UnsupportedEncodingException ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
             return null;
         }

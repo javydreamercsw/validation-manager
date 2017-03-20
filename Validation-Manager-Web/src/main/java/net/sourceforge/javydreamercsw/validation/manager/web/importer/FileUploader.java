@@ -6,7 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.openide.util.Exceptions;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -15,6 +16,8 @@ import org.openide.util.Exceptions;
 public class FileUploader implements Upload.Receiver {
 
     private File file;         // File to write to.
+    private static final Logger LOG
+            = Logger.getLogger(FileUploader.class.getName());
 
     // Callback method to begin receiving the upload.
     @Override
@@ -28,11 +31,11 @@ public class FileUploader implements Upload.Receiver {
             fos = new FileOutputStream(getFile());
         } catch (FileNotFoundException ex) {
             // Error while opening the file. Not reported here.
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
             return null;
         } catch (IOException ex) {
             // Error while opening the file. Not reported here.
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
             return null;
         }
         return fos; // Return the output stream to write to
