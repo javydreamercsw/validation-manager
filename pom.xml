@@ -71,8 +71,8 @@
         <netbeans.version>RELEASE802</netbeans.version>
         <jasper.reports.version>5.6.0</jasper.reports.version>
         <junit.version>4.12</junit.version>
-        <mysql.version>6.0.5</mysql.version>
-        <h2.version>1.4.193</h2.version>
+        <mysql.version>6.0.6</mysql.version>
+        <h2.version>1.4.194</h2.version>
     </properties>
     
     <build>
