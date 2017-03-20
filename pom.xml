@@ -174,7 +174,7 @@
                 <executions>
                     <execution>
                         <id>install-gsp</id>
-                        <phase>validate</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -246,20 +246,10 @@
             <name>NetBeans</name>
             <url>http://bits.netbeans.org/maven2/</url>
         </repository>
-        <!--To use dev builds
-        <repository>
-            <id>Netbeans-Dev</id>
-            <name>Netbeans Dev</name>
-            <url>http://bits.netbeans.org/nexus/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>-->
     </repositories>
 
     <modules>
         <module>VM-Core</module>
-        <module>Client</module>
         <module>Validation-Manager-Web</module>
     </modules>
     
