@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>Validation-Manager</artifactId>
     <version>0.3-SNAPSHOT</version>
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <packaging>pom</packaging>
-
+    
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
@@ -52,9 +54,9 @@
         </license>
     </licenses>
     <scm>
-        <url>https://bitbucket.org/javydreamercsw/validation-manager/src</url>
-        <connection>scm:hg:https://bitbucket.org/javydreamercsw/validation-manager/src</connection>
-        <developerConnection>scm:hg:ssh://hg@bitbucket.org/javydreamercsw/validation-manager</developerConnection>
+        <url>https://github.com/javydreamercsw/validation-manager</url>
+        <connection>scm:git:https://github.com/javydreamercsw/validation-manager.git</connection>
+        <developerConnection>scm:git:https://github.com/javydreamercsw/validation-manager.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <ciManagement>
