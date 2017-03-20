@@ -1661,7 +1661,11 @@ public class ValidationManagerUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
         //Connect to the database defined in context.xml
-        DataBaseManager.setPersistenceUnitName("VMPUJNDI");
+        try {
+            DataBaseManager.setPersistenceUnitName("VMPUJNDI");
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
         setInstance(this);
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
@@ -2002,7 +2006,8 @@ public class ValidationManagerUI extends UI {
         public String convertToPresentation(byte[] value,
                 Class<? extends String> targetType, Locale locale)
                 throws ConversionException {
-            return value == null ? "null" : new String(value, StandardCharsets.UTF_8);
+            return value == null ? "null" : new String(value,
+                    StandardCharsets.UTF_8);
         }
 
         @Override
