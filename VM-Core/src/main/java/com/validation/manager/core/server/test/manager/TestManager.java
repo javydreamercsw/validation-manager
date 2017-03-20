@@ -16,13 +16,17 @@ import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.openide.util.Exceptions;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class TestManager {
+
+    private static final Logger LOG
+            = Logger.getLogger(TestManager.class.getSimpleName());
 
     /**
      * Add a complete Test Plan
@@ -77,7 +81,7 @@ public class TestManager {
         try {
             controller.create(result);
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
         steps.forEach((s) -> {
             try {
@@ -89,7 +93,7 @@ public class TestManager {
                 c3.edit(s);
                 result.getExecutionStepList().add(es);
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
         });
         return result;

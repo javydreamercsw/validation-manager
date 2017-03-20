@@ -19,12 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.RollbackException;
-import org.openide.util.Exceptions;
-import static org.openide.util.Lookup.getDefault;
+import org.openide.util.Lookup;
 
 /**
  *
@@ -34,7 +32,7 @@ public final class RequirementServer extends Requirement
         implements EntityServer<Requirement>, VersionableServer<Requirement> {
 
     private static final Logger LOG
-            = getLogger(RequirementServer.class.getSimpleName());
+            = Logger.getLogger(RequirementServer.class.getSimpleName());
     /**
      * Having this static map reduces drastically the amount of resources used
      * to constantly calculate test coverage. This is causing huge performance
@@ -269,7 +267,7 @@ public final class RequirementServer extends Requirement
                 update();
             }
         } else {
-            MessageHandler handler = getDefault().lookup(MessageHandler.class);
+            MessageHandler handler = Lookup.getDefault().lookup(MessageHandler.class);
             String message = new StringBuilder().append("Ignored addition of ")
                     .append(child.getUniqueId()).append(" as a children of ")
                     .append(getUniqueId())
@@ -514,7 +512,7 @@ public final class RequirementServer extends Requirement
                     } catch (RollbackException ex) {
                         //Relationship already exists.
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
                 }
             }

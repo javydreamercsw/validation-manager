@@ -18,8 +18,8 @@ import com.validation.manager.core.server.core.TestProjectServer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -127,7 +127,7 @@ public class DemoBuilder {
             DataBaseManager.setPersistenceUnitName("TestVMPU");
             buildDemoProject();
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 }
