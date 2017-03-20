@@ -108,7 +108,6 @@ public class VersionListener {
                         clone.setDirty(false);
                         LOG.log(Level.FINE, "Clone: {0}",
                                 clone.toString());
-                        DataBaseManager.getEntityManager().persist(clone);
                         if (!PROCESSED.containsKey(versionable.getClass())) {
                             PROCESSED.put(versionable.getClass(), new ArrayList<>());
                         }
@@ -120,6 +119,7 @@ public class VersionListener {
                                 .getEntityManagerFactory()
                                 .getPersistenceUnitUtil()
                                 .getIdentifier(versionable));
+                        DataBaseManager.getEntityManager().persist(clone);
                         //Create the new version
                         versionable.setMinorVersion(clone.getMinorVersion() + 1);
                         versionable.setDirty(true);
