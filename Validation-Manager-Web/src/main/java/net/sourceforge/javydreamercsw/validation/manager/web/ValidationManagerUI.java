@@ -2004,23 +2004,19 @@ public class ValidationManagerUI extends UI {
                 testTree.addItem(new Object[]{pcb, ""},
                         plan.getTestPlanPK());
                 testTree.setParent(plan.getTestPlanPK(),
-                        "testproject" + plan.getTestProject().getId());
-                plan.getTestCaseList().stream().map((tc) -> {
+                        "testproject" + tp.getId());
+                for (TestCase tc : plan.getTestCaseList()) {
                     TreeTableCheckBox tccb = new TreeTableCheckBox(testTree,
-                            tc.getName(), "testcase" + tc.getId());
+                            tc.getName(), "tc" + tc.getId());
                     tccb.setIcon(testIcon);
                     testTree.addItem(new Object[]{tccb,
                         tc.getSummary() != null
                         ? new String(tc.getSummary()) : ""},
-                            "testcase" + tc.getId());
-                    return tc;
-                }).map((tc) -> {
-                    testTree.setParent("testcase" + tc.getId(),
+                            "tc" + tc.getId());
+                    testTree.setParent("tc" + tc.getId(),
                             plan.getTestPlanPK());
-                    return tc;
-                }).forEachOrdered((tc) -> {
-                    testTree.setChildrenAllowed("testcase" + tc.getId(), false);
-                });
+                    testTree.setChildrenAllowed("tc" + tc.getId(), false);
+                }
             }
             testTree.setCollapsed("testproject" + tp.getId(), false);
         }

@@ -7,6 +7,7 @@ import com.vaadin.data.Item;
 import com.vaadin.sebastian.indeterminatecheckbox.IndeterminateCheckBox;
 import com.vaadin.ui.TreeTable;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -18,7 +19,7 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
     private final TreeTable tt;
     private final static Logger LOG
             = Logger.getLogger(TreeTableCheckBox.class.getSimpleName());
-    private Object objectId;
+    private final Object objectId;
 
     public TreeTableCheckBox(TreeTable tt, Object objectId) {
         this.tt = tt;
@@ -47,16 +48,30 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
 
     @Override
     protected void setInternalValue(Boolean value) {
-        if (!Objects.equals(value, getState().value) && value != null
-                && (tt != null && tt.hasChildren(objectId))) {
-            tt.getChildren(objectId).forEach((o) -> {
-                Item item = tt.getItem(o);
-                Object val = item.getItemProperty("Name").getValue();
-                if (val instanceof TreeTableCheckBox) {
-                    TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
-                    ttcb.setValue(value);
+        if (value != null && !Objects.equals(value, getState().value)) {
+            if ((tt != null && tt.hasChildren(objectId))) {
+                tt.getChildren(objectId).forEach((o) -> {
+                    Item item = tt.getItem(o);
+                    Object val = item.getItemProperty("Name").getValue();
+                    if (val instanceof TreeTableCheckBox) {
+                        TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
+                        ttcb.setValue(value);
+                    }
+                });
+            }
+            Object parentId = tt.getParent(objectId);
+            if (!value && parentId != null) {
+                TreeTableCheckBox parent
+                        = ((TreeTableCheckBox) tt.getItem(parentId)
+                                .getItemProperty("Name").getValue());
+                if (parent.getValue() != null && parent.getValue()) {
+                    LOG.log(Level.INFO, "Setting {0} to undetermined.",
+                            parentId);
+                    parent.setValue(null);
+                } else {
+                    LOG.info("Parent not selected!");
                 }
-            });
+            }
         }
         //Switching from false to true. Select all children
         super.setInternalValue(value);
