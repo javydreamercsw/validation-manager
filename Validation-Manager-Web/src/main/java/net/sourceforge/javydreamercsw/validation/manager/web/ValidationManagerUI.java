@@ -44,6 +44,7 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.TreeDragMode;
 import com.vaadin.ui.Tree.TreeDropCriterion;
 import com.vaadin.ui.Tree.TreeTargetDetails;
+import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
@@ -130,6 +131,8 @@ public class ValidationManagerUI extends UI {
     private final VaadinIcons testIcon = VaadinIcons.FILE_TEXT;
     private final VaadinIcons stepIcon = VaadinIcons.FILE_TREE_SUB;
     private final VaadinIcons importIcon = VaadinIcons.ARROW_CIRCLE_UP_O;
+    private final VaadinIcons planIcon = VaadinIcons.BULLETS;
+    private final VaadinIcons editIcon = VaadinIcons.EDIT;
     private Tree tree;
     private Tab main, tester, designer, demo, admin;
     private final List<String> roles = new ArrayList<>();
@@ -1085,7 +1088,7 @@ public class ValidationManagerUI extends UI {
                 = menu.addItem("Create Test Suite", testSuiteIcon);
         createTest.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Project", VaadinIcons.EDIT);
+                = menu.addItem("Edit Project", editIcon);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject((Project) tree.getValue(), true);
@@ -1098,11 +1101,18 @@ public class ValidationManagerUI extends UI {
                     tp.getProjectList().add((Project) tree.getValue());
                     displayTestProject(tp, true);
                 });
+        ContextMenu.ContextMenuItem plan
+                = menu.addItem("Plan Testing", planIcon);
+        plan.setEnabled(checkRight("testplan.planning"));
+        plan.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayTestPlanning((Project) tree.getValue());
+                });
     }
 
     private void createRequirementMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Requirement", VaadinIcons.EDIT);
+                = menu.addItem("Edit Requirement", editIcon);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayRequirement((Requirement) tree.getValue(),
@@ -1136,7 +1146,7 @@ public class ValidationManagerUI extends UI {
                 = menu.addItem("Create Requirement Spec", VaadinIcons.PLUS);
         create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Requirement Spec Node", VaadinIcons.EDIT);
+                = menu.addItem("Edit Requirement Spec Node", editIcon);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayRequirementSpecNode((RequirementSpecNode) tree.getValue(),
@@ -1208,7 +1218,7 @@ public class ValidationManagerUI extends UI {
                 = menu.addItem("Create Step", VaadinIcons.PLUS);
         create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Test Case", VaadinIcons.EDIT);
+                = menu.addItem("Edit Test Case", editIcon);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayTestCase((TestCase) tree.getValue(), true);
@@ -1293,7 +1303,7 @@ public class ValidationManagerUI extends UI {
 
     private void createStepMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Step", VaadinIcons.EDIT);
+                = menu.addItem("Edit Step", editIcon);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayStep((Step) tree.getValue(), true);
@@ -1306,7 +1316,7 @@ public class ValidationManagerUI extends UI {
                 = menu.addItem("Create Test Plan", VaadinIcons.PLUS);
         create.setEnabled(checkRight("testplan.planning"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Test Project", VaadinIcons.EDIT);
+                = menu.addItem("Edit Test Project", editIcon);
         edit.setEnabled(checkRight("testplan.planning"));
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1448,7 +1458,7 @@ public class ValidationManagerUI extends UI {
     private void updateScreen() {
         //Set up a menu header on top and the content below
         VerticalSplitPanel vs = new VerticalSplitPanel();
-        vs.setSplitPosition(20, Unit.PERCENTAGE);
+        vs.setSplitPosition(25, Unit.PERCENTAGE);
         //Set up top menu panel
         vs.setFirstComponent(getMenu());
         //Add the content
@@ -1918,8 +1928,8 @@ public class ValidationManagerUI extends UI {
             subwindow.setClosable(false);
             subwindow.setResizable(false);
             subwindow.center();
-            subwindow.setWidth(25, Unit.PERCENTAGE);
-            subwindow.setHeight(25, Unit.PERCENTAGE);
+            subwindow.setWidth(35, Unit.PERCENTAGE);
+            subwindow.setHeight(35, Unit.PERCENTAGE);
             addWindow(subwindow);
         } else {
             subwindow.setVisible(true);
@@ -1967,6 +1977,70 @@ public class ValidationManagerUI extends UI {
             }
         }
         return false;
+    }
+
+    private void addProjectTestPlanning(TreeTable testTree, Project p) {
+        //Add the test projects
+        testTree.addItem(new Object[]{new TreeTableCheckBox(testTree,
+            p.getName(), "project" + p.getId()), ""},
+                "project" + p.getId());
+        if (p.getParentProjectId() != null) {
+            //Add as child
+            testTree.setParent("project" + p.getId(),
+                    "project" + p.getParentProjectId().getId());
+        }
+        for (TestProject tp : p.getTestProjectList()) {
+            TreeTableCheckBox cb = new TreeTableCheckBox(testTree,
+                    tp.getName(), "testproject" + tp.getId());
+            cb.setIcon(testSuiteIcon);
+            testTree.addItem(new Object[]{cb, ""},
+                    "testproject" + tp.getId());
+            testTree.setParent("testproject" + tp.getId(),
+                    "project" + p.getId());
+            for (TestPlan plan : tp.getTestPlanList()) {
+                TreeTableCheckBox pcb = new TreeTableCheckBox(testTree,
+                        plan.getName(), plan.getTestPlanPK());
+                pcb.setIcon(planIcon);
+                testTree.addItem(new Object[]{pcb, ""},
+                        plan.getTestPlanPK());
+                testTree.setParent(plan.getTestPlanPK(),
+                        "testproject" + plan.getTestProject().getId());
+                plan.getTestCaseList().stream().map((tc) -> {
+                    TreeTableCheckBox tccb = new TreeTableCheckBox(testTree,
+                            tc.getName(), "testcase" + tc.getId());
+                    tccb.setIcon(testIcon);
+                    testTree.addItem(new Object[]{tccb,
+                        tc.getSummary() != null
+                        ? new String(tc.getSummary()) : ""},
+                            "testcase" + tc.getId());
+                    return tc;
+                }).map((tc) -> {
+                    testTree.setParent("testcase" + tc.getId(),
+                            plan.getTestPlanPK());
+                    return tc;
+                }).forEachOrdered((tc) -> {
+                    testTree.setChildrenAllowed("testcase" + tc.getId(), false);
+                });
+            }
+            testTree.setCollapsed("testproject" + tp.getId(), false);
+        }
+        p.getProjectList().forEach((sp) -> {
+            addProjectTestPlanning(testTree, sp);
+        });
+        testTree.setCollapsed("project" + p.getId(), false);
+    }
+
+    private void displayTestPlanning(Project p) {
+        TreeTable testTree = new TreeTable("Available Tests");
+        if (p != null) {
+            //Show the Test Plans for the selected project (including sub projects
+            testTree.addContainerProperty("Name", TreeTableCheckBox.class, "");
+            testTree.addContainerProperty("Description", String.class, "");
+            testTree.setWidth("20em");
+            addProjectTestPlanning(testTree, p);
+        }
+        testTree.setSizeFull();
+        setTabContent(designer, testTree, "testplan.planning");
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
