@@ -6,17 +6,17 @@
   <!-- H2 Embedded Database, not for production.
     Note: For H2, make sure this values match the contents of
     web.xml for proper shutdown of H2 database!-->
-  <!-- <Resource auth="Container" driverClassName="org.h2.Driver" maxActive="100" 
+   <Resource auth="Container" driverClassName="org.h2.Driver" maxActive="100" 
             maxIdle="30" maxWait="10000" name="jdbc/VMDB" password="" 
             type="javax.sql.DataSource" 
             url="jdbc:h2:file:~/VM/data/validation-manager;CREATE=TRUE;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE" 
             username="root"/>
-  MySQL Database-->
+ <!-- MySQL Database
 <Resource auth="Container" driverClassName="com.mysql.cj.jdbc.Driver"
     maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/VMDB"
     password="" type="javax.sql.DataSource"
     url="jdbc:mysql://localhost:3306/validation-manager?serverTimezone=UTC"
-    username="root"/>
+    username="root"/>-->
   <!-- Oracle Database 
 <Resource auth="Container" driverClassName="oracle.jdbc.driver.OracleDriver"
     maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/VMDB"
