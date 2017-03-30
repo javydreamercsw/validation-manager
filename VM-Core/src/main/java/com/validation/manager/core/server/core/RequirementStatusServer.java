@@ -22,7 +22,7 @@ public final class RequirementStatusServer extends RequirementStatus
                         getEntityManagerFactory());
         RequirementStatus rs = controller.findRequirementStatus(id);
         if (rs != null) {
-            update(this, rs);
+            update(RequirementStatusServer.this, rs);
         }
     }
 
@@ -57,13 +57,6 @@ public final class RequirementStatusServer extends RequirementStatus
         target.setId(source.getId());
         target.setStatus(source.getStatus());
         target.setRequirementList(source.getRequirementList());
-        if (target.getClass().isInstance(Versionable.class)) {
-            Versionable vTarget = Versionable.class.cast(target);
-            Versionable vSource = Versionable.class.cast(source);
-            vTarget.setMajorVersion(vSource.getMajorVersion());
-            vTarget.setMidVersion(vSource.getMidVersion());
-            vTarget.setMinorVersion(vSource.getMinorVersion());
-        }
     }
 
     @Override

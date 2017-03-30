@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Login;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -130,6 +129,8 @@ public class VmUser extends Login implements Serializable {
     private List<UserAssigment> userAssigmentList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assigneeId")
     private List<UserAssigment> userAssigmentList1;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "createdBy")
+    private List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionList;
 
     public VmUser() {
     }
@@ -343,5 +344,15 @@ public class VmUser extends Login implements Serializable {
 
     public void setExecutionStepList(List<ExecutionStep> executionStepList) {
         this.executionStepList = executionStepList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ProjectHasTestCaseExecution> getProjectHasTestCaseExecutionList() {
+        return projectHasTestCaseExecutionList;
+    }
+
+    public void setProjectHasTestCaseExecutionList(List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionList) {
+        this.projectHasTestCaseExecutionList = projectHasTestCaseExecutionList;
     }
 }

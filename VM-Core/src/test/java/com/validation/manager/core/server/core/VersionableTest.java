@@ -1,5 +1,6 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.db.Versionable;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -18,11 +19,13 @@ public class VersionableTest {
     @Test
     public void testCompareTo() {
         System.out.println("compareTo");
-        Versionable o = new Versionable();
+        Versionable o = new Versionable() {
+        };
         o.setMajorVersion(1);
         o.setMidVersion(1);
         o.setMinorVersion(1);
-        Versionable o2 = new Versionable();
+        Versionable o2 = new Versionable() {
+        };
         o2.setMajorVersion(1);
         o2.setMidVersion(1);
         o2.setMinorVersion(1);

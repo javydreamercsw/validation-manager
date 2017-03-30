@@ -2,7 +2,6 @@ package com.validation.manager.core.db;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.controller.RequirementJpaController;
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

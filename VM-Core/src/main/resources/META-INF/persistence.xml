@@ -47,6 +47,7 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
+    <class>com.validation.manager.core.db.ProjectHasTestCaseExecution</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/validation_manager?serverTimezone=UTC"/>
@@ -105,6 +106,7 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
+    <class>com.validation.manager.core.db.ProjectHasTestCaseExecution</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:./target/data/test/validation-manager-test;AUTO_SERVER=TRUE"/>
@@ -165,6 +167,7 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
+    <class>com.validation.manager.core.db.ProjectHasTestCaseExecution</class>
     <properties>
       <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
       <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.DefaultSessionLog"/>

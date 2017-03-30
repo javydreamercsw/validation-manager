@@ -12,6 +12,7 @@ import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
+import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
@@ -43,6 +44,7 @@ public class DemoBuilder {
             controller.create(temp);
             addDemoProjectRequirements(temp);
             addDemoProjectTestProject(temp);
+            addDemoExecution(temp);
             rootProject.getProjectList().add(temp);
         }
         addDemoProjectRequirements(rootProject);
@@ -129,5 +131,15 @@ public class DemoBuilder {
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
+    }
+
+    private static void addDemoExecution(Project p) {
+        int i = p.getTestCaseExecutions().size() + 1;
+        TestCaseExecutionServer tces
+                = new TestCaseExecutionServer("Execution " + i, "Test Scope " + i);
+        tces.setConclusion("Conclusion!");
+        p.getTestProjectList().forEach((tp) -> {
+            tces.addTestProject(tp);
+        });
     }
 }
