@@ -93,6 +93,5 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <poi.version>3.15</poi.version>
     </properties>
 </project>
