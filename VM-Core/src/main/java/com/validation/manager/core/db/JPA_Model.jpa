@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<jpa:entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:java="http://jcp.org/en/jsr/detail?id=270" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:jpa="http://java.sun.com/xml/ns/persistence/orm" v="4.0" rws="_1490825276886603" Pws="_1490825276886603" cws="_1490825276886603" thm="PDarkColorScheme" sm="false" xs="false" id="_1490825276743240" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm orm_2_1.xsd">
+<jpa:entity-mappings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:java="http://jcp.org/en/jsr/detail?id=270" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:jpa="http://java.sun.com/xml/ns/persistence/orm" pkg="com.validation.manager.core.db.test" v="4.0" rws="_1490825276886603" Pws="_1490825276886603" cws="_1490825276886603" thm="PDarkColorScheme" sm="false" xs="false" id="_1490825276743240" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm orm_2_1.xsd">
     <jpa:entity xre="false" compositePrimaryKeyClass="VmUserPK" abs="false" class="VmUser" v="true" m="false" rootElement="_1490825276743240" id="_1490825276743241">
         <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="username" id="_1490825276749288">
                 <jpa:bv/>
@@ -58,47 +60,52 @@
                 <jpa:vbv/>
                 <jpa:join-column name="USER_STATUS_ID" rc="ID" unique="false" nullable="true" insertable="true" updatable="true"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276743246" connected-attribute-id="_1490825276770351" v="true" name="executionStepCollection" id="_1490825276750300">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276743246" connected-attribute-id="_1490825276770351" v="true" name="executionStepCollection" id="_1490825276750300">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744249" connected-attribute-id="_1490825276770366" v="true" name="projectHasTestCaseExecutionCollection" id="_1490825276750301">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744249" connected-attribute-id="_1490825276770366" v="true" name="projectHasTestCaseExecutionCollection" id="_1490825276750301">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744251" connected-attribute-id="_1490825276770375" v="true" name="userTestProjectRoleCollection" id="_1490825276750302">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744251" connected-attribute-id="_1490825276770375" v="true" name="userTestProjectRoleCollection" id="_1490825276750302">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744256" connected-attribute-id="_1490825276771413" v="true" name="vmExceptionCollection" id="_1490825276750303">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744256" connected-attribute-id="_1490825276771413" v="true" name="vmExceptionCollection" id="_1490825276750303">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744274" connected-attribute-id="_1490825276773524" v="true" name="userTestPlanRoleCollection" id="_1490825276750304">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744274" connected-attribute-id="_1490825276773524" v="true" name="userTestPlanRoleCollection" id="_1490825276750304">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744277" connected-attribute-id="_1490825276773543" v="true" name="userModifiedRecordCollection" id="_1490825276750305">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744277" connected-attribute-id="_1490825276773543" v="true" name="userModifiedRecordCollection" id="_1490825276750305">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744285" connected-attribute-id="_1490825276773592" v="true" name="userHasInvestigationCollection" id="_1490825276750306">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744285" connected-attribute-id="_1490825276773592" v="true" name="userHasInvestigationCollection" id="_1490825276750306">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744286" connected-attribute-id="_1490825276774601" v="true" name="userAssigmentCollection" id="_1490825276750307">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744286" connected-attribute-id="_1490825276774601" v="true" name="userAssigmentCollection" id="_1490825276750307">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744286" connected-attribute-id="_1490825276774602" v="true" name="userAssigmentCollection1" id="_1490825276750308">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744286" connected-attribute-id="_1490825276774602" v="true" name="userAssigmentCollection1" id="_1490825276750308">
+                <jpa:bv/>
+                <jpa:kbv/>
+                <jpa:vbv/>
+            </jpa:one-to-many>
+            <jpa:one-to-many own="true" collection-type="java.util.List" connected-entity-id="_1490825276743246" v="true" name="executionSteps" id="_1490882452477922">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -129,6 +136,9 @@
         <jpa:table name="vm_user"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="RolePK" abs="false" class="Role" v="true" m="false" rootElement="_1490825276743240" id="_1490825276743242">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="roleName" id="_1490825276751310">
                 <jpa:bv/>
@@ -143,12 +153,12 @@
                 <jpa:column name="description" unique="false" nullable="true" insertable="true" updatable="true" table="role" length="65535"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744251" connected-attribute-id="_1490825276770376" v="true" name="userTestProjectRoleCollection" id="_1490825276769314">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744251" connected-attribute-id="_1490825276770376" v="true" name="userTestProjectRoleCollection" id="_1490825276769314">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744274" connected-attribute-id="_1490825276773525" v="true" name="userTestPlanRoleCollection" id="_1490825276769315">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744274" connected-attribute-id="_1490825276773525" v="true" name="userTestPlanRoleCollection" id="_1490825276769315">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -174,9 +184,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="role"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="role"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="RiskItemPK" abs="false" class="RiskItem" v="true" m="false" rootElement="_1490825276743240" id="_1490825276743243">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="int" v="true" name="sequence" id="_1490825276770318">
                 <jpa:bv/>
@@ -196,7 +210,7 @@
                 <jpa:vbv/>
                 <jpa:join-column name="FMEA_ID" rc="ID" unique="false" nullable="true" insertable="false" updatable="false"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744273" connected-attribute-id="_1490825276772518" v="true" name="riskItemHasRiskCategoryCollection" id="_1490825276770326">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744273" connected-attribute-id="_1490825276772518" v="true" name="riskItemHasRiskCategoryCollection" id="_1490825276770326">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -240,9 +254,13 @@
                 <jpa:column name="FMEA_id" unique="false" nullable="false" insertable="true" updatable="true" table="risk_item"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="risk_item"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="ProjectPK" abs="false" class="Project" v="true" m="false" rootElement="_1490825276743240" id="_1490825276743244">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276770328">
                 <jpa:bv/>
@@ -257,23 +275,23 @@
                 <jpa:column name="notes" unique="false" nullable="true" insertable="true" updatable="true" table="project" length="65535"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:many-to-one primaryKey="false" connected-entity-id="_1490825276743244" connected-attribute-id="_1490825276770331" v="true" name="parentProjectId" id="_1490825276770332">
+            <jpa:many-to-one optional="true" primaryKey="false" connected-entity-id="_1490825276743244" connected-attribute-id="_1490825276770331" v="true" name="parentProjectId" id="_1490825276770332">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
                 <jpa:join-column name="PARENT_PROJECT_ID" rc="ID" unique="false" nullable="true" insertable="true" updatable="true"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276743244" connected-attribute-id="_1490825276770332" v="true" name="projectCollection" id="_1490825276770331">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276743244" connected-attribute-id="_1490825276770332" v="true" name="projectCollection" id="_1490825276770331">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744249" connected-attribute-id="_1490825276770364" v="true" name="projectHasTestCaseExecutionCollection" id="_1490825276770333">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744249" connected-attribute-id="_1490825276770364" v="true" name="projectHasTestCaseExecutionCollection" id="_1490825276770333">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744276" connected-attribute-id="_1490825276773537" v="true" name="requirementSpecCollection" id="_1490825276770334">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744276" connected-attribute-id="_1490825276773537" v="true" name="requirementSpecCollection" id="_1490825276770334">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -294,9 +312,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="project"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="project"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="CausePK" abs="false" class="Cause" v="true" m="false" rootElement="_1490825276743240" id="_1490825276743245">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276770336">
                 <jpa:bv/>
@@ -329,10 +351,13 @@
                 <jpa:generated-value strategy="AUTO"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="cause"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="ExecutionStepPK" abs="false" class="ExecutionStep" v="true" m="false" rootElement="_1490825276743240" id="_1490825276743246">
         <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="true" attribute-type="String" v="true" name="executionTime" id="_1490825276770342">
                 <jpa:bv/>
@@ -369,13 +394,13 @@
                 <jpa:temporal>TIMESTAMP</jpa:temporal>
                 <jpa:column name="assigned_time" unique="false" nullable="true" insertable="true" updatable="true" table="execution_step"/>
             </jpa:basic>
-            <jpa:many-to-one primaryKey="false" connected-entity-id="_1490825276743247" connected-attribute-id="_1490825276770356" v="true" name="resultId" id="_1490825276770350">
+            <jpa:many-to-one optional="true" primaryKey="false" connected-entity-id="_1490825276743247" connected-attribute-id="_1490825276770356" v="true" name="resultId" id="_1490825276770350">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
                 <jpa:join-column name="RESULT_ID" rc="ID" unique="false" nullable="true" insertable="true" updatable="true"/>
             </jpa:many-to-one>
-            <jpa:many-to-one primaryKey="false" connected-entity-id="_1490825276743241" connected-attribute-id="_1490825276750300" v="true" name="vmUserId" id="_1490825276770351">
+            <jpa:many-to-one optional="true" primaryKey="false" connected-entity-id="_1490825276743241" connected-attribute-id="_1490825276750300" v="true" name="vmUserId" id="_1490825276770351">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -394,11 +419,6 @@
                 <jpa:vbv/>
                 <jpa:join-column name="TEST_CASE_EXECUTION_ID" rc="ID" unique="false" nullable="true" insertable="false" updatable="false"/>
             </jpa:many-to-one>
-            <jpa:one-to-many orp="false" own="true" collection-type="java.util.List" connected-entity-id="_1490825276743241" v="true" name="assignedByUser" id="_1490880615781845">
-                <jpa:bv/>
-                <jpa:kbv/>
-                <jpa:vbv/>
-            </jpa:one-to-many>
             <jpa:many-to-many own="true" collection-type="java.util.List" connected-entity-id="_1490825276744257" connected-attribute-id="_1490825276771420" v="true" name="attachmentCollection" id="_1490825276770348">
                 <jpa:bv/>
                 <jpa:kbv/>
@@ -439,6 +459,9 @@
         <jpa:table name="execution_step"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="ExecutionResultPK" abs="false" class="ExecutionResult" v="true" m="false" rootElement="_1490825276743240" id="_1490825276743247">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="resultName" id="_1490825276770355">
                 <jpa:bv/>
@@ -446,7 +469,7 @@
                 <jpa:vbv/>
                 <jpa:column name="result_name" unique="false" nullable="false" insertable="true" updatable="true" table="execution_result" length="255"/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276743246" connected-attribute-id="_1490825276770350" v="true" name="executionStepCollection" id="_1490825276770356">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276743246" connected-attribute-id="_1490825276770350" v="true" name="executionStepCollection" id="_1490825276770356">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -458,6 +481,7 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="execution_result"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="execution_result">
             <jpa:unique-constraint>
                 <jpa:column-name>result_name</jpa:column-name>
@@ -465,6 +489,9 @@
         </jpa:table>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="SpecLevelPK" abs="false" class="SpecLevel" v="true" m="false" rootElement="_1490825276743240" id="_1490825276743248">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276770358">
                 <jpa:bv/>
@@ -479,7 +506,7 @@
                 <jpa:column name="description" unique="false" nullable="false" insertable="true" updatable="true" table="spec_level" length="65535"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744276" connected-attribute-id="_1490825276773538" v="true" name="requirementSpecCollection" id="_1490825276770360">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744276" connected-attribute-id="_1490825276773538" v="true" name="requirementSpecCollection" id="_1490825276770360">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -491,6 +518,7 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="spec_level"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="spec_level">
             <jpa:unique-constraint>
                 <jpa:column-name>name</jpa:column-name>
@@ -498,6 +526,9 @@
         </jpa:table>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="ProjectHasTestCaseExecutionPK" abs="false" class="ProjectHasTestCaseExecution" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744249">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="java.util.Date" v="true" name="creationTime" id="_1490825276770363">
                 <jpa:bv/>
@@ -537,9 +568,13 @@
                 <jpa:column name="test_case_execution_id" unique="false" nullable="false" insertable="true" updatable="true" table="project_has_test_case_execution"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="project_has_test_case_execution"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="RootCauseTypePK" abs="false" class="RootCauseType" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744250">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276770368">
                 <jpa:bv/>
@@ -553,7 +588,7 @@
                 <jpa:vbv/>
                 <jpa:column name="description" unique="false" nullable="false" insertable="true" updatable="true" table="root_cause_type" length="255"/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744264" connected-attribute-id="_1490825276771465" v="true" name="rootCauseCollection" id="_1490825276770370">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744264" connected-attribute-id="_1490825276771465" v="true" name="rootCauseCollection" id="_1490825276770370">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -565,9 +600,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="root_cause_type"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="root_cause_type"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="UserTestProjectRolePK" abs="false" class="UserTestProjectRole" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744251">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:many-to-one optional="false" primaryKey="false" connected-entity-id="_1490825276744280" connected-attribute-id="_1490825276773560" v="true" name="testProject" id="_1490825276770374">
                 <jpa:bv/>
@@ -606,9 +645,13 @@
                 <jpa:column name="role_id" unique="false" nullable="false" insertable="true" updatable="true" table="user_test_project_role"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="user_test_project_role"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="TestPlanPK" abs="false" class="TestPlan" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744252">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276771379">
                 <jpa:bv/>
@@ -635,7 +678,7 @@
                 <jpa:vbv/>
                 <jpa:column name="is_open" unique="false" nullable="false" insertable="true" updatable="true" table="test_plan"/>
             </jpa:basic>
-            <jpa:many-to-one primaryKey="false" connected-entity-id="_1490825276744252" connected-attribute-id="_1490825276771384" v="true" name="testPlan" id="_1490825276771385">
+            <jpa:many-to-one optional="true" primaryKey="false" connected-entity-id="_1490825276744252" connected-attribute-id="_1490825276771384" v="true" name="testPlan" id="_1490825276771385">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -648,12 +691,12 @@
                 <jpa:vbv/>
                 <jpa:join-column name="TEST_PROJECT_ID" rc="ID" unique="false" nullable="true" insertable="false" updatable="false"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744252" connected-attribute-id="_1490825276771385" v="true" name="testPlanCollection" id="_1490825276771384">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744252" connected-attribute-id="_1490825276771385" v="true" name="testPlanCollection" id="_1490825276771384">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744274" connected-attribute-id="_1490825276773523" v="true" name="userTestPlanRoleCollection" id="_1490825276771387">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744274" connected-attribute-id="_1490825276773523" v="true" name="userTestPlanRoleCollection" id="_1490825276771387">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -676,9 +719,13 @@
                 <jpa:column name="test_project_id" unique="false" nullable="false" insertable="true" updatable="true" table="test_plan"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="test_plan"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="VmIdPK" abs="false" class="VmId" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744253">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="tableName" id="_1490825276771389">
                 <jpa:bv/>
@@ -700,6 +747,7 @@
                 <jpa:generated-value strategy="AUTO"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="vm_id">
             <jpa:unique-constraint>
                 <jpa:column-name>table_name</jpa:column-name>
@@ -707,6 +755,9 @@
         </jpa:table>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="FmeaPK" abs="false" class="Fmea" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744254">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276771392">
                 <jpa:bv/>
@@ -720,18 +771,18 @@
                 <jpa:vbv/>
                 <jpa:column name="description" unique="false" nullable="true" insertable="true" updatable="true" table="fmea" length="45"/>
             </jpa:basic>
-            <jpa:many-to-one primaryKey="false" connected-entity-id="_1490825276744254" connected-attribute-id="_1490825276771396" v="true" name="parent" id="_1490825276771397">
+            <jpa:many-to-one optional="true" primaryKey="false" connected-entity-id="_1490825276744254" connected-attribute-id="_1490825276771396" v="true" name="parent" id="_1490825276771397">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
                 <jpa:join-column name="PARENT" rc="ID" unique="false" nullable="true" insertable="true" updatable="true"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276743243" connected-attribute-id="_1490825276770325" v="true" name="riskItemCollection" id="_1490825276771395">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276743243" connected-attribute-id="_1490825276770325" v="true" name="riskItemCollection" id="_1490825276771395">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744254" connected-attribute-id="_1490825276771397" v="true" name="fmeaCollection" id="_1490825276771396">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744254" connected-attribute-id="_1490825276771397" v="true" name="fmeaCollection" id="_1490825276771396">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -752,6 +803,7 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="fmea"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="fmea">
             <jpa:unique-constraint>
                 <jpa:column-name>name</jpa:column-name>
@@ -759,6 +811,9 @@
         </jpa:table>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="RiskControlTypePK" abs="false" class="RiskControlType" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744255">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276771399">
                 <jpa:bv/>
@@ -773,7 +828,7 @@
                 <jpa:column name="description" unique="false" nullable="false" insertable="true" updatable="true" table="risk_control_type" length="65535"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744269" connected-attribute-id="_1490825276772490" v="true" name="riskControlCollection" id="_1490825276771401">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744269" connected-attribute-id="_1490825276772490" v="true" name="riskControlCollection" id="_1490825276771401">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -786,9 +841,13 @@
                 <jpa:generated-value strategy="AUTO"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="risk_control_type"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="VmExceptionPK" abs="false" class="VmException" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744256">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="java.util.Date" v="true" name="reportDate" id="_1490825276771404">
                 <jpa:bv/>
@@ -871,9 +930,13 @@
                 <jpa:column name="reporter_id" unique="false" nullable="false" insertable="true" updatable="true" table="vm_exception"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="vm_exception"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="AttachmentPK" abs="false" class="Attachment" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744257">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="byte []" v="true" name="file" id="_1490825276771416">
                 <jpa:bv/>
@@ -932,9 +995,13 @@
                 <jpa:column name="attachment_type_id" unique="false" nullable="false" insertable="true" updatable="true" table="attachment"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="attachment"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="TestCaseExecutionPK" abs="false" class="TestCaseExecution" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744258">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="scope" id="_1490825276771423">
                 <jpa:bv/>
@@ -956,12 +1023,12 @@
                 <jpa:column name="conclusion" unique="false" nullable="true" insertable="true" updatable="true" table="test_case_execution" length="2147483647"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276743246" connected-attribute-id="_1490825276770353" v="true" name="executionStepCollection" id="_1490825276771426">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276743246" connected-attribute-id="_1490825276770353" v="true" name="executionStepCollection" id="_1490825276771426">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744249" connected-attribute-id="_1490825276770365" v="true" name="projectHasTestCaseExecutionCollection" id="_1490825276771427">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744249" connected-attribute-id="_1490825276770365" v="true" name="projectHasTestCaseExecutionCollection" id="_1490825276771427">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -973,9 +1040,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="test_case_execution"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="test_case_execution"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="HazardPK" abs="false" class="Hazard" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744259">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276771429">
                 <jpa:bv/>
@@ -1008,9 +1079,13 @@
                 <jpa:generated-value strategy="AUTO"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="hazard"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="UserRightPK" abs="false" class="UserRight" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744260">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="description" id="_1490825276771433">
                 <jpa:bv/>
@@ -1034,9 +1109,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="user_right"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="user_right"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="RequirementSpecNodePK" abs="false" class="RequirementSpecNode" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744261">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276771439">
                 <jpa:bv/>
@@ -1066,7 +1145,7 @@
                 <jpa:join-column name="REQUIREMENT_SPEC_PROJECT_ID" rc="PROJECT_ID" unique="false" nullable="true" insertable="false" updatable="false"/>
                 <jpa:join-column name="REQUIREMENT_SPEC_SPEC_LEVEL_ID" rc="SPEC_LEVEL_ID" unique="false" nullable="true" insertable="false" updatable="false"/>
             </jpa:many-to-one>
-            <jpa:many-to-one primaryKey="false" connected-entity-id="_1490825276744261" connected-attribute-id="_1490825276771443" v="true" name="requirementSpecNode" id="_1490825276771444">
+            <jpa:many-to-one optional="true" primaryKey="false" connected-entity-id="_1490825276744261" connected-attribute-id="_1490825276771443" v="true" name="requirementSpecNode" id="_1490825276771444">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1075,12 +1154,12 @@
                 <jpa:join-column name="REQUIREMENT_SPEC_NODE_REQUIREMENT_SPEC_PROJECT_ID" rc="REQUIREMENT_SPEC_PROJECT_ID" unique="false" nullable="true" insertable="true" updatable="true"/>
                 <jpa:join-column name="REQUIREMENT_SPEC_NODE_REQUIREMENT_SPEC_SPEC_LEVEL_ID" rc="REQUIREMENT_SPEC_SPEC_LEVEL_ID" unique="false" nullable="true" insertable="true" updatable="true"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744261" connected-attribute-id="_1490825276771444" v="true" name="requirementSpecNodeCollection" id="_1490825276771443">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744261" connected-attribute-id="_1490825276771444" v="true" name="requirementSpecNodeCollection" id="_1490825276771443">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744272" connected-attribute-id="_1490825276772509" v="true" name="requirementCollection" id="_1490825276771445">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744272" connected-attribute-id="_1490825276772509" v="true" name="requirementCollection" id="_1490825276771445">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1110,9 +1189,13 @@
                 <jpa:column name="requirement_spec_spec_level_id" unique="false" nullable="false" insertable="true" updatable="true" table="requirement_spec_node"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="requirement_spec_node"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="FailureModePK" abs="false" class="FailureMode" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744262">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276771447">
                 <jpa:bv/>
@@ -1145,9 +1228,13 @@
                 <jpa:generated-value strategy="AUTO"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="failure_mode"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="TestCasePK" abs="false" class="TestCase" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744263">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276771451">
                 <jpa:bv/>
@@ -1188,12 +1275,12 @@
                 <jpa:column name="expected_results" unique="false" nullable="true" insertable="true" updatable="true" table="test_case"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744279" connected-attribute-id="_1490825276773554" v="true" name="riskControlHasTestCaseCollection" id="_1490825276771458">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744279" connected-attribute-id="_1490825276773554" v="true" name="riskControlHasTestCaseCollection" id="_1490825276771458">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744284" connected-attribute-id="_1490825276773586" v="true" name="stepCollection" id="_1490825276771459">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744284" connected-attribute-id="_1490825276773586" v="true" name="stepCollection" id="_1490825276771459">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1215,9 +1302,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="test_case"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="test_case"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="RootCausePK" abs="false" class="RootCause" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744264">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="details" id="_1490825276771462">
                 <jpa:bv/>
@@ -1260,9 +1351,13 @@
                 <jpa:column name="root_cause_type_id" unique="false" nullable="false" insertable="true" updatable="true" table="root_cause"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="root_cause"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="UserStatusPK" abs="false" class="UserStatus" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744265">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="status" id="_1490825276772467">
                 <jpa:bv/>
@@ -1276,7 +1371,7 @@
                 <jpa:vbv/>
                 <jpa:column name="description" unique="false" nullable="true" insertable="true" updatable="true" table="user_status" length="255"/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276743241" connected-attribute-id="_1490825276749299" v="true" name="vmUserCollection" id="_1490825276772469">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276743241" connected-attribute-id="_1490825276749299" v="true" name="vmUserCollection" id="_1490825276772469">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1288,6 +1383,7 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="user_status"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="user_status">
             <jpa:unique-constraint>
                 <jpa:column-name>status</jpa:column-name>
@@ -1295,6 +1391,9 @@
         </jpa:table>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="RiskCategoryPK" abs="false" class="RiskCategory" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744266">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276772471">
                 <jpa:bv/>
@@ -1314,7 +1413,7 @@
                 <jpa:vbv/>
                 <jpa:column name="maximum" unique="false" nullable="false" insertable="true" updatable="true" table="risk_category"/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744273" connected-attribute-id="_1490825276772517" v="true" name="riskItemHasRiskCategoryCollection" id="_1490825276772475">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744273" connected-attribute-id="_1490825276772517" v="true" name="riskItemHasRiskCategoryCollection" id="_1490825276772475">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1332,6 +1431,7 @@
                 <jpa:generated-value strategy="AUTO"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="risk_category">
             <jpa:unique-constraint>
                 <jpa:column-name>name</jpa:column-name>
@@ -1339,6 +1439,9 @@
         </jpa:table>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="AssignmentStatusPK" abs="false" class="AssignmentStatus" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744267">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276772477">
                 <jpa:bv/>
@@ -1353,7 +1456,7 @@
                 <jpa:column name="description" unique="false" nullable="false" insertable="true" updatable="true" table="assignment_status" length="65535"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744286" connected-attribute-id="_1490825276774600" v="true" name="userAssigmentCollection" id="_1490825276772479">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744286" connected-attribute-id="_1490825276774600" v="true" name="userAssigmentCollection" id="_1490825276772479">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1365,9 +1468,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="assignment_status"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="assignment_status"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="VmSettingPK" abs="false" class="VmSetting" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744268">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="setting" id="_1490825276772481">
                 <jpa:bv/>
@@ -1408,6 +1515,7 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="vm_setting"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="vm_setting">
             <jpa:unique-constraint>
                 <jpa:column-name>setting</jpa:column-name>
@@ -1415,6 +1523,9 @@
         </jpa:table>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="RiskControlPK" abs="false" class="RiskControl" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744269">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:many-to-one optional="false" primaryKey="false" connected-entity-id="_1490825276744255" connected-attribute-id="_1490825276771401" v="true" name="riskControlType" id="_1490825276772490">
                 <jpa:bv/>
@@ -1422,12 +1533,12 @@
                 <jpa:vbv/>
                 <jpa:join-column name="RISK_CONTROL_TYPE_ID" rc="ID" unique="false" nullable="true" insertable="false" updatable="false"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744279" connected-attribute-id="_1490825276773553" v="true" name="riskControlHasTestCaseCollection" id="_1490825276772491">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744279" connected-attribute-id="_1490825276773553" v="true" name="riskControlHasTestCaseCollection" id="_1490825276772491">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744281" connected-attribute-id="_1490825276773569" v="true" name="riskControlHasRequirementCollection" id="_1490825276772492">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744281" connected-attribute-id="_1490825276773569" v="true" name="riskControlHasRequirementCollection" id="_1490825276772492">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1468,9 +1579,13 @@
                 <jpa:column name="risk_control_type_id" unique="false" nullable="false" insertable="true" updatable="true" table="risk_control"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="risk_control"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="CorrectiveActionPK" abs="false" class="CorrectiveAction" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744270">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="details" id="_1490825276772494">
                 <jpa:bv/>
@@ -1505,9 +1620,25 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="corrective_action"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="corrective_action"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="AssigmentTypePK" abs="false" class="AssigmentType" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744271">
+        <jpa:ts e="true">
+            <jpa:a>_1490825276772497</jpa:a>
+            <jpa:a>_1490825276772498</jpa:a>
+            <jpa:a>_1490825276772499</jpa:a>
+        </jpa:ts>
+        <jpa:hc e="true">
+            <jpa:a>_1490825276772497</jpa:a>
+            <jpa:a>_1490825276772498</jpa:a>
+            <jpa:a>_1490825276772499</jpa:a>
+        </jpa:hc>
+        <jpa:eq e="true">
+            <jpa:a>_1490825276772497</jpa:a>
+            <jpa:a>_1490825276772498</jpa:a>
+            <jpa:a>_1490825276772499</jpa:a>
+        </jpa:eq>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="fkTable" id="_1490825276772498">
                 <jpa:bv/>
@@ -1522,7 +1653,7 @@
                 <jpa:column name="description" unique="false" nullable="true" insertable="true" updatable="true" table="assigment_type" length="65535"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744286" connected-attribute-id="_1490825276774599" v="true" name="userAssigmentCollection" id="_1490825276772500">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744286" connected-attribute-id="_1490825276774599" v="true" name="userAssigmentCollection" id="_1490825276772500">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1534,9 +1665,19 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="assigment_type"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:nq e="true" name="AssigmentType.findAll">
+            <jpa:query>Select e from AssigmentType e</jpa:query>
+        </jpa:nq>
+        <jpa:nq e="true" name="AssigmentType.findById">
+            <jpa:query>SELECT a FROM AssigmentType a WHERE a.id = :id</jpa:query>
+        </jpa:nq>
+        <jpa:el/>
         <jpa:table name="assigment_type"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="RequirementPK" abs="false" class="Requirement" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744272">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="uniqueId" id="_1490825276772502">
                 <jpa:bv/>
@@ -1579,7 +1720,7 @@
                 <jpa:vbv/>
                 <jpa:join-column name="REQUIREMENT_TYPE_ID" rc="ID" unique="false" nullable="true" insertable="true" updatable="true"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744281" connected-attribute-id="_1490825276773568" v="true" name="riskControlHasRequirementCollection" id="_1490825276772512">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744281" connected-attribute-id="_1490825276773568" v="true" name="riskControlHasRequirementCollection" id="_1490825276772512">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1625,9 +1766,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="requirement"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="requirement"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="RiskItemHasRiskCategoryPK" abs="false" class="RiskItemHasRiskCategory" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744273">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="int" v="true" name="value" id="_1490825276772516">
                 <jpa:bv/>
@@ -1667,9 +1812,13 @@
                 <jpa:column name="risk_category_id" unique="false" nullable="false" insertable="true" updatable="true" table="risk_item_has_risk_category"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="risk_item_has_risk_category"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="UserTestPlanRolePK" abs="false" class="UserTestPlanRole" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744274">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:many-to-one optional="false" primaryKey="false" connected-entity-id="_1490825276744252" connected-attribute-id="_1490825276771387" v="true" name="testPlan" id="_1490825276773523">
                 <jpa:bv/>
@@ -1715,9 +1864,13 @@
                 <jpa:column name="role_id" unique="false" nullable="false" insertable="true" updatable="true" table="user_test_plan_role"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="user_test_plan_role"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="RequirementTypePK" abs="false" class="RequirementType" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744275">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276773527">
                 <jpa:bv/>
@@ -1731,7 +1884,7 @@
                 <jpa:vbv/>
                 <jpa:column name="description" unique="false" nullable="true" insertable="true" updatable="true" table="requirement_type" length="255"/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744272" connected-attribute-id="_1490825276772511" v="true" name="requirementCollection" id="_1490825276773529">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744272" connected-attribute-id="_1490825276772511" v="true" name="requirementCollection" id="_1490825276773529">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1743,9 +1896,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="requirement_type"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="requirement_type"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="RequirementSpecPK" abs="false" class="RequirementSpec" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744276">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276773533">
                 <jpa:bv/>
@@ -1779,7 +1936,7 @@
                 <jpa:vbv/>
                 <jpa:join-column name="SPEC_LEVEL_ID" rc="ID" unique="false" nullable="true" insertable="false" updatable="false"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744261" connected-attribute-id="_1490825276771442" v="true" name="requirementSpecNodeCollection" id="_1490825276773536">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744261" connected-attribute-id="_1490825276771442" v="true" name="requirementSpecNodeCollection" id="_1490825276773536">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1803,6 +1960,7 @@
                 <jpa:column name="spec_level_id" unique="false" nullable="false" insertable="true" updatable="true" table="requirement_spec"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="requirement_spec">
             <jpa:unique-constraint>
                 <jpa:column-name>project_id</jpa:column-name>
@@ -1811,6 +1969,9 @@
         </jpa:table>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="UserModifiedRecordPK" abs="false" class="UserModifiedRecord" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744277">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="java.util.Date" v="true" name="modifiedDate" id="_1490825276773541">
                 <jpa:bv/>
@@ -1844,9 +2005,13 @@
                 <jpa:column name="record_id" unique="false" nullable="false" insertable="true" updatable="true" table="user_modified_record"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="user_modified_record"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="AttachmentTypePK" abs="false" class="AttachmentType" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744278">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="fkTable" id="_1490825276773545">
                 <jpa:bv/>
@@ -1867,7 +2032,7 @@
                 <jpa:vbv/>
                 <jpa:column name="TYPE" unique="false" nullable="false" insertable="true" updatable="true" table="attachment_type" length="255"/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744257" connected-attribute-id="_1490825276771421" v="true" name="attachmentCollection" id="_1490825276773548">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744257" connected-attribute-id="_1490825276771421" v="true" name="attachmentCollection" id="_1490825276773548">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1879,9 +2044,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="attachment_type"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="attachment_type"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="RiskControlHasTestCasePK" abs="false" class="RiskControlHasTestCase" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744279">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:many-to-one optional="false" primaryKey="false" connected-entity-id="_1490825276744269" connected-attribute-id="_1490825276772491" v="true" name="riskControl" id="_1490825276773553">
                 <jpa:bv/>
@@ -1921,9 +2090,13 @@
                 <jpa:column name="test_case_test_id" unique="false" nullable="false" insertable="true" updatable="true" table="risk_control_has_test_case"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="risk_control_has_test_case"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="TestProjectPK" abs="false" class="TestProject" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744280">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="name" id="_1490825276773556">
                 <jpa:bv/>
@@ -1944,12 +2117,12 @@
                 <jpa:column name="notes" unique="false" nullable="true" insertable="true" updatable="true" table="test_project" length="65535"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744251" connected-attribute-id="_1490825276770374" v="true" name="userTestProjectRoleCollection" id="_1490825276773560">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744251" connected-attribute-id="_1490825276770374" v="true" name="userTestProjectRoleCollection" id="_1490825276773560">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
             </jpa:one-to-many>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744252" connected-attribute-id="_1490825276771386" v="true" name="testPlanCollection" id="_1490825276773561">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744252" connected-attribute-id="_1490825276771386" v="true" name="testPlanCollection" id="_1490825276773561">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -1966,9 +2139,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="test_project"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="test_project"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="RiskControlHasRequirementPK" abs="false" class="RiskControlHasRequirement" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744281">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:many-to-one optional="false" primaryKey="false" connected-entity-id="_1490825276744272" connected-attribute-id="_1490825276772512" v="true" name="requirement" id="_1490825276773568">
                 <jpa:bv/>
@@ -2020,9 +2197,13 @@
                 <jpa:column name="requirement_minor_version" unique="false" nullable="false" insertable="true" updatable="true" table="risk_control_has_requirement"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="risk_control_has_requirement"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="InvestigationPK" abs="false" class="Investigation" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744282">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="description" id="_1490825276773571">
                 <jpa:bv/>
@@ -2031,7 +2212,7 @@
                 <jpa:column name="description" unique="false" nullable="false" insertable="true" updatable="true" table="investigation" length="65535"/>
                 <jpa:lob/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744285" connected-attribute-id="_1490825276773591" v="true" name="userHasInvestigationCollection" id="_1490825276773573">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744285" connected-attribute-id="_1490825276773591" v="true" name="userHasInvestigationCollection" id="_1490825276773573">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -2048,9 +2229,13 @@
                 <jpa:column name="id" unique="false" nullable="false" insertable="true" updatable="true" table="investigation"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="investigation"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyClass="RequirementStatusPK" abs="false" class="RequirementStatus" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744283">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="String" v="true" name="status" id="_1490825276773575">
                 <jpa:bv/>
@@ -2058,7 +2243,7 @@
                 <jpa:vbv/>
                 <jpa:column name="status" unique="false" nullable="false" insertable="true" updatable="true" table="requirement_status" length="255"/>
             </jpa:basic>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276744272" connected-attribute-id="_1490825276772510" v="true" name="requirementCollection" id="_1490825276773576">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276744272" connected-attribute-id="_1490825276772510" v="true" name="requirementCollection" id="_1490825276773576">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -2071,9 +2256,13 @@
                 <jpa:generated-value strategy="AUTO"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="requirement_status"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="StepPK" abs="false" class="Step" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744284">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="false" attribute-type="int" v="true" name="stepSequence" id="_1490825276773579">
                 <jpa:bv/>
@@ -2108,7 +2297,7 @@
                 <jpa:vbv/>
                 <jpa:join-column name="TEST_CASE_ID" rc="ID" unique="false" nullable="true" insertable="false" updatable="false"/>
             </jpa:many-to-one>
-            <jpa:one-to-many own="false" collection-type="java.util.List" connected-entity-id="_1490825276743246" connected-attribute-id="_1490825276770352" v="true" name="executionStepCollection" id="_1490825276773585">
+            <jpa:one-to-many orp="false" own="false" collection-type="java.util.List" connected-entity-id="_1490825276743246" connected-attribute-id="_1490825276770352" v="true" name="executionStepCollection" id="_1490825276773585">
                 <jpa:bv/>
                 <jpa:kbv/>
                 <jpa:vbv/>
@@ -2142,9 +2331,13 @@
                 <jpa:column name="test_case_id" unique="false" nullable="false" insertable="true" updatable="true" table="step"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="step"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="UserHasInvestigationPK" abs="false" class="UserHasInvestigation" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744285">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="true" attribute-type="java.util.Date" v="true" name="startDate" id="_1490825276773589">
                 <jpa:bv/>
@@ -2185,9 +2378,13 @@
                 <jpa:column name="investigation_id" unique="false" nullable="false" insertable="true" updatable="true" table="user_has_investigation"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="user_has_investigation"/>
     </jpa:entity>
     <jpa:entity xre="false" compositePrimaryKeyType="D" compositePrimaryKeyClass="UserAssigmentPK" abs="false" class="UserAssigment" v="true" m="false" rootElement="_1490825276743240" id="_1490825276744286">
+        <jpa:ts e="true"/>
+        <jpa:hc e="true"/>
+        <jpa:eq e="true"/>
         <jpa:attributes>
             <jpa:basic optional="true" attribute-type="java.util.Date" v="true" name="deadline" id="_1490825276773597">
                 <jpa:bv/>
@@ -2253,6 +2450,7 @@
                 <jpa:column name="assignment_status_id" unique="false" nullable="false" insertable="true" updatable="true" table="user_assigment"/>
             </jpa:id>
         </jpa:attributes>
+        <jpa:el/>
         <jpa:table name="user_assigment"/>
     </jpa:entity>
     <jpa:snp loc="BEFORE_PACKAGE" e="true">/**

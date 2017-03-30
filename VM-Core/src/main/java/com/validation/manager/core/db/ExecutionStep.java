@@ -45,9 +45,6 @@ import javax.xml.bind.annotation.XmlRootElement;
             + "e.comment = :comment")})
 public class ExecutionStep implements Serializable {
 
-    @Column(name = "assigned_by_user_id")
-    private Integer assignedByUserId;
-
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected ExecutionStepPK executionStepPK;
@@ -200,13 +197,5 @@ public class ExecutionStep implements Serializable {
 
     public void setAssignedTime(Date assignedTime) {
         this.assignedTime = assignedTime;
-    }
-
-    public Integer getAssignedByUserId() {
-        return assignedByUserId;
-    }
-
-    public void setAssignedByUserId(Integer assignedByUserId) {
-        this.assignedByUserId = assignedByUserId;
     }
 }

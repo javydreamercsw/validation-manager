@@ -8,7 +8,6 @@ import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.data.util.converter.Converter;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -44,7 +43,6 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.TreeDragMode;
 import com.vaadin.ui.Tree.TreeDropCriterion;
 import com.vaadin.ui.Tree.TreeTargetDetails;
-import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
@@ -62,6 +60,7 @@ import com.validation.manager.core.db.RequirementSpecPK;
 import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmSetting;
@@ -86,13 +85,11 @@ import com.validation.manager.core.tool.requirement.importer.RequirementImporter
 import com.validation.manager.core.tool.step.importer.StepImporter;
 import com.validation.manager.core.tool.step.importer.TestCaseImportException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -105,6 +102,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUpload
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTreeItemEvent;
+import org.vaadin.teemu.wizards.Wizard;
 
 @Theme("vmtheme")
 @SuppressWarnings("serial")
@@ -123,16 +121,18 @@ public class ValidationManagerUI extends UI {
     private Component left;
     private final TabSheet tabSheet = new TabSheet();
     private final List<Project> projects = new ArrayList<>();
-    private final VaadinIcons projectIcon = VaadinIcons.RECORDS;
-    private final VaadinIcons specIcon = VaadinIcons.BOOK;
-    private final VaadinIcons requirementIcon = VaadinIcons.PIN;
-    private final VaadinIcons testSuiteIcon = VaadinIcons.FILE_TREE;
-    private final VaadinIcons testPlanIcon = VaadinIcons.FILE_TREE_SMALL;
-    private final VaadinIcons testIcon = VaadinIcons.FILE_TEXT;
-    private final VaadinIcons stepIcon = VaadinIcons.FILE_TREE_SUB;
-    private final VaadinIcons importIcon = VaadinIcons.ARROW_CIRCLE_UP_O;
-    private final VaadinIcons planIcon = VaadinIcons.BULLETS;
-    private final VaadinIcons editIcon = VaadinIcons.EDIT;
+    public static final VaadinIcons PROJECT_ICON = VaadinIcons.RECORDS;
+    public static final VaadinIcons SPEC_ICON = VaadinIcons.BOOK;
+    public static final VaadinIcons REQUIREMENT_ICON = VaadinIcons.PIN;
+    public static final VaadinIcons TEST_SUITE_ICON = VaadinIcons.FILE_TREE;
+    public static final VaadinIcons TEST_PLAN_ICON = VaadinIcons.FILE_TREE_SMALL;
+    public static final VaadinIcons TEST_ICON = VaadinIcons.FILE_TEXT;
+    public static final VaadinIcons STEP_ICON = VaadinIcons.FILE_TREE_SUB;
+    public static final VaadinIcons IMPORT_ICON = VaadinIcons.ARROW_CIRCLE_UP_O;
+    public static final VaadinIcons PLAN_ICON = VaadinIcons.BULLETS;
+    public static final VaadinIcons EDIT_ICON = VaadinIcons.EDIT;
+    public static final VaadinIcons EXECUTIONS_ICON = VaadinIcons.COGS;
+    public static final VaadinIcons EXECUTION_ICON = VaadinIcons.COG;
     private Tree tree;
     private Tab main, tester, designer, demo, admin;
     private final List<String> roles = new ArrayList<>();
@@ -1035,7 +1035,7 @@ public class ValidationManagerUI extends UI {
 
     private void createRootMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Project", projectIcon);
+                = menu.addItem("Create Project", PROJECT_ICON);
         create.setEnabled(checkRight("product.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1045,10 +1045,10 @@ public class ValidationManagerUI extends UI {
 
     private void createTestPlanMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Test Case", specIcon);
+                = menu.addItem("Create Test Case", SPEC_ICON);
         create.setEnabled(checkRight("testplan.planning"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Test Plan", specIcon);
+                = menu.addItem("Edit Test Plan", SPEC_ICON);
         edit.setEnabled(checkRight("testplan.planning"));
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1067,7 +1067,7 @@ public class ValidationManagerUI extends UI {
 
     private void createProjectMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Sub Project", projectIcon);
+                = menu.addItem("Create Sub Project", PROJECT_ICON);
         create.setEnabled(checkRight("requirement.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1076,7 +1076,7 @@ public class ValidationManagerUI extends UI {
                     displayProject(project, true);
                 });
         ContextMenu.ContextMenuItem createSpec
-                = menu.addItem("Create Requirement Spec", specIcon);
+                = menu.addItem("Create Requirement Spec", SPEC_ICON);
         createSpec.setEnabled(checkRight("requirement.modify"));
         createSpec.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1085,10 +1085,10 @@ public class ValidationManagerUI extends UI {
                     displayRequirementSpec(rs, true);
                 });
         ContextMenu.ContextMenuItem createTest
-                = menu.addItem("Create Test Suite", testSuiteIcon);
+                = menu.addItem("Create Test Suite", TEST_SUITE_ICON);
         createTest.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Project", editIcon);
+                = menu.addItem("Edit Project", EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject((Project) tree.getValue(), true);
@@ -1102,7 +1102,7 @@ public class ValidationManagerUI extends UI {
                     displayTestProject(tp, true);
                 });
         ContextMenu.ContextMenuItem plan
-                = menu.addItem("Plan Testing", planIcon);
+                = menu.addItem("Plan Testing", PLAN_ICON);
         plan.setEnabled(checkRight("testplan.planning"));
         plan.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1112,7 +1112,7 @@ public class ValidationManagerUI extends UI {
 
     private void createRequirementMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Requirement", editIcon);
+                = menu.addItem("Edit Requirement", EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayRequirement((Requirement) tree.getValue(),
@@ -1123,10 +1123,10 @@ public class ValidationManagerUI extends UI {
 
     private void createRequirementSpecMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Requirement Spec Node", specIcon);
+                = menu.addItem("Create Requirement Spec Node", SPEC_ICON);
         create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Requirement Spec", specIcon);
+                = menu.addItem("Edit Requirement Spec", SPEC_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayRequirementSpec((RequirementSpec) tree.getValue(),
@@ -1146,7 +1146,7 @@ public class ValidationManagerUI extends UI {
                 = menu.addItem("Create Requirement Spec", VaadinIcons.PLUS);
         create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Requirement Spec Node", editIcon);
+                = menu.addItem("Edit Requirement Spec Node", EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayRequirementSpecNode((RequirementSpecNode) tree.getValue(),
@@ -1160,7 +1160,7 @@ public class ValidationManagerUI extends UI {
                     displayRequirement(r, true);
                 });
         ContextMenu.ContextMenuItem importRequirement
-                = menu.addItem("Import Requirements", importIcon);
+                = menu.addItem("Import Requirements", IMPORT_ICON);
         importRequirement.setEnabled(checkRight("requirement.modify"));
         importRequirement.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1218,7 +1218,7 @@ public class ValidationManagerUI extends UI {
                 = menu.addItem("Create Step", VaadinIcons.PLUS);
         create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Test Case", editIcon);
+                = menu.addItem("Edit Test Case", EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayTestCase((TestCase) tree.getValue(), true);
@@ -1233,7 +1233,7 @@ public class ValidationManagerUI extends UI {
                     displayStep(s, true);
                 });
         ContextMenu.ContextMenuItem importSteps
-                = menu.addItem("Import Steps", importIcon);
+                = menu.addItem("Import Steps", IMPORT_ICON);
         importSteps.setEnabled(checkRight("requirement.modify"));
         importSteps.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1303,7 +1303,7 @@ public class ValidationManagerUI extends UI {
 
     private void createStepMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Step", editIcon);
+                = menu.addItem("Edit Step", EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayStep((Step) tree.getValue(), true);
@@ -1316,7 +1316,7 @@ public class ValidationManagerUI extends UI {
                 = menu.addItem("Create Test Plan", VaadinIcons.PLUS);
         create.setEnabled(checkRight("testplan.planning"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Test Project", editIcon);
+                = menu.addItem("Edit Test Project", EDIT_ICON);
         edit.setEnabled(checkRight("testplan.planning"));
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1544,7 +1544,7 @@ public class ValidationManagerUI extends UI {
         // Add the item as a regular item.
         tree.addItem(rs);
         tree.setItemCaption(rs, rs.getName());
-        tree.setItemIcon(rs, specIcon);
+        tree.setItemIcon(rs, SPEC_ICON);
         // Set it to be a child.
         tree.setParent(rs, rs.getProject());
         if (rs.getRequirementSpecNodeList().isEmpty()) {
@@ -1561,7 +1561,7 @@ public class ValidationManagerUI extends UI {
         // Add the item as a regular item.
         tree.addItem(rsn);
         tree.setItemCaption(rsn, rsn.getName());
-        tree.setItemIcon(rsn, specIcon);
+        tree.setItemIcon(rsn, SPEC_ICON);
         // Set it to be a child.
         tree.setParent(rsn, rsn.getRequirementSpec());
         if (rsn.getRequirementList().isEmpty()) {
@@ -1582,7 +1582,7 @@ public class ValidationManagerUI extends UI {
     private void addTestProject(TestProject tp, Tree tree) {
         tree.addItem(tp);
         tree.setItemCaption(tp, tp.getName());
-        tree.setItemIcon(tp, testSuiteIcon);
+        tree.setItemIcon(tp, TEST_SUITE_ICON);
         tree.setParent(tp, tp.getProjectList().get(0));
         boolean children = false;
         if (!tp.getTestPlanList().isEmpty()) {
@@ -1597,7 +1597,7 @@ public class ValidationManagerUI extends UI {
     private void addTestPlan(TestPlan tp, Tree tree) {
         tree.addItem(tp);
         tree.setItemCaption(tp, tp.getName());
-        tree.setItemIcon(tp, testPlanIcon);
+        tree.setItemIcon(tp, TEST_PLAN_ICON);
         tree.setParent(tp, tp.getTestProject());
         if (!tp.getTestCaseList().isEmpty()) {
             tp.getTestCaseList().forEach((tc) -> {
@@ -1609,7 +1609,7 @@ public class ValidationManagerUI extends UI {
     private void addTestCase(TestCase t, TestPlan plan, Tree tree) {
         tree.addItem(t);
         tree.setItemCaption(t, t.getName());
-        tree.setItemIcon(t, testIcon);
+        tree.setItemIcon(t, TEST_ICON);
         tree.setParent(t, plan);
         List<Step> stepList = t.getStepList();
         Collections.sort(stepList, (Step o1, Step o2)
@@ -1622,7 +1622,7 @@ public class ValidationManagerUI extends UI {
     private void addStep(Step s, Tree tree) {
         tree.addItem(s);
         tree.setItemCaption(s, "Step # " + s.getStepSequence());
-        tree.setItemIcon(s, stepIcon);
+        tree.setItemIcon(s, STEP_ICON);
         tree.setParent(s, s.getTestCase());
         tree.setChildrenAllowed(s, false);
     }
@@ -1631,10 +1631,17 @@ public class ValidationManagerUI extends UI {
         // Add the item as a regular item.
         tree.addItem(req);
         tree.setItemCaption(req, req.getUniqueId());
-        tree.setItemIcon(req, requirementIcon);
+        tree.setItemIcon(req, REQUIREMENT_ICON);
         tree.setParent(req, req.getRequirementSpecNode());
         //No children
         tree.setChildrenAllowed(req, false);
+    }
+
+    private void addTestCaseExecutions(Project p, TestCaseExecution tce, Tree tree) {
+        tree.addItem(tce);
+        tree.setItemCaption(tce, tce.getName());
+        tree.setItemIcon(tce, EXECUTIONS_ICON);
+        tree.setParent(tce, p);
     }
 
     public void addProject(Project p, Tree tree) {
@@ -1642,7 +1649,7 @@ public class ValidationManagerUI extends UI {
         tree.setItemCaption(p, p.getName());
         tree.setParent(p, p.getParentProjectId() == null
                 ? projTreeRoot : p.getParentProjectId());
-        tree.setItemIcon(p, projectIcon);
+        tree.setItemIcon(p, PROJECT_ICON);
         boolean children = false;
         if (!p.getProjectList().isEmpty()) {
             p.getProjectList().forEach((sp) -> {
@@ -1659,6 +1666,12 @@ public class ValidationManagerUI extends UI {
         if (!p.getTestProjectList().isEmpty()) {
             p.getTestProjectList().forEach((tp) -> {
                 addTestProject(tp, tree);
+            });
+            children = true;
+        }
+        if (!p.getTestCaseExecutions().isEmpty()) {
+            p.getTestCaseExecutions().forEach((tce) -> {
+                addTestCaseExecutions(p, tce, tree);
             });
             children = true;
         }
@@ -1979,64 +1992,11 @@ public class ValidationManagerUI extends UI {
         return false;
     }
 
-    private void addProjectTestPlanning(TreeTable testTree, Project p) {
-        //Add the test projects
-        testTree.addItem(new Object[]{new TreeTableCheckBox(testTree,
-            p.getName(), "project" + p.getId()), ""},
-                "project" + p.getId());
-        if (p.getParentProjectId() != null) {
-            //Add as child
-            testTree.setParent("project" + p.getId(),
-                    "project" + p.getParentProjectId().getId());
-        }
-        for (TestProject tp : p.getTestProjectList()) {
-            TreeTableCheckBox cb = new TreeTableCheckBox(testTree,
-                    tp.getName(), "testproject" + tp.getId());
-            cb.setIcon(testSuiteIcon);
-            testTree.addItem(new Object[]{cb, ""},
-                    "testproject" + tp.getId());
-            testTree.setParent("testproject" + tp.getId(),
-                    "project" + p.getId());
-            for (TestPlan plan : tp.getTestPlanList()) {
-                TreeTableCheckBox pcb = new TreeTableCheckBox(testTree,
-                        plan.getName(), plan.getTestPlanPK());
-                pcb.setIcon(planIcon);
-                testTree.addItem(new Object[]{pcb, ""},
-                        plan.getTestPlanPK());
-                testTree.setParent(plan.getTestPlanPK(),
-                        "testproject" + tp.getId());
-                for (TestCase tc : plan.getTestCaseList()) {
-                    TreeTableCheckBox tccb = new TreeTableCheckBox(testTree,
-                            tc.getName(), "tc" + tc.getId());
-                    tccb.setIcon(testIcon);
-                    testTree.addItem(new Object[]{tccb,
-                        tc.getSummary() != null
-                        ? new String(tc.getSummary()) : ""},
-                            "tc" + tc.getId());
-                    testTree.setParent("tc" + tc.getId(),
-                            plan.getTestPlanPK());
-                    testTree.setChildrenAllowed("tc" + tc.getId(), false);
-                }
-            }
-            testTree.setCollapsed("testproject" + tp.getId(), false);
-        }
-        p.getProjectList().forEach((sp) -> {
-            addProjectTestPlanning(testTree, sp);
-        });
-        testTree.setCollapsed("project" + p.getId(), false);
-    }
-
     private void displayTestPlanning(Project p) {
-        TreeTable testTree = new TreeTable("Available Tests");
-        if (p != null) {
-            //Show the Test Plans for the selected project (including sub projects
-            testTree.addContainerProperty("Name", TreeTableCheckBox.class, "");
-            testTree.addContainerProperty("Description", String.class, "");
-            testTree.setWidth("20em");
-            addProjectTestPlanning(testTree, p);
-        }
-        testTree.setSizeFull();
-        setTabContent(designer, testTree, "testplan.planning");
+        Wizard w = new Wizard();
+        w.addStep(new SelectTestCasesStep(w, p));
+        w.addStep(new DetailStep());
+        setTabContent(designer, w, "testplan.planning");
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
@@ -2051,43 +2011,6 @@ public class ValidationManagerUI extends UI {
                 reset = new VMDemoResetThread();
                 reset.start();
             }
-        }
-    }
-
-    private static class ByteToStringConverter
-            implements Converter<String, byte[]> {
-
-        @Override
-        public byte[] convertToModel(String value,
-                Class<? extends byte[]> targetType,
-                Locale locale) throws ConversionException {
-            try {
-                if (value == null) {
-                    value = "null";
-                }
-                return value.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-            return null;
-        }
-
-        @Override
-        public String convertToPresentation(byte[] value,
-                Class<? extends String> targetType, Locale locale)
-                throws ConversionException {
-            return value == null ? "null" : new String(value,
-                    StandardCharsets.UTF_8);
-        }
-
-        @Override
-        public Class<byte[]> getModelType() {
-            return byte[].class;
-        }
-
-        @Override
-        public Class<String> getPresentationType() {
-            return String.class;
         }
     }
 }

@@ -21,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RiskControlTypeJpaController implements Serializable {
 
@@ -36,13 +36,13 @@ public class RiskControlTypeJpaController implements Serializable {
 
     public void create(RiskControlType riskControlType) {
         if (riskControlType.getRiskControlList() == null) {
-            riskControlType.setRiskControlList(new ArrayList<RiskControl>());
+            riskControlType.setRiskControlList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<RiskControl> attachedRiskControlList = new ArrayList<RiskControl>();
+            List<RiskControl> attachedRiskControlList = new ArrayList<>();
             for (RiskControl riskControlListRiskControlToAttach : riskControlType.getRiskControlList()) {
                 riskControlListRiskControlToAttach = em.getReference(riskControlListRiskControlToAttach.getClass(), riskControlListRiskControlToAttach.getRiskControlPK());
                 attachedRiskControlList.add(riskControlListRiskControlToAttach);
@@ -78,7 +78,7 @@ public class RiskControlTypeJpaController implements Serializable {
             for (RiskControl riskControlListOldRiskControl : riskControlListOld) {
                 if (!riskControlListNew.contains(riskControlListOldRiskControl)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain RiskControl " + riskControlListOldRiskControl + " since its riskControlType field is not nullable.");
                 }
@@ -86,7 +86,7 @@ public class RiskControlTypeJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<RiskControl> attachedRiskControlListNew = new ArrayList<RiskControl>();
+            List<RiskControl> attachedRiskControlListNew = new ArrayList<>();
             for (RiskControl riskControlListNewRiskControlToAttach : riskControlListNew) {
                 riskControlListNewRiskControlToAttach = em.getReference(riskControlListNewRiskControlToAttach.getClass(), riskControlListNewRiskControlToAttach.getRiskControlPK());
                 attachedRiskControlListNew.add(riskControlListNewRiskControlToAttach);
@@ -138,7 +138,7 @@ public class RiskControlTypeJpaController implements Serializable {
             List<RiskControl> riskControlListOrphanCheck = riskControlType.getRiskControlList();
             for (RiskControl riskControlListOrphanCheckRiskControl : riskControlListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This RiskControlType (" + riskControlType + ") cannot be destroyed since the RiskControl " + riskControlListOrphanCheckRiskControl + " in its riskControlList field has a non-nullable riskControlType field.");
             }

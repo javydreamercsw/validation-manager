@@ -22,6 +22,7 @@ import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserModifiedRecord;
 import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.UserAssigment;
+import com.validation.manager.core.db.ProjectHasTestCaseExecution;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -31,7 +32,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class VmUserJpaController implements Serializable {
 
@@ -46,37 +47,40 @@ public class VmUserJpaController implements Serializable {
 
     public void create(VmUser vmUser) {
         if (vmUser.getCorrectiveActionList() == null) {
-            vmUser.setCorrectiveActionList(new ArrayList<CorrectiveAction>());
+            vmUser.setCorrectiveActionList(new ArrayList<>());
         }
         if (vmUser.getRoleList() == null) {
-            vmUser.setRoleList(new ArrayList<Role>());
+            vmUser.setRoleList(new ArrayList<>());
         }
         if (vmUser.getRootCauseList() == null) {
-            vmUser.setRootCauseList(new ArrayList<RootCause>());
+            vmUser.setRootCauseList(new ArrayList<>());
         }
         if (vmUser.getUserTestProjectRoleList() == null) {
-            vmUser.setUserTestProjectRoleList(new ArrayList<UserTestProjectRole>());
+            vmUser.setUserTestProjectRoleList(new ArrayList<>());
         }
         if (vmUser.getVmExceptionList() == null) {
-            vmUser.setVmExceptionList(new ArrayList<VmException>());
+            vmUser.setVmExceptionList(new ArrayList<>());
         }
         if (vmUser.getUserTestPlanRoleList() == null) {
-            vmUser.setUserTestPlanRoleList(new ArrayList<UserTestPlanRole>());
+            vmUser.setUserTestPlanRoleList(new ArrayList<>());
         }
         if (vmUser.getUserModifiedRecordList() == null) {
-            vmUser.setUserModifiedRecordList(new ArrayList<UserModifiedRecord>());
+            vmUser.setUserModifiedRecordList(new ArrayList<>());
         }
         if (vmUser.getUserHasInvestigationList() == null) {
-            vmUser.setUserHasInvestigationList(new ArrayList<UserHasInvestigation>());
+            vmUser.setUserHasInvestigationList(new ArrayList<>());
         }
         if (vmUser.getUserAssigmentList() == null) {
-            vmUser.setUserAssigmentList(new ArrayList<UserAssigment>());
+            vmUser.setUserAssigmentList(new ArrayList<>());
         }
         if (vmUser.getUserAssigmentList1() == null) {
-            vmUser.setUserAssigmentList1(new ArrayList<UserAssigment>());
+            vmUser.setUserAssigmentList1(new ArrayList<>());
         }
-        if (vmUser.getExecutionStepList() == null) {
-            vmUser.setExecutionStepList(new ArrayList<ExecutionStep>());
+        if (vmUser.getProjectHasTestCaseExecutionList() == null) {
+            vmUser.setProjectHasTestCaseExecutionList(new ArrayList<>());
+        }
+        if (vmUser.getExecutionSteps() == null) {
+            vmUser.setExecutionSteps(new ArrayList<>());
         }
         EntityManager em = null;
         try {
@@ -87,72 +91,78 @@ public class VmUserJpaController implements Serializable {
                 userStatusId = em.getReference(userStatusId.getClass(), userStatusId.getId());
                 vmUser.setUserStatusId(userStatusId);
             }
-            List<CorrectiveAction> attachedCorrectiveActionList = new ArrayList<CorrectiveAction>();
+            List<CorrectiveAction> attachedCorrectiveActionList = new ArrayList<>();
             for (CorrectiveAction correctiveActionListCorrectiveActionToAttach : vmUser.getCorrectiveActionList()) {
                 correctiveActionListCorrectiveActionToAttach = em.getReference(correctiveActionListCorrectiveActionToAttach.getClass(), correctiveActionListCorrectiveActionToAttach.getId());
                 attachedCorrectiveActionList.add(correctiveActionListCorrectiveActionToAttach);
             }
             vmUser.setCorrectiveActionList(attachedCorrectiveActionList);
-            List<Role> attachedRoleList = new ArrayList<Role>();
+            List<Role> attachedRoleList = new ArrayList<>();
             for (Role roleListRoleToAttach : vmUser.getRoleList()) {
                 roleListRoleToAttach = em.getReference(roleListRoleToAttach.getClass(), roleListRoleToAttach.getId());
                 attachedRoleList.add(roleListRoleToAttach);
             }
             vmUser.setRoleList(attachedRoleList);
-            List<RootCause> attachedRootCauseList = new ArrayList<RootCause>();
+            List<RootCause> attachedRootCauseList = new ArrayList<>();
             for (RootCause rootCauseListRootCauseToAttach : vmUser.getRootCauseList()) {
                 rootCauseListRootCauseToAttach = em.getReference(rootCauseListRootCauseToAttach.getClass(), rootCauseListRootCauseToAttach.getRootCausePK());
                 attachedRootCauseList.add(rootCauseListRootCauseToAttach);
             }
             vmUser.setRootCauseList(attachedRootCauseList);
-            List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<UserTestProjectRole>();
+            List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<>();
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRoleToAttach : vmUser.getUserTestProjectRoleList()) {
                 userTestProjectRoleListUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListUserTestProjectRoleToAttach.getUserTestProjectRolePK());
                 attachedUserTestProjectRoleList.add(userTestProjectRoleListUserTestProjectRoleToAttach);
             }
             vmUser.setUserTestProjectRoleList(attachedUserTestProjectRoleList);
-            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
+            List<VmException> attachedVmExceptionList = new ArrayList<>();
             for (VmException vmExceptionListVmExceptionToAttach : vmUser.getVmExceptionList()) {
                 vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
             }
             vmUser.setVmExceptionList(attachedVmExceptionList);
-            List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<UserTestPlanRole>();
+            List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<>();
             for (UserTestPlanRole userTestPlanRoleListUserTestPlanRoleToAttach : vmUser.getUserTestPlanRoleList()) {
                 userTestPlanRoleListUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListUserTestPlanRoleToAttach.getUserTestPlanRolePK());
                 attachedUserTestPlanRoleList.add(userTestPlanRoleListUserTestPlanRoleToAttach);
             }
             vmUser.setUserTestPlanRoleList(attachedUserTestPlanRoleList);
-            List<UserModifiedRecord> attachedUserModifiedRecordList = new ArrayList<UserModifiedRecord>();
+            List<UserModifiedRecord> attachedUserModifiedRecordList = new ArrayList<>();
             for (UserModifiedRecord userModifiedRecordListUserModifiedRecordToAttach : vmUser.getUserModifiedRecordList()) {
                 userModifiedRecordListUserModifiedRecordToAttach = em.getReference(userModifiedRecordListUserModifiedRecordToAttach.getClass(), userModifiedRecordListUserModifiedRecordToAttach.getUserModifiedRecordPK());
                 attachedUserModifiedRecordList.add(userModifiedRecordListUserModifiedRecordToAttach);
             }
             vmUser.setUserModifiedRecordList(attachedUserModifiedRecordList);
-            List<UserHasInvestigation> attachedUserHasInvestigationList = new ArrayList<UserHasInvestigation>();
+            List<UserHasInvestigation> attachedUserHasInvestigationList = new ArrayList<>();
             for (UserHasInvestigation userHasInvestigationListUserHasInvestigationToAttach : vmUser.getUserHasInvestigationList()) {
                 userHasInvestigationListUserHasInvestigationToAttach = em.getReference(userHasInvestigationListUserHasInvestigationToAttach.getClass(), userHasInvestigationListUserHasInvestigationToAttach.getUserHasInvestigationPK());
                 attachedUserHasInvestigationList.add(userHasInvestigationListUserHasInvestigationToAttach);
             }
             vmUser.setUserHasInvestigationList(attachedUserHasInvestigationList);
-            List<UserAssigment> attachedUserAssigmentList = new ArrayList<UserAssigment>();
+            List<UserAssigment> attachedUserAssigmentList = new ArrayList<>();
             for (UserAssigment userAssigmentListUserAssigmentToAttach : vmUser.getUserAssigmentList()) {
                 userAssigmentListUserAssigmentToAttach = em.getReference(userAssigmentListUserAssigmentToAttach.getClass(), userAssigmentListUserAssigmentToAttach.getUserAssigmentPK());
                 attachedUserAssigmentList.add(userAssigmentListUserAssigmentToAttach);
             }
             vmUser.setUserAssigmentList(attachedUserAssigmentList);
-            List<UserAssigment> attachedUserAssigmentList1 = new ArrayList<UserAssigment>();
+            List<UserAssigment> attachedUserAssigmentList1 = new ArrayList<>();
             for (UserAssigment userAssigmentList1UserAssigmentToAttach : vmUser.getUserAssigmentList1()) {
                 userAssigmentList1UserAssigmentToAttach = em.getReference(userAssigmentList1UserAssigmentToAttach.getClass(), userAssigmentList1UserAssigmentToAttach.getUserAssigmentPK());
                 attachedUserAssigmentList1.add(userAssigmentList1UserAssigmentToAttach);
             }
             vmUser.setUserAssigmentList1(attachedUserAssigmentList1);
-            List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
-            for (ExecutionStep executionStepListExecutionStepToAttach : vmUser.getExecutionStepList()) {
-                executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
-                attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
+            List<ProjectHasTestCaseExecution> attachedProjectHasTestCaseExecutionList = new ArrayList<>();
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach : vmUser.getProjectHasTestCaseExecutionList()) {
+                projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach = em.getReference(projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach.getClass(), projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach.getProjectHasTestCaseExecutionPK());
+                attachedProjectHasTestCaseExecutionList.add(projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach);
             }
-            vmUser.setExecutionStepList(attachedExecutionStepList);
+            vmUser.setProjectHasTestCaseExecutionList(attachedProjectHasTestCaseExecutionList);
+            List<ExecutionStep> attachedExecutionSteps = new ArrayList<>();
+            for (ExecutionStep executionStepsExecutionStepToAttach : vmUser.getExecutionSteps()) {
+                executionStepsExecutionStepToAttach = em.getReference(executionStepsExecutionStepToAttach.getClass(), executionStepsExecutionStepToAttach.getExecutionStepPK());
+                attachedExecutionSteps.add(executionStepsExecutionStepToAttach);
+            }
+            vmUser.setExecutionSteps(attachedExecutionSteps);
             em.persist(vmUser);
             if (userStatusId != null) {
                 userStatusId.getVmUserList().add(vmUser);
@@ -233,13 +243,22 @@ public class VmUserJpaController implements Serializable {
                     oldAssigneeIdOfUserAssigmentList1UserAssigment = em.merge(oldAssigneeIdOfUserAssigmentList1UserAssigment);
                 }
             }
-            for (ExecutionStep executionStepListExecutionStep : vmUser.getExecutionStepList()) {
-                VmUser oldVmUserIdOfExecutionStepListExecutionStep = executionStepListExecutionStep.getVmUserId();
-                executionStepListExecutionStep.setVmUserId(vmUser);
-                executionStepListExecutionStep = em.merge(executionStepListExecutionStep);
-                if (oldVmUserIdOfExecutionStepListExecutionStep != null) {
-                    oldVmUserIdOfExecutionStepListExecutionStep.getExecutionStepList().remove(executionStepListExecutionStep);
-                    oldVmUserIdOfExecutionStepListExecutionStep = em.merge(oldVmUserIdOfExecutionStepListExecutionStep);
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListProjectHasTestCaseExecution : vmUser.getProjectHasTestCaseExecutionList()) {
+                VmUser oldCreatedByOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution = projectHasTestCaseExecutionListProjectHasTestCaseExecution.getCreatedBy();
+                projectHasTestCaseExecutionListProjectHasTestCaseExecution.setCreatedBy(vmUser);
+                projectHasTestCaseExecutionListProjectHasTestCaseExecution = em.merge(projectHasTestCaseExecutionListProjectHasTestCaseExecution);
+                if (oldCreatedByOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution != null) {
+                    oldCreatedByOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution.getProjectHasTestCaseExecutionList().remove(projectHasTestCaseExecutionListProjectHasTestCaseExecution);
+                    oldCreatedByOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution = em.merge(oldCreatedByOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution);
+                }
+            }
+            for (ExecutionStep executionStepsExecutionStep : vmUser.getExecutionSteps()) {
+                VmUser oldVmUserIdOfExecutionStepsExecutionStep = executionStepsExecutionStep.getVmUserId();
+                executionStepsExecutionStep.setVmUserId(vmUser);
+                executionStepsExecutionStep = em.merge(executionStepsExecutionStep);
+                if (oldVmUserIdOfExecutionStepsExecutionStep != null) {
+                    oldVmUserIdOfExecutionStepsExecutionStep.getExecutionSteps().remove(executionStepsExecutionStep);
+                    oldVmUserIdOfExecutionStepsExecutionStep = em.merge(oldVmUserIdOfExecutionStepsExecutionStep);
                 }
             }
             em.getTransaction().commit();
@@ -278,13 +297,15 @@ public class VmUserJpaController implements Serializable {
             List<UserAssigment> userAssigmentListNew = vmUser.getUserAssigmentList();
             List<UserAssigment> userAssigmentList1Old = persistentVmUser.getUserAssigmentList1();
             List<UserAssigment> userAssigmentList1New = vmUser.getUserAssigmentList1();
-            List<ExecutionStep> executionStepListOld = persistentVmUser.getExecutionStepList();
-            List<ExecutionStep> executionStepListNew = vmUser.getExecutionStepList();
+            List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionListOld = persistentVmUser.getProjectHasTestCaseExecutionList();
+            List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionListNew = vmUser.getProjectHasTestCaseExecutionList();
+            List<ExecutionStep> executionStepsOld = persistentVmUser.getExecutionSteps();
+            List<ExecutionStep> executionStepsNew = vmUser.getExecutionSteps();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestProjectRole " + userTestProjectRoleListOldUserTestProjectRole + " since its vmUser field is not nullable.");
                 }
@@ -292,7 +313,7 @@ public class VmUserJpaController implements Serializable {
             for (VmException vmExceptionListOldVmException : vmExceptionListOld) {
                 if (!vmExceptionListNew.contains(vmExceptionListOldVmException)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain VmException " + vmExceptionListOldVmException + " since its vmUser field is not nullable.");
                 }
@@ -300,7 +321,7 @@ public class VmUserJpaController implements Serializable {
             for (UserTestPlanRole userTestPlanRoleListOldUserTestPlanRole : userTestPlanRoleListOld) {
                 if (!userTestPlanRoleListNew.contains(userTestPlanRoleListOldUserTestPlanRole)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestPlanRole " + userTestPlanRoleListOldUserTestPlanRole + " since its vmUser field is not nullable.");
                 }
@@ -308,7 +329,7 @@ public class VmUserJpaController implements Serializable {
             for (UserModifiedRecord userModifiedRecordListOldUserModifiedRecord : userModifiedRecordListOld) {
                 if (!userModifiedRecordListNew.contains(userModifiedRecordListOldUserModifiedRecord)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserModifiedRecord " + userModifiedRecordListOldUserModifiedRecord + " since its vmUser field is not nullable.");
                 }
@@ -316,7 +337,7 @@ public class VmUserJpaController implements Serializable {
             for (UserHasInvestigation userHasInvestigationListOldUserHasInvestigation : userHasInvestigationListOld) {
                 if (!userHasInvestigationListNew.contains(userHasInvestigationListOldUserHasInvestigation)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserHasInvestigation " + userHasInvestigationListOldUserHasInvestigation + " since its vmUser field is not nullable.");
                 }
@@ -324,7 +345,7 @@ public class VmUserJpaController implements Serializable {
             for (UserAssigment userAssigmentListOldUserAssigment : userAssigmentListOld) {
                 if (!userAssigmentListNew.contains(userAssigmentListOldUserAssigment)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserAssigment " + userAssigmentListOldUserAssigment + " since its vmUser field is not nullable.");
                 }
@@ -332,9 +353,17 @@ public class VmUserJpaController implements Serializable {
             for (UserAssigment userAssigmentList1OldUserAssigment : userAssigmentList1Old) {
                 if (!userAssigmentList1New.contains(userAssigmentList1OldUserAssigment)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserAssigment " + userAssigmentList1OldUserAssigment + " since its assigneeId field is not nullable.");
+                }
+            }
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListOldProjectHasTestCaseExecution : projectHasTestCaseExecutionListOld) {
+                if (!projectHasTestCaseExecutionListNew.contains(projectHasTestCaseExecutionListOldProjectHasTestCaseExecution)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain ProjectHasTestCaseExecution " + projectHasTestCaseExecutionListOldProjectHasTestCaseExecution + " since its createdBy field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -344,83 +373,90 @@ public class VmUserJpaController implements Serializable {
                 userStatusIdNew = em.getReference(userStatusIdNew.getClass(), userStatusIdNew.getId());
                 vmUser.setUserStatusId(userStatusIdNew);
             }
-            List<CorrectiveAction> attachedCorrectiveActionListNew = new ArrayList<CorrectiveAction>();
+            List<CorrectiveAction> attachedCorrectiveActionListNew = new ArrayList<>();
             for (CorrectiveAction correctiveActionListNewCorrectiveActionToAttach : correctiveActionListNew) {
                 correctiveActionListNewCorrectiveActionToAttach = em.getReference(correctiveActionListNewCorrectiveActionToAttach.getClass(), correctiveActionListNewCorrectiveActionToAttach.getId());
                 attachedCorrectiveActionListNew.add(correctiveActionListNewCorrectiveActionToAttach);
             }
             correctiveActionListNew = attachedCorrectiveActionListNew;
             vmUser.setCorrectiveActionList(correctiveActionListNew);
-            List<Role> attachedRoleListNew = new ArrayList<Role>();
+            List<Role> attachedRoleListNew = new ArrayList<>();
             for (Role roleListNewRoleToAttach : roleListNew) {
                 roleListNewRoleToAttach = em.getReference(roleListNewRoleToAttach.getClass(), roleListNewRoleToAttach.getId());
                 attachedRoleListNew.add(roleListNewRoleToAttach);
             }
             roleListNew = attachedRoleListNew;
             vmUser.setRoleList(roleListNew);
-            List<RootCause> attachedRootCauseListNew = new ArrayList<RootCause>();
+            List<RootCause> attachedRootCauseListNew = new ArrayList<>();
             for (RootCause rootCauseListNewRootCauseToAttach : rootCauseListNew) {
                 rootCauseListNewRootCauseToAttach = em.getReference(rootCauseListNewRootCauseToAttach.getClass(), rootCauseListNewRootCauseToAttach.getRootCausePK());
                 attachedRootCauseListNew.add(rootCauseListNewRootCauseToAttach);
             }
             rootCauseListNew = attachedRootCauseListNew;
             vmUser.setRootCauseList(rootCauseListNew);
-            List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<UserTestProjectRole>();
+            List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<>();
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRoleToAttach : userTestProjectRoleListNew) {
                 userTestProjectRoleListNewUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListNewUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListNewUserTestProjectRoleToAttach.getUserTestProjectRolePK());
                 attachedUserTestProjectRoleListNew.add(userTestProjectRoleListNewUserTestProjectRoleToAttach);
             }
             userTestProjectRoleListNew = attachedUserTestProjectRoleListNew;
             vmUser.setUserTestProjectRoleList(userTestProjectRoleListNew);
-            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
+            List<VmException> attachedVmExceptionListNew = new ArrayList<>();
             for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
                 vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
             }
             vmExceptionListNew = attachedVmExceptionListNew;
             vmUser.setVmExceptionList(vmExceptionListNew);
-            List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<UserTestPlanRole>();
+            List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<>();
             for (UserTestPlanRole userTestPlanRoleListNewUserTestPlanRoleToAttach : userTestPlanRoleListNew) {
                 userTestPlanRoleListNewUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListNewUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListNewUserTestPlanRoleToAttach.getUserTestPlanRolePK());
                 attachedUserTestPlanRoleListNew.add(userTestPlanRoleListNewUserTestPlanRoleToAttach);
             }
             userTestPlanRoleListNew = attachedUserTestPlanRoleListNew;
             vmUser.setUserTestPlanRoleList(userTestPlanRoleListNew);
-            List<UserModifiedRecord> attachedUserModifiedRecordListNew = new ArrayList<UserModifiedRecord>();
+            List<UserModifiedRecord> attachedUserModifiedRecordListNew = new ArrayList<>();
             for (UserModifiedRecord userModifiedRecordListNewUserModifiedRecordToAttach : userModifiedRecordListNew) {
                 userModifiedRecordListNewUserModifiedRecordToAttach = em.getReference(userModifiedRecordListNewUserModifiedRecordToAttach.getClass(), userModifiedRecordListNewUserModifiedRecordToAttach.getUserModifiedRecordPK());
                 attachedUserModifiedRecordListNew.add(userModifiedRecordListNewUserModifiedRecordToAttach);
             }
             userModifiedRecordListNew = attachedUserModifiedRecordListNew;
             vmUser.setUserModifiedRecordList(userModifiedRecordListNew);
-            List<UserHasInvestigation> attachedUserHasInvestigationListNew = new ArrayList<UserHasInvestigation>();
+            List<UserHasInvestigation> attachedUserHasInvestigationListNew = new ArrayList<>();
             for (UserHasInvestigation userHasInvestigationListNewUserHasInvestigationToAttach : userHasInvestigationListNew) {
                 userHasInvestigationListNewUserHasInvestigationToAttach = em.getReference(userHasInvestigationListNewUserHasInvestigationToAttach.getClass(), userHasInvestigationListNewUserHasInvestigationToAttach.getUserHasInvestigationPK());
                 attachedUserHasInvestigationListNew.add(userHasInvestigationListNewUserHasInvestigationToAttach);
             }
             userHasInvestigationListNew = attachedUserHasInvestigationListNew;
             vmUser.setUserHasInvestigationList(userHasInvestigationListNew);
-            List<UserAssigment> attachedUserAssigmentListNew = new ArrayList<UserAssigment>();
+            List<UserAssigment> attachedUserAssigmentListNew = new ArrayList<>();
             for (UserAssigment userAssigmentListNewUserAssigmentToAttach : userAssigmentListNew) {
                 userAssigmentListNewUserAssigmentToAttach = em.getReference(userAssigmentListNewUserAssigmentToAttach.getClass(), userAssigmentListNewUserAssigmentToAttach.getUserAssigmentPK());
                 attachedUserAssigmentListNew.add(userAssigmentListNewUserAssigmentToAttach);
             }
             userAssigmentListNew = attachedUserAssigmentListNew;
             vmUser.setUserAssigmentList(userAssigmentListNew);
-            List<UserAssigment> attachedUserAssigmentList1New = new ArrayList<UserAssigment>();
+            List<UserAssigment> attachedUserAssigmentList1New = new ArrayList<>();
             for (UserAssigment userAssigmentList1NewUserAssigmentToAttach : userAssigmentList1New) {
                 userAssigmentList1NewUserAssigmentToAttach = em.getReference(userAssigmentList1NewUserAssigmentToAttach.getClass(), userAssigmentList1NewUserAssigmentToAttach.getUserAssigmentPK());
                 attachedUserAssigmentList1New.add(userAssigmentList1NewUserAssigmentToAttach);
             }
             userAssigmentList1New = attachedUserAssigmentList1New;
             vmUser.setUserAssigmentList1(userAssigmentList1New);
-            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
-            for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
-                executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
-                attachedExecutionStepListNew.add(executionStepListNewExecutionStepToAttach);
+            List<ProjectHasTestCaseExecution> attachedProjectHasTestCaseExecutionListNew = new ArrayList<>();
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach : projectHasTestCaseExecutionListNew) {
+                projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach = em.getReference(projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach.getClass(), projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach.getProjectHasTestCaseExecutionPK());
+                attachedProjectHasTestCaseExecutionListNew.add(projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach);
             }
-            executionStepListNew = attachedExecutionStepListNew;
-            vmUser.setExecutionStepList(executionStepListNew);
+            projectHasTestCaseExecutionListNew = attachedProjectHasTestCaseExecutionListNew;
+            vmUser.setProjectHasTestCaseExecutionList(projectHasTestCaseExecutionListNew);
+            List<ExecutionStep> attachedExecutionStepsNew = new ArrayList<>();
+            for (ExecutionStep executionStepsNewExecutionStepToAttach : executionStepsNew) {
+                executionStepsNewExecutionStepToAttach = em.getReference(executionStepsNewExecutionStepToAttach.getClass(), executionStepsNewExecutionStepToAttach.getExecutionStepPK());
+                attachedExecutionStepsNew.add(executionStepsNewExecutionStepToAttach);
+            }
+            executionStepsNew = attachedExecutionStepsNew;
+            vmUser.setExecutionSteps(executionStepsNew);
             vmUser = em.merge(vmUser);
             if (userStatusIdOld != null && !userStatusIdOld.equals(userStatusIdNew)) {
                 userStatusIdOld.getVmUserList().remove(vmUser);
@@ -543,20 +579,31 @@ public class VmUserJpaController implements Serializable {
                     }
                 }
             }
-            for (ExecutionStep executionStepListOldExecutionStep : executionStepListOld) {
-                if (!executionStepListNew.contains(executionStepListOldExecutionStep)) {
-                    executionStepListOldExecutionStep.setVmUserId(null);
-                    executionStepListOldExecutionStep = em.merge(executionStepListOldExecutionStep);
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListNewProjectHasTestCaseExecution : projectHasTestCaseExecutionListNew) {
+                if (!projectHasTestCaseExecutionListOld.contains(projectHasTestCaseExecutionListNewProjectHasTestCaseExecution)) {
+                    VmUser oldCreatedByOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution = projectHasTestCaseExecutionListNewProjectHasTestCaseExecution.getCreatedBy();
+                    projectHasTestCaseExecutionListNewProjectHasTestCaseExecution.setCreatedBy(vmUser);
+                    projectHasTestCaseExecutionListNewProjectHasTestCaseExecution = em.merge(projectHasTestCaseExecutionListNewProjectHasTestCaseExecution);
+                    if (oldCreatedByOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution != null && !oldCreatedByOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution.equals(vmUser)) {
+                        oldCreatedByOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution.getProjectHasTestCaseExecutionList().remove(projectHasTestCaseExecutionListNewProjectHasTestCaseExecution);
+                        oldCreatedByOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution = em.merge(oldCreatedByOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution);
+                    }
                 }
             }
-            for (ExecutionStep executionStepListNewExecutionStep : executionStepListNew) {
-                if (!executionStepListOld.contains(executionStepListNewExecutionStep)) {
-                    VmUser oldVmUserIdOfExecutionStepListNewExecutionStep = executionStepListNewExecutionStep.getVmUserId();
-                    executionStepListNewExecutionStep.setVmUserId(vmUser);
-                    executionStepListNewExecutionStep = em.merge(executionStepListNewExecutionStep);
-                    if (oldVmUserIdOfExecutionStepListNewExecutionStep != null && !oldVmUserIdOfExecutionStepListNewExecutionStep.equals(vmUser)) {
-                        oldVmUserIdOfExecutionStepListNewExecutionStep.getExecutionStepList().remove(executionStepListNewExecutionStep);
-                        oldVmUserIdOfExecutionStepListNewExecutionStep = em.merge(oldVmUserIdOfExecutionStepListNewExecutionStep);
+            for (ExecutionStep executionStepsOldExecutionStep : executionStepsOld) {
+                if (!executionStepsNew.contains(executionStepsOldExecutionStep)) {
+                    executionStepsOldExecutionStep.setVmUserId(null);
+                    executionStepsOldExecutionStep = em.merge(executionStepsOldExecutionStep);
+                }
+            }
+            for (ExecutionStep executionStepsNewExecutionStep : executionStepsNew) {
+                if (!executionStepsOld.contains(executionStepsNewExecutionStep)) {
+                    VmUser oldVmUserIdOfExecutionStepsNewExecutionStep = executionStepsNewExecutionStep.getVmUserId();
+                    executionStepsNewExecutionStep.setVmUserId(vmUser);
+                    executionStepsNewExecutionStep = em.merge(executionStepsNewExecutionStep);
+                    if (oldVmUserIdOfExecutionStepsNewExecutionStep != null && !oldVmUserIdOfExecutionStepsNewExecutionStep.equals(vmUser)) {
+                        oldVmUserIdOfExecutionStepsNewExecutionStep.getExecutionSteps().remove(executionStepsNewExecutionStep);
+                        oldVmUserIdOfExecutionStepsNewExecutionStep = em.merge(oldVmUserIdOfExecutionStepsNewExecutionStep);
                     }
                 }
             }
@@ -593,51 +640,58 @@ public class VmUserJpaController implements Serializable {
             List<UserTestProjectRole> userTestProjectRoleListOrphanCheck = vmUser.getUserTestProjectRoleList();
             for (UserTestProjectRole userTestProjectRoleListOrphanCheckUserTestProjectRole : userTestProjectRoleListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserTestProjectRole " + userTestProjectRoleListOrphanCheckUserTestProjectRole + " in its userTestProjectRoleList field has a non-nullable vmUser field.");
             }
             List<VmException> vmExceptionListOrphanCheck = vmUser.getVmExceptionList();
             for (VmException vmExceptionListOrphanCheckVmException : vmExceptionListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the VmException " + vmExceptionListOrphanCheckVmException + " in its vmExceptionList field has a non-nullable vmUser field.");
             }
             List<UserTestPlanRole> userTestPlanRoleListOrphanCheck = vmUser.getUserTestPlanRoleList();
             for (UserTestPlanRole userTestPlanRoleListOrphanCheckUserTestPlanRole : userTestPlanRoleListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserTestPlanRole " + userTestPlanRoleListOrphanCheckUserTestPlanRole + " in its userTestPlanRoleList field has a non-nullable vmUser field.");
             }
             List<UserModifiedRecord> userModifiedRecordListOrphanCheck = vmUser.getUserModifiedRecordList();
             for (UserModifiedRecord userModifiedRecordListOrphanCheckUserModifiedRecord : userModifiedRecordListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserModifiedRecord " + userModifiedRecordListOrphanCheckUserModifiedRecord + " in its userModifiedRecordList field has a non-nullable vmUser field.");
             }
             List<UserHasInvestigation> userHasInvestigationListOrphanCheck = vmUser.getUserHasInvestigationList();
             for (UserHasInvestigation userHasInvestigationListOrphanCheckUserHasInvestigation : userHasInvestigationListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserHasInvestigation " + userHasInvestigationListOrphanCheckUserHasInvestigation + " in its userHasInvestigationList field has a non-nullable vmUser field.");
             }
             List<UserAssigment> userAssigmentListOrphanCheck = vmUser.getUserAssigmentList();
             for (UserAssigment userAssigmentListOrphanCheckUserAssigment : userAssigmentListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserAssigment " + userAssigmentListOrphanCheckUserAssigment + " in its userAssigmentList field has a non-nullable vmUser field.");
             }
             List<UserAssigment> userAssigmentList1OrphanCheck = vmUser.getUserAssigmentList1();
             for (UserAssigment userAssigmentList1OrphanCheckUserAssigment : userAssigmentList1OrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserAssigment " + userAssigmentList1OrphanCheckUserAssigment + " in its userAssigmentList1 field has a non-nullable assigneeId field.");
+            }
+            List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionListOrphanCheck = vmUser.getProjectHasTestCaseExecutionList();
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListOrphanCheckProjectHasTestCaseExecution : projectHasTestCaseExecutionListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the ProjectHasTestCaseExecution " + projectHasTestCaseExecutionListOrphanCheckProjectHasTestCaseExecution + " in its projectHasTestCaseExecutionList field has a non-nullable createdBy field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
@@ -662,10 +716,10 @@ public class VmUserJpaController implements Serializable {
                 rootCauseListRootCause.getVmUserList().remove(vmUser);
                 rootCauseListRootCause = em.merge(rootCauseListRootCause);
             }
-            List<ExecutionStep> executionStepList = vmUser.getExecutionStepList();
-            for (ExecutionStep executionStepListExecutionStep : executionStepList) {
-                executionStepListExecutionStep.setVmUserId(null);
-                executionStepListExecutionStep = em.merge(executionStepListExecutionStep);
+            List<ExecutionStep> executionSteps = vmUser.getExecutionSteps();
+            for (ExecutionStep executionStepsExecutionStep : executionSteps) {
+                executionStepsExecutionStep.setVmUserId(null);
+                executionStepsExecutionStep = em.merge(executionStepsExecutionStep);
             }
             em.remove(vmUser);
             em.getTransaction().commit();

@@ -24,7 +24,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RootCauseJpaController implements Serializable {
 
@@ -42,10 +42,10 @@ public class RootCauseJpaController implements Serializable {
             rootCause.setRootCausePK(new RootCausePK());
         }
         if (rootCause.getVmExceptionList() == null) {
-            rootCause.setVmExceptionList(new ArrayList<VmException>());
+            rootCause.setVmExceptionList(new ArrayList<>());
         }
         if (rootCause.getVmUserList() == null) {
-            rootCause.setVmUserList(new ArrayList<VmUser>());
+            rootCause.setVmUserList(new ArrayList<>());
         }
         rootCause.getRootCausePK().setRootCauseTypeId(rootCause.getRootCauseType().getId());
         EntityManager em = null;
@@ -57,13 +57,13 @@ public class RootCauseJpaController implements Serializable {
                 rootCauseType = em.getReference(rootCauseType.getClass(), rootCauseType.getId());
                 rootCause.setRootCauseType(rootCauseType);
             }
-            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
+            List<VmException> attachedVmExceptionList = new ArrayList<>();
             for (VmException vmExceptionListVmExceptionToAttach : rootCause.getVmExceptionList()) {
                 vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
             }
             rootCause.setVmExceptionList(attachedVmExceptionList);
-            List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserList = new ArrayList<>();
             for (VmUser vmUserListVmUserToAttach : rootCause.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
@@ -112,14 +112,14 @@ public class RootCauseJpaController implements Serializable {
                 rootCauseTypeNew = em.getReference(rootCauseTypeNew.getClass(), rootCauseTypeNew.getId());
                 rootCause.setRootCauseType(rootCauseTypeNew);
             }
-            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
+            List<VmException> attachedVmExceptionListNew = new ArrayList<>();
             for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
                 vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
             }
             vmExceptionListNew = attachedVmExceptionListNew;
             rootCause.setVmExceptionList(vmExceptionListNew);
-            List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserListNew = new ArrayList<>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
                 attachedVmUserListNew.add(vmUserListNewVmUserToAttach);

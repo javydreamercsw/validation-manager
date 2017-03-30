@@ -21,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class CorrectiveActionJpaController implements Serializable {
 
@@ -36,22 +36,22 @@ public class CorrectiveActionJpaController implements Serializable {
 
     public void create(CorrectiveAction correctiveAction) {
         if (correctiveAction.getVmUserList() == null) {
-            correctiveAction.setVmUserList(new ArrayList<VmUser>());
+            correctiveAction.setVmUserList(new ArrayList<>());
         }
         if (correctiveAction.getVmExceptionList() == null) {
-            correctiveAction.setVmExceptionList(new ArrayList<VmException>());
+            correctiveAction.setVmExceptionList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserList = new ArrayList<>();
             for (VmUser vmUserListVmUserToAttach : correctiveAction.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
             }
             correctiveAction.setVmUserList(attachedVmUserList);
-            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
+            List<VmException> attachedVmExceptionList = new ArrayList<>();
             for (VmException vmExceptionListVmExceptionToAttach : correctiveAction.getVmExceptionList()) {
                 vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
@@ -84,14 +84,14 @@ public class CorrectiveActionJpaController implements Serializable {
             List<VmUser> vmUserListNew = correctiveAction.getVmUserList();
             List<VmException> vmExceptionListOld = persistentCorrectiveAction.getVmExceptionList();
             List<VmException> vmExceptionListNew = correctiveAction.getVmExceptionList();
-            List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserListNew = new ArrayList<>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
                 attachedVmUserListNew.add(vmUserListNewVmUserToAttach);
             }
             vmUserListNew = attachedVmUserListNew;
             correctiveAction.setVmUserList(vmUserListNew);
-            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
+            List<VmException> attachedVmExceptionListNew = new ArrayList<>();
             for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
                 vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);

@@ -11,10 +11,12 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Project;
-import com.validation.manager.core.db.TestProject;
 import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.TestCaseExecution;
+import com.validation.manager.core.db.ProjectHasTestCaseExecution;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
@@ -22,7 +24,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class ProjectJpaController implements Serializable {
 
@@ -36,14 +38,20 @@ public class ProjectJpaController implements Serializable {
     }
 
     public void create(Project project) {
-        if (project.getTestProjectList() == null) {
-            project.setTestProjectList(new ArrayList<TestProject>());
-        }
         if (project.getProjectList() == null) {
-            project.setProjectList(new ArrayList<Project>());
+            project.setProjectList(new ArrayList<>());
         }
         if (project.getRequirementSpecList() == null) {
-            project.setRequirementSpecList(new ArrayList<RequirementSpec>());
+            project.setRequirementSpecList(new ArrayList<>());
+        }
+        if (project.getTestProjectList() == null) {
+            project.setTestProjectList(new ArrayList<>());
+        }
+        if (project.getTestCaseExecutions() == null) {
+            project.setTestCaseExecutions(new ArrayList<>());
+        }
+        if (project.getProjectHasTestCaseExecutionList() == null) {
+            project.setProjectHasTestCaseExecutionList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
@@ -54,32 +62,45 @@ public class ProjectJpaController implements Serializable {
                 parentProjectId = em.getReference(parentProjectId.getClass(), parentProjectId.getId());
                 project.setParentProjectId(parentProjectId);
             }
-            List<TestProject> attachedTestProjectList = new ArrayList<TestProject>();
-            for (TestProject testProjectListTestProjectToAttach : project.getTestProjectList()) {
-                testProjectListTestProjectToAttach = em.getReference(testProjectListTestProjectToAttach.getClass(), testProjectListTestProjectToAttach.getId());
-                attachedTestProjectList.add(testProjectListTestProjectToAttach);
-            }
-            project.setTestProjectList(attachedTestProjectList);
-            List<Project> attachedProjectList = new ArrayList<Project>();
+            List<Project> attachedProjectList = new ArrayList<>();
             for (Project projectListProjectToAttach : project.getProjectList()) {
                 projectListProjectToAttach = em.getReference(projectListProjectToAttach.getClass(), projectListProjectToAttach.getId());
                 attachedProjectList.add(projectListProjectToAttach);
             }
             project.setProjectList(attachedProjectList);
-            List<RequirementSpec> attachedRequirementSpecList = new ArrayList<RequirementSpec>();
+            List<RequirementSpec> attachedRequirementSpecList = new ArrayList<>();
             for (RequirementSpec requirementSpecListRequirementSpecToAttach : project.getRequirementSpecList()) {
                 requirementSpecListRequirementSpecToAttach = em.getReference(requirementSpecListRequirementSpecToAttach.getClass(), requirementSpecListRequirementSpecToAttach.getRequirementSpecPK());
                 attachedRequirementSpecList.add(requirementSpecListRequirementSpecToAttach);
             }
             project.setRequirementSpecList(attachedRequirementSpecList);
+            List<TestProject> attachedTestProjectList = new ArrayList<>();
+            for (TestProject testProjectListTestProjectToAttach : project.getTestProjectList()) {
+                testProjectListTestProjectToAttach = em.getReference(testProjectListTestProjectToAttach.getClass(), testProjectListTestProjectToAttach.getId());
+                attachedTestProjectList.add(testProjectListTestProjectToAttach);
+            }
+            project.setTestProjectList(attachedTestProjectList);
+            List<TestCaseExecution> attachedTestCaseExecutions = new ArrayList<>();
+            for (TestCaseExecution testCaseExecutionsTestCaseExecutionToAttach : project.getTestCaseExecutions()) {
+                testCaseExecutionsTestCaseExecutionToAttach = em.getReference(testCaseExecutionsTestCaseExecutionToAttach.getClass(), testCaseExecutionsTestCaseExecutionToAttach.getId());
+                attachedTestCaseExecutions.add(testCaseExecutionsTestCaseExecutionToAttach);
+            }
+            project.setTestCaseExecutions(attachedTestCaseExecutions);
+            List<ProjectHasTestCaseExecution> attachedProjectHasTestCaseExecutionList = new ArrayList<>();
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach : project.getProjectHasTestCaseExecutionList()) {
+                projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach = em.getReference(projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach.getClass(), projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach.getProjectHasTestCaseExecutionPK());
+                attachedProjectHasTestCaseExecutionList.add(projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach);
+            }
+            project.setProjectHasTestCaseExecutionList(attachedProjectHasTestCaseExecutionList);
             em.persist(project);
             if (parentProjectId != null) {
-                parentProjectId.getProjectList().add(project);
+                Project oldParentProjectIdOfParentProjectId = parentProjectId.getParentProjectId();
+                if (oldParentProjectIdOfParentProjectId != null) {
+                    oldParentProjectIdOfParentProjectId.setParentProjectId(null);
+                    oldParentProjectIdOfParentProjectId = em.merge(oldParentProjectIdOfParentProjectId);
+                }
+                parentProjectId.setParentProjectId(project);
                 parentProjectId = em.merge(parentProjectId);
-            }
-            for (TestProject testProjectListTestProject : project.getTestProjectList()) {
-                testProjectListTestProject.getProjectList().add(project);
-                testProjectListTestProject = em.merge(testProjectListTestProject);
             }
             for (Project projectListProject : project.getProjectList()) {
                 Project oldParentProjectIdOfProjectListProject = projectListProject.getParentProjectId();
@@ -99,6 +120,23 @@ public class ProjectJpaController implements Serializable {
                     oldProjectOfRequirementSpecListRequirementSpec = em.merge(oldProjectOfRequirementSpecListRequirementSpec);
                 }
             }
+            for (TestProject testProjectListTestProject : project.getTestProjectList()) {
+                testProjectListTestProject.getProjectList().add(project);
+                testProjectListTestProject = em.merge(testProjectListTestProject);
+            }
+            for (TestCaseExecution testCaseExecutionsTestCaseExecution : project.getTestCaseExecutions()) {
+                testCaseExecutionsTestCaseExecution.getProjects().add(project);
+                testCaseExecutionsTestCaseExecution = em.merge(testCaseExecutionsTestCaseExecution);
+            }
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListProjectHasTestCaseExecution : project.getProjectHasTestCaseExecutionList()) {
+                Project oldProjectOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution = projectHasTestCaseExecutionListProjectHasTestCaseExecution.getProject();
+                projectHasTestCaseExecutionListProjectHasTestCaseExecution.setProject(project);
+                projectHasTestCaseExecutionListProjectHasTestCaseExecution = em.merge(projectHasTestCaseExecutionListProjectHasTestCaseExecution);
+                if (oldProjectOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution != null) {
+                    oldProjectOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution.getProjectHasTestCaseExecutionList().remove(projectHasTestCaseExecutionListProjectHasTestCaseExecution);
+                    oldProjectOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution = em.merge(oldProjectOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution);
+                }
+            }
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -115,19 +153,31 @@ public class ProjectJpaController implements Serializable {
             Project persistentProject = em.find(Project.class, project.getId());
             Project parentProjectIdOld = persistentProject.getParentProjectId();
             Project parentProjectIdNew = project.getParentProjectId();
-            List<TestProject> testProjectListOld = persistentProject.getTestProjectList();
-            List<TestProject> testProjectListNew = project.getTestProjectList();
             List<Project> projectListOld = persistentProject.getProjectList();
             List<Project> projectListNew = project.getProjectList();
             List<RequirementSpec> requirementSpecListOld = persistentProject.getRequirementSpecList();
             List<RequirementSpec> requirementSpecListNew = project.getRequirementSpecList();
+            List<TestProject> testProjectListOld = persistentProject.getTestProjectList();
+            List<TestProject> testProjectListNew = project.getTestProjectList();
+            List<TestCaseExecution> testCaseExecutionsOld = persistentProject.getTestCaseExecutions();
+            List<TestCaseExecution> testCaseExecutionsNew = project.getTestCaseExecutions();
+            List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionListOld = persistentProject.getProjectHasTestCaseExecutionList();
+            List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionListNew = project.getProjectHasTestCaseExecutionList();
             List<String> illegalOrphanMessages = null;
             for (RequirementSpec requirementSpecListOldRequirementSpec : requirementSpecListOld) {
                 if (!requirementSpecListNew.contains(requirementSpecListOldRequirementSpec)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain RequirementSpec " + requirementSpecListOldRequirementSpec + " since its project field is not nullable.");
+                }
+            }
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListOldProjectHasTestCaseExecution : projectHasTestCaseExecutionListOld) {
+                if (!projectHasTestCaseExecutionListNew.contains(projectHasTestCaseExecutionListOldProjectHasTestCaseExecution)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain ProjectHasTestCaseExecution " + projectHasTestCaseExecutionListOldProjectHasTestCaseExecution + " since its project field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -137,47 +187,54 @@ public class ProjectJpaController implements Serializable {
                 parentProjectIdNew = em.getReference(parentProjectIdNew.getClass(), parentProjectIdNew.getId());
                 project.setParentProjectId(parentProjectIdNew);
             }
-            List<TestProject> attachedTestProjectListNew = new ArrayList<TestProject>();
-            for (TestProject testProjectListNewTestProjectToAttach : testProjectListNew) {
-                testProjectListNewTestProjectToAttach = em.getReference(testProjectListNewTestProjectToAttach.getClass(), testProjectListNewTestProjectToAttach.getId());
-                attachedTestProjectListNew.add(testProjectListNewTestProjectToAttach);
-            }
-            testProjectListNew = attachedTestProjectListNew;
-            project.setTestProjectList(testProjectListNew);
-            List<Project> attachedProjectListNew = new ArrayList<Project>();
+            List<Project> attachedProjectListNew = new ArrayList<>();
             for (Project projectListNewProjectToAttach : projectListNew) {
                 projectListNewProjectToAttach = em.getReference(projectListNewProjectToAttach.getClass(), projectListNewProjectToAttach.getId());
                 attachedProjectListNew.add(projectListNewProjectToAttach);
             }
             projectListNew = attachedProjectListNew;
             project.setProjectList(projectListNew);
-            List<RequirementSpec> attachedRequirementSpecListNew = new ArrayList<RequirementSpec>();
+            List<RequirementSpec> attachedRequirementSpecListNew = new ArrayList<>();
             for (RequirementSpec requirementSpecListNewRequirementSpecToAttach : requirementSpecListNew) {
                 requirementSpecListNewRequirementSpecToAttach = em.getReference(requirementSpecListNewRequirementSpecToAttach.getClass(), requirementSpecListNewRequirementSpecToAttach.getRequirementSpecPK());
                 attachedRequirementSpecListNew.add(requirementSpecListNewRequirementSpecToAttach);
             }
             requirementSpecListNew = attachedRequirementSpecListNew;
             project.setRequirementSpecList(requirementSpecListNew);
+            List<TestProject> attachedTestProjectListNew = new ArrayList<>();
+            for (TestProject testProjectListNewTestProjectToAttach : testProjectListNew) {
+                testProjectListNewTestProjectToAttach = em.getReference(testProjectListNewTestProjectToAttach.getClass(), testProjectListNewTestProjectToAttach.getId());
+                attachedTestProjectListNew.add(testProjectListNewTestProjectToAttach);
+            }
+            testProjectListNew = attachedTestProjectListNew;
+            project.setTestProjectList(testProjectListNew);
+            List<TestCaseExecution> attachedTestCaseExecutionsNew = new ArrayList<>();
+            for (TestCaseExecution testCaseExecutionsNewTestCaseExecutionToAttach : testCaseExecutionsNew) {
+                testCaseExecutionsNewTestCaseExecutionToAttach = em.getReference(testCaseExecutionsNewTestCaseExecutionToAttach.getClass(), testCaseExecutionsNewTestCaseExecutionToAttach.getId());
+                attachedTestCaseExecutionsNew.add(testCaseExecutionsNewTestCaseExecutionToAttach);
+            }
+            testCaseExecutionsNew = attachedTestCaseExecutionsNew;
+            project.setTestCaseExecutions(testCaseExecutionsNew);
+            List<ProjectHasTestCaseExecution> attachedProjectHasTestCaseExecutionListNew = new ArrayList<>();
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach : projectHasTestCaseExecutionListNew) {
+                projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach = em.getReference(projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach.getClass(), projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach.getProjectHasTestCaseExecutionPK());
+                attachedProjectHasTestCaseExecutionListNew.add(projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach);
+            }
+            projectHasTestCaseExecutionListNew = attachedProjectHasTestCaseExecutionListNew;
+            project.setProjectHasTestCaseExecutionList(projectHasTestCaseExecutionListNew);
             project = em.merge(project);
             if (parentProjectIdOld != null && !parentProjectIdOld.equals(parentProjectIdNew)) {
-                parentProjectIdOld.getProjectList().remove(project);
+                parentProjectIdOld.setParentProjectId(null);
                 parentProjectIdOld = em.merge(parentProjectIdOld);
             }
             if (parentProjectIdNew != null && !parentProjectIdNew.equals(parentProjectIdOld)) {
-                parentProjectIdNew.getProjectList().add(project);
+                Project oldParentProjectIdOfParentProjectId = parentProjectIdNew.getParentProjectId();
+                if (oldParentProjectIdOfParentProjectId != null) {
+                    oldParentProjectIdOfParentProjectId.setParentProjectId(null);
+                    oldParentProjectIdOfParentProjectId = em.merge(oldParentProjectIdOfParentProjectId);
+                }
+                parentProjectIdNew.setParentProjectId(project);
                 parentProjectIdNew = em.merge(parentProjectIdNew);
-            }
-            for (TestProject testProjectListOldTestProject : testProjectListOld) {
-                if (!testProjectListNew.contains(testProjectListOldTestProject)) {
-                    testProjectListOldTestProject.getProjectList().remove(project);
-                    testProjectListOldTestProject = em.merge(testProjectListOldTestProject);
-                }
-            }
-            for (TestProject testProjectListNewTestProject : testProjectListNew) {
-                if (!testProjectListOld.contains(testProjectListNewTestProject)) {
-                    testProjectListNewTestProject.getProjectList().add(project);
-                    testProjectListNewTestProject = em.merge(testProjectListNewTestProject);
-                }
             }
             for (Project projectListOldProject : projectListOld) {
                 if (!projectListNew.contains(projectListOldProject)) {
@@ -204,6 +261,41 @@ public class ProjectJpaController implements Serializable {
                     if (oldProjectOfRequirementSpecListNewRequirementSpec != null && !oldProjectOfRequirementSpecListNewRequirementSpec.equals(project)) {
                         oldProjectOfRequirementSpecListNewRequirementSpec.getRequirementSpecList().remove(requirementSpecListNewRequirementSpec);
                         oldProjectOfRequirementSpecListNewRequirementSpec = em.merge(oldProjectOfRequirementSpecListNewRequirementSpec);
+                    }
+                }
+            }
+            for (TestProject testProjectListOldTestProject : testProjectListOld) {
+                if (!testProjectListNew.contains(testProjectListOldTestProject)) {
+                    testProjectListOldTestProject.getProjectList().remove(project);
+                    testProjectListOldTestProject = em.merge(testProjectListOldTestProject);
+                }
+            }
+            for (TestProject testProjectListNewTestProject : testProjectListNew) {
+                if (!testProjectListOld.contains(testProjectListNewTestProject)) {
+                    testProjectListNewTestProject.getProjectList().add(project);
+                    testProjectListNewTestProject = em.merge(testProjectListNewTestProject);
+                }
+            }
+            for (TestCaseExecution testCaseExecutionsOldTestCaseExecution : testCaseExecutionsOld) {
+                if (!testCaseExecutionsNew.contains(testCaseExecutionsOldTestCaseExecution)) {
+                    testCaseExecutionsOldTestCaseExecution.getProjects().remove(project);
+                    testCaseExecutionsOldTestCaseExecution = em.merge(testCaseExecutionsOldTestCaseExecution);
+                }
+            }
+            for (TestCaseExecution testCaseExecutionsNewTestCaseExecution : testCaseExecutionsNew) {
+                if (!testCaseExecutionsOld.contains(testCaseExecutionsNewTestCaseExecution)) {
+                    testCaseExecutionsNewTestCaseExecution.getProjects().add(project);
+                    testCaseExecutionsNewTestCaseExecution = em.merge(testCaseExecutionsNewTestCaseExecution);
+                }
+            }
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListNewProjectHasTestCaseExecution : projectHasTestCaseExecutionListNew) {
+                if (!projectHasTestCaseExecutionListOld.contains(projectHasTestCaseExecutionListNewProjectHasTestCaseExecution)) {
+                    Project oldProjectOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution = projectHasTestCaseExecutionListNewProjectHasTestCaseExecution.getProject();
+                    projectHasTestCaseExecutionListNewProjectHasTestCaseExecution.setProject(project);
+                    projectHasTestCaseExecutionListNewProjectHasTestCaseExecution = em.merge(projectHasTestCaseExecutionListNewProjectHasTestCaseExecution);
+                    if (oldProjectOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution != null && !oldProjectOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution.equals(project)) {
+                        oldProjectOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution.getProjectHasTestCaseExecutionList().remove(projectHasTestCaseExecutionListNewProjectHasTestCaseExecution);
+                        oldProjectOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution = em.merge(oldProjectOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution);
                     }
                 }
             }
@@ -240,27 +332,39 @@ public class ProjectJpaController implements Serializable {
             List<RequirementSpec> requirementSpecListOrphanCheck = project.getRequirementSpecList();
             for (RequirementSpec requirementSpecListOrphanCheckRequirementSpec : requirementSpecListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Project (" + project + ") cannot be destroyed since the RequirementSpec " + requirementSpecListOrphanCheckRequirementSpec + " in its requirementSpecList field has a non-nullable project field.");
+            }
+            List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionListOrphanCheck = project.getProjectHasTestCaseExecutionList();
+            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListOrphanCheckProjectHasTestCaseExecution : projectHasTestCaseExecutionListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This Project (" + project + ") cannot be destroyed since the ProjectHasTestCaseExecution " + projectHasTestCaseExecutionListOrphanCheckProjectHasTestCaseExecution + " in its projectHasTestCaseExecutionList field has a non-nullable project field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
             Project parentProjectId = project.getParentProjectId();
             if (parentProjectId != null) {
-                parentProjectId.getProjectList().remove(project);
+                parentProjectId.setParentProjectId(null);
                 parentProjectId = em.merge(parentProjectId);
+            }
+            List<Project> projectList = project.getProjectList();
+            for (Project projectListProject : projectList) {
+                projectListProject.setParentProjectId(null);
+                projectListProject = em.merge(projectListProject);
             }
             List<TestProject> testProjectList = project.getTestProjectList();
             for (TestProject testProjectListTestProject : testProjectList) {
                 testProjectListTestProject.getProjectList().remove(project);
                 testProjectListTestProject = em.merge(testProjectListTestProject);
             }
-            List<Project> projectList = project.getProjectList();
-            for (Project projectListProject : projectList) {
-                projectListProject.setParentProjectId(null);
-                projectListProject = em.merge(projectListProject);
+            List<TestCaseExecution> testCaseExecutions = project.getTestCaseExecutions();
+            for (TestCaseExecution testCaseExecutionsTestCaseExecution : testCaseExecutions) {
+                testCaseExecutionsTestCaseExecution.getProjects().remove(project);
+                testCaseExecutionsTestCaseExecution = em.merge(testCaseExecutionsTestCaseExecution);
             }
             em.remove(project);
             em.getTransaction().commit();

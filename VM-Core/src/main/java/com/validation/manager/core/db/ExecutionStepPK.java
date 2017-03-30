@@ -66,35 +66,40 @@ public class ExecutionStepPK implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 0;
-        hash += (int) testCaseExecutionId;
-        hash += (int) stepId;
-        hash += (int) stepTestCaseId;
+        int hash = 7;
+        hash = 31 * hash + this.testCaseExecutionId;
+        hash = 31 * hash + this.stepId;
+        hash = 31 * hash + this.stepTestCaseId;
         return hash;
     }
 
     @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof ExecutionStepPK)) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
             return false;
         }
-        ExecutionStepPK other = (ExecutionStepPK) object;
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ExecutionStepPK other = (ExecutionStepPK) obj;
+        System.out.println("Comparing: \n" + other.toString() + "\n" + this.toString());
         if (this.testCaseExecutionId != other.testCaseExecutionId) {
             return false;
         }
         if (this.stepId != other.stepId) {
             return false;
         }
-        if (this.stepTestCaseId != other.stepTestCaseId) {
-            return false;
-        }
-        return true;
+        return this.stepTestCaseId == other.stepTestCaseId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.ExecutionStepPK[ testCaseExecutionId=" + testCaseExecutionId + ", stepId=" + stepId + ", stepTestCaseId=" + stepTestCaseId + " ]";
+        return "com.validation.manager.core.db.ExecutionStepPK[ testCaseExecutionId="
+                + testCaseExecutionId + ", stepId=" + stepId + ", stepTestCaseId="
+                + stepTestCaseId + " ]";
     }
 
 }

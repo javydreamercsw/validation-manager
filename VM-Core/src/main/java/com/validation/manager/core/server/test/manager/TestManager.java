@@ -13,6 +13,7 @@ import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
+import com.validation.manager.core.server.core.VMUserServer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -63,7 +64,7 @@ public class TestManager {
     }
 
     /**
-     * Add a complete Test Case
+     * Add a complete Test Case to the execution.
      *
      * @param steps Steps to add
      * @return created execution.
@@ -112,12 +113,26 @@ public class TestManager {
         ExecutionStepJpaController controller
                 = new ExecutionStepJpaController(DataBaseManager
                         .getEntityManagerFactory());
+        VMUserServer assignees = new VMUserServer(assignee);
         for (ExecutionStep es : steps) {
-            es.setVmUserId(assignee);
-            es.setAssignedTime(new Date());
-            es.setAssignedByUserId(assigner.getId());
-            controller.edit(es);
+            if (alreadyAssigned(assignees, es)) {
+                LOG.log(Level.INFO,
+                        "Skipping already existing step: {0}", es.toString());
+            } else {
+                es.setVmUserId(assignee);
+                es.setAssignedTime(new Date());
+                controller.edit(es);
+                //Add assignee
+                VMUserServer assigners = new VMUserServer(assigner);
+                assigners.getExecutionStepCollection().add(es);
+                assigners.write2DB();
+            }
         }
+    }
+
+    public boolean alreadyAssigned(VmUser user, ExecutionStep es) {
+        return user.getExecutionSteps().stream().anyMatch((e)
+                -> (e.getExecutionStepPK().equals(es.getExecutionStepPK())));
     }
 
     /**

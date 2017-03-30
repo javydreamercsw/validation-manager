@@ -28,7 +28,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RiskItemJpaController implements Serializable {
 
@@ -46,22 +46,22 @@ public class RiskItemJpaController implements Serializable {
             riskItem.setRiskItemPK(new RiskItemPK());
         }
         if (riskItem.getFailureModeList() == null) {
-            riskItem.setFailureModeList(new ArrayList<FailureMode>());
+            riskItem.setFailureModeList(new ArrayList<>());
         }
         if (riskItem.getHazardList() == null) {
-            riskItem.setHazardList(new ArrayList<Hazard>());
+            riskItem.setHazardList(new ArrayList<>());
         }
         if (riskItem.getRiskControlList() == null) {
-            riskItem.setRiskControlList(new ArrayList<RiskControl>());
+            riskItem.setRiskControlList(new ArrayList<>());
         }
         if (riskItem.getRiskControlList1() == null) {
-            riskItem.setRiskControlList1(new ArrayList<RiskControl>());
+            riskItem.setRiskControlList1(new ArrayList<>());
         }
         if (riskItem.getCauseList() == null) {
-            riskItem.setCauseList(new ArrayList<Cause>());
+            riskItem.setCauseList(new ArrayList<>());
         }
         if (riskItem.getRiskItemHasRiskCategoryList() == null) {
-            riskItem.setRiskItemHasRiskCategoryList(new ArrayList<RiskItemHasRiskCategory>());
+            riskItem.setRiskItemHasRiskCategoryList(new ArrayList<>());
         }
         riskItem.getRiskItemPK().setFMEAid(riskItem.getFmea().getId());
         EntityManager em = null;
@@ -73,37 +73,37 @@ public class RiskItemJpaController implements Serializable {
                 fmea = em.getReference(fmea.getClass(), fmea.getId());
                 riskItem.setFmea(fmea);
             }
-            List<FailureMode> attachedFailureModeList = new ArrayList<FailureMode>();
+            List<FailureMode> attachedFailureModeList = new ArrayList<>();
             for (FailureMode failureModeListFailureModeToAttach : riskItem.getFailureModeList()) {
                 failureModeListFailureModeToAttach = em.getReference(failureModeListFailureModeToAttach.getClass(), failureModeListFailureModeToAttach.getId());
                 attachedFailureModeList.add(failureModeListFailureModeToAttach);
             }
             riskItem.setFailureModeList(attachedFailureModeList);
-            List<Hazard> attachedHazardList = new ArrayList<Hazard>();
+            List<Hazard> attachedHazardList = new ArrayList<>();
             for (Hazard hazardListHazardToAttach : riskItem.getHazardList()) {
                 hazardListHazardToAttach = em.getReference(hazardListHazardToAttach.getClass(), hazardListHazardToAttach.getId());
                 attachedHazardList.add(hazardListHazardToAttach);
             }
             riskItem.setHazardList(attachedHazardList);
-            List<RiskControl> attachedRiskControlList = new ArrayList<RiskControl>();
+            List<RiskControl> attachedRiskControlList = new ArrayList<>();
             for (RiskControl riskControlListRiskControlToAttach : riskItem.getRiskControlList()) {
                 riskControlListRiskControlToAttach = em.getReference(riskControlListRiskControlToAttach.getClass(), riskControlListRiskControlToAttach.getRiskControlPK());
                 attachedRiskControlList.add(riskControlListRiskControlToAttach);
             }
             riskItem.setRiskControlList(attachedRiskControlList);
-            List<RiskControl> attachedRiskControlList1 = new ArrayList<RiskControl>();
+            List<RiskControl> attachedRiskControlList1 = new ArrayList<>();
             for (RiskControl riskControlList1RiskControlToAttach : riskItem.getRiskControlList1()) {
                 riskControlList1RiskControlToAttach = em.getReference(riskControlList1RiskControlToAttach.getClass(), riskControlList1RiskControlToAttach.getRiskControlPK());
                 attachedRiskControlList1.add(riskControlList1RiskControlToAttach);
             }
             riskItem.setRiskControlList1(attachedRiskControlList1);
-            List<Cause> attachedCauseList = new ArrayList<Cause>();
+            List<Cause> attachedCauseList = new ArrayList<>();
             for (Cause causeListCauseToAttach : riskItem.getCauseList()) {
                 causeListCauseToAttach = em.getReference(causeListCauseToAttach.getClass(), causeListCauseToAttach.getId());
                 attachedCauseList.add(causeListCauseToAttach);
             }
             riskItem.setCauseList(attachedCauseList);
-            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryList = new ArrayList<RiskItemHasRiskCategory>();
+            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryList = new ArrayList<>();
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach : riskItem.getRiskItemHasRiskCategoryList()) {
                 riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach = em.getReference(riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach.getClass(), riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach.getRiskItemHasRiskCategoryPK());
                 attachedRiskItemHasRiskCategoryList.add(riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach);
@@ -181,7 +181,7 @@ public class RiskItemJpaController implements Serializable {
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListOldRiskItemHasRiskCategory : riskItemHasRiskCategoryListOld) {
                 if (!riskItemHasRiskCategoryListNew.contains(riskItemHasRiskCategoryListOldRiskItemHasRiskCategory)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain RiskItemHasRiskCategory " + riskItemHasRiskCategoryListOldRiskItemHasRiskCategory + " since its riskItem field is not nullable.");
                 }
@@ -193,42 +193,42 @@ public class RiskItemJpaController implements Serializable {
                 fmeaNew = em.getReference(fmeaNew.getClass(), fmeaNew.getId());
                 riskItem.setFmea(fmeaNew);
             }
-            List<FailureMode> attachedFailureModeListNew = new ArrayList<FailureMode>();
+            List<FailureMode> attachedFailureModeListNew = new ArrayList<>();
             for (FailureMode failureModeListNewFailureModeToAttach : failureModeListNew) {
                 failureModeListNewFailureModeToAttach = em.getReference(failureModeListNewFailureModeToAttach.getClass(), failureModeListNewFailureModeToAttach.getId());
                 attachedFailureModeListNew.add(failureModeListNewFailureModeToAttach);
             }
             failureModeListNew = attachedFailureModeListNew;
             riskItem.setFailureModeList(failureModeListNew);
-            List<Hazard> attachedHazardListNew = new ArrayList<Hazard>();
+            List<Hazard> attachedHazardListNew = new ArrayList<>();
             for (Hazard hazardListNewHazardToAttach : hazardListNew) {
                 hazardListNewHazardToAttach = em.getReference(hazardListNewHazardToAttach.getClass(), hazardListNewHazardToAttach.getId());
                 attachedHazardListNew.add(hazardListNewHazardToAttach);
             }
             hazardListNew = attachedHazardListNew;
             riskItem.setHazardList(hazardListNew);
-            List<RiskControl> attachedRiskControlListNew = new ArrayList<RiskControl>();
+            List<RiskControl> attachedRiskControlListNew = new ArrayList<>();
             for (RiskControl riskControlListNewRiskControlToAttach : riskControlListNew) {
                 riskControlListNewRiskControlToAttach = em.getReference(riskControlListNewRiskControlToAttach.getClass(), riskControlListNewRiskControlToAttach.getRiskControlPK());
                 attachedRiskControlListNew.add(riskControlListNewRiskControlToAttach);
             }
             riskControlListNew = attachedRiskControlListNew;
             riskItem.setRiskControlList(riskControlListNew);
-            List<RiskControl> attachedRiskControlList1New = new ArrayList<RiskControl>();
+            List<RiskControl> attachedRiskControlList1New = new ArrayList<>();
             for (RiskControl riskControlList1NewRiskControlToAttach : riskControlList1New) {
                 riskControlList1NewRiskControlToAttach = em.getReference(riskControlList1NewRiskControlToAttach.getClass(), riskControlList1NewRiskControlToAttach.getRiskControlPK());
                 attachedRiskControlList1New.add(riskControlList1NewRiskControlToAttach);
             }
             riskControlList1New = attachedRiskControlList1New;
             riskItem.setRiskControlList1(riskControlList1New);
-            List<Cause> attachedCauseListNew = new ArrayList<Cause>();
+            List<Cause> attachedCauseListNew = new ArrayList<>();
             for (Cause causeListNewCauseToAttach : causeListNew) {
                 causeListNewCauseToAttach = em.getReference(causeListNewCauseToAttach.getClass(), causeListNewCauseToAttach.getId());
                 attachedCauseListNew.add(causeListNewCauseToAttach);
             }
             causeListNew = attachedCauseListNew;
             riskItem.setCauseList(causeListNew);
-            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryListNew = new ArrayList<RiskItemHasRiskCategory>();
+            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryListNew = new ArrayList<>();
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach : riskItemHasRiskCategoryListNew) {
                 riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach = em.getReference(riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach.getClass(), riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach.getRiskItemHasRiskCategoryPK());
                 attachedRiskItemHasRiskCategoryListNew.add(riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach);
@@ -348,7 +348,7 @@ public class RiskItemJpaController implements Serializable {
             List<RiskItemHasRiskCategory> riskItemHasRiskCategoryListOrphanCheck = riskItem.getRiskItemHasRiskCategoryList();
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListOrphanCheckRiskItemHasRiskCategory : riskItemHasRiskCategoryListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This RiskItem (" + riskItem + ") cannot be destroyed since the RiskItemHasRiskCategory " + riskItemHasRiskCategoryListOrphanCheckRiskItemHasRiskCategory + " in its riskItemHasRiskCategoryList field has a non-nullable riskItem field.");
             }

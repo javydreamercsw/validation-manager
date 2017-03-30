@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RiskCategoryJpaController implements Serializable {
 
@@ -37,22 +37,22 @@ public class RiskCategoryJpaController implements Serializable {
 
     public void create(RiskCategory riskCategory) {
         if (riskCategory.getFmeaList() == null) {
-            riskCategory.setFmeaList(new ArrayList<Fmea>());
+            riskCategory.setFmeaList(new ArrayList<>());
         }
         if (riskCategory.getRiskItemHasRiskCategoryList() == null) {
-            riskCategory.setRiskItemHasRiskCategoryList(new ArrayList<RiskItemHasRiskCategory>());
+            riskCategory.setRiskItemHasRiskCategoryList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Fmea> attachedFmeaList = new ArrayList<Fmea>();
+            List<Fmea> attachedFmeaList = new ArrayList<>();
             for (Fmea fmeaListFmeaToAttach : riskCategory.getFmeaList()) {
                 fmeaListFmeaToAttach = em.getReference(fmeaListFmeaToAttach.getClass(), fmeaListFmeaToAttach.getId());
                 attachedFmeaList.add(fmeaListFmeaToAttach);
             }
             riskCategory.setFmeaList(attachedFmeaList);
-            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryList = new ArrayList<RiskItemHasRiskCategory>();
+            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryList = new ArrayList<>();
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach : riskCategory.getRiskItemHasRiskCategoryList()) {
                 riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach = em.getReference(riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach.getClass(), riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach.getRiskItemHasRiskCategoryPK());
                 attachedRiskItemHasRiskCategoryList.add(riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach);
@@ -94,7 +94,7 @@ public class RiskCategoryJpaController implements Serializable {
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListOldRiskItemHasRiskCategory : riskItemHasRiskCategoryListOld) {
                 if (!riskItemHasRiskCategoryListNew.contains(riskItemHasRiskCategoryListOldRiskItemHasRiskCategory)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain RiskItemHasRiskCategory " + riskItemHasRiskCategoryListOldRiskItemHasRiskCategory + " since its riskCategory field is not nullable.");
                 }
@@ -102,14 +102,14 @@ public class RiskCategoryJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Fmea> attachedFmeaListNew = new ArrayList<Fmea>();
+            List<Fmea> attachedFmeaListNew = new ArrayList<>();
             for (Fmea fmeaListNewFmeaToAttach : fmeaListNew) {
                 fmeaListNewFmeaToAttach = em.getReference(fmeaListNewFmeaToAttach.getClass(), fmeaListNewFmeaToAttach.getId());
                 attachedFmeaListNew.add(fmeaListNewFmeaToAttach);
             }
             fmeaListNew = attachedFmeaListNew;
             riskCategory.setFmeaList(fmeaListNew);
-            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryListNew = new ArrayList<RiskItemHasRiskCategory>();
+            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryListNew = new ArrayList<>();
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach : riskItemHasRiskCategoryListNew) {
                 riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach = em.getReference(riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach.getClass(), riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach.getRiskItemHasRiskCategoryPK());
                 attachedRiskItemHasRiskCategoryListNew.add(riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach);
@@ -173,7 +173,7 @@ public class RiskCategoryJpaController implements Serializable {
             List<RiskItemHasRiskCategory> riskItemHasRiskCategoryListOrphanCheck = riskCategory.getRiskItemHasRiskCategoryList();
             for (RiskItemHasRiskCategory riskItemHasRiskCategoryListOrphanCheckRiskItemHasRiskCategory : riskItemHasRiskCategoryListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This RiskCategory (" + riskCategory + ") cannot be destroyed since the RiskItemHasRiskCategory " + riskItemHasRiskCategoryListOrphanCheckRiskItemHasRiskCategory + " in its riskItemHasRiskCategoryList field has a non-nullable riskCategory field.");
             }

@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class UserHasInvestigationJpaController implements Serializable {
 
@@ -39,8 +39,8 @@ public class UserHasInvestigationJpaController implements Serializable {
         if (userHasInvestigation.getUserHasInvestigationPK() == null) {
             userHasInvestigation.setUserHasInvestigationPK(new UserHasInvestigationPK());
         }
-        userHasInvestigation.getUserHasInvestigationPK().setInvestigationId(userHasInvestigation.getInvestigation().getId());
         userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
+        userHasInvestigation.getUserHasInvestigationPK().setInvestigationId(userHasInvestigation.getInvestigation().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -78,8 +78,8 @@ public class UserHasInvestigationJpaController implements Serializable {
     }
 
     public void edit(UserHasInvestigation userHasInvestigation) throws NonexistentEntityException, Exception {
-        userHasInvestigation.getUserHasInvestigationPK().setInvestigationId(userHasInvestigation.getInvestigation().getId());
         userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
+        userHasInvestigation.getUserHasInvestigationPK().setInvestigationId(userHasInvestigation.getInvestigation().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

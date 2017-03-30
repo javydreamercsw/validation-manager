@@ -55,9 +55,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts")})
 public class VmUser extends Login implements Serializable {
 
-    @OneToMany(mappedBy = "vmUserId")
-    private List<ExecutionStep> executionStepList;
-
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -131,6 +128,12 @@ public class VmUser extends Login implements Serializable {
     private List<UserAssigment> userAssigmentList1;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "createdBy")
     private List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionList;
+    //Steps I have for executions
+    @OneToMany(targetEntity = ExecutionStep.class)
+    private List<ExecutionStep> executionSteps;
+    //Steps I assigned someone else.
+    @OneToMany(targetEntity = ExecutionStep.class, mappedBy = "vmUserId")
+    private List<ExecutionStep> executionStepCollection;
 
     public VmUser() {
     }
@@ -338,21 +341,27 @@ public class VmUser extends Login implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<ExecutionStep> getExecutionStepList() {
-        return executionStepList;
-    }
-
-    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
-        this.executionStepList = executionStepList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
     public List<ProjectHasTestCaseExecution> getProjectHasTestCaseExecutionList() {
         return projectHasTestCaseExecutionList;
     }
 
     public void setProjectHasTestCaseExecutionList(List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionList) {
         this.projectHasTestCaseExecutionList = projectHasTestCaseExecutionList;
+    }
+
+    public List<ExecutionStep> getExecutionSteps() {
+        return this.executionSteps;
+    }
+
+    public void setExecutionSteps(List<ExecutionStep> executionSteps) {
+        this.executionSteps = executionSteps;
+    }
+
+    public List<ExecutionStep> getExecutionStepCollection() {
+        return this.executionStepCollection;
+    }
+
+    public void setExecutionStepCollection(List<ExecutionStep> executionStepCollection) {
+        this.executionStepCollection = executionStepCollection;
     }
 }

@@ -23,7 +23,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class TestProjectJpaController implements Serializable {
 
@@ -38,31 +38,31 @@ public class TestProjectJpaController implements Serializable {
 
     public void create(TestProject testProject) {
         if (testProject.getProjectList() == null) {
-            testProject.setProjectList(new ArrayList<Project>());
+            testProject.setProjectList(new ArrayList<>());
         }
         if (testProject.getUserTestProjectRoleList() == null) {
-            testProject.setUserTestProjectRoleList(new ArrayList<UserTestProjectRole>());
+            testProject.setUserTestProjectRoleList(new ArrayList<>());
         }
         if (testProject.getTestPlanList() == null) {
-            testProject.setTestPlanList(new ArrayList<TestPlan>());
+            testProject.setTestPlanList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Project> attachedProjectList = new ArrayList<Project>();
+            List<Project> attachedProjectList = new ArrayList<>();
             for (Project projectListProjectToAttach : testProject.getProjectList()) {
                 projectListProjectToAttach = em.getReference(projectListProjectToAttach.getClass(), projectListProjectToAttach.getId());
                 attachedProjectList.add(projectListProjectToAttach);
             }
             testProject.setProjectList(attachedProjectList);
-            List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<UserTestProjectRole>();
+            List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<>();
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRoleToAttach : testProject.getUserTestProjectRoleList()) {
                 userTestProjectRoleListUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListUserTestProjectRoleToAttach.getUserTestProjectRolePK());
                 attachedUserTestProjectRoleList.add(userTestProjectRoleListUserTestProjectRoleToAttach);
             }
             testProject.setUserTestProjectRoleList(attachedUserTestProjectRoleList);
-            List<TestPlan> attachedTestPlanList = new ArrayList<TestPlan>();
+            List<TestPlan> attachedTestPlanList = new ArrayList<>();
             for (TestPlan testPlanListTestPlanToAttach : testProject.getTestPlanList()) {
                 testPlanListTestPlanToAttach = em.getReference(testPlanListTestPlanToAttach.getClass(), testPlanListTestPlanToAttach.getTestPlanPK());
                 attachedTestPlanList.add(testPlanListTestPlanToAttach);
@@ -115,7 +115,7 @@ public class TestProjectJpaController implements Serializable {
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestProjectRole " + userTestProjectRoleListOldUserTestProjectRole + " since its testProject field is not nullable.");
                 }
@@ -123,7 +123,7 @@ public class TestProjectJpaController implements Serializable {
             for (TestPlan testPlanListOldTestPlan : testPlanListOld) {
                 if (!testPlanListNew.contains(testPlanListOldTestPlan)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain TestPlan " + testPlanListOldTestPlan + " since its testProject field is not nullable.");
                 }
@@ -131,21 +131,21 @@ public class TestProjectJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Project> attachedProjectListNew = new ArrayList<Project>();
+            List<Project> attachedProjectListNew = new ArrayList<>();
             for (Project projectListNewProjectToAttach : projectListNew) {
                 projectListNewProjectToAttach = em.getReference(projectListNewProjectToAttach.getClass(), projectListNewProjectToAttach.getId());
                 attachedProjectListNew.add(projectListNewProjectToAttach);
             }
             projectListNew = attachedProjectListNew;
             testProject.setProjectList(projectListNew);
-            List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<UserTestProjectRole>();
+            List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<>();
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRoleToAttach : userTestProjectRoleListNew) {
                 userTestProjectRoleListNewUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListNewUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListNewUserTestProjectRoleToAttach.getUserTestProjectRolePK());
                 attachedUserTestProjectRoleListNew.add(userTestProjectRoleListNewUserTestProjectRoleToAttach);
             }
             userTestProjectRoleListNew = attachedUserTestProjectRoleListNew;
             testProject.setUserTestProjectRoleList(userTestProjectRoleListNew);
-            List<TestPlan> attachedTestPlanListNew = new ArrayList<TestPlan>();
+            List<TestPlan> attachedTestPlanListNew = new ArrayList<>();
             for (TestPlan testPlanListNewTestPlanToAttach : testPlanListNew) {
                 testPlanListNewTestPlanToAttach = em.getReference(testPlanListNewTestPlanToAttach.getClass(), testPlanListNewTestPlanToAttach.getTestPlanPK());
                 attachedTestPlanListNew.add(testPlanListNewTestPlanToAttach);
@@ -220,14 +220,14 @@ public class TestProjectJpaController implements Serializable {
             List<UserTestProjectRole> userTestProjectRoleListOrphanCheck = testProject.getUserTestProjectRoleList();
             for (UserTestProjectRole userTestProjectRoleListOrphanCheckUserTestProjectRole : userTestProjectRoleListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This TestProject (" + testProject + ") cannot be destroyed since the UserTestProjectRole " + userTestProjectRoleListOrphanCheckUserTestProjectRole + " in its userTestProjectRoleList field has a non-nullable testProject field.");
             }
             List<TestPlan> testPlanListOrphanCheck = testProject.getTestPlanList();
             for (TestPlan testPlanListOrphanCheckTestPlan : testPlanListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This TestProject (" + testProject + ") cannot be destroyed since the TestPlan " + testPlanListOrphanCheckTestPlan + " in its testPlanList field has a non-nullable testProject field.");
             }

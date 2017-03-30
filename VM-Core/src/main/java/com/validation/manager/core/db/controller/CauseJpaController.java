@@ -20,7 +20,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class CauseJpaController implements Serializable {
 
@@ -35,13 +35,13 @@ public class CauseJpaController implements Serializable {
 
     public void create(Cause cause) {
         if (cause.getRiskItemList() == null) {
-            cause.setRiskItemList(new ArrayList<RiskItem>());
+            cause.setRiskItemList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<RiskItem> attachedRiskItemList = new ArrayList<RiskItem>();
+            List<RiskItem> attachedRiskItemList = new ArrayList<>();
             for (RiskItem riskItemListRiskItemToAttach : cause.getRiskItemList()) {
                 riskItemListRiskItemToAttach = em.getReference(riskItemListRiskItemToAttach.getClass(), riskItemListRiskItemToAttach.getRiskItemPK());
                 attachedRiskItemList.add(riskItemListRiskItemToAttach);
@@ -68,7 +68,7 @@ public class CauseJpaController implements Serializable {
             Cause persistentCause = em.find(Cause.class, cause.getId());
             List<RiskItem> riskItemListOld = persistentCause.getRiskItemList();
             List<RiskItem> riskItemListNew = cause.getRiskItemList();
-            List<RiskItem> attachedRiskItemListNew = new ArrayList<RiskItem>();
+            List<RiskItem> attachedRiskItemListNew = new ArrayList<>();
             for (RiskItem riskItemListNewRiskItemToAttach : riskItemListNew) {
                 riskItemListNewRiskItemToAttach = em.getReference(riskItemListNewRiskItemToAttach.getClass(), riskItemListNewRiskItemToAttach.getRiskItemPK());
                 attachedRiskItemListNew.add(riskItemListNewRiskItemToAttach);

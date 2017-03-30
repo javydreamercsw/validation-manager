@@ -9,7 +9,6 @@
 
     <artifactId>VM-Core</artifactId>
     <packaging>jar</packaging>
-    <version>0.3-SNAPSHOT</version>
 
     <name>VM-Core</name>
     

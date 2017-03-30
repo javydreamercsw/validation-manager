@@ -25,7 +25,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RequirementSpecJpaController implements Serializable {
 
@@ -43,7 +43,7 @@ public class RequirementSpecJpaController implements Serializable {
             requirementSpec.setRequirementSpecPK(new RequirementSpecPK());
         }
         if (requirementSpec.getRequirementSpecNodeList() == null) {
-            requirementSpec.setRequirementSpecNodeList(new ArrayList<RequirementSpecNode>());
+            requirementSpec.setRequirementSpecNodeList(new ArrayList<>());
         }
         requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
@@ -61,7 +61,7 @@ public class RequirementSpecJpaController implements Serializable {
                 specLevel = em.getReference(specLevel.getClass(), specLevel.getId());
                 requirementSpec.setSpecLevel(specLevel);
             }
-            List<RequirementSpecNode> attachedRequirementSpecNodeList = new ArrayList<RequirementSpecNode>();
+            List<RequirementSpecNode> attachedRequirementSpecNodeList = new ArrayList<>();
             for (RequirementSpecNode requirementSpecNodeListRequirementSpecNodeToAttach : requirementSpec.getRequirementSpecNodeList()) {
                 requirementSpecNodeListRequirementSpecNodeToAttach = em.getReference(requirementSpecNodeListRequirementSpecNodeToAttach.getClass(), requirementSpecNodeListRequirementSpecNodeToAttach.getRequirementSpecNodePK());
                 attachedRequirementSpecNodeList.add(requirementSpecNodeListRequirementSpecNodeToAttach);
@@ -116,7 +116,7 @@ public class RequirementSpecJpaController implements Serializable {
             for (RequirementSpecNode requirementSpecNodeListOldRequirementSpecNode : requirementSpecNodeListOld) {
                 if (!requirementSpecNodeListNew.contains(requirementSpecNodeListOldRequirementSpecNode)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain RequirementSpecNode " + requirementSpecNodeListOldRequirementSpecNode + " since its requirementSpec field is not nullable.");
                 }
@@ -132,7 +132,7 @@ public class RequirementSpecJpaController implements Serializable {
                 specLevelNew = em.getReference(specLevelNew.getClass(), specLevelNew.getId());
                 requirementSpec.setSpecLevel(specLevelNew);
             }
-            List<RequirementSpecNode> attachedRequirementSpecNodeListNew = new ArrayList<RequirementSpecNode>();
+            List<RequirementSpecNode> attachedRequirementSpecNodeListNew = new ArrayList<>();
             for (RequirementSpecNode requirementSpecNodeListNewRequirementSpecNodeToAttach : requirementSpecNodeListNew) {
                 requirementSpecNodeListNewRequirementSpecNodeToAttach = em.getReference(requirementSpecNodeListNewRequirementSpecNodeToAttach.getClass(), requirementSpecNodeListNewRequirementSpecNodeToAttach.getRequirementSpecNodePK());
                 attachedRequirementSpecNodeListNew.add(requirementSpecNodeListNewRequirementSpecNodeToAttach);
@@ -200,7 +200,7 @@ public class RequirementSpecJpaController implements Serializable {
             List<RequirementSpecNode> requirementSpecNodeListOrphanCheck = requirementSpec.getRequirementSpecNodeList();
             for (RequirementSpecNode requirementSpecNodeListOrphanCheckRequirementSpecNode : requirementSpecNodeListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This RequirementSpec (" + requirementSpec + ") cannot be destroyed since the RequirementSpecNode " + requirementSpecNodeListOrphanCheckRequirementSpecNode + " in its requirementSpecNodeList field has a non-nullable requirementSpec field.");
             }

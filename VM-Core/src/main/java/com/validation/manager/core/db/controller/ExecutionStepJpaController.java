@@ -24,7 +24,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class ExecutionStepJpaController implements Serializable {
 
@@ -41,8 +41,8 @@ public class ExecutionStepJpaController implements Serializable {
         if (executionStep.getExecutionStepPK() == null) {
             executionStep.setExecutionStepPK(new ExecutionStepPK());
         }
-        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
+        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
         EntityManager em = null;
         try {
@@ -74,7 +74,7 @@ public class ExecutionStepJpaController implements Serializable {
                 resultId = em.merge(resultId);
             }
             if (vmUserId != null) {
-                vmUserId.getExecutionStepList().add(executionStep);
+                vmUserId.getExecutionSteps().add(executionStep);
                 vmUserId = em.merge(vmUserId);
             }
             if (step != null) {
@@ -99,8 +99,8 @@ public class ExecutionStepJpaController implements Serializable {
     }
 
     public void edit(ExecutionStep executionStep) throws NonexistentEntityException, Exception {
-        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
+        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
         EntityManager em = null;
         try {
@@ -141,11 +141,11 @@ public class ExecutionStepJpaController implements Serializable {
                 resultIdNew = em.merge(resultIdNew);
             }
             if (vmUserIdOld != null && !vmUserIdOld.equals(vmUserIdNew)) {
-                vmUserIdOld.getExecutionStepList().remove(executionStep);
+                vmUserIdOld.getExecutionSteps().remove(executionStep);
                 vmUserIdOld = em.merge(vmUserIdOld);
             }
             if (vmUserIdNew != null && !vmUserIdNew.equals(vmUserIdOld)) {
-                vmUserIdNew.getExecutionStepList().add(executionStep);
+                vmUserIdNew.getExecutionSteps().add(executionStep);
                 vmUserIdNew = em.merge(vmUserIdNew);
             }
             if (stepOld != null && !stepOld.equals(stepNew)) {
@@ -200,7 +200,7 @@ public class ExecutionStepJpaController implements Serializable {
             }
             VmUser vmUserId = executionStep.getVmUserId();
             if (vmUserId != null) {
-                vmUserId.getExecutionStepList().remove(executionStep);
+                vmUserId.getExecutionSteps().remove(executionStep);
                 vmUserId = em.merge(vmUserId);
             }
             Step step = executionStep.getStep();

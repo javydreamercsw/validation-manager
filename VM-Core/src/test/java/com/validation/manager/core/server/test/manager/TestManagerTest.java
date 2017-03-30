@@ -159,6 +159,14 @@ public class TestManagerTest extends AbstractVMTestCase {
             VMUserServer test = new VMUserServer(TestHelper
                     .createUser("Tester", "test",
                             "tester@test.com", "Mr.", "Tester"));
+            test.getExecutionStepCollection().clear();
+            test.getExecutionSteps().clear();
+            test.write2DB();
+            user.getExecutionStepCollection().clear();
+            user.getExecutionSteps().clear();
+            user.write2DB();
+            assertEquals(0, test.getEntity().getExecutionStepCollection().size());
+            assertEquals(0, test.getEntity().getExecutionSteps().size());
             instance.assignUser(test.getEntity(), user.getEntity(),
                     r.getExecutionStepList());
             instance.update(r);
@@ -166,10 +174,17 @@ public class TestManagerTest extends AbstractVMTestCase {
                 assertEquals((int) test.getId(),
                         (int) es.getVmUserId().getId());
                 assertNotNull(es.getAssignedTime());
-                assertEquals(user.getId(), es.getAssignedByUserId());
+                boolean found = false;
+                for (ExecutionStep s : user.getEntity().getExecutionStepCollection()) {
+                    if (s.getExecutionStepPK().equals(es.getExecutionStepPK())) {
+                        found = true;
+                        break;
+                    }
+                }
+                assertEquals(true, found);
             });
             assertEquals(r.getExecutionStepList().size(),
-                    test.getEntity().getExecutionStepList().size());
+                    test.getEntity().getExecutionSteps().size());
             //Now execute some steps
             Random random = new Random();
             ExecutionStepJpaController controller
@@ -179,7 +194,7 @@ public class TestManagerTest extends AbstractVMTestCase {
                     .getEntityManagerFactory()).findExecutionResultEntities();
             assertTrue(results.size() > 0);
             System.out.println("Simulating executions...");
-            for (ExecutionStep es : test.getEntity().getExecutionStepList()) {
+            for (ExecutionStep es : test.getEntity().getExecutionSteps()) {
                 es.setExecutionStart(new Date());
                 StopWatch sw = new StopWatch();
                 sw.start();
@@ -207,12 +222,10 @@ public class TestManagerTest extends AbstractVMTestCase {
                 System.out.println("Completed: "
                         + temp.getExecutionEnd());
                 long timeelapsed = temp.getExecutionTime();
-                long milliseconds = timeelapsed / 1000;
                 long seconds = (timeelapsed / 1000) % 60;
                 long minutes = (timeelapsed / 60000) % 60;
                 System.out.println("Elapsed time: " + " ("
-                        + minutes + ":" + seconds
-                        + ":" + milliseconds + ")");
+                        + minutes + ":" + seconds + ")");
                 System.out.println("Comments: " + temp.getComment());
                 System.out.println("Result: "
                         + temp.getResultId().getResultName());

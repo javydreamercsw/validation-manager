@@ -94,7 +94,7 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
     }
 
     public static List<VMIdServer> getIds() throws VMException {
-        ArrayList<VMIdServer> ids = new ArrayList<VMIdServer>();
+        ArrayList<VMIdServer> ids = new ArrayList<>();
         List<Object> result = namedQuery("VMId.findAll");
         if (!result.isEmpty()) {
             for (Object o : result) {

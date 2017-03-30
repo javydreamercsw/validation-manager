@@ -48,19 +48,25 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
 
     @Override
     protected void setInternalValue(Boolean value) {
-        if (value != null && !Objects.equals(value, getState().value)) {
-            if ((tt != null && tt.hasChildren(objectId))) {
-                tt.getChildren(objectId).forEach((o) -> {
-                    Item item = tt.getItem(o);
-                    Object val = item.getItemProperty("Name").getValue();
-                    if (val instanceof TreeTableCheckBox) {
-                        TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
-                        ttcb.setValue(value);
-                    }
-                });
+        if (tt != null
+                && value != null
+                && !Objects.equals(value, getState().value)) {
+            if (tt.hasChildren(getObjectId())) {
+                if (getState().value != null) {
+                    //Switching from false to true. Select all children
+                    tt.getChildren(getObjectId()).forEach((o) -> {
+                        Item item = tt.getItem(o);
+                        Object val = item.getItemProperty("Name").getValue();
+                        if (val instanceof TreeTableCheckBox) {
+                            TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
+                            ttcb.setValue(value);
+                        }
+                    });
+                }
             }
-            Object parentId = tt.getParent(objectId);
+            Object parentId = tt.getParent(getObjectId());
             if (!value && parentId != null) {
+                //Switching from true to false. Mark parent as undeterminated
                 TreeTableCheckBox parent
                         = ((TreeTableCheckBox) tt.getItem(parentId)
                                 .getItemProperty("Name").getValue());
@@ -73,7 +79,13 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
                 }
             }
         }
-        //Switching from false to true. Select all children
         super.setInternalValue(value);
+    }
+
+    /**
+     * @return the objectId
+     */
+    public Object getObjectId() {
+        return objectId;
     }
 }

@@ -21,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class UserStatusJpaController implements Serializable {
 
@@ -36,13 +36,13 @@ public class UserStatusJpaController implements Serializable {
 
     public void create(UserStatus userStatus) {
         if (userStatus.getVmUserList() == null) {
-            userStatus.setVmUserList(new ArrayList<VmUser>());
+            userStatus.setVmUserList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserList = new ArrayList<>();
             for (VmUser vmUserListVmUserToAttach : userStatus.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
@@ -78,7 +78,7 @@ public class UserStatusJpaController implements Serializable {
             for (VmUser vmUserListOldVmUser : vmUserListOld) {
                 if (!vmUserListNew.contains(vmUserListOldVmUser)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain VmUser " + vmUserListOldVmUser + " since its userStatusId field is not nullable.");
                 }
@@ -86,7 +86,7 @@ public class UserStatusJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserListNew = new ArrayList<>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
                 attachedVmUserListNew.add(vmUserListNewVmUserToAttach);
@@ -138,7 +138,7 @@ public class UserStatusJpaController implements Serializable {
             List<VmUser> vmUserListOrphanCheck = userStatus.getVmUserList();
             for (VmUser vmUserListOrphanCheckVmUser : vmUserListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This UserStatus (" + userStatus + ") cannot be destroyed since the VmUser " + vmUserListOrphanCheckVmUser + " in its vmUserList field has a non-nullable userStatusId field.");
             }

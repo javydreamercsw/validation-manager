@@ -6,7 +6,7 @@
         <groupId>net.sourceforge.javydreamercsw</groupId>
         <version>0.3-SNAPSHOT</version>
     </parent>
-    <groupId>net.sourceforge.javydreamercsw</groupId>
+    
     <artifactId>Validation-Manager-Web</artifactId>
     <packaging>war</packaging>
     <name>Validation Manager Web</name>
