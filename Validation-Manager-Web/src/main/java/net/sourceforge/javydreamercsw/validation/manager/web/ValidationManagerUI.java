@@ -52,6 +52,7 @@ import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
+import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -76,6 +77,7 @@ import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import com.validation.manager.core.server.core.VMUserServer;
@@ -267,6 +269,137 @@ public class ValidationManagerUI extends UI {
 
     private void setTabContent(Tab target, Component content) {
         setTabContent(target, content, null);
+    }
+
+    private void displayTestCaseExecution(TestCaseExecution tce, boolean edit) {
+        Panel form = new Panel("Test Case Execution Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(tce.getClass());
+        binder.setItemDataSource(tce);
+        Field<?> scope = binder.buildAndBind("Scope", "scope");
+        layout.addComponent(scope);
+        Field<?> name = binder.buildAndBind("Name", "name");
+        layout.addComponent(name);
+        TextArea conclusion = new TextArea("Conclusion");
+        binder.bind(conclusion, "conclusion");
+        layout.addComponent(conclusion);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (tce.getId() == null) {
+                displayObject(tree.getValue());
+            } else {
+                displayObject(tce, false);
+            }
+        });
+        if (edit) {
+            TestCaseExecutionServer tces = new TestCaseExecutionServer(tce);
+            if (tce.getId() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    tces.setConclusion(conclusion.getValue());
+                    tces.setScope(scope.getValue().toString());
+                    tces.setName(name.getValue().toString());
+                    try {
+                        tces.write2DB();
+                        tces.update(tce, tces.getEntity());
+                        displayObject(tce);
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                });
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    tces.setConclusion(conclusion.getValue());
+                    tces.setScope(scope.getValue().toString());
+                    tces.setName(name.getValue().toString());
+                    try {
+                        tces.write2DB();
+                        tces.update(tce, tces.getEntity());
+                        displayObject(tce);
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                });
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
+            }
+        }
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        layout.setSizeFull();
+        form.setSizeFull();
+        setTabContent(main, form, "testcase.view");
+    }
+
+    private void displayExecutionStep(ExecutionStep es, boolean edit) {
+        Panel form = new Panel("Execution Step Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(es.getClass());
+        binder.setItemDataSource(es);
+        TextArea comment = new TextArea("Comment");
+        binder.bind(comment, "comment");
+        layout.addComponent(comment);
+        Field<?> start = binder.buildAndBind("Execution Start", "executionStart");
+        layout.addComponent(start);
+        Field<?> end = binder.buildAndBind("Execution End", "executionEnd");
+        layout.addComponent(end);
+        Field<?> time = binder.buildAndBind("Execution Time", "executionTime");
+        layout.addComponent(time);
+        Button cancel = new Button("Cancel");
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            if (es.getExecutionStepPK() == null) {
+                displayObject(tree.getValue());
+            } else {
+                displayObject(es, false);
+            }
+        });
+        if (edit) {
+            if (es.getExecutionStepPK() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+
+                });
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+
+                });
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
+            }
+        }
+        binder.setReadOnly(!edit);
+        //Time fields are always disabled
+        start.setEnabled(false);
+        end.setEnabled(false);
+        time.setEnabled(false);
+        binder.bindMemberFields(form);
+        layout.setSizeFull();
+        form.setSizeFull();
+        setTabContent(main, form, "testcase.view");
     }
 
     private void displayStep(Step s, boolean edit) {
@@ -847,6 +980,16 @@ public class ValidationManagerUI extends UI {
             LOG.log(Level.FINE, "Selected: Step #{0}",
                     step.getStepSequence());
             displayStep(step, edit);
+        } else if (item instanceof TestCaseExecution) {
+            TestCaseExecution tce = (TestCaseExecution) item;
+            LOG.log(Level.FINE, "Selected: Test Case Execution #{0}",
+                    tce.getId());
+            displayTestCaseExecution(tce, edit);
+        } else if (item instanceof ExecutionStep) {
+            ExecutionStep es = (ExecutionStep) item;
+            LOG.log(Level.FINE, "Selected: Test Case Execution #{0}",
+                    es.getExecutionStepPK());
+            displayExecutionStep(es, edit);
         }
     }
 
@@ -1040,6 +1183,20 @@ public class ValidationManagerUI extends UI {
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject(new Project(), true);
+                });
+    }
+
+    private void createTestCaseExecutionPlanMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Execution Step", SPEC_ICON);
+        create.setEnabled(checkRight("testplan.planning"));
+        ContextMenu.ContextMenuItem edit
+                = menu.addItem("Edit Execution", EXECUTION_ICON);
+        edit.setEnabled(checkRight("testplan.planning"));
+        edit.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayTestCaseExecution((TestCaseExecution) tree.getValue(),
+                            true);
                 });
     }
 
@@ -1620,10 +1777,18 @@ public class ValidationManagerUI extends UI {
     }
 
     private void addStep(Step s, Tree tree) {
+        addStep(s, tree, null);
+    }
+
+    private void addStep(Step s, Tree tree, String parent) {
         tree.addItem(s);
         tree.setItemCaption(s, "Step # " + s.getStepSequence());
         tree.setItemIcon(s, STEP_ICON);
-        tree.setParent(s, s.getTestCase());
+        Object parentId = s.getTestCase();
+        if (parent != null) {
+            parentId = parent;
+        }
+        tree.setParent(s, parentId);
         tree.setChildrenAllowed(s, false);
     }
 
@@ -1637,11 +1802,20 @@ public class ValidationManagerUI extends UI {
         tree.setChildrenAllowed(req, false);
     }
 
-    private void addTestCaseExecutions(Project p, TestCaseExecution tce, Tree tree) {
+    private void addTestCaseExecutions(String parent, TestCaseExecution tce,
+            Tree tree) {
         tree.addItem(tce);
         tree.setItemCaption(tce, tce.getName());
-        tree.setItemIcon(tce, EXECUTIONS_ICON);
-        tree.setParent(tce, p);
+        tree.setItemIcon(tce, EXECUTION_ICON);
+        tree.setParent(tce, parent);
+        int i = 1;
+        for (ExecutionStep es : tce.getExecutionStepList()) {
+            tree.addItem(es);
+            tree.setItemCaption(es, "Step #" + i++);
+            //Use icon based on result of step
+            tree.setItemIcon(es, STEP_ICON);
+            tree.setParent(es, tce);
+        }
     }
 
     public void addProject(Project p, Tree tree) {
@@ -1670,8 +1844,13 @@ public class ValidationManagerUI extends UI {
             children = true;
         }
         if (!p.getTestCaseExecutions().isEmpty()) {
+            String id = "executions" + p.getId();
+            tree.addItem(id);
+            tree.setItemCaption(id, "Executions");
+            tree.setItemIcon(id, EXECUTIONS_ICON);
+            tree.setParent(id, p);
             p.getTestCaseExecutions().forEach((tce) -> {
-                addTestCaseExecutions(p, tce, tree);
+                addTestCaseExecutions(id, tce, tree);
             });
             children = true;
         }
@@ -1897,6 +2076,8 @@ public class ValidationManagerUI extends UI {
                         createRootMenu(contextMenu);
                     } else if (tree.getValue() instanceof TestPlan) {
                         createTestPlanMenu(contextMenu);
+                    } else if (tree.getValue() instanceof TestCaseExecution) {
+                        createTestCaseExecutionPlanMenu(contextMenu);
                     }
                 };
         contextMenu.addContextMenuTreeListener(treeItemListener);
