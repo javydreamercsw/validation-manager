@@ -2181,6 +2181,10 @@ public class ValidationManagerUI extends UI {
         setTabContent(designer, w, "testplan.planning");
     }
 
+    protected Object getSelectdValue() {
+        return tree.getValue();
+    }
+
     @WebServlet(value = "/*", asyncSupported = true)
     @VaadinServletConfiguration(productionMode = false,
             ui = ValidationManagerUI.class,

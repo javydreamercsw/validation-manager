@@ -6,13 +6,17 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
+import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestCaseExecution;
+import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import java.util.List;
-import org.openide.util.Exceptions;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
@@ -24,9 +28,15 @@ public class DetailStep implements WizardStep {
     private List<Integer> testCases;
     private final TestCaseExecution tce;
     private List<Integer> projects;
+    private static final Logger LOG
+            = Logger.getLogger(DetailStep.class.getSimpleName());
+    private final ValidationManagerUI ui;
+    private final Project p;
 
-    public DetailStep() {
+    public DetailStep(ValidationManagerUI ui, Project p) {
         this.tce = new TestCaseExecution();
+        this.ui = ui;
+        this.p = p;
     }
 
     @Override
@@ -49,19 +59,16 @@ public class DetailStep implements WizardStep {
         TextArea scope = new TextArea("Scope");
         scope.setConverter(new ByteToStringConverter());
         binder.bind(scope, "scope");
-        scope.setStyleName(ValoTheme.TEXTAREA_LARGE);
         layout.addComponent(scope);
         if (tce.getId() != null) {
             TextArea conclusion = new TextArea("Conclusion");
             conclusion.setConverter(new ByteToStringConverter());
             binder.bind(conclusion, "conclusion");
-            conclusion.setStyleName(ValoTheme.TEXTAREA_LARGE);
             layout.addComponent(conclusion);
             conclusion.setSizeFull();
             layout.addComponent(conclusion);
         }
-        binder.setBuffered(true);
-        binder.setReadOnly(false);
+        binder.setBuffered(false);
         binder.bindMemberFields(form);
         form.setSizeFull();
         return form;
@@ -71,8 +78,9 @@ public class DetailStep implements WizardStep {
     public boolean onAdvance() {
         try {
             //Create the record
+            new TestCaseExecutionJpaController(DataBaseManager
+                    .getEntityManagerFactory()).create(tce);
             TestCaseExecutionServer tces = new TestCaseExecutionServer(tce);
-            tces.write2DB();
             //Now create the execution records
             TestCaseServer tc;
             for (Integer id : testCases) {
@@ -82,18 +90,23 @@ public class DetailStep implements WizardStep {
             }
             projects.stream().map((pid)
                     -> new ProjectServer(pid)).forEachOrdered((ps) -> {
+                LOG.log(Level.INFO, "Adding project: {0}", ps.getName());
                 tces.getProjects().add(ps.getEntity());
             });
             try {
                 tces.write2DB();
+                ui.buildProjectTree(ui.getSelectdValue());
+                ui.updateProjectList();
+                ui.updateScreen();
+                ui.displayObject(tces.getEntity(), false);
                 return true;
             } catch (NonexistentEntityException ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.SEVERE, null, ex);
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
         return false;
     }
