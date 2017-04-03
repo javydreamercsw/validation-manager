@@ -946,7 +946,7 @@ public class ValidationManagerUI extends UI {
         displayObject(item, false);
     }
 
-    private void displayObject(Object item, boolean edit) {
+    protected void displayObject(Object item, boolean edit) {
         if (item instanceof Project) {
             Project p = (Project) item;
             LOG.log(Level.FINE, "Selected: {0}", p.getName());
@@ -1147,11 +1147,11 @@ public class ValidationManagerUI extends UI {
         }
     }
 
-    private void buildProjectTree() {
+    protected void buildProjectTree() {
         buildProjectTree(null);
     }
 
-    private void buildProjectTree(Object item) {
+    protected void buildProjectTree(Object item) {
         tree.removeAllItems();
         tree.addItem(projTreeRoot);
         projects.forEach((p) -> {
@@ -1612,7 +1612,7 @@ public class ValidationManagerUI extends UI {
         return hl;
     }
 
-    private void updateScreen() {
+    protected void updateScreen() {
         //Set up a menu header on top and the content below
         VerticalSplitPanel vs = new VerticalSplitPanel();
         vs.setSplitPosition(25, Unit.PERCENTAGE);
@@ -1815,6 +1815,7 @@ public class ValidationManagerUI extends UI {
             //Use icon based on result of step
             tree.setItemIcon(es, STEP_ICON);
             tree.setParent(es, tce);
+            tree.setChildrenAllowed(es, false);
         }
     }
 
@@ -2096,7 +2097,7 @@ public class ValidationManagerUI extends UI {
         m.put(i1, first);
     }
 
-    private void updateProjectList() {
+    protected void updateProjectList() {
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
                         .getEntityManagerFactory());
@@ -2176,7 +2177,7 @@ public class ValidationManagerUI extends UI {
     private void displayTestPlanning(Project p) {
         Wizard w = new Wizard();
         w.addStep(new SelectTestCasesStep(w, p));
-        w.addStep(new DetailStep());
+        w.addStep(new DetailStep(ValidationManagerUI.this, p));
         setTabContent(designer, w, "testplan.planning");
     }
 
