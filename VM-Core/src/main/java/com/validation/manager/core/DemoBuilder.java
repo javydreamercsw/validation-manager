@@ -42,10 +42,11 @@ public class DemoBuilder {
             Project temp = new Project("Sub " + (i + 1));
             temp.setParentProjectId(rootProject);
             controller.create(temp);
-            addDemoProjectRequirements(temp);
-            addDemoProjectTestProject(temp);
-            addDemoExecution(temp);
-            rootProject.getProjectList().add(temp);
+            ProjectServer ps = new ProjectServer(temp);
+            addDemoProjectRequirements(ps.getEntity());
+            addDemoProjectTestProject(ps.getEntity());
+            addDemoExecution(ps.getEntity());
+            rootProject.getProjectList().add(ps.getEntity());
         }
         addDemoProjectRequirements(rootProject);
         controller.edit(rootProject);
@@ -118,7 +119,9 @@ public class DemoBuilder {
             tps.addTestCase(tcs.getEntity());
         }
         ProjectServer ps = new ProjectServer(p);
-        ps.setTestProjectList(new ArrayList<>());
+        if (ps.getTestProjectList() == null) {
+            ps.setTestProjectList(new ArrayList<>());
+        }
         ps.getTestProjectList().add(tp.getEntity());
         //Save it
         ps.write2DB();
@@ -140,6 +143,7 @@ public class DemoBuilder {
                 = new TestCaseExecutionServer("Execution " + i,
                         "Test Scope " + i);
         tces.setConclusion("Conclusion!");
+        tces.write2DB();
         p.getTestProjectList().forEach((tp) -> {
             tces.addTestProject(tp);
         });
