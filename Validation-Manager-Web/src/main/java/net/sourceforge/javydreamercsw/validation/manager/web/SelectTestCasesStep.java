@@ -62,6 +62,9 @@ public class SelectTestCasesStep implements WizardStep {
         testCases.forEach((i) -> {
             LOG.log(Level.INFO, "Test Case: {0}", i);
         });
+        if (testCases.isEmpty()) {
+            return false;
+        }
         //update next step
         DetailStep next = ((DetailStep) w.getSteps().get(1));
         next.setTestCases(testCases);
@@ -153,14 +156,17 @@ public class SelectTestCasesStep implements WizardStep {
                                     ttcb.getObjectId());
                             testCases.add(Integer.parseInt(id.substring(2)));
                             Object pid = id;
+                            //Add the related project to the list.
                             while (pid != null) {
-                                pid = testTree.getParent(id);
                                 if (pid instanceof String) {
                                     String s = (String) pid;
                                     if (s.startsWith("project")) {
-                                        getProjects().add(Integer.parseInt(id.substring(7)));
+                                        LOG.log(Level.FINE, "Processing: {0}", s);
+                                        getProjects().add(Integer.parseInt(s.substring(7)));
+                                        break;
                                     }
                                 }
+                                pid = testTree.getParent(pid);
                             }
                         }
                     }
