@@ -3,6 +3,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 import com.vaadin.data.Item;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.db.Project;
@@ -60,9 +61,12 @@ public class SelectTestCasesStep implements WizardStep {
         List<Integer> testCases
                 = processChildren("project" + p.getId());
         testCases.forEach((i) -> {
-            LOG.log(Level.INFO, "Test Case: {0}", i);
+            LOG.log(Level.FINE, "Test Case: {0}", i);
         });
         if (testCases.isEmpty()) {
+            Notification.show("Unable to proceed",
+                    "Please select at least one Test Case prior to continuing.",
+                    Notification.Type.WARNING_MESSAGE);
             return false;
         }
         //update next step
