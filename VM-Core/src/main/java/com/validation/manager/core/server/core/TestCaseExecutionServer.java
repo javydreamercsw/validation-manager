@@ -16,7 +16,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class TestCaseExecutionServer extends TestCaseExecution
+public final class TestCaseExecutionServer extends TestCaseExecution
         implements EntityServer<TestCaseExecution> {
 
     public TestCaseExecutionServer(String name, String scope) {
@@ -27,6 +27,9 @@ public class TestCaseExecutionServer extends TestCaseExecution
         TestCaseExecution tces = new TestCaseExecutionJpaController(DataBaseManager
                 .getEntityManagerFactory()).findTestCaseExecution(tce.getId());
         update(TestCaseExecutionServer.this, tces);
+    }
+
+    public TestCaseExecutionServer() {
     }
 
     /**
@@ -41,6 +44,8 @@ public class TestCaseExecutionServer extends TestCaseExecution
         tc.getStepList().forEach((s) -> {
             ExecutionStep executionStep = new ExecutionStep(getId(),
                     s.getStepPK().getId(), s.getStepPK().getTestCaseId());
+            executionStep.setStep(s);
+            executionStep.setTestCaseExecution(getEntity());
             try {
                 econtroller.create(executionStep);
                 getExecutionStepList().add(executionStep);
