@@ -133,13 +133,20 @@ public class DemoBuilder {
         }
     }
 
-    private static void addDemoExecution(Project p) {
+    private static void addDemoExecution(Project p)
+            throws NonexistentEntityException, Exception {
         int i = p.getTestCaseExecutions().size() + 1;
         TestCaseExecutionServer tces
-                = new TestCaseExecutionServer("Execution " + i, "Test Scope " + i);
+                = new TestCaseExecutionServer("Execution " + i,
+                        "Test Scope " + i);
         tces.setConclusion("Conclusion!");
         p.getTestProjectList().forEach((tp) -> {
             tces.addTestProject(tp);
         });
+        tces.write2DB();
+        ProjectServer ps = new ProjectServer(p);
+        ps.getTestCaseExecutions().add(tces.getEntity());
+        ps.write2DB();
+        ps.update(p, ps.getEntity());
     }
 }

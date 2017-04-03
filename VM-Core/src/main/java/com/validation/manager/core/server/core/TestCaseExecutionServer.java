@@ -9,6 +9,7 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
+import java.util.ArrayList;
 import org.openide.util.Exceptions;
 
 /**
@@ -65,6 +66,7 @@ public class TestCaseExecutionServer extends TestCaseExecution
             update(tce, this);
             controller.edit(tce);
         }
+        update(this, tce);
         return getId();
     }
 
@@ -80,14 +82,26 @@ public class TestCaseExecutionServer extends TestCaseExecution
         target.setId(source.getId());
         target.setScope(source.getScope());
         target.setName(source.getName());
-        target.getProjects().clear();
-        target.getExecutionStepList().clear();
-        source.getExecutionStepList().forEach((es) -> {
-            target.getExecutionStepList().add(es);
-        });
-        source.getProjects().forEach((p) -> {
-            target.getProjects().add(p);
-        });
+        if (target.getProjects() == null) {
+            target.setProjects(new ArrayList<>());
+        } else {
+            target.getProjects().clear();
+        }
+        if (target.getExecutionStepList() == null) {
+            target.setExecutionStepList(new ArrayList<>());
+        } else {
+            target.getExecutionStepList().clear();
+        }
+        if (source.getExecutionStepList() != null) {
+            source.getExecutionStepList().forEach((es) -> {
+                target.getExecutionStepList().add(es);
+            });
+        }
+        if (source.getProjects() != null) {
+            source.getProjects().forEach((p) -> {
+                target.getProjects().add(p);
+            });
+        }
     }
 
     @Override

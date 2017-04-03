@@ -92,6 +92,7 @@ public final class ProjectServer extends Project
         target.setProjectList(source.getProjectList());
         target.setRequirementSpecList(source.getRequirementSpecList());
         target.setTestProjectList(source.getTestProjectList());
+        target.setTestCaseExecutions(source.getTestCaseExecutions());
         if (copyId) {
             target.setId(source.getId());
         }

@@ -122,7 +122,7 @@ public class TestManager {
                 es.setVmUserId(assignee);
                 es.setAssignedTime(new Date());
                 controller.edit(es);
-                //Add assignee
+                //Add assigner
                 VMUserServer assigners = new VMUserServer(assigner);
                 assigners.getExecutionStepCollection().add(es);
                 assigners.write2DB();
