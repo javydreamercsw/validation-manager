@@ -85,7 +85,6 @@ public class ExecutionStepPK implements Serializable {
             return false;
         }
         final ExecutionStepPK other = (ExecutionStepPK) obj;
-        System.out.println("Comparing: \n" + other.toString() + "\n" + this.toString());
         if (this.testCaseExecutionId != other.testCaseExecutionId) {
             return false;
         }
