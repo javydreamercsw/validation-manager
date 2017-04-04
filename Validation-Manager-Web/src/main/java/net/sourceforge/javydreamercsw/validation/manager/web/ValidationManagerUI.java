@@ -21,6 +21,7 @@ import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -28,6 +29,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
@@ -49,6 +51,7 @@ import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
@@ -350,15 +353,78 @@ public class ValidationManagerUI extends UI {
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(es.getClass());
         binder.setItemDataSource(es);
-        TextArea comment = new TextArea("Comment");
-        binder.bind(comment, "comment");
-        layout.addComponent(comment);
+        BeanItemContainer stepContainer = new BeanItemContainer<>(Step.class);
+        stepContainer.addBean(es.getStep());
+        Grid grid = new Grid(stepContainer);
+        grid.setCaption("Step Details");
+        grid.setContainerDataSource(stepContainer);
+        grid.setColumns("text", "expectedResult", "notes");
+        grid.setHeightMode(HeightMode.ROW);
+        grid.setHeightByRows(1);
+        Grid.Column textColumn = grid.getColumn("text");
+        textColumn.setHeaderCaption("Text");
+        textColumn.setConverter(new ByteToStringConverter());
+        Grid.Column resultColumn = grid.getColumn("expectedResult");
+        resultColumn.setHeaderCaption("Expected Result");
+        resultColumn.setConverter(new ByteToStringConverter());
+        Grid.Column notesColumn = grid.getColumn("notes");
+        notesColumn.setHeaderCaption("Notes");
+        grid.setSizeFull();
+        layout.addComponent(grid);
+        if (es.getResultId() != null) {
+            Field<?> result = binder.buildAndBind("Result", "resultId.resultName");
+            layout.addComponent(result);
+        }
+        if (es.getComment() != null) {
+            TextArea comment = new TextArea("Comment");
+            binder.bind(comment, "comment");
+            layout.addComponent(comment);
+        }
         Field<?> start = binder.buildAndBind("Execution Start", "executionStart");
         layout.addComponent(start);
         Field<?> end = binder.buildAndBind("Execution End", "executionEnd");
         layout.addComponent(end);
         Field<?> time = binder.buildAndBind("Execution Time", "executionTime");
         layout.addComponent(time);
+        if (es.getStep().getRequirementList() != null
+                && !es.getStep().getRequirementList().isEmpty()) {
+            BeanItemContainer reqContainer
+                    = new BeanItemContainer<>(Requirement.class);
+            reqContainer.addAll(es.getStep().getRequirementList());
+            Grid reqGrid = new Grid(reqContainer);
+            reqGrid.setCaption("Related Requirements");
+            reqGrid.setColumns("uniqueId");
+            Grid.Column reqColumn = reqGrid.getColumn("uniqueId");
+            reqColumn.setHeaderCaption("Requirement ID");
+            reqColumn.setRenderer(new ButtonRenderer(e -> {
+                //Show the requirement details in a window
+                VerticalLayout l = new VerticalLayout();
+                Window subWindow = new Window(
+                        ((Requirement) e.getItemId()).getUniqueId()
+                        + " Details");
+                BeanFieldGroup<Requirement> b
+                        = new BeanFieldGroup<>(Requirement.class);
+                b.setItemDataSource((Requirement) e.getItemId());
+                b.setReadOnly(true);
+                Field<?> id = b.buildAndBind("Requirement ID", "uniqueId");
+                id.setReadOnly(true); //Read only flag set to true !!!
+                l.addComponent(id);
+                Field<?> desc = b.buildAndBind("Description", "description",
+                        TextArea.class);
+                desc.setReadOnly(true); //Read only flag set to true !!!
+                l.addComponent(desc);
+                Field<?> notes = b.buildAndBind("Notes", "notes",
+                        TextArea.class);
+                notes.setReadOnly(true); //Read only flag set to true !!!
+                l.addComponent(notes);
+                subWindow.setContent(l);
+                subWindow.setModal(true);
+                subWindow.center();
+                // Open it in the UI
+                addWindow(subWindow);
+            }));
+            layout.addComponent(reqGrid);
+        }
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
