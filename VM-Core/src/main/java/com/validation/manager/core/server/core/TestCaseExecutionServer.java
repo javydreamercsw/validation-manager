@@ -23,6 +23,12 @@ public final class TestCaseExecutionServer extends TestCaseExecution
         super(name, scope);
     }
 
+    public TestCaseExecutionServer(int id) {
+        TestCaseExecution tces = new TestCaseExecutionJpaController(DataBaseManager
+                .getEntityManagerFactory()).findTestCaseExecution(id);
+        update(TestCaseExecutionServer.this, tces);
+    }
+
     public TestCaseExecutionServer(TestCaseExecution tce) {
         TestCaseExecution tces = new TestCaseExecutionJpaController(DataBaseManager
                 .getEntityManagerFactory()).findTestCaseExecution(tce.getId());
