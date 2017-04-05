@@ -63,7 +63,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     public VMUserServer(VmUser vmu) {
         update(VMUserServer.this, vmu);
         //previously hashing the already hashed password
-        hashPassword = false;
+        setHashPassword(false);
     }
 
     //create user object and login
@@ -92,7 +92,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                 VmUser vmu = (VmUser) result.get(0);
                 update(VMUserServer.this, vmu);
                 //previously hashing the already hashed password
-                hashPassword = false;
+                setHashPassword(false);
                 int status = vmu.getUserStatusId().getId();
                 if (status != 2) {
                     Calendar cal2 = getInstance(),
@@ -129,8 +129,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                 VmUser vmu = (VmUser) result.get(0);
                 update(VMUserServer.this, vmu);
                 //Don't rehash the pasword!
-                hashPassword = false;
-                //Increase attempts after a unsuccessfull login.
+                setHashPassword(false); //Increase attempts after a unsuccessfull login.
                 setIncreaseAttempts(true);
                 setLastModified(vmu.getLastModified());
                 setChange(false);
@@ -149,7 +148,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             VmUser vmu = (VmUser) result.get(0);
             update(VMUserServer.this, vmu);
             //previously hashing the already hashed password
-            hashPassword = false;
+            setHashPassword(false);
         } else {
             throw new Exception("Unable to find user");
         }
@@ -228,7 +227,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             setLastModified(date);
             //Sometimes password got re-hashed
             String password;
-            if (hashPassword) {
+            if (isHashPassword()) {
                 password = encrypt(getPassword().replaceAll("'", "\\\\'"));
             } else {
                 password = getPassword().replaceAll("'", "\\\\'");
