@@ -8,6 +8,7 @@ import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.CorrectiveAction;
+import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
@@ -503,8 +504,10 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         return false;
     }
 
-    public void assignTestCase(TestCaseExecution tce, TestCase tc) {
+    public void assignTestCase(TestCaseExecution tce, TestCase tc,
+            VmUser assigner) {
         try {
+            VMUserServer a = new VMUserServer(assigner);
             ExecutionStepJpaController c
                     = new ExecutionStepJpaController(DataBaseManager
                             .getEntityManagerFactory());
@@ -516,14 +519,24 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                                 es.setAssignedTime(new Date());
                                 c.edit(es);
                                 getExecutionSteps().add(es);
+                                a.getExecutionStepCollection().add(es);
                             } catch (Exception ex) {
                                 Exceptions.printStackTrace(ex);
                             }
                         });
             });
+            a.write2DB();
             write2DB();
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
+    }
+
+    public void setAsAssigner(ExecutionStep es) throws Exception {
+        if (getExecutionStepCollection() == null) {
+            setExecutionStepCollection(new ArrayList<>());
+        }
+        getExecutionStepCollection().add(es);
+        write2DB();
     }
 }
