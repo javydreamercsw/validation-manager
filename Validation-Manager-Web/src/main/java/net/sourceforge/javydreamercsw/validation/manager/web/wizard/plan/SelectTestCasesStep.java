@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.validation.manager.web;
+package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
 import com.vaadin.data.Item;
 import com.vaadin.ui.Component;
@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.validation.manager.web.TreeTableCheckBox;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.WizardStep;
 

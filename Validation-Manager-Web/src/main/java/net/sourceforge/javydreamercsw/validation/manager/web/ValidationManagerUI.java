@@ -6,6 +6,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.fieldgroup.FieldGroupFieldFactory;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.event.ItemClickEvent;
@@ -41,6 +42,7 @@ import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.TreeDragMode;
 import com.vaadin.ui.Tree.TreeDropCriterion;
@@ -68,6 +70,7 @@ import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmSetting;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
@@ -91,6 +94,7 @@ import com.validation.manager.core.tool.step.importer.StepImporter;
 import com.validation.manager.core.tool.step.importer.TestCaseImportException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -104,10 +108,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
+import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTreeItemEvent;
 import org.vaadin.teemu.wizards.Wizard;
+import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
+import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
+import org.vaadin.teemu.wizards.event.WizardProgressListener;
+import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
+import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 @Theme("vmtheme")
 @SuppressWarnings("serial")
@@ -138,6 +149,7 @@ public class ValidationManagerUI extends UI {
     public static final VaadinIcons EDIT_ICON = VaadinIcons.EDIT;
     public static final VaadinIcons EXECUTIONS_ICON = VaadinIcons.COGS;
     public static final VaadinIcons EXECUTION_ICON = VaadinIcons.COG;
+    public static final VaadinIcons ASSIGN_ICON = VaadinIcons.USER_CLOCK;
     private Tree tree;
     private Tab main, tester, designer, demo, admin;
     private final List<String> roles = new ArrayList<>();
@@ -259,7 +271,9 @@ public class ValidationManagerUI extends UI {
             String permission) {
         Layout l = (Layout) target.getComponent();
         l.removeAllComponents();
-        l.addComponent(content);
+        if (content != null) {
+            l.addComponent(content);
+        }
         if (permission != null && !permission.isEmpty()) {
             //Hide tab based on permissions
             boolean viewable = checkRight(permission);
@@ -353,6 +367,24 @@ public class ValidationManagerUI extends UI {
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(es.getClass());
         binder.setItemDataSource(es);
+        FieldGroupFieldFactory defaultFactory = binder.getFieldFactory();
+        binder.setFieldFactory(new FieldGroupFieldFactory() {
+
+            @Override
+            public <T extends Field> T createField(Class<?> dataType, Class<T> fieldType) {
+                if (dataType.isAssignableFrom(VmUser.class)) {
+                    BeanItemContainer<VmUser> userEntityContainer
+                            = new BeanItemContainer<>(VmUser.class);
+                    userEntityContainer.addBean(es.getVmUserId());
+                    Field field = new TextField(es.getVmUserId() == null ? "N/A"
+                            : es.getVmUserId().getFirstName() + " "
+                            + es.getVmUserId().getLastName());
+                    return fieldType.cast(field);
+                }
+
+                return defaultFactory.createField(dataType, fieldType);
+            }
+        });
         BeanItemContainer stepContainer = new BeanItemContainer<>(Step.class);
         stepContainer.addBean(es.getStep());
         Grid grid = new Grid(stepContainer);
@@ -380,12 +412,27 @@ public class ValidationManagerUI extends UI {
             binder.bind(comment, "comment");
             layout.addComponent(comment);
         }
-        Field<?> start = binder.buildAndBind("Execution Start", "executionStart");
-        layout.addComponent(start);
-        Field<?> end = binder.buildAndBind("Execution End", "executionEnd");
-        layout.addComponent(end);
-        Field<?> time = binder.buildAndBind("Execution Time", "executionTime");
-        layout.addComponent(time);
+        if (es.getVmUserId() != null) {
+            TextField assignee = new TextField("Assignee");
+            assignee.setConverter(new UserToStringConverter());
+            binder.bind(assignee, "vmUserId");
+            layout.addComponent(assignee);
+        }
+        if (es.getExecutionStart() != null) {
+            Field<?> start = binder.buildAndBind("Execution Start",
+                    "executionStart");
+            layout.addComponent(start);
+        }
+        if (es.getExecutionEnd() != null) {
+            Field<?> end = binder.buildAndBind("Execution End",
+                    "executionEnd");
+            layout.addComponent(end);
+        }
+        if (es.getExecutionTime() > 0) {
+            Field<?> time = binder.buildAndBind("Execution Time",
+                    "executionTime");
+            layout.addComponent(time);
+        }
         if (es.getStep().getRequirementList() != null
                 && !es.getStep().getRequirementList().isEmpty()) {
             BeanItemContainer reqContainer
@@ -458,10 +505,6 @@ public class ValidationManagerUI extends UI {
             }
         }
         binder.setReadOnly(!edit);
-        //Time fields are always disabled
-        start.setEnabled(false);
-        end.setEnabled(false);
-        time.setEnabled(false);
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
@@ -1012,7 +1055,7 @@ public class ValidationManagerUI extends UI {
         displayObject(item, false);
     }
 
-    protected void displayObject(Object item, boolean edit) {
+    public void displayObject(Object item, boolean edit) {
         if (item instanceof Project) {
             Project p = (Project) item;
             LOG.log(Level.FINE, "Selected: {0}", p.getName());
@@ -1213,11 +1256,11 @@ public class ValidationManagerUI extends UI {
         }
     }
 
-    protected void buildProjectTree() {
+    public void buildProjectTree() {
         buildProjectTree(null);
     }
 
-    protected void buildProjectTree(Object item) {
+    public void buildProjectTree(Object item) {
         tree.removeAllItems();
         tree.addItem(projTreeRoot);
         projects.forEach((p) -> {
@@ -1242,6 +1285,48 @@ public class ValidationManagerUI extends UI {
         }
     }
 
+    private void addTestCaseAssignment(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Assign Test Case Execution", ASSIGN_ICON);
+        create.setEnabled(checkRight("testplan.planning"));
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    Wizard w = new Wizard();
+                    Window sw = new Window();
+                    w.addStep(new AssignUserStep(tree.getValue()));
+                    w.addListener(new WizardProgressListener() {
+                        @Override
+                        public void activeStepChanged(WizardStepActivationEvent event) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void stepSetChanged(WizardStepSetChangedEvent event) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void wizardCompleted(WizardCompletedEvent event) {
+                            removeWindow(sw);
+                        }
+
+                        @Override
+                        public void wizardCancelled(WizardCancelledEvent event) {
+                            removeWindow(sw);
+                        }
+                    });
+                    sw.setContent(w);
+                    sw.center();
+                    sw.setModal(true);
+                    sw.setSizeFull();
+                    addWindow(sw);
+                });
+    }
+
+    private void createTestExecutionMenu(ContextMenu menu) {
+        addTestCaseAssignment(menu);
+    }
+
     private void createRootMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
                 = menu.addItem("Create Project", PROJECT_ICON);
@@ -1264,6 +1349,7 @@ public class ValidationManagerUI extends UI {
                     displayTestCaseExecution((TestCaseExecution) tree.getValue(),
                             true);
                 });
+        addTestCaseAssignment(menu);
     }
 
     private void createTestPlanMenu(ContextMenu menu) {
@@ -1678,7 +1764,7 @@ public class ValidationManagerUI extends UI {
         return hl;
     }
 
-    protected void updateScreen() {
+    public void updateScreen() {
         //Set up a menu header on top and the content below
         VerticalSplitPanel vs = new VerticalSplitPanel();
         vs.setSplitPosition(25, Unit.PERCENTAGE);
@@ -1874,13 +1960,33 @@ public class ValidationManagerUI extends UI {
         tree.setItemCaption(tce, tce.getName());
         tree.setItemIcon(tce, EXECUTION_ICON);
         tree.setParent(tce, parent);
-        int i = 1;
         for (ExecutionStep es : tce.getExecutionStepList()) {
+            //Group under the Test Case
+            TestCase tc = es.getStep().getTestCase();
+            Collection<?> children = tree.getChildren(tce);
+            String node = "tce-" + tce.getId() + "-" + tc.getId();
+            boolean add = true;
+            if (children != null) {
+                //Check if already added as children
+                for (Object o : children) {
+                    if (o.equals(node)) {
+                        add = false;
+                        break;
+                    }
+                }
+            }
+            if (add) {
+                //Add Test Case if not there
+                Item item = tree.addItem(node);
+                tree.setItemCaption(node, tc.getName());
+                tree.setItemIcon(node, TEST_ICON);
+                tree.setParent(node, tce);
+            }
             tree.addItem(es);
-            tree.setItemCaption(es, "Step #" + i++);
+            tree.setItemCaption(es, "Step #" + es.getStep().getStepSequence());
             //Use icon based on result of step
             tree.setItemIcon(es, STEP_ICON);
-            tree.setParent(es, tce);
+            tree.setParent(es, node);
             tree.setChildrenAllowed(es, false);
         }
     }
@@ -2139,8 +2245,13 @@ public class ValidationManagerUI extends UI {
                     } else if (tree.getValue() instanceof TestCase) {
                         createTestCaseMenu(contextMenu);
                     } else if (tree.getValue() instanceof String) {
-                        //We are at the root
-                        createRootMenu(contextMenu);
+                        String val = (String) tree.getValue();
+                        if (val.startsWith("tce")) {
+                            createTestExecutionMenu(contextMenu);
+                        } else {
+                            //We are at the root
+                            createRootMenu(contextMenu);
+                        }
                     } else if (tree.getValue() instanceof TestPlan) {
                         createTestPlanMenu(contextMenu);
                     } else if (tree.getValue() instanceof TestCaseExecution) {
@@ -2163,7 +2274,7 @@ public class ValidationManagerUI extends UI {
         m.put(i1, first);
     }
 
-    protected void updateProjectList() {
+    public void updateProjectList() {
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
                         .getEntityManagerFactory());
@@ -2244,10 +2355,31 @@ public class ValidationManagerUI extends UI {
         Wizard w = new Wizard();
         w.addStep(new SelectTestCasesStep(w, p));
         w.addStep(new DetailStep(ValidationManagerUI.this, p));
+        w.addListener(new WizardProgressListener() {
+            @Override
+            public void activeStepChanged(WizardStepActivationEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void stepSetChanged(WizardStepSetChangedEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(WizardCompletedEvent event) {
+                setTabContent(designer, null, "testplan.planning");
+            }
+
+            @Override
+            public void wizardCancelled(WizardCancelledEvent event) {
+                setTabContent(designer, null, "testplan.planning");
+            }
+        });
         setTabContent(designer, w, "testplan.planning");
     }
 
-    protected Object getSelectdValue() {
+    public Object getSelectdValue() {
         return tree.getValue();
     }
 

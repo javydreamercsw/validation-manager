@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.validation.manager.web;
+package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.ui.Component;
@@ -17,6 +17,8 @@ import com.validation.manager.core.server.core.TestCaseServer;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
