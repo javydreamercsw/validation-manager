@@ -18,3 +18,5 @@ INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `las
 INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (6, 9);
 /*Update version*/
 UPDATE `vm_setting` SET `int_val` = 2 WHERE id = 3;
+/*Add permissions*/
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (7, 8);
