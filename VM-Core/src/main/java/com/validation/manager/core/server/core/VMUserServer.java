@@ -1,5 +1,6 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.createdQuery;
 import static com.validation.manager.core.DataBaseManager.getEntityManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
@@ -8,6 +9,8 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.CorrectiveAction;
 import com.validation.manager.core.db.Role;
+import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.UserAssigment;
 import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.UserModifiedRecord;
@@ -16,6 +19,7 @@ import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.CorrectiveActionJpaController;
+import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.RoleJpaController;
 import com.validation.manager.core.db.controller.UserAssigmentJpaController;
 import com.validation.manager.core.db.controller.UserHasInvestigationJpaController;
@@ -40,6 +44,7 @@ import static java.util.Locale.getDefault;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import javax.persistence.EntityTransaction;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -496,5 +501,29 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     public boolean isChangeVersionable() {
         //TODO
         return false;
+    }
+
+    public void assignTestCase(TestCaseExecution tce, TestCase tc) {
+        try {
+            ExecutionStepJpaController c
+                    = new ExecutionStepJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+            tc.getStepList().forEach((s) -> {
+                tce.getExecutionStepList().stream().filter((es)
+                        -> (es.getStep().getStepPK().equals(s.getStepPK())))
+                        .forEachOrdered((es) -> {
+                            try {
+                                es.setAssignedTime(new Date());
+                                c.edit(es);
+                                getExecutionSteps().add(es);
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
+                        });
+            });
+            write2DB();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 }
