@@ -48,7 +48,7 @@ public final class ProjectServer extends Project
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         Project p;
-        if (getId() > 0) {
+        if (getId() != null && getId() > 0) {
             p = new ProjectJpaController(getEntityManagerFactory())
                     .findProject(getId());
             update(p, this);
@@ -85,7 +85,8 @@ public final class ProjectServer extends Project
                 .findProject(getId());
     }
 
-    private void update(Project target, Project source, boolean copyId) {
+    @Override
+    public void update(Project target, Project source) {
         target.setNotes(source.getNotes());
         target.setName(source.getName());
         target.setParentProjectId(source.getParentProjectId());
@@ -93,14 +94,7 @@ public final class ProjectServer extends Project
         target.setRequirementSpecList(source.getRequirementSpecList());
         target.setTestProjectList(source.getTestProjectList());
         target.setTestCaseExecutions(source.getTestCaseExecutions());
-        if (copyId) {
-            target.setId(source.getId());
-        }
-    }
-
-    @Override
-    public void update(Project target, Project source) {
-        update(target, source, true);
+        target.setId(source.getId());
     }
 
     public static List<Project> getProjects() {
@@ -122,12 +116,16 @@ public final class ProjectServer extends Project
     public static List<Requirement> getRequirements(Project p) {
         ProjectServer project = new ProjectServer(p);
         ArrayList<Requirement> requirements = new ArrayList<>();
-        project.getRequirementSpecList().forEach((rs) -> {
-            requirements.addAll(RequirementSpecServer.getRequirements(rs));
-        });
-        project.getProjectList().forEach((sp) -> {
-            requirements.addAll(getRequirements(sp));
-        });
+        if (project.getRequirementSpecList() != null) {
+            project.getRequirementSpecList().forEach((rs) -> {
+                requirements.addAll(RequirementSpecServer.getRequirements(rs));
+            });
+        }
+        if (project.getProjectList() != null) {
+            project.getProjectList().forEach((sp) -> {
+                requirements.addAll(getRequirements(sp));
+            });
+        }
         return requirements;
     }
 
