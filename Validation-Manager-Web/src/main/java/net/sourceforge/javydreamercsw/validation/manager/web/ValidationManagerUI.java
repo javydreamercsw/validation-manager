@@ -1330,7 +1330,7 @@ public class ValidationManagerUI extends UI {
 
     private void createRootMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Project", PROJECT_ICON);
+                = menu.addItem("Create Execution", PROJECT_ICON);
         create.setEnabled(checkRight("product.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
