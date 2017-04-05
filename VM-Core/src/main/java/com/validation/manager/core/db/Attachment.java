@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlRootElement;
             query = "SELECT a FROM Attachment a WHERE a.attachmentPK.attachmentTypeId = :attachmentTypeId")
     , @NamedQuery(name = "Attachment.findByStringValue",
             query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue")
-    , @NamedQuery(name = "Attachment.findByAttachmentcol",
-            query = "SELECT a FROM Attachment a WHERE a.attachmentcol = :attachmentcol")})
+    , @NamedQuery(name = "Attachment.findByFileName",
+            query = "SELECT a FROM Attachment a WHERE a.fileName = :fileName")})
 public class Attachment implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,8 +53,8 @@ public class Attachment implements Serializable {
     @Column(name = "TEXT_VALUE")
     private String textValue;
     @Size(max = 255)
-    @Column(name = "attachmentcol")
-    private String attachmentcol;
+    @Column(name = "file_name")
+    private String fileName;
     @JoinColumn(name = "attachment_type_id", referencedColumnName = "id",
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
@@ -109,12 +109,12 @@ public class Attachment implements Serializable {
         this.textValue = textValue;
     }
 
-    public String getAttachmentcol() {
-        return attachmentcol;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setAttachmentcol(String attachmentcol) {
-        this.attachmentcol = attachmentcol;
+    public void setFileName(String filename) {
+        this.fileName = filename;
     }
 
     public AttachmentType getAttachmentType() {

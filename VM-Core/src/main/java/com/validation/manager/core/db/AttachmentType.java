@@ -30,8 +30,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT a FROM AttachmentType a")
     , @NamedQuery(name = "AttachmentType.findById",
             query = "SELECT a FROM AttachmentType a WHERE a.id = :id")
-    , @NamedQuery(name = "AttachmentType.findByFkTable",
-            query = "SELECT a FROM AttachmentType a WHERE a.fkTable = :fkTable")
     , @NamedQuery(name = "AttachmentType.findByType",
             query = "SELECT a FROM AttachmentType a WHERE a.type = :type")})
 public class AttachmentType implements Serializable {
@@ -42,11 +40,6 @@ public class AttachmentType implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "fk_table")
-    private String fkTable;
     @Lob
     @Size(max = 65535)
     @Column(name = "description")
@@ -66,9 +59,8 @@ public class AttachmentType implements Serializable {
         this.id = id;
     }
 
-    public AttachmentType(Integer id, String fkTable, String type) {
+    public AttachmentType(Integer id, String type) {
         this.id = id;
-        this.fkTable = fkTable;
         this.type = type;
     }
 
@@ -78,14 +70,6 @@ public class AttachmentType implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getFkTable() {
-        return fkTable;
-    }
-
-    public void setFkTable(String fkTable) {
-        this.fkTable = fkTable;
     }
 
     public String getDescription() {

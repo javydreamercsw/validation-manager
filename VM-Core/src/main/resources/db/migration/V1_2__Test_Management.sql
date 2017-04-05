@@ -20,3 +20,13 @@ INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (6, 9);
 UPDATE `vm_setting` SET `int_val` = 2 WHERE id = 3;
 /*Add permissions*/
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (7, 8);
+/*Attachment Types*/
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (1, 'plain text', 'txt');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (2, 'PDF', 'pdf');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (3, 'Legacy Word Document', 'doc');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (4, 'Word Document', 'docx');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (5, 'Legacy Excel Document', 'xls');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (6, 'Excel Document', 'xlsx');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (7, 'Legacy Power Point Document', 'ppt');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (8, 'Power Point Document', 'pptx');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (9, 'undefined', '');
