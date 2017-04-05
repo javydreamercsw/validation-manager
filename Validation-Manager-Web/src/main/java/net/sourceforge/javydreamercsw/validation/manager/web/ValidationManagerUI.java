@@ -31,6 +31,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
@@ -133,7 +134,7 @@ public class ValidationManagerUI extends UI {
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset = null;
-    private LoginDialog subwindow = null;
+    private LoginDialog loginWindow = null;
     private final String projTreeRoot = "Available Projects";
     private Component left;
     private final TabSheet tabSheet = new TabSheet();
@@ -1709,8 +1710,9 @@ public class ValidationManagerUI extends UI {
                         -> (u.getId() < 1000)).forEachOrdered((u) -> {
                     try {
                         //Default accounts
-                        if (u.getPassword().equals(MD5
-                                .encrypt(u.getUsername()))) {
+                        if (u.getPassword() != null
+                                && u.getPassword().equals(MD5
+                                        .encrypt(u.getUsername()))) {
                             sb.append("<li><b>User name:</b> ")
                                     .append(u.getUsername())
                                     .append(", <b>Password:</b> ")
@@ -1760,9 +1762,24 @@ public class ValidationManagerUI extends UI {
     }
 
     private Component getMenu() {
-        HorizontalLayout hl = new HorizontalLayout();
-        hl.addComponent(new Image("", logo));
-        return hl;
+        GridLayout gl = new GridLayout(3, 3);
+        gl.addComponent(new Image("", logo), 0, 0);
+        if (getUser() != null) {
+            //Logout button
+            Button logout = new Button("Log out");
+            logout.addClickListener((Button.ClickEvent event) -> {
+                try {
+                    user.write2DB();
+                    user = null;
+                    updateScreen();
+                } catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            });
+            gl.addComponent(logout, 2, 2);
+        }
+        gl.setSizeFull();
+        return gl;
     }
 
     public void updateScreen() {
@@ -2295,17 +2312,19 @@ public class ValidationManagerUI extends UI {
     }
 
     private void showLoginDialog() {
-        if (subwindow == null) {
-            subwindow = new LoginDialog(this, small);
-            subwindow.setVisible(true);
-            subwindow.setClosable(false);
-            subwindow.setResizable(false);
-            subwindow.center();
-            subwindow.setWidth(35, Unit.PERCENTAGE);
-            subwindow.setHeight(35, Unit.PERCENTAGE);
-            addWindow(subwindow);
+        if (loginWindow == null) {
+            loginWindow = new LoginDialog(this, small);
+            loginWindow.setVisible(true);
+            loginWindow.setClosable(false);
+            loginWindow.setResizable(false);
+            loginWindow.center();
+            loginWindow.setWidth(35, Unit.PERCENTAGE);
+            loginWindow.setHeight(35, Unit.PERCENTAGE);
         } else {
-            subwindow.setVisible(true);
+            loginWindow.clear();
+        }
+        if (!getWindows().contains(loginWindow)) {
+            addWindow(loginWindow);
         }
     }
 
