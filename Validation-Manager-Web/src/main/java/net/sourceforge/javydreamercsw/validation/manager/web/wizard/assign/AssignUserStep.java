@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.validation.manager.web;
+package net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign;
 
 import com.vaadin.data.Item;
 import com.vaadin.ui.Component;
@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.validation.manager.web.TreeTableCheckBox;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
@@ -34,9 +36,11 @@ public class AssignUserStep implements WizardStep {
     private TestCaseServer tc = null;
     private static final Logger LOG
             = Logger.getLogger(AssignUserStep.class.getSimpleName());
+    private final ValidationManagerUI ui;
 
-    public AssignUserStep(Object item) {
+    public AssignUserStep(ValidationManagerUI ui, Object item) {
         this.key = item;
+        this.ui = ui;
     }
 
     @Override
@@ -163,7 +167,7 @@ public class AssignUserStep implements WizardStep {
                     = new TestCaseJpaController(DataBaseManager
                             .getEntityManagerFactory());
             testCaseIds.forEach((id) -> {
-                user.assignTestCase(tce, c.findTestCase(id));
+                user.assignTestCase(tce, c.findTestCase(id), ui.getUser());
             });
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);

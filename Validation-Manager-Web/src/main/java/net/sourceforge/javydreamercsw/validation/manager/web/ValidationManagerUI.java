@@ -108,6 +108,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
+import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
 import org.vaadin.peter.contextmenu.ContextMenu;
@@ -159,7 +160,7 @@ public class ValidationManagerUI extends UI {
     /**
      * @return the user
      */
-    protected VMUserServer getUser() {
+    public VMUserServer getUser() {
         return user;
     }
 
@@ -1293,7 +1294,7 @@ public class ValidationManagerUI extends UI {
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     Wizard w = new Wizard();
                     Window sw = new Window();
-                    w.addStep(new AssignUserStep(tree.getValue()));
+                    w.addStep(new AssignUserStep(this, tree.getValue()));
                     w.addListener(new WizardProgressListener() {
                         @Override
                         public void activeStepChanged(WizardStepActivationEvent event) {
