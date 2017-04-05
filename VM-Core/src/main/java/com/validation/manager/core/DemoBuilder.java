@@ -8,6 +8,7 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
@@ -16,9 +17,11 @@ import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
+import com.validation.manager.core.server.core.VMUserServer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -152,5 +155,15 @@ public class DemoBuilder {
         ps.getTestCaseExecutions().add(tces.getEntity());
         ps.write2DB();
         ps.update(p, ps.getEntity());
+        VMUserServer tester1 = new VMUserServer(2);//Tester
+        VMUserServer tester2 = new VMUserServer(3);//Tester
+        VMUserServer assigner = new VMUserServer(6);//Tester
+        Random r = new Random();
+        tces.getExecutionStepList().stream().map((es)
+                -> new ExecutionStepServer(es)).forEachOrdered((ess)
+                -> {
+            ess.assignUser(r.nextBoolean() ? tester1.getEntity()
+                    : tester2.getEntity(), assigner.getEntity());
+        });
     }
 }
