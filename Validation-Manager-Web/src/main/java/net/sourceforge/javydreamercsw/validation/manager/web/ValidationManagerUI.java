@@ -1770,28 +1770,33 @@ public class ValidationManagerUI extends UI {
                                 sp.getTestProjectList().forEach(test -> {
                                     test.getProjectList().forEach(tp -> {
                                         tp.getTestCaseExecutions().forEach(tce -> {
+                                            List<Integer> tcids = new ArrayList<>();
                                             testCaseTree.addItem(new Object[]{tce.getName(),
                                                 "", "",}, "tce" + tce.getId());
                                             testCaseTree.setParent("tce" + tce.getId(), "p" + sp.getId());
                                             testCaseTree.setItemIcon("tce" + tce.getId(), EXECUTION_ICON);
                                             tce.getExecutionStepList().forEach(es -> {
                                                 if (es.getVmUserId().getId().equals(getUser().getId())) {
-                                                    DateTimeFormatter format
-                                                            = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
-                                                    LocalDateTime time
-                                                            = LocalDateTime.ofInstant(es.getAssignedTime()
-                                                                    .toInstant(), ZoneId.systemDefault());
                                                     TestCase tc = es.getStep().getTestCase();
-                                                    String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
-                                                            + "-" + es.getStep().getStepPK().getId() + "-" + tc.getId();
-                                                    testCaseTree.addItem(new Object[]{tc.getName(),
-                                                        tc.getSummary(), format.format(time),},
-                                                            key);
-                                                    testCaseTree.setParent(key, "tce" + tce.getId());
-                                                    testCaseTree.setItemIcon(key, TEST_ICON);
-                                                    testCaseTree.setChildrenAllowed(key, false);
+                                                    if (!tcids.contains(tc.getId())) {
+                                                        tcids.add(tc.getId());
+                                                        DateTimeFormatter format
+                                                                = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
+                                                        LocalDateTime time
+                                                                = LocalDateTime.ofInstant(es.getAssignedTime()
+                                                                        .toInstant(), ZoneId.systemDefault());
+                                                        String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
+                                                                + "-" + es.getStep().getStepPK().getId() + "-" + tc.getId();
+                                                        testCaseTree.addItem(new Object[]{tc.getName(),
+                                                            tc.getSummary(), format.format(time),},
+                                                                key);
+                                                        testCaseTree.setParent(key, "tce" + tce.getId());
+                                                        testCaseTree.setItemIcon(key, TEST_ICON);
+                                                        testCaseTree.setChildrenAllowed(key, false);
+                                                    }
                                                 }
                                             });
+                                            tcids.clear();
                                         });
                                     });
                                 });
