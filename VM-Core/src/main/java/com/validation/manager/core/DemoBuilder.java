@@ -33,6 +33,7 @@ public class DemoBuilder {
 
     private static final Logger LOG
             = Logger.getLogger(DemoBuilder.class.getSimpleName());
+    private static int tcCounter = 1, tpCounter = 1, reqCounter = 1;
 
     public static void buildDemoProject() throws Exception {
         LOG.info("Creating demo projects...");
@@ -58,7 +59,6 @@ public class DemoBuilder {
 
     private static void addDemoProjectRequirements(Project p)
             throws Exception {
-        int count = 1;
         for (int i = 0; i < 5; i++) {
             //Create a spec
             RequirementSpecServer temp
@@ -72,13 +72,13 @@ public class DemoBuilder {
             for (int y = 0; y < 5; y++) {
                 RequirementServer req
                         = new RequirementServer("Requirement "
-                                + count,
-                                "Description " + count,
+                                + reqCounter,
+                                "Description " + reqCounter,
                                 node.getRequirementSpecNodePK(),
                                 "Notes", 1, 1);
                 req.write2DB();
                 node.getRequirementList().add(req.getEntity());
-                count++;
+                reqCounter++;
             }
             node.write2DB();
             p.getRequirementSpecList().add(temp.getEntity());
@@ -98,14 +98,14 @@ public class DemoBuilder {
         //Add the test structur
         TestPlanServer tps = new TestPlanServer(tp.getEntity(),
                 true, true);
-        tps.setName("Test Plan #1");
+        tps.setName("Test Plan #" + (tpCounter++));
         tps.setNotes("Notes");
         tps.write2DB();
         for (int i = 0; i < 5; i++) {
             //Add steps
             TestCaseServer tcs
                     = new TestCaseServer("Test Case #"
-                            + (i + 1),
+                            + (tcCounter++),
                             new Date());
             tcs.write2DB();
             for (int j = 0; j < 5; j++) {
