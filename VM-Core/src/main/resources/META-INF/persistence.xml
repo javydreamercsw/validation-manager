@@ -47,7 +47,6 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
-    <class>com.validation.manager.core.db.ProjectHasTestCaseExecution</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/validation_manager?serverTimezone=UTC"/>
@@ -106,7 +105,6 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
-    <class>com.validation.manager.core.db.ProjectHasTestCaseExecution</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:./target/data/test/validation-manager-test;AUTO_SERVER=TRUE"/>
@@ -167,7 +165,6 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
-    <class>com.validation.manager.core.db.ProjectHasTestCaseExecution</class>
     <properties>
       <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
       <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.DefaultSessionLog"/>
@@ -178,108 +175,6 @@
             that will set the lookupType on the JNDI connector to STRING_LOOKUP
             instead of Composite-->
       <property name="eclipselink.session.customizer" value="com.validation.manager.core.server.JPAEclipseLinkSessionCustomizer"/>
-    </properties>
-  </persistence-unit>
-  <persistence-unit name="DEFAULT_PU" transaction-type="RESOURCE_LOCAL">
-    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <class>com.validation.manager.core.db.VmUser</class>
-    <class>com.validation.manager.core.db.Role</class>
-    <class>com.validation.manager.core.db.RiskItem</class>
-    <class>com.validation.manager.core.db.Project</class>
-    <class>com.validation.manager.core.db.Cause</class>
-    <class>com.validation.manager.core.db.ExecutionStep</class>
-    <class>com.validation.manager.core.db.ExecutionResult</class>
-    <class>com.validation.manager.core.db.SpecLevel</class>
-    <class>com.validation.manager.core.db.ProjectHasTestCaseExecution</class>
-    <class>com.validation.manager.core.db.RootCauseType</class>
-    <class>com.validation.manager.core.db.UserTestProjectRole</class>
-    <class>com.validation.manager.core.db.TestPlan</class>
-    <class>com.validation.manager.core.db.VmId</class>
-    <class>com.validation.manager.core.db.Fmea</class>
-    <class>com.validation.manager.core.db.RiskControlType</class>
-    <class>com.validation.manager.core.db.VmException</class>
-    <class>com.validation.manager.core.db.Attachment</class>
-    <class>com.validation.manager.core.db.TestCaseExecution</class>
-    <class>com.validation.manager.core.db.Hazard</class>
-    <class>com.validation.manager.core.db.UserRight</class>
-    <class>com.validation.manager.core.db.RequirementSpecNode</class>
-    <class>com.validation.manager.core.db.FailureMode</class>
-    <class>com.validation.manager.core.db.TestCase</class>
-    <class>com.validation.manager.core.db.RootCause</class>
-    <class>com.validation.manager.core.db.UserStatus</class>
-    <class>com.validation.manager.core.db.RiskCategory</class>
-    <class>com.validation.manager.core.db.AssignmentStatus</class>
-    <class>com.validation.manager.core.db.VmSetting</class>
-    <class>com.validation.manager.core.db.RiskControl</class>
-    <class>com.validation.manager.core.db.CorrectiveAction</class>
-    <class>com.validation.manager.core.db.AssigmentType</class>
-    <class>com.validation.manager.core.db.Requirement</class>
-    <class>com.validation.manager.core.db.RiskItemHasRiskCategory</class>
-    <class>com.validation.manager.core.db.UserTestPlanRole</class>
-    <class>com.validation.manager.core.db.RequirementType</class>
-    <class>com.validation.manager.core.db.RequirementSpec</class>
-    <class>com.validation.manager.core.db.UserModifiedRecord</class>
-    <class>com.validation.manager.core.db.AttachmentType</class>
-    <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
-    <class>com.validation.manager.core.db.TestProject</class>
-    <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
-    <class>com.validation.manager.core.db.Investigation</class>
-    <class>com.validation.manager.core.db.RequirementStatus</class>
-    <class>com.validation.manager.core.db.Step</class>
-    <class>com.validation.manager.core.db.UserHasInvestigation</class>
-    <class>com.validation.manager.core.db.UserAssigment</class>
-    <class>com.validation.manager.core.db.test.VmUser</class>
-    <class>com.validation.manager.core.db.test.Role</class>
-    <class>com.validation.manager.core.db.test.RiskItem</class>
-    <class>com.validation.manager.core.db.test.Project</class>
-    <class>com.validation.manager.core.db.test.Cause</class>
-    <class>com.validation.manager.core.db.test.ExecutionStep</class>
-    <class>com.validation.manager.core.db.test.ExecutionResult</class>
-    <class>com.validation.manager.core.db.test.SpecLevel</class>
-    <class>com.validation.manager.core.db.test.ProjectHasTestCaseExecution</class>
-    <class>com.validation.manager.core.db.test.RootCauseType</class>
-    <class>com.validation.manager.core.db.test.UserTestProjectRole</class>
-    <class>com.validation.manager.core.db.test.TestPlan</class>
-    <class>com.validation.manager.core.db.test.VmId</class>
-    <class>com.validation.manager.core.db.test.Fmea</class>
-    <class>com.validation.manager.core.db.test.RiskControlType</class>
-    <class>com.validation.manager.core.db.test.VmException</class>
-    <class>com.validation.manager.core.db.test.Attachment</class>
-    <class>com.validation.manager.core.db.test.TestCaseExecution</class>
-    <class>com.validation.manager.core.db.test.Hazard</class>
-    <class>com.validation.manager.core.db.test.UserRight</class>
-    <class>com.validation.manager.core.db.test.RequirementSpecNode</class>
-    <class>com.validation.manager.core.db.test.FailureMode</class>
-    <class>com.validation.manager.core.db.test.TestCase</class>
-    <class>com.validation.manager.core.db.test.RootCause</class>
-    <class>com.validation.manager.core.db.test.UserStatus</class>
-    <class>com.validation.manager.core.db.test.RiskCategory</class>
-    <class>com.validation.manager.core.db.test.AssignmentStatus</class>
-    <class>com.validation.manager.core.db.test.VmSetting</class>
-    <class>com.validation.manager.core.db.test.RiskControl</class>
-    <class>com.validation.manager.core.db.test.CorrectiveAction</class>
-    <class>com.validation.manager.core.db.test.AssigmentType</class>
-    <class>com.validation.manager.core.db.test.Requirement</class>
-    <class>com.validation.manager.core.db.test.RiskItemHasRiskCategory</class>
-    <class>com.validation.manager.core.db.test.UserTestPlanRole</class>
-    <class>com.validation.manager.core.db.test.RequirementType</class>
-    <class>com.validation.manager.core.db.test.RequirementSpec</class>
-    <class>com.validation.manager.core.db.test.UserModifiedRecord</class>
-    <class>com.validation.manager.core.db.test.AttachmentType</class>
-    <class>com.validation.manager.core.db.test.RiskControlHasTestCase</class>
-    <class>com.validation.manager.core.db.test.TestProject</class>
-    <class>com.validation.manager.core.db.test.RiskControlHasRequirement</class>
-    <class>com.validation.manager.core.db.test.Investigation</class>
-    <class>com.validation.manager.core.db.test.RequirementStatus</class>
-    <class>com.validation.manager.core.db.test.Step</class>
-    <class>com.validation.manager.core.db.test.UserHasInvestigation</class>
-    <class>com.validation.manager.core.db.test.UserAssigment</class>
-    <properties>
-      <property name="javax.persistence.jdbc.url" value="jdbc:derby://localhost:1527/sample"/>
-      <property name="javax.persistence.jdbc.password" value="app"/>
-      <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.ClientDriver"/>
-      <property name="javax.persistence.jdbc.user" value="app"/>
-      <property name="javax.persistence.schema-generation.database.action" value="create"/>
     </properties>
   </persistence-unit>
 </persistence>

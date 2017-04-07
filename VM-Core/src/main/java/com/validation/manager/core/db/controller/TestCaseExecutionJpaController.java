@@ -7,7 +7,6 @@ package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Project;
-import com.validation.manager.core.db.ProjectHasTestCaseExecution;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -43,9 +42,6 @@ public class TestCaseExecutionJpaController implements Serializable {
         if (testCaseExecution.getProjects() == null) {
             testCaseExecution.setProjects(new ArrayList<>());
         }
-        if (testCaseExecution.getProjectHasTestCaseExecutionList() == null) {
-            testCaseExecution.setProjectHasTestCaseExecutionList(new ArrayList<>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -62,12 +58,6 @@ public class TestCaseExecutionJpaController implements Serializable {
                 attachedProjects.add(projectsProjectToAttach);
             }
             testCaseExecution.setProjects(attachedProjects);
-            List<ProjectHasTestCaseExecution> attachedProjectHasTestCaseExecutionList = new ArrayList<>();
-            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach : testCaseExecution.getProjectHasTestCaseExecutionList()) {
-                projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach = em.getReference(projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach.getClass(), projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach.getProjectHasTestCaseExecutionPK());
-                attachedProjectHasTestCaseExecutionList.add(projectHasTestCaseExecutionListProjectHasTestCaseExecutionToAttach);
-            }
-            testCaseExecution.setProjectHasTestCaseExecutionList(attachedProjectHasTestCaseExecutionList);
             em.persist(testCaseExecution);
             for (ExecutionStep executionStepListExecutionStep : testCaseExecution.getExecutionStepList()) {
                 TestCaseExecution oldTestCaseExecutionOfExecutionStepListExecutionStep = executionStepListExecutionStep.getTestCaseExecution();
@@ -81,15 +71,6 @@ public class TestCaseExecutionJpaController implements Serializable {
             for (Project projectsProject : testCaseExecution.getProjects()) {
                 projectsProject.getTestCaseExecutions().add(testCaseExecution);
                 projectsProject = em.merge(projectsProject);
-            }
-            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListProjectHasTestCaseExecution : testCaseExecution.getProjectHasTestCaseExecutionList()) {
-                TestCaseExecution oldTestCaseExecutionOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution = projectHasTestCaseExecutionListProjectHasTestCaseExecution.getTestCaseExecution();
-                projectHasTestCaseExecutionListProjectHasTestCaseExecution.setTestCaseExecution(testCaseExecution);
-                projectHasTestCaseExecutionListProjectHasTestCaseExecution = em.merge(projectHasTestCaseExecutionListProjectHasTestCaseExecution);
-                if (oldTestCaseExecutionOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution != null) {
-                    oldTestCaseExecutionOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution.getProjectHasTestCaseExecutionList().remove(projectHasTestCaseExecutionListProjectHasTestCaseExecution);
-                    oldTestCaseExecutionOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution = em.merge(oldTestCaseExecutionOfProjectHasTestCaseExecutionListProjectHasTestCaseExecution);
-                }
             }
             em.getTransaction().commit();
         } finally {
@@ -109,8 +90,6 @@ public class TestCaseExecutionJpaController implements Serializable {
             List<ExecutionStep> executionStepListNew = testCaseExecution.getExecutionStepList();
             List<Project> projectsOld = persistentTestCaseExecution.getProjects();
             List<Project> projectsNew = testCaseExecution.getProjects();
-            List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionListOld = persistentTestCaseExecution.getProjectHasTestCaseExecutionList();
-            List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionListNew = testCaseExecution.getProjectHasTestCaseExecutionList();
             List<String> illegalOrphanMessages = null;
             for (ExecutionStep executionStepListOldExecutionStep : executionStepListOld) {
                 if (!executionStepListNew.contains(executionStepListOldExecutionStep)) {
@@ -118,14 +97,6 @@ public class TestCaseExecutionJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStep " + executionStepListOldExecutionStep + " since its testCaseExecution field is not nullable.");
-                }
-            }
-            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListOldProjectHasTestCaseExecution : projectHasTestCaseExecutionListOld) {
-                if (!projectHasTestCaseExecutionListNew.contains(projectHasTestCaseExecutionListOldProjectHasTestCaseExecution)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
-                    }
-                    illegalOrphanMessages.add("You must retain ProjectHasTestCaseExecution " + projectHasTestCaseExecutionListOldProjectHasTestCaseExecution + " since its testCaseExecution field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -145,13 +116,6 @@ public class TestCaseExecutionJpaController implements Serializable {
             }
             projectsNew = attachedProjectsNew;
             testCaseExecution.setProjects(projectsNew);
-            List<ProjectHasTestCaseExecution> attachedProjectHasTestCaseExecutionListNew = new ArrayList<>();
-            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach : projectHasTestCaseExecutionListNew) {
-                projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach = em.getReference(projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach.getClass(), projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach.getProjectHasTestCaseExecutionPK());
-                attachedProjectHasTestCaseExecutionListNew.add(projectHasTestCaseExecutionListNewProjectHasTestCaseExecutionToAttach);
-            }
-            projectHasTestCaseExecutionListNew = attachedProjectHasTestCaseExecutionListNew;
-            testCaseExecution.setProjectHasTestCaseExecutionList(projectHasTestCaseExecutionListNew);
             testCaseExecution = em.merge(testCaseExecution);
             for (ExecutionStep executionStepListNewExecutionStep : executionStepListNew) {
                 if (!executionStepListOld.contains(executionStepListNewExecutionStep)) {
@@ -174,17 +138,6 @@ public class TestCaseExecutionJpaController implements Serializable {
                 if (!projectsOld.contains(projectsNewProject)) {
                     projectsNewProject.getTestCaseExecutions().add(testCaseExecution);
                     projectsNewProject = em.merge(projectsNewProject);
-                }
-            }
-            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListNewProjectHasTestCaseExecution : projectHasTestCaseExecutionListNew) {
-                if (!projectHasTestCaseExecutionListOld.contains(projectHasTestCaseExecutionListNewProjectHasTestCaseExecution)) {
-                    TestCaseExecution oldTestCaseExecutionOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution = projectHasTestCaseExecutionListNewProjectHasTestCaseExecution.getTestCaseExecution();
-                    projectHasTestCaseExecutionListNewProjectHasTestCaseExecution.setTestCaseExecution(testCaseExecution);
-                    projectHasTestCaseExecutionListNewProjectHasTestCaseExecution = em.merge(projectHasTestCaseExecutionListNewProjectHasTestCaseExecution);
-                    if (oldTestCaseExecutionOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution != null && !oldTestCaseExecutionOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution.equals(testCaseExecution)) {
-                        oldTestCaseExecutionOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution.getProjectHasTestCaseExecutionList().remove(projectHasTestCaseExecutionListNewProjectHasTestCaseExecution);
-                        oldTestCaseExecutionOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution = em.merge(oldTestCaseExecutionOfProjectHasTestCaseExecutionListNewProjectHasTestCaseExecution);
-                    }
                 }
             }
             em.getTransaction().commit();
@@ -223,13 +176,6 @@ public class TestCaseExecutionJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This TestCaseExecution (" + testCaseExecution + ") cannot be destroyed since the ExecutionStep " + executionStepListOrphanCheckExecutionStep + " in its executionStepList field has a non-nullable testCaseExecution field.");
-            }
-            List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionListOrphanCheck = testCaseExecution.getProjectHasTestCaseExecutionList();
-            for (ProjectHasTestCaseExecution projectHasTestCaseExecutionListOrphanCheckProjectHasTestCaseExecution : projectHasTestCaseExecutionListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
-                }
-                illegalOrphanMessages.add("This TestCaseExecution (" + testCaseExecution + ") cannot be destroyed since the ProjectHasTestCaseExecution " + projectHasTestCaseExecutionListOrphanCheckProjectHasTestCaseExecution + " in its projectHasTestCaseExecutionList field has a non-nullable testCaseExecution field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

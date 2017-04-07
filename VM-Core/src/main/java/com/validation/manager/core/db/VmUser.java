@@ -126,8 +126,6 @@ public class VmUser extends Login implements Serializable {
     private List<UserAssigment> userAssigmentList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assigneeId")
     private List<UserAssigment> userAssigmentList1;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "createdBy")
-    private List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionList;
     //Steps I have for executions
     @OneToMany(targetEntity = ExecutionStep.class)
     private List<ExecutionStep> executionSteps;
@@ -337,16 +335,6 @@ public class VmUser extends Login implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.VmUser[ id=" + id + " ]";
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<ProjectHasTestCaseExecution> getProjectHasTestCaseExecutionList() {
-        return projectHasTestCaseExecutionList;
-    }
-
-    public void setProjectHasTestCaseExecutionList(List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionList) {
-        this.projectHasTestCaseExecutionList = projectHasTestCaseExecutionList;
     }
 
     public List<ExecutionStep> getExecutionSteps() {

@@ -25,8 +25,6 @@ import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 @Entity
 @Table(name = "project")
@@ -39,9 +37,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     , @NamedQuery(name = "Project.findByName",
             query = "SELECT p FROM Project p WHERE p.name = :name")})
 public class Project implements Serializable {
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
-    private List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionList;
 
     @Column(name = "id")
     @Id
@@ -161,15 +156,4 @@ public class Project implements Serializable {
     public void setTestCaseExecutions(List<TestCaseExecution> testCaseExecutions) {
         this.testCaseExecutions = testCaseExecutions;
     }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<ProjectHasTestCaseExecution> getProjectHasTestCaseExecutionList() {
-        return projectHasTestCaseExecutionList;
-    }
-
-    public void setProjectHasTestCaseExecutionList(List<ProjectHasTestCaseExecution> projectHasTestCaseExecutionList) {
-        this.projectHasTestCaseExecutionList = projectHasTestCaseExecutionList;
-    }
-
 }

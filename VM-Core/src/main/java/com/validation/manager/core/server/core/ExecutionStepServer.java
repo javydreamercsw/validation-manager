@@ -3,6 +3,7 @@ package com.validation.manager.core.server.core;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import java.util.Date;
@@ -21,6 +22,11 @@ public final class ExecutionStepServer extends ExecutionStep
 
     public ExecutionStepServer(ExecutionStep es) {
         super(es.getExecutionStepPK());
+        update();
+    }
+
+    public ExecutionStepServer(ExecutionStepPK pk) {
+        super(pk);
         update();
     }
 
