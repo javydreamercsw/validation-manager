@@ -41,8 +41,8 @@ public class Cause implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "CuseGen")
-    @TableGenerator(name = "CuseGen", table = "vm_id",
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "CauseGen")
+    @TableGenerator(name = "CauseGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "cause",
