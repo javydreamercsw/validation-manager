@@ -121,6 +121,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
+import net.sourceforge.javydreamercsw.validation.manager.web.execution.ExecutionWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
@@ -148,6 +149,7 @@ public class ValidationManagerUI extends UI {
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset = null;
     private LoginDialog loginWindow = null;
+    private ExecutionWindow executionWindow = null;
     private final String projTreeRoot = "Available Projects";
     private Component left;
     private final TabSheet tabSheet = new TabSheet();
@@ -1687,14 +1689,7 @@ public class ValidationManagerUI extends UI {
                                 && ((String) itemId).startsWith("es")) {
                                     Button label = new Button();
                                     label.addStyleName(ValoTheme.BUTTON_BORDERLESS + " labelButton");
-                                    String id = ((String) itemId).substring(2);
-                                    int esId, sId, tcId;
-                                    StringTokenizer st = new StringTokenizer(id, "-");
-                                    esId = Integer.parseInt(st.nextToken());
-                                    sId = Integer.parseInt(st.nextToken());
-                                    tcId = Integer.parseInt(st.nextToken());
-                                    ExecutionStepPK pk = new ExecutionStepPK(esId, sId, tcId);
-                                    ExecutionStepServer ess = new ExecutionStepServer(pk);
+                                    ExecutionStepServer ess = new ExecutionStepServer(extractExecutionStepPK((String) itemId));
                                     String message;
                                     if (ess.getResultId() == null) {
                                         ExecutionResult result = ExecutionResultServer.getResult("result.pending");
@@ -1751,7 +1746,10 @@ public class ValidationManagerUI extends UI {
 
                         @Override
                         public void handleAction(Action action, Object sender, Object target) {
-                            LOG.log(Level.INFO, "Target: {0}", target);
+                            //Parse the information to get the exact Execution Step
+                            List<TestCaseExecutionServer> executions = new ArrayList<>();
+                            executions.add(new TestCaseExecutionServer(new ExecutionStepServer(extractExecutionStepPK((String) target)).getTestCaseExecution().getId()));
+                            showExecutionScreen(executions);
                         }
                     });
                     ProjectServer.getProjects().forEach(p -> {
@@ -1932,8 +1930,6 @@ public class ValidationManagerUI extends UI {
         vs.setSplitPosition(25, Unit.PERCENTAGE);
         //Set up top menu panel
         vs.setFirstComponent(getMenu());
-        //Add the content
-        vs.setSecondComponent(getContentComponent());
         setContent(vs);
         if (getUser() == null) {
             showLoginDialog();
@@ -1950,6 +1946,8 @@ public class ValidationManagerUI extends UI {
                 }
             });
         }
+        //Add the content
+        vs.setSecondComponent(getContentComponent());
     }
 
     private void displayProject(Project p, boolean edit) {
@@ -2151,7 +2149,7 @@ public class ValidationManagerUI extends UI {
             }
             if (add) {
                 //Add Test Case if not there
-                Item item = tree.addItem(node);
+                tree.addItem(node);
                 tree.setItemCaption(node, tc.getName());
                 tree.setItemIcon(node, TEST_ICON);
                 tree.setParent(node, tce);
@@ -2559,6 +2557,16 @@ public class ValidationManagerUI extends UI {
         return tree.getValue();
     }
 
+    private ExecutionStepPK extractExecutionStepPK(String itemId) {
+        String id = itemId.substring(2);//Remove es
+        int esId, sId, tcId;
+        StringTokenizer st = new StringTokenizer(id, "-");
+        esId = Integer.parseInt(st.nextToken());
+        sId = Integer.parseInt(st.nextToken());
+        tcId = Integer.parseInt(st.nextToken());
+        return new ExecutionStepPK(esId, sId, tcId);
+    }
+
     @WebServlet(value = "/*", asyncSupported = true)
     @VaadinServletConfiguration(productionMode = false,
             ui = ValidationManagerUI.class,
@@ -2571,6 +2579,21 @@ public class ValidationManagerUI extends UI {
                 reset = new VMDemoResetThread();
                 reset.start();
             }
+        }
+    }
+
+    private void showExecutionScreen(List<TestCaseExecutionServer> executions) {
+        if (executionWindow == null) {
+            executionWindow = new ExecutionWindow(executions, logo);
+            executionWindow.setVisible(true);
+            executionWindow.setClosable(false);
+            executionWindow.setResizable(false);
+            executionWindow.center();
+            executionWindow.setModal(true);
+            executionWindow.setSizeFull();
+        }
+        if (!getWindows().contains(executionWindow)) {
+            addWindow(executionWindow);
         }
     }
 }
