@@ -44,21 +44,26 @@ public final class TestCaseExecutionServer extends TestCaseExecution
      * @param tc Test Case to add
      */
     public void addTestCase(TestCase tc) {
-        ExecutionStepJpaController econtroller
-                = new ExecutionStepJpaController(DataBaseManager
-                        .getEntityManagerFactory());
-        tc.getStepList().forEach((s) -> {
-            ExecutionStep executionStep = new ExecutionStep(getId(),
-                    s.getStepPK().getId(), s.getStepPK().getTestCaseId());
-            executionStep.setStep(s);
-            executionStep.setTestCaseExecution(getEntity());
-            try {
-                econtroller.create(executionStep);
-                getExecutionStepList().add(executionStep);
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        });
+        try {
+            ExecutionStepJpaController econtroller
+                    = new ExecutionStepJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+            tc.getStepList().forEach((s) -> {
+                ExecutionStep executionStep = new ExecutionStep(getId(),
+                        s.getStepPK().getId(), s.getStepPK().getTestCaseId());
+                executionStep.setStep(s);
+                executionStep.setTestCaseExecution(getEntity());
+                try {
+                    econtroller.create(executionStep);
+                    getExecutionStepList().add(executionStep);
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            });
+            write2DB();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     @Override
