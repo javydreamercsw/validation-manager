@@ -1,12 +1,15 @@
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -14,6 +17,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -35,14 +40,23 @@ import javax.xml.bind.annotation.XmlRootElement;
             query = "SELECT a FROM Attachment a WHERE a.fileName = :fileName")})
 public class Attachment implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected AttachmentPK attachmentPK;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Column(name = "file")
     private byte[] file;
+    @JoinTable(name = "execution_step_has_attachment", joinColumns = {
+        @JoinColumn(name = "attachment_id", referencedColumnName = "id")
+        , @JoinColumn(name = "attachment_attachment_type_id", referencedColumnName = "attachment_type_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "execution_step_test_case_execution_id", referencedColumnName = "test_case_execution_id")
+        , @JoinColumn(name = "execution_step_step_id", referencedColumnName = "step_id")
+        , @JoinColumn(name = "execution_step_step_test_case_id", referencedColumnName = "step_test_case_id")})
+    @ManyToMany
+    private List<ExecutionStep> executionStepList;
+
+    private static final long serialVersionUID = 1L;
+    @EmbeddedId
+    protected AttachmentPK attachmentPK;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -85,13 +99,6 @@ public class Attachment implements Serializable {
         this.attachmentPK = attachmentPK;
     }
 
-    public byte[] getFile() {
-        return file;
-    }
-
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
 
     public String getStringValue() {
         return stringValue;
@@ -148,6 +155,24 @@ public class Attachment implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Attachment[ attachmentPK="
                 + attachmentPK + " ]";
+    }
+
+    public byte[] getFile() {
+        return file;
+    }
+
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
+    }
+
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
     }
 
 }

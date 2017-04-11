@@ -2,12 +2,14 @@ package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -16,6 +18,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -82,6 +86,10 @@ public class ExecutionStep implements Serializable {
     @Column(name = "assigned_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date assignedTime;
+    @Column(name = "assigned_by_user_id")
+    private Integer assignedByUserId;
+    @ManyToMany(mappedBy = "executionStepList")
+    private List<Attachment> attachmentList;
 
     public ExecutionStep() {
     }
@@ -197,5 +205,23 @@ public class ExecutionStep implements Serializable {
 
     public void setAssignedTime(Date assignedTime) {
         this.assignedTime = assignedTime;
+    }
+
+    public Integer getAssignedByUserId() {
+        return assignedByUserId;
+    }
+
+    public void setAssignedByUserId(Integer assignedByUserId) {
+        this.assignedByUserId = assignedByUserId;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Attachment> getAttachmentList() {
+        return attachmentList;
+    }
+
+    public void setAttachmentList(List<Attachment> attachmentList) {
+        this.attachmentList = attachmentList;
     }
 }
