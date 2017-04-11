@@ -4,6 +4,9 @@ import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -16,6 +19,14 @@ public class AttachmentPK implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "Attachment_IDGEN")
+    @TableGenerator(name = "Attachment_IDGEN", table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "attachment",
+            initialValue = 1,
+            allocationSize = 1)
     private int id;
     @Basic(optional = false)
     @NotNull
