@@ -8,9 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -24,14 +22,13 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "attachment")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Attachment.findAll",
-            query = "SELECT a FROM Attachment a")
+    @NamedQuery(name = "Attachment.findAll", query = "SELECT a FROM Attachment a")
     , @NamedQuery(name = "Attachment.findById",
             query = "SELECT a FROM Attachment a WHERE a.attachmentPK.id = :id")
     , @NamedQuery(name = "Attachment.findByAttachmentTypeId",
@@ -49,19 +46,6 @@ public class Attachment implements Serializable {
     private byte[] file;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "attachment")
     private List<ExecutionStepHasAttachment> executionStepHasAttachmentList;
-    @JoinTable(name = "execution_step_has_attachment", joinColumns = {
-        @JoinColumn(name = "attachment_id", referencedColumnName = "id")
-        , @JoinColumn(name = "attachment_attachment_type_id",
-                referencedColumnName = "attachment_type_id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "execution_step_test_case_execution_id",
-                        referencedColumnName = "test_case_execution_id")
-                , @JoinColumn(name = "execution_step_step_id",
-                        referencedColumnName = "step_id")
-                , @JoinColumn(name = "execution_step_step_test_case_id",
-                        referencedColumnName = "step_test_case_id")})
-    @ManyToMany
-    private List<ExecutionStep> executionStepList;
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
@@ -128,8 +112,8 @@ public class Attachment implements Serializable {
         return fileName;
     }
 
-    public void setFileName(String filename) {
-        this.fileName = filename;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public AttachmentType getAttachmentType() {
@@ -161,18 +145,7 @@ public class Attachment implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Attachment[ attachmentPK="
-                + attachmentPK + " ]";
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<ExecutionStep> getExecutionStepList() {
-        return executionStepList;
-    }
-
-    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
-        this.executionStepList = executionStepList;
+        return "com.validation.manager.core.db.Attachment[ attachmentPK=" + attachmentPK + " ]";
     }
 
     public byte[] getFile() {

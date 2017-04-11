@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class AttachmentPK implements Serializable {
@@ -72,5 +72,4 @@ public class AttachmentPK implements Serializable {
         return "com.validation.manager.core.db.AttachmentPK[ id=" + id
                 + ", attachmentTypeId=" + attachmentTypeId + " ]";
     }
-
 }

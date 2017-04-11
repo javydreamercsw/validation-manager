@@ -63,6 +63,8 @@ public final class AttachmentServer extends Attachment
         target.setFile(source.getFile());
         target.setStringValue(source.getStringValue());
         target.setTextValue(source.getTextValue());
+        target.setExecutionStepHasAttachmentList(source
+                .getExecutionStepHasAttachmentList());
     }
 
     @Override

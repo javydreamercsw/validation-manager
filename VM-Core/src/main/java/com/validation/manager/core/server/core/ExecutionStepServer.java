@@ -3,8 +3,10 @@ package com.validation.manager.core.server.core;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.ExecutionStepHasAttachment;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.ExecutionStepHasAttachmentJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import java.util.Date;
 import org.openide.util.Exceptions;
@@ -59,7 +61,8 @@ public final class ExecutionStepServer extends ExecutionStep
         target.setComment(source.getComment());
         target.setExecutionEnd(source.getExecutionEnd());
         target.setExecutionStart(source.getExecutionStart());
-        target.setExecutionStepPK(source.getExecutionStepPK());
+        target.setExecutionStepHasAttachmentList(source
+                .getExecutionStepHasAttachmentList());
         target.setExecutionTime(source.getExecutionTime());
         target.setResultId(source.getResultId());
         target.setStep(source.getStep());
@@ -82,5 +85,19 @@ public final class ExecutionStepServer extends ExecutionStep
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
+    }
+
+    public void addAttachment(AttachmentServer attachment) throws Exception {
+        ExecutionStepHasAttachment esha = new ExecutionStepHasAttachment();
+        ExecutionStepHasAttachmentJpaController controller
+                = new ExecutionStepHasAttachmentJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        //Make sure attachemtn exists in database
+        attachment.write2DB();
+        esha.setAttachment(attachment.getEntity());
+        esha.setExecutionStep(getEntity());
+        esha.setCreationTime(new Date());
+        controller.create(esha);
+        update();
     }
 }

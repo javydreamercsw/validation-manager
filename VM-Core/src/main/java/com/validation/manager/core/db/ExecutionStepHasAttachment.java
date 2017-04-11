@@ -30,13 +30,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "execution_step_has_attachment")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "ExecutionStepHasAttachment.findAll", query = "SELECT e FROM ExecutionStepHasAttachment e")
-    , @NamedQuery(name = "ExecutionStepHasAttachment.findByExecutionStepTestCaseExecutionId", query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.executionStepTestCaseExecutionId = :executionStepTestCaseExecutionId")
-    , @NamedQuery(name = "ExecutionStepHasAttachment.findByExecutionStepStepId", query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.executionStepStepId = :executionStepStepId")
-    , @NamedQuery(name = "ExecutionStepHasAttachment.findByExecutionStepStepTestCaseId", query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.executionStepStepTestCaseId = :executionStepStepTestCaseId")
-    , @NamedQuery(name = "ExecutionStepHasAttachment.findByAttachmentId", query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.attachmentId = :attachmentId")
-    , @NamedQuery(name = "ExecutionStepHasAttachment.findByAttachmentAttachmentTypeId", query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.attachmentAttachmentTypeId = :attachmentAttachmentTypeId")
-    , @NamedQuery(name = "ExecutionStepHasAttachment.findByCreationTime", query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.creationTime = :creationTime")})
+    @NamedQuery(name = "ExecutionStepHasAttachment.findAll",
+            query = "SELECT e FROM ExecutionStepHasAttachment e")
+    , @NamedQuery(name = "ExecutionStepHasAttachment.findByExecutionStepTestCaseExecutionId",
+            query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.executionStepTestCaseExecutionId = :executionStepTestCaseExecutionId")
+    , @NamedQuery(name = "ExecutionStepHasAttachment.findByExecutionStepStepId",
+            query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.executionStepStepId = :executionStepStepId")
+    , @NamedQuery(name = "ExecutionStepHasAttachment.findByExecutionStepStepTestCaseId",
+            query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.executionStepStepTestCaseId = :executionStepStepTestCaseId")
+    , @NamedQuery(name = "ExecutionStepHasAttachment.findByAttachmentId",
+            query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.attachmentId = :attachmentId")
+    , @NamedQuery(name = "ExecutionStepHasAttachment.findByAttachmentAttachmentTypeId",
+            query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.executionStepHasAttachmentPK.attachmentAttachmentTypeId = :attachmentAttachmentTypeId")
+    , @NamedQuery(name = "ExecutionStepHasAttachment.findByCreationTime",
+            query = "SELECT e FROM ExecutionStepHasAttachment e WHERE e.creationTime = :creationTime")})
 public class ExecutionStepHasAttachment implements Serializable {
 
     private static final long serialVersionUID = 1L;
