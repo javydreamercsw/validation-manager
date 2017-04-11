@@ -36,13 +36,13 @@ public class SpecLevelJpaController implements Serializable {
 
     public void create(SpecLevel specLevel) {
         if (specLevel.getRequirementSpecList() == null) {
-            specLevel.setRequirementSpecList(new ArrayList<>());
+            specLevel.setRequirementSpecList(new ArrayList<RequirementSpec>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<RequirementSpec> attachedRequirementSpecList = new ArrayList<>();
+            List<RequirementSpec> attachedRequirementSpecList = new ArrayList<RequirementSpec>();
             for (RequirementSpec requirementSpecListRequirementSpecToAttach : specLevel.getRequirementSpecList()) {
                 requirementSpecListRequirementSpecToAttach = em.getReference(requirementSpecListRequirementSpecToAttach.getClass(), requirementSpecListRequirementSpecToAttach.getRequirementSpecPK());
                 attachedRequirementSpecList.add(requirementSpecListRequirementSpecToAttach);
@@ -78,7 +78,7 @@ public class SpecLevelJpaController implements Serializable {
             for (RequirementSpec requirementSpecListOldRequirementSpec : requirementSpecListOld) {
                 if (!requirementSpecListNew.contains(requirementSpecListOldRequirementSpec)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain RequirementSpec " + requirementSpecListOldRequirementSpec + " since its specLevel field is not nullable.");
                 }
@@ -86,7 +86,7 @@ public class SpecLevelJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<RequirementSpec> attachedRequirementSpecListNew = new ArrayList<>();
+            List<RequirementSpec> attachedRequirementSpecListNew = new ArrayList<RequirementSpec>();
             for (RequirementSpec requirementSpecListNewRequirementSpecToAttach : requirementSpecListNew) {
                 requirementSpecListNewRequirementSpecToAttach = em.getReference(requirementSpecListNewRequirementSpecToAttach.getClass(), requirementSpecListNewRequirementSpecToAttach.getRequirementSpecPK());
                 attachedRequirementSpecListNew.add(requirementSpecListNewRequirementSpecToAttach);
@@ -138,7 +138,7 @@ public class SpecLevelJpaController implements Serializable {
             List<RequirementSpec> requirementSpecListOrphanCheck = specLevel.getRequirementSpecList();
             for (RequirementSpec requirementSpecListOrphanCheckRequirementSpec : requirementSpecListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This SpecLevel (" + specLevel + ") cannot be destroyed since the RequirementSpec " + requirementSpecListOrphanCheckRequirementSpec + " in its requirementSpecList field has a non-nullable specLevel field.");
             }

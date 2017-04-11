@@ -35,13 +35,13 @@ public class HazardJpaController implements Serializable {
 
     public void create(Hazard hazard) {
         if (hazard.getRiskItemList() == null) {
-            hazard.setRiskItemList(new ArrayList<>());
+            hazard.setRiskItemList(new ArrayList<RiskItem>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<RiskItem> attachedRiskItemList = new ArrayList<>();
+            List<RiskItem> attachedRiskItemList = new ArrayList<RiskItem>();
             for (RiskItem riskItemListRiskItemToAttach : hazard.getRiskItemList()) {
                 riskItemListRiskItemToAttach = em.getReference(riskItemListRiskItemToAttach.getClass(), riskItemListRiskItemToAttach.getRiskItemPK());
                 attachedRiskItemList.add(riskItemListRiskItemToAttach);
@@ -68,7 +68,7 @@ public class HazardJpaController implements Serializable {
             Hazard persistentHazard = em.find(Hazard.class, hazard.getId());
             List<RiskItem> riskItemListOld = persistentHazard.getRiskItemList();
             List<RiskItem> riskItemListNew = hazard.getRiskItemList();
-            List<RiskItem> attachedRiskItemListNew = new ArrayList<>();
+            List<RiskItem> attachedRiskItemListNew = new ArrayList<RiskItem>();
             for (RiskItem riskItemListNewRiskItemToAttach : riskItemListNew) {
                 riskItemListNewRiskItemToAttach = em.getReference(riskItemListNewRiskItemToAttach.getClass(), riskItemListNewRiskItemToAttach.getRiskItemPK());
                 attachedRiskItemListNew.add(riskItemListNewRiskItemToAttach);

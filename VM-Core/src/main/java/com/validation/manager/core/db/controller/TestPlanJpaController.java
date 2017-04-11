@@ -43,13 +43,13 @@ public class TestPlanJpaController implements Serializable {
             testPlan.setTestPlanPK(new TestPlanPK());
         }
         if (testPlan.getTestCaseList() == null) {
-            testPlan.setTestCaseList(new ArrayList<>());
+            testPlan.setTestCaseList(new ArrayList<TestCase>());
         }
         if (testPlan.getTestPlanList() == null) {
-            testPlan.setTestPlanList(new ArrayList<>());
+            testPlan.setTestPlanList(new ArrayList<TestPlan>());
         }
         if (testPlan.getUserTestPlanRoleList() == null) {
-            testPlan.setUserTestPlanRoleList(new ArrayList<>());
+            testPlan.setUserTestPlanRoleList(new ArrayList<UserTestPlanRole>());
         }
         testPlan.getTestPlanPK().setTestProjectId(testPlan.getTestProject().getId());
         EntityManager em = null;
@@ -66,19 +66,19 @@ public class TestPlanJpaController implements Serializable {
                 testProject = em.getReference(testProject.getClass(), testProject.getId());
                 testPlan.setTestProject(testProject);
             }
-            List<TestCase> attachedTestCaseList = new ArrayList<>();
+            List<TestCase> attachedTestCaseList = new ArrayList<TestCase>();
             for (TestCase testCaseListTestCaseToAttach : testPlan.getTestCaseList()) {
                 testCaseListTestCaseToAttach = em.getReference(testCaseListTestCaseToAttach.getClass(), testCaseListTestCaseToAttach.getId());
                 attachedTestCaseList.add(testCaseListTestCaseToAttach);
             }
             testPlan.setTestCaseList(attachedTestCaseList);
-            List<TestPlan> attachedTestPlanList = new ArrayList<>();
+            List<TestPlan> attachedTestPlanList = new ArrayList<TestPlan>();
             for (TestPlan testPlanListTestPlanToAttach : testPlan.getTestPlanList()) {
                 testPlanListTestPlanToAttach = em.getReference(testPlanListTestPlanToAttach.getClass(), testPlanListTestPlanToAttach.getTestPlanPK());
                 attachedTestPlanList.add(testPlanListTestPlanToAttach);
             }
             testPlan.setTestPlanList(attachedTestPlanList);
-            List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<>();
+            List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<UserTestPlanRole>();
             for (UserTestPlanRole userTestPlanRoleListUserTestPlanRoleToAttach : testPlan.getUserTestPlanRoleList()) {
                 userTestPlanRoleListUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListUserTestPlanRoleToAttach.getUserTestPlanRolePK());
                 attachedUserTestPlanRoleList.add(userTestPlanRoleListUserTestPlanRoleToAttach);
@@ -149,7 +149,7 @@ public class TestPlanJpaController implements Serializable {
             for (UserTestPlanRole userTestPlanRoleListOldUserTestPlanRole : userTestPlanRoleListOld) {
                 if (!userTestPlanRoleListNew.contains(userTestPlanRoleListOldUserTestPlanRole)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestPlanRole " + userTestPlanRoleListOldUserTestPlanRole + " since its testPlan field is not nullable.");
                 }
@@ -165,21 +165,21 @@ public class TestPlanJpaController implements Serializable {
                 testProjectNew = em.getReference(testProjectNew.getClass(), testProjectNew.getId());
                 testPlan.setTestProject(testProjectNew);
             }
-            List<TestCase> attachedTestCaseListNew = new ArrayList<>();
+            List<TestCase> attachedTestCaseListNew = new ArrayList<TestCase>();
             for (TestCase testCaseListNewTestCaseToAttach : testCaseListNew) {
                 testCaseListNewTestCaseToAttach = em.getReference(testCaseListNewTestCaseToAttach.getClass(), testCaseListNewTestCaseToAttach.getId());
                 attachedTestCaseListNew.add(testCaseListNewTestCaseToAttach);
             }
             testCaseListNew = attachedTestCaseListNew;
             testPlan.setTestCaseList(testCaseListNew);
-            List<TestPlan> attachedTestPlanListNew = new ArrayList<>();
+            List<TestPlan> attachedTestPlanListNew = new ArrayList<TestPlan>();
             for (TestPlan testPlanListNewTestPlanToAttach : testPlanListNew) {
                 testPlanListNewTestPlanToAttach = em.getReference(testPlanListNewTestPlanToAttach.getClass(), testPlanListNewTestPlanToAttach.getTestPlanPK());
                 attachedTestPlanListNew.add(testPlanListNewTestPlanToAttach);
             }
             testPlanListNew = attachedTestPlanListNew;
             testPlan.setTestPlanList(testPlanListNew);
-            List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<>();
+            List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<UserTestPlanRole>();
             for (UserTestPlanRole userTestPlanRoleListNewUserTestPlanRoleToAttach : userTestPlanRoleListNew) {
                 userTestPlanRoleListNewUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListNewUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListNewUserTestPlanRoleToAttach.getUserTestPlanRolePK());
                 attachedUserTestPlanRoleListNew.add(userTestPlanRoleListNewUserTestPlanRoleToAttach);
@@ -276,7 +276,7 @@ public class TestPlanJpaController implements Serializable {
             List<UserTestPlanRole> userTestPlanRoleListOrphanCheck = testPlan.getUserTestPlanRoleList();
             for (UserTestPlanRole userTestPlanRoleListOrphanCheckUserTestPlanRole : userTestPlanRoleListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This TestPlan (" + testPlan + ") cannot be destroyed since the UserTestPlanRole " + userTestPlanRoleListOrphanCheckUserTestPlanRole + " in its userTestPlanRoleList field has a non-nullable testPlan field.");
             }

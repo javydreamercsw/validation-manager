@@ -86,6 +86,8 @@ public class VmException implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
+    @ManyToMany(mappedBy = "vmExceptionList")
+    private List<ExecutionStep> executionStepList;
 
     public VmException() {
     }
@@ -218,5 +220,15 @@ public class VmException implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmException[ vmExceptionPK="
                 + vmExceptionPK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
+    }
+
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
     }
 }

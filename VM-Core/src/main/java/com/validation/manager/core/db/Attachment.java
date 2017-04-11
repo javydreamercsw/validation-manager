@@ -3,6 +3,7 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -13,6 +14,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -45,12 +47,19 @@ public class Attachment implements Serializable {
     @Lob
     @Column(name = "file")
     private byte[] file;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "attachment")
+    private List<ExecutionStepHasAttachment> executionStepHasAttachmentList;
     @JoinTable(name = "execution_step_has_attachment", joinColumns = {
         @JoinColumn(name = "attachment_id", referencedColumnName = "id")
-        , @JoinColumn(name = "attachment_attachment_type_id", referencedColumnName = "attachment_type_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "execution_step_test_case_execution_id", referencedColumnName = "test_case_execution_id")
-        , @JoinColumn(name = "execution_step_step_id", referencedColumnName = "step_id")
-        , @JoinColumn(name = "execution_step_step_test_case_id", referencedColumnName = "step_test_case_id")})
+        , @JoinColumn(name = "attachment_attachment_type_id",
+                referencedColumnName = "attachment_type_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "execution_step_test_case_execution_id",
+                        referencedColumnName = "test_case_execution_id")
+                , @JoinColumn(name = "execution_step_step_id",
+                        referencedColumnName = "step_id")
+                , @JoinColumn(name = "execution_step_step_test_case_id",
+                        referencedColumnName = "step_test_case_id")})
     @ManyToMany
     private List<ExecutionStep> executionStepList;
 
@@ -98,7 +107,6 @@ public class Attachment implements Serializable {
     public void setAttachmentPK(AttachmentPK attachmentPK) {
         this.attachmentPK = attachmentPK;
     }
-
 
     public String getStringValue() {
         return stringValue;
@@ -157,14 +165,6 @@ public class Attachment implements Serializable {
                 + attachmentPK + " ]";
     }
 
-    public byte[] getFile() {
-        return file;
-    }
-
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
-
     @XmlTransient
     @JsonIgnore
     public List<ExecutionStep> getExecutionStepList() {
@@ -175,4 +175,21 @@ public class Attachment implements Serializable {
         this.executionStepList = executionStepList;
     }
 
+    public byte[] getFile() {
+        return file;
+    }
+
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepHasAttachment> getExecutionStepHasAttachmentList() {
+        return executionStepHasAttachmentList;
+    }
+
+    public void setExecutionStepHasAttachmentList(List<ExecutionStepHasAttachment> executionStepHasAttachmentList) {
+        this.executionStepHasAttachmentList = executionStepHasAttachmentList;
+    }
 }

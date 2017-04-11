@@ -35,13 +35,13 @@ public class UserRightJpaController implements Serializable {
 
     public void create(UserRight userRight) {
         if (userRight.getRoleList() == null) {
-            userRight.setRoleList(new ArrayList<>());
+            userRight.setRoleList(new ArrayList<Role>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Role> attachedRoleList = new ArrayList<>();
+            List<Role> attachedRoleList = new ArrayList<Role>();
             for (Role roleListRoleToAttach : userRight.getRoleList()) {
                 roleListRoleToAttach = em.getReference(roleListRoleToAttach.getClass(), roleListRoleToAttach.getId());
                 attachedRoleList.add(roleListRoleToAttach);
@@ -68,7 +68,7 @@ public class UserRightJpaController implements Serializable {
             UserRight persistentUserRight = em.find(UserRight.class, userRight.getId());
             List<Role> roleListOld = persistentUserRight.getRoleList();
             List<Role> roleListNew = userRight.getRoleList();
-            List<Role> attachedRoleListNew = new ArrayList<>();
+            List<Role> attachedRoleListNew = new ArrayList<Role>();
             for (Role roleListNewRoleToAttach : roleListNew) {
                 roleListNewRoleToAttach = em.getReference(roleListNewRoleToAttach.getClass(), roleListNewRoleToAttach.getId());
                 attachedRoleListNew.add(roleListNewRoleToAttach);

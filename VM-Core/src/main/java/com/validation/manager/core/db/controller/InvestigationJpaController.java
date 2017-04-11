@@ -37,22 +37,22 @@ public class InvestigationJpaController implements Serializable {
 
     public void create(Investigation investigation) {
         if (investigation.getVmExceptionList() == null) {
-            investigation.setVmExceptionList(new ArrayList<>());
+            investigation.setVmExceptionList(new ArrayList<VmException>());
         }
         if (investigation.getUserHasInvestigationList() == null) {
-            investigation.setUserHasInvestigationList(new ArrayList<>());
+            investigation.setUserHasInvestigationList(new ArrayList<UserHasInvestigation>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<VmException> attachedVmExceptionList = new ArrayList<>();
+            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
             for (VmException vmExceptionListVmExceptionToAttach : investigation.getVmExceptionList()) {
                 vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
             }
             investigation.setVmExceptionList(attachedVmExceptionList);
-            List<UserHasInvestigation> attachedUserHasInvestigationList = new ArrayList<>();
+            List<UserHasInvestigation> attachedUserHasInvestigationList = new ArrayList<UserHasInvestigation>();
             for (UserHasInvestigation userHasInvestigationListUserHasInvestigationToAttach : investigation.getUserHasInvestigationList()) {
                 userHasInvestigationListUserHasInvestigationToAttach = em.getReference(userHasInvestigationListUserHasInvestigationToAttach.getClass(), userHasInvestigationListUserHasInvestigationToAttach.getUserHasInvestigationPK());
                 attachedUserHasInvestigationList.add(userHasInvestigationListUserHasInvestigationToAttach);
@@ -94,7 +94,7 @@ public class InvestigationJpaController implements Serializable {
             for (UserHasInvestigation userHasInvestigationListOldUserHasInvestigation : userHasInvestigationListOld) {
                 if (!userHasInvestigationListNew.contains(userHasInvestigationListOldUserHasInvestigation)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain UserHasInvestigation " + userHasInvestigationListOldUserHasInvestigation + " since its investigation field is not nullable.");
                 }
@@ -102,14 +102,14 @@ public class InvestigationJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<VmException> attachedVmExceptionListNew = new ArrayList<>();
+            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
             for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
                 vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
             }
             vmExceptionListNew = attachedVmExceptionListNew;
             investigation.setVmExceptionList(vmExceptionListNew);
-            List<UserHasInvestigation> attachedUserHasInvestigationListNew = new ArrayList<>();
+            List<UserHasInvestigation> attachedUserHasInvestigationListNew = new ArrayList<UserHasInvestigation>();
             for (UserHasInvestigation userHasInvestigationListNewUserHasInvestigationToAttach : userHasInvestigationListNew) {
                 userHasInvestigationListNewUserHasInvestigationToAttach = em.getReference(userHasInvestigationListNewUserHasInvestigationToAttach.getClass(), userHasInvestigationListNewUserHasInvestigationToAttach.getUserHasInvestigationPK());
                 attachedUserHasInvestigationListNew.add(userHasInvestigationListNewUserHasInvestigationToAttach);
@@ -173,7 +173,7 @@ public class InvestigationJpaController implements Serializable {
             List<UserHasInvestigation> userHasInvestigationListOrphanCheck = investigation.getUserHasInvestigationList();
             for (UserHasInvestigation userHasInvestigationListOrphanCheckUserHasInvestigation : userHasInvestigationListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Investigation (" + investigation + ") cannot be destroyed since the UserHasInvestigation " + userHasInvestigationListOrphanCheckUserHasInvestigation + " in its userHasInvestigationList field has a non-nullable investigation field.");
             }

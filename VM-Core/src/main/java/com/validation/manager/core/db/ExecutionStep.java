@@ -3,16 +3,19 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -88,8 +91,16 @@ public class ExecutionStep implements Serializable {
     private Date assignedTime;
     @Column(name = "assigned_by_user_id")
     private Integer assignedByUserId;
-    @ManyToMany(mappedBy = "executionStepList")
-    private List<Attachment> attachmentList;
+    @JoinTable(name = "execution_step_has_vm_exception", joinColumns = {
+        @JoinColumn(name = "execution_step_test_case_execution_id", referencedColumnName = "test_case_execution_id")
+        , @JoinColumn(name = "execution_step_step_id", referencedColumnName = "step_id")
+        , @JoinColumn(name = "execution_step_step_test_case_id", referencedColumnName = "step_test_case_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "vm_exception_id", referencedColumnName = "id")
+        , @JoinColumn(name = "vm_exception_reporter_id", referencedColumnName = "reporter_id")})
+    @ManyToMany
+    private List<VmException> vmExceptionList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
+    private List<ExecutionStepHasAttachment> executionStepHasAttachmentList;
 
     public ExecutionStep() {
     }
@@ -217,11 +228,21 @@ public class ExecutionStep implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<Attachment> getAttachmentList() {
-        return attachmentList;
+    public List<VmException> getVmExceptionList() {
+        return vmExceptionList;
     }
 
-    public void setAttachmentList(List<Attachment> attachmentList) {
-        this.attachmentList = attachmentList;
+    public void setVmExceptionList(List<VmException> vmExceptionList) {
+        this.vmExceptionList = vmExceptionList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepHasAttachment> getExecutionStepHasAttachmentList() {
+        return executionStepHasAttachmentList;
+    }
+
+    public void setExecutionStepHasAttachmentList(List<ExecutionStepHasAttachment> executionStepHasAttachmentList) {
+        this.executionStepHasAttachmentList = executionStepHasAttachmentList;
     }
 }

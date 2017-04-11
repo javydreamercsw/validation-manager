@@ -5,21 +5,21 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.Project;
-import com.validation.manager.core.db.RequirementSpec;
-import com.validation.manager.core.db.TestCaseExecution;
-import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.Project;
+import java.util.ArrayList;
+import java.util.List;
+import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.TestCaseExecution;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -38,16 +38,16 @@ public class ProjectJpaController implements Serializable {
 
     public void create(Project project) {
         if (project.getProjectList() == null) {
-            project.setProjectList(new ArrayList<>());
+            project.setProjectList(new ArrayList<Project>());
         }
         if (project.getRequirementSpecList() == null) {
-            project.setRequirementSpecList(new ArrayList<>());
+            project.setRequirementSpecList(new ArrayList<RequirementSpec>());
         }
         if (project.getTestProjectList() == null) {
-            project.setTestProjectList(new ArrayList<>());
+            project.setTestProjectList(new ArrayList<TestProject>());
         }
         if (project.getTestCaseExecutions() == null) {
-            project.setTestCaseExecutions(new ArrayList<>());
+            project.setTestCaseExecutions(new ArrayList<TestCaseExecution>());
         }
         EntityManager em = null;
         try {
@@ -58,25 +58,25 @@ public class ProjectJpaController implements Serializable {
                 parentProjectId = em.getReference(parentProjectId.getClass(), parentProjectId.getId());
                 project.setParentProjectId(parentProjectId);
             }
-            List<Project> attachedProjectList = new ArrayList<>();
+            List<Project> attachedProjectList = new ArrayList<Project>();
             for (Project projectListProjectToAttach : project.getProjectList()) {
                 projectListProjectToAttach = em.getReference(projectListProjectToAttach.getClass(), projectListProjectToAttach.getId());
                 attachedProjectList.add(projectListProjectToAttach);
             }
             project.setProjectList(attachedProjectList);
-            List<RequirementSpec> attachedRequirementSpecList = new ArrayList<>();
+            List<RequirementSpec> attachedRequirementSpecList = new ArrayList<RequirementSpec>();
             for (RequirementSpec requirementSpecListRequirementSpecToAttach : project.getRequirementSpecList()) {
                 requirementSpecListRequirementSpecToAttach = em.getReference(requirementSpecListRequirementSpecToAttach.getClass(), requirementSpecListRequirementSpecToAttach.getRequirementSpecPK());
                 attachedRequirementSpecList.add(requirementSpecListRequirementSpecToAttach);
             }
             project.setRequirementSpecList(attachedRequirementSpecList);
-            List<TestProject> attachedTestProjectList = new ArrayList<>();
+            List<TestProject> attachedTestProjectList = new ArrayList<TestProject>();
             for (TestProject testProjectListTestProjectToAttach : project.getTestProjectList()) {
                 testProjectListTestProjectToAttach = em.getReference(testProjectListTestProjectToAttach.getClass(), testProjectListTestProjectToAttach.getId());
                 attachedTestProjectList.add(testProjectListTestProjectToAttach);
             }
             project.setTestProjectList(attachedTestProjectList);
-            List<TestCaseExecution> attachedTestCaseExecutions = new ArrayList<>();
+            List<TestCaseExecution> attachedTestCaseExecutions = new ArrayList<TestCaseExecution>();
             for (TestCaseExecution testCaseExecutionsTestCaseExecutionToAttach : project.getTestCaseExecutions()) {
                 testCaseExecutionsTestCaseExecutionToAttach = em.getReference(testCaseExecutionsTestCaseExecutionToAttach.getClass(), testCaseExecutionsTestCaseExecutionToAttach.getId());
                 attachedTestCaseExecutions.add(testCaseExecutionsTestCaseExecutionToAttach);
@@ -146,7 +146,7 @@ public class ProjectJpaController implements Serializable {
             for (RequirementSpec requirementSpecListOldRequirementSpec : requirementSpecListOld) {
                 if (!requirementSpecListNew.contains(requirementSpecListOldRequirementSpec)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain RequirementSpec " + requirementSpecListOldRequirementSpec + " since its project field is not nullable.");
                 }
@@ -158,28 +158,28 @@ public class ProjectJpaController implements Serializable {
                 parentProjectIdNew = em.getReference(parentProjectIdNew.getClass(), parentProjectIdNew.getId());
                 project.setParentProjectId(parentProjectIdNew);
             }
-            List<Project> attachedProjectListNew = new ArrayList<>();
+            List<Project> attachedProjectListNew = new ArrayList<Project>();
             for (Project projectListNewProjectToAttach : projectListNew) {
                 projectListNewProjectToAttach = em.getReference(projectListNewProjectToAttach.getClass(), projectListNewProjectToAttach.getId());
                 attachedProjectListNew.add(projectListNewProjectToAttach);
             }
             projectListNew = attachedProjectListNew;
             project.setProjectList(projectListNew);
-            List<RequirementSpec> attachedRequirementSpecListNew = new ArrayList<>();
+            List<RequirementSpec> attachedRequirementSpecListNew = new ArrayList<RequirementSpec>();
             for (RequirementSpec requirementSpecListNewRequirementSpecToAttach : requirementSpecListNew) {
                 requirementSpecListNewRequirementSpecToAttach = em.getReference(requirementSpecListNewRequirementSpecToAttach.getClass(), requirementSpecListNewRequirementSpecToAttach.getRequirementSpecPK());
                 attachedRequirementSpecListNew.add(requirementSpecListNewRequirementSpecToAttach);
             }
             requirementSpecListNew = attachedRequirementSpecListNew;
             project.setRequirementSpecList(requirementSpecListNew);
-            List<TestProject> attachedTestProjectListNew = new ArrayList<>();
+            List<TestProject> attachedTestProjectListNew = new ArrayList<TestProject>();
             for (TestProject testProjectListNewTestProjectToAttach : testProjectListNew) {
                 testProjectListNewTestProjectToAttach = em.getReference(testProjectListNewTestProjectToAttach.getClass(), testProjectListNewTestProjectToAttach.getId());
                 attachedTestProjectListNew.add(testProjectListNewTestProjectToAttach);
             }
             testProjectListNew = attachedTestProjectListNew;
             project.setTestProjectList(testProjectListNew);
-            List<TestCaseExecution> attachedTestCaseExecutionsNew = new ArrayList<>();
+            List<TestCaseExecution> attachedTestCaseExecutionsNew = new ArrayList<TestCaseExecution>();
             for (TestCaseExecution testCaseExecutionsNewTestCaseExecutionToAttach : testCaseExecutionsNew) {
                 testCaseExecutionsNewTestCaseExecutionToAttach = em.getReference(testCaseExecutionsNewTestCaseExecutionToAttach.getClass(), testCaseExecutionsNewTestCaseExecutionToAttach.getId());
                 attachedTestCaseExecutionsNew.add(testCaseExecutionsNewTestCaseExecutionToAttach);
@@ -285,7 +285,7 @@ public class ProjectJpaController implements Serializable {
             List<RequirementSpec> requirementSpecListOrphanCheck = project.getRequirementSpecList();
             for (RequirementSpec requirementSpecListOrphanCheckRequirementSpec : requirementSpecListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Project (" + project + ") cannot be destroyed since the RequirementSpec " + requirementSpecListOrphanCheckRequirementSpec + " in its requirementSpecList field has a non-nullable project field.");
             }

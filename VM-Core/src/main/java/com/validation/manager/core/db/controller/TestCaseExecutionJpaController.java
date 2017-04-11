@@ -5,20 +5,20 @@
  */
 package com.validation.manager.core.db.controller;
 
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.ExecutionStep;
+import java.util.ArrayList;
+import java.util.List;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -37,22 +37,22 @@ public class TestCaseExecutionJpaController implements Serializable {
 
     public void create(TestCaseExecution testCaseExecution) {
         if (testCaseExecution.getExecutionStepList() == null) {
-            testCaseExecution.setExecutionStepList(new ArrayList<>());
+            testCaseExecution.setExecutionStepList(new ArrayList<ExecutionStep>());
         }
         if (testCaseExecution.getProjects() == null) {
-            testCaseExecution.setProjects(new ArrayList<>());
+            testCaseExecution.setProjects(new ArrayList<Project>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<ExecutionStep> attachedExecutionStepList = new ArrayList<>();
+            List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListExecutionStepToAttach : testCaseExecution.getExecutionStepList()) {
                 executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
             }
             testCaseExecution.setExecutionStepList(attachedExecutionStepList);
-            List<Project> attachedProjects = new ArrayList<>();
+            List<Project> attachedProjects = new ArrayList<Project>();
             for (Project projectsProjectToAttach : testCaseExecution.getProjects()) {
                 projectsProjectToAttach = em.getReference(projectsProjectToAttach.getClass(), projectsProjectToAttach.getId());
                 attachedProjects.add(projectsProjectToAttach);
@@ -94,7 +94,7 @@ public class TestCaseExecutionJpaController implements Serializable {
             for (ExecutionStep executionStepListOldExecutionStep : executionStepListOld) {
                 if (!executionStepListNew.contains(executionStepListOldExecutionStep)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStep " + executionStepListOldExecutionStep + " since its testCaseExecution field is not nullable.");
                 }
@@ -102,14 +102,14 @@ public class TestCaseExecutionJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<>();
+            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
                 executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepListNew.add(executionStepListNewExecutionStepToAttach);
             }
             executionStepListNew = attachedExecutionStepListNew;
             testCaseExecution.setExecutionStepList(executionStepListNew);
-            List<Project> attachedProjectsNew = new ArrayList<>();
+            List<Project> attachedProjectsNew = new ArrayList<Project>();
             for (Project projectsNewProjectToAttach : projectsNew) {
                 projectsNewProjectToAttach = em.getReference(projectsNewProjectToAttach.getClass(), projectsNewProjectToAttach.getId());
                 attachedProjectsNew.add(projectsNewProjectToAttach);
@@ -173,7 +173,7 @@ public class TestCaseExecutionJpaController implements Serializable {
             List<ExecutionStep> executionStepListOrphanCheck = testCaseExecution.getExecutionStepList();
             for (ExecutionStep executionStepListOrphanCheckExecutionStep : executionStepListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This TestCaseExecution (" + testCaseExecution + ") cannot be destroyed since the ExecutionStep " + executionStepListOrphanCheckExecutionStep + " in its executionStepList field has a non-nullable testCaseExecution field.");
             }

@@ -35,13 +35,13 @@ public class FailureModeJpaController implements Serializable {
 
     public void create(FailureMode failureMode) {
         if (failureMode.getRiskItemList() == null) {
-            failureMode.setRiskItemList(new ArrayList<>());
+            failureMode.setRiskItemList(new ArrayList<RiskItem>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<RiskItem> attachedRiskItemList = new ArrayList<>();
+            List<RiskItem> attachedRiskItemList = new ArrayList<RiskItem>();
             for (RiskItem riskItemListRiskItemToAttach : failureMode.getRiskItemList()) {
                 riskItemListRiskItemToAttach = em.getReference(riskItemListRiskItemToAttach.getClass(), riskItemListRiskItemToAttach.getRiskItemPK());
                 attachedRiskItemList.add(riskItemListRiskItemToAttach);
@@ -68,7 +68,7 @@ public class FailureModeJpaController implements Serializable {
             FailureMode persistentFailureMode = em.find(FailureMode.class, failureMode.getId());
             List<RiskItem> riskItemListOld = persistentFailureMode.getRiskItemList();
             List<RiskItem> riskItemListNew = failureMode.getRiskItemList();
-            List<RiskItem> attachedRiskItemListNew = new ArrayList<>();
+            List<RiskItem> attachedRiskItemListNew = new ArrayList<RiskItem>();
             for (RiskItem riskItemListNewRiskItemToAttach : riskItemListNew) {
                 riskItemListNewRiskItemToAttach = em.getReference(riskItemListNewRiskItemToAttach.getClass(), riskItemListNewRiskItemToAttach.getRiskItemPK());
                 attachedRiskItemListNew.add(riskItemListNewRiskItemToAttach);

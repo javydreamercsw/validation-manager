@@ -44,13 +44,13 @@ public class StepJpaController implements Serializable {
             step.setStepPK(new StepPK());
         }
         if (step.getRequirementList() == null) {
-            step.setRequirementList(new ArrayList<>());
+            step.setRequirementList(new ArrayList<Requirement>());
         }
         if (step.getVmExceptionList() == null) {
-            step.setVmExceptionList(new ArrayList<>());
+            step.setVmExceptionList(new ArrayList<VmException>());
         }
         if (step.getExecutionStepList() == null) {
-            step.setExecutionStepList(new ArrayList<>());
+            step.setExecutionStepList(new ArrayList<ExecutionStep>());
         }
         step.getStepPK().setTestCaseId(step.getTestCase().getId());
         EntityManager em = null;
@@ -62,19 +62,19 @@ public class StepJpaController implements Serializable {
                 testCase = em.getReference(testCase.getClass(), testCase.getId());
                 step.setTestCase(testCase);
             }
-            List<Requirement> attachedRequirementList = new ArrayList<>();
+            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
             for (Requirement requirementListRequirementToAttach : step.getRequirementList()) {
                 requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getId());
                 attachedRequirementList.add(requirementListRequirementToAttach);
             }
             step.setRequirementList(attachedRequirementList);
-            List<VmException> attachedVmExceptionList = new ArrayList<>();
+            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
             for (VmException vmExceptionListVmExceptionToAttach : step.getVmExceptionList()) {
                 vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
             }
             step.setVmExceptionList(attachedVmExceptionList);
-            List<ExecutionStep> attachedExecutionStepList = new ArrayList<>();
+            List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListExecutionStepToAttach : step.getExecutionStepList()) {
                 executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
@@ -134,7 +134,7 @@ public class StepJpaController implements Serializable {
             for (ExecutionStep executionStepListOldExecutionStep : executionStepListOld) {
                 if (!executionStepListNew.contains(executionStepListOldExecutionStep)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStep " + executionStepListOldExecutionStep + " since its step field is not nullable.");
                 }
@@ -146,21 +146,21 @@ public class StepJpaController implements Serializable {
                 testCaseNew = em.getReference(testCaseNew.getClass(), testCaseNew.getId());
                 step.setTestCase(testCaseNew);
             }
-            List<Requirement> attachedRequirementListNew = new ArrayList<>();
+            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
             for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
                 requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getId());
                 attachedRequirementListNew.add(requirementListNewRequirementToAttach);
             }
             requirementListNew = attachedRequirementListNew;
             step.setRequirementList(requirementListNew);
-            List<VmException> attachedVmExceptionListNew = new ArrayList<>();
+            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
             for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
                 vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
             }
             vmExceptionListNew = attachedVmExceptionListNew;
             step.setVmExceptionList(vmExceptionListNew);
-            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<>();
+            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
                 executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepListNew.add(executionStepListNewExecutionStepToAttach);
@@ -244,7 +244,7 @@ public class StepJpaController implements Serializable {
             List<ExecutionStep> executionStepListOrphanCheck = step.getExecutionStepList();
             for (ExecutionStep executionStepListOrphanCheckExecutionStep : executionStepListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Step (" + step + ") cannot be destroyed since the ExecutionStep " + executionStepListOrphanCheckExecutionStep + " in its executionStepList field has a non-nullable step field.");
             }

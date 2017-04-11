@@ -36,22 +36,22 @@ public class CorrectiveActionJpaController implements Serializable {
 
     public void create(CorrectiveAction correctiveAction) {
         if (correctiveAction.getVmUserList() == null) {
-            correctiveAction.setVmUserList(new ArrayList<>());
+            correctiveAction.setVmUserList(new ArrayList<VmUser>());
         }
         if (correctiveAction.getVmExceptionList() == null) {
-            correctiveAction.setVmExceptionList(new ArrayList<>());
+            correctiveAction.setVmExceptionList(new ArrayList<VmException>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<VmUser> attachedVmUserList = new ArrayList<>();
+            List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
             for (VmUser vmUserListVmUserToAttach : correctiveAction.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
             }
             correctiveAction.setVmUserList(attachedVmUserList);
-            List<VmException> attachedVmExceptionList = new ArrayList<>();
+            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
             for (VmException vmExceptionListVmExceptionToAttach : correctiveAction.getVmExceptionList()) {
                 vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
@@ -84,14 +84,14 @@ public class CorrectiveActionJpaController implements Serializable {
             List<VmUser> vmUserListNew = correctiveAction.getVmUserList();
             List<VmException> vmExceptionListOld = persistentCorrectiveAction.getVmExceptionList();
             List<VmException> vmExceptionListNew = correctiveAction.getVmExceptionList();
-            List<VmUser> attachedVmUserListNew = new ArrayList<>();
+            List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
                 attachedVmUserListNew.add(vmUserListNewVmUserToAttach);
             }
             vmUserListNew = attachedVmUserListNew;
             correctiveAction.setVmUserList(vmUserListNew);
-            List<VmException> attachedVmExceptionListNew = new ArrayList<>();
+            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
             for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
                 vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
                 attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);

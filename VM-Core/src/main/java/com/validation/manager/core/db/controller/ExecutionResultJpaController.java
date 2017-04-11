@@ -36,13 +36,13 @@ public class ExecutionResultJpaController implements Serializable {
 
     public void create(ExecutionResult executionResult) throws PreexistingEntityException, Exception {
         if (executionResult.getExecutionStepList() == null) {
-            executionResult.setExecutionStepList(new ArrayList<>());
+            executionResult.setExecutionStepList(new ArrayList<ExecutionStep>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<ExecutionStep> attachedExecutionStepList = new ArrayList<>();
+            List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListExecutionStepToAttach : executionResult.getExecutionStepList()) {
                 executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
@@ -79,7 +79,7 @@ public class ExecutionResultJpaController implements Serializable {
             ExecutionResult persistentExecutionResult = em.find(ExecutionResult.class, executionResult.getId());
             List<ExecutionStep> executionStepListOld = persistentExecutionResult.getExecutionStepList();
             List<ExecutionStep> executionStepListNew = executionResult.getExecutionStepList();
-            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<>();
+            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
                 executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepListNew.add(executionStepListNewExecutionStepToAttach);

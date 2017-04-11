@@ -43,10 +43,10 @@ public class RequirementSpecJpaController implements Serializable {
             requirementSpec.setRequirementSpecPK(new RequirementSpecPK());
         }
         if (requirementSpec.getRequirementSpecNodeList() == null) {
-            requirementSpec.setRequirementSpecNodeList(new ArrayList<>());
+            requirementSpec.setRequirementSpecNodeList(new ArrayList<RequirementSpecNode>());
         }
-        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
+        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -61,7 +61,7 @@ public class RequirementSpecJpaController implements Serializable {
                 specLevel = em.getReference(specLevel.getClass(), specLevel.getId());
                 requirementSpec.setSpecLevel(specLevel);
             }
-            List<RequirementSpecNode> attachedRequirementSpecNodeList = new ArrayList<>();
+            List<RequirementSpecNode> attachedRequirementSpecNodeList = new ArrayList<RequirementSpecNode>();
             for (RequirementSpecNode requirementSpecNodeListRequirementSpecNodeToAttach : requirementSpec.getRequirementSpecNodeList()) {
                 requirementSpecNodeListRequirementSpecNodeToAttach = em.getReference(requirementSpecNodeListRequirementSpecNodeToAttach.getClass(), requirementSpecNodeListRequirementSpecNodeToAttach.getRequirementSpecNodePK());
                 attachedRequirementSpecNodeList.add(requirementSpecNodeListRequirementSpecNodeToAttach);
@@ -99,8 +99,8 @@ public class RequirementSpecJpaController implements Serializable {
     }
 
     public void edit(RequirementSpec requirementSpec) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
+        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -116,7 +116,7 @@ public class RequirementSpecJpaController implements Serializable {
             for (RequirementSpecNode requirementSpecNodeListOldRequirementSpecNode : requirementSpecNodeListOld) {
                 if (!requirementSpecNodeListNew.contains(requirementSpecNodeListOldRequirementSpecNode)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain RequirementSpecNode " + requirementSpecNodeListOldRequirementSpecNode + " since its requirementSpec field is not nullable.");
                 }
@@ -132,7 +132,7 @@ public class RequirementSpecJpaController implements Serializable {
                 specLevelNew = em.getReference(specLevelNew.getClass(), specLevelNew.getId());
                 requirementSpec.setSpecLevel(specLevelNew);
             }
-            List<RequirementSpecNode> attachedRequirementSpecNodeListNew = new ArrayList<>();
+            List<RequirementSpecNode> attachedRequirementSpecNodeListNew = new ArrayList<RequirementSpecNode>();
             for (RequirementSpecNode requirementSpecNodeListNewRequirementSpecNodeToAttach : requirementSpecNodeListNew) {
                 requirementSpecNodeListNewRequirementSpecNodeToAttach = em.getReference(requirementSpecNodeListNewRequirementSpecNodeToAttach.getClass(), requirementSpecNodeListNewRequirementSpecNodeToAttach.getRequirementSpecNodePK());
                 attachedRequirementSpecNodeListNew.add(requirementSpecNodeListNewRequirementSpecNodeToAttach);
@@ -200,7 +200,7 @@ public class RequirementSpecJpaController implements Serializable {
             List<RequirementSpecNode> requirementSpecNodeListOrphanCheck = requirementSpec.getRequirementSpecNodeList();
             for (RequirementSpecNode requirementSpecNodeListOrphanCheckRequirementSpecNode : requirementSpecNodeListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This RequirementSpec (" + requirementSpec + ") cannot be destroyed since the RequirementSpecNode " + requirementSpecNodeListOrphanCheckRequirementSpecNode + " in its requirementSpecNodeList field has a non-nullable requirementSpec field.");
             }

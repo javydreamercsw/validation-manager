@@ -13,8 +13,11 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.AttachmentType;
+import com.validation.manager.core.db.ExecutionStepHasAttachment;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -38,6 +41,9 @@ public class AttachmentJpaController implements Serializable {
         if (attachment.getAttachmentPK() == null) {
             attachment.setAttachmentPK(new AttachmentPK());
         }
+        if (attachment.getExecutionStepHasAttachmentList() == null) {
+            attachment.setExecutionStepHasAttachmentList(new ArrayList<ExecutionStepHasAttachment>());
+        }
         attachment.getAttachmentPK().setAttachmentTypeId(attachment.getAttachmentType().getId());
         EntityManager em = null;
         try {
@@ -48,10 +54,25 @@ public class AttachmentJpaController implements Serializable {
                 attachmentType = em.getReference(attachmentType.getClass(), attachmentType.getId());
                 attachment.setAttachmentType(attachmentType);
             }
+            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentList = new ArrayList<ExecutionStepHasAttachment>();
+            for (ExecutionStepHasAttachment executionStepHasAttachmentListExecutionStepHasAttachmentToAttach : attachment.getExecutionStepHasAttachmentList()) {
+                executionStepHasAttachmentListExecutionStepHasAttachmentToAttach = em.getReference(executionStepHasAttachmentListExecutionStepHasAttachmentToAttach.getClass(), executionStepHasAttachmentListExecutionStepHasAttachmentToAttach.getExecutionStepHasAttachmentPK());
+                attachedExecutionStepHasAttachmentList.add(executionStepHasAttachmentListExecutionStepHasAttachmentToAttach);
+            }
+            attachment.setExecutionStepHasAttachmentList(attachedExecutionStepHasAttachmentList);
             em.persist(attachment);
             if (attachmentType != null) {
                 attachmentType.getAttachmentList().add(attachment);
                 attachmentType = em.merge(attachmentType);
+            }
+            for (ExecutionStepHasAttachment executionStepHasAttachmentListExecutionStepHasAttachment : attachment.getExecutionStepHasAttachmentList()) {
+                Attachment oldAttachmentOfExecutionStepHasAttachmentListExecutionStepHasAttachment = executionStepHasAttachmentListExecutionStepHasAttachment.getAttachment();
+                executionStepHasAttachmentListExecutionStepHasAttachment.setAttachment(attachment);
+                executionStepHasAttachmentListExecutionStepHasAttachment = em.merge(executionStepHasAttachmentListExecutionStepHasAttachment);
+                if (oldAttachmentOfExecutionStepHasAttachmentListExecutionStepHasAttachment != null) {
+                    oldAttachmentOfExecutionStepHasAttachmentListExecutionStepHasAttachment.getExecutionStepHasAttachmentList().remove(executionStepHasAttachmentListExecutionStepHasAttachment);
+                    oldAttachmentOfExecutionStepHasAttachmentListExecutionStepHasAttachment = em.merge(oldAttachmentOfExecutionStepHasAttachmentListExecutionStepHasAttachment);
+                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -66,7 +87,7 @@ public class AttachmentJpaController implements Serializable {
         }
     }
 
-    public void edit(Attachment attachment) throws NonexistentEntityException, Exception {
+    public void edit(Attachment attachment) throws IllegalOrphanException, NonexistentEntityException, Exception {
         attachment.getAttachmentPK().setAttachmentTypeId(attachment.getAttachmentType().getId());
         EntityManager em = null;
         try {
@@ -75,10 +96,31 @@ public class AttachmentJpaController implements Serializable {
             Attachment persistentAttachment = em.find(Attachment.class, attachment.getAttachmentPK());
             AttachmentType attachmentTypeOld = persistentAttachment.getAttachmentType();
             AttachmentType attachmentTypeNew = attachment.getAttachmentType();
+            List<ExecutionStepHasAttachment> executionStepHasAttachmentListOld = persistentAttachment.getExecutionStepHasAttachmentList();
+            List<ExecutionStepHasAttachment> executionStepHasAttachmentListNew = attachment.getExecutionStepHasAttachmentList();
+            List<String> illegalOrphanMessages = null;
+            for (ExecutionStepHasAttachment executionStepHasAttachmentListOldExecutionStepHasAttachment : executionStepHasAttachmentListOld) {
+                if (!executionStepHasAttachmentListNew.contains(executionStepHasAttachmentListOldExecutionStepHasAttachment)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain ExecutionStepHasAttachment " + executionStepHasAttachmentListOldExecutionStepHasAttachment + " since its attachment field is not nullable.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
             if (attachmentTypeNew != null) {
                 attachmentTypeNew = em.getReference(attachmentTypeNew.getClass(), attachmentTypeNew.getId());
                 attachment.setAttachmentType(attachmentTypeNew);
             }
+            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentListNew = new ArrayList<ExecutionStepHasAttachment>();
+            for (ExecutionStepHasAttachment executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach : executionStepHasAttachmentListNew) {
+                executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach = em.getReference(executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach.getClass(), executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach.getExecutionStepHasAttachmentPK());
+                attachedExecutionStepHasAttachmentListNew.add(executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach);
+            }
+            executionStepHasAttachmentListNew = attachedExecutionStepHasAttachmentListNew;
+            attachment.setExecutionStepHasAttachmentList(executionStepHasAttachmentListNew);
             attachment = em.merge(attachment);
             if (attachmentTypeOld != null && !attachmentTypeOld.equals(attachmentTypeNew)) {
                 attachmentTypeOld.getAttachmentList().remove(attachment);
@@ -87,6 +129,17 @@ public class AttachmentJpaController implements Serializable {
             if (attachmentTypeNew != null && !attachmentTypeNew.equals(attachmentTypeOld)) {
                 attachmentTypeNew.getAttachmentList().add(attachment);
                 attachmentTypeNew = em.merge(attachmentTypeNew);
+            }
+            for (ExecutionStepHasAttachment executionStepHasAttachmentListNewExecutionStepHasAttachment : executionStepHasAttachmentListNew) {
+                if (!executionStepHasAttachmentListOld.contains(executionStepHasAttachmentListNewExecutionStepHasAttachment)) {
+                    Attachment oldAttachmentOfExecutionStepHasAttachmentListNewExecutionStepHasAttachment = executionStepHasAttachmentListNewExecutionStepHasAttachment.getAttachment();
+                    executionStepHasAttachmentListNewExecutionStepHasAttachment.setAttachment(attachment);
+                    executionStepHasAttachmentListNewExecutionStepHasAttachment = em.merge(executionStepHasAttachmentListNewExecutionStepHasAttachment);
+                    if (oldAttachmentOfExecutionStepHasAttachmentListNewExecutionStepHasAttachment != null && !oldAttachmentOfExecutionStepHasAttachmentListNewExecutionStepHasAttachment.equals(attachment)) {
+                        oldAttachmentOfExecutionStepHasAttachmentListNewExecutionStepHasAttachment.getExecutionStepHasAttachmentList().remove(executionStepHasAttachmentListNewExecutionStepHasAttachment);
+                        oldAttachmentOfExecutionStepHasAttachmentListNewExecutionStepHasAttachment = em.merge(oldAttachmentOfExecutionStepHasAttachmentListNewExecutionStepHasAttachment);
+                    }
+                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -105,7 +158,7 @@ public class AttachmentJpaController implements Serializable {
         }
     }
 
-    public void destroy(AttachmentPK id) throws NonexistentEntityException {
+    public void destroy(AttachmentPK id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -116,6 +169,17 @@ public class AttachmentJpaController implements Serializable {
                 attachment.getAttachmentPK();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The attachment with id " + id + " no longer exists.", enfe);
+            }
+            List<String> illegalOrphanMessages = null;
+            List<ExecutionStepHasAttachment> executionStepHasAttachmentListOrphanCheck = attachment.getExecutionStepHasAttachmentList();
+            for (ExecutionStepHasAttachment executionStepHasAttachmentListOrphanCheckExecutionStepHasAttachment : executionStepHasAttachmentListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Attachment (" + attachment + ") cannot be destroyed since the ExecutionStepHasAttachment " + executionStepHasAttachmentListOrphanCheckExecutionStepHasAttachment + " in its executionStepHasAttachmentList field has a non-nullable attachment field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             AttachmentType attachmentType = attachment.getAttachmentType();
             if (attachmentType != null) {

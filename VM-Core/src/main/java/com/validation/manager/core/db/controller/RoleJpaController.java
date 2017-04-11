@@ -39,40 +39,40 @@ public class RoleJpaController implements Serializable {
 
     public void create(Role role) {
         if (role.getVmUserList() == null) {
-            role.setVmUserList(new ArrayList<>());
+            role.setVmUserList(new ArrayList<VmUser>());
         }
         if (role.getUserRightList() == null) {
-            role.setUserRightList(new ArrayList<>());
+            role.setUserRightList(new ArrayList<UserRight>());
         }
         if (role.getUserTestProjectRoleList() == null) {
-            role.setUserTestProjectRoleList(new ArrayList<>());
+            role.setUserTestProjectRoleList(new ArrayList<UserTestProjectRole>());
         }
         if (role.getUserTestPlanRoleList() == null) {
-            role.setUserTestPlanRoleList(new ArrayList<>());
+            role.setUserTestPlanRoleList(new ArrayList<UserTestPlanRole>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<VmUser> attachedVmUserList = new ArrayList<>();
+            List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
             for (VmUser vmUserListVmUserToAttach : role.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
             }
             role.setVmUserList(attachedVmUserList);
-            List<UserRight> attachedUserRightList = new ArrayList<>();
+            List<UserRight> attachedUserRightList = new ArrayList<UserRight>();
             for (UserRight userRightListUserRightToAttach : role.getUserRightList()) {
                 userRightListUserRightToAttach = em.getReference(userRightListUserRightToAttach.getClass(), userRightListUserRightToAttach.getId());
                 attachedUserRightList.add(userRightListUserRightToAttach);
             }
             role.setUserRightList(attachedUserRightList);
-            List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<>();
+            List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<UserTestProjectRole>();
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRoleToAttach : role.getUserTestProjectRoleList()) {
                 userTestProjectRoleListUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListUserTestProjectRoleToAttach.getUserTestProjectRolePK());
                 attachedUserTestProjectRoleList.add(userTestProjectRoleListUserTestProjectRoleToAttach);
             }
             role.setUserTestProjectRoleList(attachedUserTestProjectRoleList);
-            List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<>();
+            List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<UserTestPlanRole>();
             for (UserTestPlanRole userTestPlanRoleListUserTestPlanRoleToAttach : role.getUserTestPlanRoleList()) {
                 userTestPlanRoleListUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListUserTestPlanRoleToAttach.getUserTestPlanRolePK());
                 attachedUserTestPlanRoleList.add(userTestPlanRoleListUserTestPlanRoleToAttach);
@@ -131,7 +131,7 @@ public class RoleJpaController implements Serializable {
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestProjectRole " + userTestProjectRoleListOldUserTestProjectRole + " since its role field is not nullable.");
                 }
@@ -139,7 +139,7 @@ public class RoleJpaController implements Serializable {
             for (UserTestPlanRole userTestPlanRoleListOldUserTestPlanRole : userTestPlanRoleListOld) {
                 if (!userTestPlanRoleListNew.contains(userTestPlanRoleListOldUserTestPlanRole)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestPlanRole " + userTestPlanRoleListOldUserTestPlanRole + " since its role field is not nullable.");
                 }
@@ -147,28 +147,28 @@ public class RoleJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<VmUser> attachedVmUserListNew = new ArrayList<>();
+            List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
                 attachedVmUserListNew.add(vmUserListNewVmUserToAttach);
             }
             vmUserListNew = attachedVmUserListNew;
             role.setVmUserList(vmUserListNew);
-            List<UserRight> attachedUserRightListNew = new ArrayList<>();
+            List<UserRight> attachedUserRightListNew = new ArrayList<UserRight>();
             for (UserRight userRightListNewUserRightToAttach : userRightListNew) {
                 userRightListNewUserRightToAttach = em.getReference(userRightListNewUserRightToAttach.getClass(), userRightListNewUserRightToAttach.getId());
                 attachedUserRightListNew.add(userRightListNewUserRightToAttach);
             }
             userRightListNew = attachedUserRightListNew;
             role.setUserRightList(userRightListNew);
-            List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<>();
+            List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<UserTestProjectRole>();
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRoleToAttach : userTestProjectRoleListNew) {
                 userTestProjectRoleListNewUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListNewUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListNewUserTestProjectRoleToAttach.getUserTestProjectRolePK());
                 attachedUserTestProjectRoleListNew.add(userTestProjectRoleListNewUserTestProjectRoleToAttach);
             }
             userTestProjectRoleListNew = attachedUserTestProjectRoleListNew;
             role.setUserTestProjectRoleList(userTestProjectRoleListNew);
-            List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<>();
+            List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<UserTestPlanRole>();
             for (UserTestPlanRole userTestPlanRoleListNewUserTestPlanRoleToAttach : userTestPlanRoleListNew) {
                 userTestPlanRoleListNewUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListNewUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListNewUserTestPlanRoleToAttach.getUserTestPlanRolePK());
                 attachedUserTestPlanRoleListNew.add(userTestPlanRoleListNewUserTestPlanRoleToAttach);
@@ -255,14 +255,14 @@ public class RoleJpaController implements Serializable {
             List<UserTestProjectRole> userTestProjectRoleListOrphanCheck = role.getUserTestProjectRoleList();
             for (UserTestProjectRole userTestProjectRoleListOrphanCheckUserTestProjectRole : userTestProjectRoleListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the UserTestProjectRole " + userTestProjectRoleListOrphanCheckUserTestProjectRole + " in its userTestProjectRoleList field has a non-nullable role field.");
             }
             List<UserTestPlanRole> userTestPlanRoleListOrphanCheck = role.getUserTestPlanRoleList();
             for (UserTestPlanRole userTestPlanRoleListOrphanCheckUserTestPlanRole : userTestPlanRoleListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the UserTestPlanRole " + userTestPlanRoleListOrphanCheckUserTestPlanRole + " in its userTestPlanRoleList field has a non-nullable role field.");
             }
