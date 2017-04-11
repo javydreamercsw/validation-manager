@@ -80,7 +80,7 @@ public final class ExecutionStepServer extends ExecutionStep
             setVmUserId(assignee);
             setAssignedTime(new Date());
             write2DB();
-            //Now set the assignee
+            //Now set the assigner
             new VMUserServer(assigner).setAsAssigner(getEntity());
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
