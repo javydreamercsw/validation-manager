@@ -392,10 +392,10 @@ public class ValidationManagerUI extends UI {
                 if (dataType.isAssignableFrom(VmUser.class)) {
                     BeanItemContainer<VmUser> userEntityContainer
                             = new BeanItemContainer<>(VmUser.class);
-                    userEntityContainer.addBean(es.getVmUserId());
-                    Field field = new TextField(es.getVmUserId() == null ? "N/A"
-                            : es.getVmUserId().getFirstName() + " "
-                            + es.getVmUserId().getLastName());
+                    userEntityContainer.addBean(es.getAssignee());
+                    Field field = new TextField(es.getAssignee() == null ? "N/A"
+                            : es.getAssignee().getFirstName() + " "
+                            + es.getAssignee().getLastName());
                     return fieldType.cast(field);
                 }
 
@@ -429,7 +429,7 @@ public class ValidationManagerUI extends UI {
             binder.bind(comment, "comment");
             layout.addComponent(comment);
         }
-        if (es.getVmUserId() != null) {
+        if (es.getAssignee() != null) {
             TextField assignee = new TextField("Assignee");
             assignee.setConverter(new UserToStringConverter());
             binder.bind(assignee, "vmUserId");
@@ -1679,7 +1679,7 @@ public class ValidationManagerUI extends UI {
             if (tester == null) {
                 VerticalLayout vl = new VerticalLayout();
                 if (getUser() != null
-                        && !getUser().getExecutionSteps().isEmpty()) {
+                        && !getUser().getExecutionStepList().isEmpty()) {
                     TreeTable testCaseTree = new TreeTable("Available Tests");
                     testCaseTree.addContainerProperty("Name", String.class, "");
                     testCaseTree.addGeneratedColumn("Status",
@@ -1766,44 +1766,47 @@ public class ValidationManagerUI extends UI {
                                 //Add applicable Executions
                                 Map<Integer, ExecutionStep> tests = new HashMap<>();
                                 sp.getTestProjectList().forEach(test -> {
-                                    test.getProjectList().forEach(tp -> {
-                                        tp.getTestCaseExecutions().forEach(tce -> {
+                                    test.getTestPlanList().forEach(tp -> {
+                                        tp.getTestCaseList().forEach(testCase -> {
                                             List<Integer> tcids = new ArrayList<>();
-                                            testCaseTree.addItem(new Object[]{tce.getName(),
-                                                "", "",}, "tce" + tce.getId());
-                                            testCaseTree.setParent("tce" + tce.getId(), "p" + sp.getId());
-                                            testCaseTree.setItemIcon("tce" + tce.getId(), EXECUTION_ICON);
-                                            tce.getExecutionStepList().forEach(es -> {
-                                                if (es.getVmUserId().getId().equals(getUser().getId())) {
-                                                    TestCase tc = es.getStep().getTestCase();
-                                                    if (!tcids.contains(tc.getId())) {
-                                                        tcids.add(tc.getId());
-                                                        DateTimeFormatter format
-                                                                = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
-                                                        LocalDateTime time
-                                                                = LocalDateTime.ofInstant(es.getAssignedTime()
-                                                                        .toInstant(), ZoneId.systemDefault());
-                                                        String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
-                                                                + "-" + es.getStep().getStepPK().getId() + "-" + tc.getId();
-                                                        testCaseTree.addItem(new Object[]{tc.getName(),
-                                                            tc.getSummary(), format.format(time),},
-                                                                key);
-                                                        testCaseTree.setParent(key, "tce" + tce.getId());
-                                                        testCaseTree.setItemIcon(key, TEST_ICON);
-                                                        testCaseTree.setChildrenAllowed(key, false);
+                                            testCase.getStepList().forEach(s -> {
+                                                s.getExecutionStepList().forEach(es -> {
+                                                    TestCaseExecution tce = es.getTestCaseExecution();
+                                                    testCaseTree.addItem(new Object[]{tce.getName(),
+                                                        "", "",}, "tce" + tce.getId());
+                                                    testCaseTree.setParent("tce" + tce.getId(), "p" + sp.getId());
+                                                    testCaseTree.setItemIcon("tce" + tce.getId(), EXECUTION_ICON);
+                                                    if (es.getAssignee().getId().equals(getUser().getId())) {
+                                                        TestCase tc = es.getStep().getTestCase();
+                                                        if (!tcids.contains(tc.getId())) {
+                                                            tcids.add(tc.getId());
+                                                            DateTimeFormatter format
+                                                                    = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
+                                                            LocalDateTime time
+                                                                    = LocalDateTime.ofInstant(es.getAssignedTime()
+                                                                            .toInstant(), ZoneId.systemDefault());
+                                                            String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
+                                                                    + "-" + es.getStep().getStepPK().getId() + "-" + tc.getId();
+                                                            testCaseTree.addItem(new Object[]{tc.getName(),
+                                                                tc.getSummary(), format.format(time),},
+                                                                    key);
+                                                            testCaseTree.setParent(key, "tce" + tce.getId());
+                                                            testCaseTree.setItemIcon(key, TEST_ICON);
+                                                            testCaseTree.setChildrenAllowed(key, false);
+                                                        }
                                                     }
-                                                }
+                                                });
                                             });
                                             tcids.clear();
                                         });
                                     });
                                 });
+                                testCaseTree.setSizeFull();
+                                vl.addComponent(testCaseTree);
+                                tester = tabSheet.addTab(vl, "Tester");
                             });
                         }
                     });
-                    testCaseTree.setSizeFull();
-                    vl.addComponent(testCaseTree);
-                    tester = tabSheet.addTab(vl, "Tester");
                 }
             }
             if (designer == null) {
@@ -1913,6 +1916,11 @@ public class ValidationManagerUI extends UI {
                 try {
                     user.write2DB();
                     user = null;
+                    main = null;
+                    tester = null;
+                    designer = null;
+                    demo = null;
+                    admin = null;
                     updateScreen();
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -1937,14 +1945,15 @@ public class ValidationManagerUI extends UI {
             //Process any notifications
             //Check for assigned test
             getUser().update();
-            getUser().getExecutionSteps().forEach(es -> {
+            for (ExecutionStep es : getUser().getExecutionStepList()) {
                 if (es.getExecutionStart() == null) {
                     //It has been assigned but not started
                     Notification.show("Test Pending",
                             "You have test case(s) pending execution.",
                             Notification.Type.TRAY_NOTIFICATION);
+                    break;
                 }
-            });
+            }
         }
         //Add the content
         vs.setSecondComponent(getContentComponent());
@@ -2188,13 +2197,14 @@ public class ValidationManagerUI extends UI {
             });
             children = true;
         }
-        if (!p.getTestCaseExecutions().isEmpty()) {
+        List<TestCaseExecution> executions = TestCaseExecutionServer.getExecutions(p);
+        if (!executions.isEmpty()) {
             String id = "executions" + p.getId();
             tree.addItem(id);
             tree.setItemCaption(id, "Executions");
             tree.setItemIcon(id, EXECUTIONS_ICON);
             tree.setParent(id, p);
-            p.getTestCaseExecutions().forEach((tce) -> {
+            executions.forEach((tce) -> {
                 addTestCaseExecutions(id, tce, tree);
             });
             children = true;
@@ -2584,7 +2594,7 @@ public class ValidationManagerUI extends UI {
 
     private void showExecutionScreen(List<TestCaseExecutionServer> executions) {
         if (executionWindow == null) {
-            executionWindow = new ExecutionWindow(executions, logo);
+            executionWindow = new ExecutionWindow(this, executions, logo);
             executionWindow.setVisible(true);
             executionWindow.setClosable(false);
             executionWindow.setResizable(false);

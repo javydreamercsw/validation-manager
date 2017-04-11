@@ -11,7 +11,6 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import java.util.List;
@@ -90,11 +89,6 @@ public class DetailStep implements WizardStep {
                 tc = new TestCaseServer(id);
                 tces.addTestCase(tc.getEntity());
             }
-            projects.stream().map((pid)
-                    -> new ProjectServer(pid)).forEachOrdered((ps) -> {
-                LOG.log(Level.INFO, "Adding project: {0}", ps.getName());
-                tces.getProjects().add(ps.getEntity());
-            });
             try {
                 tces.write2DB();
                 ui.buildProjectTree(ui.getSelectdValue());

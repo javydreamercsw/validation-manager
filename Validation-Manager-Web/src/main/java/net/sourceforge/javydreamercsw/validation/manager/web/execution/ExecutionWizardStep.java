@@ -1,0 +1,179 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package net.sourceforge.javydreamercsw.validation.manager.web.execution;
+
+import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Field;
+import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.ValoTheme;
+import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.server.core.AttachmentServer;
+import com.validation.manager.core.server.core.ExecutionStepServer;
+import com.validation.manager.core.server.core.VMSettingServer;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import org.vaadin.easyuploads.MultiFileUpload;
+import org.vaadin.teemu.wizards.Wizard;
+import org.vaadin.teemu.wizards.WizardStep;
+
+/**
+ *
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ */
+public class ExecutionWizardStep implements WizardStep {
+
+    private final Wizard w;
+
+    private final ValidationManagerUI ui;
+
+    private final ExecutionStepServer step;
+    private final TextArea result = new TextArea("Result");
+    private static final Logger LOG
+            = Logger.getLogger(ExecutionWizardStep.class.getSimpleName());
+
+    public ExecutionWizardStep(Wizard w, ValidationManagerUI ui,
+            ExecutionStep step) {
+        this.w = w;
+        this.ui = ui;
+        this.step = new ExecutionStepServer(step);
+    }
+
+    @Override
+    public String getCaption() {
+        return step.getStep().getTestCase().getName() + " Step:"
+                + step.getStep().getStepSequence();
+    }
+
+    @Override
+    public Component getContent() {
+        Panel form = new Panel("Step Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(step.getStep().getClass());
+        binder.setItemDataSource(step.getStep());
+        TextArea text = new TextArea("Text");
+        text.setConverter(new ByteToStringConverter());
+        binder.bind(text, "text");
+        text.setSizeFull();
+        layout.addComponent(text);
+        Field notes = binder.buildAndBind("Notes", "notes",
+                TextArea.class);
+        notes.setSizeFull();
+        layout.addComponent(notes);
+        binder.setReadOnly(true);
+        //Space to record result
+        result.setSizeFull();
+        result.setReadOnly(false);
+        result.setRequired(true);
+        result.setRequiredError("Please provide a result!");
+        layout.addComponent(result);
+        if (VMSettingServer.getSetting("show.expected.result").getBoolVal()) {
+            TextArea expectedResult = new TextArea("Expected Result");
+            expectedResult.setConverter(new ByteToStringConverter());
+            binder.bind(expectedResult, "expectedResult");
+            expectedResult.setSizeFull();
+            layout.addComponent(expectedResult);
+        }
+        //Add the Attachments
+        HorizontalLayout attachments = new HorizontalLayout();
+        step.getExecutionStepHasAttachmentList().forEach(attachment -> {
+            Button a = new Button(attachment.getAttachment().getFileName());
+            a.setIcon(VaadinIcons.PAPERCLIP);
+            a.addClickListener((Button.ClickEvent event) -> {
+                LOG.log(Level.INFO, "Clicked on attachment: {0}",
+                        attachment.getAttachment().getFileName());
+            });
+            attachments.addComponent(a);
+        });
+        if (attachments.getComponentCount() > 0) {
+            layout.addComponent(attachments);
+        }
+        //Add the menu
+        HorizontalLayout hl = new HorizontalLayout();
+        Button attach = new Button("Add Attachment");
+        attach.setIcon(VaadinIcons.PAPERCLIP);
+        attach.addClickListener((Button.ClickEvent event) -> {
+            //Show dialog to upload file.
+            Window dialog = new Window("Attach File");
+            VerticalLayout vl = new VerticalLayout();
+            MultiFileUpload multiFileUpload = new MultiFileUpload() {
+                @Override
+                protected void handleFile(File file, String fileName,
+                        String mimeType, long length) {
+                    try {
+                        LOG.log(Level.INFO, "Received file {1} at: {0}",
+                                new Object[]{file.getAbsolutePath(), fileName});
+                        //Process the file
+                        //Create the attachment
+                        AttachmentServer a = new AttachmentServer();
+                        a.addFile(file);
+                        //Overwrite the default file name set in addFile. It'll be a temporary file name
+                        a.setFileName(fileName);
+                        a.write2DB();
+                        //Now add it to this Execution Step
+                        if (step.getExecutionStepHasAttachmentList() == null) {
+                            step.setExecutionStepHasAttachmentList(new ArrayList<>());
+                        }
+                        step.addAttachment(a);
+                        w.updateCurrentStep();
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, "Error creating attachment!", ex);
+                    }
+                }
+            };
+            multiFileUpload.setCaption("Select file(s) to attach...");
+            vl.addComponent(multiFileUpload);
+            dialog.setContent(vl);
+            dialog.center();
+            ui.addWindow(dialog);
+        });
+        hl.addComponent(attach);
+        Button bug = new Button("Create an Issue");
+        bug.setIcon(VaadinIcons.BUG);
+        bug.addClickListener((Button.ClickEvent event) -> {
+            LOG.info("Clicked to add a bug!");
+        });
+        hl.addComponent(bug);
+        Button comment = new Button("Add comment");
+        comment.setIcon(VaadinIcons.BUG);
+        comment.addClickListener((Button.ClickEvent event) -> {
+            LOG.info("Clicked to add comment!");
+        });
+        hl.addComponent(comment);
+        layout.addComponent(hl);
+        return layout;
+    }
+
+    @Override
+    public boolean onAdvance() {
+        //Can only proceed after the current step is executed and documented.
+        if (result.getValue().trim().isEmpty()) {
+            Notification.show("Unable to proceed!",
+                    result.getRequiredError(),
+                    Notification.Type.WARNING_MESSAGE);
+        }
+        return !result.getValue().trim().isEmpty();
+    }
+
+    @Override
+    public boolean onBack() {
+        return step.getStep().getStepSequence() > 1;
+    }
+}
