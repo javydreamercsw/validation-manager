@@ -7,8 +7,11 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -18,12 +21,17 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
+import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.controller.ExecutionResultJpaController;
 import com.validation.manager.core.server.core.AttachmentServer;
+import com.validation.manager.core.server.core.ExecutionResultServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
@@ -43,7 +51,7 @@ public class ExecutionWizardStep implements WizardStep {
     private final ValidationManagerUI ui;
 
     private final ExecutionStepServer step;
-    private final TextArea result = new TextArea("Result");
+    private final ComboBox result = new ComboBox("Result");
     private static final Logger LOG
             = Logger.getLogger(ExecutionWizardStep.class.getSimpleName());
 
@@ -52,6 +60,34 @@ public class ExecutionWizardStep implements WizardStep {
         this.w = w;
         this.ui = ui;
         this.step = new ExecutionStepServer(step);
+        result.setSizeFull();
+        result.setReadOnly(false);
+        result.setRequired(true);
+        result.setRequiredError("Please provide a result!");
+        ExecutionResultJpaController c
+                = new ExecutionResultJpaController(DataBaseManager.getEntityManagerFactory());
+        c.findExecutionResultEntities().forEach(r -> {
+            String item = r.getResultName();
+            if (ValidationManagerUI.rb.containsKey(item)) {
+                item = ValidationManagerUI.rb.getString(item);
+            }
+            result.addItem(r.getResultName());
+            result.setItemCaption(r.getResultName(), item);
+            switch (r.getId()) {
+                case 1:
+                    result.setItemIcon(r.getResultName(), VaadinIcons.CHECK);
+                    break;
+                case 2:
+                    result.setItemIcon(r.getResultName(), VaadinIcons.CLOSE);
+                    break;
+                case 3:
+                    result.setItemIcon(r.getResultName(), VaadinIcons.PAUSE);
+                    break;
+                default:
+                    result.setItemIcon(r.getResultName(), VaadinIcons.CLOCK);
+                    break;
+            }
+        });
     }
 
     @Override
@@ -62,7 +98,12 @@ public class ExecutionWizardStep implements WizardStep {
 
     @Override
     public Component getContent() {
+        step.update();
         Panel form = new Panel("Step Detail");
+        if (step.getExecutionStart() == null) {
+            //Set the start date.
+            step.setExecutionStart(new Date());
+        }
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
@@ -77,12 +118,23 @@ public class ExecutionWizardStep implements WizardStep {
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
+        if (step.getExecutionStart() != null) {
+            DateField start = new DateField("Start Date");
+            start.setResolution(Resolution.SECOND);
+            start.setValue(step.getExecutionStart());
+            layout.addComponent(start);
+        }
+        if (step.getExecutionEnd() != null) {
+            DateField end = new DateField("End Date");
+            end.setResolution(Resolution.SECOND);
+            end.setValue(step.getExecutionEnd());
+            layout.addComponent(end);
+        }
         binder.setReadOnly(true);
         //Space to record result
-        result.setSizeFull();
-        result.setReadOnly(false);
-        result.setRequired(true);
-        result.setRequiredError("Please provide a result!");
+        if (step.getResultId() != null) {
+            result.setValue(step.getResultId().getResultName());
+        }
         layout.addComponent(result);
         if (VMSettingServer.getSetting("show.expected.result").getBoolVal()) {
             TextArea expectedResult = new TextArea("Expected Result");
@@ -93,6 +145,7 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add the Attachments
         HorizontalLayout attachments = new HorizontalLayout();
+        attachments.setCaption("Attachments");
         step.getExecutionStepHasAttachmentList().forEach(attachment -> {
             Button a = new Button(attachment.getAttachment().getFileName());
             a.setIcon(VaadinIcons.PAPERCLIP);
@@ -132,6 +185,7 @@ public class ExecutionWizardStep implements WizardStep {
                             step.setExecutionStepHasAttachmentList(new ArrayList<>());
                         }
                         step.addAttachment(a);
+                        step.write2DB();
                         w.updateCurrentStep();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, "Error creating attachment!", ex);
@@ -164,12 +218,30 @@ public class ExecutionWizardStep implements WizardStep {
     @Override
     public boolean onAdvance() {
         //Can only proceed after the current step is executed and documented.
-        if (result.getValue().trim().isEmpty()) {
+        String answer = ((String) result.getValue());
+        if (answer == null) {
             Notification.show("Unable to proceed!",
                     result.getRequiredError(),
                     Notification.Type.WARNING_MESSAGE);
+        } else {
+            try {
+                //Save the result
+                ExecutionResult newResult = ExecutionResultServer.getResult(answer);
+                if (step.getResultId() == null
+                        || step.getResultId().getId() != newResult.getId()) {
+                    step.setResultId(newResult);
+                    //Set end date to null to reflect update
+                    step.setExecutionEnd(null);
+                }
+                if (step.getExecutionEnd() == null) {
+                    step.setExecutionEnd(new Date());
+                }
+                step.write2DB();
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
         }
-        return !result.getValue().trim().isEmpty();
+        return !((String) result.getValue()).trim().isEmpty();
     }
 
     @Override

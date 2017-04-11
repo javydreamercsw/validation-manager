@@ -170,7 +170,7 @@ public class ValidationManagerUI extends UI {
     private Tree tree;
     private Tab main, tester, designer, demo, admin;
     private final List<String> roles = new ArrayList<>();
-    final ResourceBundle rb = ResourceBundle.getBundle(
+    public static final ResourceBundle rb = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages");
 
     /**

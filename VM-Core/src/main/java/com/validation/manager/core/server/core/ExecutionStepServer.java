@@ -8,6 +8,7 @@ import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ExecutionStepHasAttachmentJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
+import java.util.ArrayList;
 import java.util.Date;
 import org.openide.util.Exceptions;
 
@@ -57,6 +58,9 @@ public final class ExecutionStepServer extends ExecutionStep
 
     @Override
     public void update(ExecutionStep target, ExecutionStep source) {
+        if (target.getExecutionStepHasAttachmentList() == null) {
+            target.setExecutionStepHasAttachmentList(new ArrayList<>());
+        }
         target.setAssignedTime(source.getAssignedTime());
         target.setComment(source.getComment());
         target.setExecutionEnd(source.getExecutionEnd());
@@ -98,6 +102,7 @@ public final class ExecutionStepServer extends ExecutionStep
         esha.setExecutionStep(getEntity());
         esha.setCreationTime(new Date());
         controller.create(esha);
+        getExecutionStepHasAttachmentList().add(esha);
         update();
     }
 }
