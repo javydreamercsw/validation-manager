@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -55,14 +50,21 @@ public class ExecutionStepHasAttachment implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
     @JoinColumns({
-        @JoinColumn(name = "attachment_id", referencedColumnName = "id", insertable = false, updatable = false)
-        , @JoinColumn(name = "attachment_attachment_type_id", referencedColumnName = "attachment_type_id", insertable = false, updatable = false)})
+        @JoinColumn(name = "attachment_id", referencedColumnName = "id",
+                insertable = false, updatable = false)
+        , @JoinColumn(name = "attachment_attachment_type_id",
+                referencedColumnName = "attachment_type_id", insertable = false,
+                updatable = false)})
     @ManyToOne(optional = false)
     private Attachment attachment;
     @JoinColumns({
-        @JoinColumn(name = "execution_step_test_case_execution_id", referencedColumnName = "test_case_execution_id", insertable = false, updatable = false)
-        , @JoinColumn(name = "execution_step_step_id", referencedColumnName = "step_id", insertable = false, updatable = false)
-        , @JoinColumn(name = "execution_step_step_test_case_id", referencedColumnName = "step_test_case_id", insertable = false, updatable = false)})
+        @JoinColumn(name = "execution_step_test_case_execution_id",
+                referencedColumnName = "test_case_execution_id",
+                insertable = false, updatable = false)
+        , @JoinColumn(name = "execution_step_step_id",
+                referencedColumnName = "step_id", insertable = false, updatable = false)
+        , @JoinColumn(name = "execution_step_step_test_case_id",
+                referencedColumnName = "step_test_case_id", insertable = false, updatable = false)})
     @ManyToOne(optional = false)
     private ExecutionStep executionStep;
 
@@ -78,7 +80,9 @@ public class ExecutionStepHasAttachment implements Serializable {
         this.creationTime = creationTime;
     }
 
-    public ExecutionStepHasAttachment(int executionStepTestCaseExecutionId, int executionStepStepId, int executionStepStepTestCaseId, int attachmentId, int attachmentAttachmentTypeId) {
+    public ExecutionStepHasAttachment(int executionStepTestCaseExecutionId,
+            int executionStepStepId, int executionStepStepTestCaseId,
+            int attachmentId, int attachmentAttachmentTypeId) {
         this.executionStepHasAttachmentPK = new ExecutionStepHasAttachmentPK(executionStepTestCaseExecutionId, executionStepStepId, executionStepStepTestCaseId, attachmentId, attachmentAttachmentTypeId);
     }
 
@@ -128,15 +132,17 @@ public class ExecutionStepHasAttachment implements Serializable {
             return false;
         }
         ExecutionStepHasAttachment other = (ExecutionStepHasAttachment) object;
-        if ((this.executionStepHasAttachmentPK == null && other.executionStepHasAttachmentPK != null) || (this.executionStepHasAttachmentPK != null && !this.executionStepHasAttachmentPK.equals(other.executionStepHasAttachmentPK))) {
-            return false;
-        }
-        return true;
+        return !((this.executionStepHasAttachmentPK == null
+                && other.executionStepHasAttachmentPK != null)
+                || (this.executionStepHasAttachmentPK != null
+                && !this.executionStepHasAttachmentPK
+                        .equals(other.executionStepHasAttachmentPK)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.ExecutionStepHasAttachment[ executionStepHasAttachmentPK=" + executionStepHasAttachmentPK + " ]";
+        return "com.validation.manager.core.db.ExecutionStepHasAttachment[ "
+                + "executionStepHasAttachmentPK="
+                + executionStepHasAttachmentPK + " ]";
     }
-
 }

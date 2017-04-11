@@ -99,7 +99,7 @@ public class StepImporterTest extends AbstractVMTestCase {
         System.out.println("Create Test");
         TestCase test = null;
         try {
-            test = createTestCase("Test", "", "");
+            test = createTestCase("Test", "");
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -114,8 +114,7 @@ public class StepImporterTest extends AbstractVMTestCase {
         System.out.println("Create Test Case");
         com.validation.manager.core.db.TestCase tc = null;
         try {
-            tc = createTestCase("Dummy",
-                    "Test Case", "Test Summary");
+            tc = createTestCase("Dummy", "Test Summary");
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();

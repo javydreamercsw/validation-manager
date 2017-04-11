@@ -3,6 +3,7 @@ package com.validation.manager.core.server.core;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
@@ -10,6 +11,7 @@ import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import java.util.ArrayList;
+import java.util.List;
 import org.openide.util.Exceptions;
 
 /**
@@ -98,11 +100,6 @@ public final class TestCaseExecutionServer extends TestCaseExecution
         target.setId(source.getId());
         target.setScope(source.getScope());
         target.setName(source.getName());
-        if (target.getProjects() == null) {
-            target.setProjects(new ArrayList<>());
-        } else {
-            target.getProjects().clear();
-        }
         if (target.getExecutionStepList() == null) {
             target.setExecutionStepList(new ArrayList<>());
         } else {
@@ -111,11 +108,6 @@ public final class TestCaseExecutionServer extends TestCaseExecution
         if (source.getExecutionStepList() != null) {
             source.getExecutionStepList().forEach((es) -> {
                 target.getExecutionStepList().add(es);
-            });
-        }
-        if (source.getProjects() != null) {
-            source.getProjects().forEach((p) -> {
-                target.getProjects().add(p);
             });
         }
     }
@@ -145,5 +137,32 @@ public final class TestCaseExecutionServer extends TestCaseExecution
         plan.getTestCaseList().forEach((tc) -> {
             addTestCase(tc);
         });
+    }
+
+    /**
+     * List of Executions for the provided project.
+     *
+     * @param p project to look into.
+     * @return List of Executions for the provided project.
+     */
+    public static List<TestCaseExecution> getExecutions(Project p) {
+        List<TestCaseExecution> results = new ArrayList<>();
+        List<Integer> ids = new ArrayList<>();
+        p.getTestProjectList().forEach(tp -> {
+            tp.getTestPlanList().forEach(plan -> {
+                plan.getTestCaseList().forEach(tc -> {
+                    tc.getStepList().forEach(s -> {
+                        s.getExecutionStepList().forEach(es -> {
+                            TestCaseExecution tce = es.getTestCaseExecution();
+                            if (!ids.contains(es.getStep().getTestCase().getId())) {
+                                results.add(tce);
+                                ids.add(es.getStep().getTestCase().getId());
+                            }
+                        });
+                    });
+                });
+            });
+        });
+        return results;
     }
 }

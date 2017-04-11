@@ -24,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "investigation")
@@ -126,5 +126,4 @@ public class Investigation implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Investigation[ id=" + id + " ]";
     }
-
 }

@@ -51,9 +51,9 @@ public class ExecutionStepJpaController implements Serializable {
         if (executionStep.getExecutionStepHasAttachmentList() == null) {
             executionStep.setExecutionStepHasAttachmentList(new ArrayList<ExecutionStepHasAttachment>());
         }
-        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
         executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
+        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -63,10 +63,15 @@ public class ExecutionStepJpaController implements Serializable {
                 resultId = em.getReference(resultId.getClass(), resultId.getId());
                 executionStep.setResultId(resultId);
             }
-            VmUser vmUserId = executionStep.getVmUserId();
-            if (vmUserId != null) {
-                vmUserId = em.getReference(vmUserId.getClass(), vmUserId.getId());
-                executionStep.setVmUserId(vmUserId);
+            VmUser assignee = executionStep.getAssignee();
+            if (assignee != null) {
+                assignee = em.getReference(assignee.getClass(), assignee.getId());
+                executionStep.setAssignee(assignee);
+            }
+            VmUser assigner = executionStep.getAssigner();
+            if (assigner != null) {
+                assigner = em.getReference(assigner.getClass(), assigner.getId());
+                executionStep.setAssigner(assigner);
             }
             Step step = executionStep.getStep();
             if (step != null) {
@@ -95,9 +100,13 @@ public class ExecutionStepJpaController implements Serializable {
                 resultId.getExecutionStepList().add(executionStep);
                 resultId = em.merge(resultId);
             }
-            if (vmUserId != null) {
-                vmUserId.getExecutionSteps().add(executionStep);
-                vmUserId = em.merge(vmUserId);
+            if (assignee != null) {
+                assignee.getExecutionStepList().add(executionStep);
+                assignee = em.merge(assignee);
+            }
+            if (assigner != null) {
+                assigner.getExecutionStepList().add(executionStep);
+                assigner = em.merge(assigner);
             }
             if (step != null) {
                 step.getExecutionStepList().add(executionStep);
@@ -134,9 +143,9 @@ public class ExecutionStepJpaController implements Serializable {
     }
 
     public void edit(ExecutionStep executionStep) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
         executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
+        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -144,8 +153,10 @@ public class ExecutionStepJpaController implements Serializable {
             ExecutionStep persistentExecutionStep = em.find(ExecutionStep.class, executionStep.getExecutionStepPK());
             ExecutionResult resultIdOld = persistentExecutionStep.getResultId();
             ExecutionResult resultIdNew = executionStep.getResultId();
-            VmUser vmUserIdOld = persistentExecutionStep.getVmUserId();
-            VmUser vmUserIdNew = executionStep.getVmUserId();
+            VmUser assigneeOld = persistentExecutionStep.getAssignee();
+            VmUser assigneeNew = executionStep.getAssignee();
+            VmUser assignerOld = persistentExecutionStep.getAssigner();
+            VmUser assignerNew = executionStep.getAssigner();
             Step stepOld = persistentExecutionStep.getStep();
             Step stepNew = executionStep.getStep();
             TestCaseExecution testCaseExecutionOld = persistentExecutionStep.getTestCaseExecution();
@@ -170,9 +181,13 @@ public class ExecutionStepJpaController implements Serializable {
                 resultIdNew = em.getReference(resultIdNew.getClass(), resultIdNew.getId());
                 executionStep.setResultId(resultIdNew);
             }
-            if (vmUserIdNew != null) {
-                vmUserIdNew = em.getReference(vmUserIdNew.getClass(), vmUserIdNew.getId());
-                executionStep.setVmUserId(vmUserIdNew);
+            if (assigneeNew != null) {
+                assigneeNew = em.getReference(assigneeNew.getClass(), assigneeNew.getId());
+                executionStep.setAssignee(assigneeNew);
+            }
+            if (assignerNew != null) {
+                assignerNew = em.getReference(assignerNew.getClass(), assignerNew.getId());
+                executionStep.setAssigner(assignerNew);
             }
             if (stepNew != null) {
                 stepNew = em.getReference(stepNew.getClass(), stepNew.getStepPK());
@@ -205,13 +220,21 @@ public class ExecutionStepJpaController implements Serializable {
                 resultIdNew.getExecutionStepList().add(executionStep);
                 resultIdNew = em.merge(resultIdNew);
             }
-            if (vmUserIdOld != null && !vmUserIdOld.equals(vmUserIdNew)) {
-                vmUserIdOld.getExecutionSteps().remove(executionStep);
-                vmUserIdOld = em.merge(vmUserIdOld);
+            if (assigneeOld != null && !assigneeOld.equals(assigneeNew)) {
+                assigneeOld.getExecutionStepList().remove(executionStep);
+                assigneeOld = em.merge(assigneeOld);
             }
-            if (vmUserIdNew != null && !vmUserIdNew.equals(vmUserIdOld)) {
-                vmUserIdNew.getExecutionSteps().add(executionStep);
-                vmUserIdNew = em.merge(vmUserIdNew);
+            if (assigneeNew != null && !assigneeNew.equals(assigneeOld)) {
+                assigneeNew.getExecutionStepList().add(executionStep);
+                assigneeNew = em.merge(assigneeNew);
+            }
+            if (assignerOld != null && !assignerOld.equals(assignerNew)) {
+                assignerOld.getExecutionStepList().remove(executionStep);
+                assignerOld = em.merge(assignerOld);
+            }
+            if (assignerNew != null && !assignerNew.equals(assignerOld)) {
+                assignerNew.getExecutionStepList().add(executionStep);
+                assignerNew = em.merge(assignerNew);
             }
             if (stepOld != null && !stepOld.equals(stepNew)) {
                 stepOld.getExecutionStepList().remove(executionStep);
@@ -297,10 +320,15 @@ public class ExecutionStepJpaController implements Serializable {
                 resultId.getExecutionStepList().remove(executionStep);
                 resultId = em.merge(resultId);
             }
-            VmUser vmUserId = executionStep.getVmUserId();
-            if (vmUserId != null) {
-                vmUserId.getExecutionSteps().remove(executionStep);
-                vmUserId = em.merge(vmUserId);
+            VmUser assignee = executionStep.getAssignee();
+            if (assignee != null) {
+                assignee.getExecutionStepList().remove(executionStep);
+                assignee = em.merge(assignee);
+            }
+            VmUser assigner = executionStep.getAssigner();
+            if (assigner != null) {
+                assigner.getExecutionStepList().remove(executionStep);
+                assigner = em.merge(assigner);
             }
             Step step = executionStep.getStep();
             if (step != null) {

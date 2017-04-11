@@ -26,7 +26,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "execution_step")
@@ -58,28 +58,9 @@ public class ExecutionStep implements Serializable {
     @Column(name = "execution_time")
     private long executionTime;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "comment")
     private String comment;
-    @JoinColumn(name = "result_id", referencedColumnName = "id")
-    @ManyToOne
-    private ExecutionResult resultId;
-    @JoinColumn(name = "vm_user_id", referencedColumnName = "id")
-    @ManyToOne
-    private VmUser vmUserId;
-    @JoinColumns({
-        @JoinColumn(name = "step_id", referencedColumnName = "id",
-                insertable = false, updatable = false)
-        , @JoinColumn(name = "step_test_case_id",
-                referencedColumnName = "test_case_id",
-                insertable = false, updatable = false)})
-    @ManyToOne(optional = false)
-    private Step step;
-    @JoinColumn(name = "test_case_execution_id",
-            referencedColumnName = "id", insertable = false,
-            updatable = false)
-    @ManyToOne(optional = false)
-    private TestCaseExecution testCaseExecution;
     @Column(name = "execution_start")
     @Temporal(TemporalType.TIMESTAMP)
     private Date executionStart;
@@ -89,16 +70,39 @@ public class ExecutionStep implements Serializable {
     @Column(name = "assigned_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date assignedTime;
-    @Column(name = "assigned_by_user_id")
-    private Integer assignedByUserId;
     @JoinTable(name = "execution_step_has_vm_exception", joinColumns = {
-        @JoinColumn(name = "execution_step_test_case_execution_id", referencedColumnName = "test_case_execution_id")
-        , @JoinColumn(name = "execution_step_step_id", referencedColumnName = "step_id")
-        , @JoinColumn(name = "execution_step_step_test_case_id", referencedColumnName = "step_test_case_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "execution_step_test_case_execution_id",
+                referencedColumnName = "test_case_execution_id")
+        , @JoinColumn(name = "execution_step_step_id",
+                referencedColumnName = "step_id")
+        , @JoinColumn(name = "execution_step_step_test_case_id",
+                referencedColumnName = "step_test_case_id")}, inverseJoinColumns = {
         @JoinColumn(name = "vm_exception_id", referencedColumnName = "id")
-        , @JoinColumn(name = "vm_exception_reporter_id", referencedColumnName = "reporter_id")})
+        , @JoinColumn(name = "vm_exception_reporter_id",
+                referencedColumnName = "reporter_id")})
     @ManyToMany
     private List<VmException> vmExceptionList;
+    @JoinColumn(name = "result_id", referencedColumnName = "id")
+    @ManyToOne
+    private ExecutionResult resultId;
+    @JoinColumn(name = "assignee", referencedColumnName = "id")
+    @ManyToOne
+    private VmUser assignee;
+    @JoinColumn(name = "assigner", referencedColumnName = "id")
+    @ManyToOne
+    private VmUser assigner;
+    @JoinColumns({
+        @JoinColumn(name = "step_id", referencedColumnName = "id",
+                insertable = false, updatable = false)
+        , @JoinColumn(name = "step_test_case_id",
+                referencedColumnName = "test_case_id", insertable = false,
+                updatable = false)})
+    @ManyToOne(optional = false)
+    private Step step;
+    @JoinColumn(name = "test_case_execution_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private TestCaseExecution testCaseExecution;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
     private List<ExecutionStepHasAttachment> executionStepHasAttachmentList;
 
@@ -110,7 +114,8 @@ public class ExecutionStep implements Serializable {
     }
 
     public ExecutionStep(int testCaseExecutionId, int stepId, int stepTestCaseId) {
-        this.executionStepPK = new ExecutionStepPK(testCaseExecutionId, stepId, stepTestCaseId);
+        this.executionStepPK = new ExecutionStepPK(testCaseExecutionId,
+                stepId, stepTestCaseId);
     }
 
     public ExecutionStepPK getExecutionStepPK() {
@@ -137,63 +142,6 @@ public class ExecutionStep implements Serializable {
         this.comment = comment;
     }
 
-    public ExecutionResult getResultId() {
-        return resultId;
-    }
-
-    public void setResultId(ExecutionResult resultId) {
-        this.resultId = resultId;
-    }
-
-    public VmUser getVmUserId() {
-        return vmUserId;
-    }
-
-    public void setVmUserId(VmUser vmUserId) {
-        this.vmUserId = vmUserId;
-    }
-
-    public Step getStep() {
-        return step;
-    }
-
-    public void setStep(Step step) {
-        this.step = step;
-    }
-
-    public TestCaseExecution getTestCaseExecution() {
-        return testCaseExecution;
-    }
-
-    public void setTestCaseExecution(TestCaseExecution testCaseExecution) {
-        this.testCaseExecution = testCaseExecution;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (executionStepPK != null ? executionStepPK.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof ExecutionStep)) {
-            return false;
-        }
-        ExecutionStep other = (ExecutionStep) object;
-        return !((this.executionStepPK == null
-                && other.executionStepPK != null)
-                || (this.executionStepPK != null
-                && !this.executionStepPK.equals(other.executionStepPK)));
-    }
-
-    @Override
-    public String toString() {
-        return "com.validation.manager.core.db.ExecutionStep[ executionStepPK=" + executionStepPK + " ]";
-    }
-
     public Date getExecutionStart() {
         return executionStart;
     }
@@ -218,14 +166,6 @@ public class ExecutionStep implements Serializable {
         this.assignedTime = assignedTime;
     }
 
-    public Integer getAssignedByUserId() {
-        return assignedByUserId;
-    }
-
-    public void setAssignedByUserId(Integer assignedByUserId) {
-        this.assignedByUserId = assignedByUserId;
-    }
-
     @XmlTransient
     @JsonIgnore
     public List<VmException> getVmExceptionList() {
@@ -236,6 +176,46 @@ public class ExecutionStep implements Serializable {
         this.vmExceptionList = vmExceptionList;
     }
 
+    public ExecutionResult getResultId() {
+        return resultId;
+    }
+
+    public void setResultId(ExecutionResult resultId) {
+        this.resultId = resultId;
+    }
+
+    public VmUser getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(VmUser assignee) {
+        this.assignee = assignee;
+    }
+
+    public VmUser getAssigner() {
+        return assigner;
+    }
+
+    public void setAssigner(VmUser assigner) {
+        this.assigner = assigner;
+    }
+
+    public Step getStep() {
+        return step;
+    }
+
+    public void setStep(Step step) {
+        this.step = step;
+    }
+
+    public TestCaseExecution getTestCaseExecution() {
+        return testCaseExecution;
+    }
+
+    public void setTestCaseExecution(TestCaseExecution testCaseExecution) {
+        this.testCaseExecution = testCaseExecution;
+    }
+
     @XmlTransient
     @JsonIgnore
     public List<ExecutionStepHasAttachment> getExecutionStepHasAttachmentList() {
@@ -244,5 +224,31 @@ public class ExecutionStep implements Serializable {
 
     public void setExecutionStepHasAttachmentList(List<ExecutionStepHasAttachment> executionStepHasAttachmentList) {
         this.executionStepHasAttachmentList = executionStepHasAttachmentList;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (executionStepPK != null ? executionStepPK.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof ExecutionStep)) {
+            return false;
+        }
+        ExecutionStep other = (ExecutionStep) object;
+        return !((this.executionStepPK == null
+                && other.executionStepPK != null)
+                || (this.executionStepPK != null
+                && !this.executionStepPK.equals(other.executionStepPK)));
+    }
+
+    @Override
+    public String toString() {
+        return "com.validation.manager.core.db.ExecutionStep[ executionStepPK="
+                + executionStepPK + " ]";
     }
 }

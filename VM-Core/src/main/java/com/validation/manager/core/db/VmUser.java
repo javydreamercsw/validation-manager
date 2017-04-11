@@ -27,7 +27,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "vm_user")
@@ -112,6 +112,10 @@ public class VmUser extends Login implements Serializable {
     @JoinColumn(name = "user_status_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private UserStatus userStatusId;
+    @OneToMany(mappedBy = "assignee")
+    private List<ExecutionStep> executionStepList;
+    @OneToMany(mappedBy = "assigner")
+    private List<ExecutionStep> executionStepList1;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserTestProjectRole> userTestProjectRoleList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
@@ -126,12 +130,6 @@ public class VmUser extends Login implements Serializable {
     private List<UserAssigment> userAssigmentList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assigneeId")
     private List<UserAssigment> userAssigmentList1;
-    //Steps I have for executions
-    @OneToMany(targetEntity = ExecutionStep.class)
-    private List<ExecutionStep> executionSteps;
-    //Steps I assigned someone else.
-    @OneToMany(targetEntity = ExecutionStep.class, mappedBy = "vmUserId")
-    private List<ExecutionStep> executionStepCollection;
 
     public VmUser() {
     }
@@ -246,6 +244,26 @@ public class VmUser extends Login implements Serializable {
 
     @XmlTransient
     @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
+    }
+
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList1() {
+        return executionStepList1;
+    }
+
+    public void setExecutionStepList1(List<ExecutionStep> executionStepList1) {
+        this.executionStepList1 = executionStepList1;
+    }
+
+    @XmlTransient
+    @JsonIgnore
     public List<UserTestProjectRole> getUserTestProjectRoleList() {
         return userTestProjectRoleList;
     }
@@ -335,21 +353,5 @@ public class VmUser extends Login implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.VmUser[ id=" + id + " ]";
-    }
-
-    public List<ExecutionStep> getExecutionSteps() {
-        return this.executionSteps;
-    }
-
-    public void setExecutionSteps(List<ExecutionStep> executionSteps) {
-        this.executionSteps = executionSteps;
-    }
-
-    public List<ExecutionStep> getExecutionStepCollection() {
-        return this.executionStepCollection;
-    }
-
-    public void setExecutionStepCollection(List<ExecutionStep> executionStepCollection) {
-        this.executionStepCollection = executionStepCollection;
     }
 }

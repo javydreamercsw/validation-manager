@@ -95,7 +95,7 @@ public class DemoBuilder {
         tp.setNotes("Notes");
         tp.setActive(true);
         tp.write2DB();
-        //Add the test structur
+        //Add the test structure
         TestPlanServer tps = new TestPlanServer(tp.getEntity(),
                 true, true);
         tps.setName("Test Plan #" + (tpCounter++));
@@ -141,7 +141,7 @@ public class DemoBuilder {
 
     private static void addDemoExecution(Project p)
             throws NonexistentEntityException, Exception {
-        int i = p.getTestCaseExecutions().size() + 1;
+        int i = 1;
         TestCaseExecutionServer tces
                 = new TestCaseExecutionServer("Execution " + i,
                         "Test Scope " + i);
@@ -151,10 +151,6 @@ public class DemoBuilder {
             tces.addTestProject(tp);
         });
         tces.write2DB();
-        ProjectServer ps = new ProjectServer(p);
-        ps.getTestCaseExecutions().add(tces.getEntity());
-        ps.write2DB();
-        ps.update(p, ps.getEntity());
         VMUserServer tester1 = new VMUserServer(2);//Tester
         VMUserServer tester2 = new VMUserServer(3);//Tester
         VMUserServer assigner = new VMUserServer(6);//Tester

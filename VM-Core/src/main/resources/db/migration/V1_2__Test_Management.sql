@@ -30,3 +30,5 @@ INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (6, 'Excel Do
 INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (7, 'Legacy Power Point Document', 'ppt');
 INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (8, 'Power Point Document', 'pptx');
 INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (9, 'undefined', '');
+/*Settings*/
+INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (8, 'show.expected.result', 1, 0, '0', '');

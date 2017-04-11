@@ -20,7 +20,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "attachment_type")
@@ -120,5 +120,4 @@ public class AttachmentType implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.AttachmentType[ id=" + id + " ]";
     }
-
 }

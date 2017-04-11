@@ -16,13 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.RootCause;
+import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserModifiedRecord;
 import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.UserAssigment;
-import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -54,6 +54,12 @@ public class VmUserJpaController implements Serializable {
         if (vmUser.getRootCauseList() == null) {
             vmUser.setRootCauseList(new ArrayList<RootCause>());
         }
+        if (vmUser.getExecutionStepList() == null) {
+            vmUser.setExecutionStepList(new ArrayList<ExecutionStep>());
+        }
+        if (vmUser.getExecutionStepList1() == null) {
+            vmUser.setExecutionStepList1(new ArrayList<ExecutionStep>());
+        }
         if (vmUser.getUserTestProjectRoleList() == null) {
             vmUser.setUserTestProjectRoleList(new ArrayList<UserTestProjectRole>());
         }
@@ -74,12 +80,6 @@ public class VmUserJpaController implements Serializable {
         }
         if (vmUser.getUserAssigmentList1() == null) {
             vmUser.setUserAssigmentList1(new ArrayList<UserAssigment>());
-        }
-        if (vmUser.getExecutionSteps() == null) {
-            vmUser.setExecutionSteps(new ArrayList<ExecutionStep>());
-        }
-        if (vmUser.getExecutionStepCollection() == null) {
-            vmUser.setExecutionStepCollection(new ArrayList<ExecutionStep>());
         }
         EntityManager em = null;
         try {
@@ -108,6 +108,18 @@ public class VmUserJpaController implements Serializable {
                 attachedRootCauseList.add(rootCauseListRootCauseToAttach);
             }
             vmUser.setRootCauseList(attachedRootCauseList);
+            List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
+            for (ExecutionStep executionStepListExecutionStepToAttach : vmUser.getExecutionStepList()) {
+                executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
+                attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
+            }
+            vmUser.setExecutionStepList(attachedExecutionStepList);
+            List<ExecutionStep> attachedExecutionStepList1 = new ArrayList<ExecutionStep>();
+            for (ExecutionStep executionStepList1ExecutionStepToAttach : vmUser.getExecutionStepList1()) {
+                executionStepList1ExecutionStepToAttach = em.getReference(executionStepList1ExecutionStepToAttach.getClass(), executionStepList1ExecutionStepToAttach.getExecutionStepPK());
+                attachedExecutionStepList1.add(executionStepList1ExecutionStepToAttach);
+            }
+            vmUser.setExecutionStepList1(attachedExecutionStepList1);
             List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<UserTestProjectRole>();
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRoleToAttach : vmUser.getUserTestProjectRoleList()) {
                 userTestProjectRoleListUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListUserTestProjectRoleToAttach.getUserTestProjectRolePK());
@@ -150,18 +162,6 @@ public class VmUserJpaController implements Serializable {
                 attachedUserAssigmentList1.add(userAssigmentList1UserAssigmentToAttach);
             }
             vmUser.setUserAssigmentList1(attachedUserAssigmentList1);
-            List<ExecutionStep> attachedExecutionSteps = new ArrayList<ExecutionStep>();
-            for (ExecutionStep executionStepsExecutionStepToAttach : vmUser.getExecutionSteps()) {
-                executionStepsExecutionStepToAttach = em.getReference(executionStepsExecutionStepToAttach.getClass(), executionStepsExecutionStepToAttach.getExecutionStepPK());
-                attachedExecutionSteps.add(executionStepsExecutionStepToAttach);
-            }
-            vmUser.setExecutionSteps(attachedExecutionSteps);
-            List<ExecutionStep> attachedExecutionStepCollection = new ArrayList<ExecutionStep>();
-            for (ExecutionStep executionStepCollectionExecutionStepToAttach : vmUser.getExecutionStepCollection()) {
-                executionStepCollectionExecutionStepToAttach = em.getReference(executionStepCollectionExecutionStepToAttach.getClass(), executionStepCollectionExecutionStepToAttach.getExecutionStepPK());
-                attachedExecutionStepCollection.add(executionStepCollectionExecutionStepToAttach);
-            }
-            vmUser.setExecutionStepCollection(attachedExecutionStepCollection);
             em.persist(vmUser);
             if (userStatusId != null) {
                 userStatusId.getVmUserList().add(vmUser);
@@ -178,6 +178,24 @@ public class VmUserJpaController implements Serializable {
             for (RootCause rootCauseListRootCause : vmUser.getRootCauseList()) {
                 rootCauseListRootCause.getVmUserList().add(vmUser);
                 rootCauseListRootCause = em.merge(rootCauseListRootCause);
+            }
+            for (ExecutionStep executionStepListExecutionStep : vmUser.getExecutionStepList()) {
+                VmUser oldAssigneeOfExecutionStepListExecutionStep = executionStepListExecutionStep.getAssignee();
+                executionStepListExecutionStep.setAssignee(vmUser);
+                executionStepListExecutionStep = em.merge(executionStepListExecutionStep);
+                if (oldAssigneeOfExecutionStepListExecutionStep != null) {
+                    oldAssigneeOfExecutionStepListExecutionStep.getExecutionStepList().remove(executionStepListExecutionStep);
+                    oldAssigneeOfExecutionStepListExecutionStep = em.merge(oldAssigneeOfExecutionStepListExecutionStep);
+                }
+            }
+            for (ExecutionStep executionStepList1ExecutionStep : vmUser.getExecutionStepList1()) {
+                VmUser oldAssignerOfExecutionStepList1ExecutionStep = executionStepList1ExecutionStep.getAssigner();
+                executionStepList1ExecutionStep.setAssigner(vmUser);
+                executionStepList1ExecutionStep = em.merge(executionStepList1ExecutionStep);
+                if (oldAssignerOfExecutionStepList1ExecutionStep != null) {
+                    oldAssignerOfExecutionStepList1ExecutionStep.getExecutionStepList1().remove(executionStepList1ExecutionStep);
+                    oldAssignerOfExecutionStepList1ExecutionStep = em.merge(oldAssignerOfExecutionStepList1ExecutionStep);
+                }
             }
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRole : vmUser.getUserTestProjectRoleList()) {
                 VmUser oldVmUserOfUserTestProjectRoleListUserTestProjectRole = userTestProjectRoleListUserTestProjectRole.getVmUser();
@@ -242,24 +260,6 @@ public class VmUserJpaController implements Serializable {
                     oldAssigneeIdOfUserAssigmentList1UserAssigment = em.merge(oldAssigneeIdOfUserAssigmentList1UserAssigment);
                 }
             }
-            for (ExecutionStep executionStepsExecutionStep : vmUser.getExecutionSteps()) {
-                VmUser oldVmUserIdOfExecutionStepsExecutionStep = executionStepsExecutionStep.getVmUserId();
-                executionStepsExecutionStep.setVmUserId(vmUser);
-                executionStepsExecutionStep = em.merge(executionStepsExecutionStep);
-                if (oldVmUserIdOfExecutionStepsExecutionStep != null) {
-                    oldVmUserIdOfExecutionStepsExecutionStep.getExecutionSteps().remove(executionStepsExecutionStep);
-                    oldVmUserIdOfExecutionStepsExecutionStep = em.merge(oldVmUserIdOfExecutionStepsExecutionStep);
-                }
-            }
-            for (ExecutionStep executionStepCollectionExecutionStep : vmUser.getExecutionStepCollection()) {
-                VmUser oldVmUserIdOfExecutionStepCollectionExecutionStep = executionStepCollectionExecutionStep.getVmUserId();
-                executionStepCollectionExecutionStep.setVmUserId(vmUser);
-                executionStepCollectionExecutionStep = em.merge(executionStepCollectionExecutionStep);
-                if (oldVmUserIdOfExecutionStepCollectionExecutionStep != null) {
-                    oldVmUserIdOfExecutionStepCollectionExecutionStep.getExecutionStepCollection().remove(executionStepCollectionExecutionStep);
-                    oldVmUserIdOfExecutionStepCollectionExecutionStep = em.merge(oldVmUserIdOfExecutionStepCollectionExecutionStep);
-                }
-            }
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -282,6 +282,10 @@ public class VmUserJpaController implements Serializable {
             List<Role> roleListNew = vmUser.getRoleList();
             List<RootCause> rootCauseListOld = persistentVmUser.getRootCauseList();
             List<RootCause> rootCauseListNew = vmUser.getRootCauseList();
+            List<ExecutionStep> executionStepListOld = persistentVmUser.getExecutionStepList();
+            List<ExecutionStep> executionStepListNew = vmUser.getExecutionStepList();
+            List<ExecutionStep> executionStepList1Old = persistentVmUser.getExecutionStepList1();
+            List<ExecutionStep> executionStepList1New = vmUser.getExecutionStepList1();
             List<UserTestProjectRole> userTestProjectRoleListOld = persistentVmUser.getUserTestProjectRoleList();
             List<UserTestProjectRole> userTestProjectRoleListNew = vmUser.getUserTestProjectRoleList();
             List<VmException> vmExceptionListOld = persistentVmUser.getVmExceptionList();
@@ -296,10 +300,6 @@ public class VmUserJpaController implements Serializable {
             List<UserAssigment> userAssigmentListNew = vmUser.getUserAssigmentList();
             List<UserAssigment> userAssigmentList1Old = persistentVmUser.getUserAssigmentList1();
             List<UserAssigment> userAssigmentList1New = vmUser.getUserAssigmentList1();
-            List<ExecutionStep> executionStepsOld = persistentVmUser.getExecutionSteps();
-            List<ExecutionStep> executionStepsNew = vmUser.getExecutionSteps();
-            List<ExecutionStep> executionStepCollectionOld = persistentVmUser.getExecutionStepCollection();
-            List<ExecutionStep> executionStepCollectionNew = vmUser.getExecutionStepCollection();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
@@ -385,6 +385,20 @@ public class VmUserJpaController implements Serializable {
             }
             rootCauseListNew = attachedRootCauseListNew;
             vmUser.setRootCauseList(rootCauseListNew);
+            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
+            for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
+                executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
+                attachedExecutionStepListNew.add(executionStepListNewExecutionStepToAttach);
+            }
+            executionStepListNew = attachedExecutionStepListNew;
+            vmUser.setExecutionStepList(executionStepListNew);
+            List<ExecutionStep> attachedExecutionStepList1New = new ArrayList<ExecutionStep>();
+            for (ExecutionStep executionStepList1NewExecutionStepToAttach : executionStepList1New) {
+                executionStepList1NewExecutionStepToAttach = em.getReference(executionStepList1NewExecutionStepToAttach.getClass(), executionStepList1NewExecutionStepToAttach.getExecutionStepPK());
+                attachedExecutionStepList1New.add(executionStepList1NewExecutionStepToAttach);
+            }
+            executionStepList1New = attachedExecutionStepList1New;
+            vmUser.setExecutionStepList1(executionStepList1New);
             List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<UserTestProjectRole>();
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRoleToAttach : userTestProjectRoleListNew) {
                 userTestProjectRoleListNewUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListNewUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListNewUserTestProjectRoleToAttach.getUserTestProjectRolePK());
@@ -434,20 +448,6 @@ public class VmUserJpaController implements Serializable {
             }
             userAssigmentList1New = attachedUserAssigmentList1New;
             vmUser.setUserAssigmentList1(userAssigmentList1New);
-            List<ExecutionStep> attachedExecutionStepsNew = new ArrayList<ExecutionStep>();
-            for (ExecutionStep executionStepsNewExecutionStepToAttach : executionStepsNew) {
-                executionStepsNewExecutionStepToAttach = em.getReference(executionStepsNewExecutionStepToAttach.getClass(), executionStepsNewExecutionStepToAttach.getExecutionStepPK());
-                attachedExecutionStepsNew.add(executionStepsNewExecutionStepToAttach);
-            }
-            executionStepsNew = attachedExecutionStepsNew;
-            vmUser.setExecutionSteps(executionStepsNew);
-            List<ExecutionStep> attachedExecutionStepCollectionNew = new ArrayList<ExecutionStep>();
-            for (ExecutionStep executionStepCollectionNewExecutionStepToAttach : executionStepCollectionNew) {
-                executionStepCollectionNewExecutionStepToAttach = em.getReference(executionStepCollectionNewExecutionStepToAttach.getClass(), executionStepCollectionNewExecutionStepToAttach.getExecutionStepPK());
-                attachedExecutionStepCollectionNew.add(executionStepCollectionNewExecutionStepToAttach);
-            }
-            executionStepCollectionNew = attachedExecutionStepCollectionNew;
-            vmUser.setExecutionStepCollection(executionStepCollectionNew);
             vmUser = em.merge(vmUser);
             if (userStatusIdOld != null && !userStatusIdOld.equals(userStatusIdNew)) {
                 userStatusIdOld.getVmUserList().remove(vmUser);
@@ -491,6 +491,40 @@ public class VmUserJpaController implements Serializable {
                 if (!rootCauseListOld.contains(rootCauseListNewRootCause)) {
                     rootCauseListNewRootCause.getVmUserList().add(vmUser);
                     rootCauseListNewRootCause = em.merge(rootCauseListNewRootCause);
+                }
+            }
+            for (ExecutionStep executionStepListOldExecutionStep : executionStepListOld) {
+                if (!executionStepListNew.contains(executionStepListOldExecutionStep)) {
+                    executionStepListOldExecutionStep.setAssignee(null);
+                    executionStepListOldExecutionStep = em.merge(executionStepListOldExecutionStep);
+                }
+            }
+            for (ExecutionStep executionStepListNewExecutionStep : executionStepListNew) {
+                if (!executionStepListOld.contains(executionStepListNewExecutionStep)) {
+                    VmUser oldAssigneeOfExecutionStepListNewExecutionStep = executionStepListNewExecutionStep.getAssignee();
+                    executionStepListNewExecutionStep.setAssignee(vmUser);
+                    executionStepListNewExecutionStep = em.merge(executionStepListNewExecutionStep);
+                    if (oldAssigneeOfExecutionStepListNewExecutionStep != null && !oldAssigneeOfExecutionStepListNewExecutionStep.equals(vmUser)) {
+                        oldAssigneeOfExecutionStepListNewExecutionStep.getExecutionStepList().remove(executionStepListNewExecutionStep);
+                        oldAssigneeOfExecutionStepListNewExecutionStep = em.merge(oldAssigneeOfExecutionStepListNewExecutionStep);
+                    }
+                }
+            }
+            for (ExecutionStep executionStepList1OldExecutionStep : executionStepList1Old) {
+                if (!executionStepList1New.contains(executionStepList1OldExecutionStep)) {
+                    executionStepList1OldExecutionStep.setAssigner(null);
+                    executionStepList1OldExecutionStep = em.merge(executionStepList1OldExecutionStep);
+                }
+            }
+            for (ExecutionStep executionStepList1NewExecutionStep : executionStepList1New) {
+                if (!executionStepList1Old.contains(executionStepList1NewExecutionStep)) {
+                    VmUser oldAssignerOfExecutionStepList1NewExecutionStep = executionStepList1NewExecutionStep.getAssigner();
+                    executionStepList1NewExecutionStep.setAssigner(vmUser);
+                    executionStepList1NewExecutionStep = em.merge(executionStepList1NewExecutionStep);
+                    if (oldAssignerOfExecutionStepList1NewExecutionStep != null && !oldAssignerOfExecutionStepList1NewExecutionStep.equals(vmUser)) {
+                        oldAssignerOfExecutionStepList1NewExecutionStep.getExecutionStepList1().remove(executionStepList1NewExecutionStep);
+                        oldAssignerOfExecutionStepList1NewExecutionStep = em.merge(oldAssignerOfExecutionStepList1NewExecutionStep);
+                    }
                 }
             }
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRole : userTestProjectRoleListNew) {
@@ -567,40 +601,6 @@ public class VmUserJpaController implements Serializable {
                     if (oldAssigneeIdOfUserAssigmentList1NewUserAssigment != null && !oldAssigneeIdOfUserAssigmentList1NewUserAssigment.equals(vmUser)) {
                         oldAssigneeIdOfUserAssigmentList1NewUserAssigment.getUserAssigmentList1().remove(userAssigmentList1NewUserAssigment);
                         oldAssigneeIdOfUserAssigmentList1NewUserAssigment = em.merge(oldAssigneeIdOfUserAssigmentList1NewUserAssigment);
-                    }
-                }
-            }
-            for (ExecutionStep executionStepsOldExecutionStep : executionStepsOld) {
-                if (!executionStepsNew.contains(executionStepsOldExecutionStep)) {
-                    executionStepsOldExecutionStep.setVmUserId(null);
-                    executionStepsOldExecutionStep = em.merge(executionStepsOldExecutionStep);
-                }
-            }
-            for (ExecutionStep executionStepsNewExecutionStep : executionStepsNew) {
-                if (!executionStepsOld.contains(executionStepsNewExecutionStep)) {
-                    VmUser oldVmUserIdOfExecutionStepsNewExecutionStep = executionStepsNewExecutionStep.getVmUserId();
-                    executionStepsNewExecutionStep.setVmUserId(vmUser);
-                    executionStepsNewExecutionStep = em.merge(executionStepsNewExecutionStep);
-                    if (oldVmUserIdOfExecutionStepsNewExecutionStep != null && !oldVmUserIdOfExecutionStepsNewExecutionStep.equals(vmUser)) {
-                        oldVmUserIdOfExecutionStepsNewExecutionStep.getExecutionSteps().remove(executionStepsNewExecutionStep);
-                        oldVmUserIdOfExecutionStepsNewExecutionStep = em.merge(oldVmUserIdOfExecutionStepsNewExecutionStep);
-                    }
-                }
-            }
-            for (ExecutionStep executionStepCollectionOldExecutionStep : executionStepCollectionOld) {
-                if (!executionStepCollectionNew.contains(executionStepCollectionOldExecutionStep)) {
-                    executionStepCollectionOldExecutionStep.setVmUserId(null);
-                    executionStepCollectionOldExecutionStep = em.merge(executionStepCollectionOldExecutionStep);
-                }
-            }
-            for (ExecutionStep executionStepCollectionNewExecutionStep : executionStepCollectionNew) {
-                if (!executionStepCollectionOld.contains(executionStepCollectionNewExecutionStep)) {
-                    VmUser oldVmUserIdOfExecutionStepCollectionNewExecutionStep = executionStepCollectionNewExecutionStep.getVmUserId();
-                    executionStepCollectionNewExecutionStep.setVmUserId(vmUser);
-                    executionStepCollectionNewExecutionStep = em.merge(executionStepCollectionNewExecutionStep);
-                    if (oldVmUserIdOfExecutionStepCollectionNewExecutionStep != null && !oldVmUserIdOfExecutionStepCollectionNewExecutionStep.equals(vmUser)) {
-                        oldVmUserIdOfExecutionStepCollectionNewExecutionStep.getExecutionStepCollection().remove(executionStepCollectionNewExecutionStep);
-                        oldVmUserIdOfExecutionStepCollectionNewExecutionStep = em.merge(oldVmUserIdOfExecutionStepCollectionNewExecutionStep);
                     }
                 }
             }
@@ -706,15 +706,15 @@ public class VmUserJpaController implements Serializable {
                 rootCauseListRootCause.getVmUserList().remove(vmUser);
                 rootCauseListRootCause = em.merge(rootCauseListRootCause);
             }
-            List<ExecutionStep> executionSteps = vmUser.getExecutionSteps();
-            for (ExecutionStep executionStepsExecutionStep : executionSteps) {
-                executionStepsExecutionStep.setVmUserId(null);
-                executionStepsExecutionStep = em.merge(executionStepsExecutionStep);
+            List<ExecutionStep> executionStepList = vmUser.getExecutionStepList();
+            for (ExecutionStep executionStepListExecutionStep : executionStepList) {
+                executionStepListExecutionStep.setAssignee(null);
+                executionStepListExecutionStep = em.merge(executionStepListExecutionStep);
             }
-            List<ExecutionStep> executionStepCollection = vmUser.getExecutionStepCollection();
-            for (ExecutionStep executionStepCollectionExecutionStep : executionStepCollection) {
-                executionStepCollectionExecutionStep.setVmUserId(null);
-                executionStepCollectionExecutionStep = em.merge(executionStepCollectionExecutionStep);
+            List<ExecutionStep> executionStepList1 = vmUser.getExecutionStepList1();
+            for (ExecutionStep executionStepList1ExecutionStep : executionStepList1) {
+                executionStepList1ExecutionStep.setAssigner(null);
+                executionStepList1ExecutionStep = em.merge(executionStepList1ExecutionStep);
             }
             em.remove(vmUser);
             em.getTransaction().commit();

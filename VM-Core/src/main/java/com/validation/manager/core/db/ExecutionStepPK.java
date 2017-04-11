@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -13,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class ExecutionStepPK implements Serializable {
@@ -66,25 +61,20 @@ public class ExecutionStepPK implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + this.testCaseExecutionId;
-        hash = 31 * hash + this.stepId;
-        hash = 31 * hash + this.stepTestCaseId;
+        int hash = 0;
+        hash += (int) testCaseExecutionId;
+        hash += (int) stepId;
+        hash += (int) stepTestCaseId;
         return hash;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof ExecutionStepPK)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ExecutionStepPK other = (ExecutionStepPK) obj;
+        ExecutionStepPK other = (ExecutionStepPK) object;
         if (this.testCaseExecutionId != other.testCaseExecutionId) {
             return false;
         }
@@ -100,5 +90,4 @@ public class ExecutionStepPK implements Serializable {
                 + testCaseExecutionId + ", stepId=" + stepId + ", stepTestCaseId="
                 + stepTestCaseId + " ]";
     }
-
 }

@@ -25,7 +25,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "requirement_spec")
@@ -68,8 +68,7 @@ public class RequirementSpec implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Project project;
-    @JoinColumn(name = "spec_level_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumn(name = "spec_level_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private SpecLevel specLevel;
 

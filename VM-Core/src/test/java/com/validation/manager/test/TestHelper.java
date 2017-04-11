@@ -97,14 +97,11 @@ public class TestHelper {
                 getEntityManagerFactory()).findProject(p.getId()) == null);
     }
 
-    public static TestCase createTestCase(String name,
-            String expectedResults, String summary)
+    public static TestCase createTestCase(String name, String summary)
             throws PreexistingEntityException, Exception {
         TestCaseServer tc = new TestCaseServer(name, new Date());
-        tc.setExpectedResults(expectedResults.getBytes("UTF-8"));
         tc.setRiskControlHasTestCaseList(new ArrayList<>());
         tc.setActive(true);
-        tc.setExpectedResults(expectedResults.getBytes("UTF-8"));
         tc.setIsOpen(true);
         tc.setSummary(summary.getBytes());
         TestCaseJpaController controller = new TestCaseJpaController(

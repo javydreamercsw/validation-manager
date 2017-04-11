@@ -464,21 +464,21 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setUserTestProjectRoleList(source.getUserTestProjectRoleList());
         target.setVmExceptionList(source.getVmExceptionList());
-        target.setExecutionStepCollection(source.getExecutionStepCollection());
-        target.setExecutionSteps(source.getExecutionSteps());
         target.setId(source.getId());
-        if (target.getExecutionSteps() == null) {
-            target.setExecutionSteps(new ArrayList<>());
+        if (target.getExecutionStepList() == null) {
+            target.setExecutionStepList(new ArrayList<>());
         }
-        if (source.getExecutionSteps() != null) {
-            target.setExecutionSteps(source.getExecutionSteps());
+        if (source.getExecutionStepList() != null) {
+            target.setExecutionStepList(source.getExecutionStepList());
         }
-        if (target.getExecutionStepCollection() == null) {
-            target.setExecutionStepCollection(new ArrayList<>());
+        if (target.getExecutionStepList1() == null) {
+            target.setExecutionStepList1(new ArrayList<>());
         }
-        if (source.getExecutionStepCollection() != null) {
-            target.setExecutionStepCollection(source.getExecutionStepCollection());
+        if (source.getExecutionStepList1() != null) {
+            target.setExecutionStepList1(source.getExecutionStepList1());
         }
+        target.setExecutionStepList(source.getExecutionStepList());
+        target.setExecutionStepList1(source.getExecutionStepList1());
         super.update(target, source);
     }
 
@@ -519,8 +519,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                             try {
                                 es.setAssignedTime(new Date());
                                 c.edit(es);
-                                getExecutionSteps().add(es);
-                                a.getExecutionStepCollection().add(es);
+                                getExecutionStepList().add(es);
+                                a.getExecutionStepList1().add(es);
                             } catch (Exception ex) {
                                 Exceptions.printStackTrace(ex);
                             }
@@ -534,10 +534,9 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     }
 
     public void setAsAssigner(ExecutionStep es) throws Exception {
-        if (getExecutionStepCollection() == null) {
-            setExecutionStepCollection(new ArrayList<>());
-        }
-        getExecutionStepCollection().add(es);
-        write2DB();
+        ExecutionStepServer ess = new ExecutionStepServer(es);
+        ess.setAssigner(getEntity());
+        ess.write2DB();
+        update();
     }
 }

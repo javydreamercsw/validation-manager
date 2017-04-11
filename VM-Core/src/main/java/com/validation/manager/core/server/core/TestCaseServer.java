@@ -66,7 +66,6 @@ public final class TestCaseServer extends TestCase
     public void update(TestCase target, TestCase source) {
         target.setActive(source.getActive());
         target.setCreationDate(source.getCreationDate());
-        target.setExpectedResults(source.getExpectedResults());
         target.setRiskControlHasTestCaseList(source
                 .getRiskControlHasTestCaseList());
         target.setStepList(source.getStepList() == null

@@ -25,7 +25,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "vm_exception")
@@ -75,6 +75,8 @@ public class VmException implements Serializable {
     private List<CorrectiveAction> correctiveActionList;
     @ManyToMany(mappedBy = "vmExceptionList")
     private List<Step> stepList;
+    @ManyToMany(mappedBy = "vmExceptionList")
+    private List<ExecutionStep> executionStepList;
     @JoinTable(name = "exception_has_investigation", joinColumns = {
         @JoinColumn(name = "exception_id", referencedColumnName = "id")
         , @JoinColumn(name = "exception_reporter_id",
@@ -86,8 +88,6 @@ public class VmException implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private VmUser vmUser;
-    @ManyToMany(mappedBy = "vmExceptionList")
-    private List<ExecutionStep> executionStepList;
 
     public VmException() {
     }
@@ -181,6 +181,16 @@ public class VmException implements Serializable {
 
     @XmlTransient
     @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
+    }
+
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
     public List<Investigation> getInvestigationList() {
         return investigationList;
     }
@@ -220,15 +230,5 @@ public class VmException implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.VmException[ vmExceptionPK="
                 + vmExceptionPK + " ]";
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<ExecutionStep> getExecutionStepList() {
-        return executionStepList;
-    }
-
-    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
-        this.executionStepList = executionStepList;
     }
 }

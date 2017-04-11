@@ -29,7 +29,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_case")
@@ -48,13 +48,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     , @NamedQuery(name = "TestCase.findByIsOpen",
             query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
 public class TestCase implements Serializable {
-
-    @Lob
-    @Column(name = "summary")
-    private byte[] summary;
-    @Lob
-    @Column(name = "expected_results")
-    private byte[] expectedResults;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -75,6 +68,9 @@ public class TestCase implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
+    @Lob
+    @Column(name = "summary")
+    private byte[] summary;
     @Basic(optional = false)
     @NotNull
     @Column(name = "creation_date")
@@ -123,6 +119,14 @@ public class TestCase implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public byte[] getSummary() {
+        return summary;
+    }
+
+    public void setSummary(byte[] summary) {
+        this.summary = summary;
     }
 
     public Date getCreationDate() {
@@ -200,21 +204,5 @@ public class TestCase implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCase[ id=" + id + " ]";
-    }
-
-    public byte[] getExpectedResults() {
-        return expectedResults;
-    }
-
-    public void setExpectedResults(byte[] expectedResults) {
-        this.expectedResults = expectedResults;
-    }
-
-    public byte[] getSummary() {
-        return summary;
-    }
-
-    public void setSummary(byte[] summary) {
-        this.summary = summary;
     }
 }

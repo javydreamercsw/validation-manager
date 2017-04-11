@@ -158,8 +158,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             RequirementServer rs = new RequirementServer(req);
             assertEquals(0, rs.getTestCoverage());
             //Create Test Case
-            TestCase tc = TestHelper.createTestCase("Dummy",
-                    "Expected Results", "Summary");
+            TestCase tc = TestHelper.createTestCase("Dummy", "Summary");
             //Add steps
             int i = 1;
             for (; i < 6; i++) {
@@ -301,7 +300,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
             TestHelper.addTestProjectToProject(tp, p);
             TestPlan plan = TestHelper.createTestPlan(tp, "Plan", true, true);
             TestCase tc = TestHelper.createTestCase("TC #1",
-                    "Results",
                     "Summary");
             TestHelper.addTestCaseToPlan(plan, tc);
             TestCase step = TestHelper.addStep(tc, 1, "Test", "Test");

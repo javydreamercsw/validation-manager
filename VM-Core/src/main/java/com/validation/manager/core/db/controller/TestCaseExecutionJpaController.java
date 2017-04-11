@@ -11,12 +11,11 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.ExecutionStep;
-import java.util.ArrayList;
-import java.util.List;
-import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -39,9 +38,6 @@ public class TestCaseExecutionJpaController implements Serializable {
         if (testCaseExecution.getExecutionStepList() == null) {
             testCaseExecution.setExecutionStepList(new ArrayList<ExecutionStep>());
         }
-        if (testCaseExecution.getProjects() == null) {
-            testCaseExecution.setProjects(new ArrayList<Project>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -52,12 +48,6 @@ public class TestCaseExecutionJpaController implements Serializable {
                 attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
             }
             testCaseExecution.setExecutionStepList(attachedExecutionStepList);
-            List<Project> attachedProjects = new ArrayList<Project>();
-            for (Project projectsProjectToAttach : testCaseExecution.getProjects()) {
-                projectsProjectToAttach = em.getReference(projectsProjectToAttach.getClass(), projectsProjectToAttach.getId());
-                attachedProjects.add(projectsProjectToAttach);
-            }
-            testCaseExecution.setProjects(attachedProjects);
             em.persist(testCaseExecution);
             for (ExecutionStep executionStepListExecutionStep : testCaseExecution.getExecutionStepList()) {
                 TestCaseExecution oldTestCaseExecutionOfExecutionStepListExecutionStep = executionStepListExecutionStep.getTestCaseExecution();
@@ -67,10 +57,6 @@ public class TestCaseExecutionJpaController implements Serializable {
                     oldTestCaseExecutionOfExecutionStepListExecutionStep.getExecutionStepList().remove(executionStepListExecutionStep);
                     oldTestCaseExecutionOfExecutionStepListExecutionStep = em.merge(oldTestCaseExecutionOfExecutionStepListExecutionStep);
                 }
-            }
-            for (Project projectsProject : testCaseExecution.getProjects()) {
-                projectsProject.getTestCaseExecutions().add(testCaseExecution);
-                projectsProject = em.merge(projectsProject);
             }
             em.getTransaction().commit();
         } finally {
@@ -88,8 +74,6 @@ public class TestCaseExecutionJpaController implements Serializable {
             TestCaseExecution persistentTestCaseExecution = em.find(TestCaseExecution.class, testCaseExecution.getId());
             List<ExecutionStep> executionStepListOld = persistentTestCaseExecution.getExecutionStepList();
             List<ExecutionStep> executionStepListNew = testCaseExecution.getExecutionStepList();
-            List<Project> projectsOld = persistentTestCaseExecution.getProjects();
-            List<Project> projectsNew = testCaseExecution.getProjects();
             List<String> illegalOrphanMessages = null;
             for (ExecutionStep executionStepListOldExecutionStep : executionStepListOld) {
                 if (!executionStepListNew.contains(executionStepListOldExecutionStep)) {
@@ -109,13 +93,6 @@ public class TestCaseExecutionJpaController implements Serializable {
             }
             executionStepListNew = attachedExecutionStepListNew;
             testCaseExecution.setExecutionStepList(executionStepListNew);
-            List<Project> attachedProjectsNew = new ArrayList<Project>();
-            for (Project projectsNewProjectToAttach : projectsNew) {
-                projectsNewProjectToAttach = em.getReference(projectsNewProjectToAttach.getClass(), projectsNewProjectToAttach.getId());
-                attachedProjectsNew.add(projectsNewProjectToAttach);
-            }
-            projectsNew = attachedProjectsNew;
-            testCaseExecution.setProjects(projectsNew);
             testCaseExecution = em.merge(testCaseExecution);
             for (ExecutionStep executionStepListNewExecutionStep : executionStepListNew) {
                 if (!executionStepListOld.contains(executionStepListNewExecutionStep)) {
@@ -126,18 +103,6 @@ public class TestCaseExecutionJpaController implements Serializable {
                         oldTestCaseExecutionOfExecutionStepListNewExecutionStep.getExecutionStepList().remove(executionStepListNewExecutionStep);
                         oldTestCaseExecutionOfExecutionStepListNewExecutionStep = em.merge(oldTestCaseExecutionOfExecutionStepListNewExecutionStep);
                     }
-                }
-            }
-            for (Project projectsOldProject : projectsOld) {
-                if (!projectsNew.contains(projectsOldProject)) {
-                    projectsOldProject.getTestCaseExecutions().remove(testCaseExecution);
-                    projectsOldProject = em.merge(projectsOldProject);
-                }
-            }
-            for (Project projectsNewProject : projectsNew) {
-                if (!projectsOld.contains(projectsNewProject)) {
-                    projectsNewProject.getTestCaseExecutions().add(testCaseExecution);
-                    projectsNewProject = em.merge(projectsNewProject);
                 }
             }
             em.getTransaction().commit();
@@ -179,11 +144,6 @@ public class TestCaseExecutionJpaController implements Serializable {
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
-            }
-            List<Project> projects = testCaseExecution.getProjects();
-            for (Project projectsProject : projects) {
-                projectsProject.getTestCaseExecutions().remove(testCaseExecution);
-                projectsProject = em.merge(projectsProject);
             }
             em.remove(testCaseExecution);
             em.getTransaction().commit();

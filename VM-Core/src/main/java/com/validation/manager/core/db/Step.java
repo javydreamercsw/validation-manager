@@ -24,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "step")
@@ -40,6 +40,13 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence")})
 public class Step implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    @EmbeddedId
+    protected StepPK stepPK;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "step_sequence")
+    private int stepSequence;
     @Basic(optional = false)
     @NotNull
     @Lob
@@ -48,16 +55,6 @@ public class Step implements Serializable {
     @Lob
     @Column(name = "expected_result")
     private byte[] expectedResult;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
-    private List<ExecutionStep> executionStepList;
-
-    private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected StepPK stepPK;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "step_sequence")
-    private int stepSequence;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "notes")
@@ -73,6 +70,8 @@ public class Step implements Serializable {
                 referencedColumnName = "reporter_id")})
     @ManyToMany
     private List<VmException> vmExceptionList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
+    private List<ExecutionStep> executionStepList;
     @JoinColumn(name = "test_case_id", referencedColumnName = "id",
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
@@ -111,6 +110,22 @@ public class Step implements Serializable {
         this.stepSequence = stepSequence;
     }
 
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
+    }
+
+    public byte[] getExpectedResult() {
+        return expectedResult;
+    }
+
+    public void setExpectedResult(byte[] expectedResult) {
+        this.expectedResult = expectedResult;
+    }
+
     public String getNotes() {
         return notes;
     }
@@ -137,6 +152,16 @@ public class Step implements Serializable {
 
     public void setVmExceptionList(List<VmException> vmExceptionList) {
         this.vmExceptionList = vmExceptionList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
+    }
+
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
     }
 
     public TestCase getTestCase() {
@@ -168,31 +193,5 @@ public class Step implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<ExecutionStep> getExecutionStepList() {
-        return executionStepList;
-    }
-
-    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
-        this.executionStepList = executionStepList;
-    }
-
-    public byte[] getExpectedResult() {
-        return expectedResult;
-    }
-
-    public void setExpectedResult(byte[] expectedResult) {
-        this.expectedResult = expectedResult;
-    }
-
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
     }
 }

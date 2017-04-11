@@ -23,7 +23,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "risk_control_type")
@@ -120,15 +120,12 @@ public class RiskControlType implements Serializable {
             return false;
         }
         RiskControlType other = (RiskControlType) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RiskControlType[ id=" + id + " ]";
     }
-
 }

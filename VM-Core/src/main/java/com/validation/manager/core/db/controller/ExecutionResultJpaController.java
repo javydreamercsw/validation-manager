@@ -13,7 +13,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -34,7 +33,7 @@ public class ExecutionResultJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(ExecutionResult executionResult) throws PreexistingEntityException, Exception {
+    public void create(ExecutionResult executionResult) {
         if (executionResult.getExecutionStepList() == null) {
             executionResult.setExecutionStepList(new ArrayList<ExecutionStep>());
         }
@@ -59,11 +58,6 @@ public class ExecutionResultJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findExecutionResult(executionResult.getId()) != null) {
-                throw new PreexistingEntityException("ExecutionResult " + executionResult + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();

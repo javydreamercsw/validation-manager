@@ -67,7 +67,8 @@ public final class ExecutionStepServer extends ExecutionStep
         target.setResultId(source.getResultId());
         target.setStep(source.getStep());
         target.setTestCaseExecution(source.getTestCaseExecution());
-        target.setVmUserId(source.getVmUserId());
+        target.setAssignee(source.getAssignee());
+        target.setAssigner(source.getAssigner());
     }
 
     @Override
@@ -77,11 +78,10 @@ public final class ExecutionStepServer extends ExecutionStep
 
     public void assignUser(VmUser assignee, VmUser assigner) {
         try {
-            setVmUserId(assignee);
+            setAssignee(assignee);
+            setAssigner(assigner);
             setAssignedTime(new Date());
             write2DB();
-            //Now set the assigner
-            new VMUserServer(assigner).setAsAssigner(getEntity());
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }

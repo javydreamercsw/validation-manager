@@ -39,17 +39,14 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT a FROM Attachment a WHERE a.fileName = :fileName")})
 public class Attachment implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    @EmbeddedId
+    protected AttachmentPK attachmentPK;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Column(name = "file")
     private byte[] file;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "attachment")
-    private List<ExecutionStepHasAttachment> executionStepHasAttachmentList;
-
-    private static final long serialVersionUID = 1L;
-    @EmbeddedId
-    protected AttachmentPK attachmentPK;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -66,6 +63,8 @@ public class Attachment implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private AttachmentType attachmentType;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "attachment")
+    private List<ExecutionStepHasAttachment> executionStepHasAttachmentList;
 
     public Attachment() {
     }
@@ -90,6 +89,14 @@ public class Attachment implements Serializable {
 
     public void setAttachmentPK(AttachmentPK attachmentPK) {
         this.attachmentPK = attachmentPK;
+    }
+
+    public byte[] getFile() {
+        return file;
+    }
+
+    public void setFile(byte[] file) {
+        this.file = file;
     }
 
     public String getStringValue() {
@@ -124,6 +131,16 @@ public class Attachment implements Serializable {
         this.attachmentType = attachmentType;
     }
 
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepHasAttachment> getExecutionStepHasAttachmentList() {
+        return executionStepHasAttachmentList;
+    }
+
+    public void setExecutionStepHasAttachmentList(List<ExecutionStepHasAttachment> executionStepHasAttachmentList) {
+        this.executionStepHasAttachmentList = executionStepHasAttachmentList;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -146,23 +163,5 @@ public class Attachment implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Attachment[ attachmentPK=" + attachmentPK + " ]";
-    }
-
-    public byte[] getFile() {
-        return file;
-    }
-
-    public void setFile(byte[] file) {
-        this.file = file;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<ExecutionStepHasAttachment> getExecutionStepHasAttachmentList() {
-        return executionStepHasAttachmentList;
-    }
-
-    public void setExecutionStepHasAttachmentList(List<ExecutionStepHasAttachment> executionStepHasAttachmentList) {
-        this.executionStepHasAttachmentList = executionStepHasAttachmentList;
     }
 }
