@@ -9,7 +9,6 @@ import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroupFieldFactory;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.event.Action;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -43,14 +42,12 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.TreeDragMode;
 import com.vaadin.ui.Tree.TreeDropCriterion;
 import com.vaadin.ui.Tree.TreeTargetDetails;
-import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
@@ -61,9 +58,7 @@ import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
-import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
-import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -88,8 +83,6 @@ import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.server.core.ExecutionResultServer;
-import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
@@ -101,28 +94,22 @@ import com.validation.manager.core.tool.requirement.importer.RequirementImporter
 import com.validation.manager.core.tool.step.importer.StepImporter;
 import com.validation.manager.core.tool.step.importer.TestCaseImportException;
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
-import net.sourceforge.javydreamercsw.validation.manager.web.execution.ExecutionWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
+import net.sourceforge.javydreamercsw.validation.manager.web.tester.TesterScreen;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
@@ -148,7 +135,6 @@ public class ValidationManagerUI extends UI {
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset = null;
     private LoginDialog loginWindow = null;
-    private ExecutionWindow executionWindow = null;
     private final String projTreeRoot = "Available Projects";
     private Component left;
     private final TabSheet tabSheet = new TabSheet();
@@ -1676,142 +1662,9 @@ public class ValidationManagerUI extends UI {
                 main = tabSheet.addTab(new VerticalLayout(), "Main");
             }
             if (tester == null) {
-                VerticalLayout vl = new VerticalLayout();
                 if (getUser() != null
                         && !getUser().getExecutionStepList().isEmpty()) {
-                    TreeTable testCaseTree = new TreeTable("Available Tests");
-                    testCaseTree.setAnimationsEnabled(true);
-                    testCaseTree.addContainerProperty("Name", String.class, "");
-                    testCaseTree.addGeneratedColumn("Status",
-                            (Table source, Object itemId, Object columnId) -> {
-                                if (columnId.equals("Status")
-                                && itemId instanceof String
-                                && ((String) itemId).startsWith("es")) {
-                                    Button label = new Button();
-                                    label.addStyleName(ValoTheme.BUTTON_BORDERLESS + " labelButton");
-                                    ExecutionStepServer ess = new ExecutionStepServer(extractExecutionStepPK((String) itemId));
-                                    String message;
-                                    if (ess.getResultId() == null) {
-                                        ExecutionResult result = ExecutionResultServer.getResult("result.pending");
-                                        message = result.getResultName();
-                                    } else {
-                                        message = ess.getResultId().getResultName();
-                                    }
-                                    label.setCaption(translate(message));
-                                    if (ess.getExecutionStart() != null
-                                    && ess.getExecutionEnd() == null) {
-                                        //In progress
-                                        label.setIcon(VaadinIcons.AUTOMATION);
-                                    } else if (ess.getExecutionStart() == null
-                                    && ess.getExecutionEnd() == null) {
-                                        //Not started
-                                        label.setIcon(VaadinIcons.CLOCK);
-                                    } else if (ess.getExecutionStart() != null
-                                    && ess.getExecutionEnd() != null) {
-                                        //Completed. Now check result
-                                        switch (ess.getResultId().getId()) {
-                                            case 1:
-                                                label.setIcon(VaadinIcons.CHECK);
-                                                break;
-                                            case 2:
-                                                label.setIcon(VaadinIcons.CLOSE);
-                                                break;
-                                            case 3:
-                                                label.setIcon(VaadinIcons.PAUSE);
-                                                break;
-                                            default:
-                                                label.setIcon(VaadinIcons.CLOCK);
-                                                break;
-                                        }
-                                    }
-                                    return label;
-                                }
-                                return new Label();
-                            });
-                    testCaseTree.addContainerProperty("Summary", String.class, "");
-                    testCaseTree.addContainerProperty("Assignment Date",
-                            String.class, "");
-                    testCaseTree.setVisibleColumns(new Object[]{"Name",
-                        "Status", "Summary", "Assignment Date"});
-                    testCaseTree.addActionHandler(new Action.Handler() {
-                        @Override
-                        public Action[] getActions(Object target, Object sender) {
-                            List<Action> actions = new ArrayList<>();
-                            if (target instanceof String
-                                    && ((String) target).startsWith("es")) {
-                                actions.add(new Action("Execute"));
-                            }
-                            return actions.toArray(new Action[actions.size()]);
-                        }
-
-                        @Override
-                        public void handleAction(Action action, Object sender, Object target) {
-                            //Parse the information to get the exact Execution Step
-                            List<TestCaseExecutionServer> executions = new ArrayList<>();
-                            executions.add(new TestCaseExecutionServer(new ExecutionStepServer(extractExecutionStepPK((String) target)).getTestCaseExecution().getId()));
-                            showExecutionScreen(executions);
-                        }
-                    });
-                    ProjectServer.getProjects().forEach(p -> {
-                        if (p.getParentProjectId() == null) {
-                            testCaseTree.addItem(new Object[]{p.getName(),
-                                "", "",}, "p" + p.getId());
-                            testCaseTree.setItemIcon("p" + p.getId(), PROJECT_ICON);
-                            p.getProjectList().forEach(sp -> {
-                                //Add subprojects
-                                testCaseTree.addItem(new Object[]{sp.getName(),
-                                    "", "",}, "p" + sp.getId());
-                                testCaseTree.setParent("p" + sp.getId(), "p" + p.getId());
-                                testCaseTree.setItemIcon("p" + sp.getId(), PROJECT_ICON);
-                                //Add applicable Executions
-                                Map<Integer, ExecutionStep> tests = new HashMap<>();
-                                sp.getTestProjectList().forEach(test -> {
-                                    test.getTestPlanList().forEach(tp -> {
-                                        tp.getTestCaseList().forEach(testCase -> {
-                                            List<Integer> tcids = new ArrayList<>();
-                                            testCase.getStepList().forEach(s -> {
-                                                s.getExecutionStepList().forEach(es -> {
-                                                    TestCaseExecution tce = es.getTestCaseExecution();
-                                                    testCaseTree.addItem(new Object[]{tce.getName(),
-                                                        "", "",}, "tce" + tce.getId());
-                                                    testCaseTree.setParent("tce" + tce.getId(), "p" + sp.getId());
-                                                    testCaseTree.setItemIcon("tce" + tce.getId(), EXECUTION_ICON);
-                                                    if (es.getAssignee().getId().equals(getUser().getId())) {
-                                                        TestCase tc = es.getStep().getTestCase();
-                                                        if (!tcids.contains(tc.getId())) {
-                                                            tcids.add(tc.getId());
-                                                            DateTimeFormatter format
-                                                                    = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
-                                                            LocalDateTime time
-                                                                    = LocalDateTime.ofInstant(es.getAssignedTime()
-                                                                            .toInstant(), ZoneId.systemDefault());
-                                                            String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
-                                                                    + "-" + es.getStep().getStepPK().getId() + "-" + tc.getId();
-                                                            testCaseTree.addItem(new Object[]{tc.getName(),
-                                                                tc.getSummary(), format.format(time),},
-                                                                    key);
-                                                            testCaseTree.setParent(key, "tce" + tce.getId());
-                                                            testCaseTree.setItemIcon(key, TEST_ICON);
-                                                            testCaseTree.setChildrenAllowed(key, false);
-                                                        }
-                                                    }
-                                                });
-                                            });
-                                            tcids.clear();
-                                        });
-                                    });
-                                });
-                                testCaseTree.setSizeFull();
-                                vl.addComponent(testCaseTree);
-                                tester = tabSheet.addTab(vl, "Tester");
-                            });
-                        }
-                    });
-                    //Make columns autofit
-                    for (Object id : testCaseTree.getVisibleColumns()) {
-                        LOG.log(Level.INFO, "{0}", id);
-                        testCaseTree.setColumnExpandRatio(id, 1.0f);
-                    }
+                    tester = tabSheet.addTab(new TesterScreen(this), "Tester");
                 }
             }
             if (designer == null) {
@@ -1895,9 +1748,7 @@ public class ValidationManagerUI extends UI {
             main.setVisible(user != null);
         }
         if (tester != null) {
-            tester.setVisible(((Layout) tester.getComponent())
-                    .getComponentCount() > 0
-                    && checkRight("testplan.execute"));
+            tester.setVisible(checkRight("testplan.execute"));
         }
         if (designer != null) {
             designer.setVisible(((Layout) designer.getComponent())
@@ -2573,16 +2424,6 @@ public class ValidationManagerUI extends UI {
         return tree.getValue();
     }
 
-    private ExecutionStepPK extractExecutionStepPK(String itemId) {
-        String id = itemId.substring(2);//Remove es
-        int esId, sId, tcId;
-        StringTokenizer st = new StringTokenizer(id, "-");
-        esId = Integer.parseInt(st.nextToken());
-        sId = Integer.parseInt(st.nextToken());
-        tcId = Integer.parseInt(st.nextToken());
-        return new ExecutionStepPK(esId, sId, tcId);
-    }
-
     @WebServlet(value = "/*", asyncSupported = true)
     @VaadinServletConfiguration(productionMode = false,
             ui = ValidationManagerUI.class,
@@ -2595,22 +2436,6 @@ public class ValidationManagerUI extends UI {
                 reset = new VMDemoResetThread();
                 reset.start();
             }
-        }
-    }
-
-    private void showExecutionScreen(List<TestCaseExecutionServer> executions) {
-        if (executionWindow == null) {
-            executionWindow = new ExecutionWindow(this, executions);
-            executionWindow.setCaption("Test Execution");
-            executionWindow.setVisible(true);
-            executionWindow.setClosable(false);
-            executionWindow.setResizable(false);
-            executionWindow.center();
-            executionWindow.setModal(true);
-            executionWindow.setSizeFull();
-        }
-        if (!getWindows().contains(executionWindow)) {
-            addWindow(executionWindow);
         }
     }
 }
