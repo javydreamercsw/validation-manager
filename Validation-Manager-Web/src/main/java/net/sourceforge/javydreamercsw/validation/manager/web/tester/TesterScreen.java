@@ -9,12 +9,10 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
-import com.validation.manager.core.server.core.ExecutionResultServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
@@ -60,46 +58,66 @@ public class TesterScreen extends Panel {
         testCaseTree.addGeneratedColumn("Status",
                 (Table source, Object itemId, Object columnId) -> {
                     if (columnId.equals("Status")
-                    && itemId instanceof String
-                    && ((String) itemId).startsWith("es")) {
+                            && itemId instanceof String) {
+                        String id = (String) itemId;
+                        String message;
                         Button label = new Button();
                         label.addStyleName(ValoTheme.BUTTON_BORDERLESS + " labelButton");
-                        ExecutionStepServer ess = new ExecutionStepServer(extractExecutionStepPK((String) itemId));
-                        String message;
-                        if (ess.getResultId() == null) {
-                            ExecutionResult result = ExecutionResultServer.getResult("result.pending");
-                            message = result.getResultName();
-                        } else {
-                            message = ess.getResultId().getResultName();
+                        Map<String, Integer> summary = new HashMap<>();
+                        if (id.startsWith("tce")) {
+                            summary = getSummary(
+                                    new TestCaseExecutionServer(
+                                            Integer.parseInt(id.substring(3))), -1);
+                        } else if (id.startsWith("es")) {
+                            summary = getSummary(
+                                    new ExecutionStepServer(extractExecutionStepPK(id))
+                                            .getTestCaseExecution(),
+                                    Integer.parseInt(id
+                                            .substring(id.lastIndexOf("-") + 1)));
                         }
-                        label.setCaption(ui.translate(message));
-                        if (ess.getExecutionStart() != null
-                        && ess.getExecutionEnd() == null) {
-                            //In progress
-                            label.setIcon(VaadinIcons.AUTOMATION);
-                        } else if (ess.getExecutionStart() == null
-                        && ess.getExecutionEnd() == null) {
-                            //Not started
-                            label.setIcon(VaadinIcons.CLOCK);
-                        } else if (ess.getExecutionStart() != null
-                        && ess.getExecutionEnd() != null) {
+                        if (!summary.isEmpty()) {
+                            if (summary.containsKey("result.fail")) {
+                                //At least one failure means the test case is failing
+                                message = "result.fail";
+                            } else if (summary.containsKey("result.blocked")) {
+                                //It is blocked
+                                message = "result.blocked";
+                            } else if (summary.containsKey("result.pending")
+                                    && !summary.containsKey("result.pass")) {
+                                //Still not done
+                                message = "result.pending";
+                            } else if (summary.containsKey("result.pending")
+                                    && summary.containsKey("result.pass")) {
+                                //In progress
+                                message = "result.progress";
+                            } else {
+                                //All is pass
+                                message = "result.pass";
+                            }
+                            label.setCaption(ui.translate(message));
                             //Completed. Now check result
-                            switch (ess.getResultId().getId()) {
-                                case 1:
+                            switch (message) {
+                                case "result.pass":
                                     label.setIcon(VaadinIcons.CHECK);
                                     break;
-                                case 2:
+                                case "result.fail":
                                     label.setIcon(VaadinIcons.CLOSE);
                                     break;
-                                case 3:
+                                case "result.blocked":
                                     label.setIcon(VaadinIcons.PAUSE);
+                                    break;
+                                case "result.pending":
+                                    label.setIcon(VaadinIcons.CLOCK);
+                                    break;
+                                case "result.progress":
+                                    label.setIcon(VaadinIcons.AUTOMATION);
                                     break;
                                 default:
                                     label.setIcon(VaadinIcons.CLOCK);
                                     break;
                             }
+                            return label;
                         }
-                        return label;
                     }
                     return new Label();
                 });
@@ -216,5 +234,39 @@ public class TesterScreen extends Panel {
         if (!ui.getWindows().contains(executionWindow)) {
             ui.addWindow(executionWindow);
         }
+    }
+
+    private Map<String, Integer> getSummary(TestCaseExecution tce, int tcId) {
+        Map<String, Integer> summary = new HashMap<>();
+        tce.getExecutionStepList().forEach(es -> {
+            if (tcId == -1 || es.getStep().getTestCase().getId() == tcId) {
+                if (es.getExecutionStart() != null
+                        && es.getExecutionEnd() == null) {
+                    //In progress
+                    if (!summary.containsKey("progress")) {
+                        summary.put("progress", 0);
+                    }
+                    summary.put("progress",
+                            summary.get("progress") + 1);
+                } else if (es.getResultId() == null
+                        || (es.getExecutionStart() == null
+                        && es.getExecutionEnd() == null)) {
+                    //Not started
+                    if (!summary.containsKey("result.pending")) {
+                        summary.put("result.pending", 0);
+                    }
+                    summary.put("result.pending",
+                            summary.get("result.pending") + 1);
+                } else if (es.getExecutionStart() != null
+                        && es.getExecutionEnd() != null) {
+                    if (!summary.containsKey(es.getResultId().getResultName())) {
+                        summary.put(es.getResultId().getResultName(), 0);
+                    }
+                    summary.put(es.getResultId().getResultName(),
+                            summary.get(es.getResultId().getResultName()) + 1);
+                }
+            }
+        });
+        return summary;
     }
 }
