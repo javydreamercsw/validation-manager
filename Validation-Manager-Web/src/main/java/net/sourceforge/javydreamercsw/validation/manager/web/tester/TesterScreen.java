@@ -131,7 +131,8 @@ public class TesterScreen extends Panel {
             public Action[] getActions(Object target, Object sender) {
                 List<Action> actions = new ArrayList<>();
                 if (target instanceof String
-                        && ((String) target).startsWith("es")) {
+                        && (((String) target).startsWith("es")
+                        || ((String) target).startsWith("tce"))) {
                     actions.add(new Action("Execute"));
                 }
                 return actions.toArray(new Action[actions.size()]);
@@ -141,8 +142,18 @@ public class TesterScreen extends Panel {
             public void handleAction(Action action, Object sender, Object target) {
                 //Parse the information to get the exact Execution Step
                 List<TestCaseExecutionServer> executions = new ArrayList<>();
-                executions.add(new TestCaseExecutionServer(new ExecutionStepServer(extractExecutionStepPK((String) target)).getTestCaseExecution().getId()));
-                showExecutionScreen(executions);
+                int tcID = -1;
+                if (((String) target).startsWith("tce")) {
+                    executions.add(new TestCaseExecutionServer(
+                            Integer.parseInt(((String) target).substring(3))));
+                } else if (((String) target).startsWith("es")) {
+                    executions.add(new TestCaseExecutionServer(new ExecutionStepServer(
+                            extractExecutionStepPK((String) target))
+                            .getTestCaseExecution().getId()));
+                    tcID = Integer.parseInt(((String) target)
+                            .substring(((String) target).lastIndexOf("-") + 1));
+                }
+                showExecutionScreen(executions, tcID);
             }
         });
         ProjectServer.getProjects().forEach(p -> {
@@ -220,9 +231,10 @@ public class TesterScreen extends Panel {
         return new ExecutionStepPK(esId, sId, tcId);
     }
 
-    private void showExecutionScreen(List<TestCaseExecutionServer> executions) {
+    private void showExecutionScreen(List<TestCaseExecutionServer> executions,
+            int tcID) {
         if (executionWindow == null) {
-            executionWindow = new ExecutionWindow(ui, executions);
+            executionWindow = new ExecutionWindow(ui, executions, tcID);
             executionWindow.setCaption("Test Execution");
             executionWindow.setVisible(true);
             executionWindow.setClosable(false);
