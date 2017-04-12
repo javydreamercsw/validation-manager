@@ -279,7 +279,8 @@ public class ExecutionWizardStep implements WizardStep {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
-        return !((String) result.getValue()).trim().isEmpty();
+        return result.getValue() != null
+                && !((String) result.getValue()).trim().isEmpty();
     }
 
     @Override
