@@ -16,7 +16,7 @@ import org.vaadin.teemu.wizards.Wizard;
  */
 public final class ExecutionWindow extends VMWindow {
 
-    private ValidationManagerUI ui;
+    private final ValidationManagerUI ui;
 
     /**
      * Display all the executions one after another.
