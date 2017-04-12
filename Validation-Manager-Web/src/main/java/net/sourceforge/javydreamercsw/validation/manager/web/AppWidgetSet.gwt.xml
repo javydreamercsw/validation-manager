@@ -35,4 +35,6 @@
     <inherits name="com.vaadin.sebastian.indeterminatecheckbox.IndeterminateCheckboxWidgetSet" />
 
     <inherits name="org.vaadin.easyuploads.Widgetset" />
+
+    <inherits name="pl.pdfviewer.WidgetSet" />
 </module>

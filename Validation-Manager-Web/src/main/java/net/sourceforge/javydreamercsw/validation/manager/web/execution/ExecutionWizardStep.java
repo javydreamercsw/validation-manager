@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -30,12 +25,17 @@ import com.validation.manager.core.server.core.ExecutionResultServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
+import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
+import org.openide.util.Lookup;
 import org.vaadin.easyuploads.MultiFileUpload;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.WizardStep;
@@ -152,6 +152,38 @@ public class ExecutionWizardStep implements WizardStep {
             a.addClickListener((Button.ClickEvent event) -> {
                 LOG.log(Level.INFO, "Clicked on attachment: {0}",
                         attachment.getAttachment().getFileName());
+                String name = attachment.getAttachment().getFileName();
+                byte[] bytes = attachment.getAttachment().getFile();
+                boolean ableToDisplay = false;
+                try {
+                    //TODO:Remove when the service issue is fixed
+                    //See: https://vaadin.com/forum/#!/thread/15663093
+                    //See: http://stackoverflow.com/questions/43373082/vaadin-how-to-add-meta-inf-services-to-the-war
+                    //Optionally convert all files to pdf when possible.
+                    PDFDisplay pdf = new PDFDisplay();
+                    if (pdf.supportFile(name)) {
+                        ui.addWindow(pdf.getViewer(pdf.loadFile(name, bytes)));
+                        ableToDisplay = true;
+                    }
+                    //-------------------------------------------
+                    for (IFileDisplay fd : Lookup.getDefault()
+                            .lookupAll(IFileDisplay.class)) {
+                        if (fd.supportFile(new File(name))) {
+                            ui.addWindow(fd.getViewer(fd.loadFile(name, bytes)));
+                            ableToDisplay = true;
+                            break;
+                        }
+                    }
+                } catch (IOException ex) {
+                    LOG.log(Level.SEVERE,
+                            "Error loading attachment file: "
+                            + name, ex);
+                }
+                if (!ableToDisplay) {
+                    LOG.log(Level.WARNING,
+                            "Unable to display: {0}. No File displayer found!",
+                            name);
+                }
             });
             attachments.addComponent(a);
         });
@@ -228,7 +260,8 @@ public class ExecutionWizardStep implements WizardStep {
                 //Save the result
                 ExecutionResult newResult = ExecutionResultServer.getResult(answer);
                 if (step.getResultId() == null
-                        || step.getResultId().getId() != newResult.getId()) {
+                        || !Objects.equals(step.getResultId().getId(),
+                                newResult.getId())) {
                     step.setResultId(newResult);
                     //Set end date to null to reflect update
                     step.setExecutionEnd(null);
