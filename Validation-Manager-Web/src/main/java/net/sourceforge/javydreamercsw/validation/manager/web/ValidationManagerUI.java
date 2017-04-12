@@ -1680,6 +1680,7 @@ public class ValidationManagerUI extends UI {
                 if (getUser() != null
                         && !getUser().getExecutionStepList().isEmpty()) {
                     TreeTable testCaseTree = new TreeTable("Available Tests");
+                    testCaseTree.setAnimationsEnabled(true);
                     testCaseTree.addContainerProperty("Name", String.class, "");
                     testCaseTree.addGeneratedColumn("Status",
                             (Table source, Object itemId, Object columnId) -> {
@@ -1806,6 +1807,11 @@ public class ValidationManagerUI extends UI {
                             });
                         }
                     });
+                    //Make columns autofit
+                    for (Object id : testCaseTree.getVisibleColumns()) {
+                        LOG.log(Level.INFO, "{0}", id);
+                        testCaseTree.setColumnExpandRatio(id, 1.0f);
+                    }
                 }
             }
             if (designer == null) {
