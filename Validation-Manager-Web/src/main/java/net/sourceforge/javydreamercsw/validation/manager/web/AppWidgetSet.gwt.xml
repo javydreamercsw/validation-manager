@@ -37,4 +37,8 @@
     <inherits name="org.vaadin.easyuploads.Widgetset" />
 
     <inherits name="pl.pdfviewer.WidgetSet" />
+
+    
+
+    <inherits name="org.tepi.imageviewer.WidgetSet" />
 </module>

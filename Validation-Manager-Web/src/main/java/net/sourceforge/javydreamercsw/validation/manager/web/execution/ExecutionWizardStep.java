@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
+import net.sourceforge.javydreamercsw.validation.manager.web.file.ImageDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
 import org.openide.util.Lookup;
 import org.vaadin.easyuploads.MultiFileUpload;
@@ -163,6 +164,11 @@ public class ExecutionWizardStep implements WizardStep {
                     PDFDisplay pdf = new PDFDisplay();
                     if (pdf.supportFile(name)) {
                         ui.addWindow(pdf.getViewer(pdf.loadFile(name, bytes)));
+                        ableToDisplay = true;
+                    }
+                    ImageDisplay image = new ImageDisplay();
+                    if (image.supportFile(name)) {
+                        ui.addWindow(image.getViewer(image.loadFile(name, bytes)));
                         ableToDisplay = true;
                     }
                     //-------------------------------------------
