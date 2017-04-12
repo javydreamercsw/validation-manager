@@ -9,6 +9,11 @@ import java.util.List;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.vaadin.teemu.wizards.Wizard;
+import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
+import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
+import org.vaadin.teemu.wizards.event.WizardProgressListener;
+import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
+import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 /**
  *
@@ -56,6 +61,27 @@ public final class ExecutionWindow extends VMWindow {
             });
         });
         execution.setDisplayedMaxTitles(3);
+        execution.addListener(new WizardProgressListener() {
+            @Override
+            public void activeStepChanged(WizardStepActivationEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void stepSetChanged(WizardStepSetChangedEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(WizardCompletedEvent event) {
+                ui.removeWindow(ExecutionWindow.this);
+            }
+
+            @Override
+            public void wizardCancelled(WizardCancelledEvent event) {
+                ui.removeWindow(ExecutionWindow.this);
+            }
+        });
         layout.addComponent(execution);
         layout.setSizeFull();
         setContent(layout);
