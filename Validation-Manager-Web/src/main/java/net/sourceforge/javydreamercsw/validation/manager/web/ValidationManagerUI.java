@@ -142,8 +142,7 @@ public class ValidationManagerUI extends UI {
 
     private static final ThreadLocal<ValidationManagerUI> THREAD_LOCAL
             = new ThreadLocal<>();
-    private final ThemeResource logo = new ThemeResource("vm_logo.png"),
-            small = new ThemeResource("VMSmall.png");
+    private final ThemeResource logo = new ThemeResource("vm_logo.png");
     private VMUserServer user = null;
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
@@ -463,7 +462,7 @@ public class ValidationManagerUI extends UI {
             reqColumn.setRenderer(new ButtonRenderer(e -> {
                 //Show the requirement details in a window
                 VerticalLayout l = new VerticalLayout();
-                Window subWindow = new Window(
+                Window subWindow = new VMWindow(
                         ((Requirement) e.getItemId()).getUniqueId()
                         + " Details");
                 BeanFieldGroup<Requirement> b
@@ -1309,7 +1308,7 @@ public class ValidationManagerUI extends UI {
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     Wizard w = new Wizard();
-                    Window sw = new Window();
+                    Window sw = new VMWindow();
                     w.addStep(new AssignUserStep(this, tree.getValue()));
                     w.addListener(new WizardProgressListener() {
                         @Override
@@ -1491,7 +1490,7 @@ public class ValidationManagerUI extends UI {
         importRequirement.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     // Create a sub-window and set the content
-                    Window subWindow = new Window("Import Requirements");
+                    Window subWindow = new VMWindow("Import Requirements");
                     VerticalLayout subContent = new VerticalLayout();
                     subWindow.setContent(subContent);
 
@@ -1564,7 +1563,7 @@ public class ValidationManagerUI extends UI {
         importSteps.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     // Create a sub-window and set the content
-                    Window subWindow = new Window("Import Test Case Steps");
+                    Window subWindow = new VMWindow("Import Test Case Steps");
                     VerticalLayout subContent = new VerticalLayout();
                     subWindow.setContent(subContent);
 
@@ -2477,7 +2476,7 @@ public class ValidationManagerUI extends UI {
 
     private void showLoginDialog() {
         if (loginWindow == null) {
-            loginWindow = new LoginDialog(this, small);
+            loginWindow = new LoginDialog(this);
             loginWindow.setVisible(true);
             loginWindow.setClosable(false);
             loginWindow.setResizable(false);
@@ -2594,7 +2593,8 @@ public class ValidationManagerUI extends UI {
 
     private void showExecutionScreen(List<TestCaseExecutionServer> executions) {
         if (executionWindow == null) {
-            executionWindow = new ExecutionWindow(this, executions, logo);
+            executionWindow = new ExecutionWindow(this, executions);
+            executionWindow.setCaption("Test Execution");
             executionWindow.setVisible(true);
             executionWindow.setClosable(false);
             executionWindow.setResizable(false);

@@ -5,7 +5,6 @@ import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.Page;
-import com.vaadin.server.Resource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -14,7 +13,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.Window;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMUserServer;
 
@@ -23,15 +21,10 @@ import com.validation.manager.core.server.core.VMUserServer;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @SuppressWarnings("serial")
-public final class LoginDialog extends Window {
+public final class LoginDialog extends VMWindow {
 
-    private final ValidationManagerUI menu;
-
-    public LoginDialog(ValidationManagerUI menu, Resource icon) {
-        // New login -window in the center of the screen
-        super("Account login");
-        setIcon(icon);
-        this.menu = menu;
+    public LoginDialog(ValidationManagerUI menu) {
+        super(menu, "Account login");
         init();
     }
 

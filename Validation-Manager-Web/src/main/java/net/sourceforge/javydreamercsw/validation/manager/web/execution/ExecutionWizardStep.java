@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.ImageDisplay;
@@ -66,7 +67,8 @@ public class ExecutionWizardStep implements WizardStep {
         result.setRequired(true);
         result.setRequiredError("Please provide a result!");
         ExecutionResultJpaController c
-                = new ExecutionResultJpaController(DataBaseManager.getEntityManagerFactory());
+                = new ExecutionResultJpaController(DataBaseManager
+                        .getEntityManagerFactory());
         c.findExecutionResultEntities().forEach(r -> {
             String item = r.getResultName();
             if (ValidationManagerUI.rb.containsKey(item)) {
@@ -202,7 +204,7 @@ public class ExecutionWizardStep implements WizardStep {
         attach.setIcon(VaadinIcons.PAPERCLIP);
         attach.addClickListener((Button.ClickEvent event) -> {
             //Show dialog to upload file.
-            Window dialog = new Window("Attach File");
+            Window dialog = new VMWindow("Attach File");
             VerticalLayout vl = new VerticalLayout();
             MultiFileUpload multiFileUpload = new MultiFileUpload() {
                 @Override

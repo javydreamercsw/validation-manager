@@ -3,6 +3,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.file;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Window;
 import java.io.File;
+import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.lookup.ServiceProvider;
 import pl.pdfviewer.PdfViewer;
@@ -26,7 +27,7 @@ public class PDFDisplay extends AbstractFileDisplay {
 
     @Override
     public Window getViewer(File f) {
-        Window w = new Window(f.getName());
+        Window w = new VMWindow(f.getName());
         w.center();
         w.setModal(true);
         PdfViewer pdfViewer = new PdfViewer(f);

@@ -6,6 +6,7 @@ import com.vaadin.ui.Window;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.lookup.ServiceProvider;
 import org.tepi.imageviewer.ImageViewer;
@@ -46,7 +47,7 @@ public class ImageDisplay extends AbstractFileDisplay
 
     @Override
     public Window getViewer(File f) {
-        w = new Window(f.getName());
+        w = new VMWindow(f.getName());
         boolean found = false;
         for (FileResource fr : images) {
             if (fr.getFilename().equals(f.getName())) {
