@@ -5,6 +5,7 @@ INSERT INTO `execution_result` (`id`, `result_name`) VALUES (1, 'result.pass');
 INSERT INTO `execution_result` (`id`, `result_name`) VALUES (2, 'result.fail');
 INSERT INTO `execution_result` (`id`, `result_name`) VALUES (3, 'result.blocked');
 INSERT INTO `execution_result` (`id`, `result_name`) VALUES (4, 'result.pending');
+INSERT INTO `execution_result` (`id`, `result_name`) VALUES (5, 'result.progress');
 /*Add some more demo users and their roles*/
 INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `locale`, `user_status_id`) VALUES (2, 'tester', 'f5d1278e8109edd94e1e4197e04873b9', '', 'Mr.', 'Tester', 'en', 1);
 INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (2, 7);
