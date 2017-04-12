@@ -169,7 +169,7 @@ public class ValidationManagerUI extends UI {
     private Tree tree;
     private Tab main, tester, designer, demo, admin;
     private final List<String> roles = new ArrayList<>();
-    public static final ResourceBundle RB = ResourceBundle.getBundle(
+    private static final ResourceBundle RB = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages");
 
     /**
@@ -1655,7 +1655,7 @@ public class ValidationManagerUI extends UI {
                 });
     }
 
-    public static String translate(String mess) {
+    public String translate(String mess) {
         return RB.containsKey(mess) ? RB.getString(mess) : mess;
     }
 
@@ -1696,7 +1696,7 @@ public class ValidationManagerUI extends UI {
                                     } else {
                                         message = ess.getResultId().getResultName();
                                     }
-                                    label.setCaption(RB.containsKey(message) ? RB.getString(message) : message);
+                                    label.setCaption(translate(message));
                                     if (ess.getExecutionStart() != null
                                     && ess.getExecutionEnd() == null) {
                                         //In progress
