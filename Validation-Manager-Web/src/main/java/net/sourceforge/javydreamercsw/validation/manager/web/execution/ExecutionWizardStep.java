@@ -71,8 +71,8 @@ public class ExecutionWizardStep implements WizardStep {
                         .getEntityManagerFactory());
         c.findExecutionResultEntities().forEach(r -> {
             String item = r.getResultName();
-            if (ValidationManagerUI.rb.containsKey(item)) {
-                item = ValidationManagerUI.rb.getString(item);
+            if (ValidationManagerUI.RB.containsKey(item)) {
+                item = ValidationManagerUI.RB.getString(item);
             }
             result.addItem(r.getResultName());
             result.setItemCaption(r.getResultName(), item);

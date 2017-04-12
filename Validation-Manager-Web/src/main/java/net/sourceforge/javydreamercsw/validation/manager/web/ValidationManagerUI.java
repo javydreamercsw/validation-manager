@@ -169,7 +169,7 @@ public class ValidationManagerUI extends UI {
     private Tree tree;
     private Tab main, tester, designer, demo, admin;
     private final List<String> roles = new ArrayList<>();
-    public static final ResourceBundle rb = ResourceBundle.getBundle(
+    public static final ResourceBundle RB = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages");
 
     /**
@@ -1655,8 +1655,8 @@ public class ValidationManagerUI extends UI {
                 });
     }
 
-    private String translate(String mess) {
-        return rb.containsKey(mess) ? rb.getString(mess) : mess;
+    public static String translate(String mess) {
+        return RB.containsKey(mess) ? RB.getString(mess) : mess;
     }
 
     private Component getContentComponent() {
@@ -1696,7 +1696,7 @@ public class ValidationManagerUI extends UI {
                                     } else {
                                         message = ess.getResultId().getResultName();
                                     }
-                                    label.setCaption(rb.containsKey(message) ? rb.getString(message) : message);
+                                    label.setCaption(RB.containsKey(message) ? RB.getString(message) : message);
                                     if (ess.getExecutionStart() != null
                                     && ess.getExecutionEnd() == null) {
                                         //In progress
@@ -1901,6 +1901,7 @@ public class ValidationManagerUI extends UI {
         if (admin != null) {
             admin.setVisible(checkRight("system.configuration"));
         }
+        tabSheet.setTabPosition(demo, tabSheet.getComponentCount() - 1);
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
         return hsplit;
     }
