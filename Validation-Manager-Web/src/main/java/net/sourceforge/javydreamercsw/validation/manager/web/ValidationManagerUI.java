@@ -1641,8 +1641,8 @@ public class ValidationManagerUI extends UI {
                                     .append(", <b>Password:</b> ")
                                     .append(u.getUsername())
                                     .append(" <b>Role</b>: ")
-                                    .append(u.getRoleList().get(0)
-                                            .getDescription())
+                                    .append(translate(u.getRoleList().get(0)
+                                            .getDescription()))
                                     .append("</li>");
                         }
                     } catch (Exception ex) {
