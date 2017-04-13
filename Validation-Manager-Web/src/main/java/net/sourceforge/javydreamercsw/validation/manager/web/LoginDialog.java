@@ -23,24 +23,26 @@ import com.validation.manager.core.server.core.VMUserServer;
 @SuppressWarnings("serial")
 public final class LoginDialog extends VMWindow {
 
+    private final ShortcutAction enterKey = new ShortcutAction("Login",
+            ShortcutAction.KeyCode.ENTER, null);
+
+    private final TextField name = new TextField("Username");
+    private final PasswordField password = new PasswordField("Password");
+
+    private final Button loginButton = new Button("Log In",
+            (ClickEvent event) -> {
+        tryToLogIn();
+    });
+
+    private final Button cancelButton = new Button("Cancel",
+            (ClickEvent event) -> {
+        LoginDialog.this.close();
+    });
+
     public LoginDialog(ValidationManagerUI menu) {
         super(menu, "Account login");
         init();
     }
-
-    private final ShortcutAction enterKey = new ShortcutAction("Login",
-            ShortcutAction.KeyCode.ENTER, null);
-
-    TextField name = new TextField("Username");
-    PasswordField password = new PasswordField("Password");
-
-    Button loginButton = new Button("Log In", (ClickEvent event) -> {
-        tryToLogIn();
-    });
-
-    Button cancelButton = new Button("Cancel", (ClickEvent event) -> {
-        LoginDialog.this.close();
-    });
 
     public void init() {
         //Layout

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
 import com.vaadin.data.util.converter.Converter;
@@ -26,10 +21,11 @@ public class ByteToStringConverter implements Converter<String, byte[]> {
             Class<? extends byte[]> targetType, Locale locale)
             throws ConversionException {
         try {
+            String result = value;
             if (value == null) {
-                value = "null";
+                result = "null";
             }
-            return value.getBytes("UTF-8");
+            return result.getBytes("UTF-8");
         } catch (UnsupportedEncodingException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }

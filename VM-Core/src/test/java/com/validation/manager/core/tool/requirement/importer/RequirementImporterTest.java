@@ -33,9 +33,6 @@ public class RequirementImporterTest extends AbstractVMTestCase {
     private static final Logger LOG
             = getLogger(RequirementImporterTest.class.getName());
 
-    public RequirementImporterTest() {
-    }
-
     /**
      * Test of importFile method, of class RequirementImporter.
      */

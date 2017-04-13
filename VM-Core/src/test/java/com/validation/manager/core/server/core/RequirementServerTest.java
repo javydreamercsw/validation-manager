@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -27,10 +28,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
     private static final Logger LOG
             = getLogger(RequirementServerTest.class.getName());
     private Project p;
-    private RequirementSpec rss;
     private RequirementSpecNode rsns;
 
     private void prepare() throws Exception {
+        RequirementSpec rss = null;
         p = TestHelper.createProject("New Project", "Notes");
         ProjectServer project = new ProjectServer(p);
         project.setNotes("Notes 2");
@@ -252,33 +253,37 @@ public class RequirementServerTest extends AbstractVMTestCase {
     }
 
     private void checkCircularDependency(Requirement r) {
-        RequirementServer rs = new RequirementServer(r);
-        rs.getVersions().stream().map((t)
-                -> new RequirementServer(t)).filter((temp)
-                -> (temp.getRequirementList().size() > 0
-                && temp.getRequirementList1().size() > 0)).map((temp) -> {
-            //Has both children and parents
-            LOG.log(Level.INFO,
-                    "Inspecting {0} for circular dependencies.",
-                    temp.getUniqueId());
-            return temp;
-        }).forEachOrdered((temp) -> {
-            temp.getRequirementList1().forEach((parent) -> {
-                //Check all parents of this requirement
-                parent.getRequirementList().stream().filter((child)
-                        -> (child.getUniqueId().equals(temp.getUniqueId())))
-                        .map((_item) -> {
-                            LOG.log(Level.SEVERE,
-                                    "Circular dependency "
-                                    + "detected between {0} and {1}",
-                                    new Object[]{temp.getUniqueId(),
-                                        parent.getUniqueId()});
-                            return _item;
-                        }).forEachOrdered((_item) -> {
-                    fail();
-                }); //Check if the parent has this requirement as a child
-            });
-        }); //Detect circular relationships
+        try {
+            RequirementServer rs = new RequirementServer(r);
+            rs.getVersions().stream().map((t)
+                    -> t).filter((temp)
+                    -> (temp.getRequirementList().size() > 0
+                    && temp.getRequirementList1().size() > 0)).map((temp) -> {
+                //Has both children and parents
+                LOG.log(Level.INFO,
+                        "Inspecting {0} for circular dependencies.",
+                        temp.getUniqueId());
+                return temp;
+            }).forEachOrdered((temp) -> {
+                temp.getRequirementList1().forEach((parent) -> {
+                    //Check all parents of this requirement
+                    parent.getRequirementList().stream().filter((child)
+                            -> (child.getUniqueId().equals(temp.getUniqueId())))
+                            .map((_item) -> {
+                                LOG.log(Level.SEVERE,
+                                        "Circular dependency "
+                                        + "detected between {0} and {1}",
+                                        new Object[]{temp.getUniqueId(),
+                                            parent.getUniqueId()});
+                                return _item;
+                            }).forEachOrdered((_item) -> {
+                        fail();
+                    }); //Check if the parent has this requirement as a child
+                });
+            }); //Detect circular relationships
+        } catch (VMException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
     }
 
     /**

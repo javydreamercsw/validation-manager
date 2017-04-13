@@ -22,7 +22,8 @@ public class VersionListenerIT extends AbstractVMTestCase {
     public void testOnChange() {
         System.out.println("onChange");
         DataBaseManager.setVersioningEnabled(true);
-        int count = 0, max = 10;
+        int count = 0;
+        int max = 10;
         Requirement entity = new Requirement("SRS0001", "Description "
                 + (++count));
         RequirementJpaController controller

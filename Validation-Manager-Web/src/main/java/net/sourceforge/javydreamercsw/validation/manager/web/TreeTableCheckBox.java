@@ -51,18 +51,17 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
         if (tt != null
                 && value != null
                 && !Objects.equals(value, getState().value)) {
-            if (tt.hasChildren(getObjectId())) {
-                if (getState().value != null) {
-                    //Switching from false to true. Select all children
-                    tt.getChildren(getObjectId()).forEach((o) -> {
-                        Item item = tt.getItem(o);
-                        Object val = item.getItemProperty("Name").getValue();
-                        if (val instanceof TreeTableCheckBox) {
-                            TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
-                            ttcb.setValue(value);
-                        }
-                    });
-                }
+            if (tt.hasChildren(getObjectId())
+                    && getState().value != null) {
+                //Switching from false to true. Select all children
+                tt.getChildren(getObjectId()).forEach((o) -> {
+                    Item item = tt.getItem(o);
+                    Object val = item.getItemProperty("Name").getValue();
+                    if (val instanceof TreeTableCheckBox) {
+                        TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
+                        ttcb.setValue(value);
+                    }
+                });
             }
             Object parentId = tt.getParent(getObjectId());
             if (!value && parentId != null) {

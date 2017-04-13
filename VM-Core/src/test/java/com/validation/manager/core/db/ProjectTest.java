@@ -33,7 +33,7 @@ import org.junit.Test;
  */
 public class ProjectTest extends AbstractVMTestCase {
 
-    Project p;
+    private Project p;
     private static final Logger LOG
             = getLogger(ProjectTest.class.getName());
 

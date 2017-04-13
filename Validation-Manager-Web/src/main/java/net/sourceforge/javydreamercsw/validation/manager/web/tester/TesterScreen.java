@@ -57,7 +57,7 @@ public class TesterScreen extends Panel {
         testCaseTree.addContainerProperty("Name", String.class, "");
         testCaseTree.addGeneratedColumn("Status",
                 (Table source, Object itemId, Object columnId) -> {
-                    if (columnId.equals("Status")
+                    if ("Status".equals(columnId)
                             && itemId instanceof String) {
                         String id = (String) itemId;
                         String message;

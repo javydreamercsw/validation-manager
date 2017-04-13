@@ -3,6 +3,7 @@ package com.validation.manager.core.server.core;
 import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.StepPK;
@@ -16,11 +17,13 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  */
 public final class StepServer extends Step implements EntityServer<Step> {
 
-    public StepServer(TestCase tc, int stepSequence, String text) {
+    public StepServer(TestCase tc, int stepSequence, String text)
+            throws VMException {
         super(new StepPK(tc.getId()), stepSequence, text.getBytes());
         setTestCase(tc);
         if (getTestCase() == null) {
-            throw new RuntimeException("Provided TestCase that doesn't exist in the database yet!");
+            throw new VMException("Provided TestCase that doesn't exist in "
+                    + "the database yet!");
         }
     }
 

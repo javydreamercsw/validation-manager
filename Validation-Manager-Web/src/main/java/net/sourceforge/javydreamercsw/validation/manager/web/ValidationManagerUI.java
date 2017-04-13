@@ -1602,11 +1602,10 @@ public class ValidationManagerUI extends UI {
             if (main == null) {
                 main = tabSheet.addTab(new VerticalLayout(), "Main");
             }
-            if (tester == null) {
-                if (getUser() != null
-                        && !getUser().getExecutionStepList().isEmpty()) {
-                    tester = tabSheet.addTab(new TesterScreen(this), "Tester");
-                }
+            if (tester == null
+                    && getUser() != null
+                    && !getUser().getExecutionStepList().isEmpty()) {
+                tester = tabSheet.addTab(new TesterScreen(this), "Tester");
             }
             if (designer == null) {
                 designer = tabSheet.addTab(new VerticalLayout(), "Test Designer");
@@ -2312,7 +2311,7 @@ public class ValidationManagerUI extends UI {
     private void displayTestPlanning(Project p) {
         Wizard w = new Wizard();
         w.addStep(new SelectTestCasesStep(w, p));
-        w.addStep(new DetailStep(ValidationManagerUI.this, p));
+        w.addStep(new DetailStep(ValidationManagerUI.this));
         w.addListener(new WizardProgressListener() {
             @Override
             public void activeStepChanged(WizardStepActivationEvent event) {

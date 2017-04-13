@@ -146,15 +146,12 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                 String value = "";
                                 if (cell != null) {
                                     switch (cell.getCellType()) {
-
                                         case Cell.CELL_TYPE_FORMULA:
                                             value = cell.getCellFormula();
                                             break;
-
                                         case Cell.CELL_TYPE_NUMERIC:
                                             value = "" + cell.getNumericCellValue();
                                             break;
-
                                         case Cell.CELL_TYPE_STRING:
                                             value = cell.getStringCellValue();
                                             break;
@@ -200,7 +197,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                         requirement.setNotes(value);
                                         break;
                                     default:
-                                        throw new RuntimeException("Invalid column detected: " + c);
+                                        throw new RequirementImportException("Invalid column detected: " + c);
                                 }
                                 LOG.fine(value);
                             }

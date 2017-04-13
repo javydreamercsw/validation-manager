@@ -7,7 +7,6 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -28,16 +27,13 @@ public class DetailStep implements WizardStep {
 
     private List<Integer> testCases;
     private final TestCaseExecution tce;
-    private List<Integer> projects;
     private static final Logger LOG
             = Logger.getLogger(DetailStep.class.getSimpleName());
     private final ValidationManagerUI ui;
-    private final Project p;
 
-    public DetailStep(ValidationManagerUI ui, Project p) {
+    public DetailStep(ValidationManagerUI ui) {
         this.tce = new TestCaseExecution();
         this.ui = ui;
-        this.p = p;
     }
 
     @Override
@@ -124,9 +120,5 @@ public class DetailStep implements WizardStep {
      */
     public void setTestCases(List<Integer> testCases) {
         this.testCases = testCases;
-    }
-
-    public void setProjects(List<Integer> projects) {
-        this.projects = projects;
     }
 }

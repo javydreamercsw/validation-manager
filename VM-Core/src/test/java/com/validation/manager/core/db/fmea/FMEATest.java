@@ -12,10 +12,7 @@ import org.junit.Test;
 public class FMEATest extends AbstractVMTestCase {
 
     private static final Logger LOG =
-            getLogger(FMEATest.class.getName());
-
-    public FMEATest() {
-    }
+ getLogger(FMEATest.class.getName());
 
     /**
      * Test of toString method, of class FMEA.

@@ -2,6 +2,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNodePK;
@@ -70,7 +71,7 @@ public final class RequirementServer extends Requirement
         }
     }
 
-    public RequirementServer(int id) {
+    public RequirementServer(int id) throws VMException {
         super();
         RequirementJpaController controller
                 = new RequirementJpaController(DataBaseManager
@@ -79,13 +80,13 @@ public final class RequirementServer extends Requirement
         if (requirement != null) {
             update((RequirementServer) this, requirement);
         } else {
-            throw new RuntimeException("Unable to find "
+            throw new VMException("Unable to find "
                     + "requirement with id: "
                     + id);
         }
     }
 
-    public RequirementServer(Requirement r) {
+    public RequirementServer(Requirement r) throws VMException {
         this(r.getId());
     }
 
@@ -219,7 +220,11 @@ public final class RequirementServer extends Requirement
                     if (COVERAGE_MAP.containsKey(getCoverageMapID(r))) {
                         coverage += COVERAGE_MAP.get(getCoverageMapID(r));
                     } else {
-                        coverage += new RequirementServer(r).getTestCoverage();
+                        try {
+                            coverage += new RequirementServer(r).getTestCoverage();
+                        } catch (VMException ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
                 coverage /= children.size();
@@ -316,7 +321,8 @@ public final class RequirementServer extends Requirement
             EntityManagerFactory emf
                     = Persistence.createEntityManagerFactory("VMPU", parameters);
             DataBaseManager.setEntityManagerFactory(emf);
-            int counter = 0, circular = 0;
+            int counter = 0;
+            int circular = 0;
             List<String> processed = new ArrayList<>();
             LOG.log(Level.INFO, "Analyzing {0}. Please wait...",
                     parameters.get("javax.persistence.jdbc.url"));
@@ -357,28 +363,27 @@ public final class RequirementServer extends Requirement
                                     //Check all parents of this requirement
                                     for (Requirement child : parent.getRequirementList()) {
                                         //Check if the parent has this requirement as a child
-                                        if (child.getUniqueId().equals(temp.getUniqueId())) {
-                                            if (!toRemove.contains(parent.getUniqueId())) {
-                                                LOG.log(Level.INFO,
-                                                        "Circular dependency "
-                                                        + "detected between {0} and {1}",
-                                                        new Object[]{temp.getUniqueId(),
-                                                            parent.getUniqueId()});
+                                        if (child.getUniqueId().equals(temp.getUniqueId())
+                                                && !toRemove.contains(parent.getUniqueId())) {
+                                            LOG.log(Level.INFO,
+                                                    "Circular dependency "
+                                                    + "detected between {0} and {1}",
+                                                    new Object[]{temp.getUniqueId(),
+                                                        parent.getUniqueId()});
 
-                                                RequirementServer p = new RequirementServer(parent);
-                                                assert temp.getRequirementList().contains(parent);
-                                                temp.getRequirementList().remove(parent);
-                                                LOG.log(Level.INFO, "Remove link from {0} to {1}",
-                                                        new Object[]{temp.getUniqueId(),
-                                                            parent.getUniqueId()});
-                                                temp.write2DB();
-                                                temp.update();
-                                                assert !temp.getRequirementList().contains(parent);
-                                                p.update();
-                                                assert p.getRequirementList1().contains(temp);
-                                                toRemove.add(parent.getUniqueId());
-                                                circular++;
-                                            }
+                                            RequirementServer p = new RequirementServer(parent);
+                                            assert temp.getRequirementList().contains(parent);
+                                            temp.getRequirementList().remove(parent);
+                                            LOG.log(Level.INFO, "Remove link from {0} to {1}",
+                                                    new Object[]{temp.getUniqueId(),
+                                                        parent.getUniqueId()});
+                                            temp.write2DB();
+                                            temp.update();
+                                            assert !temp.getRequirementList().contains(parent);
+                                            p.update();
+                                            assert p.getRequirementList1().contains(temp);
+                                            toRemove.add(parent.getUniqueId());
+                                            circular++;
                                         }
                                     }
                                 }

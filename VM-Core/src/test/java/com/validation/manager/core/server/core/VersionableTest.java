@@ -10,9 +10,6 @@ import org.junit.Test;
  */
 public class VersionableTest {
 
-    public VersionableTest() {
-    }
-
     /**
      * Test of compareTo method, of class Versionable.
      */

@@ -16,9 +16,6 @@ import static org.openide.util.Exceptions.printStackTrace;
  */
 public class ProjectServerTest extends AbstractVMTestCase {
 
-    public ProjectServerTest() {
-    }
-
     /**
      * Test of create and deleteProject method, of class ProjectServer.
      */

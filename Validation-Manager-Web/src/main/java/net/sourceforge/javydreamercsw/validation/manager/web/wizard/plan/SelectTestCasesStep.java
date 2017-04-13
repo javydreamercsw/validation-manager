@@ -74,7 +74,6 @@ public class SelectTestCasesStep implements WizardStep {
         //update next step
         DetailStep next = ((DetailStep) w.getSteps().get(1));
         next.setTestCases(testCases);
-        next.setProjects(projects);
         return true;
     }
 

@@ -57,7 +57,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     private static final long serialVersionUID = 1L;
     private boolean hashPassword = true;
     private boolean increaseAttempts = false;
-    private static List<Object> result;
     private boolean change;
 
     public VMUserServer(VmUser vmu) {
@@ -69,7 +68,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     //create user object and login
     public VMUserServer(String attrUN, String attrUPW) throws Exception {
         try {
-            result = createdQuery(
+            List<Object> result = createdQuery(
                     "SELECT u FROM VmUser uu WHERE u.username='" // NOI18N
                     + attrUN + "' AND u.password='" + encrypt(attrUPW)
                     + "' AND u.userStatusId.id <> 2");
@@ -122,7 +121,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             if (transaction.isActive()) {
                 transaction.rollback();
             }
-            result = createdQuery("SELECT u FROM VmUser u WHERE u.username='"
+            List<Object> result = createdQuery("SELECT u FROM VmUser u WHERE u.username='"
                     + attrUN + "' AND u.userStatusId.id <> 2");
             //increase number of attempts
             if (!result.isEmpty()) {
@@ -142,7 +141,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     public VMUserServer(int id) throws Exception {
         parameters.clear();
         parameters.put("id", id);
-        result = namedQuery("VmUser.findById", parameters);
+        List<Object> result = namedQuery("VmUser.findById", parameters);
         //throw exception if no result found
         if (result.size() > 0) {
             VmUser vmu = (VmUser) result.get(0);
@@ -261,7 +260,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     public static ArrayList<VMUserServer> getVMUsers() {
         ArrayList<VMUserServer> coreUsers = new ArrayList<>();
         try {
-            result = createdQuery(
+            List<Object> result = createdQuery(
                     "Select x from VMUser x order by x.username");
             result.forEach((o) -> {
                 coreUsers.add(new VMUserServer((VmUser) o));
@@ -293,7 +292,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         boolean passwordIsUsable = true;
         try {
             //Now check if password is not the same as the current password
-            result = createdQuery(
+            List<Object> result = createdQuery(
                     "Select x from VmUser x where x.id=" + getId()
                     + " and x.password='"
                     + (hash ? encrypt(newPass) : newPass) + "'");
@@ -337,51 +336,51 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         if (user != null) {
             parameters.clear();
             parameters.put("id", user.getId());
-            user = (VmUser) namedQuery("VmUser.findById",
+            VmUser temp = (VmUser) namedQuery("VmUser.findById",
                     parameters).get(0);
             try {
-                for (CorrectiveAction ca : user.getCorrectiveActionList()) {
+                for (CorrectiveAction ca : temp.getCorrectiveActionList()) {
                     new CorrectiveActionJpaController(
                             getEntityManagerFactory()).destroy(ca.getId());
                 }
-                for (Role r : user.getRoleList()) {
+                for (Role r : temp.getRoleList()) {
                     new RoleJpaController(
                             getEntityManagerFactory()).destroy(r.getId());
                 }
-                for (UserAssigment ua : user.getUserAssigmentList()) {
+                for (UserAssigment ua : temp.getUserAssigmentList()) {
                     new UserAssigmentJpaController(
                             getEntityManagerFactory()).destroy(ua.getUserAssigmentPK());
                 }
-                for (UserAssigment ua : user.getUserAssigmentList1()) {
+                for (UserAssigment ua : temp.getUserAssigmentList1()) {
                     new UserAssigmentJpaController(
                             getEntityManagerFactory()).destroy(ua.getUserAssigmentPK());
                 }
-                for (UserHasInvestigation i : user.getUserHasInvestigationList()) {
+                for (UserHasInvestigation i : temp.getUserHasInvestigationList()) {
                     new UserHasInvestigationJpaController(
                             getEntityManagerFactory()).destroy(i.getUserHasInvestigationPK());
                 }
-                for (UserModifiedRecord rc : user.getUserModifiedRecordList()) {
+                for (UserModifiedRecord rc : temp.getUserModifiedRecordList()) {
                     new UserModifiedRecordJpaController(
                             getEntityManagerFactory()).destroy(rc.getUserModifiedRecordPK());
                 }
-                for (UserTestPlanRole rc : user.getUserTestPlanRoleList()) {
+                for (UserTestPlanRole rc : temp.getUserTestPlanRoleList()) {
                     new UserTestPlanRoleJpaController(
                             getEntityManagerFactory()).destroy(rc.getUserTestPlanRolePK());
                 }
-                for (UserTestProjectRole rc : user.getUserTestProjectRoleList()) {
+                for (UserTestProjectRole rc : temp.getUserTestProjectRoleList()) {
                     new UserTestProjectRoleJpaController(
                             getEntityManagerFactory()).destroy(rc.getUserTestProjectRolePK());
                 }
-                for (VmException rc : user.getVmExceptionList()) {
+                for (VmException rc : temp.getVmExceptionList()) {
                     new VmExceptionJpaController(
                             getEntityManagerFactory()).destroy(rc.getVmExceptionPK());
                 }
                 parameters.clear();
-                parameters.put("id", user.getId());
-                user = (VmUser) namedQuery("VmUser.findById",
+                parameters.put("id", temp.getId());
+                temp = (VmUser) namedQuery("VmUser.findById",
                         parameters).get(0);
                 new VmUserJpaController(
-                        getEntityManagerFactory()).destroy(user.getId());
+                        getEntityManagerFactory()).destroy(temp.getId());
             } catch (NonexistentEntityException | IllegalOrphanException ex) {
                 getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
             }
