@@ -94,7 +94,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
 
     @Override
     public List<Requirement> importFile(boolean header) throws
-            RequirementImportException {
+            RequirementImportException, VMException {
         queue.clear();
         List<Integer> errors = new ArrayList<>();
         HashMap<String, Object> parameters = new HashMap<>();
