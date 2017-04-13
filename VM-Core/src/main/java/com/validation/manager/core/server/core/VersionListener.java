@@ -45,21 +45,20 @@ public class VersionListener {
             }
             ao.setModificationTime(new Date());
         }
-        if (entity instanceof Versionable) {
-            if (DataBaseManager.isVersioningEnabled()) {
-                Versionable versionable = (Versionable) entity;
-                //Make sure the version is initialized
-                if (versionable.getMajorVersion() == null) {
-                    versionable.setMajorVersion(0);
-                }
-                if (versionable.getMidVersion() == null) {
-                    versionable.setMidVersion(0);
-                }
-                if (versionable.getMinorVersion() == null) {
-                    versionable.setMinorVersion(1);
-                }
-                versionable.setDirty(false);
+        if (entity instanceof Versionable
+                && DataBaseManager.isVersioningEnabled()) {
+            Versionable versionable = (Versionable) entity;
+            //Make sure the version is initialized
+            if (versionable.getMajorVersion() == null) {
+                versionable.setMajorVersion(0);
             }
+            if (versionable.getMidVersion() == null) {
+                versionable.setMidVersion(0);
+            }
+            if (versionable.getMinorVersion() == null) {
+                versionable.setMinorVersion(1);
+            }
+            versionable.setDirty(false);
         }
     }
 
@@ -78,63 +77,62 @@ public class VersionListener {
             ao.setModificationTime(new Date());
         }
         //Handle versioning
-        if (entity instanceof Versionable) {
-            if (DataBaseManager.isVersioningEnabled()) {
-                Versionable versionable = (Versionable) entity;
-                if (versionable.isChangeVersionable()
-                        && !PROCESSED.containsKey(versionable.getClass())
-                        || (PROCESSED.containsKey(versionable.getClass())
-                        && !PROCESSED.get(versionable.getClass()).contains(DataBaseManager
-                                .getEntityManagerFactory()
-                                .getPersistenceUnitUtil()
-                                .getIdentifier(versionable)))) {
-                    EntityTransaction t = DataBaseManager.getEntityManager()
-                            .getTransaction();
-                    if (!t.isActive()) {
-                        t.begin();
+        if (entity instanceof Versionable
+                && DataBaseManager.isVersioningEnabled()) {
+            Versionable versionable = (Versionable) entity;
+            if (versionable.isChangeVersionable()
+                    && !PROCESSED.containsKey(versionable.getClass())
+                    || (PROCESSED.containsKey(versionable.getClass())
+                    && !PROCESSED.get(versionable.getClass()).contains(DataBaseManager
+                            .getEntityManagerFactory()
+                            .getPersistenceUnitUtil()
+                            .getIdentifier(versionable)))) {
+                EntityTransaction t = DataBaseManager.getEntityManager()
+                        .getTransaction();
+                if (!t.isActive()) {
+                    t.begin();
+                }
+                try {
+                    //Get the original one from the database
+                    Versionable original = DataBaseManager
+                            .getEntityManager()
+                            .find(versionable.getClass(),
+                                    DataBaseManager
+                                            .getEntityManagerFactory()
+                                            .getPersistenceUnitUtil()
+                                            .getIdentifier(versionable));
+                    LOG.log(Level.FINE, "Incoming change: {0}",
+                            entity.toString());
+                    //Copy the current state to keep it in history.
+                    Versionable clone = cloneEntity(original);
+                    clone.setDirty(false);
+                    LOG.log(Level.FINE, "Clone: {0}",
+                            clone.toString());
+                    if (!PROCESSED.containsKey(versionable.getClass())) {
+                        PROCESSED.put(versionable.getClass(), new ArrayList<>());
                     }
-                    try {
-                        //Get the original one from the database
-                        Versionable original = DataBaseManager
-                                .getEntityManager()
-                                .find(versionable.getClass(),
-                                        DataBaseManager
-                                                .getEntityManagerFactory()
-                                                .getPersistenceUnitUtil()
-                                                .getIdentifier(versionable));
-                        LOG.log(Level.FINE, "Incoming change: {0}",
-                                entity.toString());
-                        //Copy the current state to keep it in history.
-                        Versionable clone = cloneEntity(original);
-                        clone.setDirty(false);
-                        LOG.log(Level.FINE, "Clone: {0}",
-                                clone.toString());
-                        if (!PROCESSED.containsKey(versionable.getClass())) {
-                            PROCESSED.put(versionable.getClass(), new ArrayList<>());
-                        }
-                        PROCESSED.get(versionable.getClass()).add(DataBaseManager
-                                .getEntityManagerFactory()
-                                .getPersistenceUnitUtil()
-                                .getIdentifier(clone));
-                        PROCESSED.get(versionable.getClass()).add(DataBaseManager
-                                .getEntityManagerFactory()
-                                .getPersistenceUnitUtil()
-                                .getIdentifier(versionable));
-                        DataBaseManager.getEntityManager().persist(clone);
-                        //Create the new version
-                        versionable.setMinorVersion(clone.getMinorVersion() + 1);
-                        versionable.setDirty(true);
-                        DataBaseManager.getEntityManager().merge(versionable);
-                        t.commit();
-                    } catch (Exception ex) {
-                        LOG.log(Level.WARNING, "Class {0} is not properly "
-                                + "set up. Make sure constructor calls "
-                                + "super() so the version is initialized.",
-                                versionable.getClass());
-                        LOG.log(Level.SEVERE, null, ex);
-                        if (t.isActive()) {
-                            t.rollback();
-                        }
+                    PROCESSED.get(versionable.getClass()).add(DataBaseManager
+                            .getEntityManagerFactory()
+                            .getPersistenceUnitUtil()
+                            .getIdentifier(clone));
+                    PROCESSED.get(versionable.getClass()).add(DataBaseManager
+                            .getEntityManagerFactory()
+                            .getPersistenceUnitUtil()
+                            .getIdentifier(versionable));
+                    DataBaseManager.getEntityManager().persist(clone);
+                    //Create the new version
+                    versionable.setMinorVersion(clone.getMinorVersion() + 1);
+                    versionable.setDirty(true);
+                    DataBaseManager.getEntityManager().merge(versionable);
+                    t.commit();
+                } catch (Exception ex) {
+                    LOG.log(Level.WARNING, "Class {0} is not properly "
+                            + "set up. Make sure constructor calls "
+                            + "super() so the version is initialized.",
+                            versionable.getClass());
+                    LOG.log(Level.SEVERE, null, ex);
+                    if (t.isActive()) {
+                        t.rollback();
                     }
                 }
             } else {
