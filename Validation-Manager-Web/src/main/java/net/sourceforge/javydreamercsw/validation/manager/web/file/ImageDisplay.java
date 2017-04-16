@@ -27,6 +27,11 @@ public class ImageDisplay extends AbstractFileDisplay
         validExtensions = new ArrayList<>();
         validExtensions.add("png");
         validExtensions.add("jpg");
+        validExtensions.add("jpeg");
+        validExtensions.add("bmp");
+        validExtensions.add("tif");
+        validExtensions.add("tiff");
+        validExtensions.add("gif");
         imageViewer.setSizeFull();
         imageViewer.setAnimationEnabled(false);
         imageViewer.setSideImageRelativeWidth(0.7f);
