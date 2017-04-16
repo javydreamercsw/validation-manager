@@ -37,6 +37,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.ImageDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
+import net.sourceforge.javydreamercsw.validation.manager.web.file.TextDisplay;
 import org.openide.util.Lookup;
 import org.vaadin.easyuploads.MultiFileUpload;
 import org.vaadin.teemu.wizards.Wizard;
@@ -166,8 +167,13 @@ public class ExecutionWizardStep implements WizardStep {
                         ableToDisplay = true;
                     }
                     ImageDisplay image = new ImageDisplay();
-                    if (image.supportFile(name)) {
+                    if (!ableToDisplay && image.supportFile(name)) {
                         ui.addWindow(image.getViewer(image.loadFile(name, bytes)));
+                        ableToDisplay = true;
+                    }
+                    TextDisplay textDisplay = new TextDisplay();
+                    if (!ableToDisplay && textDisplay.supportFile(name)) {
+                        ui.addWindow(textDisplay.getViewer(textDisplay.loadFile(name, bytes)));
                         ableToDisplay = true;
                     }
                     //-------------------------------------------
