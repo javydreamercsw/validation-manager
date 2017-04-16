@@ -11,7 +11,9 @@ import java.io.IOException;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
+import org.openide.util.lookup.ServiceProvider;
 
+@ServiceProvider(service = IFileDisplay.class)
 public class TextDisplay extends AbstractFileDisplay
         implements IFileDisplay {
 
