@@ -34,6 +34,8 @@ import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.file.DocDisplay;
+import net.sourceforge.javydreamercsw.validation.manager.web.file.DocxDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.ImageDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
@@ -174,6 +176,16 @@ public class ExecutionWizardStep implements WizardStep {
                     TextDisplay textDisplay = new TextDisplay();
                     if (!ableToDisplay && textDisplay.supportFile(name)) {
                         ui.addWindow(textDisplay.getViewer(textDisplay.loadFile(name, bytes)));
+                        ableToDisplay = true;
+                    }
+                    DocDisplay wordDisplay = new DocDisplay();
+                    if (!ableToDisplay && wordDisplay.supportFile(name)) {
+                        ui.addWindow(wordDisplay.getViewer(wordDisplay.loadFile(name, bytes)));
+                        ableToDisplay = true;
+                    }
+                    DocxDisplay docxDisplay = new DocxDisplay();
+                    if (!ableToDisplay && docxDisplay.supportFile(name)) {
+                        ui.addWindow(docxDisplay.getViewer(docxDisplay.loadFile(name, bytes)));
                         ableToDisplay = true;
                     }
                     //-------------------------------------------
