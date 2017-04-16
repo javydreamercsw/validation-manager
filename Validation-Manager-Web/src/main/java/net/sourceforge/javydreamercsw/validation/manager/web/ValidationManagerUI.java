@@ -58,6 +58,7 @@ import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -112,6 +113,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.tester.TesterScreen
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
+import org.openide.util.Exceptions;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTreeItemEvent;
@@ -1445,6 +1447,8 @@ public class ValidationManagerUI extends UI {
                                     ex);
                             Notification.show("Importing unsuccessful!",
                                     Notification.Type.ERROR_MESSAGE);
+                        } catch (VMException ex) {
+                            Exceptions.printStackTrace(ex);
                         }
                     });
                     upload.addFailedListener((Upload.FailedEvent event1) -> {
