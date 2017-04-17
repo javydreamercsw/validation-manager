@@ -113,6 +113,7 @@ public class TesterScreen extends Panel {
                         }
                         if (locked) {
                             label2.setIcon(VaadinIcons.LOCK);
+                            label2.setDescription(ui.translate("message.locked"));
                         }
                         if (!summary.isEmpty()) {
                             if (summary.containsKey("result.fail")) {
@@ -134,6 +135,7 @@ public class TesterScreen extends Panel {
                                 message = "result.pass";
                             }
                             label.setCaption(ui.translate(message));
+                            label.setDescription(ui.translate(message));
                             //Completed. Now check result
                             switch (message) {
                                 case "result.pass":
