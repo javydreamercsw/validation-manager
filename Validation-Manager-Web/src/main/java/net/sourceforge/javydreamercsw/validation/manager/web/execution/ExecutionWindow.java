@@ -5,10 +5,12 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.ui.HorizontalLayout;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
+import de.steinwedel.messagebox.MessageBox;
 import java.util.List;
 import java.util.TreeMap;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import org.openide.util.Exceptions;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
 import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
@@ -90,6 +92,30 @@ public final class ExecutionWindow extends VMWindow {
             public void wizardCompleted(WizardCompletedEvent event) {
                 //TODO: Add confirmation prior to locking the Test Case
                 //See: https://vaadin.com/directory#!addon/messagebox
+                MessageBox
+                        .createQuestion()
+                        .withCaption("Do you want to lock the test case?")
+                        .withMessage("Locked test cases are commited and can no "
+                                + "longer be modified.\nIt would be equivalent "
+                                + "to documenting in paper.")
+                        .withYesButton(() -> {
+                    execution.getSteps().stream().map((step)
+                            -> (ExecutionWizardStep) step).map((s)
+                            -> s.getStep()).filter((ess) -> (!ess.isLocked()
+                            && ess.getResultId() != null))
+                            .forEachOrdered((ess) -> {
+                                try {
+                                    ess.setLocked(true);
+                                    ess.write2DB();
+                                } catch (Exception ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
+                            });
+                        })
+                        .withNoButton(() -> {
+                            System.out.println("No button was pressed.");
+                        })
+                        .open();
                 ui.removeWindow(ExecutionWindow.this);
             }
 

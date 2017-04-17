@@ -77,6 +77,7 @@
             <artifactId>VM-Core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--Vaadin Addons-->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-icons</artifactId>
@@ -116,6 +117,11 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
             <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>de.steinwedel.vaadin.addon</groupId>
+            <artifactId>messagebox</artifactId>
+            <version>3.0.19</version>
         </dependency>
     </dependencies>
 

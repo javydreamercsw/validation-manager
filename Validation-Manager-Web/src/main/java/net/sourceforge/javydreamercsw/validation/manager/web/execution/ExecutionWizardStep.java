@@ -52,11 +52,12 @@ import org.vaadin.teemu.wizards.WizardStep;
 public class ExecutionWizardStep implements WizardStep {
 
     private final Wizard w;
-
     private final ValidationManagerUI ui;
-
     private final ExecutionStepServer step;
     private final ComboBox result = new ComboBox("Result");
+    private Button attach;
+    private Button bug;
+    private Button comment;
     private static final Logger LOG
             = Logger.getLogger(ExecutionWizardStep.class.getSimpleName());
 
@@ -95,23 +96,23 @@ public class ExecutionWizardStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return step.getStep().getTestCase().getName() + " Step:"
-                + step.getStep().getStepSequence();
+        return getStep().getStep().getTestCase().getName() + " Step:"
+                + getStep().getStep().getStepSequence();
     }
 
     @Override
     public Component getContent() {
-        step.update();
+        getStep().update();
         Panel form = new Panel("Step Detail");
-        if (step.getExecutionStart() == null) {
+        if (getStep().getExecutionStart() == null) {
             //Set the start date.
-            step.setExecutionStart(new Date());
+            getStep().setExecutionStart(new Date());
         }
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(step.getStep().getClass());
-        binder.setItemDataSource(step.getStep());
+        BeanFieldGroup binder = new BeanFieldGroup(getStep().getStep().getClass());
+        binder.setItemDataSource(getStep().getStep());
         TextArea text = new TextArea("Text");
         text.setConverter(new ByteToStringConverter());
         binder.bind(text, "text");
@@ -121,22 +122,22 @@ public class ExecutionWizardStep implements WizardStep {
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
-        if (step.getExecutionStart() != null) {
+        if (getStep().getExecutionStart() != null) {
             DateField start = new DateField("Start Date");
             start.setResolution(Resolution.SECOND);
-            start.setValue(step.getExecutionStart());
+            start.setValue(getStep().getExecutionStart());
             layout.addComponent(start);
         }
-        if (step.getExecutionEnd() != null) {
+        if (getStep().getExecutionEnd() != null) {
             DateField end = new DateField("End Date");
             end.setResolution(Resolution.SECOND);
-            end.setValue(step.getExecutionEnd());
+            end.setValue(getStep().getExecutionEnd());
             layout.addComponent(end);
         }
         binder.setReadOnly(true);
         //Space to record result
-        if (step.getResultId() != null) {
-            result.setValue(step.getResultId().getResultName());
+        if (getStep().getResultId() != null) {
+            result.setValue(getStep().getResultId().getResultName());
         }
         layout.addComponent(result);
         if (VMSettingServer.getSetting("show.expected.result").getBoolVal()) {
@@ -149,7 +150,7 @@ public class ExecutionWizardStep implements WizardStep {
         //Add the Attachments
         HorizontalLayout attachments = new HorizontalLayout();
         attachments.setCaption("Attachments");
-        step.getExecutionStepHasAttachmentList().forEach(attachment -> {
+        getStep().getExecutionStepHasAttachmentList().forEach(attachment -> {
             Button a = new Button(attachment.getAttachment().getFileName());
             a.setIcon(VaadinIcons.PAPERCLIP);
             a.addClickListener((Button.ClickEvent event) -> {
@@ -215,7 +216,7 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add the menu
         HorizontalLayout hl = new HorizontalLayout();
-        Button attach = new Button("Add Attachment");
+        attach = new Button("Add Attachment");
         attach.setIcon(VaadinIcons.PAPERCLIP);
         attach.addClickListener((Button.ClickEvent event) -> {
             //Show dialog to upload file.
@@ -236,11 +237,11 @@ public class ExecutionWizardStep implements WizardStep {
                         a.setFileName(fileName);
                         a.write2DB();
                         //Now add it to this Execution Step
-                        if (step.getExecutionStepHasAttachmentList() == null) {
-                            step.setExecutionStepHasAttachmentList(new ArrayList<>());
+                        if (getStep().getExecutionStepHasAttachmentList() == null) {
+                            getStep().setExecutionStepHasAttachmentList(new ArrayList<>());
                         }
-                        step.addAttachment(a);
-                        step.write2DB();
+                        getStep().addAttachment(a);
+                        getStep().write2DB();
                         w.updateCurrentStep();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, "Error creating attachment!", ex);
@@ -254,18 +255,20 @@ public class ExecutionWizardStep implements WizardStep {
             ui.addWindow(dialog);
         });
         hl.addComponent(attach);
-        Button bug = new Button("Create an Issue");
+        bug = new Button("Create an Issue");
         bug.setIcon(VaadinIcons.BUG);
         bug.addClickListener((Button.ClickEvent event) -> {
             LOG.info("Clicked to add a bug!");
         });
         hl.addComponent(bug);
-        Button comment = new Button("Add comment");
+        comment = new Button("Add comment");
         comment.setIcon(VaadinIcons.BUG);
         comment.addClickListener((Button.ClickEvent event) -> {
             LOG.info("Clicked to add comment!");
         });
         hl.addComponent(comment);
+        step.update();
+        lock(step.isLocked());
         layout.addComponent(hl);
         return layout;
     }
@@ -282,17 +285,17 @@ public class ExecutionWizardStep implements WizardStep {
             try {
                 //Save the result
                 ExecutionResult newResult = ExecutionResultServer.getResult(answer);
-                if (step.getResultId() == null
+                if (getStep().getResultId() == null
                         || !Objects.equals(step.getResultId().getId(),
                                 newResult.getId())) {
-                    step.setResultId(newResult);
+                    getStep().setResultId(newResult);
                     //Set end date to null to reflect update
-                    step.setExecutionEnd(null);
+                    getStep().setExecutionEnd(null);
                 }
-                if (step.getExecutionEnd() == null) {
-                    step.setExecutionEnd(new Date());
+                if (getStep().getExecutionEnd() == null) {
+                    getStep().setExecutionEnd(new Date());
                 }
-                step.write2DB();
+                getStep().write2DB();
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
@@ -303,6 +306,25 @@ public class ExecutionWizardStep implements WizardStep {
 
     @Override
     public boolean onBack() {
-        return step.getStep().getStepSequence() > 1;
+        return getStep().getStep().getStepSequence() > 1;
+    }
+
+    /**
+     * @return the step
+     */
+    public ExecutionStepServer getStep() {
+        return step;
+    }
+
+    /**
+     * Lock/unlock controls
+     *
+     * @param lock if true controls are locked. Unlocked otherwise.
+     */
+    private void lock(boolean lock) {
+        attach.setEnabled(!lock);
+        bug.setEnabled(!lock);
+        comment.setEnabled(!lock);
+        result.setEnabled(!lock);
     }
 }

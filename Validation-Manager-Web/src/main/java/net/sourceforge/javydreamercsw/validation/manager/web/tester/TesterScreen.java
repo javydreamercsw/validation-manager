@@ -3,6 +3,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.tester;
 import com.vaadin.event.Action;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
@@ -50,6 +51,29 @@ public class TesterScreen extends Panel {
         init();
     }
 
+    private boolean isLocked(TestCaseExecutionServer tce) {
+        return isLocked(tce, -1);
+    }
+
+    private boolean isLocked(TestCaseExecutionServer tce, int tcID) {
+        boolean locked = true;
+        //Check to see if the execution is locked or not
+        if (tce != null) {
+            for (ExecutionStep e : tce.getExecutionStepList()) {
+                if ((tcID > 0
+                        && e.getExecutionStepPK().getStepTestCaseId() == tcID)
+                        && !e.isLocked()) {
+                    locked = false;
+                    break;
+                } else if (tcID < 0 && !e.isLocked()) {
+                    locked = false;
+                    break;
+                }
+            }
+        }
+        return locked;
+    }
+
     private void init() {
         VerticalLayout vl = new VerticalLayout();
         TreeTable testCaseTree = new TreeTable("Available Tests");
@@ -61,19 +85,34 @@ public class TesterScreen extends Panel {
                             && itemId instanceof String) {
                         String id = (String) itemId;
                         String message;
+                        HorizontalLayout icons = new HorizontalLayout();
                         Button label = new Button();
-                        label.addStyleName(ValoTheme.BUTTON_BORDERLESS + " labelButton");
+                        Button label2 = new Button();
+                        icons.addComponent(label2);
+                        icons.addComponent(label);
+                        label.addStyleName(ValoTheme.BUTTON_BORDERLESS
+                                + " labelButton");
+                        label2.addStyleName(ValoTheme.BUTTON_BORDERLESS
+                                + " labelButton");
                         Map<String, Integer> summary = new HashMap<>();
+                        boolean locked = false;
                         if (id.startsWith("tce")) {
-                            summary = getSummary(
-                                    new TestCaseExecutionServer(
-                                            Integer.parseInt(id.substring(3))), -1);
+                            TestCaseExecutionServer tce
+                                    = new TestCaseExecutionServer(
+                                            Integer.parseInt(id.substring(3)));
+                            summary = getSummary(tce, -1);
+                            locked = isLocked(tce);
                         } else if (id.startsWith("es")) {
+                            ExecutionStepServer es
+                                    = new ExecutionStepServer(extractExecutionStepPK(id));
                             summary = getSummary(
-                                    new ExecutionStepServer(extractExecutionStepPK(id))
-                                            .getTestCaseExecution(),
+                                    es.getTestCaseExecution(),
                                     Integer.parseInt(id
                                             .substring(id.lastIndexOf("-") + 1)));
+                            locked = es.isLocked();
+                        }
+                        if (locked) {
+                            label2.setIcon(VaadinIcons.LOCK);
                         }
                         if (!summary.isEmpty()) {
                             if (summary.containsKey("result.fail")) {
@@ -116,7 +155,7 @@ public class TesterScreen extends Panel {
                                     label.setIcon(VaadinIcons.CLOCK);
                                     break;
                             }
-                            return label;
+                            return icons;
                         }
                     }
                     return new Label();
@@ -130,10 +169,23 @@ public class TesterScreen extends Panel {
             @Override
             public Action[] getActions(Object target, Object sender) {
                 List<Action> actions = new ArrayList<>();
-                if (target instanceof String
-                        && (((String) target).startsWith("es")
-                        || ((String) target).startsWith("tce"))) {
-                    actions.add(new Action("Execute"));
+                if (target instanceof String) {
+                    String t = (String) target;
+                    int tcID = -1;
+                    TestCaseExecutionServer tce = null;
+                    if (t.startsWith("es")) {
+                        tce = new TestCaseExecutionServer(new ExecutionStepServer(
+                                extractExecutionStepPK(t))
+                                .getTestCaseExecution().getId());
+                        tcID = Integer.parseInt(t
+                                .substring(t.lastIndexOf("-") + 1));
+                    } else if (t.startsWith("tce")) {
+                        tce = new TestCaseExecutionServer(
+                                Integer.parseInt(t.substring(3)));
+                    }
+                    if (!isLocked(tce, tcID)) {
+                        actions.add(new Action("Execute"));
+                    }
                 }
                 return actions.toArray(new Action[actions.size()]);
             }
