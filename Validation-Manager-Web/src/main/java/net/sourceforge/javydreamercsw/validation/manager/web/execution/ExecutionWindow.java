@@ -88,6 +88,8 @@ public final class ExecutionWindow extends VMWindow {
 
             @Override
             public void wizardCompleted(WizardCompletedEvent event) {
+                //TODO: Add confirmation prior to locking the Test Case
+                //See: https://vaadin.com/directory#!addon/messagebox
                 ui.removeWindow(ExecutionWindow.this);
             }
 

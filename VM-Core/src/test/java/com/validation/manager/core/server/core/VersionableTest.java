@@ -1,6 +1,6 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.db.Versionable;
+import com.validation.manager.core.db.mapped.Versionable;
 import static org.junit.Assert.*;
 import org.junit.Test;
 

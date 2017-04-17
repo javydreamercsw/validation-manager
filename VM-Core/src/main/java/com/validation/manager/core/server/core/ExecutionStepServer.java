@@ -73,6 +73,7 @@ public final class ExecutionStepServer extends ExecutionStep
         target.setTestCaseExecution(source.getTestCaseExecution());
         target.setAssignee(source.getAssignee());
         target.setAssigner(source.getAssigner());
+        target.setLocked(source.isLocked());
     }
 
     @Override

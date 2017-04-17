@@ -1,3 +1,6 @@
 [submodule "WizardsForVaadin"]
 	path = WizardsForVaadin
 	url = https://github.com/javydreamercsw/WizardsForVaadin.git
+[submodule "validation-manager.wiki"]
+	path = validation-manager.wiki
+	url = https://github.com/javydreamercsw/validation-manager.wiki.git

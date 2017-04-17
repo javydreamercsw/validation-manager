@@ -1,5 +1,6 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.db.mapped.Versionable;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import java.io.Serializable;

@@ -61,6 +61,8 @@ public class ExecutionStep implements Serializable {
     @Size(max = 2147483647)
     @Column(name = "comment")
     private String comment;
+    @Column(name = "locked")
+    private boolean locked = false;
     @Column(name = "execution_start")
     @Temporal(TemporalType.TIMESTAMP)
     private Date executionStart;
@@ -250,5 +252,19 @@ public class ExecutionStep implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.ExecutionStep[ executionStepPK="
                 + executionStepPK + " ]";
+    }
+
+    /**
+     * @return the locked
+     */
+    public boolean isLocked() {
+        return locked;
+    }
+
+    /**
+     * @param locked the locked to set
+     */
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 }

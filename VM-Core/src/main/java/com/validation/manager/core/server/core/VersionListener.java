@@ -6,7 +6,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.AuditedObject;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.db.Versionable;
+import com.validation.manager.core.db.mapped.Versionable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;

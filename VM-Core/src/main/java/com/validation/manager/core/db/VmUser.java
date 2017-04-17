@@ -1,5 +1,6 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.db.mapped.Login;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
