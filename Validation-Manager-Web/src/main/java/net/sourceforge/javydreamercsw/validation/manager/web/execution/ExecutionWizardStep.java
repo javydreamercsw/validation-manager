@@ -34,12 +34,14 @@ import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
-import net.sourceforge.javydreamercsw.validation.manager.web.file.DocDisplay;
-import net.sourceforge.javydreamercsw.validation.manager.web.file.DocxDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.ImageDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.TextDisplay;
+import org.artofsolving.jodconverter.OfficeDocumentConverter;
+import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
+import org.artofsolving.jodconverter.office.OfficeException;
+import org.artofsolving.jodconverter.office.OfficeManager;
 import org.openide.util.Lookup;
 import org.vaadin.easyuploads.MultiFileUpload;
 import org.vaadin.teemu.wizards.Wizard;
@@ -179,21 +181,30 @@ public class ExecutionWizardStep implements WizardStep {
                         ui.addWindow(textDisplay.getViewer(textDisplay.loadFile(name, bytes)));
                         ableToDisplay = true;
                     }
-                    DocDisplay wordDisplay = new DocDisplay();
-                    if (!ableToDisplay && wordDisplay.supportFile(name)) {
-                        ui.addWindow(wordDisplay.getViewer(wordDisplay.loadFile(name, bytes)));
-                        ableToDisplay = true;
-                    }
-                    DocxDisplay docxDisplay = new DocxDisplay();
-                    if (!ableToDisplay && docxDisplay.supportFile(name)) {
-                        ui.addWindow(docxDisplay.getViewer(docxDisplay.loadFile(name, bytes)));
-                        ableToDisplay = true;
+                    if (!ableToDisplay) {
+                        //Convert file to pfd
+                        File source = textDisplay.loadFile(name, bytes);
+                        File dest = new File(System.getProperty("java.io.tmpdir")
+                                + System.getProperty("file.separator")
+                                + name.substring(0, name.lastIndexOf("."))
+                                + ".pdf");
+                        getPDFRendering(source, dest);
+                        if (dest.exists()) {
+                            ui.addWindow(pdf.getViewer(dest));
+                            ableToDisplay = true;
+                        } else {
+                            Notification.show("Unable to render file",
+                                    "Unable to render file in pdf. "
+                                    + "Contact the system administrator",
+                                    Notification.Type.ERROR_MESSAGE);
+                        }
                     }
                     //-------------------------------------------
                     for (IFileDisplay fd : Lookup.getDefault()
                             .lookupAll(IFileDisplay.class)) {
                         if (fd.supportFile(new File(name))) {
-                            ui.addWindow(fd.getViewer(fd.loadFile(name, bytes)));
+                            ui.addWindow(fd.getViewer(fd.loadFile(name,
+                                    bytes)));
                             ableToDisplay = true;
                             break;
                         }
@@ -326,5 +337,62 @@ public class ExecutionWizardStep implements WizardStep {
         bug.setEnabled(!lock);
         comment.setEnabled(!lock);
         result.setEnabled(!lock);
+    }
+
+    public static boolean getPDFRendering(File source, File dest)
+            throws IllegalStateException {
+        OfficeManager officeManager = null;
+        try {
+            File home = new File(VMSettingServer.getSetting("openoffice.home")
+                    .getStringVal());
+            int port = VMSettingServer
+                    .getSetting("openoffice.port").getIntVal();
+            if (!home.isDirectory() || !home.exists()) {
+                LOG.log(Level.WARNING,
+                        "Unable to find OpenOffice and/or LibreOffice "
+                        + "installation at: {0}", home);
+                Notification.show("Unable to render file for viewing!",
+                        "Inavlid OpenOffice home. Contact your "
+                        + "system administrator.",
+                        Notification.Type.ERROR_MESSAGE);
+                return false;
+            }
+            if (port <= 0) {
+                LOG.log(Level.WARNING,
+                        "Unable to find OpenOffice and/or LibreOffice "
+                        + "installation at port: {0}", port);
+                Notification.show("Unable to render file for viewing!",
+                        "Inavlid OpenOffice port. Contact your "
+                        + "system administrator.",
+                        Notification.Type.ERROR_MESSAGE);
+                return false;
+            }
+            // Connect to an OpenOffice.org instance running on available port
+            try {
+                officeManager = new DefaultOfficeManagerConfiguration()
+                        .setPortNumber(port)
+                        .setOfficeHome(home)
+                        .buildOfficeManager();
+                officeManager.start();
+
+                OfficeDocumentConverter converter
+                        = new OfficeDocumentConverter(officeManager);
+                converter.convert(source, dest);
+                // close the connection
+                officeManager.stop();
+                return true;
+            } catch (IllegalStateException ise) {
+                //Looks like OpenOffice or LibreOffice is not installed
+                LOG.log(Level.WARNING,
+                        "Unable to find OpenOffice and/or LibreOffice "
+                        + "installation.", ise);
+            }
+        } catch (OfficeException e) {
+            if (officeManager != null) {
+                officeManager.stop();
+            }
+            LOG.log(Level.SEVERE, null, e);
+        }
+        return false;
     }
 }

@@ -33,3 +33,5 @@ INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (8, 'Power Po
 INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (9, 'undefined', '');
 /*Settings*/
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (8, 'show.expected.result', 1, 0, '0', '');
+INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (9, 'openoffice.port', 0, 1000, '0', '');
+INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (10, 'openoffice.home', 0, 0, '0', '');
