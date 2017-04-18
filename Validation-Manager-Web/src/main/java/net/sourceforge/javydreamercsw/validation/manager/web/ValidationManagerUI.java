@@ -1397,8 +1397,14 @@ public class ValidationManagerUI extends UI {
 
     private void createRequirementSpecNodeMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Requirement Spec", VaadinIcons.PLUS);
+                = menu.addItem("Create Requirement", VaadinIcons.PLUS);
         create.setEnabled(checkRight("requirement.modify"));
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    Requirement r = new Requirement();
+                    r.setRequirementSpecNode((RequirementSpecNode) tree.getValue());
+                    displayRequirement(r, true);
+                });
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Requirement Spec Node", EDIT_ICON);
         edit.addItemClickListener(
@@ -1407,12 +1413,6 @@ public class ValidationManagerUI extends UI {
                             true);
                 });
         edit.setEnabled(checkRight("requirement.modify"));
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    Requirement r = new Requirement();
-                    r.setRequirementSpecNode((RequirementSpecNode) tree.getValue());
-                    displayRequirement(r, true);
-                });
         ContextMenu.ContextMenuItem importRequirement
                 = menu.addItem("Import Requirements", IMPORT_ICON);
         importRequirement.setEnabled(checkRight("requirement.modify"));
