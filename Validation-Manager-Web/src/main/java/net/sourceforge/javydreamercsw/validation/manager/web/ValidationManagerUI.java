@@ -1717,6 +1717,9 @@ public class ValidationManagerUI extends UI {
         vs.setFirstComponent(getMenu());
         setContent(vs);
         if (getUser() == null) {
+            if (tabSheet != null) {
+                tabSheet.removeAllComponents();
+            }
             showLoginDialog();
         } else {
             //Process any notifications
