@@ -68,6 +68,8 @@ public class ExecutionWizardStep implements WizardStep {
     private Button attach;
     private Button bug;
     private Button comment;
+    private DateField start;
+    private DateField end;
     private static final Logger LOG
             = Logger.getLogger(ExecutionWizardStep.class.getSimpleName());
 
@@ -133,13 +135,13 @@ public class ExecutionWizardStep implements WizardStep {
         notes.setSizeFull();
         layout.addComponent(notes);
         if (getStep().getExecutionStart() != null) {
-            DateField start = new DateField("Start Date");
+            start = new DateField("Start Date");
             start.setResolution(Resolution.SECOND);
             start.setValue(getStep().getExecutionStart());
             layout.addComponent(start);
         }
         if (getStep().getExecutionEnd() != null) {
-            DateField end = new DateField("End Date");
+            end = new DateField("End Date");
             end.setResolution(Resolution.SECOND);
             end.setValue(getStep().getExecutionEnd());
             layout.addComponent(end);
@@ -381,6 +383,7 @@ public class ExecutionWizardStep implements WizardStep {
             try {
                 //Save the result
                 ExecutionResult newResult = ExecutionResultServer.getResult(answer);
+                getStep().setExecutionStart(start.getValue());
                 if (getStep().getResultId() == null
                         || !Objects.equals(step.getResultId().getId(),
                                 newResult.getId())) {
