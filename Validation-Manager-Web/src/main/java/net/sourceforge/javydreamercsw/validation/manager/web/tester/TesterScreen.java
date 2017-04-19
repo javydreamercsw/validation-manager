@@ -26,9 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
-import static net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI.EXECUTION_ICON;
-import static net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI.PROJECT_ICON;
-import static net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI.TEST_ICON;
 import net.sourceforge.javydreamercsw.validation.manager.web.execution.ExecutionWindow;
 
 /**
@@ -39,6 +36,7 @@ public class TesterScreen extends Panel {
 
     private final ValidationManagerUI ui;
     private ExecutionWindow executionWindow = null;
+    private final TreeTable testCaseTree = new TreeTable("Available Tests");
 
     public TesterScreen(ValidationManagerUI ui) {
         this.ui = ui;
@@ -76,7 +74,6 @@ public class TesterScreen extends Panel {
 
     private void init() {
         VerticalLayout vl = new VerticalLayout();
-        TreeTable testCaseTree = new TreeTable("Available Tests");
         testCaseTree.setAnimationsEnabled(true);
         testCaseTree.addContainerProperty("Name", String.class, "");
         testCaseTree.addGeneratedColumn("Status",
@@ -214,13 +211,15 @@ public class TesterScreen extends Panel {
             if (p.getParentProjectId() == null) {
                 testCaseTree.addItem(new Object[]{p.getName(),
                     "", "",}, "p" + p.getId());
-                testCaseTree.setItemIcon("p" + p.getId(), PROJECT_ICON);
+                testCaseTree.setItemIcon("p" + p.getId(),
+                        ValidationManagerUI.PROJECT_ICON);
                 p.getProjectList().forEach(sp -> {
                     //Add subprojects
                     testCaseTree.addItem(new Object[]{sp.getName(),
                         "", "",}, "p" + sp.getId());
                     testCaseTree.setParent("p" + sp.getId(), "p" + p.getId());
-                    testCaseTree.setItemIcon("p" + sp.getId(), PROJECT_ICON);
+                    testCaseTree.setItemIcon("p" + sp.getId(),
+                            ValidationManagerUI.PROJECT_ICON);
                     //Add applicable Executions
                     Map<Integer, ExecutionStep> tests = new HashMap<>();
                     sp.getTestProjectList().forEach(test -> {
@@ -232,8 +231,10 @@ public class TesterScreen extends Panel {
                                         TestCaseExecution tce = es.getTestCaseExecution();
                                         testCaseTree.addItem(new Object[]{tce.getName(),
                                             "", "",}, "tce" + tce.getId());
-                                        testCaseTree.setParent("tce" + tce.getId(), "p" + sp.getId());
-                                        testCaseTree.setItemIcon("tce" + tce.getId(), EXECUTION_ICON);
+                                        testCaseTree.setParent("tce" + tce.getId(),
+                                                "p" + sp.getId());
+                                        testCaseTree.setItemIcon("tce" + tce.getId(),
+                                                ValidationManagerUI.EXECUTION_ICON);
                                         if (es.getAssignee().getId().equals(ui.getUser().getId())) {
                                             TestCase tc = es.getStep().getTestCase();
                                             if (!tcids.contains(tc.getId())) {
@@ -244,12 +245,15 @@ public class TesterScreen extends Panel {
                                                         = LocalDateTime.ofInstant(es.getAssignedTime()
                                                                 .toInstant(), ZoneId.systemDefault());
                                                 String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
-                                                        + "-" + es.getStep().getStepPK().getId() + "-" + tc.getId();
+                                                        + "-" + es.getStep().getStepPK().getId()
+                                                        + "-" + tc.getId();
                                                 testCaseTree.addItem(new Object[]{tc.getName(),
                                                     tc.getSummary(), format.format(time),},
                                                         key);
-                                                testCaseTree.setParent(key, "tce" + tce.getId());
-                                                testCaseTree.setItemIcon(key, TEST_ICON);
+                                                testCaseTree.setParent(key, "tce"
+                                                        + tce.getId());
+                                                testCaseTree.setItemIcon(key,
+                                                        ValidationManagerUI.TEST_ICON);
                                                 testCaseTree.setChildrenAllowed(key, false);
                                             }
                                         }
@@ -334,5 +338,11 @@ public class TesterScreen extends Panel {
             }
         });
         return summary;
+    }
+
+    public void update() {
+        if (testCaseTree != null) {
+            testCaseTree.refreshRowCache();
+        }
     }
 }

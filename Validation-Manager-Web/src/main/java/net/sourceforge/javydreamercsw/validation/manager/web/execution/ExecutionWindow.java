@@ -106,6 +106,7 @@ public final class ExecutionWindow extends VMWindow {
                                 try {
                                     ess.setLocked(true);
                                     ess.write2DB();
+                                    ui.updateScreen();
                                 } catch (Exception ex) {
                                     Exceptions.printStackTrace(ex);
                                 }
@@ -117,7 +118,6 @@ public final class ExecutionWindow extends VMWindow {
                 prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
                 prompt.open();
                 ui.removeWindow(ExecutionWindow.this);
-                ui.updateScreen();
             }
 
             @Override

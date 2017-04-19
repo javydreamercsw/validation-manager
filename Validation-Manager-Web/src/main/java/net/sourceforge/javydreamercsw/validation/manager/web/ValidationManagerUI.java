@@ -159,6 +159,7 @@ public class ValidationManagerUI extends UI {
     public static final ThemeResource SMALL_APP_ICON = new ThemeResource("VMSmall.png");
     private static final ResourceBundle RB = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages");
+    private TesterScreen testScreen;
 
     /**
      * @return the user
@@ -1610,7 +1611,12 @@ public class ValidationManagerUI extends UI {
             if (tester == null
                     && getUser() != null
                     && !getUser().getExecutionStepList().isEmpty()) {
-                tester = tabSheet.addTab(new TesterScreen(this), "Tester");
+                testScreen = new TesterScreen(this);
+                tester = tabSheet.addTab(testScreen, "Tester");
+            } else {
+                if (tester != null) {
+                    testScreen.update();
+                }
             }
             if (designer == null) {
                 designer = tabSheet.addTab(new VerticalLayout(), "Test Designer");
