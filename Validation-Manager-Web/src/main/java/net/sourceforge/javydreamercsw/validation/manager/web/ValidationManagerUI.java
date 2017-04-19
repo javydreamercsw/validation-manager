@@ -156,6 +156,7 @@ public class ValidationManagerUI extends UI {
     private Tree tree;
     private Tab main, tester, designer, demo, admin;
     private final List<String> roles = new ArrayList<>();
+    public static final ThemeResource SMALL_APP_ICON = new ThemeResource("VMSmall.png");
     private static final ResourceBundle RB = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages");
 
