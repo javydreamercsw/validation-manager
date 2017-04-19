@@ -3,8 +3,10 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
+import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
 import java.util.List;
 import java.util.TreeMap;
@@ -90,31 +92,28 @@ public final class ExecutionWindow extends VMWindow {
 
             @Override
             public void wizardCompleted(WizardCompletedEvent event) {
-                //TODO: Add confirmation prior to locking the Test Case
-                //See: https://vaadin.com/directory#!addon/messagebox
                 MessageBox prompt = MessageBox.createQuestion()
                         .withCaption("Do you want to lock the test case?")
                         .withMessage("Locked test cases are commited and can no "
                                 + "longer be modified.\nIt would be equivalent "
                                 + "to documenting in paper.")
                         .withYesButton(() -> {
-                    execution.getSteps().stream().map((step)
-                            -> (ExecutionWizardStep) step).map((s)
-                            -> s.getStep()).filter((ess) -> (!ess.isLocked()
-                            && ess.getResultId() != null))
-                            .forEachOrdered((ess) -> {
-                                try {
-                                    ess.setLocked(true);
-                                    ess.write2DB();
-                                    ui.updateScreen();
-                                } catch (Exception ex) {
-                                    Exceptions.printStackTrace(ex);
-                                }
-                            });
-                        })
-                        .withNoButton(() -> {
-                            System.out.println("No button was pressed.");
-                        });
+                            execution.getSteps().stream().map((step)
+                                    -> (ExecutionWizardStep) step).map((s)
+                                    -> s.getStep()).filter((ess) -> (!ess.isLocked()
+                                    && ess.getResultId() != null))
+                                    .forEachOrdered((ess) -> {
+                                        try {
+                                            ess.setLocked(true);
+                                            ess.write2DB();
+                                            ui.updateScreen();
+                                        } catch (Exception ex) {
+                                            Exceptions.printStackTrace(ex);
+                                        }
+                                    });
+                        }, ButtonOption.focus(),
+                                ButtonOption.icon(VaadinIcons.CHECK))
+                        .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
                 prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
                 prompt.open();
                 ui.removeWindow(ExecutionWindow.this);
