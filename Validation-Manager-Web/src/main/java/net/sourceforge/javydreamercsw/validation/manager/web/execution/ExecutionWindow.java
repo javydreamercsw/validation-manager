@@ -115,6 +115,7 @@ public final class ExecutionWindow extends VMWindow {
                             System.out.println("No button was pressed.");
                         });
                 prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                prompt.open();
                 ui.removeWindow(ExecutionWindow.this);
                 ui.updateScreen();
             }
