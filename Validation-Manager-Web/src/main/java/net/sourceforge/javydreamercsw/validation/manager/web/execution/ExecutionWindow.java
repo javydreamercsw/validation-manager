@@ -92,8 +92,7 @@ public final class ExecutionWindow extends VMWindow {
             public void wizardCompleted(WizardCompletedEvent event) {
                 //TODO: Add confirmation prior to locking the Test Case
                 //See: https://vaadin.com/directory#!addon/messagebox
-                MessageBox
-                        .createQuestion()
+                MessageBox prompt = MessageBox.createQuestion()
                         .withCaption("Do you want to lock the test case?")
                         .withMessage("Locked test cases are commited and can no "
                                 + "longer be modified.\nIt would be equivalent "
@@ -114,9 +113,10 @@ public final class ExecutionWindow extends VMWindow {
                         })
                         .withNoButton(() -> {
                             System.out.println("No button was pressed.");
-                        })
-                        .open();
+                        });
+                prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
                 ui.removeWindow(ExecutionWindow.this);
+                ui.updateScreen();
             }
 
             @Override

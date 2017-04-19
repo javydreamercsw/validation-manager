@@ -6,7 +6,7 @@ import com.vaadin.ui.Window;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public final class VMWindow extends Window {
+public class VMWindow extends Window {
 
     protected final ValidationManagerUI menu;
 

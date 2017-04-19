@@ -4,7 +4,6 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Attachment;
 import com.validation.manager.core.db.AttachmentPK;
-import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.controller.AttachmentJpaController;
 import com.validation.manager.core.db.controller.AttachmentTypeJpaController;
 import java.io.File;
@@ -81,15 +80,7 @@ public final class AttachmentServer extends Attachment
                 String ext = FilenameUtils.getExtension(getFileName());
                 if (ext != null) {
                     //Set attachment type
-                    for (AttachmentType type
-                            : new AttachmentTypeJpaController(DataBaseManager
-                                    .getEntityManagerFactory())
-                                    .findAttachmentTypeEntities()) {
-                        if (type.getType().equals(ext)) {
-                            setAttachmentType(type);
-                            break;
-                        }
-                    }
+                    setAttachmentType(AttachmentTypeServer.getTypeForExtension(ext));
                 }
                 if (getAttachmentType() == null) {
                     //Set as undefined
@@ -97,7 +88,8 @@ public final class AttachmentServer extends Attachment
                             .getEntityManagerFactory()).findAttachmentType(9));
                 }
             }
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
@@ -108,7 +100,8 @@ public final class AttachmentServer extends Attachment
             result = File.createTempFile("temp", "vm");
             result.deleteOnExit();
             FileUtils.writeByteArrayToFile(result, getFile());
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             Exceptions.printStackTrace(ex);
             result = null;
         }

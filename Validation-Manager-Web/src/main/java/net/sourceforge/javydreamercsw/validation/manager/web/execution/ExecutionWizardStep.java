@@ -1,8 +1,10 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.datefield.Resolution;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
@@ -17,13 +19,19 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.ExecutionStepHasAttachment;
 import com.validation.manager.core.db.controller.ExecutionResultJpaController;
 import com.validation.manager.core.server.core.AttachmentServer;
+import com.validation.manager.core.server.core.AttachmentTypeServer;
 import com.validation.manager.core.server.core.ExecutionResultServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.VMSettingServer;
+import de.steinwedel.messagebox.ButtonOption;
+import de.steinwedel.messagebox.ButtonType;
+import de.steinwedel.messagebox.MessageBox;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -152,78 +160,98 @@ public class ExecutionWizardStep implements WizardStep {
         //Add the Attachments
         HorizontalLayout attachments = new HorizontalLayout();
         attachments.setCaption("Attachments");
-        getStep().getExecutionStepHasAttachmentList().forEach(attachment -> {
-            Button a = new Button(attachment.getAttachment().getFileName());
-            a.setIcon(VaadinIcons.PAPERCLIP);
-            a.addClickListener((Button.ClickEvent event) -> {
-                LOG.log(Level.INFO, "Clicked on attachment: {0}",
-                        attachment.getAttachment().getFileName());
-                String name = attachment.getAttachment().getFileName();
-                byte[] bytes = attachment.getAttachment().getFile();
-                boolean ableToDisplay = false;
-                try {
-                    //TODO:Remove when the service issue is fixed
-                    //See: https://vaadin.com/forum/#!/thread/15663093
-                    //See: http://stackoverflow.com/questions/43373082/vaadin-how-to-add-meta-inf-services-to-the-war
-                    //Optionally convert all files to pdf when possible.
-                    PDFDisplay pdf = new PDFDisplay();
-                    if (pdf.supportFile(name)) {
-                        ui.addWindow(pdf.getViewer(pdf.loadFile(name, bytes)));
-                        ableToDisplay = true;
-                    }
-                    ImageDisplay image = new ImageDisplay();
-                    if (!ableToDisplay && image.supportFile(name)) {
-                        ui.addWindow(image.getViewer(image.loadFile(name, bytes)));
-                        ableToDisplay = true;
-                    }
-                    TextDisplay textDisplay = new TextDisplay();
-                    if (!ableToDisplay && textDisplay.supportFile(name)) {
-                        ui.addWindow(textDisplay.getViewer(textDisplay.loadFile(name, bytes)));
-                        ableToDisplay = true;
+        HorizontalLayout comments = new HorizontalLayout();
+        comments.setCaption("Comments");
+        int commentCounter = 0;
+        for (ExecutionStepHasAttachment attachment
+                : getStep().getExecutionStepHasAttachmentList()) {
+            if (attachment.getAttachment().getAttachmentType().getType()
+                    .equals("comment")) {
+                //Comments go in a different section
+                commentCounter++;
+                Button a = new Button("Comment #" + commentCounter);
+                a.setIcon(VaadinIcons.CLIPBOARD_TEXT);
+                a.addClickListener((Button.ClickEvent event) -> {
+                    displayComment(new AttachmentServer(attachment
+                            .getAttachment().getAttachmentPK()));
+                });
+                a.setEnabled(!step.isLocked());
+                comments.addComponent(a);
+            } else {
+                Button a = new Button(attachment.getAttachment().getFileName());
+                a.setEnabled(!step.isLocked());
+                a.setIcon(VaadinIcons.PAPERCLIP);
+                a.addClickListener((Button.ClickEvent event) -> {
+                    String name = attachment.getAttachment().getFileName();
+                    byte[] bytes = attachment.getAttachment().getFile();
+                    boolean ableToDisplay = false;
+                    try {
+                        //TODO:Remove when the service issue is fixed
+                        //See: https://vaadin.com/forum/#!/thread/15663093
+                        //See: http://stackoverflow.com/questions/43373082/vaadin-how-to-add-meta-inf-services-to-the-war
+                        //Optionally convert all files to pdf when possible.
+                        PDFDisplay pdf = new PDFDisplay();
+                        if (pdf.supportFile(name)) {
+                            ui.addWindow(pdf.getViewer(pdf.loadFile(name, bytes)));
+                            ableToDisplay = true;
+                        }
+                        ImageDisplay image = new ImageDisplay();
+                        if (!ableToDisplay && image.supportFile(name)) {
+                            ui.addWindow(image.getViewer(image.loadFile(name, bytes)));
+                            ableToDisplay = true;
+                        }
+                        TextDisplay textDisplay = new TextDisplay();
+                        if (!ableToDisplay && textDisplay.supportFile(name)) {
+                            ui.addWindow(textDisplay.getViewer(textDisplay.loadFile(name, bytes)));
+                            ableToDisplay = true;
+                        }
+                        if (!ableToDisplay) {
+                            //Convert file to pfd
+                            File source = textDisplay.loadFile(name, bytes);
+                            File dest = new File(System.getProperty("java.io.tmpdir")
+                                    + System.getProperty("file.separator")
+                                    + name.substring(0, name.lastIndexOf("."))
+                                    + ".pdf");
+                            getPDFRendering(source, dest);
+                            if (dest.exists()) {
+                                ui.addWindow(pdf.getViewer(dest));
+                                ableToDisplay = true;
+                            } else {
+                                Notification.show("Unable to render file",
+                                        "Unable to render file in pdf. "
+                                        + "Contact the system administrator",
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        }
+                        //-------------------------------------------
+                        for (IFileDisplay fd : Lookup.getDefault()
+                                .lookupAll(IFileDisplay.class)) {
+                            if (fd.supportFile(new File(name))) {
+                                ui.addWindow(fd.getViewer(fd.loadFile(name,
+                                        bytes)));
+                                ableToDisplay = true;
+                                break;
+                            }
+                        }
+                    } catch (IOException ex) {
+                        LOG.log(Level.SEVERE,
+                                "Error loading attachment file: "
+                                + name, ex);
                     }
                     if (!ableToDisplay) {
-                        //Convert file to pfd
-                        File source = textDisplay.loadFile(name, bytes);
-                        File dest = new File(System.getProperty("java.io.tmpdir")
-                                + System.getProperty("file.separator")
-                                + name.substring(0, name.lastIndexOf("."))
-                                + ".pdf");
-                        getPDFRendering(source, dest);
-                        if (dest.exists()) {
-                            ui.addWindow(pdf.getViewer(dest));
-                            ableToDisplay = true;
-                        } else {
-                            Notification.show("Unable to render file",
-                                    "Unable to render file in pdf. "
-                                    + "Contact the system administrator",
-                                    Notification.Type.ERROR_MESSAGE);
-                        }
+                        LOG.log(Level.WARNING,
+                                "Unable to display: {0}. No File displayer found!",
+                                name);
                     }
-                    //-------------------------------------------
-                    for (IFileDisplay fd : Lookup.getDefault()
-                            .lookupAll(IFileDisplay.class)) {
-                        if (fd.supportFile(new File(name))) {
-                            ui.addWindow(fd.getViewer(fd.loadFile(name,
-                                    bytes)));
-                            ableToDisplay = true;
-                            break;
-                        }
-                    }
-                } catch (IOException ex) {
-                    LOG.log(Level.SEVERE,
-                            "Error loading attachment file: "
-                            + name, ex);
-                }
-                if (!ableToDisplay) {
-                    LOG.log(Level.WARNING,
-                            "Unable to display: {0}. No File displayer found!",
-                            name);
-                }
-            });
-            attachments.addComponent(a);
-        });
+                });
+                attachments.addComponent(a);
+            }
+        }
         if (attachments.getComponentCount() > 0) {
             layout.addComponent(attachments);
+        }
+        if (comments.getComponentCount() > 0) {
+            layout.addComponent(comments);
         }
         //Add the menu
         HorizontalLayout hl = new HorizontalLayout();
@@ -273,15 +301,72 @@ public class ExecutionWizardStep implements WizardStep {
         });
         hl.addComponent(bug);
         comment = new Button("Add comment");
-        comment.setIcon(VaadinIcons.BUG);
+        comment.setIcon(VaadinIcons.CLIPBOARD_TEXT);
         comment.addClickListener((Button.ClickEvent event) -> {
-            LOG.info("Clicked to add comment!");
+            AttachmentServer as = new AttachmentServer();
+            //Get comment type
+            AttachmentType type = AttachmentTypeServer
+                    .getTypeForExtension("comment");
+            as.setAttachmentType(type);
+            displayComment(as);
         });
         hl.addComponent(comment);
         step.update();
-        lock(step.isLocked());
+        attach.setEnabled(!step.isLocked());
+        bug.setEnabled(!step.isLocked());
+        comment.setEnabled(!step.isLocked());
+        result.setEnabled(!step.isLocked());
         layout.addComponent(hl);
         return layout;
+    }
+
+    private void displayComment(AttachmentServer as) {
+        Panel form = new Panel("Comment");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        BeanFieldGroup binder = new BeanFieldGroup(as.getClass());
+        binder.setItemDataSource(as);
+        Field desc = binder.buildAndBind("Text", "textValue",
+                TextArea.class);
+        desc.setSizeFull();
+        layout.addComponent(desc);
+        MessageBox mb = MessageBox.create();
+        mb.setData(as);
+        mb.asModal(true)
+                .withMessage(desc)
+                .withButtonAlignment(Alignment.MIDDLE_CENTER)
+                .withOkButton(() -> {
+                    try {
+                        //Create the attachment
+                        AttachmentServer a = (AttachmentServer) mb.getData();
+                        a.setTextValue(((TextArea) desc).getValue().trim());
+                        boolean toAdd = a.getAttachmentPK() == null;
+                        a.write2DB();
+                        if (toAdd) {
+                            //Now add it to this Execution Step
+                            if (getStep().getExecutionStepHasAttachmentList() == null) {
+                                getStep().setExecutionStepHasAttachmentList(new ArrayList<>());
+                            }
+                            getStep().addAttachment(a);
+                            getStep().write2DB();
+                        }
+                        w.updateCurrentStep();
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                }, ButtonOption.focus(),
+                        ButtonOption.icon(VaadinIcons.CHECK),
+                        ButtonOption.disable())
+                .withCancelButton(ButtonOption.icon(VaadinIcons.CLOSE));
+        mb.getWindow().setCaption("Enter Comment");
+        mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) -> {
+            //Enable only when there is a comment.
+            mb.getButton(ButtonType.OK)
+                    .setEnabled(!step.isLocked()
+                            && !event1.getText().trim().isEmpty());
+        });
+        mb.open();
     }
 
     @Override
@@ -325,18 +410,6 @@ public class ExecutionWizardStep implements WizardStep {
      */
     public ExecutionStepServer getStep() {
         return step;
-    }
-
-    /**
-     * Lock/unlock controls
-     *
-     * @param lock if true controls are locked. Unlocked otherwise.
-     */
-    private void lock(boolean lock) {
-        attach.setEnabled(!lock);
-        bug.setEnabled(!lock);
-        comment.setEnabled(!lock);
-        result.setEnabled(!lock);
     }
 
     public static boolean getPDFRendering(File source, File dest)

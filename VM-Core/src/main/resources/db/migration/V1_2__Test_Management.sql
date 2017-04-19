@@ -30,7 +30,8 @@ INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (5, 'Legacy E
 INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (6, 'Excel Document', 'xlsx');
 INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (7, 'Legacy Power Point Document', 'ppt');
 INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (8, 'Power Point Document', 'pptx');
-INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (9, 'undefined', '');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (9, 'Comment', 'comment');
+INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (10, 'undefined', '');
 /*Settings*/
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (8, 'show.expected.result', 1, 0, '0', '');
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (9, 'openoffice.port', 0, 1000, '0', '');
