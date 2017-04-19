@@ -20,11 +20,15 @@ import org.openide.util.Exceptions;
 public class ExecutionStepServerTest extends AbstractVMTestCase {
 
     private static int tcCounter = 1, tpCounter = 1, reqCounter = 1;
+    private VMUserServer assignee;//Tester
+    private VMUserServer assigner;//Tester
 
     @Before
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        assignee = new VMUserServer(2);//Tester
+        assigner = new VMUserServer(6);//Tester
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
                         .getEntityManagerFactory());
@@ -88,6 +92,15 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
             tcs.write2DB();
             tps.addTestCase(tcs.getEntity());
         }
+        tps.write2DB();
+        tp.getTestPlanList().add(tps.getEntity());
+        tp.write2DB();
+        TestCaseExecutionServer tce = new TestCaseExecutionServer();
+        tce.write2DB();
+        tce.addTestProject(tp.getEntity());
+        tps.getTestCaseList().forEach((tc) -> {
+            assignee.assignTestCase(tce.getEntity(), tc, assigner);
+        });
         ProjectServer ps = new ProjectServer(p);
         if (ps.getTestProjectList() == null) {
             ps.setTestProjectList(new ArrayList<>());
@@ -115,22 +128,19 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
     public void testAssignUser() {
         try {
             System.out.println("assignUser");
-            VMUserServer assignee = new VMUserServer(2);//Tester
-            VMUserServer assigner = new VMUserServer(6);//Tester
             ProjectServer ps = new ProjectServer(ProjectServer.getProjects().get(0));
             TestCaseExecutionServer tces
                     = new TestCaseExecutionServer(ps.getTestProjectList().get(0)
                             .getTestPlanList().get(0).getTestCaseList().get(0)
                             .getStepList().get(0).getExecutionStepList().get(0)
                             .getTestCaseExecution());
-            tces.addTestCase(ps.getTestProjectList().get(0).getTestPlanList()
-                    .get(0).getTestCaseList().get(0));
             ExecutionStepServer instance
                     = new ExecutionStepServer(tces.getExecutionStepList().get(0));
             instance.assignUser(assignee.getEntity(), assigner.getEntity());
             assertEquals(assignee.getId(), instance.getAssignee().getId());
             assertEquals(assigner.getId(), instance.getAssigner().getId());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             fail();
         }
@@ -138,14 +148,28 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
 
     /**
      * Test of addAttachment method, of class ExecutionStepServer.
+     *
+     * @throws java.lang.Exception
      */
     @Test
     public void testAddAttachment() throws Exception {
         System.out.println("addAttachment");
-        AttachmentServer attachment = null;
-        ExecutionStepServer instance = null;
+        AttachmentServer attachment = new AttachmentServer();
+        attachment.setTextValue("Test");
+        attachment.setAttachmentType(AttachmentTypeServer.getTypeForExtension("comment"));
+        attachment.write2DB();
+        ProjectServer ps = new ProjectServer(ProjectServer.getProjects().get(0));
+        TestCaseExecutionServer tces
+                = new TestCaseExecutionServer(ps.getTestProjectList().get(0)
+                        .getTestPlanList().get(0).getTestCaseList().get(0)
+                        .getStepList().get(0).getExecutionStepList().get(0)
+                        .getTestCaseExecution());
+        ExecutionStepServer instance
+                = new ExecutionStepServer(tces.getExecutionStepList().get(0));
+        assertEquals(0, instance.getExecutionStepHasAttachmentList().size());
         instance.addAttachment(attachment);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        instance.write2DB();
+        instance = new ExecutionStepServer(tces.getExecutionStepList().get(0));
+        assertEquals(1, instance.getExecutionStepHasAttachmentList().size());
     }
 }
