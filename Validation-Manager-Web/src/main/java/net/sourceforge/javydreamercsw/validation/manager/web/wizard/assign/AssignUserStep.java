@@ -1,8 +1,12 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign;
 
 import com.vaadin.data.Item;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.DataBaseManager;
@@ -31,7 +35,7 @@ public class AssignUserStep implements WizardStep {
 
     private final Object key;
     private final TreeTable testTree = new TreeTable("Available Tests");
-    private final TreeTable testerTree = new TreeTable("Available Testers");
+    private final OptionGroup userGroup = new OptionGroup("Available Testers");
     private TestCaseExecutionServer tce = null;
     private TestCaseServer tc = null;
     private static final Logger LOG
@@ -102,16 +106,18 @@ public class AssignUserStep implements WizardStep {
         l.addComponent(testTree);
         //Add list of testers
         users.addAll(RoleServer.getRole("tester").getVmUserList());
-        testerTree.addContainerProperty("Name", TreeTableCheckBox.class, "");
-        testerTree.setWidth("20em");
-        users.forEach((u) -> {
-            testerTree.addItem(new Object[]{new TreeTableCheckBox(testerTree,
-                u.getFirstName() + " " + u.getLastName(), u.getId())}, u.getId());
-            testerTree.setChildrenAllowed(u.getId(), false);
+        BeanItemContainer<VmUser> userContainer
+                = new BeanItemContainer<>(VmUser.class);
+        userContainer.addAll(users);
+        userGroup.setContainerDataSource(userContainer);
+        userGroup.setItemCaptionMode(ItemCaptionMode.EXPLICIT);
+        userGroup.getItemIds().forEach(id -> {
+            VmUser u = (VmUser) id;
+            userGroup.setItemCaption(id, u.getFirstName() + " "
+                    + u.getLastName());
+            userGroup.setItemIcon(id, VaadinIcons.USER);
         });
-        testerTree.setPageLength(users.size() + 1);
-        testerTree.setSizeFull();
-        l.addComponent(testerTree);
+        l.addComponent(userGroup);
         return l;
     }
 
@@ -119,7 +125,6 @@ public class AssignUserStep implements WizardStep {
     public boolean onAdvance() {
         boolean selectedTestCase = false;
         List<Integer> testCaseIds = new ArrayList<>();
-        int userId = 1;
         for (Object id : testTree.getItemIds()) {
             Item item = testTree.getItem(id);
             Object val = item.getItemProperty("Name").getValue();
@@ -137,32 +142,9 @@ public class AssignUserStep implements WizardStep {
                     Notification.Type.WARNING_MESSAGE);
             return false;
         }
-        boolean selectedUser = false;
-        int count = 0;
-        for (Object id : testerTree.getItemIds()) {
-            Item item = testerTree.getItem(id);
-            Object val = item.getItemProperty("Name").getValue();
-            if (val instanceof TreeTableCheckBox) {
-                TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
-                if (ttcb.getValue()) {
-                    selectedUser = true;
-                    userId = (int) id;
-                    count++;
-                    if (count > 1) {
-                        break;
-                    }
-                }
-            }
-        }
-        if (!selectedUser || count > 1) {
-            Notification.show("Unable to proceed",
-                    "Please select one User prior to continuing.",
-                    Notification.Type.WARNING_MESSAGE);
-            return false;
-        }
         try {
             //Now process the data
-            VMUserServer user = new VMUserServer(userId);
+            VMUserServer user = new VMUserServer((VmUser) userGroup.getValue());
             TestCaseJpaController c
                     = new TestCaseJpaController(DataBaseManager
                             .getEntityManagerFactory());
