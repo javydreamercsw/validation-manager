@@ -409,7 +409,8 @@ public class ValidationManagerUI extends UI {
         grid.setSizeFull();
         layout.addComponent(grid);
         if (es.getResultId() != null) {
-            Field<?> result = binder.buildAndBind("Result", "resultId.resultName");
+            Field<?> result = binder.buildAndBind("Result",
+                    "resultId.resultName");
             layout.addComponent(result);
         }
         if (es.getComment() != null) {
@@ -419,8 +420,9 @@ public class ValidationManagerUI extends UI {
         }
         if (es.getAssignee() != null) {
             TextField assignee = new TextField("Assignee");
-            assignee.setConverter(new UserToStringConverter());
-            binder.bind(assignee, "vmUserId");
+            VmUser u = es.getAssignee();
+            assignee.setValue(u.getFirstName() + " " + u.getLastName());
+            assignee.setReadOnly(true);
             layout.addComponent(assignee);
         }
         if (es.getExecutionStart() != null) {
@@ -444,6 +446,8 @@ public class ValidationManagerUI extends UI {
                     = new BeanItemContainer<>(Requirement.class);
             reqContainer.addAll(es.getStep().getRequirementList());
             Grid reqGrid = new Grid(reqContainer);
+            reqGrid.setHeightMode(HeightMode.ROW);
+            reqGrid.setHeightByRows(reqContainer.size() > 5 ? 5 : reqContainer.size());
             reqGrid.setCaption("Related Requirements");
             reqGrid.setColumns("uniqueId");
             Grid.Column reqColumn = reqGrid.getColumn("uniqueId");
