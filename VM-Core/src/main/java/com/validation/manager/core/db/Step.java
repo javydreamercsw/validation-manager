@@ -110,14 +110,6 @@ public class Step implements Serializable {
         this.stepSequence = stepSequence;
     }
 
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
-    }
-
     public byte[] getExpectedResult() {
         return expectedResult;
     }
@@ -193,5 +185,13 @@ public class Step implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
+    }
+
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
     }
 }

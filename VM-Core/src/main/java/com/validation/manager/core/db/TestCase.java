@@ -49,6 +49,10 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
 public class TestCase implements Serializable {
 
+    @Lob
+    @Column(name = "summary")
+    private byte[] summary;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -68,9 +72,6 @@ public class TestCase implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
-    @Lob
-    @Column(name = "summary")
-    private byte[] summary;
     @Basic(optional = false)
     @NotNull
     @Column(name = "creation_date")
@@ -121,13 +122,6 @@ public class TestCase implements Serializable {
         this.name = name;
     }
 
-    public byte[] getSummary() {
-        return summary;
-    }
-
-    public void setSummary(byte[] summary) {
-        this.summary = summary;
-    }
 
     public Date getCreationDate() {
         return creationDate;
@@ -204,5 +198,13 @@ public class TestCase implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCase[ id=" + id + " ]";
+    }
+
+    public byte[] getSummary() {
+        return summary;
+    }
+
+    public void setSummary(byte[] summary) {
+        this.summary = summary;
     }
 }

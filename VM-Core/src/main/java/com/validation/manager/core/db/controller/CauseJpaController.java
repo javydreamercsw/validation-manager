@@ -53,7 +53,8 @@ public class CauseJpaController implements Serializable {
                 riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -89,7 +90,8 @@ public class CauseJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = cause.getId();
@@ -98,7 +100,8 @@ public class CauseJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -114,7 +117,8 @@ public class CauseJpaController implements Serializable {
             try {
                 cause = em.getReference(Cause.class, id);
                 cause.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The cause with id " + id + " no longer exists.", enfe);
             }
             List<RiskItem> riskItemList = cause.getRiskItemList();
@@ -124,7 +128,8 @@ public class CauseJpaController implements Serializable {
             }
             em.remove(cause);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -150,7 +155,8 @@ public class CauseJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -159,7 +165,8 @@ public class CauseJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(Cause.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -172,7 +179,8 @@ public class CauseJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

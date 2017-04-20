@@ -116,12 +116,14 @@ public class TestPlanJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findTestPlan(testPlan.getTestPlanPK()) != null) {
                 throw new PreexistingEntityException("TestPlan " + testPlan + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -244,7 +246,8 @@ public class TestPlanJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 TestPlanPK id = testPlan.getTestPlanPK();
@@ -253,7 +256,8 @@ public class TestPlanJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -269,7 +273,8 @@ public class TestPlanJpaController implements Serializable {
             try {
                 testPlan = em.getReference(TestPlan.class, id);
                 testPlan.getTestPlanPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The testPlan with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -305,7 +310,8 @@ public class TestPlanJpaController implements Serializable {
             }
             em.remove(testPlan);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -331,7 +337,8 @@ public class TestPlanJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -340,7 +347,8 @@ public class TestPlanJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(TestPlan.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -353,7 +361,8 @@ public class TestPlanJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

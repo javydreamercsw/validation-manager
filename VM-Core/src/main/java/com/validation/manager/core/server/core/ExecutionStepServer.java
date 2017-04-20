@@ -4,9 +4,11 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepHasAttachment;
+import com.validation.manager.core.db.ExecutionStepHasIssue;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ExecutionStepHasAttachmentJpaController;
+import com.validation.manager.core.db.controller.ExecutionStepHasIssueJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,6 +76,7 @@ public final class ExecutionStepServer extends ExecutionStep
         target.setAssignee(source.getAssignee());
         target.setAssigner(source.getAssigner());
         target.setLocked(source.isLocked());
+        target.setExecutionStepHasIssueList(source.getExecutionStepHasIssueList());
     }
 
     @Override
@@ -87,7 +90,8 @@ public final class ExecutionStepServer extends ExecutionStep
             setAssigner(assigner);
             setAssignedTime(new Date());
             write2DB();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
     }
@@ -104,6 +108,21 @@ public final class ExecutionStepServer extends ExecutionStep
         esha.setCreationTime(new Date());
         controller.create(esha);
         getExecutionStepHasAttachmentList().add(esha);
+        update();
+    }
+
+    public void addIssue(IssueServer issue, VMUserServer user) throws Exception {
+        ExecutionStepHasIssue eshi = new ExecutionStepHasIssue();
+        ExecutionStepHasIssueJpaController controller
+                = new ExecutionStepHasIssueJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        issue.write2DB();
+        eshi.setIssue(issue.getEntity());
+        eshi.setExecutionStep(getEntity());
+        eshi.setVmUserList(new ArrayList<>());
+        eshi.getVmUserList().add(user.getEntity());
+        controller.create(eshi);
+        getExecutionStepHasIssueList().add(eshi);
         update();
     }
 }

@@ -40,10 +40,10 @@ public class UserTestPlanRoleJpaController implements Serializable {
         if (userTestPlanRole.getUserTestPlanRolePK() == null) {
             userTestPlanRole.setUserTestPlanRolePK(new UserTestPlanRolePK());
         }
+        userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
+        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
         userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
-        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
-        userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -77,12 +77,14 @@ public class UserTestPlanRoleJpaController implements Serializable {
                 role = em.merge(role);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findUserTestPlanRole(userTestPlanRole.getUserTestPlanRolePK()) != null) {
                 throw new PreexistingEntityException("UserTestPlanRole " + userTestPlanRole + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -90,10 +92,10 @@ public class UserTestPlanRoleJpaController implements Serializable {
     }
 
     public void edit(UserTestPlanRole userTestPlanRole) throws NonexistentEntityException, Exception {
+        userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
+        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
         userTestPlanRole.getUserTestPlanRolePK().setTestPlanTestProjectId(userTestPlanRole.getTestPlan().getTestPlanPK().getTestProjectId());
         userTestPlanRole.getUserTestPlanRolePK().setUserId(userTestPlanRole.getVmUser().getId());
-        userTestPlanRole.getUserTestPlanRolePK().setRoleId(userTestPlanRole.getRole().getId());
-        userTestPlanRole.getUserTestPlanRolePK().setTestPlanId(userTestPlanRole.getTestPlan().getTestPlanPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -143,7 +145,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
                 roleNew = em.merge(roleNew);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 UserTestPlanRolePK id = userTestPlanRole.getUserTestPlanRolePK();
@@ -152,7 +155,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -168,7 +172,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
             try {
                 userTestPlanRole = em.getReference(UserTestPlanRole.class, id);
                 userTestPlanRole.getUserTestPlanRolePK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userTestPlanRole with id " + id + " no longer exists.", enfe);
             }
             TestPlan testPlan = userTestPlanRole.getTestPlan();
@@ -188,7 +193,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
             }
             em.remove(userTestPlanRole);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -214,7 +220,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -223,7 +230,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(UserTestPlanRole.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -236,7 +244,8 @@ public class UserTestPlanRoleJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

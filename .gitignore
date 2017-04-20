@@ -7,3 +7,4 @@ VM-Core/data/*
 \.chg\..*$
 \.rej$
 \.conflict\~$
+/validation-manager.wiki/

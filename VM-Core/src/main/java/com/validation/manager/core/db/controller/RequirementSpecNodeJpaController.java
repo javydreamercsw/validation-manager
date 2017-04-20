@@ -47,9 +47,9 @@ public class RequirementSpecNodeJpaController implements Serializable {
         if (requirementSpecNode.getRequirementList() == null) {
             requirementSpecNode.setRequirementList(new ArrayList<Requirement>());
         }
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
-        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -104,12 +104,14 @@ public class RequirementSpecNodeJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findRequirementSpecNode(requirementSpecNode.getRequirementSpecNodePK()) != null) {
                 throw new PreexistingEntityException("RequirementSpecNode " + requirementSpecNode + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -117,9 +119,9 @@ public class RequirementSpecNodeJpaController implements Serializable {
     }
 
     public void edit(RequirementSpecNode requirementSpecNode) throws IllegalOrphanException, NonexistentEntityException, Exception {
+        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecProjectId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getProjectId());
         requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecSpecLevelId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getSpecLevelId());
-        requirementSpecNode.getRequirementSpecNodePK().setRequirementSpecId(requirementSpecNode.getRequirementSpec().getRequirementSpecPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -213,7 +215,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 RequirementSpecNodePK id = requirementSpecNode.getRequirementSpecNodePK();
@@ -222,7 +225,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -238,7 +242,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
             try {
                 requirementSpecNode = em.getReference(RequirementSpecNode.class, id);
                 requirementSpecNode.getRequirementSpecNodePK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The requirementSpecNode with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -269,7 +274,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
             }
             em.remove(requirementSpecNode);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -295,7 +301,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -304,7 +311,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(RequirementSpecNode.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -317,7 +325,8 @@ public class RequirementSpecNodeJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

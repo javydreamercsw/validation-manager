@@ -92,7 +92,8 @@ public class TestCaseJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -188,7 +189,8 @@ public class TestCaseJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = testCase.getId();
@@ -197,7 +199,8 @@ public class TestCaseJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -213,7 +216,8 @@ public class TestCaseJpaController implements Serializable {
             try {
                 testCase = em.getReference(TestCase.class, id);
                 testCase.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The testCase with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -241,7 +245,8 @@ public class TestCaseJpaController implements Serializable {
             }
             em.remove(testCase);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -267,7 +272,8 @@ public class TestCaseJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -276,7 +282,8 @@ public class TestCaseJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(TestCase.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -289,7 +296,8 @@ public class TestCaseJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

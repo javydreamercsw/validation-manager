@@ -476,8 +476,12 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         if (source.getExecutionStepList1() != null) {
             target.setExecutionStepList1(source.getExecutionStepList1());
         }
+        if (target.getExecutionStepHasIssueList() == null) {
+            target.setExecutionStepHasIssueList(new ArrayList<>());
+        }
         target.setExecutionStepList(source.getExecutionStepList());
         target.setExecutionStepList1(source.getExecutionStepList1());
+        target.setExecutionStepHasIssueList(source.getExecutionStepHasIssueList());
         super.update(target, source);
     }
 

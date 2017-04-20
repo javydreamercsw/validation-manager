@@ -131,6 +131,8 @@ public class VmUser extends Login implements Serializable {
     private List<UserAssigment> userAssigmentList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assigneeId")
     private List<UserAssigment> userAssigmentList1;
+    @ManyToMany(mappedBy = "vmUserList")
+    private List<ExecutionStepHasIssue> executionStepHasIssueList;
 
     public VmUser() {
     }
@@ -354,5 +356,15 @@ public class VmUser extends Login implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.VmUser[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepHasIssue> getExecutionStepHasIssueList() {
+        return executionStepHasIssueList;
+    }
+
+    public void setExecutionStepHasIssueList(List<ExecutionStepHasIssue> executionStepHasIssueList) {
+        this.executionStepHasIssueList = executionStepHasIssueList;
     }
 }

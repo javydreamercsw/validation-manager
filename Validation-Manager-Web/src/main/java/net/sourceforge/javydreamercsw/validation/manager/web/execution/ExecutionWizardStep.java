@@ -15,6 +15,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
@@ -23,11 +24,15 @@ import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepHasAttachment;
+import com.validation.manager.core.db.ExecutionStepHasIssue;
 import com.validation.manager.core.db.controller.ExecutionResultJpaController;
+import com.validation.manager.core.db.controller.IssueTypeJpaController;
 import com.validation.manager.core.server.core.AttachmentServer;
 import com.validation.manager.core.server.core.AttachmentTypeServer;
 import com.validation.manager.core.server.core.ExecutionResultServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
+import com.validation.manager.core.server.core.IssueServer;
+import com.validation.manager.core.server.core.IssueTypeServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.ButtonType;
@@ -65,6 +70,7 @@ public class ExecutionWizardStep implements WizardStep {
     private final ValidationManagerUI ui;
     private final ExecutionStepServer step;
     private final ComboBox result = new ComboBox("Result");
+    private final ComboBox issueType = new ComboBox("Issue Type");
     private Button attach;
     private Button bug;
     private Button comment;
@@ -78,6 +84,29 @@ public class ExecutionWizardStep implements WizardStep {
         this.w = w;
         this.ui = ui;
         this.step = new ExecutionStepServer(step);
+        issueType.setSizeFull();
+        issueType.setReadOnly(false);
+        issueType.setRequired(true);
+        issueType.setRequiredError("Please provide a type!");
+        IssueTypeJpaController it
+                = new IssueTypeJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        it.findIssueTypeEntities().forEach(type -> {
+            String item = ui.translate(type.getTypeName());
+            issueType.addItem(type.getTypeName());
+            issueType.setItemCaption(type.getTypeName(), item);
+            switch (type.getId()) {
+                case 1:
+                    issueType.setItemIcon(type.getTypeName(), VaadinIcons.BUG);
+                    break;
+                case 2:
+                    issueType.setItemIcon(type.getTypeName(), VaadinIcons.EYE);
+                    break;
+                case 3:
+                    issueType.setItemIcon(type.getTypeName(), VaadinIcons.QUESTION);
+                    break;
+            }
+        });
         result.setSizeFull();
         result.setReadOnly(false);
         result.setRequired(true);
@@ -164,89 +193,106 @@ public class ExecutionWizardStep implements WizardStep {
         attachments.setCaption("Attachments");
         HorizontalLayout comments = new HorizontalLayout();
         comments.setCaption("Comments");
+        HorizontalLayout issues = new HorizontalLayout();
+        issues.setCaption("Issues");
         int commentCounter = 0;
+        int issueCounter = 0;
+        for (ExecutionStepHasIssue ei : getStep().getExecutionStepHasIssueList()) {
+            issueCounter++;
+            Button a = new Button("Issue #" + issueCounter);
+            a.setIcon(VaadinIcons.BUG);
+            a.addClickListener((Button.ClickEvent event) -> {
+                displayIssue(new IssueServer(ei.getIssue()));
+            });
+            a.setEnabled(!step.isLocked());
+            issues.addComponent(a);
+        }
         for (ExecutionStepHasAttachment attachment
                 : getStep().getExecutionStepHasAttachmentList()) {
-            if (attachment.getAttachment().getAttachmentType().getType()
-                    .equals("comment")) {
-                //Comments go in a different section
-                commentCounter++;
-                Button a = new Button("Comment #" + commentCounter);
-                a.setIcon(VaadinIcons.CLIPBOARD_TEXT);
-                a.addClickListener((Button.ClickEvent event) -> {
-                    displayComment(new AttachmentServer(attachment
-                            .getAttachment().getAttachmentPK()));
-                });
-                a.setEnabled(!step.isLocked());
-                comments.addComponent(a);
-            } else {
-                Button a = new Button(attachment.getAttachment().getFileName());
-                a.setEnabled(!step.isLocked());
-                a.setIcon(VaadinIcons.PAPERCLIP);
-                a.addClickListener((Button.ClickEvent event) -> {
-                    String name = attachment.getAttachment().getFileName();
-                    byte[] bytes = attachment.getAttachment().getFile();
-                    boolean ableToDisplay = false;
-                    try {
-                        //TODO:Remove when the service issue is fixed
-                        //See: https://vaadin.com/forum/#!/thread/15663093
-                        //See: http://stackoverflow.com/questions/43373082/vaadin-how-to-add-meta-inf-services-to-the-war
-                        //Optionally convert all files to pdf when possible.
-                        PDFDisplay pdf = new PDFDisplay();
-                        if (pdf.supportFile(name)) {
-                            ui.addWindow(pdf.getViewer(pdf.loadFile(name, bytes)));
-                            ableToDisplay = true;
-                        }
-                        ImageDisplay image = new ImageDisplay();
-                        if (!ableToDisplay && image.supportFile(name)) {
-                            ui.addWindow(image.getViewer(image.loadFile(name, bytes)));
-                            ableToDisplay = true;
-                        }
-                        TextDisplay textDisplay = new TextDisplay();
-                        if (!ableToDisplay && textDisplay.supportFile(name)) {
-                            ui.addWindow(textDisplay.getViewer(textDisplay.loadFile(name, bytes)));
-                            ableToDisplay = true;
+            switch (attachment.getAttachment().getAttachmentType().getType()) {
+                case "comment": {
+                    //Comments go in a different section
+                    commentCounter++;
+                    Button a = new Button("Comment #" + commentCounter);
+                    a.setIcon(VaadinIcons.CLIPBOARD_TEXT);
+                    a.addClickListener((Button.ClickEvent event) -> {
+                        displayComment(new AttachmentServer(attachment
+                                .getAttachment().getAttachmentPK()));
+                    });
+                    a.setEnabled(!step.isLocked());
+                    comments.addComponent(a);
+                    break;
+                }
+                default: {
+                    Button a = new Button(attachment.getAttachment().getFileName());
+                    a.setEnabled(!step.isLocked());
+                    a.setIcon(VaadinIcons.PAPERCLIP);
+                    a.addClickListener((Button.ClickEvent event) -> {
+                        String name = attachment.getAttachment().getFileName();
+                        byte[] bytes = attachment.getAttachment().getFile();
+                        boolean ableToDisplay = false;
+                        try {
+                            //TODO:Remove when the service issue is fixed
+                            //See: https://vaadin.com/forum/#!/thread/15663093
+                            //See: http://stackoverflow.com/questions/43373082/vaadin-how-to-add-meta-inf-services-to-the-war
+                            //Optionally convert all files to pdf when possible.
+                            PDFDisplay pdf = new PDFDisplay();
+                            if (pdf.supportFile(name)) {
+                                ui.addWindow(pdf.getViewer(pdf.loadFile(name, bytes)));
+                                ableToDisplay = true;
+                            }
+                            ImageDisplay image = new ImageDisplay();
+                            if (!ableToDisplay && image.supportFile(name)) {
+                                ui.addWindow(image.getViewer(image.loadFile(name, bytes)));
+                                ableToDisplay = true;
+                            }
+                            TextDisplay textDisplay = new TextDisplay();
+                            if (!ableToDisplay && textDisplay.supportFile(name)) {
+                                ui.addWindow(textDisplay.getViewer(textDisplay.loadFile(name, bytes)));
+                                ableToDisplay = true;
+                            }
+                            if (!ableToDisplay) {
+                                //Convert file to pfd
+                                File source = textDisplay.loadFile(name, bytes);
+                                File dest = new File(System.getProperty("java.io.tmpdir")
+                                        + System.getProperty("file.separator")
+                                        + name.substring(0, name.lastIndexOf("."))
+                                        + ".pdf");
+                                getPDFRendering(source, dest);
+                                if (dest.exists()) {
+                                    ui.addWindow(pdf.getViewer(dest));
+                                    ableToDisplay = true;
+                                } else {
+                                    Notification.show("Unable to render file",
+                                            "Unable to render file in pdf. "
+                                            + "Contact the system administrator",
+                                            Notification.Type.ERROR_MESSAGE);
+                                }
+                            }
+                            //-------------------------------------------
+                            for (IFileDisplay fd : Lookup.getDefault()
+                                    .lookupAll(IFileDisplay.class)) {
+                                if (fd.supportFile(new File(name))) {
+                                    ui.addWindow(fd.getViewer(fd.loadFile(name,
+                                            bytes)));
+                                    ableToDisplay = true;
+                                    break;
+                                }
+                            }
+                        } catch (IOException ex) {
+                            LOG.log(Level.SEVERE,
+                                    "Error loading attachment file: "
+                                    + name, ex);
                         }
                         if (!ableToDisplay) {
-                            //Convert file to pfd
-                            File source = textDisplay.loadFile(name, bytes);
-                            File dest = new File(System.getProperty("java.io.tmpdir")
-                                    + System.getProperty("file.separator")
-                                    + name.substring(0, name.lastIndexOf("."))
-                                    + ".pdf");
-                            getPDFRendering(source, dest);
-                            if (dest.exists()) {
-                                ui.addWindow(pdf.getViewer(dest));
-                                ableToDisplay = true;
-                            } else {
-                                Notification.show("Unable to render file",
-                                        "Unable to render file in pdf. "
-                                        + "Contact the system administrator",
-                                        Notification.Type.ERROR_MESSAGE);
-                            }
+                            LOG.log(Level.WARNING,
+                                    "Unable to display: {0}. No File displayer found!",
+                                    name);
                         }
-                        //-------------------------------------------
-                        for (IFileDisplay fd : Lookup.getDefault()
-                                .lookupAll(IFileDisplay.class)) {
-                            if (fd.supportFile(new File(name))) {
-                                ui.addWindow(fd.getViewer(fd.loadFile(name,
-                                        bytes)));
-                                ableToDisplay = true;
-                                break;
-                            }
-                        }
-                    } catch (IOException ex) {
-                        LOG.log(Level.SEVERE,
-                                "Error loading attachment file: "
-                                + name, ex);
-                    }
-                    if (!ableToDisplay) {
-                        LOG.log(Level.WARNING,
-                                "Unable to display: {0}. No File displayer found!",
-                                name);
-                    }
-                });
-                attachments.addComponent(a);
+                    });
+                    attachments.addComponent(a);
+                    break;
+                }
             }
         }
         if (attachments.getComponentCount() > 0) {
@@ -254,6 +300,9 @@ public class ExecutionWizardStep implements WizardStep {
         }
         if (comments.getComponentCount() > 0) {
             layout.addComponent(comments);
+        }
+        if (issues.getComponentCount() > 0) {
+            layout.addComponent(issues);
         }
         //Add the menu
         HorizontalLayout hl = new HorizontalLayout();
@@ -299,7 +348,7 @@ public class ExecutionWizardStep implements WizardStep {
         bug = new Button("Create an Issue");
         bug.setIcon(VaadinIcons.BUG);
         bug.addClickListener((Button.ClickEvent event) -> {
-            LOG.info("Clicked to add a bug!");
+            displayIssue(new IssueServer());
         });
         hl.addComponent(bug);
         comment = new Button("Add comment");
@@ -320,6 +369,88 @@ public class ExecutionWizardStep implements WizardStep {
         result.setEnabled(!step.isLocked());
         layout.addComponent(hl);
         return layout;
+    }
+
+    private void displayIssue(IssueServer is) {
+        Panel form = new Panel("Issue");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        if (is.getIssuePK() == null) {
+            //Set creation date
+            is.setCreationTime(new Date());
+        }
+        BeanFieldGroup binder = new BeanFieldGroup(is.getClass());
+        binder.setItemDataSource(is);
+        Field title = binder.buildAndBind("Summary", "title",
+                TextField.class);
+        title.setSizeFull();
+        layout.addComponent(title);
+        Field desc = binder.buildAndBind("Description", "description",
+                TextArea.class);
+        desc.setSizeFull();
+        layout.addComponent(desc);
+        DateField creation = (DateField) binder.buildAndBind("Creation Time",
+                "creationTime",
+                DateField.class);
+        creation.setReadOnly(true);
+        creation.setResolution(Resolution.SECOND);
+        layout.addComponent(creation);
+        //Add the result
+        layout.addComponent(issueType);
+        if (is.getIssueType() != null) {
+            issueType.setValue(is.getIssueType().getTypeName());
+        } else {
+            //Set it as observation
+            issueType.setValue("observation.name");
+        }
+        //Lock if being created
+        issueType.setReadOnly(is.getIssueType() == null);
+        MessageBox mb = MessageBox.create();
+        mb.setData(is);
+        mb.asModal(true)
+                .withMessage(layout)
+                .withButtonAlignment(Alignment.MIDDLE_CENTER)
+                .withOkButton(() -> {
+                    try {
+                        //Create the attachment
+                        IssueServer issue = (IssueServer) mb.getData();
+                        issue.setDescription(((TextArea) desc).getValue().trim());
+                        issue.setIssueType(IssueTypeServer.getType((String) issueType.getValue()));
+                        issue.setCreationTime(creation.getValue());
+                        issue.setTitle((String) title.getValue());
+                        boolean toAdd = issue.getIssuePK() == null;
+                        issue.write2DB();
+                        if (toAdd) {
+                            //Now add it to this Execution Step
+                            if (getStep().getExecutionStepHasIssueList() == null) {
+                                getStep().setExecutionStepHasIssueList(new ArrayList<>());
+                            }
+                            getStep().addIssue(issue, ui.getUser());
+                            getStep().write2DB();
+                        }
+                        w.updateCurrentStep();
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                }, ButtonOption.focus(),
+                        ButtonOption.icon(VaadinIcons.CHECK),
+                        ButtonOption.disable())
+                .withCancelButton(ButtonOption.icon(VaadinIcons.CLOSE));
+        mb.getWindow().setCaption("Issue Details");
+        mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) -> {
+            //Enable if there is a description change.
+            mb.getButton(ButtonType.OK)
+                    .setEnabled(!step.isLocked()
+                            && !event1.getText().trim().isEmpty());
+        });
+        ((TextField) title).addTextChangeListener((TextChangeEvent event1) -> {
+            //Enable if there is a title change.
+            mb.getButton(ButtonType.OK)
+                    .setEnabled(!step.isLocked()
+                            && !event1.getText().trim().isEmpty());
+        });
+        mb.open();
     }
 
     private void displayComment(AttachmentServer as) {

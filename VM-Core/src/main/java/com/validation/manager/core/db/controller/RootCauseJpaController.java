@@ -83,12 +83,14 @@ public class RootCauseJpaController implements Serializable {
                 vmUserListVmUser = em.merge(vmUserListVmUser);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findRootCause(rootCause.getRootCausePK()) != null) {
                 throw new PreexistingEntityException("RootCause " + rootCause + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -160,7 +162,8 @@ public class RootCauseJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 RootCausePK id = rootCause.getRootCausePK();
@@ -169,7 +172,8 @@ public class RootCauseJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -185,7 +189,8 @@ public class RootCauseJpaController implements Serializable {
             try {
                 rootCause = em.getReference(RootCause.class, id);
                 rootCause.getRootCausePK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The rootCause with id " + id + " no longer exists.", enfe);
             }
             RootCauseType rootCauseType = rootCause.getRootCauseType();
@@ -205,7 +210,8 @@ public class RootCauseJpaController implements Serializable {
             }
             em.remove(rootCause);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -231,7 +237,8 @@ public class RootCauseJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -240,7 +247,8 @@ public class RootCauseJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(RootCause.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -253,7 +261,8 @@ public class RootCauseJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

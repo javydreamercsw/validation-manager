@@ -172,4 +172,36 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
         instance = new ExecutionStepServer(tces.getExecutionStepList().get(0));
         assertEquals(1, instance.getExecutionStepHasAttachmentList().size());
     }
+
+    /**
+     * Test of addIssue method, of class ExecutionStepServer.
+     *
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testAddIssue() throws Exception {
+        System.out.println("addIssue");
+        IssueServer issue = new IssueServer();
+        issue.setTitle("Title");
+        issue.setDescription("Description");
+        issue.setCreationTime(new Date());
+        issue.setIssueType(IssueTypeServer.getType("observation.name"));
+        issue.write2DB();
+        ProjectServer ps = new ProjectServer(ProjectServer.getProjects().get(0));
+        TestCaseExecutionServer tces
+                = new TestCaseExecutionServer(ps.getTestProjectList().get(0)
+                        .getTestPlanList().get(0).getTestCaseList().get(0)
+                        .getStepList().get(0).getExecutionStepList().get(0)
+                        .getTestCaseExecution());
+        ExecutionStepServer instance
+                = new ExecutionStepServer(tces.getExecutionStepList().get(0));
+        assertEquals(0, instance.getExecutionStepHasIssueList().size());
+        instance.addIssue(issue, assigner);
+        instance.write2DB();
+        instance = new ExecutionStepServer(tces.getExecutionStepList().get(0));
+        assertEquals(1, instance.getExecutionStepHasIssueList().size());
+        assertEquals(assigner.getId(),
+                instance.getExecutionStepHasIssueList().get(0)
+                        .getVmUserList().get(0).getId());
+    }
 }

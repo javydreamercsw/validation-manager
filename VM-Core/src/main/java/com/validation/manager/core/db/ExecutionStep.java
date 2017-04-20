@@ -53,6 +53,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 public class ExecutionStep implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
+    private List<ExecutionStepHasIssue> executionStepHasIssueList;
     @EmbeddedId
     protected ExecutionStepPK executionStepPK;
     @Column(name = "execution_time")
@@ -266,5 +269,15 @@ public class ExecutionStep implements Serializable {
      */
     public void setLocked(boolean locked) {
         this.locked = locked;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepHasIssue> getExecutionStepHasIssueList() {
+        return executionStepHasIssueList;
+    }
+
+    public void setExecutionStepHasIssueList(List<ExecutionStepHasIssue> executionStepHasIssueList) {
+        this.executionStepHasIssueList = executionStepHasIssueList;
     }
 }

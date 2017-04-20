@@ -23,6 +23,7 @@ import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserModifiedRecord;
 import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.UserAssigment;
+import com.validation.manager.core.db.ExecutionStepHasIssue;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -80,6 +81,9 @@ public class VmUserJpaController implements Serializable {
         }
         if (vmUser.getUserAssigmentList1() == null) {
             vmUser.setUserAssigmentList1(new ArrayList<UserAssigment>());
+        }
+        if (vmUser.getExecutionStepHasIssueList() == null) {
+            vmUser.setExecutionStepHasIssueList(new ArrayList<ExecutionStepHasIssue>());
         }
         EntityManager em = null;
         try {
@@ -162,6 +166,12 @@ public class VmUserJpaController implements Serializable {
                 attachedUserAssigmentList1.add(userAssigmentList1UserAssigmentToAttach);
             }
             vmUser.setUserAssigmentList1(attachedUserAssigmentList1);
+            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueList = new ArrayList<ExecutionStepHasIssue>();
+            for (ExecutionStepHasIssue executionStepHasIssueListExecutionStepHasIssueToAttach : vmUser.getExecutionStepHasIssueList()) {
+                executionStepHasIssueListExecutionStepHasIssueToAttach = em.getReference(executionStepHasIssueListExecutionStepHasIssueToAttach.getClass(), executionStepHasIssueListExecutionStepHasIssueToAttach.getExecutionStepHasIssuePK());
+                attachedExecutionStepHasIssueList.add(executionStepHasIssueListExecutionStepHasIssueToAttach);
+            }
+            vmUser.setExecutionStepHasIssueList(attachedExecutionStepHasIssueList);
             em.persist(vmUser);
             if (userStatusId != null) {
                 userStatusId.getVmUserList().add(vmUser);
@@ -260,8 +270,13 @@ public class VmUserJpaController implements Serializable {
                     oldAssigneeIdOfUserAssigmentList1UserAssigment = em.merge(oldAssigneeIdOfUserAssigmentList1UserAssigment);
                 }
             }
+            for (ExecutionStepHasIssue executionStepHasIssueListExecutionStepHasIssue : vmUser.getExecutionStepHasIssueList()) {
+                executionStepHasIssueListExecutionStepHasIssue.getVmUserList().add(vmUser);
+                executionStepHasIssueListExecutionStepHasIssue = em.merge(executionStepHasIssueListExecutionStepHasIssue);
+            }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -300,6 +315,8 @@ public class VmUserJpaController implements Serializable {
             List<UserAssigment> userAssigmentListNew = vmUser.getUserAssigmentList();
             List<UserAssigment> userAssigmentList1Old = persistentVmUser.getUserAssigmentList1();
             List<UserAssigment> userAssigmentList1New = vmUser.getUserAssigmentList1();
+            List<ExecutionStepHasIssue> executionStepHasIssueListOld = persistentVmUser.getExecutionStepHasIssueList();
+            List<ExecutionStepHasIssue> executionStepHasIssueListNew = vmUser.getExecutionStepHasIssueList();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
@@ -448,6 +465,13 @@ public class VmUserJpaController implements Serializable {
             }
             userAssigmentList1New = attachedUserAssigmentList1New;
             vmUser.setUserAssigmentList1(userAssigmentList1New);
+            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueListNew = new ArrayList<ExecutionStepHasIssue>();
+            for (ExecutionStepHasIssue executionStepHasIssueListNewExecutionStepHasIssueToAttach : executionStepHasIssueListNew) {
+                executionStepHasIssueListNewExecutionStepHasIssueToAttach = em.getReference(executionStepHasIssueListNewExecutionStepHasIssueToAttach.getClass(), executionStepHasIssueListNewExecutionStepHasIssueToAttach.getExecutionStepHasIssuePK());
+                attachedExecutionStepHasIssueListNew.add(executionStepHasIssueListNewExecutionStepHasIssueToAttach);
+            }
+            executionStepHasIssueListNew = attachedExecutionStepHasIssueListNew;
+            vmUser.setExecutionStepHasIssueList(executionStepHasIssueListNew);
             vmUser = em.merge(vmUser);
             if (userStatusIdOld != null && !userStatusIdOld.equals(userStatusIdNew)) {
                 userStatusIdOld.getVmUserList().remove(vmUser);
@@ -604,8 +628,21 @@ public class VmUserJpaController implements Serializable {
                     }
                 }
             }
+            for (ExecutionStepHasIssue executionStepHasIssueListOldExecutionStepHasIssue : executionStepHasIssueListOld) {
+                if (!executionStepHasIssueListNew.contains(executionStepHasIssueListOldExecutionStepHasIssue)) {
+                    executionStepHasIssueListOldExecutionStepHasIssue.getVmUserList().remove(vmUser);
+                    executionStepHasIssueListOldExecutionStepHasIssue = em.merge(executionStepHasIssueListOldExecutionStepHasIssue);
+                }
+            }
+            for (ExecutionStepHasIssue executionStepHasIssueListNewExecutionStepHasIssue : executionStepHasIssueListNew) {
+                if (!executionStepHasIssueListOld.contains(executionStepHasIssueListNewExecutionStepHasIssue)) {
+                    executionStepHasIssueListNewExecutionStepHasIssue.getVmUserList().add(vmUser);
+                    executionStepHasIssueListNewExecutionStepHasIssue = em.merge(executionStepHasIssueListNewExecutionStepHasIssue);
+                }
+            }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = vmUser.getId();
@@ -614,7 +651,8 @@ public class VmUserJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -630,7 +668,8 @@ public class VmUserJpaController implements Serializable {
             try {
                 vmUser = em.getReference(VmUser.class, id);
                 vmUser.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The vmUser with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -716,9 +755,15 @@ public class VmUserJpaController implements Serializable {
                 executionStepList1ExecutionStep.setAssigner(null);
                 executionStepList1ExecutionStep = em.merge(executionStepList1ExecutionStep);
             }
+            List<ExecutionStepHasIssue> executionStepHasIssueList = vmUser.getExecutionStepHasIssueList();
+            for (ExecutionStepHasIssue executionStepHasIssueListExecutionStepHasIssue : executionStepHasIssueList) {
+                executionStepHasIssueListExecutionStepHasIssue.getVmUserList().remove(vmUser);
+                executionStepHasIssueListExecutionStepHasIssue = em.merge(executionStepHasIssueListExecutionStepHasIssue);
+            }
             em.remove(vmUser);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -744,7 +789,8 @@ public class VmUserJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -753,7 +799,8 @@ public class VmUserJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(VmUser.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -766,7 +813,8 @@ public class VmUserJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

@@ -73,7 +73,8 @@ public class RiskCategoryJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -141,7 +142,8 @@ public class RiskCategoryJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = riskCategory.getId();
@@ -150,7 +152,8 @@ public class RiskCategoryJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -166,7 +169,8 @@ public class RiskCategoryJpaController implements Serializable {
             try {
                 riskCategory = em.getReference(RiskCategory.class, id);
                 riskCategory.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskCategory with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -187,7 +191,8 @@ public class RiskCategoryJpaController implements Serializable {
             }
             em.remove(riskCategory);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -213,7 +218,8 @@ public class RiskCategoryJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -222,7 +228,8 @@ public class RiskCategoryJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(RiskCategory.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -235,7 +242,8 @@ public class RiskCategoryJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

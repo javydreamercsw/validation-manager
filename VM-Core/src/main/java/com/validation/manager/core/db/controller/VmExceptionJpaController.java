@@ -139,12 +139,14 @@ public class VmExceptionJpaController implements Serializable {
                 investigationListInvestigation = em.merge(investigationListInvestigation);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findVmException(vmException.getVmExceptionPK()) != null) {
                 throw new PreexistingEntityException("VmException " + vmException + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -300,7 +302,8 @@ public class VmExceptionJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 VmExceptionPK id = vmException.getVmExceptionPK();
@@ -309,7 +312,8 @@ public class VmExceptionJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -325,7 +329,8 @@ public class VmExceptionJpaController implements Serializable {
             try {
                 vmException = em.getReference(VmException.class, id);
                 vmException.getVmExceptionPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The vmException with id " + id + " no longer exists.", enfe);
             }
             VmUser vmUser = vmException.getVmUser();
@@ -365,7 +370,8 @@ public class VmExceptionJpaController implements Serializable {
             }
             em.remove(vmException);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -391,7 +397,8 @@ public class VmExceptionJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -400,7 +407,8 @@ public class VmExceptionJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(VmException.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -413,7 +421,8 @@ public class VmExceptionJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

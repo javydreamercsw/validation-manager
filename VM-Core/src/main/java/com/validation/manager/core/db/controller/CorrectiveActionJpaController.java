@@ -67,7 +67,8 @@ public class CorrectiveActionJpaController implements Serializable {
                 vmExceptionListVmException = em.merge(vmExceptionListVmException);
             }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -124,7 +125,8 @@ public class CorrectiveActionJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = correctiveAction.getId();
@@ -133,7 +135,8 @@ public class CorrectiveActionJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -149,7 +152,8 @@ public class CorrectiveActionJpaController implements Serializable {
             try {
                 correctiveAction = em.getReference(CorrectiveAction.class, id);
                 correctiveAction.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The correctiveAction with id " + id + " no longer exists.", enfe);
             }
             List<VmUser> vmUserList = correctiveAction.getVmUserList();
@@ -164,7 +168,8 @@ public class CorrectiveActionJpaController implements Serializable {
             }
             em.remove(correctiveAction);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -190,7 +195,8 @@ public class CorrectiveActionJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -199,7 +205,8 @@ public class CorrectiveActionJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(CorrectiveAction.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -212,7 +219,8 @@ public class CorrectiveActionJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

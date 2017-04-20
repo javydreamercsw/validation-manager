@@ -39,8 +39,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
         if (riskControlHasRequirement.getRiskControlHasRequirementPK() == null) {
             riskControlHasRequirement.setRiskControlHasRequirementPK(new RiskControlHasRequirementPK());
         }
-        riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlRiskControlTypeId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getRiskControlTypeId());
+        riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getId());
         EntityManager em = null;
         try {
@@ -66,12 +66,14 @@ public class RiskControlHasRequirementJpaController implements Serializable {
                 riskControl = em.merge(riskControl);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findRiskControlHasRequirement(riskControlHasRequirement.getRiskControlHasRequirementPK()) != null) {
                 throw new PreexistingEntityException("RiskControlHasRequirement " + riskControlHasRequirement + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -79,8 +81,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
     }
 
     public void edit(RiskControlHasRequirement riskControlHasRequirement) throws NonexistentEntityException, Exception {
-        riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlRiskControlTypeId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getRiskControlTypeId());
+        riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getId());
         EntityManager em = null;
         try {
@@ -117,7 +119,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
                 riskControlNew = em.merge(riskControlNew);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 RiskControlHasRequirementPK id = riskControlHasRequirement.getRiskControlHasRequirementPK();
@@ -126,7 +129,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -142,7 +146,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
             try {
                 riskControlHasRequirement = em.getReference(RiskControlHasRequirement.class, id);
                 riskControlHasRequirement.getRiskControlHasRequirementPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskControlHasRequirement with id " + id + " no longer exists.", enfe);
             }
             Requirement requirement = riskControlHasRequirement.getRequirement();
@@ -157,7 +162,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
             }
             em.remove(riskControlHasRequirement);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -183,7 +189,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -192,7 +199,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(RiskControlHasRequirement.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -205,7 +213,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

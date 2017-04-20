@@ -39,9 +39,9 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
         if (riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK() == null) {
             riskItemHasRiskCategory.setRiskItemHasRiskCategoryPK(new RiskItemHasRiskCategoryPK());
         }
+        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
-        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -66,12 +66,14 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
                 riskItem = em.merge(riskItem);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findRiskItemHasRiskCategory(riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK()) != null) {
                 throw new PreexistingEntityException("RiskItemHasRiskCategory " + riskItemHasRiskCategory + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -79,9 +81,9 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
     }
 
     public void edit(RiskItemHasRiskCategory riskItemHasRiskCategory) throws NonexistentEntityException, Exception {
+        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
-        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -117,7 +119,8 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
                 riskItemNew = em.merge(riskItemNew);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 RiskItemHasRiskCategoryPK id = riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK();
@@ -126,7 +129,8 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -142,7 +146,8 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
             try {
                 riskItemHasRiskCategory = em.getReference(RiskItemHasRiskCategory.class, id);
                 riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskItemHasRiskCategory with id " + id + " no longer exists.", enfe);
             }
             RiskCategory riskCategory = riskItemHasRiskCategory.getRiskCategory();
@@ -157,7 +162,8 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
             }
             em.remove(riskItemHasRiskCategory);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -183,7 +189,8 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -192,7 +199,8 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(RiskItemHasRiskCategory.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -205,7 +213,8 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

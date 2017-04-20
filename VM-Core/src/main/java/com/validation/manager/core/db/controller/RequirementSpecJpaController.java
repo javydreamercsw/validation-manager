@@ -45,8 +45,8 @@ public class RequirementSpecJpaController implements Serializable {
         if (requirementSpec.getRequirementSpecNodeList() == null) {
             requirementSpec.setRequirementSpecNodeList(new ArrayList<RequirementSpecNode>());
         }
-        requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
         requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
+        requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -86,12 +86,14 @@ public class RequirementSpecJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findRequirementSpec(requirementSpec.getRequirementSpecPK()) != null) {
                 throw new PreexistingEntityException("RequirementSpec " + requirementSpec + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -99,8 +101,8 @@ public class RequirementSpecJpaController implements Serializable {
     }
 
     public void edit(RequirementSpec requirementSpec) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
         requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
+        requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -168,7 +170,8 @@ public class RequirementSpecJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 RequirementSpecPK id = requirementSpec.getRequirementSpecPK();
@@ -177,7 +180,8 @@ public class RequirementSpecJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -193,7 +197,8 @@ public class RequirementSpecJpaController implements Serializable {
             try {
                 requirementSpec = em.getReference(RequirementSpec.class, id);
                 requirementSpec.getRequirementSpecPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The requirementSpec with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -219,7 +224,8 @@ public class RequirementSpecJpaController implements Serializable {
             }
             em.remove(requirementSpec);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -245,7 +251,8 @@ public class RequirementSpecJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -254,7 +261,8 @@ public class RequirementSpecJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(RequirementSpec.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -267,7 +275,8 @@ public class RequirementSpecJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

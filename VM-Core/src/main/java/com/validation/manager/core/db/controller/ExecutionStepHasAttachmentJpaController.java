@@ -39,11 +39,11 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
         if (executionStepHasAttachment.getExecutionStepHasAttachmentPK() == null) {
             executionStepHasAttachment.setExecutionStepHasAttachmentPK(new ExecutionStepHasAttachmentPK());
         }
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepTestCaseExecutionId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentId(executionStepHasAttachment.getAttachment().getAttachmentPK().getId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -68,12 +68,14 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
                 executionStep = em.merge(executionStep);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findExecutionStepHasAttachment(executionStepHasAttachment.getExecutionStepHasAttachmentPK()) != null) {
                 throw new PreexistingEntityException("ExecutionStepHasAttachment " + executionStepHasAttachment + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -81,11 +83,11 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
     }
 
     public void edit(ExecutionStepHasAttachment executionStepHasAttachment) throws NonexistentEntityException, Exception {
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepTestCaseExecutionId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentId(executionStepHasAttachment.getAttachment().getAttachmentPK().getId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -121,7 +123,8 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
                 executionStepNew = em.merge(executionStepNew);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 ExecutionStepHasAttachmentPK id = executionStepHasAttachment.getExecutionStepHasAttachmentPK();
@@ -130,7 +133,8 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -146,7 +150,8 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
             try {
                 executionStepHasAttachment = em.getReference(ExecutionStepHasAttachment.class, id);
                 executionStepHasAttachment.getExecutionStepHasAttachmentPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The executionStepHasAttachment with id " + id + " no longer exists.", enfe);
             }
             Attachment attachment = executionStepHasAttachment.getAttachment();
@@ -161,7 +166,8 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
             }
             em.remove(executionStepHasAttachment);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -187,7 +193,8 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -196,7 +203,8 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(ExecutionStepHasAttachment.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -209,7 +217,8 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

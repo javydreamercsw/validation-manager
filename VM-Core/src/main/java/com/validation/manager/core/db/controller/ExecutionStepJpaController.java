@@ -19,6 +19,7 @@ import com.validation.manager.core.db.VmException;
 import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.ExecutionStepHasAttachment;
+import com.validation.manager.core.db.ExecutionStepHasIssue;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -51,9 +52,12 @@ public class ExecutionStepJpaController implements Serializable {
         if (executionStep.getExecutionStepHasAttachmentList() == null) {
             executionStep.setExecutionStepHasAttachmentList(new ArrayList<ExecutionStepHasAttachment>());
         }
+        if (executionStep.getExecutionStepHasIssueList() == null) {
+            executionStep.setExecutionStepHasIssueList(new ArrayList<ExecutionStepHasIssue>());
+        }
         executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
-        executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
         executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
+        executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -95,6 +99,12 @@ public class ExecutionStepJpaController implements Serializable {
                 attachedExecutionStepHasAttachmentList.add(executionStepHasAttachmentListExecutionStepHasAttachmentToAttach);
             }
             executionStep.setExecutionStepHasAttachmentList(attachedExecutionStepHasAttachmentList);
+            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueList = new ArrayList<ExecutionStepHasIssue>();
+            for (ExecutionStepHasIssue executionStepHasIssueListExecutionStepHasIssueToAttach : executionStep.getExecutionStepHasIssueList()) {
+                executionStepHasIssueListExecutionStepHasIssueToAttach = em.getReference(executionStepHasIssueListExecutionStepHasIssueToAttach.getClass(), executionStepHasIssueListExecutionStepHasIssueToAttach.getExecutionStepHasIssuePK());
+                attachedExecutionStepHasIssueList.add(executionStepHasIssueListExecutionStepHasIssueToAttach);
+            }
+            executionStep.setExecutionStepHasIssueList(attachedExecutionStepHasIssueList);
             em.persist(executionStep);
             if (resultId != null) {
                 resultId.getExecutionStepList().add(executionStep);
@@ -129,13 +139,24 @@ public class ExecutionStepJpaController implements Serializable {
                     oldExecutionStepOfExecutionStepHasAttachmentListExecutionStepHasAttachment = em.merge(oldExecutionStepOfExecutionStepHasAttachmentListExecutionStepHasAttachment);
                 }
             }
+            for (ExecutionStepHasIssue executionStepHasIssueListExecutionStepHasIssue : executionStep.getExecutionStepHasIssueList()) {
+                ExecutionStep oldExecutionStepOfExecutionStepHasIssueListExecutionStepHasIssue = executionStepHasIssueListExecutionStepHasIssue.getExecutionStep();
+                executionStepHasIssueListExecutionStepHasIssue.setExecutionStep(executionStep);
+                executionStepHasIssueListExecutionStepHasIssue = em.merge(executionStepHasIssueListExecutionStepHasIssue);
+                if (oldExecutionStepOfExecutionStepHasIssueListExecutionStepHasIssue != null) {
+                    oldExecutionStepOfExecutionStepHasIssueListExecutionStepHasIssue.getExecutionStepHasIssueList().remove(executionStepHasIssueListExecutionStepHasIssue);
+                    oldExecutionStepOfExecutionStepHasIssueListExecutionStepHasIssue = em.merge(oldExecutionStepOfExecutionStepHasIssueListExecutionStepHasIssue);
+                }
+            }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findExecutionStep(executionStep.getExecutionStepPK()) != null) {
                 throw new PreexistingEntityException("ExecutionStep " + executionStep + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -144,8 +165,8 @@ public class ExecutionStepJpaController implements Serializable {
 
     public void edit(ExecutionStep executionStep) throws IllegalOrphanException, NonexistentEntityException, Exception {
         executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
-        executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
         executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
+        executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -165,6 +186,8 @@ public class ExecutionStepJpaController implements Serializable {
             List<VmException> vmExceptionListNew = executionStep.getVmExceptionList();
             List<ExecutionStepHasAttachment> executionStepHasAttachmentListOld = persistentExecutionStep.getExecutionStepHasAttachmentList();
             List<ExecutionStepHasAttachment> executionStepHasAttachmentListNew = executionStep.getExecutionStepHasAttachmentList();
+            List<ExecutionStepHasIssue> executionStepHasIssueListOld = persistentExecutionStep.getExecutionStepHasIssueList();
+            List<ExecutionStepHasIssue> executionStepHasIssueListNew = executionStep.getExecutionStepHasIssueList();
             List<String> illegalOrphanMessages = null;
             for (ExecutionStepHasAttachment executionStepHasAttachmentListOldExecutionStepHasAttachment : executionStepHasAttachmentListOld) {
                 if (!executionStepHasAttachmentListNew.contains(executionStepHasAttachmentListOldExecutionStepHasAttachment)) {
@@ -172,6 +195,14 @@ public class ExecutionStepJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStepHasAttachment " + executionStepHasAttachmentListOldExecutionStepHasAttachment + " since its executionStep field is not nullable.");
+                }
+            }
+            for (ExecutionStepHasIssue executionStepHasIssueListOldExecutionStepHasIssue : executionStepHasIssueListOld) {
+                if (!executionStepHasIssueListNew.contains(executionStepHasIssueListOldExecutionStepHasIssue)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain ExecutionStepHasIssue " + executionStepHasIssueListOldExecutionStepHasIssue + " since its executionStep field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -211,6 +242,13 @@ public class ExecutionStepJpaController implements Serializable {
             }
             executionStepHasAttachmentListNew = attachedExecutionStepHasAttachmentListNew;
             executionStep.setExecutionStepHasAttachmentList(executionStepHasAttachmentListNew);
+            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueListNew = new ArrayList<ExecutionStepHasIssue>();
+            for (ExecutionStepHasIssue executionStepHasIssueListNewExecutionStepHasIssueToAttach : executionStepHasIssueListNew) {
+                executionStepHasIssueListNewExecutionStepHasIssueToAttach = em.getReference(executionStepHasIssueListNewExecutionStepHasIssueToAttach.getClass(), executionStepHasIssueListNewExecutionStepHasIssueToAttach.getExecutionStepHasIssuePK());
+                attachedExecutionStepHasIssueListNew.add(executionStepHasIssueListNewExecutionStepHasIssueToAttach);
+            }
+            executionStepHasIssueListNew = attachedExecutionStepHasIssueListNew;
+            executionStep.setExecutionStepHasIssueList(executionStepHasIssueListNew);
             executionStep = em.merge(executionStep);
             if (resultIdOld != null && !resultIdOld.equals(resultIdNew)) {
                 resultIdOld.getExecutionStepList().remove(executionStep);
@@ -275,8 +313,20 @@ public class ExecutionStepJpaController implements Serializable {
                     }
                 }
             }
+            for (ExecutionStepHasIssue executionStepHasIssueListNewExecutionStepHasIssue : executionStepHasIssueListNew) {
+                if (!executionStepHasIssueListOld.contains(executionStepHasIssueListNewExecutionStepHasIssue)) {
+                    ExecutionStep oldExecutionStepOfExecutionStepHasIssueListNewExecutionStepHasIssue = executionStepHasIssueListNewExecutionStepHasIssue.getExecutionStep();
+                    executionStepHasIssueListNewExecutionStepHasIssue.setExecutionStep(executionStep);
+                    executionStepHasIssueListNewExecutionStepHasIssue = em.merge(executionStepHasIssueListNewExecutionStepHasIssue);
+                    if (oldExecutionStepOfExecutionStepHasIssueListNewExecutionStepHasIssue != null && !oldExecutionStepOfExecutionStepHasIssueListNewExecutionStepHasIssue.equals(executionStep)) {
+                        oldExecutionStepOfExecutionStepHasIssueListNewExecutionStepHasIssue.getExecutionStepHasIssueList().remove(executionStepHasIssueListNewExecutionStepHasIssue);
+                        oldExecutionStepOfExecutionStepHasIssueListNewExecutionStepHasIssue = em.merge(oldExecutionStepOfExecutionStepHasIssueListNewExecutionStepHasIssue);
+                    }
+                }
+            }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 ExecutionStepPK id = executionStep.getExecutionStepPK();
@@ -285,7 +335,8 @@ public class ExecutionStepJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -301,7 +352,8 @@ public class ExecutionStepJpaController implements Serializable {
             try {
                 executionStep = em.getReference(ExecutionStep.class, id);
                 executionStep.getExecutionStepPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The executionStep with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -311,6 +363,13 @@ public class ExecutionStepJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This ExecutionStep (" + executionStep + ") cannot be destroyed since the ExecutionStepHasAttachment " + executionStepHasAttachmentListOrphanCheckExecutionStepHasAttachment + " in its executionStepHasAttachmentList field has a non-nullable executionStep field.");
+            }
+            List<ExecutionStepHasIssue> executionStepHasIssueListOrphanCheck = executionStep.getExecutionStepHasIssueList();
+            for (ExecutionStepHasIssue executionStepHasIssueListOrphanCheckExecutionStepHasIssue : executionStepHasIssueListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This ExecutionStep (" + executionStep + ") cannot be destroyed since the ExecutionStepHasIssue " + executionStepHasIssueListOrphanCheckExecutionStepHasIssue + " in its executionStepHasIssueList field has a non-nullable executionStep field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
@@ -347,7 +406,8 @@ public class ExecutionStepJpaController implements Serializable {
             }
             em.remove(executionStep);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -373,7 +433,8 @@ public class ExecutionStepJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -382,7 +443,8 @@ public class ExecutionStepJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(ExecutionStep.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -395,7 +457,8 @@ public class ExecutionStepJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

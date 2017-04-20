@@ -144,12 +144,14 @@ public class RiskItemJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findRiskItem(riskItem.getRiskItemPK()) != null) {
                 throw new PreexistingEntityException("RiskItem " + riskItem + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -316,7 +318,8 @@ public class RiskItemJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 RiskItemPK id = riskItem.getRiskItemPK();
@@ -325,7 +328,8 @@ public class RiskItemJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -341,7 +345,8 @@ public class RiskItemJpaController implements Serializable {
             try {
                 riskItem = em.getReference(RiskItem.class, id);
                 riskItem.getRiskItemPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskItem with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -387,7 +392,8 @@ public class RiskItemJpaController implements Serializable {
             }
             em.remove(riskItem);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -413,7 +419,8 @@ public class RiskItemJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -422,7 +429,8 @@ public class RiskItemJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(RiskItem.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -435,7 +443,8 @@ public class RiskItemJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

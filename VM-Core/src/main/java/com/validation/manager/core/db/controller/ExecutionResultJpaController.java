@@ -58,7 +58,8 @@ public class ExecutionResultJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -99,7 +100,8 @@ public class ExecutionResultJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = executionResult.getId();
@@ -108,7 +110,8 @@ public class ExecutionResultJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -124,7 +127,8 @@ public class ExecutionResultJpaController implements Serializable {
             try {
                 executionResult = em.getReference(ExecutionResult.class, id);
                 executionResult.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The executionResult with id " + id + " no longer exists.", enfe);
             }
             List<ExecutionStep> executionStepList = executionResult.getExecutionStepList();
@@ -134,7 +138,8 @@ public class ExecutionResultJpaController implements Serializable {
             }
             em.remove(executionResult);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -160,7 +165,8 @@ public class ExecutionResultJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -169,7 +175,8 @@ public class ExecutionResultJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(ExecutionResult.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -182,7 +189,8 @@ public class ExecutionResultJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

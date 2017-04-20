@@ -36,3 +36,11 @@ INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (10, 'undefin
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (8, 'show.expected.result', 1, 0, '0', '');
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (9, 'openoffice.port', 0, 1000, '0', '');
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (10, 'openoffice.home', 0, 0, '0', '');
+/*Issue Types*/
+INSERT INTO `issue_type` (`id`, `type_name`, `description`) VALUES (1, 'bug.name', 'bug.desc');
+INSERT INTO `issue_type` (`id`, `type_name`, `description`) VALUES (2, 'observation.name', 'observation.desc');
+INSERT INTO `issue_type` (`id`, `type_name`, `description`) VALUES (3, 'step.issue.name', 'step.issue.desc');
+/*Issue Resolutions*/
+INSERT INTO `issue_resolution` (`id`, `name`) VALUES (1, 'issue.invalid');
+INSERT INTO `issue_resolution` (`id`, `name`) VALUES (2, 'issue.not.reproduceable');
+INSERT INTO `issue_resolution` (`id`, `name`) VALUES (3, 'issue.fixed');

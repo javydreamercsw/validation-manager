@@ -40,8 +40,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
         if (userTestProjectRole.getUserTestProjectRolePK() == null) {
             userTestProjectRole.setUserTestProjectRolePK(new UserTestProjectRolePK());
         }
-        userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
         userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
         userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         EntityManager em = null;
         try {
@@ -76,12 +76,14 @@ public class UserTestProjectRoleJpaController implements Serializable {
                 role = em.merge(role);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findUserTestProjectRole(userTestProjectRole.getUserTestProjectRolePK()) != null) {
                 throw new PreexistingEntityException("UserTestProjectRole " + userTestProjectRole + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -89,8 +91,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
     }
 
     public void edit(UserTestProjectRole userTestProjectRole) throws NonexistentEntityException, Exception {
-        userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
         userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
+        userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
         userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         EntityManager em = null;
         try {
@@ -141,7 +143,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
                 roleNew = em.merge(roleNew);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 UserTestProjectRolePK id = userTestProjectRole.getUserTestProjectRolePK();
@@ -150,7 +153,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -166,7 +170,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
             try {
                 userTestProjectRole = em.getReference(UserTestProjectRole.class, id);
                 userTestProjectRole.getUserTestProjectRolePK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userTestProjectRole with id " + id + " no longer exists.", enfe);
             }
             TestProject testProject = userTestProjectRole.getTestProject();
@@ -186,7 +191,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
             }
             em.remove(userTestProjectRole);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -212,7 +218,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -221,7 +228,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(UserTestProjectRole.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -234,7 +242,8 @@ public class UserTestProjectRoleJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

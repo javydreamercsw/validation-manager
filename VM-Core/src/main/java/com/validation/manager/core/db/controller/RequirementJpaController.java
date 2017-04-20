@@ -143,7 +143,8 @@ public class RequirementJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -316,7 +317,8 @@ public class RequirementJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = requirement.getId();
@@ -325,7 +327,8 @@ public class RequirementJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -341,7 +344,8 @@ public class RequirementJpaController implements Serializable {
             try {
                 requirement = em.getReference(Requirement.class, id);
                 requirement.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The requirement with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -392,7 +396,8 @@ public class RequirementJpaController implements Serializable {
             }
             em.remove(requirement);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -418,7 +423,8 @@ public class RequirementJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -427,7 +433,8 @@ public class RequirementJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(Requirement.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -440,7 +447,8 @@ public class RequirementJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
