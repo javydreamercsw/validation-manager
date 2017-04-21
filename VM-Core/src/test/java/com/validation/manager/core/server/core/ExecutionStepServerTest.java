@@ -156,7 +156,8 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
         System.out.println("addAttachment");
         AttachmentServer attachment = new AttachmentServer();
         attachment.setTextValue("Test");
-        attachment.setAttachmentType(AttachmentTypeServer.getTypeForExtension("comment"));
+        attachment.setAttachmentType(AttachmentTypeServer
+                .getTypeForExtension("comment"));
         attachment.write2DB();
         ProjectServer ps = new ProjectServer(ProjectServer.getProjects().get(0));
         TestCaseExecutionServer tces
@@ -168,9 +169,9 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
                 = new ExecutionStepServer(tces.getExecutionStepList().get(0));
         assertEquals(0, instance.getExecutionStepHasAttachmentList().size());
         instance.addAttachment(attachment);
-        instance.write2DB();
-        instance = new ExecutionStepServer(tces.getExecutionStepList().get(0));
         assertEquals(1, instance.getExecutionStepHasAttachmentList().size());
+        instance.removeAttachment(attachment);
+        assertEquals(0, instance.getExecutionStepHasAttachmentList().size());
     }
 
     /**
@@ -203,5 +204,7 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
         assertEquals(assigner.getId(),
                 instance.getExecutionStepHasIssueList().get(0)
                         .getVmUserList().get(0).getId());
+        instance.removeIssue(issue);
+        assertEquals(0, instance.getExecutionStepHasIssueList().size());
     }
 }
