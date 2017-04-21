@@ -43,15 +43,18 @@ public abstract class AbstractVMTestCase extends TestCase {
     private static final Logger LOG
             = Logger.getLogger(AbstractVMTestCase.class.getSimpleName());
 
-    @Override
     @Before
+    @Override
     protected void setUp() throws Exception {
+        LOG.info("Setting up database!");
         DataBaseManager.setPersistenceUnitName("TestVMPU");
         assertEquals(DBState.VALID, DataBaseManager.getState());
+        postSetUp();
+        LOG.info("Done!");
     }
 
-    @Override
     @After
+    @Override
     protected void tearDown() throws Exception {
         LOG.info("Deleting database!");
         deleteTestUsers();
@@ -73,26 +76,31 @@ public abstract class AbstractVMTestCase extends TestCase {
             conn = ds.getConnection();
             stmt = conn.createStatement();
             stmt.executeUpdate("DROP ALL OBJECTS DELETE FILES");
-        } catch (SQLException | ClassNotFoundException ex) {
+        }
+        catch (SQLException | ClassNotFoundException ex) {
             LOG.log(Level.SEVERE,
                     null, ex);
-        } finally {
+        }
+        finally {
             try {
                 if (stmt != null) {
                     stmt.close();
                 }
-            } catch (SQLException ex) {
+            }
+            catch (SQLException ex) {
                 fail();
             }
             try {
                 if (conn != null) {
                     conn.close();
                 }
-            } catch (SQLException ex) {
+            }
+            catch (SQLException ex) {
                 fail();
             }
         }
         DataBaseManager.close();
+        postTearDown();
         LOG.info("Done!");
     }
 
@@ -117,9 +125,24 @@ public abstract class AbstractVMTestCase extends TestCase {
                     .getEntityManagerFactory())
                     .findVmUser(temp.getId());
             LOG.log(Level.INFO, "Done!");
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
+    }
+
+    /**
+     * Code to be performed after set up.
+     */
+    protected void postSetUp() {
+
+    }
+
+    /**
+     * Code to be performed after set teardown.
+     */
+    protected void postTearDown() {
+
     }
 
     protected void deleteTestUsers() {
@@ -130,7 +153,8 @@ public abstract class AbstractVMTestCase extends TestCase {
             designer = null;
             tester = null;
             leader = null;
-        } catch (IllegalOrphanException | NonexistentEntityException ex) {
+        }
+        catch (IllegalOrphanException | NonexistentEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
     }

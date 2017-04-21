@@ -9,7 +9,6 @@ import com.validation.manager.test.AbstractVMTestCase;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.junit.Before;
 import org.junit.Test;
 import org.openide.util.Exceptions;
 
@@ -23,102 +22,106 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
     private VMUserServer assignee;//Tester
     private VMUserServer assigner;//Tester
 
-    @Before
     @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        assignee = new VMUserServer(2);//Tester
-        assigner = new VMUserServer(6);//Tester
-        ProjectJpaController controller
-                = new ProjectJpaController(DataBaseManager
-                        .getEntityManagerFactory());
-        Project p = new Project("Demo");
-        controller.create(p);
-        for (int i = 0; i < 5; i++) {
-            //Create a spec
-            RequirementSpecServer temp
-                    = new RequirementSpecServer("Spec "
-                            + (i + 1), "Description " + (i + 1),
-                            p.getId(), 1);
-            temp.write2DB();
-            RequirementSpecNodeServer node
-                    = temp.addSpecNode("Node " + (i + 1),
-                            "Description " + (i + 1), "Scope " + (i + 1));
-            for (int y = 0; y < 5; y++) {
-                RequirementServer req
-                        = new RequirementServer("Requirement "
-                                + reqCounter,
-                                "Description " + reqCounter,
-                                node.getRequirementSpecNodePK(),
-                                "Notes", 1, 1);
-                req.write2DB();
-                node.getRequirementList().add(req.getEntity());
-                reqCounter++;
+    protected void postSetUp() {
+        try {
+            DataBaseManager.getEntityManagerFactory();
+            assignee = new VMUserServer(2);//Tester
+            assigner = new VMUserServer(6);//Tester
+            ProjectJpaController controller
+                    = new ProjectJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+            Project p = new Project("Demo");
+            controller.create(p);
+            for (int i = 0; i < 5; i++) {
+                //Create a spec
+                RequirementSpecServer temp
+                        = new RequirementSpecServer("Spec "
+                                + (i + 1), "Description " + (i + 1),
+                                p.getId(), 1);
+                temp.write2DB();
+                RequirementSpecNodeServer node
+                        = temp.addSpecNode("Node " + (i + 1),
+                                "Description " + (i + 1), "Scope " + (i + 1));
+                for (int y = 0; y < 5; y++) {
+                    RequirementServer req
+                            = new RequirementServer("Requirement "
+                                    + reqCounter,
+                                    "Description " + reqCounter,
+                                    node.getRequirementSpecNodePK(),
+                                    "Notes", 1, 1);
+                    req.write2DB();
+                    node.getRequirementList().add(req.getEntity());
+                    reqCounter++;
+                }
+                node.write2DB();
+                p.getRequirementSpecList().add(temp.getEntity());
             }
-            node.write2DB();
-            p.getRequirementSpecList().add(temp.getEntity());
-        }
-        new ProjectJpaController(DataBaseManager
-                .getEntityManagerFactory()).edit(p);
-        TestProjectServer tp
-                = new TestProjectServer("Test Project", true);
-        tp.setName("Test Project");
-        tp.setNotes("Notes");
-        tp.setActive(true);
-        tp.write2DB();
-        //Add the test structure
-        TestPlanServer tps = new TestPlanServer(tp.getEntity(),
-                true, true);
-        tps.setName("Test Plan #" + (tpCounter++));
-        tps.setNotes("Notes");
-        tps.write2DB();
-        for (int i = 0; i < 5; i++) {
-            //Add steps
-            TestCaseServer tcs
-                    = new TestCaseServer("Test Case #"
-                            + (tcCounter++),
-                            new Date());
-            tcs.write2DB();
-            for (int j = 0; j < 5; j++) {
-                List<Requirement> requirements
-                        = new RequirementJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findRequirementEntities()
-                                .subList(j * 5, j * 5 + 5);
-                tcs.addStep((j + 1), "Step #" + (j + 1), "Note",
-                        "Criteria",
-                        requirements);
+            new ProjectJpaController(DataBaseManager
+                    .getEntityManagerFactory()).edit(p);
+            TestProjectServer tp
+                    = new TestProjectServer("Test Project", true);
+            tp.setName("Test Project");
+            tp.setNotes("Notes");
+            tp.setActive(true);
+            tp.write2DB();
+            //Add the test structure
+            TestPlanServer tps = new TestPlanServer(tp.getEntity(),
+                    true, true);
+            tps.setName("Test Plan #" + (tpCounter++));
+            tps.setNotes("Notes");
+            tps.write2DB();
+            for (int i = 0; i < 5; i++) {
+                //Add steps
+                TestCaseServer tcs
+                        = new TestCaseServer("Test Case #"
+                                + (tcCounter++),
+                                new Date());
+                tcs.write2DB();
+                for (int j = 0; j < 5; j++) {
+                    List<Requirement> requirements
+                            = new RequirementJpaController(DataBaseManager
+                                    .getEntityManagerFactory())
+                                    .findRequirementEntities()
+                                    .subList(j * 5, j * 5 + 5);
+                    tcs.addStep((j + 1), "Step #" + (j + 1), "Note",
+                            "Criteria",
+                            requirements);
+                }
+                tcs.write2DB();
+                tps.addTestCase(tcs.getEntity());
             }
-            tcs.write2DB();
-            tps.addTestCase(tcs.getEntity());
+            tps.write2DB();
+            tp.getTestPlanList().add(tps.getEntity());
+            tp.write2DB();
+            TestCaseExecutionServer tce = new TestCaseExecutionServer();
+            tce.write2DB();
+            tce.addTestProject(tp.getEntity());
+            tps.getTestCaseList().forEach((tc) -> {
+                assignee.assignTestCase(tce.getEntity(), tc, assigner);
+            });
+            ProjectServer ps = new ProjectServer(p);
+            if (ps.getTestProjectList() == null) {
+                ps.setTestProjectList(new ArrayList<>());
+            }
+            ps.getTestProjectList().add(tp.getEntity());
+            //Save it
+            ps.write2DB();
+            int i = 1;
+            TestCaseExecutionServer tces
+                    = new TestCaseExecutionServer("Execution " + i,
+                            "Test Scope " + i);
+            tces.setConclusion("Conclusion!");
+            tces.write2DB();
+            p.getTestProjectList().forEach((t) -> {
+                tces.addTestProject(t);
+            });
+            tces.write2DB();
+            ps.update(p, ps.getEntity());
         }
-        tps.write2DB();
-        tp.getTestPlanList().add(tps.getEntity());
-        tp.write2DB();
-        TestCaseExecutionServer tce = new TestCaseExecutionServer();
-        tce.write2DB();
-        tce.addTestProject(tp.getEntity());
-        tps.getTestCaseList().forEach((tc) -> {
-            assignee.assignTestCase(tce.getEntity(), tc, assigner);
-        });
-        ProjectServer ps = new ProjectServer(p);
-        if (ps.getTestProjectList() == null) {
-            ps.setTestProjectList(new ArrayList<>());
+        catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        ps.getTestProjectList().add(tp.getEntity());
-        //Save it
-        ps.write2DB();
-        int i = 1;
-        TestCaseExecutionServer tces
-                = new TestCaseExecutionServer("Execution " + i,
-                        "Test Scope " + i);
-        tces.setConclusion("Conclusion!");
-        tces.write2DB();
-        p.getTestProjectList().forEach((t) -> {
-            tces.addTestProject(t);
-        });
-        tces.write2DB();
-        ps.update(p, ps.getEntity());
     }
 
     /**

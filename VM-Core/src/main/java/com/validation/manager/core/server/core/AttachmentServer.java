@@ -20,9 +20,6 @@ import org.openide.util.Exceptions;
 public final class AttachmentServer extends Attachment
         implements EntityServer<Attachment> {
 
-    private static final AttachmentJpaController c
-            = new AttachmentJpaController(DataBaseManager.getEntityManagerFactory());
-
     public AttachmentServer(AttachmentPK attachmentPK) {
         super(attachmentPK);
         update();
@@ -34,6 +31,8 @@ public final class AttachmentServer extends Attachment
 
     @Override
     public int write2DB() throws Exception {
+        AttachmentJpaController c
+                = new AttachmentJpaController(DataBaseManager.getEntityManagerFactory());
         if (getAttachmentPK() == null) {
             Attachment a = new Attachment();
             update(a, this);
@@ -52,6 +51,8 @@ public final class AttachmentServer extends Attachment
 
     @Override
     public Attachment getEntity() {
+        AttachmentJpaController c
+                = new AttachmentJpaController(DataBaseManager.getEntityManagerFactory());
         return c.findAttachment(getAttachmentPK());
     }
 
@@ -88,7 +89,8 @@ public final class AttachmentServer extends Attachment
                     setAttachmentType(AttachmentTypeServer.getTypeForExtension(""));
                 }
             }
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
@@ -99,7 +101,8 @@ public final class AttachmentServer extends Attachment
             result = File.createTempFile("temp", "vm");
             result.deleteOnExit();
             FileUtils.writeByteArrayToFile(result, getFile());
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             Exceptions.printStackTrace(ex);
             result = null;
         }
@@ -107,7 +110,10 @@ public final class AttachmentServer extends Attachment
     }
 
     public static void delete(Attachment entity)
-            throws IllegalOrphanException, NonexistentEntityException, Exception {
+            throws IllegalOrphanException, NonexistentEntityException,
+            Exception {
+        AttachmentJpaController c
+                = new AttachmentJpaController(DataBaseManager.getEntityManagerFactory());
         c.destroy(entity.getAttachmentPK());
     }
 }
