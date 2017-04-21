@@ -202,6 +202,15 @@
                 <version>3.0.0</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webResources>
+                        <resource>
+                            <directory>target/classes/META-INF/services</directory>
+                            <includes>
+                                <include>*.*</include>
+                            </includes>
+                            <targetPath>META-INF/services</targetPath>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
             <plugin>

@@ -12,6 +12,7 @@ import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
@@ -48,9 +49,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConvert
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
-import net.sourceforge.javydreamercsw.validation.manager.web.file.ImageDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
-import net.sourceforge.javydreamercsw.validation.manager.web.file.TextDisplay;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeException;
@@ -204,7 +203,7 @@ public class ExecutionWizardStep implements WizardStep {
             a.addClickListener((Button.ClickEvent event) -> {
                 displayIssue(new IssueServer(ei.getIssue()));
             });
-            a.setEnabled(!step.isLocked());
+            a.setEnabled(!step.getLocked());
             issues.addComponent(a);
         }
         for (ExecutionStepHasAttachment attachment
@@ -216,79 +215,27 @@ public class ExecutionWizardStep implements WizardStep {
                     Button a = new Button("Comment #" + commentCounter);
                     a.setIcon(VaadinIcons.CLIPBOARD_TEXT);
                     a.addClickListener((Button.ClickEvent event) -> {
-                        displayComment(new AttachmentServer(attachment
-                                .getAttachment().getAttachmentPK()));
+                        if (!step.getLocked()) {
+                            //Prompt if user wants this removed
+                            MessageBox mb = getDeletionPrompt(attachment);
+                            mb.open();
+                        } else {
+                            displayComment(new AttachmentServer(attachment
+                                    .getAttachment().getAttachmentPK()));
+                        }
                     });
-                    a.setEnabled(!step.isLocked());
+                    a.setEnabled(!step.getLocked());
                     comments.addComponent(a);
                     break;
                 }
                 default: {
                     Button a = new Button(attachment.getAttachment().getFileName());
-                    a.setEnabled(!step.isLocked());
+                    a.setEnabled(!step.getLocked());
                     a.setIcon(VaadinIcons.PAPERCLIP);
                     a.addClickListener((Button.ClickEvent event) -> {
-                        String name = attachment.getAttachment().getFileName();
-                        byte[] bytes = attachment.getAttachment().getFile();
-                        boolean ableToDisplay = false;
-                        try {
-                            //TODO:Remove when the service issue is fixed
-                            //See: https://vaadin.com/forum/#!/thread/15663093
-                            //See: http://stackoverflow.com/questions/43373082/vaadin-how-to-add-meta-inf-services-to-the-war
-                            //Optionally convert all files to pdf when possible.
-                            PDFDisplay pdf = new PDFDisplay();
-                            if (pdf.supportFile(name)) {
-                                ui.addWindow(pdf.getViewer(pdf.loadFile(name, bytes)));
-                                ableToDisplay = true;
-                            }
-                            ImageDisplay image = new ImageDisplay();
-                            if (!ableToDisplay && image.supportFile(name)) {
-                                ui.addWindow(image.getViewer(image.loadFile(name, bytes)));
-                                ableToDisplay = true;
-                            }
-                            TextDisplay textDisplay = new TextDisplay();
-                            if (!ableToDisplay && textDisplay.supportFile(name)) {
-                                ui.addWindow(textDisplay.getViewer(textDisplay.loadFile(name, bytes)));
-                                ableToDisplay = true;
-                            }
-                            if (!ableToDisplay) {
-                                //Convert file to pfd
-                                File source = textDisplay.loadFile(name, bytes);
-                                File dest = new File(System.getProperty("java.io.tmpdir")
-                                        + System.getProperty("file.separator")
-                                        + name.substring(0, name.lastIndexOf("."))
-                                        + ".pdf");
-                                getPDFRendering(source, dest);
-                                if (dest.exists()) {
-                                    ui.addWindow(pdf.getViewer(dest));
-                                    ableToDisplay = true;
-                                } else {
-                                    Notification.show("Unable to render file",
-                                            "Unable to render file in pdf. "
-                                            + "Contact the system administrator",
-                                            Notification.Type.ERROR_MESSAGE);
-                                }
-                            }
-                            //-------------------------------------------
-                            for (IFileDisplay fd : Lookup.getDefault()
-                                    .lookupAll(IFileDisplay.class)) {
-                                if (fd.supportFile(new File(name))) {
-                                    ui.addWindow(fd.getViewer(fd.loadFile(name,
-                                            bytes)));
-                                    ableToDisplay = true;
-                                    break;
-                                }
-                            }
-                        } catch (IOException ex) {
-                            LOG.log(Level.SEVERE,
-                                    "Error loading attachment file: "
-                                    + name, ex);
-                        }
-                        if (!ableToDisplay) {
-                            LOG.log(Level.WARNING,
-                                    "Unable to display: {0}. No File displayer found!",
-                                    name);
-                        }
+                        displayAttachment(
+                                new AttachmentServer(attachment.getAttachment()
+                                        .getAttachmentPK()));
                     });
                     attachments.addComponent(a);
                     break;
@@ -317,12 +264,12 @@ public class ExecutionWizardStep implements WizardStep {
                 protected void handleFile(File file, String fileName,
                         String mimeType, long length) {
                     try {
-                        LOG.log(Level.INFO, "Received file {1} at: {0}",
+                        LOG.log(Level.FINE, "Received file {1} at: {0}",
                                 new Object[]{file.getAbsolutePath(), fileName});
                         //Process the file
                         //Create the attachment
                         AttachmentServer a = new AttachmentServer();
-                        a.addFile(file);
+                        a.addFile(file, fileName);
                         //Overwrite the default file name set in addFile. It'll be a temporary file name
                         a.setFileName(fileName);
                         a.write2DB();
@@ -363,10 +310,10 @@ public class ExecutionWizardStep implements WizardStep {
         });
         hl.addComponent(comment);
         step.update();
-        attach.setEnabled(!step.isLocked());
-        bug.setEnabled(!step.isLocked());
-        comment.setEnabled(!step.isLocked());
-        result.setEnabled(!step.isLocked());
+        attach.setEnabled(!step.getLocked());
+        bug.setEnabled(!step.getLocked());
+        comment.setEnabled(!step.getLocked());
+        result.setEnabled(!step.getLocked());
         layout.addComponent(hl);
         return layout;
     }
@@ -441,13 +388,13 @@ public class ExecutionWizardStep implements WizardStep {
         ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) -> {
             //Enable if there is a description change.
             mb.getButton(ButtonType.OK)
-                    .setEnabled(!step.isLocked()
+                    .setEnabled(!step.getLocked()
                             && !event1.getText().trim().isEmpty());
         });
         ((TextField) title).addTextChangeListener((TextChangeEvent event1) -> {
             //Enable if there is a title change.
             mb.getButton(ButtonType.OK)
-                    .setEnabled(!step.isLocked()
+                    .setEnabled(!step.getLocked()
                             && !event1.getText().trim().isEmpty());
         });
         mb.open();
@@ -496,7 +443,7 @@ public class ExecutionWizardStep implements WizardStep {
         ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) -> {
             //Enable only when there is a comment.
             mb.getButton(ButtonType.OK)
-                    .setEnabled(!step.isLocked()
+                    .setEnabled(!step.getLocked()
                             && !event1.getText().trim().isEmpty());
         });
         mb.open();
@@ -601,5 +548,91 @@ public class ExecutionWizardStep implements WizardStep {
             LOG.log(Level.SEVERE, null, e);
         }
         return false;
+    }
+
+    private void displayAttachment(AttachmentServer attachment) {
+        String name = attachment.getFileName();
+        byte[] bytes = attachment.getFile();
+        boolean ableToDisplay = false;
+        try {
+            for (IFileDisplay fd : Lookup.getDefault()
+                    .lookupAll(IFileDisplay.class)) {
+                if (fd.supportFile(new File(name))) {
+                    ui.addWindow(fd.getViewer(fd.loadFile(name,
+                            bytes)));
+                    ableToDisplay = true;
+                    break;
+                }
+            }
+            if (!ableToDisplay) {
+                //Convert file to pfd
+                PDFDisplay pdf = new PDFDisplay();
+                File source = pdf.loadFile(name, bytes);
+                File dest = new File(System.getProperty("java.io.tmpdir")
+                        + System.getProperty("file.separator")
+                        + name.substring(0, name.lastIndexOf("."))
+                        + ".pdf");
+                getPDFRendering(source, dest);
+                if (dest.exists()) {
+                    ui.addWindow(pdf.getViewer(dest));
+                    ableToDisplay = true;
+                }
+            }
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE,
+                    "Error loading attachment file: "
+                    + name, ex);
+        }
+        if (!ableToDisplay) {
+            Notification.show("Unable to render file",
+                    "Unable to render file in pdf. "
+                    + "Contact the system administrator",
+                    Notification.Type.ERROR_MESSAGE);
+        }
+    }
+
+    private MessageBox getDeletionPrompt(Object data) {
+        MessageBox mb = MessageBox.createQuestion();
+        mb.setData(data);
+        mb.asModal(true)
+                .withMessage(new Label("Do you want to remove this item?"))
+                .withButtonAlignment(Alignment.MIDDLE_CENTER)
+                .withOkButton(() -> {
+                    try {
+                        if (mb.getData() instanceof ExecutionStepHasAttachment) {
+                            getStep().removeAttachment(new AttachmentServer(
+                                    ((ExecutionStepHasAttachment) mb.getData())
+                                            .getAttachment().getAttachmentPK()));
+                        }
+                        if (mb.getData() instanceof ExecutionStepHasIssue) {
+                            getStep().removeIssue((ExecutionStepHasIssue) mb.getData());
+                        }
+                        getStep().write2DB();
+                        getStep().update();
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                }, ButtonOption.focus(),
+                        ButtonOption.icon(VaadinIcons.CHECK))
+                .withCancelButton(() -> {
+                    if (mb.getData() instanceof ExecutionStepHasAttachment) {
+                        ExecutionStepHasAttachment esha = (ExecutionStepHasAttachment) mb.getData();
+                        if (esha.getAttachment().getAttachmentType().getType().equals("comment")) {
+                            displayComment(new AttachmentServer(esha
+                                    .getAttachment().getAttachmentPK()));
+                        } else {
+                            displayAttachment(new AttachmentServer(esha
+                                    .getAttachment().getAttachmentPK()));
+                        }
+                    }
+                    if (mb.getData() instanceof ExecutionStepHasIssue) {
+                        ExecutionStepHasIssue eshi = (ExecutionStepHasIssue) mb.getData();
+                        displayIssue(new IssueServer(eshi.getIssue()));
+                    }
+                },
+                        ButtonOption.icon(VaadinIcons.CLOSE));
+        mb.getWindow().setCaption("Issue Details");
+        mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        return mb;
     }
 }
