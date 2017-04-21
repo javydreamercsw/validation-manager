@@ -60,10 +60,10 @@ public class TesterScreen extends Panel {
             for (ExecutionStep e : tce.getExecutionStepList()) {
                 if ((tcID > 0
                         && e.getExecutionStepPK().getStepTestCaseId() == tcID)
-                        && !e.isLocked()) {
+                        && !e.getLocked()) {
                     locked = false;
                     break;
-                } else if (tcID < 0 && !e.isLocked()) {
+                } else if (tcID < 0 && !e.getLocked()) {
                     locked = false;
                     break;
                 }
@@ -106,7 +106,7 @@ public class TesterScreen extends Panel {
                                     es.getTestCaseExecution(),
                                     Integer.parseInt(id
                                             .substring(id.lastIndexOf("-") + 1)));
-                            locked = es.isLocked();
+                            locked = es.getLocked();
                         }
                         if (locked) {
                             label2.setIcon(VaadinIcons.LOCK);

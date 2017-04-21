@@ -100,7 +100,7 @@ public final class ExecutionWindow extends VMWindow {
                         .withYesButton(() -> {
                             execution.getSteps().stream().map((step)
                                     -> (ExecutionWizardStep) step).map((s)
-                                    -> s.getStep()).filter((ess) -> (!ess.isLocked()
+                                    -> s.getStep()).filter((ess) -> (!ess.getLocked()
                                     && ess.getResultId() != null))
                                     .forEachOrdered((ess) -> {
                                         try {
