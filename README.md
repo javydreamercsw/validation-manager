@@ -1,6 +1,7 @@
 # README #
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/390b17b2843d4f29afde2f0194252b99)](https://www.codacy.com/app/javydreamercsw/validation-manager?utm_source=github.com&utm_medium=referral&utm_content=javydreamercsw/validation-manager&utm_campaign=badger)
+[![Build Status](https://travis-ci.org/javydreamercsw/validation-manager.svg?branch=master)](https://travis-ci.org/javydreamercsw/validation-manager)
 
 
 Welcome to Validation Manager Repository!
@@ -8,8 +9,6 @@ Welcome to Validation Manager Repository!
 ### What is this repository for? ###
 
 Validation Manager is a tool to handle all the cumbersome paperwork of regulated environment validations. Including Validation Plans, protocols, executions and exceptions. Keeping everything in one place and best of all paperless.
-
-[Issue Tracker](https://simple-marauroa.jira.com/projects/VM/issues)
 
 ### How do I get set up? ###
 
