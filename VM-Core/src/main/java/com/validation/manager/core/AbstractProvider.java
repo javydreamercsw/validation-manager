@@ -22,4 +22,9 @@ public abstract class AbstractProvider implements IMainContentProvider {
     public boolean shouldDisplay() {
         return true;
     }
+
+    @Override
+    public void update() {
+        //Do nothing by default
+    }
 }

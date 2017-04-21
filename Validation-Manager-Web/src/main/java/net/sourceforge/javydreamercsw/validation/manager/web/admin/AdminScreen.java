@@ -16,11 +16,11 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.server.core.VMSettingServer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 
 /**
  *
@@ -28,16 +28,16 @@ import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI
  */
 public class AdminScreen extends Panel {
 
-    private final ValidationManagerUI ui;
+    private final VMUI ui;
     private static final Logger LOG
             = Logger.getLogger(AdminScreen.class.getSimpleName());
 
-    public AdminScreen(ValidationManagerUI ui) {
+    public AdminScreen(VMUI ui) {
         this.ui = ui;
         init();
     }
 
-    public AdminScreen(ValidationManagerUI ui, String caption) {
+    public AdminScreen(VMUI ui, String caption) {
         super(caption);
         this.ui = ui;
         init();

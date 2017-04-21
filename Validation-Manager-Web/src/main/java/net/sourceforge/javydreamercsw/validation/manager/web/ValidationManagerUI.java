@@ -105,12 +105,8 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
-import net.sourceforge.javydreamercsw.validation.manager.web.admin.AdminScreen;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
-import net.sourceforge.javydreamercsw.validation.manager.web.tester.TesterScreen;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
-import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
-import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
@@ -141,11 +137,10 @@ public class ValidationManagerUI extends UI implements VMUI {
     private final TabSheet tabSheet = new TabSheet();
     private final List<Project> projects = new ArrayList<>();
     private Tree tree;
-    private Tab main, designer, admin;
+    private Tab main;
     private final List<String> roles = new ArrayList<>();
     private static final ResourceBundle RB = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages");
-    private TesterScreen testScreen;
 
     /**
      * @return the user
@@ -279,10 +274,6 @@ public class ValidationManagerUI extends UI implements VMUI {
             }
         }
         tabSheet.setSelectedTab(target);
-    }
-
-    private void setTabContent(Tab target, Component content) {
-        setTabContent(target, content, null);
     }
 
     private void displayTestCaseExecution(TestCaseExecution tce, boolean edit) {
@@ -1594,6 +1585,20 @@ public class ValidationManagerUI extends UI implements VMUI {
         return RB.containsKey(mess) ? RB.getString(mess) : mess;
     }
 
+    private Component findMainProvider(String id) {
+        Iterator<Component> it = tabSheet.iterator();
+        Component me = null;
+        while (it.hasNext()) {
+            Component next = it.next();
+            if (next.getId() != null
+                    && next.getId().equals(id)) {
+                me = next;
+                break;
+            }
+        }
+        return me;
+    }
+
     private Component getContentComponent() {
         HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
         hsplit.setLocked(true);
@@ -1610,35 +1615,19 @@ public class ValidationManagerUI extends UI implements VMUI {
             if (main == null) {
                 main = tabSheet.addTab(new VerticalLayout(), "Main");
             }
-            if (designer == null) {
-                designer = tabSheet.addTab(new VerticalLayout(), "Test Designer");
-            }
-            if (admin == null) {
-                admin = tabSheet.addTab(new AdminScreen(this), "Admin");
-            }
             Lookup.getDefault().lookupAll(IMainContentProvider.class)
                     .forEach((provider) -> {
                         Iterator<Component> it = tabSheet.iterator();
-                        boolean found = false;
-                        Component me = null;
-                        while (it.hasNext()) {
-                            Component next = it.next();
-                            if (next.getId() != null
-                                    && next.getId().equals(provider
-                                            .getComponentCaption())) {
-                                found = true;
-                                me = next;
-                                break;
-                            }
-                        }
-                        if (found) {
-                            provider.update();
-                        } else {
+                        Component me = findMainProvider(provider
+                                .getComponentCaption());
+                        if (me == null) {
                             provider.setUI(this);
                             if (provider.shouldDisplay()) {
                                 Tab tab = tabSheet.addTab(provider.getContent(),
                                         translate(provider.getComponentCaption()));
                             }
+                        } else {
+                            provider.update();
                         }
                         //Hide if needed
                         if (!provider.shouldDisplay()) {
@@ -1658,12 +1647,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (main != null) {
             main.setVisible(user != null);
         }
-        if (designer != null) {
-            designer.setVisible(checkRight("testplan.planning"));
-        }
-        if (admin != null) {
-            admin.setVisible(checkRight("system.configuration"));
-        }
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
         return hsplit;
     }
@@ -1679,8 +1662,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                     user.write2DB();
                     user = null;
                     main = null;
-                    designer = null;
-                    admin = null;
                     updateScreen();
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -2304,31 +2285,14 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayTestPlanning(Project p) {
-        Wizard w = new Wizard();
-        w.addStep(new SelectTestCasesStep(w, p));
-        w.addStep(new DetailStep(ValidationManagerUI.this));
-        w.addListener(new WizardProgressListener() {
-            @Override
-            public void activeStepChanged(WizardStepActivationEvent event) {
-                //Do nothing
-            }
-
-            @Override
-            public void stepSetChanged(WizardStepSetChangedEvent event) {
-                //Do nothing
-            }
-
-            @Override
-            public void wizardCompleted(WizardCompletedEvent event) {
-                setTabContent(designer, null, "testplan.planning");
-            }
-
-            @Override
-            public void wizardCancelled(WizardCancelledEvent event) {
-                setTabContent(designer, null, "testplan.planning");
-            }
-        });
-        setTabContent(designer, w, "testplan.planning");
+        DesignerScreenProvider provider = Lookup.getDefault()
+                .lookup(DesignerScreenProvider.class);
+        if (provider != null && p != null) {
+            provider.setProject(p);
+            updateScreen();
+            tabSheet.setSelectedTab(findMainProvider(provider
+                    .getComponentCaption()));
+        }
     }
 
     @Override
