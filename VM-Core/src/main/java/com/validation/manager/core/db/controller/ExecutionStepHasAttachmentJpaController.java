@@ -39,11 +39,11 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
         if (executionStepHasAttachment.getExecutionStepHasAttachmentPK() == null) {
             executionStepHasAttachment.setExecutionStepHasAttachmentPK(new ExecutionStepHasAttachmentPK());
         }
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepTestCaseExecutionId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentId(executionStepHasAttachment.getAttachment().getAttachmentPK().getId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -83,11 +83,11 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
     }
 
     public void edit(ExecutionStepHasAttachment executionStepHasAttachment) throws NonexistentEntityException, Exception {
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepTestCaseExecutionId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentId(executionStepHasAttachment.getAttachment().getAttachmentPK().getId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
         EntityManager em = null;
         try {
             em = getEntityManager();

@@ -1,8 +1,12 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -14,7 +18,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -29,27 +32,19 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Attachment.findAll", query = "SELECT a FROM Attachment a")
-    , @NamedQuery(name = "Attachment.findById",
-            query = "SELECT a FROM Attachment a WHERE a.attachmentPK.id = :id")
-    , @NamedQuery(name = "Attachment.findByAttachmentTypeId",
-            query = "SELECT a FROM Attachment a WHERE a.attachmentPK.attachmentTypeId = :attachmentTypeId")
-    , @NamedQuery(name = "Attachment.findByStringValue",
-            query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue")
-    , @NamedQuery(name = "Attachment.findByFileName",
-            query = "SELECT a FROM Attachment a WHERE a.fileName = :fileName")})
+    , @NamedQuery(name = "Attachment.findById", query = "SELECT a FROM Attachment a WHERE a.attachmentPK.id = :id")
+    , @NamedQuery(name = "Attachment.findByAttachmentTypeId", query = "SELECT a FROM Attachment a WHERE a.attachmentPK.attachmentTypeId = :attachmentTypeId")
+    , @NamedQuery(name = "Attachment.findByStringValue", query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue")
+    , @NamedQuery(name = "Attachment.findByFileName", query = "SELECT a FROM Attachment a WHERE a.fileName = :fileName")})
 public class Attachment implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected AttachmentPK attachmentPK;
-    @Basic(optional = false)
-    @NotNull
     @Lob
     @Column(name = "file")
     private byte[] file;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "string_value")
     private String stringValue;
     @Lob
@@ -59,8 +54,7 @@ public class Attachment implements Serializable {
     @Size(max = 255)
     @Column(name = "file_name")
     private String fileName;
-    @JoinColumn(name = "attachment_type_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumn(name = "attachment_type_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private AttachmentType attachmentType;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "attachment")
@@ -71,12 +65,6 @@ public class Attachment implements Serializable {
 
     public Attachment(AttachmentPK attachmentPK) {
         this.attachmentPK = attachmentPK;
-    }
-
-    public Attachment(AttachmentPK attachmentPK, byte[] file, String stringValue) {
-        this.attachmentPK = attachmentPK;
-        this.file = file;
-        this.stringValue = stringValue;
     }
 
     public Attachment(int id, int attachmentTypeId) {
@@ -155,13 +143,15 @@ public class Attachment implements Serializable {
             return false;
         }
         Attachment other = (Attachment) object;
-        return !((this.attachmentPK == null && other.attachmentPK != null)
-                || (this.attachmentPK != null
-                && !this.attachmentPK.equals(other.attachmentPK)));
+        if ((this.attachmentPK == null && other.attachmentPK != null) || (this.attachmentPK != null && !this.attachmentPK.equals(other.attachmentPK))) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Attachment[ attachmentPK=" + attachmentPK + " ]";
     }
+
 }

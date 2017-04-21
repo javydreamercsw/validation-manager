@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -37,9 +42,7 @@ public class ExecutionStepHasAttachmentPK implements Serializable {
     public ExecutionStepHasAttachmentPK() {
     }
 
-    public ExecutionStepHasAttachmentPK(int executionStepTestCaseExecutionId,
-            int executionStepStepId, int executionStepStepTestCaseId,
-            int attachmentId, int attachmentAttachmentTypeId) {
+    public ExecutionStepHasAttachmentPK(int executionStepTestCaseExecutionId, int executionStepStepId, int executionStepStepTestCaseId, int attachmentId, int attachmentAttachmentTypeId) {
         this.executionStepTestCaseExecutionId = executionStepTestCaseExecutionId;
         this.executionStepStepId = executionStepStepId;
         this.executionStepStepTestCaseId = executionStepStepTestCaseId;
@@ -117,17 +120,15 @@ public class ExecutionStepHasAttachmentPK implements Serializable {
         if (this.attachmentId != other.attachmentId) {
             return false;
         }
-        return this.attachmentAttachmentTypeId == other.attachmentAttachmentTypeId;
+        if (this.attachmentAttachmentTypeId != other.attachmentAttachmentTypeId) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.ExecutionStepHasAttachmentPK[ "
-                + "executionStepTestCaseExecutionId="
-                + executionStepTestCaseExecutionId + ", executionStepStepId="
-                + executionStepStepId + ", executionStepStepTestCaseId="
-                + executionStepStepTestCaseId + ", attachmentId="
-                + attachmentId + ", attachmentAttachmentTypeId="
-                + attachmentAttachmentTypeId + " ]";
+        return "com.validation.manager.core.db.ExecutionStepHasAttachmentPK[ executionStepTestCaseExecutionId=" + executionStepTestCaseExecutionId + ", executionStepStepId=" + executionStepStepId + ", executionStepStepTestCaseId=" + executionStepStepTestCaseId + ", attachmentId=" + attachmentId + ", attachmentAttachmentTypeId=" + attachmentAttachmentTypeId + " ]";
     }
+
 }

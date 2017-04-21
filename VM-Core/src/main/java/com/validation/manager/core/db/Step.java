@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -61,15 +60,6 @@ public class Step implements Serializable {
     private String notes;
     @ManyToMany(mappedBy = "stepList")
     private List<Requirement> requirementList;
-    @JoinTable(name = "step_has_vm_exception", joinColumns = {
-        @JoinColumn(name = "step_id", referencedColumnName = "id")
-        , @JoinColumn(name = "step_test_case_id",
-                referencedColumnName = "test_case_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "vm_exception_id", referencedColumnName = "id")
-        , @JoinColumn(name = "vm_exception_reporter_id",
-                referencedColumnName = "reporter_id")})
-    @ManyToMany
-    private List<VmException> vmExceptionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
     private List<ExecutionStep> executionStepList;
     @JoinColumn(name = "test_case_id", referencedColumnName = "id",
@@ -134,16 +124,6 @@ public class Step implements Serializable {
 
     public void setRequirementList(List<Requirement> requirementList) {
         this.requirementList = requirementList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
     }
 
     @XmlTransient

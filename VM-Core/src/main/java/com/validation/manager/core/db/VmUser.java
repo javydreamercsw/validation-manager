@@ -120,8 +120,6 @@ public class VmUser extends Login implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserTestProjectRole> userTestProjectRoleList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
-    private List<VmException> vmExceptionList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserTestPlanRole> userTestPlanRoleList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserModifiedRecord> userModifiedRecordList;
@@ -273,16 +271,6 @@ public class VmUser extends Login implements Serializable {
 
     public void setUserTestProjectRoleList(List<UserTestProjectRole> userTestProjectRoleList) {
         this.userTestProjectRoleList = userTestProjectRoleList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
     }
 
     @XmlTransient

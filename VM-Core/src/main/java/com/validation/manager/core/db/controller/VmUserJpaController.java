@@ -18,7 +18,6 @@ import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.RootCause;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.UserTestProjectRole;
-import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserModifiedRecord;
 import com.validation.manager.core.db.UserHasInvestigation;
@@ -63,9 +62,6 @@ public class VmUserJpaController implements Serializable {
         }
         if (vmUser.getUserTestProjectRoleList() == null) {
             vmUser.setUserTestProjectRoleList(new ArrayList<UserTestProjectRole>());
-        }
-        if (vmUser.getVmExceptionList() == null) {
-            vmUser.setVmExceptionList(new ArrayList<VmException>());
         }
         if (vmUser.getUserTestPlanRoleList() == null) {
             vmUser.setUserTestPlanRoleList(new ArrayList<UserTestPlanRole>());
@@ -130,12 +126,6 @@ public class VmUserJpaController implements Serializable {
                 attachedUserTestProjectRoleList.add(userTestProjectRoleListUserTestProjectRoleToAttach);
             }
             vmUser.setUserTestProjectRoleList(attachedUserTestProjectRoleList);
-            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
-            for (VmException vmExceptionListVmExceptionToAttach : vmUser.getVmExceptionList()) {
-                vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
-            }
-            vmUser.setVmExceptionList(attachedVmExceptionList);
             List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<UserTestPlanRole>();
             for (UserTestPlanRole userTestPlanRoleListUserTestPlanRoleToAttach : vmUser.getUserTestPlanRoleList()) {
                 userTestPlanRoleListUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListUserTestPlanRoleToAttach.getUserTestPlanRolePK());
@@ -216,15 +206,6 @@ public class VmUserJpaController implements Serializable {
                     oldVmUserOfUserTestProjectRoleListUserTestProjectRole = em.merge(oldVmUserOfUserTestProjectRoleListUserTestProjectRole);
                 }
             }
-            for (VmException vmExceptionListVmException : vmUser.getVmExceptionList()) {
-                VmUser oldVmUserOfVmExceptionListVmException = vmExceptionListVmException.getVmUser();
-                vmExceptionListVmException.setVmUser(vmUser);
-                vmExceptionListVmException = em.merge(vmExceptionListVmException);
-                if (oldVmUserOfVmExceptionListVmException != null) {
-                    oldVmUserOfVmExceptionListVmException.getVmExceptionList().remove(vmExceptionListVmException);
-                    oldVmUserOfVmExceptionListVmException = em.merge(oldVmUserOfVmExceptionListVmException);
-                }
-            }
             for (UserTestPlanRole userTestPlanRoleListUserTestPlanRole : vmUser.getUserTestPlanRoleList()) {
                 VmUser oldVmUserOfUserTestPlanRoleListUserTestPlanRole = userTestPlanRoleListUserTestPlanRole.getVmUser();
                 userTestPlanRoleListUserTestPlanRole.setVmUser(vmUser);
@@ -303,8 +284,6 @@ public class VmUserJpaController implements Serializable {
             List<ExecutionStep> executionStepList1New = vmUser.getExecutionStepList1();
             List<UserTestProjectRole> userTestProjectRoleListOld = persistentVmUser.getUserTestProjectRoleList();
             List<UserTestProjectRole> userTestProjectRoleListNew = vmUser.getUserTestProjectRoleList();
-            List<VmException> vmExceptionListOld = persistentVmUser.getVmExceptionList();
-            List<VmException> vmExceptionListNew = vmUser.getVmExceptionList();
             List<UserTestPlanRole> userTestPlanRoleListOld = persistentVmUser.getUserTestPlanRoleList();
             List<UserTestPlanRole> userTestPlanRoleListNew = vmUser.getUserTestPlanRoleList();
             List<UserModifiedRecord> userModifiedRecordListOld = persistentVmUser.getUserModifiedRecordList();
@@ -324,14 +303,6 @@ public class VmUserJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestProjectRole " + userTestProjectRoleListOldUserTestProjectRole + " since its vmUser field is not nullable.");
-                }
-            }
-            for (VmException vmExceptionListOldVmException : vmExceptionListOld) {
-                if (!vmExceptionListNew.contains(vmExceptionListOldVmException)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain VmException " + vmExceptionListOldVmException + " since its vmUser field is not nullable.");
                 }
             }
             for (UserTestPlanRole userTestPlanRoleListOldUserTestPlanRole : userTestPlanRoleListOld) {
@@ -423,13 +394,6 @@ public class VmUserJpaController implements Serializable {
             }
             userTestProjectRoleListNew = attachedUserTestProjectRoleListNew;
             vmUser.setUserTestProjectRoleList(userTestProjectRoleListNew);
-            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
-            for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
-                vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
-            }
-            vmExceptionListNew = attachedVmExceptionListNew;
-            vmUser.setVmExceptionList(vmExceptionListNew);
             List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<UserTestPlanRole>();
             for (UserTestPlanRole userTestPlanRoleListNewUserTestPlanRoleToAttach : userTestPlanRoleListNew) {
                 userTestPlanRoleListNewUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListNewUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListNewUserTestPlanRoleToAttach.getUserTestPlanRolePK());
@@ -562,17 +526,6 @@ public class VmUserJpaController implements Serializable {
                     }
                 }
             }
-            for (VmException vmExceptionListNewVmException : vmExceptionListNew) {
-                if (!vmExceptionListOld.contains(vmExceptionListNewVmException)) {
-                    VmUser oldVmUserOfVmExceptionListNewVmException = vmExceptionListNewVmException.getVmUser();
-                    vmExceptionListNewVmException.setVmUser(vmUser);
-                    vmExceptionListNewVmException = em.merge(vmExceptionListNewVmException);
-                    if (oldVmUserOfVmExceptionListNewVmException != null && !oldVmUserOfVmExceptionListNewVmException.equals(vmUser)) {
-                        oldVmUserOfVmExceptionListNewVmException.getVmExceptionList().remove(vmExceptionListNewVmException);
-                        oldVmUserOfVmExceptionListNewVmException = em.merge(oldVmUserOfVmExceptionListNewVmException);
-                    }
-                }
-            }
             for (UserTestPlanRole userTestPlanRoleListNewUserTestPlanRole : userTestPlanRoleListNew) {
                 if (!userTestPlanRoleListOld.contains(userTestPlanRoleListNewUserTestPlanRole)) {
                     VmUser oldVmUserOfUserTestPlanRoleListNewUserTestPlanRole = userTestPlanRoleListNewUserTestPlanRole.getVmUser();
@@ -679,13 +632,6 @@ public class VmUserJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserTestProjectRole " + userTestProjectRoleListOrphanCheckUserTestProjectRole + " in its userTestProjectRoleList field has a non-nullable vmUser field.");
-            }
-            List<VmException> vmExceptionListOrphanCheck = vmUser.getVmExceptionList();
-            for (VmException vmExceptionListOrphanCheckVmException : vmExceptionListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the VmException " + vmExceptionListOrphanCheckVmException + " in its vmExceptionList field has a non-nullable vmUser field.");
             }
             List<UserTestPlanRole> userTestPlanRoleListOrphanCheck = vmUser.getUserTestPlanRoleList();
             for (UserTestPlanRole userTestPlanRoleListOrphanCheckUserTestPlanRole : userTestPlanRoleListOrphanCheck) {

@@ -91,10 +91,6 @@ public final class RequirementServer extends Requirement
     }
 
     private void copyRelationships(Requirement target, Requirement source) {
-        if (source.getVmExceptionList() != null) {
-            target.getVmExceptionList().clear();
-            target.getVmExceptionList().addAll(source.getVmExceptionList());
-        }
         if (source.getRequirementList() != null) {
             target.getRequirementList().clear();
             target.getRequirementList().addAll(source.getRequirementList());
@@ -164,7 +160,6 @@ public final class RequirementServer extends Requirement
         target.setRequirementList1(source.getRequirementList1());
         target.setRequirementStatusId(source.getRequirementStatusId());
         target.setRequirementTypeId(source.getRequirementTypeId());
-        target.setVmExceptionList(source.getVmExceptionList());
         target.setRiskControlHasRequirementList(source
                 .getRiskControlHasRequirementList());
         target.setStepList(source.getStepList());

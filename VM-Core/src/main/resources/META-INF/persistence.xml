@@ -44,7 +44,6 @@
     <class>com.validation.manager.core.db.UserStatus</class>
     <class>com.validation.manager.core.db.UserTestPlanRole</class>
     <class>com.validation.manager.core.db.UserTestProjectRole</class>
-    <class>com.validation.manager.core.db.VmException</class>
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
@@ -108,7 +107,6 @@
     <class>com.validation.manager.core.db.UserStatus</class>
     <class>com.validation.manager.core.db.UserTestPlanRole</class>
     <class>com.validation.manager.core.db.UserTestProjectRole</class>
-    <class>com.validation.manager.core.db.VmException</class>
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
@@ -174,7 +172,6 @@
     <class>com.validation.manager.core.db.UserStatus</class>
     <class>com.validation.manager.core.db.UserTestPlanRole</class>
     <class>com.validation.manager.core.db.UserTestProjectRole</class>
-    <class>com.validation.manager.core.db.VmException</class>
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>

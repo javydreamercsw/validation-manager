@@ -14,7 +14,6 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.Requirement;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.StepPK;
@@ -46,9 +45,6 @@ public class StepJpaController implements Serializable {
         if (step.getRequirementList() == null) {
             step.setRequirementList(new ArrayList<Requirement>());
         }
-        if (step.getVmExceptionList() == null) {
-            step.setVmExceptionList(new ArrayList<VmException>());
-        }
         if (step.getExecutionStepList() == null) {
             step.setExecutionStepList(new ArrayList<ExecutionStep>());
         }
@@ -68,12 +64,6 @@ public class StepJpaController implements Serializable {
                 attachedRequirementList.add(requirementListRequirementToAttach);
             }
             step.setRequirementList(attachedRequirementList);
-            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
-            for (VmException vmExceptionListVmExceptionToAttach : step.getVmExceptionList()) {
-                vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
-            }
-            step.setVmExceptionList(attachedVmExceptionList);
             List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListExecutionStepToAttach : step.getExecutionStepList()) {
                 executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
@@ -88,10 +78,6 @@ public class StepJpaController implements Serializable {
             for (Requirement requirementListRequirement : step.getRequirementList()) {
                 requirementListRequirement.getStepList().add(step);
                 requirementListRequirement = em.merge(requirementListRequirement);
-            }
-            for (VmException vmExceptionListVmException : step.getVmExceptionList()) {
-                vmExceptionListVmException.getStepList().add(step);
-                vmExceptionListVmException = em.merge(vmExceptionListVmException);
             }
             for (ExecutionStep executionStepListExecutionStep : step.getExecutionStepList()) {
                 Step oldStepOfExecutionStepListExecutionStep = executionStepListExecutionStep.getStep();
@@ -128,8 +114,6 @@ public class StepJpaController implements Serializable {
             TestCase testCaseNew = step.getTestCase();
             List<Requirement> requirementListOld = persistentStep.getRequirementList();
             List<Requirement> requirementListNew = step.getRequirementList();
-            List<VmException> vmExceptionListOld = persistentStep.getVmExceptionList();
-            List<VmException> vmExceptionListNew = step.getVmExceptionList();
             List<ExecutionStep> executionStepListOld = persistentStep.getExecutionStepList();
             List<ExecutionStep> executionStepListNew = step.getExecutionStepList();
             List<String> illegalOrphanMessages = null;
@@ -155,13 +139,6 @@ public class StepJpaController implements Serializable {
             }
             requirementListNew = attachedRequirementListNew;
             step.setRequirementList(requirementListNew);
-            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
-            for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
-                vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
-            }
-            vmExceptionListNew = attachedVmExceptionListNew;
-            step.setVmExceptionList(vmExceptionListNew);
             List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
                 executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
@@ -188,18 +165,6 @@ public class StepJpaController implements Serializable {
                 if (!requirementListOld.contains(requirementListNewRequirement)) {
                     requirementListNewRequirement.getStepList().add(step);
                     requirementListNewRequirement = em.merge(requirementListNewRequirement);
-                }
-            }
-            for (VmException vmExceptionListOldVmException : vmExceptionListOld) {
-                if (!vmExceptionListNew.contains(vmExceptionListOldVmException)) {
-                    vmExceptionListOldVmException.getStepList().remove(step);
-                    vmExceptionListOldVmException = em.merge(vmExceptionListOldVmException);
-                }
-            }
-            for (VmException vmExceptionListNewVmException : vmExceptionListNew) {
-                if (!vmExceptionListOld.contains(vmExceptionListNewVmException)) {
-                    vmExceptionListNewVmException.getStepList().add(step);
-                    vmExceptionListNewVmException = em.merge(vmExceptionListNewVmException);
                 }
             }
             for (ExecutionStep executionStepListNewExecutionStep : executionStepListNew) {
@@ -265,11 +230,6 @@ public class StepJpaController implements Serializable {
             for (Requirement requirementListRequirement : requirementList) {
                 requirementListRequirement.getStepList().remove(step);
                 requirementListRequirement = em.merge(requirementListRequirement);
-            }
-            List<VmException> vmExceptionList = step.getVmExceptionList();
-            for (VmException vmExceptionListVmException : vmExceptionList) {
-                vmExceptionListVmException.getStepList().remove(step);
-                vmExceptionListVmException = em.merge(vmExceptionListVmException);
             }
             em.remove(step);
             em.getTransaction().commit();

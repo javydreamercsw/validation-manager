@@ -17,7 +17,6 @@ import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.UserModifiedRecord;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserTestProjectRole;
-import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.CorrectiveActionJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
@@ -28,7 +27,6 @@ import com.validation.manager.core.db.controller.UserModifiedRecordJpaController
 import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.UserTestPlanRoleJpaController;
 import com.validation.manager.core.db.controller.UserTestProjectRoleJpaController;
-import com.validation.manager.core.db.controller.VmExceptionJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -371,10 +369,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                     new UserTestProjectRoleJpaController(
                             getEntityManagerFactory()).destroy(rc.getUserTestProjectRolePK());
                 }
-                for (VmException rc : temp.getVmExceptionList()) {
-                    new VmExceptionJpaController(
-                            getEntityManagerFactory()).destroy(rc.getVmExceptionPK());
-                }
                 parameters.clear();
                 parameters.put("id", temp.getId());
                 temp = (VmUser) namedQuery("VmUser.findById",
@@ -462,7 +456,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         target.setRootCauseList(source.getRootCauseList());
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setUserTestProjectRoleList(source.getUserTestProjectRoleList());
-        target.setVmExceptionList(source.getVmExceptionList());
         target.setId(source.getId());
         if (target.getExecutionStepList() == null) {
             target.setExecutionStepList(new ArrayList<>());

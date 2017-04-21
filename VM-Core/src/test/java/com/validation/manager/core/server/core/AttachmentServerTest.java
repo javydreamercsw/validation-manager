@@ -39,7 +39,7 @@ public class AttachmentServerTest extends AbstractVMTestCase {
             Path file = Paths.get(f.getAbsolutePath());
             Files.write(file, lines, Charset.forName("UTF-8"));
             AttachmentServer instance = new AttachmentServer();
-            instance.addFile(f);
+            instance.addFile(f, f.getName());
             instance.write2DB();
             assertEquals(1, (int) instance.getAttachmentType().getId());//Text file
             System.out.println("retrieveFile");
@@ -62,7 +62,7 @@ public class AttachmentServerTest extends AbstractVMTestCase {
             pdf.deleteOnExit();
             pdfd.save(pdf);
             instance = new AttachmentServer();
-            instance.addFile(pdf);
+            instance.addFile(pdf, pdf.getName());
             instance.write2DB();
             assertEquals(2, (int) instance.getAttachmentType().getId());//PDF file
             System.out.println("retrieveFile");
@@ -82,14 +82,17 @@ public class AttachmentServerTest extends AbstractVMTestCase {
                 pdfStripper.setEndPage(1);
                 String parsedText = pdfStripper.getText(pdDoc);
                 System.out.println(parsedText);
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
                 fail();
             }
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             Exceptions.printStackTrace(ex);
             fail();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             fail();
         }

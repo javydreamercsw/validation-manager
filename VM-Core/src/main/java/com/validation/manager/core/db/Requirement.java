@@ -1,8 +1,8 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.db.mapped.Versionable;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.controller.RequirementJpaController;
+import com.validation.manager.core.db.mapped.Versionable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,14 +83,6 @@ public class Requirement extends Versionable implements Serializable {
     private List<Requirement> requirementList;
     @ManyToMany(mappedBy = "requirementList")
     private List<Requirement> requirementList1;
-    @JoinTable(name = "requirement_has_vm_exception", joinColumns = {
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "vm_exception_id", referencedColumnName = "id")
-                , @JoinColumn(name = "vm_exception_reporter_id",
-                        referencedColumnName = "reporter_id")})
-    @ManyToMany
-    private List<VmException> vmExceptionList;
     @JoinTable(name = "step_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id")},
             inverseJoinColumns = {
@@ -138,25 +130,23 @@ public class Requirement extends Versionable implements Serializable {
         this.uniqueId = uniqueId;
         this.description = description;
         this.notes = notes;
-        setMajorVersion(major_version);
-        setMidVersion(mid_version);
-        setMinorVersion(minor_version);
+        super.setMajorVersion(major_version);
+        super.setMidVersion(mid_version);
+        super.setMinorVersion(minor_version);
         setRiskControlHasRequirementList(new ArrayList<>());
         setRequirementList(new ArrayList<>());
         setRequirementList1(new ArrayList<>());
         setStepList(new ArrayList<>());
-        setVmExceptionList(new ArrayList<>());
     }
 
     public Requirement(int major_version, int mid_version, int minor_version) {
-        setMajorVersion(major_version);
-        setMidVersion(mid_version);
-        setMinorVersion(minor_version);
+        super.setMajorVersion(major_version);
+        super.setMidVersion(mid_version);
+        super.setMinorVersion(minor_version);
         setRiskControlHasRequirementList(new ArrayList<>());
         setRequirementList(new ArrayList<>());
         setRequirementList1(new ArrayList<>());
         setStepList(new ArrayList<>());
-        setVmExceptionList(new ArrayList<>());
     }
 
     public String getUniqueId() {
@@ -201,16 +191,6 @@ public class Requirement extends Versionable implements Serializable {
 
     public void setRequirementList1(List<Requirement> requirementList1) {
         this.requirementList1 = requirementList1;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
     }
 
     @XmlTransient

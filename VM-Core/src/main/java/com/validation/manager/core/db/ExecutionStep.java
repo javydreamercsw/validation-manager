@@ -3,15 +3,14 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -19,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -54,18 +54,15 @@ public class ExecutionStep implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
-    private List<ExecutionStepHasIssue> executionStepHasIssueList;
     @EmbeddedId
     protected ExecutionStepPK executionStepPK;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "execution_time")
-    private long executionTime;
+    private Double executionTime;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "comment")
     private String comment;
-    @Column(name = "locked")
-    private boolean locked = false;
     @Column(name = "execution_start")
     @Temporal(TemporalType.TIMESTAMP)
     private Date executionStart;
@@ -75,18 +72,10 @@ public class ExecutionStep implements Serializable {
     @Column(name = "assigned_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date assignedTime;
-    @JoinTable(name = "execution_step_has_vm_exception", joinColumns = {
-        @JoinColumn(name = "execution_step_test_case_execution_id",
-                referencedColumnName = "test_case_execution_id")
-        , @JoinColumn(name = "execution_step_step_id",
-                referencedColumnName = "step_id")
-        , @JoinColumn(name = "execution_step_step_test_case_id",
-                referencedColumnName = "step_test_case_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "vm_exception_id", referencedColumnName = "id")
-        , @JoinColumn(name = "vm_exception_reporter_id",
-                referencedColumnName = "reporter_id")})
-    @ManyToMany
-    private List<VmException> vmExceptionList;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "locked")
+    private boolean locked;
     @JoinColumn(name = "result_id", referencedColumnName = "id")
     @ManyToOne
     private ExecutionResult resultId;
@@ -110,12 +99,19 @@ public class ExecutionStep implements Serializable {
     private TestCaseExecution testCaseExecution;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
     private List<ExecutionStepHasAttachment> executionStepHasAttachmentList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
+    private List<ExecutionStepHasIssue> executionStepHasIssueList;
 
     public ExecutionStep() {
     }
 
     public ExecutionStep(ExecutionStepPK executionStepPK) {
         this.executionStepPK = executionStepPK;
+    }
+
+    public ExecutionStep(ExecutionStepPK executionStepPK, boolean locked) {
+        this.executionStepPK = executionStepPK;
+        this.locked = locked;
     }
 
     public ExecutionStep(int testCaseExecutionId, int stepId, int stepTestCaseId) {
@@ -131,11 +127,11 @@ public class ExecutionStep implements Serializable {
         this.executionStepPK = executionStepPK;
     }
 
-    public long getExecutionTime() {
+    public Double getExecutionTime() {
         return executionTime;
     }
 
-    public void setExecutionTime(long executionTime) {
+    public void setExecutionTime(Double executionTime) {
         this.executionTime = executionTime;
     }
 
@@ -171,14 +167,12 @@ public class ExecutionStep implements Serializable {
         this.assignedTime = assignedTime;
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
+    public boolean getLocked() {
+        return locked;
     }
 
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 
     public ExecutionResult getResultId() {
@@ -255,20 +249,6 @@ public class ExecutionStep implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.ExecutionStep[ executionStepPK="
                 + executionStepPK + " ]";
-    }
-
-    /**
-     * @return the locked
-     */
-    public boolean isLocked() {
-        return locked;
-    }
-
-    /**
-     * @param locked the locked to set
-     */
-    public void setLocked(boolean locked) {
-        this.locked = locked;
     }
 
     @XmlTransient

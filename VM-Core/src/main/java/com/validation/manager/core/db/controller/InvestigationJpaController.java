@@ -11,12 +11,11 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.VmException;
-import java.util.ArrayList;
-import java.util.List;
 import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -36,9 +35,6 @@ public class InvestigationJpaController implements Serializable {
     }
 
     public void create(Investigation investigation) {
-        if (investigation.getVmExceptionList() == null) {
-            investigation.setVmExceptionList(new ArrayList<VmException>());
-        }
         if (investigation.getUserHasInvestigationList() == null) {
             investigation.setUserHasInvestigationList(new ArrayList<UserHasInvestigation>());
         }
@@ -46,12 +42,6 @@ public class InvestigationJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<VmException> attachedVmExceptionList = new ArrayList<VmException>();
-            for (VmException vmExceptionListVmExceptionToAttach : investigation.getVmExceptionList()) {
-                vmExceptionListVmExceptionToAttach = em.getReference(vmExceptionListVmExceptionToAttach.getClass(), vmExceptionListVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionList.add(vmExceptionListVmExceptionToAttach);
-            }
-            investigation.setVmExceptionList(attachedVmExceptionList);
             List<UserHasInvestigation> attachedUserHasInvestigationList = new ArrayList<UserHasInvestigation>();
             for (UserHasInvestigation userHasInvestigationListUserHasInvestigationToAttach : investigation.getUserHasInvestigationList()) {
                 userHasInvestigationListUserHasInvestigationToAttach = em.getReference(userHasInvestigationListUserHasInvestigationToAttach.getClass(), userHasInvestigationListUserHasInvestigationToAttach.getUserHasInvestigationPK());
@@ -59,10 +49,6 @@ public class InvestigationJpaController implements Serializable {
             }
             investigation.setUserHasInvestigationList(attachedUserHasInvestigationList);
             em.persist(investigation);
-            for (VmException vmExceptionListVmException : investigation.getVmExceptionList()) {
-                vmExceptionListVmException.getInvestigationList().add(investigation);
-                vmExceptionListVmException = em.merge(vmExceptionListVmException);
-            }
             for (UserHasInvestigation userHasInvestigationListUserHasInvestigation : investigation.getUserHasInvestigationList()) {
                 Investigation oldInvestigationOfUserHasInvestigationListUserHasInvestigation = userHasInvestigationListUserHasInvestigation.getInvestigation();
                 userHasInvestigationListUserHasInvestigation.setInvestigation(investigation);
@@ -87,8 +73,6 @@ public class InvestigationJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Investigation persistentInvestigation = em.find(Investigation.class, investigation.getId());
-            List<VmException> vmExceptionListOld = persistentInvestigation.getVmExceptionList();
-            List<VmException> vmExceptionListNew = investigation.getVmExceptionList();
             List<UserHasInvestigation> userHasInvestigationListOld = persistentInvestigation.getUserHasInvestigationList();
             List<UserHasInvestigation> userHasInvestigationListNew = investigation.getUserHasInvestigationList();
             List<String> illegalOrphanMessages = null;
@@ -103,13 +87,6 @@ public class InvestigationJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<VmException> attachedVmExceptionListNew = new ArrayList<VmException>();
-            for (VmException vmExceptionListNewVmExceptionToAttach : vmExceptionListNew) {
-                vmExceptionListNewVmExceptionToAttach = em.getReference(vmExceptionListNewVmExceptionToAttach.getClass(), vmExceptionListNewVmExceptionToAttach.getVmExceptionPK());
-                attachedVmExceptionListNew.add(vmExceptionListNewVmExceptionToAttach);
-            }
-            vmExceptionListNew = attachedVmExceptionListNew;
-            investigation.setVmExceptionList(vmExceptionListNew);
             List<UserHasInvestigation> attachedUserHasInvestigationListNew = new ArrayList<UserHasInvestigation>();
             for (UserHasInvestigation userHasInvestigationListNewUserHasInvestigationToAttach : userHasInvestigationListNew) {
                 userHasInvestigationListNewUserHasInvestigationToAttach = em.getReference(userHasInvestigationListNewUserHasInvestigationToAttach.getClass(), userHasInvestigationListNewUserHasInvestigationToAttach.getUserHasInvestigationPK());
@@ -118,18 +95,6 @@ public class InvestigationJpaController implements Serializable {
             userHasInvestigationListNew = attachedUserHasInvestigationListNew;
             investigation.setUserHasInvestigationList(userHasInvestigationListNew);
             investigation = em.merge(investigation);
-            for (VmException vmExceptionListOldVmException : vmExceptionListOld) {
-                if (!vmExceptionListNew.contains(vmExceptionListOldVmException)) {
-                    vmExceptionListOldVmException.getInvestigationList().remove(investigation);
-                    vmExceptionListOldVmException = em.merge(vmExceptionListOldVmException);
-                }
-            }
-            for (VmException vmExceptionListNewVmException : vmExceptionListNew) {
-                if (!vmExceptionListOld.contains(vmExceptionListNewVmException)) {
-                    vmExceptionListNewVmException.getInvestigationList().add(investigation);
-                    vmExceptionListNewVmException = em.merge(vmExceptionListNewVmException);
-                }
-            }
             for (UserHasInvestigation userHasInvestigationListNewUserHasInvestigation : userHasInvestigationListNew) {
                 if (!userHasInvestigationListOld.contains(userHasInvestigationListNewUserHasInvestigation)) {
                     Investigation oldInvestigationOfUserHasInvestigationListNewUserHasInvestigation = userHasInvestigationListNewUserHasInvestigation.getInvestigation();
@@ -183,11 +148,6 @@ public class InvestigationJpaController implements Serializable {
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
-            }
-            List<VmException> vmExceptionList = investigation.getVmExceptionList();
-            for (VmException vmExceptionListVmException : vmExceptionList) {
-                vmExceptionListVmException.getInvestigationList().remove(investigation);
-                vmExceptionListVmException = em.merge(vmExceptionListVmException);
             }
             em.remove(investigation);
             em.getTransaction().commit();

@@ -5,7 +5,8 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Attachment;
 import com.validation.manager.core.db.AttachmentPK;
 import com.validation.manager.core.db.controller.AttachmentJpaController;
-import com.validation.manager.core.db.controller.AttachmentTypeJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
@@ -19,7 +20,7 @@ import org.openide.util.Exceptions;
 public final class AttachmentServer extends Attachment
         implements EntityServer<Attachment> {
 
-    private final AttachmentJpaController c
+    private static final AttachmentJpaController c
             = new AttachmentJpaController(DataBaseManager.getEntityManagerFactory());
 
     public AttachmentServer(AttachmentPK attachmentPK) {
@@ -71,12 +72,12 @@ public final class AttachmentServer extends Attachment
         update(this, getEntity());
     }
 
-    public void addFile(File f) {
+    public void addFile(File f, String fileName) {
         try {
             if (f != null && f.isFile() && f.exists()) {
                 byte[] array = FileUtils.readFileToByteArray(f);
                 setFile(array);
-                setFileName(f.getName());
+                setFileName(fileName);
                 String ext = FilenameUtils.getExtension(getFileName());
                 if (ext != null) {
                     //Set attachment type
@@ -84,12 +85,10 @@ public final class AttachmentServer extends Attachment
                 }
                 if (getAttachmentType() == null) {
                     //Set as undefined
-                    setAttachmentType(new AttachmentTypeJpaController(DataBaseManager
-                            .getEntityManagerFactory()).findAttachmentType(9));
+                    setAttachmentType(AttachmentTypeServer.getTypeForExtension(""));
                 }
             }
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
@@ -100,11 +99,15 @@ public final class AttachmentServer extends Attachment
             result = File.createTempFile("temp", "vm");
             result.deleteOnExit();
             FileUtils.writeByteArrayToFile(result, getFile());
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
             result = null;
         }
         return result;
+    }
+
+    public static void delete(Attachment entity)
+            throws IllegalOrphanException, NonexistentEntityException, Exception {
+        c.destroy(entity.getAttachmentPK());
     }
 }

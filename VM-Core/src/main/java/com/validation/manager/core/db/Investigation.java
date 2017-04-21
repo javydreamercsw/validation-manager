@@ -10,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -56,8 +55,6 @@ public class Investigation implements Serializable {
     @Size(min = 1, max = 65535)
     @Column(name = "description")
     private String description;
-    @ManyToMany(mappedBy = "investigationList")
-    private List<VmException> vmExceptionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private List<UserHasInvestigation> userHasInvestigationList;
 
@@ -82,16 +79,6 @@ public class Investigation implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
     }
 
     @XmlTransient
