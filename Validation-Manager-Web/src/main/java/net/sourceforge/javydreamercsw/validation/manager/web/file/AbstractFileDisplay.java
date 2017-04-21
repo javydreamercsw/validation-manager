@@ -12,7 +12,7 @@ public abstract class AbstractFileDisplay implements IFileDisplay {
 
     @Override
     public boolean supportFile(File f) {
-        return f.isFile() && supportFile(f.getName());
+        return supportFile(f.getName());
     }
 
     @Override
