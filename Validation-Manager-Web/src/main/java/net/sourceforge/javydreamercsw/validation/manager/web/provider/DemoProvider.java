@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.validation.manager.web;
+package net.sourceforge.javydreamercsw.validation.manager.web.provider;
 
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Component;
@@ -57,17 +57,12 @@ public class DemoProvider extends AbstractProvider {
     }
 
     @Override
-    public String getId() {
-        return getComponentCaption();
-    }
-
-    @Override
     public String getComponentCaption() {
         return "demo.tab.name";
     }
 
     @Override
-    public void update() {
-        //Do nothing
+    public boolean shouldDisplay() {
+        return DataBaseManager.isDemo();
     }
 }

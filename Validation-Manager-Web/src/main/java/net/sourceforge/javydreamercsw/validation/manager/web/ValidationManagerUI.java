@@ -1,5 +1,6 @@
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
+import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;

@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.validation.manager.web;
+package net.sourceforge.javydreamercsw.validation.manager.web.tester;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Panel;
@@ -21,11 +21,6 @@ public class TesterScreenProvider extends AbstractProvider {
             return ts;
         }
         return ts == null ? new Panel() : ts;
-    }
-
-    @Override
-    public String getId() {
-        return getComponentCaption();
     }
 
     @Override

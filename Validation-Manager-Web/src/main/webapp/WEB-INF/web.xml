@@ -27,9 +27,6 @@
             <param-value>UTF-8</param-value>
         </init-param>
     </filter>
-    <listener>
-        <listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
-    </listener>
     <servlet>
         <servlet-name>Vaadin Application Servlet</servlet-name>
         <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
@@ -44,15 +41,6 @@
             <param-value>net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet</param-value>
         </init-param>
     </servlet>
-    <servlet>
-        <servlet-name>VMWebService</servlet-name>
-        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>VMWebService</servlet-name>
-        <url-pattern>/VMWebService</url-pattern>
-    </servlet-mapping>
     <session-config>
         <session-timeout>
             30

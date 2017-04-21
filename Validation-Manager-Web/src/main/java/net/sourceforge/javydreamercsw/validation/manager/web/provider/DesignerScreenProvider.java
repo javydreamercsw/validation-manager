@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.validation.manager.web;
+package net.sourceforge.javydreamercsw.validation.manager.web.provider;
 
 import com.vaadin.ui.Component;
 import com.validation.manager.core.AbstractProvider;
@@ -48,11 +48,6 @@ public class DesignerScreenProvider extends AbstractProvider {
             }
         });
         return w;
-    }
-
-    @Override
-    public String getId() {
-        return getComponentCaption();
     }
 
     @Override

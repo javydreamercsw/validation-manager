@@ -1,4 +1,4 @@
-package net.sourceforge.javydreamercsw.validation.manager.web;
+package net.sourceforge.javydreamercsw.validation.manager.web.admin;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Panel;
@@ -7,7 +7,7 @@ import com.validation.manager.core.IMainContentProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.admin.AdminScreen;
 import org.openide.util.lookup.ServiceProvider;
 
-@ServiceProvider(service = IMainContentProvider.class, position = 3)
+@ServiceProvider(service = IMainContentProvider.class)
 public class AdminScreenProvider extends AbstractProvider {
 
     private AdminScreen as;
@@ -24,18 +24,13 @@ public class AdminScreenProvider extends AbstractProvider {
     }
 
     @Override
-    public String getId() {
-        return getComponentCaption();
-    }
-
-    @Override
     public String getComponentCaption() {
         return "admin.tab.name";
     }
 
     @Override
     public boolean shouldDisplay() {
-        return getUI().getUser() != null
+        return super.shouldDisplay()
                 && getUI().checkRight("system.configuration");
     }
 }
