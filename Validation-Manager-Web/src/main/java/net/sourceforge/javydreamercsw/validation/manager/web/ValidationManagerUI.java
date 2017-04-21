@@ -16,14 +16,12 @@ import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
@@ -35,7 +33,6 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
@@ -58,7 +55,9 @@ import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
+import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.VMException;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -81,13 +80,11 @@ import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
-import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.VMUserServer;
-import com.validation.manager.core.tool.MD5;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import com.validation.manager.core.tool.step.importer.StepImporter;
@@ -98,6 +95,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
@@ -114,6 +112,8 @@ import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.Assig
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
+import org.openide.util.lookup.ServiceProvider;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTreeItemEvent;
@@ -126,11 +126,11 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 @Theme("vmtheme")
 @SuppressWarnings("serial")
-public class ValidationManagerUI extends UI {
+@ServiceProvider(service = VMUI.class)
+public class ValidationManagerUI extends UI implements VMUI {
 
     private static final ThreadLocal<ValidationManagerUI> THREAD_LOCAL
             = new ThreadLocal<>();
-    private final ThemeResource logo = new ThemeResource("vm_logo.png");
     private VMUserServer user = null;
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
@@ -140,23 +140,9 @@ public class ValidationManagerUI extends UI {
     private Component left;
     private final TabSheet tabSheet = new TabSheet();
     private final List<Project> projects = new ArrayList<>();
-    public static final VaadinIcons PROJECT_ICON = VaadinIcons.RECORDS;
-    public static final VaadinIcons SPEC_ICON = VaadinIcons.BOOK;
-    public static final VaadinIcons REQUIREMENT_ICON = VaadinIcons.PIN;
-    public static final VaadinIcons TEST_SUITE_ICON = VaadinIcons.FILE_TREE;
-    public static final VaadinIcons TEST_PLAN_ICON = VaadinIcons.FILE_TREE_SMALL;
-    public static final VaadinIcons TEST_ICON = VaadinIcons.FILE_TEXT;
-    public static final VaadinIcons STEP_ICON = VaadinIcons.FILE_TREE_SUB;
-    public static final VaadinIcons IMPORT_ICON = VaadinIcons.ARROW_CIRCLE_UP_O;
-    public static final VaadinIcons PLAN_ICON = VaadinIcons.BULLETS;
-    public static final VaadinIcons EDIT_ICON = VaadinIcons.EDIT;
-    public static final VaadinIcons EXECUTIONS_ICON = VaadinIcons.COGS;
-    public static final VaadinIcons EXECUTION_ICON = VaadinIcons.COG;
-    public static final VaadinIcons ASSIGN_ICON = VaadinIcons.USER_CLOCK;
     private Tree tree;
-    private Tab main, tester, designer, demo, admin;
+    private Tab main, designer, admin;
     private final List<String> roles = new ArrayList<>();
-    public static final ThemeResource SMALL_APP_ICON = new ThemeResource("VMSmall.png");
     private static final ResourceBundle RB = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages");
     private TesterScreen testScreen;
@@ -164,8 +150,14 @@ public class ValidationManagerUI extends UI {
     /**
      * @return the user
      */
+    @Override
     public VMUserServer getUser() {
         return user;
+    }
+
+    @Override
+    public Tree getTree() {
+        return tree;
     }
 
     /**
@@ -974,8 +966,10 @@ public class ValidationManagerUI extends UI {
         BeanItemContainer<SpecLevel> specLevelContainer
                 = new BeanItemContainer<>(SpecLevel.class, levels);
         ComboBox level = new ComboBox("Spec Level");
-        level.setItemCaptionPropertyId("name");
         level.setContainerDataSource(specLevelContainer);
+        level.getItemIds().forEach(id -> {
+            level.setItemCaption(id, translate(((SpecLevel) id).getName()));
+        });
         binder.bind(level, "specLevel");
         layout.addComponent(level);
         Button cancel = new Button("Cancel");
@@ -1064,6 +1058,7 @@ public class ValidationManagerUI extends UI {
         displayObject(item, false);
     }
 
+    @Override
     public void displayObject(Object item, boolean edit) {
         if (item instanceof Project) {
             Project p = (Project) item;
@@ -1207,10 +1202,12 @@ public class ValidationManagerUI extends UI {
         }
     }
 
+    @Override
     public void buildProjectTree() {
         buildProjectTree(null);
     }
 
+    @Override
     public void buildProjectTree(Object item) {
         tree.removeAllItems();
         tree.addItem(projTreeRoot);
@@ -1592,6 +1589,7 @@ public class ValidationManagerUI extends UI {
                 });
     }
 
+    @Override
     public String translate(String mess) {
         return RB.containsKey(mess) ? RB.getString(mess) : mess;
     }
@@ -1612,59 +1610,41 @@ public class ValidationManagerUI extends UI {
             if (main == null) {
                 main = tabSheet.addTab(new VerticalLayout(), "Main");
             }
-            if (tester == null
-                    && getUser() != null
-                    && !getUser().getExecutionStepList().isEmpty()) {
-                testScreen = new TesterScreen(this);
-                tester = tabSheet.addTab(testScreen, "Tester");
-            } else {
-                if (tester != null) {
-                    testScreen.update();
-                }
-            }
             if (designer == null) {
                 designer = tabSheet.addTab(new VerticalLayout(), "Test Designer");
             }
             if (admin == null) {
                 admin = tabSheet.addTab(new AdminScreen(this), "Admin");
             }
-            if (demo == null && DataBaseManager.isDemo()) {
-                VerticalLayout layout = new VerticalLayout();
-                VmUserJpaController controller
-                        = new VmUserJpaController(DataBaseManager
-                                .getEntityManagerFactory());
-                layout.addComponent(new Label("<h1>Welcome to "
-                        + "Validation Manager Demo instance</h1>",
-                        ContentMode.HTML));
-                layout.addComponent(new Label("Below you can find the "
-                        + "various accounts that exist in the demo so "
-                        + "you can explore."));
-                StringBuilder sb = new StringBuilder("<ul>");
-                controller.findVmUserEntities().stream().filter((u)
-                        -> (u.getId() < 1000)).forEachOrdered((u) -> {
-                    try {
-                        //Default accounts
-                        if (u.getPassword() != null
-                                && u.getPassword().equals(MD5
-                                        .encrypt(u.getUsername()))) {
-                            sb.append("<li><b>User name:</b> ")
-                                    .append(u.getUsername())
-                                    .append(", <b>Password:</b> ")
-                                    .append(u.getUsername())
-                                    .append(" <b>Role</b>: ")
-                                    .append(translate(u.getRoleList().get(0)
-                                            .getDescription()))
-                                    .append("</li>");
+            Lookup.getDefault().lookupAll(IMainContentProvider.class)
+                    .forEach((provider) -> {
+                        Iterator<Component> it = tabSheet.iterator();
+                        boolean found = false;
+                        Component me = null;
+                        while (it.hasNext()) {
+                            Component next = it.next();
+                            if (next.getId() != null
+                                    && next.getId().equals(provider
+                                            .getComponentCaption())) {
+                                found = true;
+                                me = next;
+                                break;
+                            }
                         }
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                    }
-                });
-                sb.append("</ul>");
-                layout.addComponent(new Label(sb.toString(),
-                        ContentMode.HTML));
-                demo = tabSheet.addTab(layout, "Demo");
-            }
+                        if (found) {
+                            provider.update();
+                        } else {
+                            provider.setUI(this);
+                            if (provider.shouldDisplay()) {
+                                Tab tab = tabSheet.addTab(provider.getContent(),
+                                        translate(provider.getComponentCaption()));
+                            }
+                        }
+                        //Hide if needed
+                        if (!provider.shouldDisplay()) {
+                            tabSheet.removeComponent(me);
+                        }
+                    });
             hsplit.setSecondComponent(tabSheet);
         }
         //This is a tabbed pane. Enable/Disable the panes based on role
@@ -1678,25 +1658,19 @@ public class ValidationManagerUI extends UI {
         if (main != null) {
             main.setVisible(user != null);
         }
-        if (tester != null) {
-            tester.setVisible(checkRight("testplan.execute"));
-        }
         if (designer != null) {
-            designer.setVisible(((Layout) designer.getComponent())
-                    .getComponentCount() > 0
-                    && checkRight("testplan.planning"));
+            designer.setVisible(checkRight("testplan.planning"));
         }
         if (admin != null) {
             admin.setVisible(checkRight("system.configuration"));
         }
-        tabSheet.setTabPosition(demo, tabSheet.getComponentCount() - 1);
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
         return hsplit;
     }
 
     private Component getMenu() {
         GridLayout gl = new GridLayout(3, 3);
-        gl.addComponent(new Image("", logo), 0, 0);
+        gl.addComponent(new Image("", LOGO), 0, 0);
         if (getUser() != null) {
             //Logout button
             Button logout = new Button("Log out");
@@ -1705,9 +1679,7 @@ public class ValidationManagerUI extends UI {
                     user.write2DB();
                     user = null;
                     main = null;
-                    tester = null;
                     designer = null;
-                    demo = null;
                     admin = null;
                     updateScreen();
                 } catch (Exception ex) {
@@ -1720,6 +1692,7 @@ public class ValidationManagerUI extends UI {
         return gl;
     }
 
+    @Override
     public void updateScreen() {
         //Set up a menu header on top and the content below
         VerticalSplitPanel vs = new VerticalSplitPanel();
@@ -1963,6 +1936,7 @@ public class ValidationManagerUI extends UI {
         }
     }
 
+    @Override
     public void addProject(Project p, Tree tree) {
         tree.addItem(p);
         tree.setItemCaption(p, p.getName());
@@ -2247,6 +2221,7 @@ public class ValidationManagerUI extends UI {
         m.put(i1, first);
     }
 
+    @Override
     public void updateProjectList() {
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
@@ -2303,7 +2278,8 @@ public class ValidationManagerUI extends UI {
         return result;
     }
 
-    private boolean checkAllRights(List<String> rights) {
+    @Override
+    public boolean checkAllRights(List<String> rights) {
         boolean result = true;
         for (String r : rights) {
             if (!checkRight(r)) {
@@ -2314,7 +2290,8 @@ public class ValidationManagerUI extends UI {
         return result;
     }
 
-    private boolean checkRight(String right) {
+    @Override
+    public boolean checkRight(String right) {
         if (user != null) {
             user.update();
             if (user.getRoleList().stream().anyMatch((r)
@@ -2354,6 +2331,7 @@ public class ValidationManagerUI extends UI {
         setTabContent(designer, w, "testplan.planning");
     }
 
+    @Override
     public Object getSelectdValue() {
         return tree.getValue();
     }

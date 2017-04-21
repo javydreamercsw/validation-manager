@@ -10,6 +10,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.TestCase;
@@ -34,16 +35,16 @@ import net.sourceforge.javydreamercsw.validation.manager.web.execution.Execution
  */
 public class TesterScreen extends Panel {
 
-    private final ValidationManagerUI ui;
+    private final VMUI ui;
     private ExecutionWindow executionWindow = null;
     private final TreeTable testCaseTree = new TreeTable("Available Tests");
 
-    public TesterScreen(ValidationManagerUI ui) {
+    public TesterScreen(VMUI ui) {
         this.ui = ui;
         init();
     }
 
-    public TesterScreen(ValidationManagerUI ui, String caption) {
+    public TesterScreen(VMUI ui, String caption) {
         super(caption);
         this.ui = ui;
         init();

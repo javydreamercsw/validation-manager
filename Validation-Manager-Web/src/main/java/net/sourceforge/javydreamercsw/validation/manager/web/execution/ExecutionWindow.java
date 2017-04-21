@@ -5,6 +5,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
@@ -26,7 +27,7 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
  */
 public final class ExecutionWindow extends VMWindow {
 
-    private final ValidationManagerUI ui;
+    private final VMUI ui;
 
     /**
      * Display all the executions one after another.
@@ -34,7 +35,7 @@ public final class ExecutionWindow extends VMWindow {
      * @param ui ValidationManagerUI instance
      * @param executions Executions to display.
      */
-    public ExecutionWindow(ValidationManagerUI ui,
+    public ExecutionWindow(VMUI ui,
             List<TestCaseExecutionServer> executions) {
         super();
         init(executions, -1);
@@ -48,7 +49,7 @@ public final class ExecutionWindow extends VMWindow {
      * @param executions Executions to display.
      * @param tcID test case to show
      */
-    public ExecutionWindow(ValidationManagerUI ui,
+    public ExecutionWindow(VMUI ui,
             List<TestCaseExecutionServer> executions, int tcID) {
         super();
         this.ui = ui;

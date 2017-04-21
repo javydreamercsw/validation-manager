@@ -23,6 +23,16 @@
     </dependencyManagement>
     
     <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-server</artifactId>
+            <version>${vaadin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-icons</artifactId>
+            <version>${vaadin.icons.version}</version>
+        </dependency>
         <!--Flyway, Database update-->
         <dependency>
             <groupId>com.googlecode.flyway</groupId>

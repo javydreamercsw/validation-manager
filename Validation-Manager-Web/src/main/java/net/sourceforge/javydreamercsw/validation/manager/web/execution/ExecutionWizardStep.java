@@ -21,6 +21,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
@@ -66,7 +67,7 @@ import org.vaadin.teemu.wizards.WizardStep;
 public class ExecutionWizardStep implements WizardStep {
 
     private final Wizard w;
-    private final ValidationManagerUI ui;
+    private final VMUI ui;
     private final ExecutionStepServer step;
     private final ComboBox result = new ComboBox("Result");
     private final ComboBox issueType = new ComboBox("Issue Type");
@@ -78,8 +79,7 @@ public class ExecutionWizardStep implements WizardStep {
     private static final Logger LOG
             = Logger.getLogger(ExecutionWizardStep.class.getSimpleName());
 
-    public ExecutionWizardStep(Wizard w, ValidationManagerUI ui,
-            ExecutionStep step) {
+    public ExecutionWizardStep(Wizard w, VMUI ui, ExecutionStep step) {
         this.w = w;
         this.ui = ui;
         this.step = new ExecutionStepServer(step);
