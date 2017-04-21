@@ -233,9 +233,15 @@ public class ExecutionWizardStep implements WizardStep {
                     a.setEnabled(!step.getLocked());
                     a.setIcon(VaadinIcons.PAPERCLIP);
                     a.addClickListener((Button.ClickEvent event) -> {
-                        displayAttachment(
-                                new AttachmentServer(attachment.getAttachment()
-                                        .getAttachmentPK()));
+                        if (!step.getLocked()) {
+                            //Prompt if user wants this removed
+                            MessageBox mb = getDeletionPrompt(attachment);
+                            mb.open();
+                        } else {
+                            displayAttachment(
+                                    new AttachmentServer(attachment.getAttachment()
+                                            .getAttachmentPK()));
+                        }
                     });
                     attachments.addComponent(a);
                     break;
@@ -597,7 +603,7 @@ public class ExecutionWizardStep implements WizardStep {
         mb.asModal(true)
                 .withMessage(new Label("Do you want to remove this item?"))
                 .withButtonAlignment(Alignment.MIDDLE_CENTER)
-                .withOkButton(() -> {
+                .withYesButton(() -> {
                     try {
                         if (mb.getData() instanceof ExecutionStepHasAttachment) {
                             getStep().removeAttachment(new AttachmentServer(
@@ -605,16 +611,19 @@ public class ExecutionWizardStep implements WizardStep {
                                             .getAttachment().getAttachmentPK()));
                         }
                         if (mb.getData() instanceof ExecutionStepHasIssue) {
-                            getStep().removeIssue((ExecutionStepHasIssue) mb.getData());
+                            getStep().removeIssue(new IssueServer(
+                                    ((ExecutionStepHasIssue) mb.getData())
+                                            .getIssue()));
                         }
                         getStep().write2DB();
                         getStep().update();
+                        w.updateCurrentStep();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }, ButtonOption.focus(),
                         ButtonOption.icon(VaadinIcons.CHECK))
-                .withCancelButton(() -> {
+                .withNoButton(() -> {
                     if (mb.getData() instanceof ExecutionStepHasAttachment) {
                         ExecutionStepHasAttachment esha = (ExecutionStepHasAttachment) mb.getData();
                         if (esha.getAttachment().getAttachmentType().getType().equals("comment")) {
