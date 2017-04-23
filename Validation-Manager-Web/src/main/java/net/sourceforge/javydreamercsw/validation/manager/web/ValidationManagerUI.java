@@ -1,6 +1,6 @@
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
-import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
+import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
@@ -107,6 +107,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
+import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -1260,6 +1261,14 @@ public class ValidationManagerUI extends UI implements VMUI {
                     sw.setModal(true);
                     sw.setSizeFull();
                     addWindow(sw);
+                });
+        ContextMenu.ContextMenuItem dashboard
+                = menu.addItem("View Execution Dashboard",
+                        VaadinIcons.DASHBOARD);
+        dashboard.setEnabled(checkRight("testplan.planning"));
+        dashboard.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    addWindow(new ExecutionDashboard((TestCaseExecution) tree.getValue()));
                 });
     }
 

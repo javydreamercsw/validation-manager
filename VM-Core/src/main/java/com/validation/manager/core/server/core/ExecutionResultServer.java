@@ -13,11 +13,11 @@ import java.util.List;
 public class ExecutionResultServer extends ExecutionResult
         implements EntityServer<ExecutionResult> {
 
-    private final ExecutionResultJpaController c
-            = new ExecutionResultJpaController(DataBaseManager.getEntityManagerFactory());
-
     @Override
     public int write2DB() throws Exception {
+        ExecutionResultJpaController c
+                = new ExecutionResultJpaController(DataBaseManager
+                        .getEntityManagerFactory());
         if (getId() == null) {
             ExecutionResult r = new ExecutionResult();
             update(r, this);
@@ -36,7 +36,8 @@ public class ExecutionResultServer extends ExecutionResult
 
     @Override
     public ExecutionResult getEntity() {
-        return c.findExecutionResult(getId());
+        return new ExecutionResultJpaController(DataBaseManager
+                .getEntityManagerFactory()).findExecutionResult(getId());
     }
 
     @Override
@@ -54,11 +55,17 @@ public class ExecutionResultServer extends ExecutionResult
     public static ExecutionResult getResult(String result) {
         parameters.clear();
         parameters.put("resultName", result);
-        List r = DataBaseManager.namedQuery("ExecutionResult.findByResultName", parameters);
+        List r = DataBaseManager.namedQuery("ExecutionResult.findByResultName",
+                parameters);
         if (r.isEmpty()) {
             return null;
         } else {
             return (ExecutionResult) r.get(0);
         }
+    }
+
+    public static List<ExecutionResult> getResults() {
+        return new ExecutionResultJpaController(DataBaseManager
+                .getEntityManagerFactory()).findExecutionResultEntities();
     }
 }

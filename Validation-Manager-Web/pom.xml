@@ -81,6 +81,11 @@
             <artifactId>VM-Core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.19</version>
+        </dependency>
         <!--PDF rendering with Open Office-->
         <dependency>
             <groupId>org.openoffice</groupId>
@@ -152,6 +157,11 @@
             <groupId>de.steinwedel.vaadin.addon</groupId>
             <artifactId>messagebox</artifactId>
             <version>3.0.19</version>
+        </dependency>
+        <dependency>
+            <groupId>org.vaadin.addon</groupId>
+            <artifactId>jfreechartwrapper</artifactId>
+            <version>3.0.4</version>
         </dependency>
     </dependencies>
     
