@@ -111,6 +111,7 @@ public class ExecutionWizardStep implements WizardStep {
         result.setReadOnly(false);
         result.setRequired(true);
         result.setRequiredError("Please provide a result!");
+        result.setTextInputAllowed(false);
         ExecutionResultJpaController c
                 = new ExecutionResultJpaController(DataBaseManager
                         .getEntityManagerFactory());
