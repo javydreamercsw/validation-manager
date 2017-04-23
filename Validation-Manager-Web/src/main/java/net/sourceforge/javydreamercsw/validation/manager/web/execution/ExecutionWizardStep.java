@@ -3,6 +3,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.Sizeable;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -294,6 +295,8 @@ public class ExecutionWizardStep implements WizardStep {
             multiFileUpload.setCaption("Select file(s) to attach...");
             vl.addComponent(multiFileUpload);
             dialog.setContent(vl);
+            dialog.setHeight(25, Sizeable.Unit.PERCENTAGE);
+            dialog.setWidth(25, Sizeable.Unit.PERCENTAGE);
             dialog.center();
             ui.addWindow(dialog);
         });
