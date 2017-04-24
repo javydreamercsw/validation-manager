@@ -10,7 +10,7 @@ import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.tool.MD5;
 import java.util.logging.Level;
-import static org.openide.util.BaseUtilities.translate;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = IMainContentProvider.class)
@@ -41,8 +41,9 @@ public class DemoProvider extends AbstractProvider {
                             .append(", <b>Password:</b> ")
                             .append(u.getUsername())
                             .append(" <b>Role</b>: ")
-                            .append(translate(u.getRoleList().get(0)
-                                    .getDescription()))
+                            .append(ValidationManagerUI.getInstance()
+                                    .translate(u.getRoleList().get(0)
+                                            .getDescription()))
                             .append("</li>");
                 }
             } catch (Exception ex) {
