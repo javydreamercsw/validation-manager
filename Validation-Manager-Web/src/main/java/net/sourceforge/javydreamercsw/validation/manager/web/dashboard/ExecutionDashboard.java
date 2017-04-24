@@ -14,9 +14,8 @@ import java.util.Map;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PiePlot3D;
-import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.util.Rotation;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.openide.util.Lookup;
 import org.vaadin.addon.JFreeChartWrapper;
 
@@ -57,25 +56,23 @@ public final class ExecutionDashboard extends VMWindow {
         }).map((e) -> e.getExecutionStepList().size())
                 .reduce(totalTestCases, Integer::sum);
         //Build percentage pie graph
-        DefaultPieDataset dataset = new DefaultPieDataset();
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         stats.entrySet().forEach((entry) -> {
-            dataset.setValue(Lookup.getDefault().lookup(VMUI.class)
-                    .translate(entry.getKey()),
-                    new Double(entry.getValue()));
+            dataset.addValue(new Double(entry.getValue()),
+                    "TC",
+                    Lookup.getDefault().lookup(VMUI.class)
+                            .translate(entry.getKey())
+            );
         });
-        JFreeChart chart = ChartFactory.createPieChart3D(
+        JFreeChart chart = ChartFactory.createBarChart3D(
                 "Execution Progress", // chart title
+                "Test Case",
+                "Amount",
                 dataset, // data
+                PlotOrientation.VERTICAL,
                 true, // include legend
                 true,
                 false);
-
-        final PiePlot3D plot = (PiePlot3D) chart.getPlot();
-        plot.setStartAngle(270);
-        plot.setForegroundAlpha(0.60f);
-        plot.setInteriorGap(0.02);
-        plot.setDirection(Rotation.CLOCKWISE);
-        plot.setNoDataMessage("No data to display");
         setContent(new JFreeChartWrapper(chart));
     }
 
@@ -94,6 +91,10 @@ public final class ExecutionDashboard extends VMWindow {
                 if (result != null) {
                     stats.put(result.getResultName(),
                             stats.get(result.getResultName()) + 1);
+                } else {
+                    String pending = ExecutionResultServer.getResult("result.pending")
+                            .getResultName();
+                    stats.put(pending, stats.get(pending) + 1);
                 }
             });
         }
