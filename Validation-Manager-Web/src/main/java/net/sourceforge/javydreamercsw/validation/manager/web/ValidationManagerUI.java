@@ -1683,7 +1683,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             });
-            gl.addComponent(logout, 2, 2);
+            gl.addComponent(logout, 2, 0);
         }
         gl.setSizeFull();
         return gl;
