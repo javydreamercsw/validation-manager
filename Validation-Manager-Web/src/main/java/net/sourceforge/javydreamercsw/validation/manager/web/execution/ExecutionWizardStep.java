@@ -3,6 +3,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Alignment;
@@ -22,20 +23,22 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepHasAttachment;
 import com.validation.manager.core.db.ExecutionStepHasIssue;
+import com.validation.manager.core.db.ReviewResult;
 import com.validation.manager.core.db.controller.ExecutionResultJpaController;
 import com.validation.manager.core.db.controller.IssueTypeJpaController;
+import com.validation.manager.core.db.controller.ReviewResultJpaController;
 import com.validation.manager.core.server.core.AttachmentServer;
 import com.validation.manager.core.server.core.AttachmentTypeServer;
 import com.validation.manager.core.server.core.ExecutionResultServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.IssueServer;
 import com.validation.manager.core.server.core.IssueTypeServer;
+import com.validation.manager.core.server.core.ReviewResultServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.ButtonType;
@@ -68,21 +71,24 @@ import org.vaadin.teemu.wizards.WizardStep;
 public class ExecutionWizardStep implements WizardStep {
 
     private final Wizard w;
-    private final VMUI ui;
     private final ExecutionStepServer step;
     private final ComboBox result = new ComboBox("Result");
+    private final ComboBox review = new ComboBox("Quality Review");
     private final ComboBox issueType = new ComboBox("Issue Type");
     private Button attach;
     private Button bug;
     private Button comment;
     private DateField start;
     private DateField end;
+    private DateField reviewDate;
     private static final Logger LOG
             = Logger.getLogger(ExecutionWizardStep.class.getSimpleName());
+    private boolean reviewer = false;
 
-    public ExecutionWizardStep(Wizard w, VMUI ui, ExecutionStep step) {
+    public ExecutionWizardStep(Wizard w, ExecutionStep step,
+            boolean reviewer) {
+        this.reviewer = reviewer;
         this.w = w;
-        this.ui = ui;
         this.step = new ExecutionStepServer(step);
         issueType.setSizeFull();
         issueType.setReadOnly(false);
@@ -92,7 +98,8 @@ public class ExecutionWizardStep implements WizardStep {
                 = new IssueTypeJpaController(DataBaseManager
                         .getEntityManagerFactory());
         it.findIssueTypeEntities().forEach(type -> {
-            String item = ui.translate(type.getTypeName());
+            String item = ValidationManagerUI.getInstance()
+                    .translate(type.getTypeName());
             issueType.addItem(type.getTypeName());
             issueType.setItemCaption(type.getTypeName(), item);
             switch (type.getId()) {
@@ -107,32 +114,60 @@ public class ExecutionWizardStep implements WizardStep {
                     break;
             }
         });
-        result.setSizeFull();
         result.setReadOnly(false);
         result.setRequired(true);
         result.setRequiredError("Please provide a result!");
         result.setTextInputAllowed(false);
+        review.setReadOnly(false);
+        review.setRequired(true);
+        review.setRequiredError("Please provide a review result!");
+        review.setTextInputAllowed(false);
+        ReviewResultJpaController c2
+                = new ReviewResultJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        c2.findReviewResultEntities().forEach(r -> {
+            String item = ValidationManagerUI.getInstance()
+                    .translate(r.getReviewName());
+            review.addItem(r.getReviewName());
+            review.setItemCaption(r.getReviewName(), item);
+            Resource icon;
+            switch (r.getId()) {
+                case 1:
+                    icon = VaadinIcons.CHECK;
+                    break;
+                case 2:
+                    icon = VaadinIcons.CLOSE;
+                    break;
+                default:
+                    icon = VaadinIcons.CLOCK;
+                    break;
+            }
+            review.setItemIcon(r.getReviewName(), icon);
+        });
         ExecutionResultJpaController c
                 = new ExecutionResultJpaController(DataBaseManager
                         .getEntityManagerFactory());
         c.findExecutionResultEntities().forEach(r -> {
-            String item = ui.translate(r.getResultName());
+            String item = ValidationManagerUI.getInstance()
+                    .translate(r.getResultName());
             result.addItem(r.getResultName());
             result.setItemCaption(r.getResultName(), item);
+            Resource icon;
             switch (r.getId()) {
                 case 1:
-                    result.setItemIcon(r.getResultName(), VaadinIcons.CHECK);
+                    icon = VaadinIcons.CHECK;
                     break;
                 case 2:
-                    result.setItemIcon(r.getResultName(), VaadinIcons.CLOSE);
+                    icon = VaadinIcons.CLOSE;
                     break;
                 case 3:
-                    result.setItemIcon(r.getResultName(), VaadinIcons.PAUSE);
+                    icon = VaadinIcons.PAUSE;
                     break;
                 default:
-                    result.setItemIcon(r.getResultName(), VaadinIcons.CLOCK);
+                    icon = VaadinIcons.CLOCK;
                     break;
             }
+            result.setItemIcon(r.getResultName(), icon);
         });
     }
 
@@ -168,12 +203,14 @@ public class ExecutionWizardStep implements WizardStep {
             start = new DateField("Start Date");
             start.setResolution(Resolution.SECOND);
             start.setValue(getStep().getExecutionStart());
+            start.setReadOnly(true);
             layout.addComponent(start);
         }
         if (getStep().getExecutionEnd() != null) {
             end = new DateField("End Date");
             end.setResolution(Resolution.SECOND);
             end.setValue(getStep().getExecutionEnd());
+            end.setReadOnly(true);
             layout.addComponent(end);
         }
         binder.setReadOnly(true);
@@ -182,6 +219,28 @@ public class ExecutionWizardStep implements WizardStep {
             result.setValue(getStep().getResultId().getResultName());
         }
         layout.addComponent(result);
+        if (reviewer) {//Space to record review
+            if (getStep().getReviewResultId() != null) {
+                review.setValue(getStep().getReviewResultId().getReviewName());
+            }
+            layout.addComponent(review);
+        }
+        //Add Reviewer name
+        if (getStep().getReviewer() != null) {
+            TextField reviewerField = new TextField(ValidationManagerUI
+                    .getInstance().translate("general.reviewer"));
+            reviewerField.setValue(getStep().getReviewer().getFirstName() + " "
+                    + getStep().getReviewer().getLastName());
+            reviewerField.setReadOnly(true);
+            layout.addComponent(reviewerField);
+        }
+        if (getStep().getReviewDate() != null) {
+            reviewDate = new DateField("Review Date");
+            reviewDate.setResolution(Resolution.SECOND);
+            reviewDate.setValue(getStep().getReviewDate());
+            reviewDate.setReadOnly(true);
+            layout.addComponent(reviewDate);
+        }
         if (VMSettingServer.getSetting("show.expected.result").getBoolVal()) {
             TextArea expectedResult = new TextArea("Expected Result");
             expectedResult.setConverter(new ByteToStringConverter());
@@ -299,7 +358,7 @@ public class ExecutionWizardStep implements WizardStep {
             dialog.setHeight(25, Sizeable.Unit.PERCENTAGE);
             dialog.setWidth(25, Sizeable.Unit.PERCENTAGE);
             dialog.center();
-            ui.addWindow(dialog);
+            ValidationManagerUI.getInstance().addWindow(dialog);
         });
         hl.addComponent(attach);
         bug = new Button("Create an Issue");
@@ -382,7 +441,8 @@ public class ExecutionWizardStep implements WizardStep {
                             if (getStep().getExecutionStepHasIssueList() == null) {
                                 getStep().setExecutionStepHasIssueList(new ArrayList<>());
                             }
-                            getStep().addIssue(issue, ui.getUser());
+                            getStep().addIssue(issue, ValidationManagerUI
+                                    .getInstance().getUser());
                             getStep().write2DB();
                         }
                         w.updateCurrentStep();
@@ -463,14 +523,21 @@ public class ExecutionWizardStep implements WizardStep {
     public boolean onAdvance() {
         //Can only proceed after the current step is executed and documented.
         String answer = ((String) result.getValue());
+        String answer2 = ((String) review.getValue());
         if (answer == null) {
             Notification.show("Unable to proceed!",
                     result.getRequiredError(),
                     Notification.Type.WARNING_MESSAGE);
+        } else if (reviewer && answer2 == null) {
+            Notification.show("Unable to proceed!",
+                    review.getRequiredError(),
+                    Notification.Type.WARNING_MESSAGE);
         } else {
             try {
                 //Save the result
-                ExecutionResult newResult = ExecutionResultServer.getResult(answer);
+                ExecutionResult newResult = ExecutionResultServer
+                        .getResult(answer);
+                ReviewResult newReview = ReviewResultServer.getReview(answer2);
                 getStep().setExecutionStart(start.getValue());
                 if (getStep().getResultId() == null
                         || !Objects.equals(step.getResultId().getId(),
@@ -479,16 +546,29 @@ public class ExecutionWizardStep implements WizardStep {
                     //Set end date to null to reflect update
                     getStep().setExecutionEnd(null);
                 }
+                if (getStep().getReviewResultId() == null
+                        || !Objects.equals(step.getReviewResultId().getId(),
+                                newReview.getId())) {
+                    getStep().setReviewResultId(newReview);
+                    //Set end date to null to reflect update
+                    getStep().setReviewer(ValidationManagerUI.getInstance().getUser());
+                }
                 if (getStep().getExecutionEnd() == null) {
                     getStep().setExecutionEnd(new Date());
+                }
+                if (reviewer && getStep().getReviewDate() == null) {
+                    getStep().setReviewDate(new Date());
                 }
                 getStep().write2DB();
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
-        return result.getValue() != null
+        boolean validAnswer = result.getValue() != null
                 && !((String) result.getValue()).trim().isEmpty();
+        boolean validReview = review.getValue() != null
+                && !((String) review.getValue()).trim().isEmpty();
+        return reviewer ? validReview && validAnswer : validAnswer;
     }
 
     @Override
@@ -568,8 +648,9 @@ public class ExecutionWizardStep implements WizardStep {
             for (IFileDisplay fd : Lookup.getDefault()
                     .lookupAll(IFileDisplay.class)) {
                 if (fd.supportFile(new File(name))) {
-                    ui.addWindow(fd.getViewer(fd.loadFile(name,
-                            bytes)));
+                    ValidationManagerUI.getInstance()
+                            .addWindow(fd.getViewer(fd.loadFile(name,
+                                    bytes)));
                     ableToDisplay = true;
                     break;
                 }
@@ -584,7 +665,7 @@ public class ExecutionWizardStep implements WizardStep {
                         + ".pdf");
                 getPDFRendering(source, dest);
                 if (dest.exists()) {
-                    ui.addWindow(pdf.getViewer(dest));
+                    ValidationManagerUI.getInstance().addWindow(pdf.getViewer(dest));
                     ableToDisplay = true;
                 }
             }

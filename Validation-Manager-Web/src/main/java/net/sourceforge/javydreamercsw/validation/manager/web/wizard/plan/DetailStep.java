@@ -7,7 +7,6 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -17,6 +16,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
@@ -29,11 +29,9 @@ public class DetailStep implements WizardStep {
     private final TestCaseExecution tce;
     private static final Logger LOG
             = Logger.getLogger(DetailStep.class.getSimpleName());
-    private final VMUI ui;
 
-    public DetailStep(VMUI ui) {
+    public DetailStep() {
         this.tce = new TestCaseExecution();
-        this.ui = ui;
     }
 
     @Override
@@ -87,6 +85,7 @@ public class DetailStep implements WizardStep {
             }
             try {
                 tces.write2DB();
+                ValidationManagerUI ui = ValidationManagerUI.getInstance();
                 ui.buildProjectTree(ui.getSelectdValue());
                 ui.updateProjectList();
                 ui.updateScreen();

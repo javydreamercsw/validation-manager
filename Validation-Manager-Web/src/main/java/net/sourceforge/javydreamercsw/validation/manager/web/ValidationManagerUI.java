@@ -133,8 +133,6 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 @ServiceProvider(service = VMUI.class)
 public class ValidationManagerUI extends UI implements VMUI {
 
-    private static final ThreadLocal<ValidationManagerUI> THREAD_LOCAL
-            = new ThreadLocal<>();
     private VMUserServer user = null;
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
@@ -1183,12 +1181,8 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     // @return the current application instance
     public static ValidationManagerUI getInstance() {
-        return THREAD_LOCAL.get();
-    }
-
-    // Set the current application instance
-    public static void setInstance(ValidationManagerUI application) {
-        THREAD_LOCAL.set(application);
+        return (ValidationManagerUI) ValidationManagerUI
+                .getCurrent();
     }
 
     private static void buildDemoTree() {
@@ -1637,7 +1631,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                         Component me = findMainProvider(provider
                                 .getComponentCaption());
                         if (me == null) {
-                            provider.setUI(this);
                             if (provider.shouldDisplay()) {
                                 Tab tab = tabSheet.addTab(provider.getContent(),
                                         translate(provider.getComponentCaption()));
@@ -1975,7 +1968,6 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     @Override
     protected void init(VaadinRequest request) {
-        setInstance(this);
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
                         .getEntityManagerFactory());

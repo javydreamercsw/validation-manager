@@ -33,20 +33,6 @@ public interface IMainContentProvider {
     String getComponentCaption();
 
     /**
-     * Set the instance of the UI for this provider.
-     *
-     * @param ui UI to set.
-     */
-    void setUI(VMUI ui);
-
-    /**
-     * Get the instance of the UI for this provider.
-     *
-     * @return instance of the UI for this provider
-     */
-    VMUI getUI();
-
-    /**
      * Refresh the contents.
      */
     void update();
@@ -57,4 +43,9 @@ public interface IMainContentProvider {
      * @return true if meant to be displayed, false otherwise.
      */
     boolean shouldDisplay();
+
+    /**
+     * Make any notifications to the user as needed.
+     */
+    void processNotification();
 }

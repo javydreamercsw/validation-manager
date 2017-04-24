@@ -13,6 +13,7 @@ INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (6, 'senior.tester'
 INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (7, 'tester', 'tester.desc');
 INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (8, 'admin', 'admin.desc');
 INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (9, 'leader', 'leader.desc');
+INSERT INTO `role` (`id`, `role_name`, `description`) VALUES (10, 'quality', 'quality.desc');
 /*Add user rights*/
 INSERT INTO `user_right` (`id`, `description`) VALUES (1, 'testplan.execute');
 INSERT INTO `user_right` (`id`, `description`) VALUES (2, 'testplan.create.build');
@@ -30,6 +31,7 @@ INSERT INTO `user_right` (`id`, `description`) VALUES (13, 'events.view');
 INSERT INTO `user_right` (`id`, `description`) VALUES (14, 'events.management');
 INSERT INTO `user_right` (`id`, `description`) VALUES (15, 'system.configuration');
 INSERT INTO `user_right` (`id`, `description`) VALUES (16, 'project.viewer');
+INSERT INTO `user_right` (`id`, `description`) VALUES (17, 'quality.assurance');
 /*Set rights per role*/
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 1);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 2);
@@ -47,6 +49,7 @@ INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 13);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 14);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 15);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 16);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (8, 17);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (5, 3);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (5, 6);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (4, 3);
@@ -73,6 +76,13 @@ INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 7);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 8);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 9);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 12);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 2);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 5);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 6);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 9);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 12);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 16);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 17);
 /*Add assignment types*/
 INSERT INTO `assigment_type` (`id`, `fk_table`, `description`) VALUES (1, 'test_plan_has_test', 'testcase.execution');
 INSERT INTO `assigment_type` (`id`, `fk_table`, `description`) VALUES (2, 'test_case', 'testcase.review');

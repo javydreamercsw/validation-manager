@@ -5,7 +5,6 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
@@ -27,50 +26,53 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
  */
 public final class ExecutionWindow extends VMWindow {
 
-    private final VMUI ui;
+    private final boolean reviewer;
 
     /**
      * Display all the executions one after another.
      *
-     * @param ui ValidationManagerUI instance
      * @param executions Executions to display.
+     * @param reviewer true if this is for a reviewer
      */
-    public ExecutionWindow(VMUI ui,
-            List<TestCaseExecutionServer> executions) {
+    public ExecutionWindow(
+            List<TestCaseExecutionServer> executions, boolean reviewer) {
         super();
+        this.reviewer = reviewer;
         init(executions, -1);
-        this.ui = ui;
     }
 
     /**
      * Display all the executions one after another for the specific test case.
      *
-     * @param ui ValidationManagerUI instance
      * @param executions Executions to display.
      * @param tcID test case to show
+     * @param reviewer true if this is for a reviewer
      */
-    public ExecutionWindow(VMUI ui,
-            List<TestCaseExecutionServer> executions, int tcID) {
+    public ExecutionWindow(
+            List<TestCaseExecutionServer> executions, int tcID, boolean reviewer) {
         super();
-        this.ui = ui;
+        this.reviewer = reviewer;
         init(executions, tcID);
     }
 
     private void init(List<TestCaseExecutionServer> executions, int tcID) {
         HorizontalLayout layout = new HorizontalLayout();
         Wizard execution = new Wizard();
-        TreeMap<Integer, TreeMap<Integer, ExecutionWizardStep>> sorted = new TreeMap<>();
+        TreeMap<Integer, TreeMap<Integer, ExecutionWizardStep>> sorted
+                = new TreeMap<>();
         executions.forEach((tce) -> {
             tce.getExecutionStepList().forEach(es -> {
                 if (tcID < 0
                         || es.getExecutionStepPK().getStepTestCaseId() == tcID) {
-                    if (!sorted.containsKey(es.getExecutionStepPK().getStepTestCaseId())) {
+                    if (!sorted.containsKey(es.getExecutionStepPK()
+                            .getStepTestCaseId())) {
                         sorted.put(es.getExecutionStepPK().getStepTestCaseId(),
                                 new TreeMap<>());
                     }
                     sorted.get(es.getExecutionStepPK().getStepTestCaseId())
                             .put(es.getStep().getStepSequence(),
-                                    new ExecutionWizardStep(execution, ui, es));
+                                    new ExecutionWizardStep(execution, es,
+                                            reviewer));
                 }
             });
         });
@@ -93,36 +95,69 @@ public final class ExecutionWindow extends VMWindow {
 
             @Override
             public void wizardCompleted(WizardCompletedEvent event) {
-                MessageBox prompt = MessageBox.createQuestion()
-                        .withCaption("Do you want to lock the test case?")
-                        .withMessage("Locked test cases are commited and can no "
-                                + "longer be modified.\nIt would be equivalent "
-                                + "to documenting in paper.")
-                        .withYesButton(() -> {
-                            execution.getSteps().stream().map((step)
-                                    -> (ExecutionWizardStep) step).map((s)
-                                    -> s.getStep()).filter((ess) -> (!ess.getLocked()
-                                    && ess.getResultId() != null))
-                                    .forEachOrdered((ess) -> {
-                                        try {
-                                            ess.setLocked(true);
-                                            ess.write2DB();
-                                            ui.updateScreen();
-                                        } catch (Exception ex) {
-                                            Exceptions.printStackTrace(ex);
-                                        }
-                                    });
-                        }, ButtonOption.focus(),
-                                ButtonOption.icon(VaadinIcons.CHECK))
-                        .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
-                prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-                prompt.open();
-                ui.removeWindow(ExecutionWindow.this);
+                if (reviewer) {
+                    MessageBox prompt = MessageBox.createQuestion()
+                            .withCaption("Do you want to release the test case?")
+                            .withMessage("Released test cases are commited and can no "
+                                    + "longer be modified.\nIt would be equivalent "
+                                    + "to documenting in paper.")
+                            .withYesButton(() -> {
+                                execution.getSteps().stream().map((step)
+                                        -> (ExecutionWizardStep) step).map((s)
+                                        -> s.getStep()).filter((ess) -> (!ess.getLocked()
+                                        && ess.getResultId() != null))
+                                        .forEachOrdered((ess) -> {
+                                            try {
+                                                if (ess.getReviewResultId().getId() == 2) {
+                                                    //TODO: Failed, send back to retest?
+                                                    ess.setLocked(false);
+                                                }
+                                                ess.setReviewed(true);
+                                                ess.write2DB();
+                                                ValidationManagerUI.getInstance()
+                                                        .updateScreen();
+                                            } catch (Exception ex) {
+                                                Exceptions.printStackTrace(ex);
+                                            }
+                                        });
+                            }, ButtonOption.focus(),
+                                    ButtonOption.icon(VaadinIcons.CHECK))
+                            .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
+                    prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                    prompt.open();
+                } else {
+                    MessageBox prompt = MessageBox.createQuestion()
+                            .withCaption("Do you want to lock the test case?")
+                            .withMessage("Locked test cases are commited and can no "
+                                    + "longer be modified.\nIt would be equivalent "
+                                    + "to documenting in paper.")
+                            .withYesButton(() -> {
+                                execution.getSteps().stream().map((step)
+                                        -> (ExecutionWizardStep) step).map((s)
+                                        -> s.getStep()).filter((ess) -> (!ess.getLocked()
+                                        && ess.getResultId() != null))
+                                        .forEachOrdered((ess) -> {
+                                            try {
+                                                ess.setLocked(true);
+                                                ess.write2DB();
+                                                ValidationManagerUI.getInstance()
+                                                        .updateScreen();
+                                            } catch (Exception ex) {
+                                                Exceptions.printStackTrace(ex);
+                                            }
+                                        });
+                            }, ButtonOption.focus(),
+                                    ButtonOption.icon(VaadinIcons.CHECK))
+                            .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
+                    prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                    prompt.open();
+                }
+                ValidationManagerUI.getInstance().removeWindow(ExecutionWindow.this);
             }
 
             @Override
             public void wizardCancelled(WizardCancelledEvent event) {
-                ui.removeWindow(ExecutionWindow.this);
+                ValidationManagerUI.getInstance().removeWindow(ExecutionWindow.this);
             }
         });
         layout.addComponent(execution);

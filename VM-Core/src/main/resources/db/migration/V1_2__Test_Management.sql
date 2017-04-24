@@ -6,6 +6,10 @@ INSERT INTO `execution_result` (`id`, `result_name`) VALUES (2, 'result.fail');
 INSERT INTO `execution_result` (`id`, `result_name`) VALUES (3, 'result.blocked');
 INSERT INTO `execution_result` (`id`, `result_name`) VALUES (4, 'result.pending');
 INSERT INTO `execution_result` (`id`, `result_name`) VALUES (5, 'result.progress');
+/*Add default review results*/
+INSERT INTO `review_result` (`id`, `review_name`) VALUES (1, 'result.pass');
+INSERT INTO `review_result` (`id`, `review_name`) VALUES (2, 'result.fail');
+INSERT INTO `review_result` (`id`, `review_name`) VALUES (3, 'result.pending');
 /*Add some more demo users and their roles*/
 INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `locale`, `user_status_id`) VALUES (2, 'tester', 'f5d1278e8109edd94e1e4197e04873b9', '', 'Mr.', 'Tester', 'en', 1);
 INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (2, 7);
@@ -17,6 +21,9 @@ INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `las
 INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (5, 6);
 INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `locale`, `user_status_id`) VALUES (6, 'leader', 'c444858e0aaeb727da73d2eae62321ad', '', 'Lead', 'Tester', 'en', 1);
 INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (6, 9);
+/*Add Quality user*/
+INSERT INTO `vm_user` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `locale`, `user_status_id`) VALUES (7, 'quality', 'd66636b253cb346dbb6240e30def3618', '', 'Quality', 'Assurance', 'en', 1);
+INSERT INTO `user_has_role` (`user_id`, `role_id`) VALUES (7, 10);
 /*Update version*/
 UPDATE `vm_setting` SET `int_val` = 2 WHERE id = 3;
 /*Add permissions*/
@@ -36,6 +43,7 @@ INSERT INTO `attachment_type` (`id`, `description`, `TYPE`) VALUES (10, 'undefin
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (8, 'show.expected.result', 1, 0, '0', '');
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (9, 'openoffice.port', 0, 1000, '0', '');
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (10, 'openoffice.home', 0, 0, '0', '');
+INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (11, 'quality.review', 1, 0, '0', '');
 /*Issue Types*/
 INSERT INTO `issue_type` (`id`, `type_name`, `description`) VALUES (1, 'bug.name', 'bug.desc');
 INSERT INTO `issue_type` (`id`, `type_name`, `description`) VALUES (2, 'observation.name', 'observation.desc');

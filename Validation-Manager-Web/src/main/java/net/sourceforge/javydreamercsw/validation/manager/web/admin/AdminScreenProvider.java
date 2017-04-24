@@ -21,6 +21,7 @@ import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.server.core.VMSettingServer;
 import java.util.logging.Level;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = IMainContentProvider.class)
@@ -42,7 +43,8 @@ public class AdminScreenProvider extends AbstractProvider {
             sTree.setChildrenAllowed(s, false);
             return s;
         }).forEachOrdered((s) -> {
-            sTree.setItemCaption(s, getUI().translate(s.getSetting()));
+            sTree.setItemCaption(s, ValidationManagerUI.getInstance()
+                    .translate(s.getSetting()));
         });
         split.setFirstComponent(sTree);
         layout.addComponent(adminSheet);
@@ -52,6 +54,7 @@ public class AdminScreenProvider extends AbstractProvider {
                         displaySetting((VmSetting) sTree.getValue()));
             }
         });
+        layout.setId(getComponentCaption());
         return layout;
     }
 
@@ -62,8 +65,9 @@ public class AdminScreenProvider extends AbstractProvider {
 
     @Override
     public boolean shouldDisplay() {
-        return super.shouldDisplay()
-                && getUI().checkRight("system.configuration");
+        return ValidationManagerUI.getInstance().getUser() != null
+                && ValidationManagerUI.getInstance()
+                        .checkRight("system.configuration");
     }
 
     private Component displaySetting(VmSetting s) {

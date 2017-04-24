@@ -35,25 +35,26 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "ExecutionStep.findAll",
             query = "SELECT e FROM ExecutionStep e")
     , @NamedQuery(name = "ExecutionStep.findByTestCaseExecutionId",
-            query = "SELECT e FROM ExecutionStep e WHERE "
-            + "e.executionStepPK.testCaseExecutionId "
-            + "= :testCaseExecutionId")
+            query = "SELECT e FROM ExecutionStep e WHERE e.executionStepPK.testCaseExecutionId = :testCaseExecutionId")
     , @NamedQuery(name = "ExecutionStep.findByStepId",
-            query = "SELECT e FROM ExecutionStep e WHERE "
-            + "e.executionStepPK.stepId = :stepId")
+            query = "SELECT e FROM ExecutionStep e WHERE e.executionStepPK.stepId = :stepId")
     , @NamedQuery(name = "ExecutionStep.findByStepTestCaseId",
-            query = "SELECT e FROM ExecutionStep e WHERE "
-            + "e.executionStepPK.stepTestCaseId = :stepTestCaseId")
+            query = "SELECT e FROM ExecutionStep e WHERE e.executionStepPK.stepTestCaseId = :stepTestCaseId")
     , @NamedQuery(name = "ExecutionStep.findByExecutionTime",
-            query = "SELECT e FROM ExecutionStep e WHERE "
-            + "e.executionTime = :executionTime")
-    , @NamedQuery(name = "ExecutionStep.findByComment",
-            query = "SELECT e FROM ExecutionStep e WHERE "
-            + "e.comment = :comment")})
+            query = "SELECT e FROM ExecutionStep e WHERE e.executionTime = :executionTime")
+    , @NamedQuery(name = "ExecutionStep.findByExecutionStart",
+            query = "SELECT e FROM ExecutionStep e WHERE e.executionStart = :executionStart")
+    , @NamedQuery(name = "ExecutionStep.findByExecutionEnd",
+            query = "SELECT e FROM ExecutionStep e WHERE e.executionEnd = :executionEnd")
+    , @NamedQuery(name = "ExecutionStep.findByAssignedTime",
+            query = "SELECT e FROM ExecutionStep e WHERE e.assignedTime = :assignedTime")
+    , @NamedQuery(name = "ExecutionStep.findByLocked",
+            query = "SELECT e FROM ExecutionStep e WHERE e.locked = :locked")
+    , @NamedQuery(name = "ExecutionStep.findByReviewed",
+            query = "SELECT e FROM ExecutionStep e WHERE e.reviewed = :reviewed")})
 public class ExecutionStep implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
     @EmbeddedId
     protected ExecutionStepPK executionStepPK;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
@@ -69,6 +70,9 @@ public class ExecutionStep implements Serializable {
     @Column(name = "execution_end")
     @Temporal(TemporalType.TIMESTAMP)
     private Date executionEnd;
+    @Column(name = "review_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date reviewDate;
     @Column(name = "assigned_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date assignedTime;
@@ -76,15 +80,25 @@ public class ExecutionStep implements Serializable {
     @NotNull
     @Column(name = "locked")
     private boolean locked;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "reviewed")
+    private boolean reviewed;
     @JoinColumn(name = "result_id", referencedColumnName = "id")
     @ManyToOne
     private ExecutionResult resultId;
+    @JoinColumn(name = "review_result_id", referencedColumnName = "id")
+    @ManyToOne
+    private ReviewResult reviewResultId;
     @JoinColumn(name = "assignee", referencedColumnName = "id")
     @ManyToOne
     private VmUser assignee;
     @JoinColumn(name = "assigner", referencedColumnName = "id")
     @ManyToOne
     private VmUser assigner;
+    @JoinColumn(name = "reviewer", referencedColumnName = "id")
+    @ManyToOne
+    private VmUser reviewer;
     @JoinColumns({
         @JoinColumn(name = "step_id", referencedColumnName = "id",
                 insertable = false, updatable = false)
@@ -109,9 +123,10 @@ public class ExecutionStep implements Serializable {
         this.executionStepPK = executionStepPK;
     }
 
-    public ExecutionStep(ExecutionStepPK executionStepPK, boolean locked) {
+    public ExecutionStep(ExecutionStepPK executionStepPK, boolean locked, boolean reviewed) {
         this.executionStepPK = executionStepPK;
         this.locked = locked;
+        this.reviewed = reviewed;
     }
 
     public ExecutionStep(int testCaseExecutionId, int stepId, int stepTestCaseId) {
@@ -175,12 +190,28 @@ public class ExecutionStep implements Serializable {
         this.locked = locked;
     }
 
+    public boolean getReviewed() {
+        return reviewed;
+    }
+
+    public void setReviewed(boolean reviewed) {
+        this.reviewed = reviewed;
+    }
+
     public ExecutionResult getResultId() {
         return resultId;
     }
 
     public void setResultId(ExecutionResult resultId) {
         this.resultId = resultId;
+    }
+
+    public ReviewResult getReviewResultId() {
+        return reviewResultId;
+    }
+
+    public void setReviewResultId(ReviewResult reviewResultId) {
+        this.reviewResultId = reviewResultId;
     }
 
     public VmUser getAssignee() {
@@ -239,16 +270,14 @@ public class ExecutionStep implements Serializable {
             return false;
         }
         ExecutionStep other = (ExecutionStep) object;
-        return !((this.executionStepPK == null
-                && other.executionStepPK != null)
+        return !((this.executionStepPK == null && other.executionStepPK != null)
                 || (this.executionStepPK != null
                 && !this.executionStepPK.equals(other.executionStepPK)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.ExecutionStep[ executionStepPK="
-                + executionStepPK + " ]";
+        return "com.validation.manager.core.db.ExecutionStep[ executionStepPK=" + executionStepPK + " ]";
     }
 
     @XmlTransient
@@ -259,5 +288,33 @@ public class ExecutionStep implements Serializable {
 
     public void setExecutionStepHasIssueList(List<ExecutionStepHasIssue> executionStepHasIssueList) {
         this.executionStepHasIssueList = executionStepHasIssueList;
+    }
+
+    /**
+     * @return the reviewDate
+     */
+    public Date getReviewDate() {
+        return reviewDate;
+    }
+
+    /**
+     * @param reviewDate the reviewDate to set
+     */
+    public void setReviewDate(Date reviewDate) {
+        this.reviewDate = reviewDate;
+    }
+
+    /**
+     * @return the reviewer
+     */
+    public VmUser getReviewer() {
+        return reviewer;
+    }
+
+    /**
+     * @param reviewer the reviewer to set
+     */
+    public void setReviewer(VmUser reviewer) {
+        this.reviewer = reviewer;
     }
 }

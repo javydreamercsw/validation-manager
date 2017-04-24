@@ -78,6 +78,8 @@ public final class ExecutionStepServer extends ExecutionStep
         target.setAssigner(source.getAssigner());
         target.setLocked(source.getLocked());
         target.setExecutionStepHasIssueList(source.getExecutionStepHasIssueList());
+        target.setReviewed(source.getReviewed());
+        target.setReviewDate(source.getReviewDate());
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.vaadin.ui.Component;
 import com.validation.manager.core.AbstractProvider;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.db.Project;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
 import org.openide.util.lookup.ServiceProvider;
@@ -23,7 +24,7 @@ public class DesignerScreenProvider extends AbstractProvider {
     public Component getContent() {
         Wizard w = new Wizard();
         w.addStep(new SelectTestCasesStep(w, p));
-        w.addStep(new DetailStep(getUI()));
+        w.addStep(new DetailStep());
         w.addListener(new WizardProgressListener() {
             @Override
             public void activeStepChanged(WizardStepActivationEvent event) {
@@ -38,13 +39,13 @@ public class DesignerScreenProvider extends AbstractProvider {
             @Override
             public void wizardCompleted(WizardCompletedEvent event) {
                 p = null;
-                getUI().updateScreen();
+                ValidationManagerUI.getInstance().updateScreen();
             }
 
             @Override
             public void wizardCancelled(WizardCancelledEvent event) {
                 p = null;
-                getUI().updateScreen();
+                ValidationManagerUI.getInstance().updateScreen();
             }
         });
         return w;
@@ -57,8 +58,9 @@ public class DesignerScreenProvider extends AbstractProvider {
 
     @Override
     public boolean shouldDisplay() {
-        return getUI().getUser() != null
-                && getUI().checkRight("testplan.planning") && p != null;
+        return ValidationManagerUI.getInstance().getUser() != null
+                && ValidationManagerUI.getInstance()
+                        .checkRight("testplan.planning") && p != null;
     }
 
     /**

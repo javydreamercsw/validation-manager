@@ -11,16 +11,21 @@
     <class>com.validation.manager.core.db.ExecutionResult</class>
     <class>com.validation.manager.core.db.ExecutionStep</class>
     <class>com.validation.manager.core.db.ExecutionStepHasAttachment</class>
+    <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
     <class>com.validation.manager.core.db.FailureMode</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
     <class>com.validation.manager.core.db.Investigation</class>
+    <class>com.validation.manager.core.db.Issue</class>
+    <class>com.validation.manager.core.db.IssueResolution</class>
+    <class>com.validation.manager.core.db.IssueType</class>
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
     <class>com.validation.manager.core.db.RequirementStatus</class>
     <class>com.validation.manager.core.db.RequirementType</class>
+    <class>com.validation.manager.core.db.ReviewResult</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
@@ -47,10 +52,6 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
-    <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
-    <class>com.validation.manager.core.db.Issue</class>
-    <class>com.validation.manager.core.db.IssueResolution</class>
-    <class>com.validation.manager.core.db.IssueType</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/validation_manager?serverTimezone=UTC"/>
@@ -74,16 +75,21 @@
     <class>com.validation.manager.core.db.ExecutionResult</class>
     <class>com.validation.manager.core.db.ExecutionStep</class>
     <class>com.validation.manager.core.db.ExecutionStepHasAttachment</class>
+    <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
     <class>com.validation.manager.core.db.FailureMode</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
     <class>com.validation.manager.core.db.Investigation</class>
+    <class>com.validation.manager.core.db.Issue</class>
+    <class>com.validation.manager.core.db.IssueResolution</class>
+    <class>com.validation.manager.core.db.IssueType</class>
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
     <class>com.validation.manager.core.db.RequirementStatus</class>
     <class>com.validation.manager.core.db.RequirementType</class>
+    <class>com.validation.manager.core.db.ReviewResult</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
@@ -110,10 +116,6 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
-    <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
-    <class>com.validation.manager.core.db.Issue</class>
-    <class>com.validation.manager.core.db.IssueResolution</class>
-    <class>com.validation.manager.core.db.IssueType</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:./target/data/test/validation-manager-test;AUTO_SERVER=TRUE"/>
@@ -139,16 +141,21 @@
     <class>com.validation.manager.core.db.ExecutionResult</class>
     <class>com.validation.manager.core.db.ExecutionStep</class>
     <class>com.validation.manager.core.db.ExecutionStepHasAttachment</class>
+    <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
     <class>com.validation.manager.core.db.FailureMode</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
     <class>com.validation.manager.core.db.Investigation</class>
+    <class>com.validation.manager.core.db.Issue</class>
+    <class>com.validation.manager.core.db.IssueResolution</class>
+    <class>com.validation.manager.core.db.IssueType</class>
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>
     <class>com.validation.manager.core.db.RequirementSpecNode</class>
     <class>com.validation.manager.core.db.RequirementStatus</class>
     <class>com.validation.manager.core.db.RequirementType</class>
+    <class>com.validation.manager.core.db.ReviewResult</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
@@ -175,10 +182,6 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
-    <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
-    <class>com.validation.manager.core.db.Issue</class>
-    <class>com.validation.manager.core.db.IssueResolution</class>
-    <class>com.validation.manager.core.db.IssueType</class>
     <properties>
       <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
       <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.DefaultSessionLog"/>
