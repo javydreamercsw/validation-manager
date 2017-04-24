@@ -1,6 +1,5 @@
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
-import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
@@ -71,6 +70,7 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
@@ -85,11 +85,16 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.server.core.VMSettingServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import com.validation.manager.core.tool.step.importer.StepImporter;
 import com.validation.manager.core.tool.step.importer.TestCaseImportException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -106,6 +111,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
+import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
@@ -1700,15 +1706,11 @@ public class ValidationManagerUI extends UI implements VMUI {
             //Process any notifications
             //Check for assigned test
             getUser().update();
-            for (ExecutionStep es : getUser().getExecutionStepList()) {
-                if (es.getExecutionStart() == null) {
-                    //It has been assigned but not started
-                    Notification.show("Test Pending",
-                            "You have test case(s) pending execution.",
-                            Notification.Type.TRAY_NOTIFICATION);
-                    break;
-                }
-            }
+            //Process notifications
+            Lookup.getDefault().lookupAll(IMainContentProvider.class)
+                    .forEach(p -> {
+                        p.processNotification();
+                    });
         }
         //Add the content
         vs.setSecondComponent(getContentComponent());
@@ -1973,12 +1975,6 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     @Override
     protected void init(VaadinRequest request) {
-        //Connect to the database defined in context.xml
-        try {
-            DataBaseManager.setPersistenceUnitName("VMPUJNDI");
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
         setInstance(this);
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
@@ -2317,10 +2313,71 @@ public class ValidationManagerUI extends UI implements VMUI {
     public static class Servlet extends VaadinServlet {
 
         public Servlet() {
+            //Connect to the database defined in context.xml
+            try {
+                DataBaseManager.setPersistenceUnitName("VMPUJNDI");
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
             if (reset == null && DataBaseManager.isDemo()) {
                 LOG.info("Running on demo mode!");
                 reset = new VMDemoResetThread();
                 reset.start();
+            }
+            //Check for existance of OpenOffice installation
+            VmSetting home = VMSettingServer.getSetting("openoffice.home");
+            VmSetting port = VMSettingServer.getSetting("openoffice.port");
+            if (home != null && port != null) {
+                File homeLocation = new File(home.getStringVal());
+                int portNumber = port.getIntVal();
+                if (homeLocation.exists() && homeLocation.isDirectory()
+                        && portNumber > 0) {
+                    try {
+                        //Everything seems valid. Start OpenOffice
+                        Process p = Runtime.getRuntime().exec(
+                                new String[]{
+                                    "\"" + homeLocation.getAbsolutePath()
+                                    + System.getProperty("file.separator")
+                                    + "program"
+                                    + System.getProperty("file.separator")
+                                    + "soffice\"",
+                                    "-headless",
+                                    "-nologo",
+                                    "-norestore",
+                                    "-accept=socket,host=localhost,port="
+                                    + portNumber
+                                    + ";urp;StarOffice.ServiceManager"});
+                        BufferedReader stdInput
+                                = new BufferedReader(new InputStreamReader(
+                                        p.getInputStream()));
+
+                        BufferedReader stdError
+                                = new BufferedReader(new InputStreamReader(
+                                        p.getErrorStream()));
+
+                        // read the output from the command
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Here is the standard output of the command:")
+                                .append("\n");
+                        String s = null;
+                        while ((s = stdInput.readLine()) != null) {
+                            sb.append(s).append("\n");
+                        }
+
+                        // read any errors from the attempted command
+                        sb.append("Here is the standard error of the "
+                                + "command (if any):").append("\n");
+                        while ((s = stdError.readLine()) != null) {
+                            sb.append(s).append("\n");
+                        }
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                } else {
+                    LOG.warning("Invalid configuration for OpenOffice");
+                }
+            } else {
+                LOG.warning("Missing configuration for Open Office!");
             }
         }
     }
