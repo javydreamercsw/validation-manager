@@ -8,6 +8,7 @@ import com.vaadin.ui.Notification;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.server.core.VMSettingServer;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
@@ -28,10 +29,12 @@ public class QualityScreenProvider extends ExecutionScreen {
 
     @Override
     public boolean shouldDisplay() {
+        VmSetting setting = VMSettingServer.getSetting("quality.review");
         return ValidationManagerUI.getInstance().getUser() != null
                 && ValidationManagerUI.getInstance()
                         .checkRight("quality.assurance")
-                && VMSettingServer.getSetting("quality.review").getBoolVal();
+                && setting != null
+                && setting.getBoolVal();
     }
 
     @Override
