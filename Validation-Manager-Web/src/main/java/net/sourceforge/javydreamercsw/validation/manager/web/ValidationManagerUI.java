@@ -1268,8 +1268,31 @@ public class ValidationManagerUI extends UI implements VMUI {
         dashboard.setEnabled(checkRight("testplan.planning"));
         dashboard.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    addWindow(new ExecutionDashboard((TestCaseExecution) tree.getValue()));
+                    addWindow(new ExecutionDashboard(extractTCE(tree.getValue())));
                 });
+    }
+
+    public TestCaseExecutionServer extractTCE(Object key) {
+        TestCaseExecutionServer tce = null;
+        if (key instanceof String) {
+            String item = (String) key;
+            String tceIdS = item.substring(item.indexOf("-") + 1,
+                    item.lastIndexOf("-"));
+            try {
+                int tceId = Integer.parseInt(tceIdS);
+                LOG.log(Level.INFO, "{0}", tceId);
+                tce = new TestCaseExecutionServer(tceId);
+            } catch (NumberFormatException nfe) {
+                LOG.log(Level.INFO, "Unable to find TCE: " + tceIdS, nfe);
+            }
+        } else if (key instanceof TestCaseExecution) {
+            //It is a TestCaseExecution
+            tce = new TestCaseExecutionServer((TestCaseExecution) key);
+        } else {
+            LOG.log(Level.SEVERE, "Unexpected key: {0}", key);
+            tce = null;
+        }
+        return tce;
     }
 
     private void createTestExecutionMenu(ContextMenu menu) {
