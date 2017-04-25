@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.TreeMap;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI.TCEExtraction;
 import org.jfree.chart.ChartFactory;
@@ -26,17 +26,17 @@ import org.vaadin.addon.JFreeChartWrapper;
  */
 public final class ExecutionDashboard extends VMWindow {
 
-    private final List<TCEExtraction> tce = new ArrayList<>();
+    private final List<TCEExtraction> extractions = new ArrayList<>();
 
     public ExecutionDashboard(List<TCEExtraction> tce) {
-        this.tce.clear();
-        this.tce.addAll(tce);
+        this.extractions.clear();
+        this.extractions.addAll(tce);
         init();
     }
 
     public ExecutionDashboard(TCEExtraction tce) {
-        this.tce.clear();
-        this.tce.add(tce);
+        this.extractions.clear();
+        this.extractions.add(tce);
         init();
     }
 
@@ -46,19 +46,24 @@ public final class ExecutionDashboard extends VMWindow {
         setHeight(100, Unit.PERCENTAGE);
         setWidth(100, Unit.PERCENTAGE);
         //Gather stats
-        boolean legend = true;
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        for (TCEExtraction e : tce) {
+        extractions.forEach((e) -> {
             ExecutionStats es = new ExecutionStats(e);
-            for (Entry<String, Integer> entry : es.stats.entrySet()) {
-                legend = e.getTestCase() != null;
-                dataset.addValue(new Double(entry.getValue()),
-                        e.getTestCase() == null ? "N/A" : e.getTestCase().getName(),
-                        Lookup.getDefault().lookup(VMUI.class)
-                                .translate(entry.getKey())
-                );
-            }
-        }
+            es.stats.entrySet().forEach((entry) -> {
+                //This is for the whole execution
+                ExecutionResultServer.getResults().forEach((er) -> {
+                    if (e.getTestCase() == null
+                            || e.getTestCase().getName().equals(entry.getKey())) {
+                        dataset.addValue(new Double(entry.getValue()
+                                .get(er.getResultName())),
+                                entry.getKey(),
+                                Lookup.getDefault().lookup(VMUI.class)
+                                        .translate(er.getResultName())
+                        );
+                    }
+                });
+            });
+        });
         //Build bar graph
         JFreeChart chart = ChartFactory.createBarChart3D(
                 "Execution Progress", // chart title
@@ -66,7 +71,7 @@ public final class ExecutionDashboard extends VMWindow {
                 "Amount",
                 dataset, // data
                 PlotOrientation.VERTICAL,
-                legend, // include legend
+                true, // include legend
                 true,
                 false);
         setContent(new JFreeChartWrapper(chart));
@@ -74,37 +79,44 @@ public final class ExecutionDashboard extends VMWindow {
 
     private class ExecutionStats {
 
-        private Map<String, Integer> stats = new HashMap<>();
+        //----------Test Case, Result, Amount
+        private Map<String, Map<String, Integer>> stats = new TreeMap<>();
         private final TCEExtraction execution;
 
         public ExecutionStats(TCEExtraction execution) {
             this.execution = execution;
-            ExecutionResultServer.getResults().forEach((er) -> {
-                stats.put(er.getResultName(), 0);
-            });
             execution.getTestCaseExecution().getExecutionStepList().forEach(es -> {
                 ExecutionResult result = es.getResultId();
-                if (execution.getTestCase() == null
-                        || execution.getTestCase().getId()
-                                .equals(es.getExecutionStepPK()
-                                        .getStepTestCaseId())) {
-                    if (result != null) {
-                        stats.put(result.getResultName(),
-                                stats.get(result.getResultName()) + 1);
-                    } else {
-                        String pending = ExecutionResultServer
-                                .getResult("result.pending")
-                                .getResultName();
-                        stats.put(pending, stats.get(pending) + 1);
-                    }
+                String tcName = es.getStep().getTestCase().getName();
+                if (!stats.containsKey(tcName)) {
+                    stats.put(tcName, getResultMap());
+                }
+                if (result != null) {
+                    stats.get(tcName).put(result.getResultName(),
+                            stats.get(tcName).get(result.getResultName()) + 1);
+                } else {
+                    String pending = ExecutionResultServer
+                            .getResult("result.pending")
+                            .getResultName();
+                    stats.get(tcName).put(pending,
+                            stats.get(tcName).get(pending) + 1);
                 }
             });
+        }
+
+        //Creates a clean map to store results.
+        private Map<String, Integer> getResultMap() {
+            Map<String, Integer> results = new HashMap<>();
+            ExecutionResultServer.getResults().forEach((er) -> {
+                results.put(er.getResultName(), 0);
+            });
+            return results;
         }
 
         /**
          * @return the stats
          */
-        public Map<String, Integer> getStats() {
+        public Map<String, Map<String, Integer>> getStats() {
             return stats;
         }
 

@@ -2356,7 +2356,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         dashboard.setEnabled(checkRight("testplan.planning"));
         dashboard.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    LOG.info("" + tree.getValue());
                     addWindow(new ExecutionDashboard(extractTCE(tree.getValue())));
                 });
     }
