@@ -11,7 +11,6 @@ import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.TestCase;
-import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.server.core.RoleServer;
@@ -57,31 +56,10 @@ public class AssignUserStep implements WizardStep {
         VerticalLayout l = new VerticalLayout();
         List<TestCase> testCases = new ArrayList<>();
         List<VmUser> users = new ArrayList<>();
-        //Parse the id: tce-<tce id>-<test case id>
-        if (key instanceof String) {
-            String item = (String) key;
-            String tceIdS = item.substring(item.indexOf("-") + 1,
-                    item.lastIndexOf("-"));
-            try {
-                int tceId = Integer.parseInt(tceIdS);
-                LOG.log(Level.INFO, "{0}", tceId);
-                tce = new TestCaseExecutionServer(tceId);
-            } catch (NumberFormatException nfe) {
-                LOG.log(Level.INFO, "Unable to find TCE: " + tceIdS, nfe);
-            }
-            try {
-                int tcId = Integer.parseInt(item.substring(item.lastIndexOf("-") + 1));
-                LOG.log(Level.INFO, "{0}", tcId);
-                tc = new TestCaseServer(tcId);
-            } catch (NumberFormatException nfe) {
-                LOG.log(Level.INFO, "Unable to find TCE: " + tceIdS, nfe);
-            }
-        } else if (key instanceof TestCaseExecution) {
-            //It is a TestCaseExecution
-            tce = new TestCaseExecutionServer((TestCaseExecution) key);
-        } else {
-            LOG.log(Level.SEVERE, "Unexpected key: {0}", key);
-        }
+        ValidationManagerUI.TCEExtraction extracted
+                = ValidationManagerUI.getInstance().extractTCE(key);
+        tc = extracted.getTestCase();
+        tce = extracted.getTestCaseExecution();
         if (tc != null) {
             testCases.add(tc.getEntity());
         } else if (tce != null) {

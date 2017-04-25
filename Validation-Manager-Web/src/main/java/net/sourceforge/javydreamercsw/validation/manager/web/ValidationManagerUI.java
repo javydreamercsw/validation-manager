@@ -1262,28 +1262,28 @@ public class ValidationManagerUI extends UI implements VMUI {
                     sw.setSizeFull();
                     addWindow(sw);
                 });
-        ContextMenu.ContextMenuItem dashboard
-                = menu.addItem("View Execution Dashboard",
-                        VaadinIcons.DASHBOARD);
-        dashboard.setEnabled(checkRight("testplan.planning"));
-        dashboard.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    addWindow(new ExecutionDashboard(extractTCE(tree.getValue())));
-                });
     }
 
-    public TestCaseExecutionServer extractTCE(Object key) {
+    public TCEExtraction extractTCE(Object key) {
         TestCaseExecutionServer tce = null;
+        TestCaseServer tcs = null;
         if (key instanceof String) {
             String item = (String) key;
             String tceIdS = item.substring(item.indexOf("-") + 1,
                     item.lastIndexOf("-"));
             try {
                 int tceId = Integer.parseInt(tceIdS);
-                LOG.log(Level.INFO, "{0}", tceId);
+                LOG.log(Level.FINE, "{0}", tceId);
                 tce = new TestCaseExecutionServer(tceId);
             } catch (NumberFormatException nfe) {
-                LOG.log(Level.INFO, "Unable to find TCE: " + tceIdS, nfe);
+                LOG.log(Level.WARNING, "Unable to find TCE: " + tceIdS, nfe);
+            }
+            try {
+                int tcId = Integer.parseInt(item.substring(item.lastIndexOf("-") + 1));
+                LOG.log(Level.FINE, "{0}", tcId);
+                tcs = new TestCaseServer(tcId);
+            } catch (NumberFormatException nfe) {
+                LOG.log(Level.WARNING, "Unable to find TCE: " + tceIdS, nfe);
             }
         } else if (key instanceof TestCaseExecution) {
             //It is a TestCaseExecution
@@ -1292,11 +1292,12 @@ public class ValidationManagerUI extends UI implements VMUI {
             LOG.log(Level.SEVERE, "Unexpected key: {0}", key);
             tce = null;
         }
-        return tce;
+        return new TCEExtraction(tce, tcs);
     }
 
     private void createTestExecutionMenu(ContextMenu menu) {
         addTestCaseAssignment(menu);
+        addExecutionDashboard(menu);
     }
 
     private void createRootMenu(ContextMenu menu) {
@@ -1322,6 +1323,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             true);
                 });
         addTestCaseAssignment(menu);
+        addExecutionDashboard(menu);
     }
 
     private void createTestPlanMenu(ContextMenu menu) {
@@ -1582,6 +1584,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     // Open it in the UI
                     addWindow(subWindow);
                 });
+        addExecutionDashboard(menu);
     }
 
     private void createStepMenu(ContextMenu menu) {
@@ -2319,6 +2322,43 @@ public class ValidationManagerUI extends UI implements VMUI {
     @Override
     public Object getSelectdValue() {
         return tree.getValue();
+    }
+
+    public class TCEExtraction {
+
+        private final TestCaseExecutionServer tce;
+        private final TestCaseServer tcs;
+
+        public TCEExtraction(TestCaseExecutionServer tce, TestCaseServer tcs) {
+            this.tce = tce;
+            this.tcs = tcs;
+        }
+
+        /**
+         * @return the tce
+         */
+        public TestCaseExecutionServer getTestCaseExecution() {
+            return tce;
+        }
+
+        /**
+         * @return the tcs
+         */
+        public TestCaseServer getTestCase() {
+            return tcs;
+        }
+    }
+
+    private void addExecutionDashboard(ContextMenu menu) {
+        ContextMenu.ContextMenuItem dashboard
+                = menu.addItem("View Execution Dashboard",
+                        VaadinIcons.DASHBOARD);
+        dashboard.setEnabled(checkRight("testplan.planning"));
+        dashboard.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    LOG.info("" + tree.getValue());
+                    addWindow(new ExecutionDashboard(extractTCE(tree.getValue())));
+                });
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
