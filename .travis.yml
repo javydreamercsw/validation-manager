@@ -4,8 +4,10 @@ addons:
   apt:
     packages:
     - oracle-java8-installer
+dist: trusty
 jdk:
 - oraclejdk8
+- openjdk8
 script: mvn install test -Dmaven.javadoc.skip=true -B -V
 deploy:
   provider: openshift
