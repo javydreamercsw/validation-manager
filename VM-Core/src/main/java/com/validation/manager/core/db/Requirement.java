@@ -109,6 +109,8 @@ public class Requirement extends Versionable implements Serializable {
     private RequirementType requirementTypeId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
     private List<RiskControlHasRequirement> riskControlHasRequirementList;
+    @ManyToMany(mappedBy = "requirementList")
+    private List<Baseline> baselineList;
 
     public Requirement() {
         super();
@@ -300,5 +302,15 @@ public class Requirement extends Versionable implements Serializable {
         }
         //Is a new entity, nothing to do
         return false;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Baseline> getBaselineList() {
+        return baselineList;
+    }
+
+    public void setBaselineList(List<Baseline> baselineList) {
+        this.baselineList = baselineList;
     }
 }
