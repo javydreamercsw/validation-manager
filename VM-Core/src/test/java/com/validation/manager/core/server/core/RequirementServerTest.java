@@ -16,6 +16,7 @@ import com.validation.manager.test.TestHelper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
+import org.junit.Before;
 import org.junit.Test;
 import org.openide.util.Exceptions;
 
@@ -30,7 +31,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
     private Project p;
     private RequirementSpecNode rsns;
 
-    private void prepare() throws Exception {
+    @Before
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
         RequirementSpec rss = null;
         p = TestHelper.createProject("New Project", "Notes");
         ProjectServer project = new ProjectServer(p);
@@ -44,7 +48,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             rss = TestHelper.createRequirementSpec("Test", "Test",
                     project, 1);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -52,7 +57,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -65,7 +71,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
     public void testDeleteRequirement() {
         try {
             System.out.println("deleteRequirement");
-            prepare();
             Requirement r = TestHelper.createRequirement("SRS-SW-0001",
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
@@ -74,7 +79,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
             parameters.put("id", r.getId());
             assertTrue(DataBaseManager.namedQuery("Requirement.findById",
                     parameters).isEmpty());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -87,7 +93,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
     public void testUpdate() {
         try {
             System.out.println("update");
-            prepare();
             Requirement source = TestHelper.createRequirement("SRS-SW-0001",
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
@@ -101,7 +106,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     target.getRequirementTypeId().getId());
             assertEquals(instance.getRequirementStatusId().getId(),
                     target.getRequirementStatusId().getId());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -114,7 +120,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
     public void testIsDuplicate() {
         try {
             System.out.println("isDuplicate");
-            prepare();
             Requirement source = TestHelper.createRequirement("SRS-SW-0001",
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
@@ -127,7 +132,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             assertEquals(true, RequirementServer.isDuplicate(source3));
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -140,7 +146,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
     public void testGetTestCoverage() {
         try {
             System.out.println("getTestCoverage");
-            prepare();
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
@@ -195,7 +200,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(0, ur.getTestCoverage());
             ur.addChildRequirement(req);
             assertEquals(33, ur.getTestCoverage());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -208,7 +214,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
     public void testChildAndParentRequirements() {
         try {
             System.out.println("Child And Parent Requirements");
-            prepare();
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
@@ -246,7 +251,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(0, rs2.getRequirementList1().size());
             checkCircularDependency(req);
             checkCircularDependency(req2);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -281,7 +287,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     }); //Check if the parent has this requirement as a child
                 });
             }); //Detect circular relationships
-        } catch (VMException ex) {
+        }
+        catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
     }
@@ -294,7 +301,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
     public void testRequirementCoverage() {
         try {
             System.out.println("Requirement Coverage and Versioning");
-            prepare();
             //Enable versioning
             DataBaseManager.setVersioningEnabled(true);
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
@@ -342,7 +348,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
             parent.write2DB();
             assertEquals(100, parent.getTestCoverage());
             assertEquals(100, rs.getTestCoverage());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             fail();
         }
@@ -355,7 +362,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
     @Test
     public void testCircularDependencies() {
         try {
-            prepare();
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
                     "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
@@ -370,7 +376,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
             r2.addChildRequirement(req);
             assertEquals(0, r2.getRequirementList1().size());
             assertEquals(1, r2.getRequirementList().size());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             fail();
         }
