@@ -18,4 +18,4 @@ deploy:
   domain: javydreamercsw
   on:
     repo: javydreamercsw/validation-manager
-    branch: test-management
+    branch: master
