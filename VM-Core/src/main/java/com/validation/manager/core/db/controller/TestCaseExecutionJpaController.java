@@ -5,20 +5,23 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.TestCaseExecution;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.TestCaseExecution;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class TestCaseExecutionJpaController implements Serializable {
 
@@ -32,27 +35,80 @@ public class TestCaseExecutionJpaController implements Serializable {
     }
 
     public void create(TestCaseExecution testCaseExecution) {
+        if (testCaseExecution.getExecutionStepList() == null) {
+            testCaseExecution.setExecutionStepList(new ArrayList<ExecutionStep>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
+            for (ExecutionStep executionStepListExecutionStepToAttach : testCaseExecution.getExecutionStepList()) {
+                executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
+                attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
+            }
+            testCaseExecution.setExecutionStepList(attachedExecutionStepList);
             em.persist(testCaseExecution);
+            for (ExecutionStep executionStepListExecutionStep : testCaseExecution.getExecutionStepList()) {
+                TestCaseExecution oldTestCaseExecutionOfExecutionStepListExecutionStep = executionStepListExecutionStep.getTestCaseExecution();
+                executionStepListExecutionStep.setTestCaseExecution(testCaseExecution);
+                executionStepListExecutionStep = em.merge(executionStepListExecutionStep);
+                if (oldTestCaseExecutionOfExecutionStepListExecutionStep != null) {
+                    oldTestCaseExecutionOfExecutionStepListExecutionStep.getExecutionStepList().remove(executionStepListExecutionStep);
+                    oldTestCaseExecutionOfExecutionStepListExecutionStep = em.merge(oldTestCaseExecutionOfExecutionStepListExecutionStep);
+                }
+            }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
         }
     }
 
-    public void edit(TestCaseExecution testCaseExecution) throws NonexistentEntityException, Exception {
+    public void edit(TestCaseExecution testCaseExecution) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            TestCaseExecution persistentTestCaseExecution = em.find(TestCaseExecution.class, testCaseExecution.getId());
+            List<ExecutionStep> executionStepListOld = persistentTestCaseExecution.getExecutionStepList();
+            List<ExecutionStep> executionStepListNew = testCaseExecution.getExecutionStepList();
+            List<String> illegalOrphanMessages = null;
+            for (ExecutionStep executionStepListOldExecutionStep : executionStepListOld) {
+                if (!executionStepListNew.contains(executionStepListOldExecutionStep)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain ExecutionStep " + executionStepListOldExecutionStep + " since its testCaseExecution field is not nullable.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
+            for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
+                executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
+                attachedExecutionStepListNew.add(executionStepListNewExecutionStepToAttach);
+            }
+            executionStepListNew = attachedExecutionStepListNew;
+            testCaseExecution.setExecutionStepList(executionStepListNew);
             testCaseExecution = em.merge(testCaseExecution);
+            for (ExecutionStep executionStepListNewExecutionStep : executionStepListNew) {
+                if (!executionStepListOld.contains(executionStepListNewExecutionStep)) {
+                    TestCaseExecution oldTestCaseExecutionOfExecutionStepListNewExecutionStep = executionStepListNewExecutionStep.getTestCaseExecution();
+                    executionStepListNewExecutionStep.setTestCaseExecution(testCaseExecution);
+                    executionStepListNewExecutionStep = em.merge(executionStepListNewExecutionStep);
+                    if (oldTestCaseExecutionOfExecutionStepListNewExecutionStep != null && !oldTestCaseExecutionOfExecutionStepListNewExecutionStep.equals(testCaseExecution)) {
+                        oldTestCaseExecutionOfExecutionStepListNewExecutionStep.getExecutionStepList().remove(executionStepListNewExecutionStep);
+                        oldTestCaseExecutionOfExecutionStepListNewExecutionStep = em.merge(oldTestCaseExecutionOfExecutionStepListNewExecutionStep);
+                    }
+                }
+            }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = testCaseExecution.getId();
@@ -61,14 +117,15 @@ public class TestCaseExecutionJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -77,12 +134,25 @@ public class TestCaseExecutionJpaController implements Serializable {
             try {
                 testCaseExecution = em.getReference(TestCaseExecution.class, id);
                 testCaseExecution.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The testCaseExecution with id " + id + " no longer exists.", enfe);
+            }
+            List<String> illegalOrphanMessages = null;
+            List<ExecutionStep> executionStepListOrphanCheck = testCaseExecution.getExecutionStepList();
+            for (ExecutionStep executionStepListOrphanCheckExecutionStep : executionStepListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This TestCaseExecution (" + testCaseExecution + ") cannot be destroyed since the ExecutionStep " + executionStepListOrphanCheckExecutionStep + " in its executionStepList field has a non-nullable testCaseExecution field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             em.remove(testCaseExecution);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -108,7 +178,8 @@ public class TestCaseExecutionJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -117,7 +188,8 @@ public class TestCaseExecutionJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(TestCaseExecution.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -130,7 +202,8 @@ public class TestCaseExecutionJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

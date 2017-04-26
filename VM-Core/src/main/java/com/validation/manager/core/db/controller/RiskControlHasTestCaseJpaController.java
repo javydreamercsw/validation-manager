@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RiskControlHasTestCaseJpaController implements Serializable {
 
@@ -39,9 +39,9 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
         if (riskControlHasTestCase.getRiskControlHasTestCasePK() == null) {
             riskControlHasTestCase.setRiskControlHasTestCasePK(new RiskControlHasTestCasePK());
         }
+        riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getId());
         riskControlHasTestCase.getRiskControlHasTestCasePK().setTestCaseId(riskControlHasTestCase.getTestCase().getId());
         riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlRiskControlTypeId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getRiskControlTypeId());
-        riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -66,12 +66,14 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
                 testCase = em.merge(testCase);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findRiskControlHasTestCase(riskControlHasTestCase.getRiskControlHasTestCasePK()) != null) {
                 throw new PreexistingEntityException("RiskControlHasTestCase " + riskControlHasTestCase + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -79,9 +81,9 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
     }
 
     public void edit(RiskControlHasTestCase riskControlHasTestCase) throws NonexistentEntityException, Exception {
+        riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getId());
         riskControlHasTestCase.getRiskControlHasTestCasePK().setTestCaseId(riskControlHasTestCase.getTestCase().getId());
         riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlRiskControlTypeId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getRiskControlTypeId());
-        riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -117,7 +119,8 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
                 testCaseNew = em.merge(testCaseNew);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 RiskControlHasTestCasePK id = riskControlHasTestCase.getRiskControlHasTestCasePK();
@@ -126,7 +129,8 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -142,7 +146,8 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
             try {
                 riskControlHasTestCase = em.getReference(RiskControlHasTestCase.class, id);
                 riskControlHasTestCase.getRiskControlHasTestCasePK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskControlHasTestCase with id " + id + " no longer exists.", enfe);
             }
             RiskControl riskControl = riskControlHasTestCase.getRiskControl();
@@ -157,7 +162,8 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
             }
             em.remove(riskControlHasTestCase);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -183,7 +189,8 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -192,7 +199,8 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(RiskControlHasTestCase.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -205,7 +213,8 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

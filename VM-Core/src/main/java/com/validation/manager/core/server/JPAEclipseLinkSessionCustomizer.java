@@ -1,5 +1,6 @@
 package com.validation.manager.core.server;
 
+import com.validation.manager.core.VMException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -20,7 +21,7 @@ import org.eclipse.persistence.sessions.server.ServerSession;
 public class JPAEclipseLinkSessionCustomizer implements SessionCustomizer {
 
     public static final String JNDI_DATASOURCE_NAME = "java:comp/env/jdbc/VMDB";
-    private static final Logger logger
+    private static final Logger LOG
             = getLogger(JPAEclipseLinkSessionCustomizer.class.getSimpleName());
 
     /**
@@ -38,7 +39,7 @@ public class JPAEclipseLinkSessionCustomizer implements SessionCustomizer {
         try {
             Context context = new InitialContext();
             if (null == context) {
-                throw new Exception("Context is null");
+                throw new VMException("Context is null");
             }
             connector = (JNDIConnector) session.getLogin().getConnector(); // possible CCE
             // Lookup this new dataSource
@@ -61,7 +62,7 @@ public class JPAEclipseLinkSessionCustomizer implements SessionCustomizer {
             // Set the new connection on the session
             session.getLogin().setConnector(connector);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, JNDI_DATASOURCE_NAME, e);
+            LOG.log(Level.SEVERE, JNDI_DATASOURCE_NAME, e);
         }
     }
 }

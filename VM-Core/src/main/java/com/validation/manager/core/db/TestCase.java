@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +29,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "test_case")
@@ -48,7 +47,11 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT t FROM TestCase t WHERE t.active = :active")
     , @NamedQuery(name = "TestCase.findByIsOpen",
             query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
-public class TestCase extends Versionable implements Serializable {
+public class TestCase implements Serializable {
+
+    @Lob
+    @Column(name = "summary")
+    private byte[] summary;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -69,9 +72,6 @@ public class TestCase extends Versionable implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
-    @Lob
-    @Column(name = "summary")
-    private byte[] summary;
     @Basic(optional = false)
     @NotNull
     @Column(name = "creation_date")
@@ -81,9 +81,6 @@ public class TestCase extends Versionable implements Serializable {
     private Boolean active;
     @Column(name = "is_open")
     private Boolean isOpen;
-    @Lob
-    @Column(name = "expected_results")
-    private byte[] expectedResults;
     @JoinTable(name = "test_plan_has_test_case", joinColumns = {
         @JoinColumn(name = "test_case_id", referencedColumnName = "id")},
             inverseJoinColumns = {
@@ -125,13 +122,6 @@ public class TestCase extends Versionable implements Serializable {
         this.name = name;
     }
 
-    public byte[] getSummary() {
-        return summary;
-    }
-
-    public void setSummary(byte[] summary) {
-        this.summary = summary;
-    }
 
     public Date getCreationDate() {
         return creationDate;
@@ -155,14 +145,6 @@ public class TestCase extends Versionable implements Serializable {
 
     public void setIsOpen(Boolean isOpen) {
         this.isOpen = isOpen;
-    }
-
-    public byte[] getExpectedResults() {
-        return expectedResults;
-    }
-
-    public void setExpectedResults(byte[] expectedResults) {
-        this.expectedResults = expectedResults;
     }
 
     @XmlTransient
@@ -216,5 +198,13 @@ public class TestCase extends Versionable implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.TestCase[ id=" + id + " ]";
+    }
+
+    public byte[] getSummary() {
+        return summary;
+    }
+
+    public void setSummary(byte[] summary) {
+        this.summary = summary;
     }
 }

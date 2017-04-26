@@ -8,18 +8,22 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
+import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
+import com.validation.manager.core.server.core.VMUserServer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -29,6 +33,7 @@ public class DemoBuilder {
 
     private static final Logger LOG
             = Logger.getLogger(DemoBuilder.class.getSimpleName());
+    private static int tcCounter = 1, tpCounter = 1, reqCounter = 1;
 
     public static void buildDemoProject() throws Exception {
         LOG.info("Creating demo projects...");
@@ -41,9 +46,11 @@ public class DemoBuilder {
             Project temp = new Project("Sub " + (i + 1));
             temp.setParentProjectId(rootProject);
             controller.create(temp);
-            addDemoProjectRequirements(temp);
-            addDemoProjectTestProject(temp);
-            rootProject.getProjectList().add(temp);
+            ProjectServer ps = new ProjectServer(temp);
+            addDemoProjectRequirements(ps.getEntity());
+            addDemoProjectTestProject(ps.getEntity());
+            addDemoExecution(ps.getEntity());
+            rootProject.getProjectList().add(ps.getEntity());
         }
         addDemoProjectRequirements(rootProject);
         controller.edit(rootProject);
@@ -52,7 +59,6 @@ public class DemoBuilder {
 
     private static void addDemoProjectRequirements(Project p)
             throws Exception {
-        int count = 1;
         for (int i = 0; i < 5; i++) {
             //Create a spec
             RequirementSpecServer temp
@@ -66,13 +72,13 @@ public class DemoBuilder {
             for (int y = 0; y < 5; y++) {
                 RequirementServer req
                         = new RequirementServer("Requirement "
-                                + count,
-                                "Description " + count,
+                                + reqCounter,
+                                "Description " + reqCounter,
                                 node.getRequirementSpecNodePK(),
                                 "Notes", 1, 1);
                 req.write2DB();
                 node.getRequirementList().add(req.getEntity());
-                count++;
+                reqCounter++;
             }
             node.write2DB();
             p.getRequirementSpecList().add(temp.getEntity());
@@ -89,17 +95,17 @@ public class DemoBuilder {
         tp.setNotes("Notes");
         tp.setActive(true);
         tp.write2DB();
-        //Add the test structur
+        //Add the test structure
         TestPlanServer tps = new TestPlanServer(tp.getEntity(),
                 true, true);
-        tps.setName("Test Plan #1");
+        tps.setName("Test Plan #" + (tpCounter++));
         tps.setNotes("Notes");
         tps.write2DB();
         for (int i = 0; i < 5; i++) {
             //Add steps
             TestCaseServer tcs
                     = new TestCaseServer("Test Case #"
-                            + (i + 1),
+                            + (tcCounter++),
                             new Date());
             tcs.write2DB();
             for (int j = 0; j < 5; j++) {
@@ -116,7 +122,9 @@ public class DemoBuilder {
             tps.addTestCase(tcs.getEntity());
         }
         ProjectServer ps = new ProjectServer(p);
-        ps.setTestProjectList(new ArrayList<>());
+        if (ps.getTestProjectList() == null) {
+            ps.setTestProjectList(new ArrayList<>());
+        }
         ps.getTestProjectList().add(tp.getEntity());
         //Save it
         ps.write2DB();
@@ -127,7 +135,31 @@ public class DemoBuilder {
             DataBaseManager.setPersistenceUnitName("TestVMPU");
             buildDemoProject();
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
+    }
+
+    private static void addDemoExecution(Project p)
+            throws NonexistentEntityException, Exception {
+        int i = 1;
+        TestCaseExecutionServer tces
+                = new TestCaseExecutionServer("Execution " + i,
+                        "Test Scope " + i);
+        tces.setConclusion("Conclusion!");
+        tces.write2DB();
+        p.getTestProjectList().forEach((tp) -> {
+            tces.addTestProject(tp);
+        });
+        tces.write2DB();
+        VMUserServer tester1 = new VMUserServer(2);//Tester
+        VMUserServer tester2 = new VMUserServer(3);//Tester
+        VMUserServer assigner = new VMUserServer(6);//Tester
+        Random r = new Random();
+        tces.getExecutionStepList().stream().map((es)
+                -> new ExecutionStepServer(es)).forEachOrdered((ess)
+                -> {
+            ess.assignUser(r.nextBoolean() ? tester1.getEntity()
+                    : tester2.getEntity(), assigner.getEntity());
+        });
     }
 }

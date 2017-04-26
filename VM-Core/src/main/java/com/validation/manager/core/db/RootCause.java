@@ -22,7 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "root_cause")
@@ -46,8 +46,6 @@ public class RootCause implements Serializable {
     @Size(max = 2147483647)
     @Column(name = "details")
     private String details;
-    @ManyToMany(mappedBy = "rootCauseList")
-    private List<VmException> vmExceptionList;
     @JoinTable(name = "root_cause_has_user", joinColumns = {
         @JoinColumn(name = "root_cause_id", referencedColumnName = "id")
         , @JoinColumn(name = "root_cause_root_cause_type_id",
@@ -91,16 +89,6 @@ public class RootCause implements Serializable {
 
     public void setDetails(String details) {
         this.details = details;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
     }
 
     @XmlTransient

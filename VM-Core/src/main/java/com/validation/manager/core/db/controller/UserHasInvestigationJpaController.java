@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class UserHasInvestigationJpaController implements Serializable {
 
@@ -65,12 +65,14 @@ public class UserHasInvestigationJpaController implements Serializable {
                 vmUser = em.merge(vmUser);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findUserHasInvestigation(userHasInvestigation.getUserHasInvestigationPK()) != null) {
                 throw new PreexistingEntityException("UserHasInvestigation " + userHasInvestigation + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -115,7 +117,8 @@ public class UserHasInvestigationJpaController implements Serializable {
                 vmUserNew = em.merge(vmUserNew);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 UserHasInvestigationPK id = userHasInvestigation.getUserHasInvestigationPK();
@@ -124,7 +127,8 @@ public class UserHasInvestigationJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -140,7 +144,8 @@ public class UserHasInvestigationJpaController implements Serializable {
             try {
                 userHasInvestigation = em.getReference(UserHasInvestigation.class, id);
                 userHasInvestigation.getUserHasInvestigationPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userHasInvestigation with id " + id + " no longer exists.", enfe);
             }
             Investigation investigation = userHasInvestigation.getInvestigation();
@@ -155,7 +160,8 @@ public class UserHasInvestigationJpaController implements Serializable {
             }
             em.remove(userHasInvestigation);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -181,7 +187,8 @@ public class UserHasInvestigationJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -190,7 +197,8 @@ public class UserHasInvestigationJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(UserHasInvestigation.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -203,7 +211,8 @@ public class UserHasInvestigationJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

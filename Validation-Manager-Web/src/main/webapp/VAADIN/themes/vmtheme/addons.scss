@@ -1,8 +1,12 @@
 /* This file is automatically managed and will be overwritten from time to time. */
 /* Do not manually edit this file. */
 
-/* Provided by vaadin-icons-2.0.0.jar */
+/* Provided by vaadin-icons-3.0.1.jar */
 @import "../../../VAADIN/addons/vaadin-icons/vaadin-icons.scss";
+
+
+/* Provided by pdfviewer-1.2.2.jar */
+@import "../../../VAADIN/addons/pdfviewer/pdfviewer.scss";
 
 
 /* Provided by contextmenu-4.5.jar */
@@ -12,6 +16,7 @@
 /* Import and include this mixin into your project theme to include the addon themes */
 @mixin addons {
 	@include vaadin-icons;
+	@include pdfviewer;
 	@include contextmenu;
 }
 

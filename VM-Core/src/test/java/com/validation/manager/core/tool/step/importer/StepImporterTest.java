@@ -55,117 +55,122 @@ public class StepImporterTest extends AbstractVMTestCase {
     }
 
     private int testImportFile(String fileName, boolean check) {
-        String name = StepImporterTest.class.getCanonicalName();
-        Project project = createProject("Test Project", "Notes");
-        name = name.substring(0, name.lastIndexOf("."));
-        name = name.replace(".", getProperty("file.separator"));
-        File file = new File(getProperty("user.dir")
-                + getProperty("file.separator") + "src"
-                + getProperty("file.separator") + "test"
-                + getProperty("file.separator") + "java"
-                + getProperty("file.separator")
-                + name
-                + getProperty("file.separator") + fileName);
-        System.out.println(file.getAbsolutePath());
-        System.out.println("Create Test Project");
-        TestProject tp = null;
         try {
-            tp = createTestProject("Test Project");
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        System.out.println("Add Test Project to Project");
-        try {
-            addTestProjectToProject(tp, project);
-        } catch (IllegalOrphanException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        } catch (NonexistentEntityException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        System.out.println("Create Test Plan");
-        TestPlan plan = null;
-        try {
-            plan = createTestPlan(tp, "Test Plan", true, true);
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        System.out.println("Create Test");
-        TestCase test = null;
-        try {
-            test = createTestCase("Test", "", "");
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        System.out.println("Add Test to Plan");
-        try {
-            addTestCaseToPlan(plan, test);
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        System.out.println("Create Test Case");
-        com.validation.manager.core.db.TestCase tc = null;
-        try {
-            tc = createTestCase("Dummy",
-                    "Test Case", "Test Summary");
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        System.out.println("Create Requirement to link");
-        Requirement r = null;
-        try {
-            RequirementSpec rs
-                    = createRequirementSpec("Test Spec", "Description",
-                            project, 1);
-            RequirementSpecNode rsn
-                    = createRequirementSpecNode(rs, "Root", "Description",
-                            "Scope");
-            r = createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsn.getRequirementSpecNodePK(),
-                    "Notes", 1, 1);
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        //Finally, do the test
-        try {
-            if (tc == null) {
-                fail("Test Case shouldn't be null!");
-            } else {
-                StepImporter instance = new StepImporter(file,
-                        new TestCaseJpaController(
-                                getEntityManagerFactory())
-                                .findTestCase(tc.getId()));
-                instance.importFile(true);
-                instance.processImport();
+            String name = StepImporterTest.class.getCanonicalName();
+            Project project = createProject("Test Project", "Notes");
+            name = name.substring(0, name.lastIndexOf("."));
+            name = name.replace(".", getProperty("file.separator"));
+            File file = new File(getProperty("user.dir")
+                    + getProperty("file.separator") + "src"
+                    + getProperty("file.separator") + "test"
+                    + getProperty("file.separator") + "java"
+                    + getProperty("file.separator")
+                    + name
+                    + getProperty("file.separator") + fileName);
+            System.out.println(file.getAbsolutePath());
+            System.out.println("Create Test Project");
+            TestProject tp = null;
+            try {
+                tp = createTestProject("Test Project");
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
             }
+            System.out.println("Add Test Project to Project");
+            try {
+                addTestProjectToProject(tp, project);
+            } catch (IllegalOrphanException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            } catch (NonexistentEntityException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+            System.out.println("Create Test Plan");
+            TestPlan plan = null;
+            try {
+                plan = createTestPlan(tp, "Test Plan", true, true);
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+            System.out.println("Create Test");
+            TestCase test = null;
+            try {
+                test = createTestCase("Test", "");
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+            System.out.println("Add Test to Plan");
+            try {
+                addTestCaseToPlan(plan, test);
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+            System.out.println("Create Test Case");
+            com.validation.manager.core.db.TestCase tc = null;
+            try {
+                tc = createTestCase("Dummy", "Test Summary");
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+            System.out.println("Create Requirement to link");
+            Requirement r = null;
+            try {
+                RequirementSpec rs
+                        = createRequirementSpec("Test Spec", "Description",
+                                project, 1);
+                RequirementSpecNode rsn
+                        = createRequirementSpecNode(rs, "Root", "Description",
+                                "Scope");
+                r = createRequirement("SRS-SW-0001",
+                        "Sample requirement", rsn.getRequirementSpecNodePK(),
+                        "Notes", 1, 1);
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+            //Finally, do the test
+            try {
+                if (tc == null) {
+                    fail("Test Case shouldn't be null!");
+                } else {
+                    StepImporter instance = new StepImporter(file,
+                            new TestCaseJpaController(
+                                    getEntityManagerFactory())
+                                    .findTestCase(tc.getId()));
+                    instance.importFile(true);
+                    instance.processImport();
+                }
+            } catch (VMException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+            RequirementServer rs = new RequirementServer(r);
+            int count = 1;
+            for (Step s : rs.getStepList()) {
+                if (count % 2 == 1) {
+                    assertEquals(1, s.getRequirementList().size());
+                }
+                count++;
+            }
+            rs.update();
+            if (check) {
+                assertEquals(10/*Update if the excel sheets change*/,
+                        rs.getStepList().size());
+            }
+            return rs.getStepList().size();
         } catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
-        RequirementServer rs = new RequirementServer(r);
-        int count = 1;
-        for (Step s : rs.getStepList()) {
-            if (count % 2 == 1) {
-                assertEquals(1, s.getRequirementList().size());
-            }
-            count++;
-        }
-        rs.update();
-        if (check) {
-            assertEquals(10/*Update if the excel sheets change*/,
-                    rs.getStepList().size());
-        }
-        return rs.getStepList().size();
+        return 0;
     }
 
     /**

@@ -1,15 +1,11 @@
 package com.validation.manager.core.server.core;
 
-import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
-import static com.validation.manager.core.DataBaseManager.setVersioningEnabled;
+import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
-import com.validation.manager.core.db.RequirementStatus;
-import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
@@ -22,7 +18,6 @@ import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import org.junit.Test;
 import org.openide.util.Exceptions;
-import static org.openide.util.Exceptions.printStackTrace;
 
 /**
  *
@@ -33,16 +28,16 @@ public class RequirementServerTest extends AbstractVMTestCase {
     private static final Logger LOG
             = getLogger(RequirementServerTest.class.getName());
     private Project p;
-    private RequirementSpec rss;
     private RequirementSpecNode rsns;
 
     private void prepare() throws Exception {
+        RequirementSpec rss = null;
         p = TestHelper.createProject("New Project", "Notes");
         ProjectServer project = new ProjectServer(p);
         project.setNotes("Notes 2");
         project.write2DB();
         assertTrue(new ProjectJpaController(
-                getEntityManagerFactory())
+                DataBaseManager.getEntityManagerFactory())
                 .findProject(project.getId()).getNotes().equals(project.getNotes()));
         //Create requirements
         System.out.println("Create Requirement Spec");
@@ -77,7 +72,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
             RequirementServer.deleteRequirement(r);
             parameters.clear();
             parameters.put("id", r.getId());
-            assertTrue(namedQuery("Requirement.findById", parameters).isEmpty());
+            assertTrue(DataBaseManager.namedQuery("Requirement.findById",
+                    parameters).isEmpty());
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
@@ -163,8 +159,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             RequirementServer rs = new RequirementServer(req);
             assertEquals(0, rs.getTestCoverage());
             //Create Test Case
-            TestCase tc = TestHelper.createTestCase("Dummy",
-                    "Expected Results", "Summary");
+            TestCase tc = TestHelper.createTestCase("Dummy", "Summary");
             //Add steps
             int i = 1;
             for (; i < 6; i++) {
@@ -224,7 +219,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             //Add a child
             RequirementServer rs = new RequirementServer(req);
             //Add a version to the requirement
-            setVersioningEnabled(true);
+            DataBaseManager.setVersioningEnabled(true);
             rs.setDescription("Modified requirement");
             rs.write2DB();
             rs.addChildRequirement(req2);
@@ -258,119 +253,37 @@ public class RequirementServerTest extends AbstractVMTestCase {
     }
 
     private void checkCircularDependency(Requirement r) {
-        RequirementServer rs = new RequirementServer(r);
-        rs.getVersions().stream().map((t)
-                -> new RequirementServer(t)).filter((temp)
-                -> (temp.getRequirementList().size() > 0
-                && temp.getRequirementList1().size() > 0)).map((temp) -> {
-            //Has both children and parents
-            LOG.log(Level.INFO,
-                    "Inspecting {0} for circular dependencies.",
-                    temp.getUniqueId());
-            return temp;
-        }).forEachOrdered((temp) -> {
-            temp.getRequirementList1().forEach((parent) -> {
-                //Check all parents of this requirement
-                parent.getRequirementList().stream().filter((child)
-                        -> (child.getUniqueId().equals(temp.getUniqueId())))
-                        .map((_item) -> {
-                            LOG.log(Level.SEVERE,
-                                    "Circular dependency "
-                                    + "detected between {0} and {1}",
-                                    new Object[]{temp.getUniqueId(),
-                                        parent.getUniqueId()});
-                            return _item;
-                        }).forEachOrdered((_item) -> {
-                    fail();
-                }); //Check if the parent has this requirement as a child
-            });
-        }); //Detect circular relationships
-    }
-
-    /**
-     * Test of requirement versioning method, of class RequirementServer.
-     */
-    @Test
-    public void testRequirementVersioningEnabled() {
         try {
-            System.out.println("Requirement Versioning (Enabled)");
-            setVersioningEnabled(true);
-            runVersioningTest();
-        } catch (Exception ex) {
-            printStackTrace(ex);
-            fail();
+            RequirementServer rs = new RequirementServer(r);
+            rs.getVersions().stream().map((t)
+                    -> t).filter((temp)
+                    -> (temp.getRequirementList().size() > 0
+                    && temp.getRequirementList1().size() > 0)).map((temp) -> {
+                //Has both children and parents
+                LOG.log(Level.INFO,
+                        "Inspecting {0} for circular dependencies.",
+                        temp.getUniqueId());
+                return temp;
+            }).forEachOrdered((temp) -> {
+                temp.getRequirementList1().forEach((parent) -> {
+                    //Check all parents of this requirement
+                    parent.getRequirementList().stream().filter((child)
+                            -> (child.getUniqueId().equals(temp.getUniqueId())))
+                            .map((_item) -> {
+                                LOG.log(Level.SEVERE,
+                                        "Circular dependency "
+                                        + "detected between {0} and {1}",
+                                        new Object[]{temp.getUniqueId(),
+                                            parent.getUniqueId()});
+                                return _item;
+                            }).forEachOrdered((_item) -> {
+                        fail();
+                    }); //Check if the parent has this requirement as a child
+                });
+            }); //Detect circular relationships
+        } catch (VMException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
-    }
-
-    /**
-     * Test of requirement versioning method, of class RequirementServer.
-     */
-    @Test
-    public void testRequirementVersioningDisabled() {
-        try {
-            System.out.println("Requirement Versioning (Disabled)");
-            setVersioningEnabled(false);
-            runVersioningTest();
-        } catch (Exception ex) {
-            printStackTrace(ex);
-            fail();
-        }
-    }
-
-    private void runVersioningTest() throws Exception {
-        prepare();
-        int version = 0;
-        String first = "Sample requirement", second = "Updated";
-        Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                first, rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
-        RequirementServer rs = new RequirementServer(req);
-        assertEquals(0, rs.getMajorVersion());
-        assertEquals(0, rs.getMidVersion());
-        assertEquals(version, rs.getMinorVersion());
-        assertEquals(1, rs.getVersions().size());
-        assertEquals(first, rs.getDescription());
-        TestProject tp = TestHelper.createTestProject("Test Project");
-        TestHelper.addTestProjectToProject(tp, p);
-        TestPlan plan = TestHelper.createTestPlan(tp, "Plan", true, true);
-        TestCase tc = TestHelper.createTestCase("TC #1",
-                "Results",
-                "Summary");
-        TestHelper.addTestCaseToPlan(plan, tc);
-        TestCase step = TestHelper.addStep(tc, 1, "Test", "Test");
-        rs.getStepList().add(step.getStepList().get(0));
-        rs.setDescription(second);
-        RequirementType originalRequirementType = rs.getRequirementTypeId();
-        RequirementSpecNode originalRequirementSpecNode
-                = rs.getRequirementSpecNode();
-        RequirementStatus originalRequirementStatusId
-                = rs.getRequirementStatusId();
-        if (isVersioningEnabled()) {
-            rs.write2DB();
-            version++;
-            assertEquals(0, rs.getMajorVersion());
-            assertEquals(0, rs.getMidVersion());
-            assertEquals(version, rs.getMinorVersion());
-            assertEquals(1, rs.getStepList().size());
-            assertEquals(originalRequirementType, rs.getRequirementTypeId());
-            assertEquals(originalRequirementSpecNode,
-                    rs.getRequirementSpecNode());
-            assertEquals(originalRequirementStatusId,
-                    rs.getRequirementStatusId());
-        } else {
-            rs.write2DB();
-            version++;
-            assertEquals(0, rs.getMajorVersion());
-            assertEquals(0, rs.getMidVersion());
-            assertEquals(0, rs.getMinorVersion());
-        }
-        assertEquals(second, rs.getDescription());
-        assertEquals(isVersioningEnabled() ? version + 1 : 1,
-                rs.getVersions().size());
-        LOG.info("Versions:");
-        rs.getVersions().forEach((r) -> {
-            LOG.info(r.toString());
-        });
-        checkCircularDependency(req);
     }
 
     /**
@@ -378,13 +291,12 @@ public class RequirementServerTest extends AbstractVMTestCase {
      * RequirementServer.
      */
     @Test
-    public void testRequirementCoverageWithVersions() {
+    public void testRequirementCoverage() {
         try {
             System.out.println("Requirement Coverage and Versioning");
             prepare();
-            int version = 0;
             //Enable versioning
-            setVersioningEnabled(true);
+            DataBaseManager.setVersioningEnabled(true);
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
                     "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
@@ -393,40 +305,33 @@ public class RequirementServerTest extends AbstractVMTestCase {
             TestHelper.addTestProjectToProject(tp, p);
             TestPlan plan = TestHelper.createTestPlan(tp, "Plan", true, true);
             TestCase tc = TestHelper.createTestCase("TC #1",
-                    "Results",
                     "Summary");
             TestHelper.addTestCaseToPlan(plan, tc);
             TestCase step = TestHelper.addStep(tc, 1, "Test", "Test");
             rs.getStepList().add(step.getStepList().get(0));
             rs.write2DB();
-            assertEquals(0, rs.getMajorVersion());
-            assertEquals(0, rs.getMidVersion());
-            assertEquals(version, rs.getMinorVersion());
             assertEquals(1, rs.getStepList().size());
             assertEquals(100, rs.getTestCoverage());
-            version++;
             //Update version and remove test coverage
             rs.setDescription("New version");
             rs.getStepList().clear();
             rs.write2DB();
-            assertEquals(0, rs.getMajorVersion());
-            assertEquals(0, rs.getMidVersion());
-            assertEquals(version, rs.getMinorVersion());
             assertEquals(0, rs.getStepList().size());
+            rs.update();
             assertEquals(0, rs.getTestCoverage());
-            version++;
             rs.setDescription("New version 2");
-            rs.getStepList().add(step.getStepList().get(0));
+            StepServer ss = new StepServer(step.getStepList().get(0));
+            ss.removeRequirement(req);
+            ss.write2DB();
+            ss.addRequirement(rs.getEntity());
+            rs.update();
             rs.write2DB();
-            assertEquals(0, rs.getMajorVersion());
-            assertEquals(0, rs.getMidVersion());
-            assertEquals(version, rs.getMinorVersion());
             assertEquals(1, rs.getStepList().size());
             assertEquals(100, rs.getTestCoverage());
-            version++;
             //Add a parent requirement
             Requirement r = TestHelper.createRequirement("PS-0001",
-                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+                    "Description", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1);
             RequirementServer parent = new RequirementServer(r);
             parent.addChildRequirement(req);
             parent.write2DB();

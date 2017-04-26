@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -25,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "hazard")
@@ -37,11 +36,12 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT h FROM Hazard h WHERE h.id = :id")
     , @NamedQuery(name = "Hazard.findByName",
             query = "SELECT h FROM Hazard h WHERE h.name = :name")})
-public class Hazard extends Versionable implements Serializable {
+public class Hazard implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "HazardGen")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "HazardGen")
     @TableGenerator(name = "HazardGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -135,5 +135,4 @@ public class Hazard extends Versionable implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Hazard[ id=" + id + " ]";
     }
-
 }

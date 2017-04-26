@@ -22,7 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "requirement_type")
@@ -35,13 +35,15 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     , @NamedQuery(name = "RequirementType.findByName",
             query = "SELECT r FROM RequirementType r WHERE r.name = :name")
     , @NamedQuery(name = "RequirementType.findByDescription",
-            query = "SELECT r FROM RequirementType r WHERE r.description = :description")})
+            query = "SELECT r FROM RequirementType r WHERE "
+            + "r.description = :description")})
 public class RequirementType implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "ReqTypeGen")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "ReqTypeGen")
     @TableGenerator(name = "ReqType", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -63,9 +65,11 @@ public class RequirementType implements Serializable {
     private List<Requirement> requirementList;
 
     public RequirementType() {
+        super();
     }
 
     public RequirementType(String name) {
+        super();
         this.name = name;
     }
 

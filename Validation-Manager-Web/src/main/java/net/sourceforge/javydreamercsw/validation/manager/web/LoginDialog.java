@@ -5,7 +5,6 @@ import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.Page;
-import com.vaadin.server.Resource;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -14,7 +13,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.Window;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMUserServer;
 
@@ -23,31 +21,28 @@ import com.validation.manager.core.server.core.VMUserServer;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @SuppressWarnings("serial")
-public final class LoginDialog extends Window {
-
-    private final ValidationManagerUI menu;
-
-    public LoginDialog(ValidationManagerUI menu, Resource icon) {
-        // New login -window in the center of the screen
-        super("Account login");
-        setIcon(icon);
-        this.menu = menu;
-        init();
-    }
+public final class LoginDialog extends VMWindow {
 
     private final ShortcutAction enterKey = new ShortcutAction("Login",
             ShortcutAction.KeyCode.ENTER, null);
 
-    TextField name = new TextField("Username");
-    PasswordField password = new PasswordField("Password");
+    private final TextField name = new TextField("Username");
+    private final PasswordField password = new PasswordField("Password");
 
-    Button loginButton = new Button("Log In", (ClickEvent event) -> {
+    private final Button loginButton = new Button("Log In",
+            (ClickEvent event) -> {
         tryToLogIn();
     });
 
-    Button cancelButton = new Button("Cancel", (ClickEvent event) -> {
+    private final Button cancelButton = new Button("Cancel",
+            (ClickEvent event) -> {
         LoginDialog.this.close();
     });
+
+    public LoginDialog(ValidationManagerUI menu) {
+        super(menu, "Account login");
+        init();
+    }
 
     public void init() {
         //Layout
@@ -97,10 +92,8 @@ public final class LoginDialog extends Window {
             VmUser user
                     = VMUserServer.getUser(name.getValue(),
                             password.getValue(), true);
-            //Set password to unencrypted to avoid passwords going out
-            user.setPassword(null);
             if (menu != null) {
-                menu.setUser(user);
+                menu.setUser(new VMUserServer(user));
             }
             close();
         } else {
@@ -113,5 +106,10 @@ public final class LoginDialog extends Window {
                     .show(Page.getCurrent());
             password.setValue("");
         }
+    }
+
+    public void clear() {
+        name.clear();
+        password.clear();
     }
 }

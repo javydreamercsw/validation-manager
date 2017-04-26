@@ -1,9 +1,6 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.service;
 
 import javax.xml.ws.Endpoint;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -13,25 +10,10 @@ import org.junit.Test;
  */
 public class VMWebServiceTest {
     
-    public VMWebServiceTest() {
-    }
-    
     @BeforeClass
     public static void setUpClass() {
         Endpoint.publish("http://localhost:8090/valitation-manager-test",
                 new VMWebService());
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
     }
 
     /**

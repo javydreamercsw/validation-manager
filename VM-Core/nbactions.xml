@@ -10,7 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.validation.manager.core.server.core.RequirementServer jdbc:mysql://eqvsrd00:3306/validation_manager arthrocare com.mysql.jdbc.Driver root</exec.args>
+                <exec.args>-classpath %classpath com.validation.manager.core.server.core.RequirementServer jdbc:mysql://localhost:3306/validation_manager?serverTimezone=UTC password com.mysql.cj.jdbc.Driver vm</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -24,7 +24,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.validation.manager.core.server.core.RequirementServer jdbc:mysql://eqvsrd00:3306/validation_manager arthrocare com.mysql.jdbc.Driver root</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.validation.manager.core.server.core.RequirementServer jdbc:mysql://localhost:3306/validation_manager?serverTimezone=UTC password com.mysql.cj.jdbc.Driver vm</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
             </properties>
@@ -39,7 +39,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.validation.manager.core.server.core.RequirementServer jdbc:mysql://eqvsrd00:3306/validation_manager arthrocare com.mysql.jdbc.Driver root</exec.args>
+                <exec.args>-classpath %classpath com.validation.manager.core.server.core.RequirementServer jdbc:mysql://localhost:3306/validation_manager?serverTimezone=UTC password com.mysql.cj.jdbc.Driver vm</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>

@@ -1,5 +1,6 @@
 package com.validation.manager.core.tool.table.extractor;
 
+import com.validation.manager.core.VMException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import static java.io.File.createTempFile;
@@ -104,7 +105,7 @@ public class TableExtractor {
     }
 
     public List<DefaultTableModel> extractTables()
-            throws IOException, FileNotFoundException, ClassNotFoundException {
+            throws IOException, FileNotFoundException, ClassNotFoundException, VMException {
         List<DefaultTableModel> tables = new ArrayList<>();
         if (source.getName().endsWith(".doc")
                 || source.getName().endsWith(".docx")
@@ -202,7 +203,7 @@ public class TableExtractor {
             }
             tables.add(new DefaultTableModel(data2, title));
         } else {
-            throw new RuntimeException(
+            throw new VMException(
                     format("Invalid import file: {0}", source));
         }
         return tables;

@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -11,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -25,7 +23,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "investigation")
@@ -35,7 +33,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT i FROM Investigation i")
     , @NamedQuery(name = "Investigation.findById",
             query = "SELECT i FROM Investigation i WHERE i.id = :id")})
-public class Investigation extends Versionable implements Serializable {
+public class Investigation implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -57,8 +55,6 @@ public class Investigation extends Versionable implements Serializable {
     @Size(min = 1, max = 65535)
     @Column(name = "description")
     private String description;
-    @ManyToMany(mappedBy = "investigationList")
-    private List<VmException> vmExceptionList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private List<UserHasInvestigation> userHasInvestigationList;
 
@@ -83,16 +79,6 @@ public class Investigation extends Versionable implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
     }
 
     @XmlTransient
@@ -127,5 +113,4 @@ public class Investigation extends Versionable implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Investigation[ id=" + id + " ]";
     }
-
 }

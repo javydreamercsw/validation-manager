@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class RiskItemPK implements Serializable {
@@ -80,5 +80,4 @@ public class RiskItemPK implements Serializable {
         return "com.validation.manager.core.db.RiskItemPK[ id=" + id
                 + ", fMEAid=" + fMEAid + " ]";
     }
-
 }

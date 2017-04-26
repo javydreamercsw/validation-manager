@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class RiskItemHasRiskCategoryPK implements Serializable {
@@ -82,10 +82,7 @@ public class RiskItemHasRiskCategoryPK implements Serializable {
         if (this.riskitemFMEAid != other.riskitemFMEAid) {
             return false;
         }
-        if (this.riskCategoryId != other.riskCategoryId) {
-            return false;
-        }
-        return true;
+        return this.riskCategoryId == other.riskCategoryId;
     }
 
     @Override

@@ -21,7 +21,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class UserStatusJpaController implements Serializable {
 
@@ -59,7 +59,8 @@ public class UserStatusJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -106,7 +107,8 @@ public class UserStatusJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = userStatus.getId();
@@ -115,7 +117,8 @@ public class UserStatusJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -131,7 +134,8 @@ public class UserStatusJpaController implements Serializable {
             try {
                 userStatus = em.getReference(UserStatus.class, id);
                 userStatus.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The userStatus with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -147,7 +151,8 @@ public class UserStatusJpaController implements Serializable {
             }
             em.remove(userStatus);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -173,7 +178,8 @@ public class UserStatusJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -182,7 +188,8 @@ public class UserStatusJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(UserStatus.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -195,7 +202,8 @@ public class UserStatusJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

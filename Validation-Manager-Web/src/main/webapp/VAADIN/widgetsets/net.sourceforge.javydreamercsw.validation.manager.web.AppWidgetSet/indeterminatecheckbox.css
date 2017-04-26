@@ -1,0 +1,13 @@
+:root .v-checkbox.v-indeterminate-checkbox{
+	box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+    text-align: left;
+}
+
+:root .v-checkbox.v-indeterminate-checkbox.valo-indeterminate > label:after{
+	color: #197de1;
+	content: "\f068";
+	font-family : "FontAwesome";
+	top: 1px;
+}

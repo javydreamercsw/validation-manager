@@ -1,6 +1,8 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
+import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.controller.RequirementJpaController;
+import com.validation.manager.core.db.mapped.Versionable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "requirement")
@@ -47,7 +49,8 @@ public class Requirement extends Versionable implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "ReqGen")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "ReqGen")
     @TableGenerator(name = "ReqGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -80,14 +83,6 @@ public class Requirement extends Versionable implements Serializable {
     private List<Requirement> requirementList;
     @ManyToMany(mappedBy = "requirementList")
     private List<Requirement> requirementList1;
-    @JoinTable(name = "requirement_has_vm_exception", joinColumns = {
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "vm_exception_id", referencedColumnName = "id")
-                , @JoinColumn(name = "vm_exception_reporter_id",
-                        referencedColumnName = "reporter_id")})
-    @ManyToMany
-    private List<VmException> vmExceptionList;
     @JoinTable(name = "step_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id")},
             inverseJoinColumns = {
@@ -116,6 +111,7 @@ public class Requirement extends Versionable implements Serializable {
     private List<RiskControlHasRequirement> riskControlHasRequirementList;
 
     public Requirement() {
+        super();
     }
 
     public Requirement(String uniqueId, String description) {
@@ -134,25 +130,23 @@ public class Requirement extends Versionable implements Serializable {
         this.uniqueId = uniqueId;
         this.description = description;
         this.notes = notes;
-        setMajorVersion(major_version);
-        setMidVersion(mid_version);
-        setMinorVersion(minor_version);
+        super.setMajorVersion(major_version);
+        super.setMidVersion(mid_version);
+        super.setMinorVersion(minor_version);
         setRiskControlHasRequirementList(new ArrayList<>());
         setRequirementList(new ArrayList<>());
         setRequirementList1(new ArrayList<>());
         setStepList(new ArrayList<>());
-        setVmExceptionList(new ArrayList<>());
     }
 
     public Requirement(int major_version, int mid_version, int minor_version) {
-        setMajorVersion(major_version);
-        setMidVersion(mid_version);
-        setMinorVersion(minor_version);
+        super.setMajorVersion(major_version);
+        super.setMidVersion(mid_version);
+        super.setMinorVersion(minor_version);
         setRiskControlHasRequirementList(new ArrayList<>());
         setRequirementList(new ArrayList<>());
         setRequirementList1(new ArrayList<>());
         setStepList(new ArrayList<>());
-        setVmExceptionList(new ArrayList<>());
     }
 
     public String getUniqueId() {
@@ -197,16 +191,6 @@ public class Requirement extends Versionable implements Serializable {
 
     public void setRequirementList1(List<Requirement> requirementList1) {
         this.requirementList1 = requirementList1;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
     }
 
     @XmlTransient
@@ -273,7 +257,11 @@ public class Requirement extends Versionable implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Requirement[ id=" + getId() + " ]";
+        return "com.validation.manager.core.db.Requirement[ id=" + getId()
+                + ", uniqueId=" + getUniqueId()
+                + ", description=" + getDescription()
+                + super.toString()
+                + " ]";
     }
 
     /**
@@ -288,5 +276,29 @@ public class Requirement extends Versionable implements Serializable {
      */
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean isChangeVersionable() {
+        RequirementJpaController controller
+                = new RequirementJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        Requirement rs = controller.findRequirement(getId());
+        if (rs != null) {
+            String desc = rs.getDescription();
+            if (desc == null) {
+                desc = "";
+            }
+            String n = rs.getNotes();
+            if (n == null) {
+                n = "";
+            }
+            return !desc.equals(getDescription())
+                    || !n.equals(getNotes())
+                    || !rs.getUniqueId().trim()
+                            .equals(getUniqueId().trim());
+        }
+        //Is a new entity, nothing to do
+        return false;
     }
 }

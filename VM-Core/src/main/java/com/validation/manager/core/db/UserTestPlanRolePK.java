@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Embeddable
 public class UserTestPlanRolePK implements Serializable {
@@ -99,10 +99,7 @@ public class UserTestPlanRolePK implements Serializable {
         if (this.userId != other.userId) {
             return false;
         }
-        if (this.roleId != other.roleId) {
-            return false;
-        }
-        return true;
+        return this.roleId == other.roleId;
     }
 
     @Override

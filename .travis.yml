@@ -3,9 +3,19 @@ sudo: false
 addons:
   apt:
     packages:
-      - oracle-java8-installer
+    - oracle-java8-installer
+dist: trusty
 jdk:
-  - oraclejdk8
-  
-script:
-    mvn install test -Dmaven.javadoc.skip=true -B -V
+- oraclejdk8
+- openjdk8
+script: mvn install test -Dmaven.javadoc.skip=true -B -V
+deploy:
+  provider: openshift
+  user: javier.ortiz.78@gmail.com
+  password:
+    secure: AAogkT7r1ef+fKCvnWNodTNYMarHbzjdlVirq0gMS9OZ97CyMeLHbiOfMhs3p6AZkjtnV2GeAf2hbnWdFr0v9DRTFq+SA7CCfilPS3AnXlv9j11zhcyxYLIkD42Pn2P8bp5pgsn4laNkSiTidgcitHkuBNv0uBXvKjCB4VvOfpfpgEraehklGQhCAVOFYCzNVqXNPV+SycnqTHmsZf45V6KeikYS1uaKbUb3K7G3lRaZ9GeB7nfhn4vz1M/g5iqCr2Bx/vEeT5kIo+2XVoMDWpLqScAPXmLxN21emV1H6f4z/1qqAYbUCmMbRXQiCoVnytZGTdiMGz46ndLp/2F0MpxQILscMZYFT9xdAPkH4aI9TN3gjm4ONXC/+bVTesTTse5JImliXjJzx2uPtUyupsb5H36G1HM9YWWFnNDm6gxkoefJy2Fv47HV38ACuACsBARdM36zEhRpwtFHdSTYxg1I23p5pj5cRFNzhTQ0gzOMM2T/oLI89SfU6p9hJVFzD2fraeT3GMtbkhDSCQk3zLuGpiTX1ytEIMqI3gKoqfO0idorFU+aLhiuhuPTeNXzat9okWMiUyOpGrNZMsES/bHRJLeg2cKptJSdFwq5+zbqNsD4MaiMTp4IIUwAkMlOS0GHNmQ5Q041wR5bmtudy6FpOj3InO97YdOsn7t0yjs=
+  app: vm
+  domain: javydreamercsw
+  on:
+    repo: javydreamercsw/validation-manager
+    branch: test-management

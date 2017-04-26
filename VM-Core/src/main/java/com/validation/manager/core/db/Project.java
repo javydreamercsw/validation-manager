@@ -1,6 +1,5 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.server.core.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -28,7 +27,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "project")
@@ -40,7 +39,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT p FROM Project p WHERE p.id = :id")
     , @NamedQuery(name = "Project.findByName",
             query = "SELECT p FROM Project p WHERE p.name = :name")})
-public class Project extends Versionable implements Serializable {
+public class Project implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -62,12 +61,14 @@ public class Project extends Versionable implements Serializable {
     @Column(name = "name")
     private String name;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 2147483647)
     @Column(name = "notes")
     private String notes;
     @JoinTable(name = "project_has_test_project", joinColumns = {
-        @JoinColumn(name = "project_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "test_project_id", referencedColumnName = "id")})
+        @JoinColumn(name = "project_id", referencedColumnName = "id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "test_project_id",
+                        referencedColumnName = "id")})
     @ManyToMany
     private List<TestProject> testProjectList;
     @OneToMany(mappedBy = "parentProjectId")
@@ -78,11 +79,11 @@ public class Project extends Versionable implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
     private List<RequirementSpec> requirementSpecList;
 
-    public Project() {
-    }
-
     public Project(String name) {
         this.name = name;
+    }
+
+    public Project() {
     }
 
     public Integer getId() {
@@ -161,13 +162,12 @@ public class Project extends Versionable implements Serializable {
             return false;
         }
         Project other = (Project) object;
-        return !((this.getId() == null && other.getId() != null)
-                || (this.getId() != null && !this.getId().equals(other.getId())));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Project[ id=" + id + " ]";
     }
-
 }

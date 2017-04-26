@@ -30,7 +30,6 @@ public final class RequirementSpecServer extends RequirementSpec
                 .findSpecLevel(specLevelId));
         setDescription(description);
         setName(name);
-        setVersion(1);
         setModificationDate(new Date());
         setRequirementSpecNodeList(new ArrayList<>());
     }
@@ -113,7 +112,6 @@ public final class RequirementSpecServer extends RequirementSpec
         target.setSpecLevel(source.getSpecLevel());
         target.setDescription(source.getDescription());
         target.setName(source.getName());
-        target.setVersion(source.getVersion());
         target.setModificationDate(source.getModificationDate());
         target.setRequirementSpecNodeList(source.getRequirementSpecNodeList());
         target.setRequirementSpecPK(source.getRequirementSpecPK());

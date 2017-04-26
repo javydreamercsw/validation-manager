@@ -2,6 +2,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNodePK;
@@ -19,12 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.RollbackException;
-import org.openide.util.Exceptions;
-import static org.openide.util.Lookup.getDefault;
+import org.openide.util.Lookup;
 
 /**
  *
@@ -34,7 +33,7 @@ public final class RequirementServer extends Requirement
         implements EntityServer<Requirement>, VersionableServer<Requirement> {
 
     private static final Logger LOG
-            = getLogger(RequirementServer.class.getSimpleName());
+            = Logger.getLogger(RequirementServer.class.getSimpleName());
     /**
      * Having this static map reduces drastically the amount of resources used
      * to constantly calculate test coverage. This is causing huge performance
@@ -72,23 +71,26 @@ public final class RequirementServer extends Requirement
         }
     }
 
-    public RequirementServer(Requirement r) {
+    public RequirementServer(int id) throws VMException {
+        super();
         RequirementJpaController controller
-                = new RequirementJpaController(DataBaseManager.getEntityManagerFactory());
-        Requirement requirement = controller.findRequirement(r.getId());
+                = new RequirementJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        Requirement requirement = controller.findRequirement(id);
         if (requirement != null) {
             update((RequirementServer) this, requirement);
         } else {
-            throw new RuntimeException("Unable to find requirement with id: "
-                    + r.getId());
+            throw new VMException("Unable to find "
+                    + "requirement with id: "
+                    + id);
         }
     }
 
+    public RequirementServer(Requirement r) throws VMException {
+        this(r.getId());
+    }
+
     private void copyRelationships(Requirement target, Requirement source) {
-        if (source.getVmExceptionList() != null) {
-            target.getVmExceptionList().clear();
-            target.getVmExceptionList().addAll(source.getVmExceptionList());
-        }
         if (source.getRequirementList() != null) {
             target.getRequirementList().clear();
             target.getRequirementList().addAll(source.getRequirementList());
@@ -122,22 +124,6 @@ public final class RequirementServer extends Requirement
         //Make sure unique id is trimmed
         setUniqueId(getUniqueId().trim());
         if (getId() != null && getId() > 0) {
-            //Check what has changed, if is only relationshipd, don't version
-            //Get the one from DB
-            if (DataBaseManager.isVersioningEnabled() && isChangeVersionable()) {
-                //One exists already, need to make a copy of the requirement
-                Requirement req = new Requirement(getUniqueId(), getDescription(),
-                        getNotes(),
-                        getMajorVersion(),
-                        getMidVersion(),
-                        getMinorVersion() + 1);
-                //Copy the relationships
-                copyRelationships(req, this);
-                //Store in data base.
-                new RequirementJpaController(
-                        DataBaseManager.getEntityManagerFactory()).create(req);
-                update(this, req);
-            }
             Requirement req = new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory())
                     .findRequirement(getId());
@@ -174,15 +160,12 @@ public final class RequirementServer extends Requirement
         target.setRequirementList1(source.getRequirementList1());
         target.setRequirementStatusId(source.getRequirementStatusId());
         target.setRequirementTypeId(source.getRequirementTypeId());
-        target.setVmExceptionList(source.getVmExceptionList());
         target.setRiskControlHasRequirementList(source
                 .getRiskControlHasRequirementList());
         target.setStepList(source.getStepList());
         target.setUniqueId(source.getUniqueId());
         target.setId(source.getId());
-        target.setMajorVersion(source.getMajorVersion());
-        target.setMidVersion(source.getMidVersion());
-        target.setMinorVersion(source.getMinorVersion());
+        super.update(target, source);
     }
 
     public static boolean isDuplicate(Requirement req) {
@@ -232,7 +215,11 @@ public final class RequirementServer extends Requirement
                     if (COVERAGE_MAP.containsKey(getCoverageMapID(r))) {
                         coverage += COVERAGE_MAP.get(getCoverageMapID(r));
                     } else {
-                        coverage += new RequirementServer(r).getTestCoverage();
+                        try {
+                            coverage += new RequirementServer(r).getTestCoverage();
+                        } catch (VMException ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
                 coverage /= children.size();
@@ -280,7 +267,7 @@ public final class RequirementServer extends Requirement
                 update();
             }
         } else {
-            MessageHandler handler = getDefault().lookup(MessageHandler.class);
+            MessageHandler handler = Lookup.getDefault().lookup(MessageHandler.class);
             String message = new StringBuilder().append("Ignored addition of ")
                     .append(child.getUniqueId()).append(" as a children of ")
                     .append(getUniqueId())
@@ -296,31 +283,17 @@ public final class RequirementServer extends Requirement
 
     @Override
     public List<Requirement> getVersions() {
-        List<Requirement> versions = new ArrayList<>();
+        List<Requirement> versions
+                = new ArrayList<>();
         parameters.clear();
-        parameters.put("uniqueId", getEntity().getUniqueId().trim());
+        parameters.put("uniqueId", getEntity()
+                .getUniqueId().trim());
         DataBaseManager.namedQuery(
                 "Requirement.findByUniqueId",
                 parameters).forEach((obj) -> {
                     versions.add((Requirement) obj);
                 });
         return versions;
-    }
-
-    @Override
-    public boolean isChangeVersionable() {
-        String description = getEntity().getDescription();
-        if (description == null) {
-            description = "";
-        }
-        String notes = getEntity().getNotes();
-        if (notes == null) {
-            notes = "";
-        }
-        return !description.equals(getDescription())
-                || !notes.equals(getNotes())
-                || !getEntity().getUniqueId().trim()
-                        .equals(getUniqueId().trim());
     }
 
     public static void main(String[] args) {
@@ -343,7 +316,8 @@ public final class RequirementServer extends Requirement
             EntityManagerFactory emf
                     = Persistence.createEntityManagerFactory("VMPU", parameters);
             DataBaseManager.setEntityManagerFactory(emf);
-            int counter = 0, circular = 0;
+            int counter = 0;
+            int circular = 0;
             List<String> processed = new ArrayList<>();
             LOG.log(Level.INFO, "Analyzing {0}. Please wait...",
                     parameters.get("javax.persistence.jdbc.url"));
@@ -384,28 +358,27 @@ public final class RequirementServer extends Requirement
                                     //Check all parents of this requirement
                                     for (Requirement child : parent.getRequirementList()) {
                                         //Check if the parent has this requirement as a child
-                                        if (child.getUniqueId().equals(temp.getUniqueId())) {
-                                            if (!toRemove.contains(parent.getUniqueId())) {
-                                                LOG.log(Level.INFO,
-                                                        "Circular dependency "
-                                                        + "detected between {0} and {1}",
-                                                        new Object[]{temp.getUniqueId(),
-                                                            parent.getUniqueId()});
+                                        if (child.getUniqueId().equals(temp.getUniqueId())
+                                                && !toRemove.contains(parent.getUniqueId())) {
+                                            LOG.log(Level.INFO,
+                                                    "Circular dependency "
+                                                    + "detected between {0} and {1}",
+                                                    new Object[]{temp.getUniqueId(),
+                                                        parent.getUniqueId()});
 
-                                                RequirementServer p = new RequirementServer(parent);
-                                                assert temp.getRequirementList().contains(parent);
-                                                temp.getRequirementList().remove(parent);
-                                                LOG.log(Level.INFO, "Remove link from {0} to {1}",
-                                                        new Object[]{temp.getUniqueId(),
-                                                            parent.getUniqueId()});
-                                                temp.write2DB();
-                                                temp.update();
-                                                assert !temp.getRequirementList().contains(parent);
-                                                p.update();
-                                                assert p.getRequirementList1().contains(temp);
-                                                toRemove.add(parent.getUniqueId());
-                                                circular++;
-                                            }
+                                            RequirementServer p = new RequirementServer(parent);
+                                            assert temp.getRequirementList().contains(parent);
+                                            temp.getRequirementList().remove(parent);
+                                            LOG.log(Level.INFO, "Remove link from {0} to {1}",
+                                                    new Object[]{temp.getUniqueId(),
+                                                        parent.getUniqueId()});
+                                            temp.write2DB();
+                                            temp.update();
+                                            assert !temp.getRequirementList().contains(parent);
+                                            p.update();
+                                            assert p.getRequirementList1().contains(temp);
+                                            toRemove.add(parent.getUniqueId());
+                                            circular++;
                                         }
                                     }
                                 }
@@ -539,7 +512,7 @@ public final class RequirementServer extends Requirement
                     } catch (RollbackException ex) {
                         //Relationship already exists.
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
                 }
             }

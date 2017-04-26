@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class FmeaJpaController implements Serializable {
 
@@ -39,11 +39,11 @@ public class FmeaJpaController implements Serializable {
         if (fmea.getRiskCategoryList() == null) {
             fmea.setRiskCategoryList(new ArrayList<RiskCategory>());
         }
-        if (fmea.getFmeaList() == null) {
-            fmea.setFmeaList(new ArrayList<Fmea>());
-        }
         if (fmea.getRiskItemList() == null) {
             fmea.setRiskItemList(new ArrayList<RiskItem>());
+        }
+        if (fmea.getFmeaList() == null) {
+            fmea.setFmeaList(new ArrayList<Fmea>());
         }
         EntityManager em = null;
         try {
@@ -60,18 +60,18 @@ public class FmeaJpaController implements Serializable {
                 attachedRiskCategoryList.add(riskCategoryListRiskCategoryToAttach);
             }
             fmea.setRiskCategoryList(attachedRiskCategoryList);
-            List<Fmea> attachedFmeaList = new ArrayList<Fmea>();
-            for (Fmea fmeaListFmeaToAttach : fmea.getFmeaList()) {
-                fmeaListFmeaToAttach = em.getReference(fmeaListFmeaToAttach.getClass(), fmeaListFmeaToAttach.getId());
-                attachedFmeaList.add(fmeaListFmeaToAttach);
-            }
-            fmea.setFmeaList(attachedFmeaList);
             List<RiskItem> attachedRiskItemList = new ArrayList<RiskItem>();
             for (RiskItem riskItemListRiskItemToAttach : fmea.getRiskItemList()) {
                 riskItemListRiskItemToAttach = em.getReference(riskItemListRiskItemToAttach.getClass(), riskItemListRiskItemToAttach.getRiskItemPK());
                 attachedRiskItemList.add(riskItemListRiskItemToAttach);
             }
             fmea.setRiskItemList(attachedRiskItemList);
+            List<Fmea> attachedFmeaList = new ArrayList<Fmea>();
+            for (Fmea fmeaListFmeaToAttach : fmea.getFmeaList()) {
+                fmeaListFmeaToAttach = em.getReference(fmeaListFmeaToAttach.getClass(), fmeaListFmeaToAttach.getId());
+                attachedFmeaList.add(fmeaListFmeaToAttach);
+            }
+            fmea.setFmeaList(attachedFmeaList);
             em.persist(fmea);
             if (parent != null) {
                 parent.getFmeaList().add(fmea);
@@ -80,15 +80,6 @@ public class FmeaJpaController implements Serializable {
             for (RiskCategory riskCategoryListRiskCategory : fmea.getRiskCategoryList()) {
                 riskCategoryListRiskCategory.getFmeaList().add(fmea);
                 riskCategoryListRiskCategory = em.merge(riskCategoryListRiskCategory);
-            }
-            for (Fmea fmeaListFmea : fmea.getFmeaList()) {
-                Fmea oldParentOfFmeaListFmea = fmeaListFmea.getParent();
-                fmeaListFmea.setParent(fmea);
-                fmeaListFmea = em.merge(fmeaListFmea);
-                if (oldParentOfFmeaListFmea != null) {
-                    oldParentOfFmeaListFmea.getFmeaList().remove(fmeaListFmea);
-                    oldParentOfFmeaListFmea = em.merge(oldParentOfFmeaListFmea);
-                }
             }
             for (RiskItem riskItemListRiskItem : fmea.getRiskItemList()) {
                 Fmea oldFmeaOfRiskItemListRiskItem = riskItemListRiskItem.getFmea();
@@ -99,8 +90,18 @@ public class FmeaJpaController implements Serializable {
                     oldFmeaOfRiskItemListRiskItem = em.merge(oldFmeaOfRiskItemListRiskItem);
                 }
             }
+            for (Fmea fmeaListFmea : fmea.getFmeaList()) {
+                Fmea oldParentOfFmeaListFmea = fmeaListFmea.getParent();
+                fmeaListFmea.setParent(fmea);
+                fmeaListFmea = em.merge(fmeaListFmea);
+                if (oldParentOfFmeaListFmea != null) {
+                    oldParentOfFmeaListFmea.getFmeaList().remove(fmeaListFmea);
+                    oldParentOfFmeaListFmea = em.merge(oldParentOfFmeaListFmea);
+                }
+            }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -117,10 +118,10 @@ public class FmeaJpaController implements Serializable {
             Fmea parentNew = fmea.getParent();
             List<RiskCategory> riskCategoryListOld = persistentFmea.getRiskCategoryList();
             List<RiskCategory> riskCategoryListNew = fmea.getRiskCategoryList();
-            List<Fmea> fmeaListOld = persistentFmea.getFmeaList();
-            List<Fmea> fmeaListNew = fmea.getFmeaList();
             List<RiskItem> riskItemListOld = persistentFmea.getRiskItemList();
             List<RiskItem> riskItemListNew = fmea.getRiskItemList();
+            List<Fmea> fmeaListOld = persistentFmea.getFmeaList();
+            List<Fmea> fmeaListNew = fmea.getFmeaList();
             List<String> illegalOrphanMessages = null;
             for (RiskItem riskItemListOldRiskItem : riskItemListOld) {
                 if (!riskItemListNew.contains(riskItemListOldRiskItem)) {
@@ -144,13 +145,6 @@ public class FmeaJpaController implements Serializable {
             }
             riskCategoryListNew = attachedRiskCategoryListNew;
             fmea.setRiskCategoryList(riskCategoryListNew);
-            List<Fmea> attachedFmeaListNew = new ArrayList<Fmea>();
-            for (Fmea fmeaListNewFmeaToAttach : fmeaListNew) {
-                fmeaListNewFmeaToAttach = em.getReference(fmeaListNewFmeaToAttach.getClass(), fmeaListNewFmeaToAttach.getId());
-                attachedFmeaListNew.add(fmeaListNewFmeaToAttach);
-            }
-            fmeaListNew = attachedFmeaListNew;
-            fmea.setFmeaList(fmeaListNew);
             List<RiskItem> attachedRiskItemListNew = new ArrayList<RiskItem>();
             for (RiskItem riskItemListNewRiskItemToAttach : riskItemListNew) {
                 riskItemListNewRiskItemToAttach = em.getReference(riskItemListNewRiskItemToAttach.getClass(), riskItemListNewRiskItemToAttach.getRiskItemPK());
@@ -158,6 +152,13 @@ public class FmeaJpaController implements Serializable {
             }
             riskItemListNew = attachedRiskItemListNew;
             fmea.setRiskItemList(riskItemListNew);
+            List<Fmea> attachedFmeaListNew = new ArrayList<Fmea>();
+            for (Fmea fmeaListNewFmeaToAttach : fmeaListNew) {
+                fmeaListNewFmeaToAttach = em.getReference(fmeaListNewFmeaToAttach.getClass(), fmeaListNewFmeaToAttach.getId());
+                attachedFmeaListNew.add(fmeaListNewFmeaToAttach);
+            }
+            fmeaListNew = attachedFmeaListNew;
+            fmea.setFmeaList(fmeaListNew);
             fmea = em.merge(fmea);
             if (parentOld != null && !parentOld.equals(parentNew)) {
                 parentOld.getFmeaList().remove(fmea);
@@ -179,6 +180,17 @@ public class FmeaJpaController implements Serializable {
                     riskCategoryListNewRiskCategory = em.merge(riskCategoryListNewRiskCategory);
                 }
             }
+            for (RiskItem riskItemListNewRiskItem : riskItemListNew) {
+                if (!riskItemListOld.contains(riskItemListNewRiskItem)) {
+                    Fmea oldFmeaOfRiskItemListNewRiskItem = riskItemListNewRiskItem.getFmea();
+                    riskItemListNewRiskItem.setFmea(fmea);
+                    riskItemListNewRiskItem = em.merge(riskItemListNewRiskItem);
+                    if (oldFmeaOfRiskItemListNewRiskItem != null && !oldFmeaOfRiskItemListNewRiskItem.equals(fmea)) {
+                        oldFmeaOfRiskItemListNewRiskItem.getRiskItemList().remove(riskItemListNewRiskItem);
+                        oldFmeaOfRiskItemListNewRiskItem = em.merge(oldFmeaOfRiskItemListNewRiskItem);
+                    }
+                }
+            }
             for (Fmea fmeaListOldFmea : fmeaListOld) {
                 if (!fmeaListNew.contains(fmeaListOldFmea)) {
                     fmeaListOldFmea.setParent(null);
@@ -196,19 +208,9 @@ public class FmeaJpaController implements Serializable {
                     }
                 }
             }
-            for (RiskItem riskItemListNewRiskItem : riskItemListNew) {
-                if (!riskItemListOld.contains(riskItemListNewRiskItem)) {
-                    Fmea oldFmeaOfRiskItemListNewRiskItem = riskItemListNewRiskItem.getFmea();
-                    riskItemListNewRiskItem.setFmea(fmea);
-                    riskItemListNewRiskItem = em.merge(riskItemListNewRiskItem);
-                    if (oldFmeaOfRiskItemListNewRiskItem != null && !oldFmeaOfRiskItemListNewRiskItem.equals(fmea)) {
-                        oldFmeaOfRiskItemListNewRiskItem.getRiskItemList().remove(riskItemListNewRiskItem);
-                        oldFmeaOfRiskItemListNewRiskItem = em.merge(oldFmeaOfRiskItemListNewRiskItem);
-                    }
-                }
-            }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = fmea.getId();
@@ -217,7 +219,8 @@ public class FmeaJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -233,7 +236,8 @@ public class FmeaJpaController implements Serializable {
             try {
                 fmea = em.getReference(Fmea.class, id);
                 fmea.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The fmea with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -264,7 +268,8 @@ public class FmeaJpaController implements Serializable {
             }
             em.remove(fmea);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -290,7 +295,8 @@ public class FmeaJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -299,7 +305,8 @@ public class FmeaJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(Fmea.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -312,7 +319,8 @@ public class FmeaJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

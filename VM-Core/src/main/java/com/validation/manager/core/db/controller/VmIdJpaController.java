@@ -18,7 +18,7 @@ import javax.persistence.criteria.Root;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class VmIdJpaController implements Serializable {
 
@@ -38,7 +38,8 @@ public class VmIdJpaController implements Serializable {
             em.getTransaction().begin();
             em.persist(vmId);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -52,7 +53,8 @@ public class VmIdJpaController implements Serializable {
             em.getTransaction().begin();
             vmId = em.merge(vmId);
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = vmId.getId();
@@ -61,7 +63,8 @@ public class VmIdJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -77,12 +80,14 @@ public class VmIdJpaController implements Serializable {
             try {
                 vmId = em.getReference(VmId.class, id);
                 vmId.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The vmId with id " + id + " no longer exists.", enfe);
             }
             em.remove(vmId);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -108,7 +113,8 @@ public class VmIdJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -117,7 +123,8 @@ public class VmIdJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(VmId.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -130,7 +137,8 @@ public class VmIdJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

@@ -24,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "corrective_action")
@@ -61,14 +61,6 @@ public class CorrectiveAction implements Serializable {
         @JoinColumn(name = "user_id", referencedColumnName = "id")})
     @ManyToMany
     private List<VmUser> vmUserList;
-    @JoinTable(name = "exception_has_corrective_action", joinColumns = {
-        @JoinColumn(name = "corrective_action_id",
-                referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "exception_id", referencedColumnName = "id")
-        , @JoinColumn(name = "exception_reporter_id",
-                referencedColumnName = "reporter_id")})
-    @ManyToMany
-    private List<VmException> vmExceptionList;
 
     public CorrectiveAction() {
     }
@@ -101,16 +93,6 @@ public class CorrectiveAction implements Serializable {
 
     public void setVmUserList(List<VmUser> vmUserList) {
         this.vmUserList = vmUserList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
-    }
-
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
     }
 
     @Override

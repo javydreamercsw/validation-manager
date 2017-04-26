@@ -26,7 +26,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class RiskControlJpaController implements Serializable {
 
@@ -121,12 +121,14 @@ public class RiskControlJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             if (findRiskControl(riskControl.getRiskControlPK()) != null) {
                 throw new PreexistingEntityException("RiskControl " + riskControl + " already exists.", ex);
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -258,7 +260,8 @@ public class RiskControlJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 RiskControlPK id = riskControl.getRiskControlPK();
@@ -267,7 +270,8 @@ public class RiskControlJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -283,7 +287,8 @@ public class RiskControlJpaController implements Serializable {
             try {
                 riskControl = em.getReference(RiskControl.class, id);
                 riskControl.getRiskControlPK();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskControl with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -321,7 +326,8 @@ public class RiskControlJpaController implements Serializable {
             }
             em.remove(riskControl);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -347,7 +353,8 @@ public class RiskControlJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -356,7 +363,8 @@ public class RiskControlJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(RiskControl.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -369,7 +377,8 @@ public class RiskControlJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

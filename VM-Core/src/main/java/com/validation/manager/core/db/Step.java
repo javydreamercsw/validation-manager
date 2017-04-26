@@ -3,16 +3,17 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -22,7 +23,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "step")
@@ -59,15 +60,8 @@ public class Step implements Serializable {
     private String notes;
     @ManyToMany(mappedBy = "stepList")
     private List<Requirement> requirementList;
-    @JoinTable(name = "step_has_vm_exception", joinColumns = {
-        @JoinColumn(name = "step_id", referencedColumnName = "id")
-        , @JoinColumn(name = "step_test_case_id",
-                referencedColumnName = "test_case_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "vm_exception_id", referencedColumnName = "id")
-        , @JoinColumn(name = "vm_exception_reporter_id",
-                referencedColumnName = "reporter_id")})
-    @ManyToMany
-    private List<VmException> vmExceptionList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
+    private List<ExecutionStep> executionStepList;
     @JoinColumn(name = "test_case_id", referencedColumnName = "id",
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
@@ -106,14 +100,6 @@ public class Step implements Serializable {
         this.stepSequence = stepSequence;
     }
 
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
-    }
-
     public byte[] getExpectedResult() {
         return expectedResult;
     }
@@ -142,12 +128,12 @@ public class Step implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<VmException> getVmExceptionList() {
-        return vmExceptionList;
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
     }
 
-    public void setVmExceptionList(List<VmException> vmExceptionList) {
-        this.vmExceptionList = vmExceptionList;
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
     }
 
     public TestCase getTestCase() {
@@ -179,5 +165,13 @@ public class Step implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
+    }
+
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
     }
 }

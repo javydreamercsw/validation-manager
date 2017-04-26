@@ -1,7 +1,9 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.StepPK;
@@ -15,12 +17,22 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  */
 public final class StepServer extends Step implements EntityServer<Step> {
 
-    public StepServer(TestCase tc, int stepSequence, String text) {
+    public StepServer(TestCase tc, int stepSequence, String text)
+            throws VMException {
         super(new StepPK(tc.getId()), stepSequence, text.getBytes());
         setTestCase(tc);
         if (getTestCase() == null) {
-            throw new RuntimeException("Provided TestCase that doesn't exist in the database yet!");
+            throw new VMException("Provided TestCase that doesn't exist in "
+                    + "the database yet!");
         }
+    }
+
+    public StepServer(StepPK stepPK) {
+        super(stepPK);
+        update(StepServer.this,
+                new StepJpaController(DataBaseManager
+                        .getEntityManagerFactory())
+                        .findStep(stepPK));
     }
 
     public StepServer(Step step) {
@@ -61,7 +73,7 @@ public final class StepServer extends Step implements EntityServer<Step> {
         target.setStepSequence(source.getStepSequence());
         target.setTestCase(source.getTestCase());
         target.setText(source.getText());
-        target.setVmExceptionList(source.getVmExceptionList());
+        target.setExecutionStepList(source.getExecutionStepList());
     }
 
     @Override
@@ -87,14 +99,6 @@ public final class StepServer extends Step implements EntityServer<Step> {
     public void removeRequirement(Requirement req) throws Exception {
         if (getRequirementList().contains(req)
                 && getEntity().getRequirementList().contains(req)) {
-//            String query = "delete from step_has_requirement "
-//                    + "where step_id=" + getStepPK().getId()
-//                    + " and step_test_case_id=" + getStepPK().getTestCaseId()
-//                    + " and requirement_id=" + req.getId()
-//                    + " and major_version=" + req.getMajorVersion()
-//                    + " and mid_version=" + req.getMidVersion()
-//                    + " and minor_version=" + req.getMinorVersion();
-//            DataBaseManager.nativeUpdateQuery(query);
             RequirementServer rs = new RequirementServer(req);
             rs.getStepList().remove(getEntity());
             rs.write2DB();

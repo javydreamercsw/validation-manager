@@ -24,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "cause")
@@ -41,8 +41,8 @@ public class Cause implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "CuseGen")
-    @TableGenerator(name = "CuseGen", table = "vm_id",
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "CauseGen")
+    @TableGenerator(name = "CauseGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "cause",
@@ -134,5 +134,4 @@ public class Cause implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.Cause[ id=" + id + " ]";
     }
-
 }

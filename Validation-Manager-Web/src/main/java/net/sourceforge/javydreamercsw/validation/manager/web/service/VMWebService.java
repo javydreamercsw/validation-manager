@@ -11,10 +11,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -24,6 +25,8 @@ import org.openide.util.Exceptions;
 public class VMWebService {
 
     private final Map<String, Object> parameters = new HashMap<>();
+    private static final Logger LOG
+            = Logger.getLogger(VMWebService.class.getName());
 
     /**
      * Web service operation
@@ -59,7 +62,7 @@ public class VMWebService {
                             user = vmuser;
                         }
                     } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
                 }
             }

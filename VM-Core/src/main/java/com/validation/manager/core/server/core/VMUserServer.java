@@ -1,5 +1,6 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.createdQuery;
 import static com.validation.manager.core.DataBaseManager.getEntityManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
@@ -7,15 +8,18 @@ import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.CorrectiveAction;
+import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Role;
+import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.UserAssigment;
 import com.validation.manager.core.db.UserHasInvestigation;
 import com.validation.manager.core.db.UserModifiedRecord;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.UserTestProjectRole;
-import com.validation.manager.core.db.VmException;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.CorrectiveActionJpaController;
+import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.RoleJpaController;
 import com.validation.manager.core.db.controller.UserAssigmentJpaController;
 import com.validation.manager.core.db.controller.UserHasInvestigationJpaController;
@@ -23,7 +27,6 @@ import com.validation.manager.core.db.controller.UserModifiedRecordJpaController
 import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.UserTestPlanRoleJpaController;
 import com.validation.manager.core.db.controller.UserTestProjectRoleJpaController;
-import com.validation.manager.core.db.controller.VmExceptionJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -40,6 +43,7 @@ import static java.util.Locale.getDefault;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import javax.persistence.EntityTransaction;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -51,19 +55,18 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     private static final long serialVersionUID = 1L;
     private boolean hashPassword = true;
     private boolean increaseAttempts = false;
-    private static List<Object> result;
     private boolean change;
 
     public VMUserServer(VmUser vmu) {
         update(VMUserServer.this, vmu);
         //previously hashing the already hashed password
-        hashPassword = false;
+        setHashPassword(false);
     }
 
     //create user object and login
     public VMUserServer(String attrUN, String attrUPW) throws Exception {
         try {
-            result = createdQuery(
+            List<Object> result = createdQuery(
                     "SELECT u FROM VmUser uu WHERE u.username='" // NOI18N
                     + attrUN + "' AND u.password='" + encrypt(attrUPW)
                     + "' AND u.userStatusId.id <> 2");
@@ -86,7 +89,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                 VmUser vmu = (VmUser) result.get(0);
                 update(VMUserServer.this, vmu);
                 //previously hashing the already hashed password
-                hashPassword = false;
+                setHashPassword(false);
                 int status = vmu.getUserStatusId().getId();
                 if (status != 2) {
                     Calendar cal2 = getInstance(),
@@ -116,15 +119,14 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             if (transaction.isActive()) {
                 transaction.rollback();
             }
-            result = createdQuery("SELECT u FROM VmUser u WHERE u.username='"
+            List<Object> result = createdQuery("SELECT u FROM VmUser u WHERE u.username='"
                     + attrUN + "' AND u.userStatusId.id <> 2");
             //increase number of attempts
             if (!result.isEmpty()) {
                 VmUser vmu = (VmUser) result.get(0);
                 update(VMUserServer.this, vmu);
                 //Don't rehash the pasword!
-                hashPassword = false;
-                //Increase attempts after a unsuccessfull login.
+                setHashPassword(false); //Increase attempts after a unsuccessfull login.
                 setIncreaseAttempts(true);
                 setLastModified(vmu.getLastModified());
                 setChange(false);
@@ -137,13 +139,13 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     public VMUserServer(int id) throws Exception {
         parameters.clear();
         parameters.put("id", id);
-        result = namedQuery("VmUser.findById", parameters);
+        List<Object> result = namedQuery("VmUser.findById", parameters);
         //throw exception if no result found
         if (result.size() > 0) {
             VmUser vmu = (VmUser) result.get(0);
             update(VMUserServer.this, vmu);
             //previously hashing the already hashed password
-            hashPassword = false;
+            setHashPassword(false);
         } else {
             throw new Exception("Unable to find user");
         }
@@ -192,7 +194,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                     getEntityManagerFactory())
                     .findUserStatus(1));
             setAttempts(0);
-            setModificationReason("audit.user.account.aged");
+            setReason("audit.user.account.aged");
             setChange(true);
         }
         //Increase login attempts
@@ -222,7 +224,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             setLastModified(date);
             //Sometimes password got re-hashed
             String password;
-            if (hashPassword) {
+            if (isHashPassword()) {
                 password = encrypt(getPassword().replaceAll("'", "\\\\'"));
             } else {
                 password = getPassword().replaceAll("'", "\\\\'");
@@ -230,8 +232,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             VmUser vmu = controller.findVmUser(getId());
             update(vmu, this);
             vmu.setPassword(password);
-            vmu.setModificationReason(getModificationReason() == null
-                    ? "audit.general.modified" : getModificationReason());
+            vmu.setReason(getReason() == null
+                    ? "audit.general.modified" : getReason());
             vmu.setModificationTime(new Timestamp(new Date().getTime()));
             controller.edit(vmu);
         } else {
@@ -248,7 +250,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             setId(vmu.getId());
         }
         setChange(false);
-        setModificationReason("");
+        setReason("");
         return getId();
     }
 
@@ -256,7 +258,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     public static ArrayList<VMUserServer> getVMUsers() {
         ArrayList<VMUserServer> coreUsers = new ArrayList<>();
         try {
-            result = createdQuery(
+            List<Object> result = createdQuery(
                     "Select x from VMUser x order by x.username");
             result.forEach((o) -> {
                 coreUsers.add(new VMUserServer((VmUser) o));
@@ -288,7 +290,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         boolean passwordIsUsable = true;
         try {
             //Now check if password is not the same as the current password
-            result = createdQuery(
+            List<Object> result = createdQuery(
                     "Select x from VmUser x where x.id=" + getId()
                     + " and x.password='"
                     + (hash ? encrypt(newPass) : newPass) + "'");
@@ -332,51 +334,47 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         if (user != null) {
             parameters.clear();
             parameters.put("id", user.getId());
-            user = (VmUser) namedQuery("VmUser.findById",
+            VmUser temp = (VmUser) namedQuery("VmUser.findById",
                     parameters).get(0);
             try {
-                for (CorrectiveAction ca : user.getCorrectiveActionList()) {
+                for (CorrectiveAction ca : temp.getCorrectiveActionList()) {
                     new CorrectiveActionJpaController(
                             getEntityManagerFactory()).destroy(ca.getId());
                 }
-                for (Role r : user.getRoleList()) {
+                for (Role r : temp.getRoleList()) {
                     new RoleJpaController(
                             getEntityManagerFactory()).destroy(r.getId());
                 }
-                for (UserAssigment ua : user.getUserAssigmentList()) {
+                for (UserAssigment ua : temp.getUserAssigmentList()) {
                     new UserAssigmentJpaController(
                             getEntityManagerFactory()).destroy(ua.getUserAssigmentPK());
                 }
-                for (UserAssigment ua : user.getUserAssigmentList1()) {
+                for (UserAssigment ua : temp.getUserAssigmentList1()) {
                     new UserAssigmentJpaController(
                             getEntityManagerFactory()).destroy(ua.getUserAssigmentPK());
                 }
-                for (UserHasInvestigation i : user.getUserHasInvestigationList()) {
+                for (UserHasInvestigation i : temp.getUserHasInvestigationList()) {
                     new UserHasInvestigationJpaController(
                             getEntityManagerFactory()).destroy(i.getUserHasInvestigationPK());
                 }
-                for (UserModifiedRecord rc : user.getUserModifiedRecordList()) {
+                for (UserModifiedRecord rc : temp.getUserModifiedRecordList()) {
                     new UserModifiedRecordJpaController(
                             getEntityManagerFactory()).destroy(rc.getUserModifiedRecordPK());
                 }
-                for (UserTestPlanRole rc : user.getUserTestPlanRoleList()) {
+                for (UserTestPlanRole rc : temp.getUserTestPlanRoleList()) {
                     new UserTestPlanRoleJpaController(
                             getEntityManagerFactory()).destroy(rc.getUserTestPlanRolePK());
                 }
-                for (UserTestProjectRole rc : user.getUserTestProjectRoleList()) {
+                for (UserTestProjectRole rc : temp.getUserTestProjectRoleList()) {
                     new UserTestProjectRoleJpaController(
                             getEntityManagerFactory()).destroy(rc.getUserTestProjectRolePK());
                 }
-                for (VmException rc : user.getVmExceptionList()) {
-                    new VmExceptionJpaController(
-                            getEntityManagerFactory()).destroy(rc.getVmExceptionPK());
-                }
                 parameters.clear();
-                parameters.put("id", user.getId());
-                user = (VmUser) namedQuery("VmUser.findById",
+                parameters.put("id", temp.getId());
+                temp = (VmUser) namedQuery("VmUser.findById",
                         parameters).get(0);
                 new VmUserJpaController(
-                        getEntityManagerFactory()).destroy(user.getId());
+                        getEntityManagerFactory()).destroy(temp.getId());
             } catch (NonexistentEntityException | IllegalOrphanException ex) {
                 getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -458,8 +456,25 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         target.setRootCauseList(source.getRootCauseList());
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setUserTestProjectRoleList(source.getUserTestProjectRoleList());
-        target.setVmExceptionList(source.getVmExceptionList());
         target.setId(source.getId());
+        if (target.getExecutionStepList() == null) {
+            target.setExecutionStepList(new ArrayList<>());
+        }
+        if (source.getExecutionStepList() != null) {
+            target.setExecutionStepList(source.getExecutionStepList());
+        }
+        if (target.getExecutionStepList1() == null) {
+            target.setExecutionStepList1(new ArrayList<>());
+        }
+        if (source.getExecutionStepList1() != null) {
+            target.setExecutionStepList1(source.getExecutionStepList1());
+        }
+        if (target.getExecutionStepHasIssueList() == null) {
+            target.setExecutionStepHasIssueList(new ArrayList<>());
+        }
+        target.setExecutionStepList(source.getExecutionStepList());
+        target.setExecutionStepList1(source.getExecutionStepList1());
+        target.setExecutionStepHasIssueList(source.getExecutionStepHasIssueList());
         super.update(target, source);
     }
 
@@ -484,5 +499,40 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
     public boolean isChangeVersionable() {
         //TODO
         return false;
+    }
+
+    public void assignTestCase(TestCaseExecution tce, TestCase tc,
+            VmUser assigner) {
+        try {
+            VMUserServer a = new VMUserServer(assigner);
+            ExecutionStepJpaController c
+                    = new ExecutionStepJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+            tc.getStepList().forEach((s) -> {
+                tce.getExecutionStepList().stream().filter((es)
+                        -> (es.getStep().getStepPK().equals(s.getStepPK())))
+                        .forEachOrdered((es) -> {
+                            try {
+                                es.setAssignedTime(new Date());
+                                c.edit(es);
+                                getExecutionStepList().add(es);
+                                a.getExecutionStepList1().add(es);
+                            } catch (Exception ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
+                        });
+            });
+            a.write2DB();
+            write2DB();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
+    public void setAsAssigner(ExecutionStep es) throws Exception {
+        ExecutionStepServer ess = new ExecutionStepServer(es);
+        ess.setAssigner(getEntity());
+        ess.write2DB();
+        update();
     }
 }

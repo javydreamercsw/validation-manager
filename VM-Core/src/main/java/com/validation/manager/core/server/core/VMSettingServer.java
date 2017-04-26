@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class VMSettingServer extends VmSetting
+public final class VMSettingServer extends VmSetting
         implements EntityServer<VmSetting>, VersionableServer<VmSetting> {
 
     private static List<Object> result;
@@ -21,7 +21,7 @@ public class VMSettingServer extends VmSetting
     public VMSettingServer(String setting) {
         VmSetting s = getSetting(setting);
         if (s != null) {
-            update(this, s);
+            update(VMSettingServer.this, s);
         } else {
             throw new RuntimeException("Setting: " + setting
                     + " doesn't exist!");
@@ -102,9 +102,6 @@ public class VMSettingServer extends VmSetting
         target.setSetting(source.getSetting());
         target.setStringVal(source.getStringVal());
         target.setId(source.getId());
-        target.setMajorVersion(source.getMajorVersion());
-        target.setMidVersion(source.getMidVersion());
-        target.setMinorVersion(source.getMinorVersion());
     }
 
     @Override
@@ -122,10 +119,5 @@ public class VMSettingServer extends VmSetting
                     versions.add((VmSetting) obj);
                 });
         return versions;
-    }
-
-    @Override
-    public boolean isChangeVersionable() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

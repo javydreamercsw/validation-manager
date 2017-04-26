@@ -1,0 +1,9 @@
+**/target/*
+m2/*
+*.jasper
+VM-Core/data/*
+\.orig\..*$
+\.orig$
+\.chg\..*$
+\.rej$
+\.conflict\~$

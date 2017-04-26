@@ -1,7 +1,6 @@
 package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.isVersioningEnabled;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
@@ -49,24 +48,11 @@ public final class ProjectServer extends Project
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         Project p;
-        if (getId() > 0) {
-            //Check what has changed, if is only relationshipd, don't version
-            //Get the one from DB
-            if (isVersioningEnabled() && isChangeVersionable()) {
-                p = new Project(getName());
-                update(p, this, false);
-                p.setMajorVersion(getMajorVersion());
-                p.setMidVersion(getMidVersion());
-                p.setMinorVersion(getMinorVersion() + 1);
-                //Store in data base.
-                new ProjectJpaController(getEntityManagerFactory()).create(p);
-                update(this, p);
-            } else {
-                p = new ProjectJpaController(getEntityManagerFactory())
-                        .findProject(getId());
-                update(p, this);
-                new ProjectJpaController(getEntityManagerFactory()).edit(p);
-            }
+        if (getId() != null && getId() > 0) {
+            p = new ProjectJpaController(getEntityManagerFactory())
+                    .findProject(getId());
+            update(p, this);
+            new ProjectJpaController(getEntityManagerFactory()).edit(p);
         } else {
             p = new Project(getName());
             update(p, this);
@@ -99,21 +85,15 @@ public final class ProjectServer extends Project
                 .findProject(getId());
     }
 
-    private void update(Project target, Project source, boolean copyId) {
+    @Override
+    public void update(Project target, Project source) {
         target.setNotes(source.getNotes());
         target.setName(source.getName());
         target.setParentProjectId(source.getParentProjectId());
         target.setProjectList(source.getProjectList());
         target.setRequirementSpecList(source.getRequirementSpecList());
         target.setTestProjectList(source.getTestProjectList());
-        if (copyId) {
-            target.setId(source.getId());
-        }
-    }
-
-    @Override
-    public void update(Project target, Project source) {
-        update(target, source, true);
+        target.setId(source.getId());
     }
 
     public static List<Project> getProjects() {
@@ -135,12 +115,16 @@ public final class ProjectServer extends Project
     public static List<Requirement> getRequirements(Project p) {
         ProjectServer project = new ProjectServer(p);
         ArrayList<Requirement> requirements = new ArrayList<>();
-        project.getRequirementSpecList().forEach((rs) -> {
-            requirements.addAll(RequirementSpecServer.getRequirements(rs));
-        });
-        project.getProjectList().forEach((sp) -> {
-            requirements.addAll(getRequirements(sp));
-        });
+        if (project.getRequirementSpecList() != null) {
+            project.getRequirementSpecList().forEach((rs) -> {
+                requirements.addAll(RequirementSpecServer.getRequirements(rs));
+            });
+        }
+        if (project.getProjectList() != null) {
+            project.getProjectList().forEach((sp) -> {
+                requirements.addAll(getRequirements(sp));
+            });
+        }
         return requirements;
     }
 
@@ -159,12 +143,6 @@ public final class ProjectServer extends Project
                     versions.add((Project) obj);
                 });
         return versions;
-    }
-
-    @Override
-    public boolean isChangeVersionable() {
-        return !getName().equals(getEntity().getName())
-                || !getNotes().equals(getEntity().getNotes());
     }
 
     public void copy(Project newProject) {

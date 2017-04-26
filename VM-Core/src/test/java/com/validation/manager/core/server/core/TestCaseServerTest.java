@@ -66,8 +66,7 @@ public class TestCaseServerTest extends AbstractVMTestCase {
                 "Sample requirement", rsns.getRequirementSpecNodePK(),
                 "Notes", 1, 1);
         //Create Test Case
-        TestCase tc = createTestCase("Dummy",
-                "Expected Results", "Summary");
+        TestCase tc = createTestCase("Dummy", "Summary");
         TestCaseServer tcs = new TestCaseServer(tc);
         //Add steps
         List<Requirement> reqs = new ArrayList<>();

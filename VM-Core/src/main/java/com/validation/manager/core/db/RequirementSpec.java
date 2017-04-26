@@ -25,7 +25,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "requirement_spec")
@@ -41,8 +41,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT r FROM RequirementSpec r WHERE r.requirementSpecPK.specLevelId = :specLevelId")
     , @NamedQuery(name = "RequirementSpec.findByName",
             query = "SELECT r FROM RequirementSpec r WHERE r.name = :name")
-    , @NamedQuery(name = "RequirementSpec.findByVersion",
-            query = "SELECT r FROM RequirementSpec r WHERE r.version = :version")
     , @NamedQuery(name = "RequirementSpec.findByModificationDate",
             query = "SELECT r FROM RequirementSpec r WHERE r.modificationDate = :modificationDate")})
 public class RequirementSpec implements Serializable {
@@ -61,10 +59,6 @@ public class RequirementSpec implements Serializable {
     private String description;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "version")
-    private int version;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "modificationDate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationDate;
@@ -74,12 +68,12 @@ public class RequirementSpec implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Project project;
-    @JoinColumn(name = "spec_level_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumn(name = "spec_level_id", referencedColumnName = "id", insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private SpecLevel specLevel;
 
     public RequirementSpec() {
+        super();
     }
 
     public RequirementSpec(RequirementSpecPK requirementSpecPK) {
@@ -87,14 +81,15 @@ public class RequirementSpec implements Serializable {
     }
 
     public RequirementSpec(RequirementSpecPK requirementSpecPK,
-            String name, int version, Date modificationDate) {
+            String name, Date modificationDate) {
+        super();
         this.requirementSpecPK = requirementSpecPK;
         this.name = name;
-        this.version = version;
         this.modificationDate = modificationDate;
     }
 
     public RequirementSpec(int projectId, int specLevelId) {
+        super();
         this.requirementSpecPK = new RequirementSpecPK(projectId, specLevelId);
     }
 
@@ -120,14 +115,6 @@ public class RequirementSpec implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
     }
 
     public Date getModificationDate() {

@@ -33,7 +33,7 @@ import org.junit.Test;
  */
 public class ProjectTest extends AbstractVMTestCase {
 
-    Project p;
+    private Project p;
     private static final Logger LOG
             = getLogger(ProjectTest.class.getName());
 
@@ -86,8 +86,7 @@ public class ProjectTest extends AbstractVMTestCase {
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             //Create Test Case
-            TestCase tc = createTestCase("Dummy", "Expected Results",
-                    "Summary");
+            TestCase tc = createTestCase("Dummy", "Summary");
             //Add steps
             for (int i = 1; i < 6; i++) {
                 LOG.info(MessageFormat.format("Adding step: {0}", i));

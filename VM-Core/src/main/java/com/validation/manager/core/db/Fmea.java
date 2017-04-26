@@ -26,20 +26,19 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
-@Table(name = "FMEA")
+@Table(name = "fmea")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Fmea.findAll",
-            query = "SELECT f FROM Fmea f")
-    , @NamedQuery(name = "Fmea.findById",
-            query = "SELECT f FROM Fmea f WHERE f.id = :id")
-    , @NamedQuery(name = "Fmea.findByName",
-            query = "SELECT f FROM Fmea f WHERE f.name = :name")
-    , @NamedQuery(name = "Fmea.findByDescription",
-            query = "SELECT f FROM Fmea f WHERE f.description = :description")})
+    @NamedQuery(name = "Fmea.findAll", query = "SELECT f FROM Fmea f")
+    , @NamedQuery(name = "Fmea.findById", query = "SELECT f FROM Fmea f "
+            + "WHERE f.id = :id")
+    , @NamedQuery(name = "Fmea.findByName", query = "SELECT f FROM Fmea f "
+            + "WHERE f.name = :name")
+    , @NamedQuery(name = "Fmea.findByDescription", query = "SELECT f FROM "
+            + "Fmea f WHERE f.description = :description")})
 public class Fmea implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -57,25 +56,25 @@ public class Fmea implements Serializable {
     private Integer id;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 255)
+    @Size(min = 1, max = 45)
     @Column(name = "name")
     private String name;
-    @Size(max = 255)
+    @Size(max = 45)
     @Column(name = "description")
     private String description;
-    @JoinTable(name = "FMEA_has_risk_category", joinColumns = {
+    @JoinTable(name = "fmea_has_risk_category", joinColumns = {
         @JoinColumn(name = "FMEA_id", referencedColumnName = "id")},
             inverseJoinColumns = {
                 @JoinColumn(name = "risk_category_id", referencedColumnName = "id")})
     @ManyToMany
     private List<RiskCategory> riskCategoryList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fmea")
+    private List<RiskItem> riskItemList;
     @OneToMany(mappedBy = "parent")
     private List<Fmea> fmeaList;
     @JoinColumn(name = "parent", referencedColumnName = "id")
     @ManyToOne
     private Fmea parent;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fmea")
-    private List<RiskItem> riskItemList;
 
     public Fmea() {
     }
@@ -120,6 +119,16 @@ public class Fmea implements Serializable {
 
     @XmlTransient
     @JsonIgnore
+    public List<RiskItem> getRiskItemList() {
+        return riskItemList;
+    }
+
+    public void setRiskItemList(List<RiskItem> riskItemList) {
+        this.riskItemList = riskItemList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
     public List<Fmea> getFmeaList() {
         return fmeaList;
     }
@@ -136,16 +145,6 @@ public class Fmea implements Serializable {
         this.parent = parent;
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskItem> getRiskItemList() {
-        return riskItemList;
-    }
-
-    public void setRiskItemList(List<RiskItem> riskItemList) {
-        this.riskItemList = riskItemList;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -160,8 +159,8 @@ public class Fmea implements Serializable {
             return false;
         }
         Fmea other = (Fmea) object;
-        return (this.id != null || other.id == null) && (this.id == null
-                || this.id.equals(other.id));
+        return !((this.id == null && other.id != null)
+                || (this.id != null && !this.id.equals(other.id)));
     }
 
     @Override

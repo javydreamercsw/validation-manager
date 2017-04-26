@@ -1,45 +1,61 @@
 package com.validation.manager.core;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  *
  * @author Javier A. Ortiz Bultr�n <javier.ortiz.78@gmail.com>
  */
 public interface AuditedObject {
+
     /**
      * Reason for the change
+     *
      * @param reason
      */
-    public void setModificationReason(String reason);
+    public void setReason(String reason);
 
     /**
      * Get reason of change
+     *
      * @return reason of change
      */
-    public String getModificationReason();
+    public String getReason();
 
     /**
      * User id that modified the record
+     *
      * @param id
      */
     public void setModifierId(int id);
 
     /**
      * Get modifier id
+     *
      * @return User id that modified the record
      */
-    public int getModifierId();
+    public Integer getModifierId();
 
     /**
      * Get modification date
+     *
      * @return modification date
      */
-    public Timestamp getModificationTime();
+    public Date getModificationTime();
 
     /**
      * Set modification date
+     *
      * @param d Modification date
      */
-    public void setModificationTime(Timestamp d);
+    public void setModificationTime(Date d);
+
+    /**
+     * Check if the changes in the entity should be versionable or not. Useful
+     * to avoid versioning changes in relationships, etc that don't modify the
+     * entity.
+     *
+     * @return true if should be versioned.
+     */
+    boolean isChangeVersionable();
 }

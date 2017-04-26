@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module-Install: net/sourceforge/javydreamercsw/h2/driver/Installer.class
-OpenIDE-Module-Localizing-Bundle: net/sourceforge/javydreamercsw/h2/driver/Bundle.properties

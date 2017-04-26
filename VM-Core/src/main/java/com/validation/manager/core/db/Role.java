@@ -26,7 +26,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "role")
@@ -35,8 +35,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Role.findAll", query = "SELECT r FROM Role r")
     , @NamedQuery(name = "Role.findById",
             query = "SELECT r FROM Role r WHERE r.id = :id")
-    , @NamedQuery(name = "Role.findByDescription",
-            query = "SELECT r FROM Role r WHERE r.description = :description")})
+    , @NamedQuery(name = "Role.findByName",
+            query = "SELECT r FROM Role r WHERE r.roleName = :name")})
 public class Role implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -55,12 +55,12 @@ public class Role implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
-    @Column(name = "description")
-    private String description;
+    @Column(name = "role_name")
+    private String roleName;
     @Lob
     @Size(max = 65535)
-    @Column(name = "notes")
-    private String notes;
+    @Column(name = "description")
+    private String description;
     @JoinTable(name = "user_has_role", joinColumns = {
         @JoinColumn(name = "role_id", referencedColumnName = "id")},
             inverseJoinColumns = {
@@ -89,20 +89,20 @@ public class Role implements Serializable {
         this.id = id;
     }
 
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
     }
 
     @XmlTransient

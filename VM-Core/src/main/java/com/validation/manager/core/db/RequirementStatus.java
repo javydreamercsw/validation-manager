@@ -22,7 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "requirement_status")
@@ -38,7 +38,8 @@ public class RequirementStatus implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "ReqStatusGen")
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "ReqStatusGen")
     @TableGenerator(name = "ReqStatusGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
@@ -111,5 +112,4 @@ public class RequirementStatus implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RequirementStatus[ id=" + id + " ]";
     }
-
 }

@@ -20,7 +20,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class HazardJpaController implements Serializable {
 
@@ -53,7 +53,8 @@ public class HazardJpaController implements Serializable {
                 riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -89,7 +90,8 @@ public class HazardJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = hazard.getId();
@@ -98,7 +100,8 @@ public class HazardJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -114,7 +117,8 @@ public class HazardJpaController implements Serializable {
             try {
                 hazard = em.getReference(Hazard.class, id);
                 hazard.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The hazard with id " + id + " no longer exists.", enfe);
             }
             List<RiskItem> riskItemList = hazard.getRiskItemList();
@@ -124,7 +128,8 @@ public class HazardJpaController implements Serializable {
             }
             em.remove(hazard);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -150,7 +155,8 @@ public class HazardJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -159,7 +165,8 @@ public class HazardJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(Hazard.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -172,7 +179,8 @@ public class HazardJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }

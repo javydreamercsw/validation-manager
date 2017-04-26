@@ -24,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 @Entity
 @Table(name = "failure_mode")
@@ -134,5 +134,4 @@ public class FailureMode implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.FailureMode[ id=" + id + " ]";
     }
-
 }

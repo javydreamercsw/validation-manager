@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class ProjectJpaController implements Serializable {
 
@@ -100,7 +100,8 @@ public class ProjectJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -208,7 +209,8 @@ public class ProjectJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
                 Integer id = project.getId();
@@ -217,7 +219,8 @@ public class ProjectJpaController implements Serializable {
                 }
             }
             throw ex;
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -233,7 +236,8 @@ public class ProjectJpaController implements Serializable {
             try {
                 project = em.getReference(Project.class, id);
                 project.getId();
-            } catch (EntityNotFoundException enfe) {
+            }
+            catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The project with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
@@ -264,7 +268,8 @@ public class ProjectJpaController implements Serializable {
             }
             em.remove(project);
             em.getTransaction().commit();
-        } finally {
+        }
+        finally {
             if (em != null) {
                 em.close();
             }
@@ -290,7 +295,8 @@ public class ProjectJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             return q.getResultList();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -299,7 +305,8 @@ public class ProjectJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             return em.find(Project.class, id);
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
@@ -312,7 +319,8 @@ public class ProjectJpaController implements Serializable {
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
-        } finally {
+        }
+        finally {
             em.close();
         }
     }
