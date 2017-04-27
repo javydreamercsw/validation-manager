@@ -18,6 +18,9 @@ public class VersionableTest {
         System.out.println("compareTo");
         Versionable o = new Versionable() {
         };
+        assertEquals(0, (int) o.getMajorVersion());
+        assertEquals(0, (int) o.getMidVersion());
+        assertEquals(1, (int) o.getMinorVersion());
         o.setMajorVersion(1);
         o.setMidVersion(1);
         o.setMinorVersion(1);

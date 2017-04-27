@@ -24,19 +24,19 @@ public abstract class Versionable extends VMAuditedObject
     @Basic(optional = false)
     @NotNull
     @Min(value = 0)
-    private Integer majorVersion;
+    private Integer majorVersion = 0;
 
     @Column(name = "mid_version")
     @Basic(optional = false)
     @NotNull
     @Min(value = 0)
-    private Integer midVersion;
+    private Integer midVersion = 0;
 
     @Column(name = "minor_version")
     @Basic(optional = false)
     @NotNull
     @Min(value = 1)
-    private Integer minorVersion;
+    private Integer minorVersion = 1;
 
     @Column(name = "dirty")
     @Basic(optional = false)
