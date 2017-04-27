@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -66,6 +67,10 @@ public class Baseline implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "baseline_name")
     private String baselineName;
+    @Lob
+    @Size(max = 2147483647)
+    @Column(name = "description")
+    private String description;
     @JoinTable(name = "baseline_has_requirement", joinColumns = {
         @JoinColumn(name = "baseline_id", referencedColumnName = "id")},
             inverseJoinColumns = {
@@ -136,6 +141,20 @@ public class Baseline implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Baseline[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

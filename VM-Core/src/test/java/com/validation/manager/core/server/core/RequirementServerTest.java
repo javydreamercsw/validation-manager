@@ -35,6 +35,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        DataBaseManager.setVersioningEnabled(true);
         RequirementSpec rss = null;
         p = TestHelper.createProject("New Project", "Notes");
         ProjectServer project = new ProjectServer(p);

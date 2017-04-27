@@ -6,6 +6,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.AuditedObject;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.mapped.Versionable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +20,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.eclipse.persistence.sessions.CopyGroup;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -49,16 +51,17 @@ public class VersionListener {
                 && DataBaseManager.isVersioningEnabled()) {
             Versionable versionable = (Versionable) entity;
             //Make sure the version is initialized
-            if (versionable.getMajorVersion() == null) {
-                versionable.setMajorVersion(0);
+            if (versionable.getVersionId() <= 0) {
+                try {
+                    if (VMIdServer.getVMId("version") == null) {
+                        new VMIdServer("version", 0).write2DB();
+                    }
+                    versionable.setVersionId(VMIdServer.getNextId("version"));
+                }
+                catch (VMException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
-            if (versionable.getMidVersion() == null) {
-                versionable.setMidVersion(0);
-            }
-            if (versionable.getMinorVersion() == null) {
-                versionable.setMinorVersion(1);
-            }
-            versionable.setDirty(false);
         }
     }
 
@@ -125,7 +128,8 @@ public class VersionListener {
                     versionable.setDirty(true);
                     DataBaseManager.getEntityManager().merge(versionable);
                     t.commit();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     LOG.log(Level.WARNING, "Class {0} is not properly "
                             + "set up. Make sure constructor calls "
                             + "super() so the version is initialized.",

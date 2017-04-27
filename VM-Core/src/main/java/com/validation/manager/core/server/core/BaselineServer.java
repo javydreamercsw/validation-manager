@@ -24,6 +24,16 @@ public class BaselineServer extends Baseline
         super(creationDate, baselineName);
     }
 
+    public BaselineServer(Baseline b) {
+        super.setId(b.getId());
+        update();
+    }
+
+    public BaselineServer(int id) {
+        super.setId(id);
+        update();
+    }
+
     @Override
     public int write2DB() throws Exception {
         BaselineJpaController c = new BaselineJpaController(DataBaseManager
@@ -55,6 +65,7 @@ public class BaselineServer extends Baseline
         target.setCreationDate(source.getCreationDate());
         target.setId(source.getId());
         target.setRequirementList(source.getRequirementList());
+        target.setDescription(source.getDescription());
     }
 
     @Override
@@ -62,16 +73,24 @@ public class BaselineServer extends Baseline
         update(this, getEntity());
     }
 
-    public static BaselineServer createBaseline(String name,
+    public static BaselineServer createBaseline(String name, String desc,
             List<Requirement> requirements) {
         BaselineServer b = new BaselineServer(new Date(), name);
+        b.setDescription(desc);
         try {
             b.write2DB();
             //Add requirements
             if (b.getRequirementList() == null) {
                 b.setRequirementList(new ArrayList<>());
             }
-            b.getRequirementList().addAll(requirements);
+            List<Requirement> baselined = new ArrayList<>();
+            for (Requirement o : requirements) {
+                RequirementServer rs = new RequirementServer(o);
+                rs.increaseMajor();
+                rs.write2DB();
+                baselined.add(rs.getEntity());
+            }
+            b.getRequirementList().addAll(baselined);
             b.write2DB();
         }
         catch (Exception ex) {

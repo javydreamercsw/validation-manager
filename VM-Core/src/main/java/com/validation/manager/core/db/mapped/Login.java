@@ -27,6 +27,10 @@ public abstract class Login extends Versionable implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModified;
 
+    public Login() {
+        super();
+    }
+
     public int getAttempts() {
         return this.attempts;
     }

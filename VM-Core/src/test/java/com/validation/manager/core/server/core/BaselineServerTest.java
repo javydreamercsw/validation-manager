@@ -108,8 +108,16 @@ public class BaselineServerTest extends AbstractVMTestCase {
     public void testCreateBaseline() {
         System.out.println("createBaseline");
         String name = "Demo";
-        BaselineServer r = BaselineServer.createBaseline(name, REQS);
+        String desc = "Description";
+        BaselineServer r = BaselineServer.createBaseline(name, desc, REQS);
         assertEquals(name, r.getEntity().getBaselineName());
+        assertEquals(desc, r.getEntity().getDescription());
+        assertNotNull(r.getEntity().getCreationDate());
         assertEquals(REQS.size(), r.getEntity().getRequirementList().size());
+        r.getEntity().getRequirementList().forEach(req -> {
+            assertEquals(1, (int) req.getMajorVersion());
+            assertEquals(0, (int) req.getMidVersion());
+            assertEquals(0, (int) req.getMinorVersion());
+        });
     }
 }

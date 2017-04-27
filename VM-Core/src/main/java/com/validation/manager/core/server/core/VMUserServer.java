@@ -65,6 +65,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
 
     //create user object and login
     public VMUserServer(String attrUN, String attrUPW) throws Exception {
+        super();
         try {
             List<Object> result = createdQuery(
                     "SELECT u FROM VmUser uu WHERE u.username='" // NOI18N
@@ -113,7 +114,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                         getEntityManagerFactory())
                         .findUserStatus(status));
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             EntityTransaction transaction
                     = getEntityManager().getTransaction();
             if (transaction.isActive()) {
@@ -263,7 +265,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             result.forEach((o) -> {
                 coreUsers.add(new VMUserServer((VmUser) o));
             });
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             coreUsers.clear();
         }
         return coreUsers;
@@ -312,7 +315,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                 }
             }
             //---------------------------
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             passwordIsUsable = false;
         }
         return passwordIsUsable;
@@ -375,7 +379,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                         parameters).get(0);
                 new VmUserJpaController(
                         getEntityManagerFactory()).destroy(temp.getId());
-            } catch (NonexistentEntityException | IllegalOrphanException ex) {
+            }
+            catch (NonexistentEntityException | IllegalOrphanException ex) {
                 getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -402,10 +407,12 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             return !createdQuery("SELECT x FROM VmUser x "
                     + "WHERE x.username = :username and x.password = :password",
                     parameters).isEmpty();
-        } catch (VMException e) {
+        }
+        catch (VMException e) {
             getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, e);
             return false;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
@@ -425,7 +432,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             } else {
                 return null;
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
             return null;
 
@@ -517,14 +525,16 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                                 c.edit(es);
                                 getExecutionStepList().add(es);
                                 a.getExecutionStepList1().add(es);
-                            } catch (Exception ex) {
+                            }
+                            catch (Exception ex) {
                                 Exceptions.printStackTrace(ex);
                             }
                         });
             });
             a.write2DB();
             write2DB();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
     }

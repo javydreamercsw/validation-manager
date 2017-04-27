@@ -66,7 +66,8 @@ public final class TestPlanServer extends TestPlan
         try {
             new TestPlanJpaController(getEntityManagerFactory())
                     .destroy(tp.getTestPlanPK());
-        } catch (IllegalOrphanException | NonexistentEntityException ex) {
+        }
+        catch (IllegalOrphanException | NonexistentEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
             return false;
         }
@@ -78,9 +79,11 @@ public final class TestPlanServer extends TestPlan
             getTestCaseList().add(test);
             write2DB();
             return true;
-        } catch (PreexistingEntityException ex) {
+        }
+        catch (PreexistingEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
         return false;

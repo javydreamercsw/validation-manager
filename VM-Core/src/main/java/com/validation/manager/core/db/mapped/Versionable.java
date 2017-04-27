@@ -20,6 +20,10 @@ import javax.validation.constraints.NotNull;
 public abstract class Versionable extends VMAuditedObject
         implements Comparable<Versionable>, Serializable {
 
+    @NotNull
+    @Column(name = "version_id")
+    private Integer versionId = 0;
+
     @Column(name = "major_version")
     @Basic(optional = false)
     @NotNull
@@ -40,7 +44,7 @@ public abstract class Versionable extends VMAuditedObject
 
     @Column(name = "dirty")
     @Basic(optional = false)
-    private boolean dirty;
+    private boolean dirty = false;
 
     public Integer getMajorVersion() {
         return this.majorVersion;
@@ -103,5 +107,43 @@ public abstract class Versionable extends VMAuditedObject
         target.setMidVersion(source.getMidVersion());
         target.setMinorVersion(source.getMinorVersion());
         super.update(target, source);
+    }
+
+    /**
+     * Do a major version of the item
+     */
+    public void increaseMajor() {
+        setMajorVersion(getMajorVersion() + 1);
+        setMidVersion(0);
+        setMinorVersion(0);
+    }
+
+    /**
+     * Do a medium version of the item
+     */
+    public void increaseMid() {
+        setMidVersion(getMidVersion() + 1);
+        setMinorVersion(0);
+    }
+
+    /**
+     * Do a minor version of the item
+     */
+    public void increaseMinor() {
+        setMinorVersion(getMinorVersion() + 1);
+    }
+
+    /**
+     * @return the versionId
+     */
+    public Integer getVersionId() {
+        return versionId;
+    }
+
+    /**
+     * @param versionId the versionId to set
+     */
+    public void setVersionId(Integer versionId) {
+        this.versionId = versionId;
     }
 }

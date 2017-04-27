@@ -8,7 +8,9 @@ import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroupFieldFactory;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -58,6 +60,7 @@ import com.validation.manager.core.DemoBuilder;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
+import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -82,7 +85,10 @@ import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.mapped.Versionable;
+import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.VMSettingServer;
@@ -181,7 +187,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(name);
         Field desc = binder.buildAndBind("Description", "description",
                 TextArea.class);
-        desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
         desc.setSizeFull();
         layout.addComponent(desc);
         Field<?> scope = binder.buildAndBind("Scope", "scope");
@@ -268,9 +273,11 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void setTabContent(Tab target, Component content,
             String permission) {
         Layout l = (Layout) target.getComponent();
-        l.removeAllComponents();
-        if (content != null) {
-            l.addComponent(content);
+        if (l != null) {
+            l.removeAllComponents();
+            if (content != null) {
+                l.addComponent(content);
+            }
         }
         if (permission != null && !permission.isEmpty()) {
             //Hide tab based on permissions
@@ -528,7 +535,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(result);
         Field notes = binder.buildAndBind("Notes", "notes",
                 TextArea.class);
-        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
         notes.setSizeFull();
         layout.addComponent(notes);
         tree.select(s);
@@ -758,7 +764,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(name);
         Field notes = binder.buildAndBind("Notes", "notes",
                 TextArea.class);
-        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
         notes.setSizeFull();
         layout.addComponent(notes);
         Field<?> active = binder.buildAndBind("Active", "active");
@@ -856,7 +861,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(name);
         Field notes = binder.buildAndBind("Notes", "notes",
                 TextArea.class);
-        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
         notes.setSizeFull();
         layout.addComponent(notes);
         Field<?> active = binder.buildAndBind("Active", "active");
@@ -1100,6 +1104,11 @@ public class ValidationManagerUI extends UI implements VMUI {
             LOG.log(Level.FINE, "Selected: Test Case Execution #{0}",
                     es.getExecutionStepPK());
             displayExecutionStep(es, edit);
+        } else if (item instanceof Baseline) {
+            Baseline es = (Baseline) item;
+            LOG.log(Level.FINE, "Selected: Baseline #{0}",
+                    es.getId());
+            displayBaseline(es, edit);
         }
     }
 
@@ -1114,14 +1123,23 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(id);
         Field desc = binder.buildAndBind("Description", "description",
                 TextArea.class);
-        desc.setStyleName(ValoTheme.TEXTAREA_LARGE);
+
         desc.setSizeFull();
         layout.addComponent(desc);
         Field notes = binder.buildAndBind("Notes", "notes",
                 TextArea.class);
-        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
         notes.setSizeFull();
         layout.addComponent(notes);
+        try {
+            //Add a history section
+            List<Requirement> versions = new RequirementServer(req).getVersions();
+            if (!versions.isEmpty()) {
+                layout.addComponent(createRequirementHistoryTable(
+                        "History", versions));
+            }
+        } catch (VMException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -1422,6 +1440,14 @@ public class ValidationManagerUI extends UI implements VMUI {
                     rs.setRequirementSpec((RequirementSpec) tree.getValue());
                     displayRequirementSpecNode(rs, true);
                 });
+        ContextMenu.ContextMenuItem baseline
+                = menu.addItem("Baseline Specification", BASELINE_ICON);
+        baseline.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayBaseline(new Baseline(), true,
+                            (RequirementSpec) tree.getValue());
+                });
+        baseline.setEnabled(checkRight("testcase.modify"));
     }
 
     private void createRequirementSpecNodeMenu(ContextMenu menu) {
@@ -1746,7 +1772,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         Field<?> name = binder.buildAndBind("Name", "name");
         Field notes = binder.buildAndBind("Notes", "notes",
                 TextArea.class);
-        notes.setStyleName(ValoTheme.TEXTAREA_LARGE);
         notes.setSizeFull();
         layout.addComponent(notes);
         layout.addComponent(name);
@@ -1909,6 +1934,10 @@ public class ValidationManagerUI extends UI implements VMUI {
         tree.setParent(req, req.getRequirementSpecNode());
         //No children
         tree.setChildrenAllowed(req, false);
+        //Add the baseline to the spec
+        req.getBaselineList().forEach(bl -> {
+            addBaseline(bl, tree);
+        });
     }
 
     private void addTestCaseExecutions(String parent, TestCaseExecution tce,
@@ -2322,6 +2351,159 @@ public class ValidationManagerUI extends UI implements VMUI {
     @Override
     public Object getSelectdValue() {
         return tree.getValue();
+    }
+
+    private void displayBaseline(Baseline baseline, boolean edit) {
+        displayBaseline(baseline, edit, null);
+    }
+
+    private List<Requirement> extractRequirements(RequirementSpecNode rsn) {
+        ArrayList<Requirement> result = new ArrayList<>();
+        result.addAll(rsn.getRequirementList());
+        rsn.getRequirementSpecNodeList().forEach(rsn2 -> {
+            result.addAll(extractRequirements(rsn2));
+        });
+        result.addAll(rsn.getRequirementList());
+        return result;
+    }
+
+    private List<Requirement> extractRequirements(RequirementSpec rs) {
+        ArrayList<Requirement> result = new ArrayList<>();
+        rs.getRequirementSpecNodeList().forEach(rsn -> {
+            result.addAll(extractRequirements(rsn));
+        });
+        return result;
+    }
+
+    private void displayBaseline(Baseline baseline,
+            boolean edit, RequirementSpec rs) {
+        Panel form = new Panel("Baseline Detail");
+        FormLayout layout = new FormLayout();
+        form.setContent(layout);
+        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        BeanFieldGroup binder = new BeanFieldGroup(baseline.getClass());
+        binder.setItemDataSource(baseline);
+        Field<?> id = binder.buildAndBind("Name", "baselineName");
+        layout.addComponent(id);
+        Field desc = binder.buildAndBind("Description", "description",
+                TextArea.class);
+        desc.setSizeFull();
+        layout.addComponent(desc);
+        Button cancel = new Button("Cancel");
+        if (rs != null) {
+            layout.addComponent(createRequirementHistoryTable("Included Requirements",
+                    extractRequirements(rs)));
+        } else {
+            layout.addComponent(createRequirementHistoryTable("Included Requirements",
+                    baseline.getRequirementList()));
+        }
+        cancel.addClickListener((Button.ClickEvent event) -> {
+            binder.discard();
+            displayObject(tree.getValue());
+        });
+        if (edit) {
+            if (baseline.getId() == null) {
+                //Creating a new one
+                Button save = new Button("Save");
+                save.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        binder.commit();
+                        if (rs != null) {
+                            Baseline entity = BaselineServer.createBaseline(
+                                    baseline.getBaselineName(),
+                                    baseline.getDescription(),
+                                    extractRequirements(rs)).getEntity();
+                            displayObject(entity, true);
+                        } else {
+                            //Recreate the tree to show the addition
+                            displayObject(baseline, true);
+                        }
+                        updateProjectList();
+                        updateScreen();
+                    } catch (FieldGroup.CommitException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                });
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(save);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
+            } else {
+                //Editing existing one
+                Button update = new Button("Update");
+                update.addClickListener((Button.ClickEvent event) -> {
+                    try {
+                        binder.commit();
+                        //Recreate the tree to show the addition
+                        buildProjectTree(baseline);
+                        displayBaseline(baseline, false);
+                    } catch (FieldGroup.CommitException ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                        Notification.show("Error updating record!",
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                });
+                HorizontalLayout hl = new HorizontalLayout();
+                hl.addComponent(update);
+                hl.addComponent(cancel);
+                layout.addComponent(hl);
+            }
+        }
+        binder.setBuffered(true);
+        binder.setReadOnly(!edit);
+        binder.bindMemberFields(form);
+        form.setSizeFull();
+        setTabContent(main, form, "requirement.view");
+    }
+
+    private Component createRequirementHistoryTable(String title,
+            List<Requirement> requirements) {
+        Grid grid = new Grid(title);
+        BeanItemContainer<Requirement> reqs
+                = new BeanItemContainer<>(Requirement.class);
+        GeneratedPropertyContainer wrapperCont
+                = new GeneratedPropertyContainer(reqs);
+        reqs.addAll(requirements);
+        grid.setContainerDataSource(wrapperCont);
+        grid.setHeightMode(HeightMode.ROW);
+        grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
+        wrapperCont.addGeneratedProperty("version",
+                new PropertyValueGenerator<String>() {
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+                Versionable v = (Versionable) itemId;
+                return v.getMajorVersion() + "." + v.getMidVersion()
+                        + "." + v.getMinorVersion();
+            }
+
+            @Override
+            public Class<String> getType() {
+                return String.class;
+            }
+        });
+        grid.setColumns("uniqueId", "description", "version");
+        Grid.Column uniqueId = grid.getColumn("uniqueId");
+        uniqueId.setHeaderCaption("ID");
+        Grid.Column description = grid.getColumn("description");
+        description.setHeaderCaption("Description");
+        Grid.Column version = grid.getColumn("version");
+        version.setHeaderCaption("Version");
+        return grid;
+    }
+
+    private void addBaseline(Baseline bl, Tree tree) {
+        if (!tree.containsId(bl)) {
+            tree.addItem(bl);
+            tree.setItemCaption(bl, bl.getBaselineName());
+            tree.setItemIcon(bl, BASELINE_ICON);
+            tree.setParent(bl, bl.getRequirementList().get(0)
+                    .getRequirementSpecNode()
+                    .getRequirementSpec());
+            //No children
+            tree.setChildrenAllowed(bl, false);
+        }
     }
 
     public class TCEExtraction {

@@ -217,7 +217,8 @@ public final class RequirementServer extends Requirement
                     } else {
                         try {
                             coverage += new RequirementServer(r).getTestCoverage();
-                        } catch (VMException ex) {
+                        }
+                        catch (VMException ex) {
                             LOG.log(Level.SEVERE, null, ex);
                         }
                     }
@@ -286,12 +287,14 @@ public final class RequirementServer extends Requirement
         List<Requirement> versions
                 = new ArrayList<>();
         parameters.clear();
-        parameters.put("uniqueId", getEntity()
-                .getUniqueId().trim());
-        DataBaseManager.namedQuery(
-                "Requirement.findByUniqueId",
+        parameters.put("versionId", getEntity().getVersionId());
+        DataBaseManager.createdQuery(
+                "SELECT r FROM Requirement r where r.versionId = :versionId",
                 parameters).forEach((obj) -> {
-                    versions.add((Requirement) obj);
+                    Requirement r = (Requirement) obj;
+                    if (compareTo(r) <= 0) {
+                        versions.add(r);
+                    }
                 });
         return versions;
     }
@@ -509,9 +512,11 @@ public final class RequirementServer extends Requirement
                             counter++;
                         }
                         new RequirementServer(newer).write2DB();
-                    } catch (RollbackException ex) {
+                    }
+                    catch (RollbackException ex) {
                         //Relationship already exists.
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }

@@ -30,6 +30,8 @@ public interface VMUI {
     VaadinIcons TEST_ICON = VaadinIcons.FILE_TEXT;
     VaadinIcons TEST_PLAN_ICON = VaadinIcons.FILE_TREE_SMALL;
     VaadinIcons TEST_SUITE_ICON = VaadinIcons.FILE_TREE;
+    VaadinIcons LINK_ICON = VaadinIcons.LINK;
+    VaadinIcons BASELINE_ICON = VaadinIcons.INSERT;
     final ThemeResource LOGO = new ThemeResource("vm_logo.png");
 
     Tree getTree();
