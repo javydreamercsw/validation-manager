@@ -55,10 +55,10 @@ import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
-import org.artofsolving.jodconverter.OfficeDocumentConverter;
-import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
-import org.artofsolving.jodconverter.office.OfficeException;
-import org.artofsolving.jodconverter.office.OfficeManager;
+import org.jodconverter.OfficeDocumentConverter;
+import org.jodconverter.office.DefaultOfficeManagerBuilder;
+import org.jodconverter.office.OfficeException;
+import org.jodconverter.office.OfficeManager;
 import org.openide.util.Lookup;
 import org.vaadin.easyuploads.MultiFileUpload;
 import org.vaadin.teemu.wizards.Wizard;
@@ -613,10 +613,10 @@ public class ExecutionWizardStep implements WizardStep {
             }
             // Connect to an OpenOffice.org instance running on available port
             try {
-                officeManager = new DefaultOfficeManagerConfiguration()
+                officeManager = new DefaultOfficeManagerBuilder()
                         .setPortNumber(port)
                         .setOfficeHome(home)
-                        .buildOfficeManager();
+                        .build();
                 officeManager.start();
 
                 OfficeDocumentConverter converter
@@ -633,7 +633,11 @@ public class ExecutionWizardStep implements WizardStep {
             }
         } catch (OfficeException e) {
             if (officeManager != null) {
-                officeManager.stop();
+                try {
+                    officeManager.stop();
+                } catch (OfficeException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
             }
             LOG.log(Level.SEVERE, null, e);
         }
