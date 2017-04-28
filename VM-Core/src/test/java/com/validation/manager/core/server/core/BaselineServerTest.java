@@ -25,10 +25,8 @@ import org.junit.Test;
  */
 public class BaselineServerTest extends AbstractVMTestCase {
 
-    private Project p;
     private static final Logger LOG
             = Logger.getLogger(BaselineServerTest.class.getSimpleName());
-    private RequirementSpecNode rsns;
     private final List<Requirement> REQS = new ArrayList<>();
 
     @Before
@@ -36,7 +34,7 @@ public class BaselineServerTest extends AbstractVMTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         RequirementSpec rss = null;
-        p = TestHelper.createProject("New Project", "Notes");
+        Project p = TestHelper.createProject("New Project", "Notes");
         ProjectServer project = new ProjectServer(p);
         project.setNotes("Notes 2");
         project.write2DB();
@@ -55,28 +53,28 @@ public class BaselineServerTest extends AbstractVMTestCase {
         }
         System.out.println("Create Requirement Spec Node");
         try {
-            rsns = TestHelper.createRequirementSpecNode(
+            RequirementSpecNode rsns = TestHelper.createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
+            REQS.add(TestHelper.createRequirement("SRS-SW-0001",
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1));
+            REQS.add(TestHelper.createRequirement("SRS-SW-0002",
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1));
+            REQS.add(TestHelper.createRequirement("SRS-SW-0003",
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1));
+            REQS.add(TestHelper.createRequirement("SRS-SW-0004",
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1));
+            REQS.add(TestHelper.createRequirement("PS-SW-0001",
+                    "Sample User requirement", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1));
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
-        REQS.add(TestHelper.createRequirement("SRS-SW-0001",
-                "Sample requirement", rsns.getRequirementSpecNodePK(),
-                "Notes", 1, 1));
-        REQS.add(TestHelper.createRequirement("SRS-SW-0002",
-                "Sample requirement", rsns.getRequirementSpecNodePK(),
-                "Notes", 1, 1));
-        REQS.add(TestHelper.createRequirement("SRS-SW-0003",
-                "Sample requirement", rsns.getRequirementSpecNodePK(),
-                "Notes", 1, 1));
-        REQS.add(TestHelper.createRequirement("SRS-SW-0004",
-                "Sample requirement", rsns.getRequirementSpecNodePK(),
-                "Notes", 1, 1));
-        REQS.add(TestHelper.createRequirement("PS-SW-0001",
-                "Sample User requirement", rsns.getRequirementSpecNodePK(),
-                "Notes", 1, 1));
     }
 
     @After

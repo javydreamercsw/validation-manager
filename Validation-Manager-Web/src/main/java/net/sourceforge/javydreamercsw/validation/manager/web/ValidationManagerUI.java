@@ -155,6 +155,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     private final List<String> roles = new ArrayList<>();
     private static final ResourceBundle RB = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages");
+    private final String REQUIREMENT_REVIEW = "requirement.view";
 
     /**
      * @return the user
@@ -269,7 +270,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        setTabContent(main, form, "requirement.view");
+        setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
     private void setTabContent(Tab target, Component content,
@@ -1054,7 +1055,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
-        setTabContent(main, form, "requirement.view");
+        setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
     private void displayObject(Object item) {
@@ -1196,7 +1197,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
         form.setSizeFull();
-        setTabContent(main, form, "requirement.view");
+        setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
     // @return the current application instance
@@ -2470,7 +2471,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         binder.setReadOnly(!edit);
         binder.bindMemberFields(form);
         form.setSizeFull();
-        setTabContent(main, form, "requirement.view");
+        setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
     private Component createRequirementHistoryTable(String title,
