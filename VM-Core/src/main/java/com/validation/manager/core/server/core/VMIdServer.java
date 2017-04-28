@@ -10,6 +10,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 
 /**
@@ -57,7 +58,8 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
                 controller.create(vmId);
             }
             return getId();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             getLogger(VMIdServer.class.getSimpleName()).log(Level.SEVERE, null, ex);
             throw new VMException(ex);
         }
@@ -69,7 +71,8 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
         if (id != null) {
             try {
                 controller.destroy(id.getId());
-            } catch (NonexistentEntityException ex) {
+            }
+            catch (NonexistentEntityException ex) {
                 throw new VMException(ex);
             }
         }
@@ -77,12 +80,15 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
     }
 
     public static VMIdServer getVMId(String table) throws VMException {
+        parameters.clear();
         parameters.put("tableName", table);
         List<Object> result = namedQuery("VmId.findByTableName", parameters);
         if (!result.isEmpty()) {
             return new VMIdServer(((VmId) result.get(0)).getId());
         } else {
-            throw new VMException("Unable to find VM id for: " + table);
+            Logger.getLogger(VMIdServer.class.getSimpleName())
+                    .log(Level.WARNING, "Unable to find VM id for: {0}", table);
+            return null;
         }
     }
 
@@ -118,7 +124,7 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
         target.setLastId(source.getLastId());
         target.setTableName(source.getTableName());
     }
-    
+
     @Override
     public void update() {
         update(this, getEntity());

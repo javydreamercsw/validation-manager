@@ -21,10 +21,6 @@
             <id>vaadin-addons</id>
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
-        <repository>
-            <id>Local repository</id>
-            <url>file://${basedir}/repo</url>
-        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -108,9 +104,9 @@
             <version>${openoffice.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.artofsolving.jodconverter</groupId>
+            <groupId>org.jodconverter</groupId>
             <artifactId>jodconverter-core</artifactId>
-            <version>3.0-beta-4</version>
+            <version>4.0.0-RELEASE</version>
         </dependency>
         <!--Vaadin Addons-->
         <dependency>
@@ -167,29 +163,6 @@
     
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.github.jsimone</groupId>
-                                    <artifactId>webapp-runner</artifactId>
-                                    <version>8.5.11.3</version>
-                                    <destFileName>webapp-runner.jar</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- Run annotation processors on src/main/java sources -->
             <plugin>
                 <groupId>org.bsc.maven</groupId>

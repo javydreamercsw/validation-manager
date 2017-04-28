@@ -111,9 +111,11 @@ public class DataBaseManager {
                     }
                 }
             }
-        } catch (VMException ex1) {
+        }
+        catch (VMException ex1) {
             LOG.log(Level.SEVERE, null, ex1);
-        } finally {
+        }
+        finally {
             if (LOG.isLoggable(Level.CONFIG)) {
                 VmIdJpaController controller = new VmIdJpaController(
                         getEntityManagerFactory());
@@ -167,7 +169,8 @@ public class DataBaseManager {
         em = null;
         try {
             reload();
-        } catch (VMException ex) {
+        }
+        catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
     }
@@ -187,7 +190,8 @@ public class DataBaseManager {
                 PU = (String) ctx.lookup("java:comp/env/validation-manager/JNDIDB");
                 try {
                     demo = (Boolean) ctx.lookup("java:comp/env/validation-manager/demo");
-                } catch (NamingException e) {
+                }
+                catch (NamingException e) {
                     LOG.log(Level.SEVERE, null, e);
                     demo = false;
                 }
@@ -195,7 +199,8 @@ public class DataBaseManager {
                     try {
                         demoResetPeriod = (Long) ctx
                                 .lookup("java:comp/env/validation-manager/demo-period");
-                    } catch (NamingException e) {
+                    }
+                    catch (NamingException e) {
                         LOG.log(Level.SEVERE, null, e);
                         demoResetPeriod = valueOf(0);
                     }
@@ -215,7 +220,8 @@ public class DataBaseManager {
                 emf = createEntityManagerFactory(JNDIDB);
                 LOG.log(Level.INFO, "Using context defined database connection: {0}", JNDIDB);
                 usingContext = true;
-            } catch (NamingException e) {
+            }
+            catch (NamingException e) {
                 LOG.log(Level.FINE, null, e);
                 if (!usingContext) {
                     LOG.log(Level.WARNING,
@@ -283,6 +289,15 @@ public class DataBaseManager {
         transaction.begin();
         List<Object> resultList
                 = getEntityManager().createNativeQuery(query).getResultList();
+        transaction.commit();
+        return resultList;
+    }
+
+    public static <T extends Object> List<T> createdQuery(String query, T result) {
+        EntityTransaction transaction = getEntityManager().getTransaction();
+        transaction.begin();
+        List<T> resultList
+                = getEntityManager().createQuery(query).getResultList();
         transaction.commit();
         return resultList;
     }
@@ -385,7 +400,8 @@ public class DataBaseManager {
         try {
             ds = (javax.sql.DataSource) new InitialContext().lookup("java:comp/env/jdbc/VMDB");
             conn = ds.getConnection();
-        } catch (NamingException ne) {
+        }
+        catch (NamingException ne) {
             LOG.log(Level.FINE, null, ne);
             if (emf == null) {
                 try {
@@ -398,7 +414,8 @@ public class DataBaseManager {
                     //Load the H2 driver
                     forName("org.h2.Driver");
                     conn = ds.getConnection();
-                } catch (ClassNotFoundException | SQLException ex) {
+                }
+                catch (ClassNotFoundException | SQLException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             } else {
@@ -407,7 +424,8 @@ public class DataBaseManager {
                 conn = getEntityManager().unwrap(java.sql.Connection.class);
                 transaction.commit();
             }
-        } catch (SQLException ex) {
+        }
+        catch (SQLException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
         if (conn != null) {
@@ -418,30 +436,35 @@ public class DataBaseManager {
                     //Tables there but empty? Not safe to proceed
                     setState(DBState.NEED_MANUAL_UPDATE);
                 }
-            } catch (SQLException ex) {
+            }
+            catch (SQLException ex) {
                 LOG.log(Level.FINE, null, ex);
                 //Need INIT, probably nothing there
                 setState(DBState.NEED_INIT);
                 //Create the database
                 getEntityManager();
-            } finally {
+            }
+            finally {
                 try {
                     conn.close();
-                } catch (SQLException ex) {
+                }
+                catch (SQLException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
                 try {
                     if (stmt != null) {
                         stmt.close();
                     }
-                } catch (SQLException ex) {
+                }
+                catch (SQLException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
                 try {
                     if (rs != null) {
                         rs.close();
                     }
-                } catch (SQLException ex) {
+                }
+                catch (SQLException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             }
@@ -467,7 +490,8 @@ public class DataBaseManager {
             LOG.info("Starting migration...");
             flyway.migrate();
             LOG.info("Done!");
-        } catch (FlywayException fe) {
+        }
+        catch (FlywayException fe) {
             LOG.log(Level.SEVERE, "Unable to migrate data", fe);
             setState(DBState.ERROR);
         }
@@ -476,7 +500,8 @@ public class DataBaseManager {
             flyway.validate();
             LOG.info("Done!");
             setState(flyway.info().current().getState() == MigrationState.SUCCESS ? DBState.VALID : DBState.ERROR);
-        } catch (FlywayException fe) {
+        }
+        catch (FlywayException fe) {
             LOG.log(Level.SEVERE, "Unable to validate", fe);
             setState(DBState.ERROR);
         }
@@ -495,7 +520,8 @@ public class DataBaseManager {
                     (getState() != null ? getState().name() : null));
             try {
                 sleep(100);
-            } catch (InterruptedException ex) {
+            }
+            catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
@@ -576,7 +602,8 @@ public class DataBaseManager {
                     }
                 }
                 //Everything the same
-            } catch (java.lang.NumberFormatException e) {
+            }
+            catch (java.lang.NumberFormatException e) {
                 LOG.log(Level.WARNING, null, e);
                 //Is not a number
                 result = false;
@@ -604,7 +631,8 @@ public class DataBaseManager {
             try {
                 flyway.init();
                 LOG.info("Done!");
-            } catch (FlywayException fe) {
+            }
+            catch (FlywayException fe) {
                 LOG.log(Level.SEVERE, "Unable to initialize database", fe);
                 setState(DBState.ERROR);
             }

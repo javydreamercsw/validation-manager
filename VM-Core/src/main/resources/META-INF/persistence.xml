@@ -6,6 +6,7 @@
     <class>com.validation.manager.core.db.AssignmentStatus</class>
     <class>com.validation.manager.core.db.Attachment</class>
     <class>com.validation.manager.core.db.AttachmentType</class>
+    <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
     <class>com.validation.manager.core.db.ExecutionResult</class>
@@ -70,6 +71,7 @@
     <class>com.validation.manager.core.db.AssignmentStatus</class>
     <class>com.validation.manager.core.db.Attachment</class>
     <class>com.validation.manager.core.db.AttachmentType</class>
+    <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
     <class>com.validation.manager.core.db.ExecutionResult</class>
@@ -136,6 +138,7 @@
     <class>com.validation.manager.core.db.AssignmentStatus</class>
     <class>com.validation.manager.core.db.Attachment</class>
     <class>com.validation.manager.core.db.AttachmentType</class>
+    <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
     <class>com.validation.manager.core.db.ExecutionResult</class>

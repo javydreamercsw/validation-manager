@@ -133,6 +133,7 @@ public class VmUser extends Login implements Serializable {
     private List<ExecutionStepHasIssue> executionStepHasIssueList;
 
     public VmUser() {
+        super();
     }
 
     public VmUser(String username, String password, String email, String first,
@@ -144,8 +145,6 @@ public class VmUser extends Login implements Serializable {
         this.firstName = first;
         this.lastName = last;
         this.locale = locale;
-        setLastModified(lastModified);
-        setAttempts(attempts);
         this.userStatusId = userStatus;
     }
 

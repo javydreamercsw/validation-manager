@@ -104,9 +104,6 @@ public final class TestCaseServer extends TestCase
                             = Collections.max(new RequirementServer(req)
                                     .getVersions(), null);
                     ss.getRequirementList().add(max);
-                    RequirementServer rs = new RequirementServer(max);
-                    rs.getStepList().add(ss.getEntity());
-                    rs.write2DB();
                 }
             }
         }

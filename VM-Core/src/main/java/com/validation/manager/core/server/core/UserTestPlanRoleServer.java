@@ -29,6 +29,7 @@ public class UserTestPlanRoleServer extends UserTestPlanRole
         if (controller.findUserTestPlanRole(getUserTestPlanRolePK()) == null) {
             UserTestPlanRole temp = new UserTestPlanRole(getTestPlan(), getVmUser(),
                     getRole());
+            update(temp, this);
             controller.create(temp);
             update(this, temp);
         }
@@ -40,7 +41,8 @@ public class UserTestPlanRoleServer extends UserTestPlanRole
             new UserTestPlanRoleJpaController(
                     getEntityManagerFactory()).destroy(
                     utpr.getUserTestPlanRolePK());
-        } catch (NonexistentEntityException ex) {
+        }
+        catch (NonexistentEntityException ex) {
             getLogger(UserTestPlanRoleServer.class.getName())
                     .log(Level.SEVERE, null, ex);
             return false;
