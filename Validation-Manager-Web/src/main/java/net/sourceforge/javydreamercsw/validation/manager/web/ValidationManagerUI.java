@@ -97,6 +97,8 @@ import com.validation.manager.core.tool.requirement.importer.RequirementImportEx
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import com.validation.manager.core.tool.step.importer.StepImporter;
 import com.validation.manager.core.tool.step.importer.TestCaseImportException;
+import de.steinwedel.messagebox.ButtonOption;
+import de.steinwedel.messagebox.MessageBox;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -2409,11 +2411,25 @@ public class ValidationManagerUI extends UI implements VMUI {
                     try {
                         binder.commit();
                         if (rs != null) {
-                            Baseline entity = BaselineServer.createBaseline(
-                                    baseline.getBaselineName(),
-                                    baseline.getDescription(),
-                                    extractRequirements(rs)).getEntity();
-                            displayObject(entity, true);
+                            MessageBox prompt = MessageBox.createQuestion()
+                                    .withCaption("Do you want to create the baseline?")
+                                    .withMessage("This is not reversible as "
+                                            + "requirements will be released to a new major version")
+                                    .withYesButton(() -> {
+                                        Baseline entity = BaselineServer.createBaseline(
+                                                baseline.getBaselineName(),
+                                                baseline.getDescription(),
+                                                extractRequirements(rs)).getEntity();
+                                        displayObject(entity, true);
+                                    },
+                                            ButtonOption.focus(),
+                                            ButtonOption.icon(VaadinIcons.CHECK))
+                                    .withNoButton(() -> {
+                                        displayObject(tree.getValue());
+                                    },
+                                            ButtonOption.icon(VaadinIcons.CLOSE));
+                            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                            prompt.open();
                         } else {
                             //Recreate the tree to show the addition
                             displayObject(baseline, true);
@@ -2490,6 +2506,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         description.setHeaderCaption("Description");
         Grid.Column version = grid.getColumn("version");
         version.setHeaderCaption("Version");
+        wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});
         return grid;
     }
 
