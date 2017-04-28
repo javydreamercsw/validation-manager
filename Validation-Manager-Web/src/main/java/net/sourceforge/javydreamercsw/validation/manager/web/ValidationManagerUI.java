@@ -243,12 +243,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         new RequirementSpecNodeJpaController(DataBaseManager
                                 .getEntityManagerFactory()).edit(rsn);
                         displayRequirementSpecNode(rsn, true);
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (NonexistentEntityException ex) {
+                    } catch (FieldGroup.CommitException | NonexistentEntityException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
