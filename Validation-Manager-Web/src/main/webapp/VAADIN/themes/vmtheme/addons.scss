@@ -9,6 +9,10 @@
 @import "../../../VAADIN/addons/pdfviewer/pdfviewer.scss";
 
 
+/* Provided by componentrenderer-1.0.3.jar */
+@import "../../../VAADIN/addons/componentrenderer/componentrenderer.scss";
+
+
 /* Provided by contextmenu-4.5.jar */
 @import "../../../VAADIN/themes/contextmenu/contextmenu.scss";
 
@@ -17,6 +21,7 @@
 @mixin addons {
 	@include vaadin-icons;
 	@include pdfviewer;
+	@include componentrenderer;
 	@include contextmenu;
 }
 
