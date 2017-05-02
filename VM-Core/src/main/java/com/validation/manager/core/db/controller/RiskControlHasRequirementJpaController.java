@@ -40,8 +40,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
             riskControlHasRequirement.setRiskControlHasRequirementPK(new RiskControlHasRequirementPK());
         }
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getId());
-        riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlRiskControlTypeId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getRiskControlTypeId());
+        riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -82,8 +82,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
 
     public void edit(RiskControlHasRequirement riskControlHasRequirement) throws NonexistentEntityException, Exception {
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getId());
-        riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlRiskControlTypeId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getRiskControlTypeId());
+        riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

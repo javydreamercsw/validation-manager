@@ -5,7 +5,6 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.Role;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
@@ -17,6 +16,8 @@ import java.util.List;
 import com.validation.manager.core.db.UserRight;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.UserTestPlanRole;
+import com.validation.manager.core.db.ExecutionStepHasVmUser;
+import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
@@ -50,6 +51,9 @@ public class RoleJpaController implements Serializable {
         if (role.getUserTestPlanRoleList() == null) {
             role.setUserTestPlanRoleList(new ArrayList<UserTestPlanRole>());
         }
+        if (role.getExecutionStepHasVmUserList() == null) {
+            role.setExecutionStepHasVmUserList(new ArrayList<ExecutionStepHasVmUser>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -78,6 +82,12 @@ public class RoleJpaController implements Serializable {
                 attachedUserTestPlanRoleList.add(userTestPlanRoleListUserTestPlanRoleToAttach);
             }
             role.setUserTestPlanRoleList(attachedUserTestPlanRoleList);
+            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserList = new ArrayList<ExecutionStepHasVmUser>();
+            for (ExecutionStepHasVmUser executionStepHasVmUserListExecutionStepHasVmUserToAttach : role.getExecutionStepHasVmUserList()) {
+                executionStepHasVmUserListExecutionStepHasVmUserToAttach = em.getReference(executionStepHasVmUserListExecutionStepHasVmUserToAttach.getClass(), executionStepHasVmUserListExecutionStepHasVmUserToAttach.getExecutionStepHasVmUserPK());
+                attachedExecutionStepHasVmUserList.add(executionStepHasVmUserListExecutionStepHasVmUserToAttach);
+            }
+            role.setExecutionStepHasVmUserList(attachedExecutionStepHasVmUserList);
             em.persist(role);
             for (VmUser vmUserListVmUser : role.getVmUserList()) {
                 vmUserListVmUser.getRoleList().add(role);
@@ -105,6 +115,15 @@ public class RoleJpaController implements Serializable {
                     oldRoleOfUserTestPlanRoleListUserTestPlanRole = em.merge(oldRoleOfUserTestPlanRoleListUserTestPlanRole);
                 }
             }
+            for (ExecutionStepHasVmUser executionStepHasVmUserListExecutionStepHasVmUser : role.getExecutionStepHasVmUserList()) {
+                Role oldRoleOfExecutionStepHasVmUserListExecutionStepHasVmUser = executionStepHasVmUserListExecutionStepHasVmUser.getRole();
+                executionStepHasVmUserListExecutionStepHasVmUser.setRole(role);
+                executionStepHasVmUserListExecutionStepHasVmUser = em.merge(executionStepHasVmUserListExecutionStepHasVmUser);
+                if (oldRoleOfExecutionStepHasVmUserListExecutionStepHasVmUser != null) {
+                    oldRoleOfExecutionStepHasVmUserListExecutionStepHasVmUser.getExecutionStepHasVmUserList().remove(executionStepHasVmUserListExecutionStepHasVmUser);
+                    oldRoleOfExecutionStepHasVmUserListExecutionStepHasVmUser = em.merge(oldRoleOfExecutionStepHasVmUserListExecutionStepHasVmUser);
+                }
+            }
             em.getTransaction().commit();
         }
         finally {
@@ -128,6 +147,8 @@ public class RoleJpaController implements Serializable {
             List<UserTestProjectRole> userTestProjectRoleListNew = role.getUserTestProjectRoleList();
             List<UserTestPlanRole> userTestPlanRoleListOld = persistentRole.getUserTestPlanRoleList();
             List<UserTestPlanRole> userTestPlanRoleListNew = role.getUserTestPlanRoleList();
+            List<ExecutionStepHasVmUser> executionStepHasVmUserListOld = persistentRole.getExecutionStepHasVmUserList();
+            List<ExecutionStepHasVmUser> executionStepHasVmUserListNew = role.getExecutionStepHasVmUserList();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
@@ -143,6 +164,14 @@ public class RoleJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestPlanRole " + userTestPlanRoleListOldUserTestPlanRole + " since its role field is not nullable.");
+                }
+            }
+            for (ExecutionStepHasVmUser executionStepHasVmUserListOldExecutionStepHasVmUser : executionStepHasVmUserListOld) {
+                if (!executionStepHasVmUserListNew.contains(executionStepHasVmUserListOldExecutionStepHasVmUser)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain ExecutionStepHasVmUser " + executionStepHasVmUserListOldExecutionStepHasVmUser + " since its role field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -176,6 +205,13 @@ public class RoleJpaController implements Serializable {
             }
             userTestPlanRoleListNew = attachedUserTestPlanRoleListNew;
             role.setUserTestPlanRoleList(userTestPlanRoleListNew);
+            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserListNew = new ArrayList<ExecutionStepHasVmUser>();
+            for (ExecutionStepHasVmUser executionStepHasVmUserListNewExecutionStepHasVmUserToAttach : executionStepHasVmUserListNew) {
+                executionStepHasVmUserListNewExecutionStepHasVmUserToAttach = em.getReference(executionStepHasVmUserListNewExecutionStepHasVmUserToAttach.getClass(), executionStepHasVmUserListNewExecutionStepHasVmUserToAttach.getExecutionStepHasVmUserPK());
+                attachedExecutionStepHasVmUserListNew.add(executionStepHasVmUserListNewExecutionStepHasVmUserToAttach);
+            }
+            executionStepHasVmUserListNew = attachedExecutionStepHasVmUserListNew;
+            role.setExecutionStepHasVmUserList(executionStepHasVmUserListNew);
             role = em.merge(role);
             for (VmUser vmUserListOldVmUser : vmUserListOld) {
                 if (!vmUserListNew.contains(vmUserListOldVmUser)) {
@@ -220,6 +256,17 @@ public class RoleJpaController implements Serializable {
                     if (oldRoleOfUserTestPlanRoleListNewUserTestPlanRole != null && !oldRoleOfUserTestPlanRoleListNewUserTestPlanRole.equals(role)) {
                         oldRoleOfUserTestPlanRoleListNewUserTestPlanRole.getUserTestPlanRoleList().remove(userTestPlanRoleListNewUserTestPlanRole);
                         oldRoleOfUserTestPlanRoleListNewUserTestPlanRole = em.merge(oldRoleOfUserTestPlanRoleListNewUserTestPlanRole);
+                    }
+                }
+            }
+            for (ExecutionStepHasVmUser executionStepHasVmUserListNewExecutionStepHasVmUser : executionStepHasVmUserListNew) {
+                if (!executionStepHasVmUserListOld.contains(executionStepHasVmUserListNewExecutionStepHasVmUser)) {
+                    Role oldRoleOfExecutionStepHasVmUserListNewExecutionStepHasVmUser = executionStepHasVmUserListNewExecutionStepHasVmUser.getRole();
+                    executionStepHasVmUserListNewExecutionStepHasVmUser.setRole(role);
+                    executionStepHasVmUserListNewExecutionStepHasVmUser = em.merge(executionStepHasVmUserListNewExecutionStepHasVmUser);
+                    if (oldRoleOfExecutionStepHasVmUserListNewExecutionStepHasVmUser != null && !oldRoleOfExecutionStepHasVmUserListNewExecutionStepHasVmUser.equals(role)) {
+                        oldRoleOfExecutionStepHasVmUserListNewExecutionStepHasVmUser.getExecutionStepHasVmUserList().remove(executionStepHasVmUserListNewExecutionStepHasVmUser);
+                        oldRoleOfExecutionStepHasVmUserListNewExecutionStepHasVmUser = em.merge(oldRoleOfExecutionStepHasVmUserListNewExecutionStepHasVmUser);
                     }
                 }
             }
@@ -269,6 +316,13 @@ public class RoleJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the UserTestPlanRole " + userTestPlanRoleListOrphanCheckUserTestPlanRole + " in its userTestPlanRoleList field has a non-nullable role field.");
+            }
+            List<ExecutionStepHasVmUser> executionStepHasVmUserListOrphanCheck = role.getExecutionStepHasVmUserList();
+            for (ExecutionStepHasVmUser executionStepHasVmUserListOrphanCheckExecutionStepHasVmUser : executionStepHasVmUserListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the ExecutionStepHasVmUser " + executionStepHasVmUserListOrphanCheckExecutionStepHasVmUser + " in its executionStepHasVmUserList field has a non-nullable role field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

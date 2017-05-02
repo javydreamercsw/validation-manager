@@ -9,6 +9,7 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.CorrectiveAction;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
@@ -33,7 +34,6 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import static com.validation.manager.core.server.core.VMSettingServer.getSetting;
 import static com.validation.manager.core.tool.MD5.encrypt;
 import static java.lang.System.currentTimeMillis;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import static java.util.Calendar.getInstance;
@@ -49,8 +49,8 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
-        VersionableServer<VmUser> {
+public final class VMUserServer extends VmUser implements EntityServer<VmUser>/*,
+        VersionableServer<VmUser>*/ {
 
     private static final long serialVersionUID = 1L;
     private boolean hashPassword = true;
@@ -196,7 +196,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                     getEntityManagerFactory())
                     .findUserStatus(1));
             setAttempts(0);
-            setReason("audit.user.account.aged");
+//            setReason("audit.user.account.aged");
             setChange(true);
         }
         //Increase login attempts
@@ -216,7 +216,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                 = new VmUserJpaController(getEntityManagerFactory());
         if (getId() > 0) {
             if (isChange()) {
-                setModifierId(getId());
+//                setModifierId(getId());
                 date = new Date();
                 setLastModified(date);
                 setChange(false);
@@ -234,9 +234,9 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             VmUser vmu = controller.findVmUser(getId());
             update(vmu, this);
             vmu.setPassword(password);
-            vmu.setReason(getReason() == null
-                    ? "audit.general.modified" : getReason());
-            vmu.setModificationTime(new Timestamp(new Date().getTime()));
+//            vmu.setReason(getReason() == null
+//                    ? "audit.general.modified" : getReason());
+//            vmu.setModificationTime(new Timestamp(new Date().getTime()));
             controller.edit(vmu);
         } else {
             VmUser vmu = new VmUser(
@@ -252,7 +252,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
             setId(vmu.getId());
         }
         setChange(false);
-        setReason("");
+//        setReason("");
         return getId();
     }
 
@@ -303,10 +303,10 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
                 //Here we'll catch if the password have been used in the
                 //unusable period (use id in case the username was modified)
                 VMUserServer user = new VMUserServer(getId());
-                for (VmUser u : user.getVersions()) {
+                for (History u : user.getHistoryList()) {
                     //Now check the aging
                     long diff = currentTimeMillis()
-                            - u.getLastModified().getTime();
+                            - u.getModificationTime().getTime();
                     if (diff / (1000 * 60 * 60 * 24)
                             > getSetting("password.unusable_period")
                                     .getIntVal()) {
@@ -483,7 +483,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         target.setExecutionStepList(source.getExecutionStepList());
         target.setExecutionStepList1(source.getExecutionStepList1());
         target.setExecutionStepHasIssueList(source.getExecutionStepHasIssueList());
-        super.update(target, source);
+//        super.update(target, source);
     }
 
     @Override
@@ -491,24 +491,17 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>,
         update(this, getEntity());
     }
 
-    @Override
-    public List<VmUser> getVersions() {
-        List<VmUser> versions = new ArrayList<>();
-        parameters.clear();
-        parameters.put("id", getEntity().getId());
-        namedQuery("VmUser.findById",
-                parameters).forEach((obj) -> {
-                    versions.add((VmUser) obj);
-                });
-        return versions;
-    }
-
-    @Override
-    public boolean isChangeVersionable() {
-        //TODO
-        return false;
-    }
-
+//    @Override
+//    public List<VmUser> getHistoryList() {
+//        List<VmUser> versions = new ArrayList<>();
+//        parameters.clear();
+//        parameters.put("id", getEntity().getId());
+//        namedQuery("VmUser.findById",
+//                parameters).forEach((obj) -> {
+//                    versions.add((VmUser) obj);
+//                });
+//        return versions;
+//    }
     public void assignTestCase(TestCaseExecution tce, TestCase tc,
             VmUser assigner) {
         try {

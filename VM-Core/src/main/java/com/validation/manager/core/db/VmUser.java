@@ -56,6 +56,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts")})
 public class VmUser extends Login implements Serializable {
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "modifierId")
+    private List<History> historyList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -131,6 +134,8 @@ public class VmUser extends Login implements Serializable {
     private List<UserAssigment> userAssigmentList1;
     @ManyToMany(mappedBy = "vmUserList")
     private List<ExecutionStepHasIssue> executionStepHasIssueList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
+    private List<ExecutionStepHasVmUser> executionStepHasVmUserList;
 
     public VmUser() {
         super();
@@ -353,5 +358,25 @@ public class VmUser extends Login implements Serializable {
 
     public void setExecutionStepHasIssueList(List<ExecutionStepHasIssue> executionStepHasIssueList) {
         this.executionStepHasIssueList = executionStepHasIssueList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepHasVmUser> getExecutionStepHasVmUserList() {
+        return executionStepHasVmUserList;
+    }
+
+    public void setExecutionStepHasVmUserList(List<ExecutionStepHasVmUser> executionStepHasVmUserList) {
+        this.executionStepHasVmUserList = executionStepHasVmUserList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
     }
 }

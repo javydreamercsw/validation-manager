@@ -1,7 +1,6 @@
 package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
@@ -19,7 +18,7 @@ import static java.util.logging.Logger.getLogger;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public final class ProjectServer extends Project
-        implements EntityServer<Project>, VersionableServer<Project> {
+        implements EntityServer<Project>/*, VersionableServer<Project>*/ {
 
     private static final long serialVersionUID = 3434510483033583117L;
 
@@ -71,7 +70,8 @@ public final class ProjectServer extends Project
                 } else {
                     throw new VMException("Unable to delete project with Requirement Specifications!");
                 }
-            } catch (IllegalOrphanException | NonexistentEntityException ex) {
+            }
+            catch (IllegalOrphanException | NonexistentEntityException ex) {
                 getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
@@ -133,18 +133,17 @@ public final class ProjectServer extends Project
         update(this, getEntity());
     }
 
-    @Override
-    public List<Project> getVersions() {
-        List<Project> versions = new ArrayList<>();
-        parameters.clear();
-        parameters.put("id", getEntity().getId());
-        namedQuery("Project.findById",
-                parameters).forEach((obj) -> {
-                    versions.add((Project) obj);
-                });
-        return versions;
-    }
-
+//    @Override
+//    public List<Project> getHistoryList() {
+//        List<Project> versions = new ArrayList<>();
+//        parameters.clear();
+//        parameters.put("id", getEntity().getId());
+//        namedQuery("Project.findById",
+//                parameters).forEach((obj) -> {
+//                    versions.add((Project) obj);
+//                });
+//        return versions;
+//    }
     public void copy(Project newProject) {
         update(this, newProject);
     }

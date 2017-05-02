@@ -57,6 +57,8 @@ public class Investigation implements Serializable {
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
     private List<UserHasInvestigation> userHasInvestigationList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")
+    private List<ExceptionHasInvestigation> exceptionHasInvestigationList;
 
     public Investigation() {
     }
@@ -112,5 +114,15 @@ public class Investigation implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Investigation[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExceptionHasInvestigation> getExceptionHasInvestigationList() {
+        return exceptionHasInvestigationList;
+    }
+
+    public void setExceptionHasInvestigationList(List<ExceptionHasInvestigation> exceptionHasInvestigationList) {
+        this.exceptionHasInvestigationList = exceptionHasInvestigationList;
     }
 }

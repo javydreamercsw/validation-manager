@@ -1,20 +1,18 @@
 package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public final class RequirementTypeServer extends RequirementType
-        implements EntityServer<RequirementType>,
-        VersionableServer<RequirementType> {
+        implements EntityServer<RequirementType>/*,
+        VersionableServer<RequirementType>*/ {
 
     public RequirementTypeServer(RequirementType rt) {
         RequirementType temp
@@ -72,15 +70,15 @@ public final class RequirementTypeServer extends RequirementType
                 .findRequirementTypeEntities();
     }
 
-    @Override
-    public List<RequirementType> getVersions() {
-        List<RequirementType> versions = new ArrayList<>();
-        parameters.clear();
-        parameters.put("id", getEntity().getId());
-        namedQuery("RequirementType.findById",
-                parameters).forEach((obj) -> {
-                    versions.add((RequirementType) obj);
-                });
-        return versions;
-    }
+//    @Override
+//    public List<RequirementType> getHistoryList() {
+//        List<RequirementType> versions = new ArrayList<>();
+//        parameters.clear();
+//        parameters.put("id", getEntity().getId());
+//        namedQuery("RequirementType.findById",
+//                parameters).forEach((obj) -> {
+//                    versions.add((RequirementType) obj);
+//                });
+//        return versions;
+//    }
 }

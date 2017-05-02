@@ -3,6 +3,7 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -13,6 +14,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -58,6 +60,8 @@ public class RootCause implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private RootCauseType rootCauseType;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "rootCause")
+    private List<ExceptionHasRootCause> exceptionHasRootCauseList;
 
     public RootCause() {
     }
@@ -132,5 +136,15 @@ public class RootCause implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RootCause[ rootCausePK="
                 + rootCausePK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExceptionHasRootCause> getExceptionHasRootCauseList() {
+        return exceptionHasRootCauseList;
+    }
+
+    public void setExceptionHasRootCauseList(List<ExceptionHasRootCause> exceptionHasRootCauseList) {
+        this.exceptionHasRootCauseList = exceptionHasRootCauseList;
     }
 }

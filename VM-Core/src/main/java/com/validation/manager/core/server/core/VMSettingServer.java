@@ -14,7 +14,7 @@ import java.util.List;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public final class VMSettingServer extends VmSetting
-        implements EntityServer<VmSetting>, VersionableServer<VmSetting> {
+        implements EntityServer<VmSetting>/*, VersionableServer<VmSetting>*/ {
 
     private static List<Object> result;
 
@@ -109,15 +109,15 @@ public final class VMSettingServer extends VmSetting
         update(this, getEntity());
     }
 
-    @Override
-    public List<VmSetting> getVersions() {
-        List<VmSetting> versions = new ArrayList<>();
-        parameters.clear();
-        parameters.put("id", getEntity().getId());
-        namedQuery("VmSetting.findById",
-                parameters).forEach((obj) -> {
-                    versions.add((VmSetting) obj);
-                });
-        return versions;
-    }
+//    @Override
+//    public List<VmSetting> getHistoryList() {
+//        List<VmSetting> versions = new ArrayList<>();
+//        parameters.clear();
+//        parameters.put("id", getEntity().getId());
+//        namedQuery("VmSetting.findById",
+//                parameters).forEach((obj) -> {
+//                    versions.add((VmSetting) obj);
+//                });
+//        return versions;
+//    }
 }

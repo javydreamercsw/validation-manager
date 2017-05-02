@@ -70,13 +70,16 @@ public class TestHelper {
         ProjectServer ps = new ProjectServer(name, notes);
         try {
             ps.write2DB();
-        } catch (IllegalOrphanException ex) {
+        }
+        catch (IllegalOrphanException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        } catch (NonexistentEntityException ex) {
+        }
+        catch (NonexistentEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -128,7 +131,8 @@ public class TestHelper {
             assertTrue(new RequirementJpaController(
                     getEntityManagerFactory())
                     .findRequirement(r.getId()) == null);
-        } catch (IllegalOrphanException ex) {
+        }
+        catch (IllegalOrphanException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
