@@ -11,8 +11,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class VMAuditedObject
-        implements Comparable<VMAuditedObject>, Serializable {
+public abstract class AuditedObject
+        implements Comparable<AuditedObject>, Serializable {
 
     private Integer majorVersion = 0;
     private Integer midVersion = 0;
@@ -89,8 +89,8 @@ public abstract class VMAuditedObject
      * @param target target object
      * @param source source object
      */
-    public void update(VMAuditedObject target,
-            VMAuditedObject source) {
+    public void update(AuditedObject target,
+            AuditedObject source) {
         target.setReason(source.getReason());
         target.setModificationTime(source.getModificationTime());
         target.setModifierId(source.getModifierId());
@@ -103,7 +103,7 @@ public abstract class VMAuditedObject
     }
 
     @Override
-    public int compareTo(VMAuditedObject o) {
+    public int compareTo(AuditedObject o) {
         if (!Objects.equals(getMajorVersion(),
                 o.getMajorVersion())) {
             return getMajorVersion() - o.getMajorVersion();

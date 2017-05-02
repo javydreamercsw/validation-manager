@@ -13,7 +13,7 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "VERSIONABLE_TYPE")
-public abstract class Versionable extends VMAuditedObject {
+public abstract class Versionable extends AuditedObject {
 
     @Column(name = "dirty")
     @Basic(optional = false)
@@ -31,7 +31,7 @@ public abstract class Versionable extends VMAuditedObject {
     }
 
     @Override
-    public void update(VMAuditedObject target, VMAuditedObject source) {
+    public void update(AuditedObject target, AuditedObject source) {
         ((Versionable) target).setDirty(((Versionable) source).getDirty());
         super.update(target, source);
     }
