@@ -12,40 +12,34 @@ import java.util.List;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel> {
+public final class SpecLevelServer extends SpecLevel implements EntityServer<SpecLevel> {
 
     public SpecLevelServer(int id) {
-        //Retrieve from db
-        setId(0);
-        SpecLevel sl = new SpecLevelJpaController(
-                getEntityManagerFactory()).findSpecLevel(id);
-        if (sl != null) {
-            setId(id);
-            update(this, sl);
-        }
+        super.setId(id);
+        update();
     }
 
     public SpecLevelServer(String name, String description) {
         super(name, description);
-        setId(0);
     }
 
     @Override
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
-        if (getId() > 0) {
-            SpecLevel sl = new SpecLevelJpaController(
-                    getEntityManagerFactory()).findSpecLevel(getId());
-            update(sl, this);
-            new SpecLevelJpaController(
-                    getEntityManagerFactory()).edit(sl);
-        } else {
+        if (getId() == null) {
             SpecLevel sl = new SpecLevel();
             update(sl, this);
             new SpecLevelJpaController(
                     getEntityManagerFactory()).create(sl);
             setId(sl.getId());
+        } else {
+            SpecLevel sl = new SpecLevelJpaController(
+                    getEntityManagerFactory()).findSpecLevel(getId());
+            update(sl, this);
+            new SpecLevelJpaController(
+                    getEntityManagerFactory()).edit(sl);
         }
+        update();
         return getId();
     }
 

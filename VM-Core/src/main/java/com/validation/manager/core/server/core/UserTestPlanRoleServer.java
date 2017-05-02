@@ -5,6 +5,7 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.UserTestPlanRole;
+import com.validation.manager.core.db.UserTestPlanRolePK;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.UserTestPlanRoleJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -15,11 +16,16 @@ import static java.util.logging.Logger.getLogger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class UserTestPlanRoleServer extends UserTestPlanRole
+public final class UserTestPlanRoleServer extends UserTestPlanRole
         implements EntityServer<UserTestPlanRole> {
 
     public UserTestPlanRoleServer(TestPlan tpl, VmUser user, Role role) {
         super(tpl, user, role);
+    }
+
+    public UserTestPlanRoleServer(UserTestPlanRolePK pk) {
+        super.setUserTestPlanRolePK(userTestPlanRolePK);
+        update();
     }
 
     @Override

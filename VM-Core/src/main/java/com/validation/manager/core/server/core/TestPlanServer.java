@@ -28,10 +28,8 @@ public final class TestPlanServer extends TestPlan
             = Logger.getLogger(TestPlanServer.class.getName());
 
     public TestPlanServer(TestPlan plan) {
-        TestPlanJpaController controller
-                = new TestPlanJpaController(getEntityManagerFactory());
-        TestPlan temp = controller.findTestPlan(plan.getTestPlanPK());
-        update(TestPlanServer.this, temp);
+        super.setTestPlanPK(plan.getTestPlanPK());
+        update();
     }
 
     public TestPlanServer(TestProject testProject, boolean active,

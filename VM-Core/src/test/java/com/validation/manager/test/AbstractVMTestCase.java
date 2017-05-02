@@ -2,17 +2,23 @@ package com.validation.manager.test;
 
 import com.validation.manager.core.DBState;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.api.history.Auditable;
+import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.HistoryField;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.mapped.Versionable;
 import com.validation.manager.core.server.core.VMUserServer;
 import static com.validation.manager.core.tool.MD5.encrypt;
 import static com.validation.manager.test.TestHelper.deleteUser;
 import static java.lang.Class.forName;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 import junit.framework.TestCase;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.After;
 import org.junit.Before;
@@ -157,5 +164,37 @@ public abstract class AbstractVMTestCase extends TestCase {
         catch (IllegalOrphanException | NonexistentEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
+    }
+
+    public List<Field> getAuditableFields(Versionable v) {
+        List<Field> r = new ArrayList<>();
+        FieldUtils.getFieldsListWithAnnotation(v.getClass(), Auditable.class)
+                .stream().filter((field)
+                        -> (field.isAnnotationPresent(Auditable.class)))
+                .forEachOrdered((field) -> {
+                    r.add(field);
+                });
+        return r;
+    }
+
+    public boolean checkHistory(Versionable v) {
+        History current = v.getHistoryList().get(v.getHistoryList().size() - 1);
+        List<Field> af = getAuditableFields(v);
+        assertEquals(af.size(), current.getHistoryFieldList().size());
+        assertTrue(af.size() > 0);
+        for (HistoryField hf : current.getHistoryFieldList()) {
+            try {
+                //Compare audit field vs. the record in history.
+                Object o = FieldUtils.readField(FieldUtils.getField(v.getClass(),
+                        hf.getFieldName(), true), v);
+                if (!o.toString().equals(hf.getFieldValue())) {
+                    return false;
+                }
+            }
+            catch (SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
+        }
+        return true;
     }
 }

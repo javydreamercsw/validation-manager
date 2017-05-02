@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -26,11 +21,14 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "ExceptionHasInvestigation.findAll",
             query = "SELECT e FROM ExceptionHasInvestigation e")
     , @NamedQuery(name = "ExceptionHasInvestigation.findByExceptionId",
-            query = "SELECT e FROM ExceptionHasInvestigation e WHERE e.exceptionHasInvestigationPK.exceptionId = :exceptionId")
+            query = "SELECT e FROM ExceptionHasInvestigation e WHERE "
+            + "e.exceptionHasInvestigationPK.exceptionId = :exceptionId")
     , @NamedQuery(name = "ExceptionHasInvestigation.findByExceptionReporterId",
-            query = "SELECT e FROM ExceptionHasInvestigation e WHERE e.exceptionHasInvestigationPK.exceptionReporterId = :exceptionReporterId")
+            query = "SELECT e FROM ExceptionHasInvestigation e WHERE "
+            + "e.exceptionHasInvestigationPK.exceptionReporterId = :exceptionReporterId")
     , @NamedQuery(name = "ExceptionHasInvestigation.findByInvestigationId",
-            query = "SELECT e FROM ExceptionHasInvestigation e WHERE e.exceptionHasInvestigationPK.investigationId = :investigationId")})
+            query = "SELECT e FROM ExceptionHasInvestigation e WHERE "
+            + "e.exceptionHasInvestigationPK.investigationId = :investigationId")})
 public class ExceptionHasInvestigation implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -81,7 +79,7 @@ public class ExceptionHasInvestigation implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        
         if (!(object instanceof ExceptionHasInvestigation)) {
             return false;
         }
@@ -89,12 +87,14 @@ public class ExceptionHasInvestigation implements Serializable {
         return !((this.exceptionHasInvestigationPK == null
                 && other.exceptionHasInvestigationPK != null)
                 || (this.exceptionHasInvestigationPK != null
-                && !this.exceptionHasInvestigationPK.equals(other.exceptionHasInvestigationPK)));
+                && !this.exceptionHasInvestigationPK
+                        .equals(other.exceptionHasInvestigationPK)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.ExceptionHasInvestigation[ exceptionHasInvestigationPK=" + exceptionHasInvestigationPK + " ]";
+        return "com.validation.manager.core.db.ExceptionHasInvestigation[ "
+                + "exceptionHasInvestigationPK=" + exceptionHasInvestigationPK
+                + " ]";
     }
-
 }

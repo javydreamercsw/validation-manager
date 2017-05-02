@@ -22,14 +22,12 @@ public final class TestCaseServer extends TestCase
 
     public TestCaseServer(int id) {
         super(id);
-        TestCaseJpaController controller
-                = new TestCaseJpaController(getEntityManagerFactory());
-        TestCase temp = controller.findTestCase(getId());
-        update((TestCaseServer) this, temp);
+        update();
     }
 
     public TestCaseServer(TestCase tc) {
-        update((TestCaseServer) this, tc);
+        super.setId(tc.getId());
+        update();
     }
 
     public TestCaseServer(String name, Date creationDate) {

@@ -49,8 +49,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public final class VMUserServer extends VmUser implements EntityServer<VmUser>/*,
-        VersionableServer<VmUser>*/ {
+public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
 
     private static final long serialVersionUID = 1L;
     private boolean hashPassword = true;
@@ -58,7 +57,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>/*
     private boolean change;
 
     public VMUserServer(VmUser vmu) {
-        update(VMUserServer.this, vmu);
+        super.setId(vmu.getId());
+        update();
         //previously hashing the already hashed password
         setHashPassword(false);
     }
@@ -139,18 +139,10 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>/*
 
 //create user object for data structures
     public VMUserServer(int id) throws Exception {
-        parameters.clear();
-        parameters.put("id", id);
-        List<Object> result = namedQuery("VmUser.findById", parameters);
-        //throw exception if no result found
-        if (result.size() > 0) {
-            VmUser vmu = (VmUser) result.get(0);
-            update(VMUserServer.this, vmu);
-            //previously hashing the already hashed password
-            setHashPassword(false);
-        } else {
-            throw new Exception("Unable to find user");
-        }
+        super.setId(id);
+        update();
+        //previously hashing the already hashed password
+        setHashPassword(false);
     }
 
     public VMUserServer(String name, String password, String firstName,
@@ -216,7 +208,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>/*
                 = new VmUserJpaController(getEntityManagerFactory());
         if (getId() > 0) {
             if (isChange()) {
-//                setModifierId(getId());
+//                setModifierId(getEntity());
                 date = new Date();
                 setLastModified(date);
                 setChange(false);
@@ -236,7 +228,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>/*
             vmu.setPassword(password);
 //            vmu.setReason(getReason() == null
 //                    ? "audit.general.modified" : getReason());
-//            vmu.setModificationTime(new Timestamp(new Date().getTime()));
+//            vmu.setModificationTime(new Date());
             controller.edit(vmu);
         } else {
             VmUser vmu = new VmUser(
@@ -289,7 +281,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>/*
     }
 
     public boolean isPasswordUsable(String newPass, boolean hash) {
-        int id;
         boolean passwordIsUsable = true;
         try {
             //Now check if password is not the same as the current password
@@ -303,7 +294,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>/*
                 //Here we'll catch if the password have been used in the
                 //unusable period (use id in case the username was modified)
                 VMUserServer user = new VMUserServer(getId());
-                for (History u : user.getHistoryList()) {
+                for (History u : user.getHistoryModificationList()) {
                     //Now check the aging
                     long diff = currentTimeMillis()
                             - u.getModificationTime().getTime();
@@ -491,17 +482,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser>/*
         update(this, getEntity());
     }
 
-//    @Override
-//    public List<VmUser> getHistoryList() {
-//        List<VmUser> versions = new ArrayList<>();
-//        parameters.clear();
-//        parameters.put("id", getEntity().getId());
-//        namedQuery("VmUser.findById",
-//                parameters).forEach((obj) -> {
-//                    versions.add((VmUser) obj);
-//                });
-//        return versions;
-//    }
     public void assignTestCase(TestCaseExecution tce, TestCase tc,
             VmUser assigner) {
         try {

@@ -113,18 +113,16 @@ public class AssigmentType implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        
         if (!(object instanceof AssigmentType)) {
             return false;
         }
         AssigmentType other = (AssigmentType) object;
-        return (this.id != null || other.id == null)
-                && (this.id == null || this.id.equals(other.id));
+        return (this.id.equals(other.id));
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.AssigmentType[ id=" + id + " ]";
     }
-
 }

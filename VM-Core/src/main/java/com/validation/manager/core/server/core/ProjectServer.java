@@ -18,14 +18,13 @@ import static java.util.logging.Logger.getLogger;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public final class ProjectServer extends Project
-        implements EntityServer<Project>/*, VersionableServer<Project>*/ {
+        implements EntityServer<Project>, VersionableServer<Project> {
 
     private static final long serialVersionUID = 3434510483033583117L;
 
     public ProjectServer(String name, String notes) {
         super(name);
         setNotes(notes);
-        setId(0);
         setProjectList(new ArrayList<>());
         setRequirementSpecList(new ArrayList<>());
         setTestProjectList(new ArrayList<>());
@@ -47,16 +46,16 @@ public final class ProjectServer extends Project
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         Project p;
-        if (getId() != null && getId() > 0) {
-            p = new ProjectJpaController(getEntityManagerFactory())
-                    .findProject(getId());
-            update(p, this);
-            new ProjectJpaController(getEntityManagerFactory()).edit(p);
-        } else {
+        if (getId() == null) {
             p = new Project(getName());
             update(p, this);
             new ProjectJpaController(getEntityManagerFactory()).create(p);
             setId(p.getId());
+        } else {
+            p = new ProjectJpaController(getEntityManagerFactory())
+                    .findProject(getId());
+            update(p, this);
+            new ProjectJpaController(getEntityManagerFactory()).edit(p);
         }
         return getId();
     }
@@ -94,6 +93,7 @@ public final class ProjectServer extends Project
         target.setRequirementSpecList(source.getRequirementSpecList());
         target.setTestProjectList(source.getTestProjectList());
         target.setId(source.getId());
+        super.update(target, source);
     }
 
     public static List<Project> getProjects() {
@@ -133,17 +133,6 @@ public final class ProjectServer extends Project
         update(this, getEntity());
     }
 
-//    @Override
-//    public List<Project> getHistoryList() {
-//        List<Project> versions = new ArrayList<>();
-//        parameters.clear();
-//        parameters.put("id", getEntity().getId());
-//        namedQuery("Project.findById",
-//                parameters).forEach((obj) -> {
-//                    versions.add((Project) obj);
-//                });
-//        return versions;
-//    }
     public void copy(Project newProject) {
         update(this, newProject);
     }

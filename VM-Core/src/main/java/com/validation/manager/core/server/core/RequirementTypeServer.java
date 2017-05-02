@@ -11,8 +11,7 @@ import java.util.ArrayList;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public final class RequirementTypeServer extends RequirementType
-        implements EntityServer<RequirementType>/*,
-        VersionableServer<RequirementType>*/ {
+        implements EntityServer<RequirementType> {
 
     public RequirementTypeServer(RequirementType rt) {
         RequirementType temp
@@ -69,16 +68,4 @@ public final class RequirementTypeServer extends RequirementType
                 getEntityManagerFactory())
                 .findRequirementTypeEntities();
     }
-
-//    @Override
-//    public List<RequirementType> getHistoryList() {
-//        List<RequirementType> versions = new ArrayList<>();
-//        parameters.clear();
-//        parameters.put("id", getEntity().getId());
-//        namedQuery("RequirementType.findById",
-//                parameters).forEach((obj) -> {
-//                    versions.add((RequirementType) obj);
-//                });
-//        return versions;
-//    }
 }

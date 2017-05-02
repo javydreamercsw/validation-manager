@@ -21,28 +21,28 @@ public final class TestProjectServer extends TestProject
 
     public TestProjectServer(String name, boolean active) {
         super(name, active);
-        setId(0);
     }
 
     public TestProjectServer(TestProject tp) {
-        update(TestProjectServer.this, tp);
+        super.setId(tp.getId());
+        update();
     }
 
     @Override
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         TestProject tp;
-        if (getId() > 0) {
-            tp = new TestProjectJpaController(getEntityManagerFactory())
-                    .findTestProject(getId());
-            update(tp, this);
-            new TestProjectJpaController(getEntityManagerFactory()).edit(tp);
-        } else {
-            tp = new TestProject(getName(), getActive());
+        if (getId() == null) {
+            tp = new TestProject();
             update(tp, this);
             new TestProjectJpaController(getEntityManagerFactory()).create(tp);
+            setId(tp.getId());
+        } else {
+            tp = getEntity();
+            update(tp, this);
+            new TestProjectJpaController(getEntityManagerFactory()).edit(tp);
         }
-        update(this, tp);
+        update();
         return getId();
     }
 

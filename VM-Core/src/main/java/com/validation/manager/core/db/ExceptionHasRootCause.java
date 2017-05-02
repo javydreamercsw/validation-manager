@@ -22,13 +22,17 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "ExceptionHasRootCause.findAll",
             query = "SELECT e FROM ExceptionHasRootCause e")
     , @NamedQuery(name = "ExceptionHasRootCause.findByExceptionId",
-            query = "SELECT e FROM ExceptionHasRootCause e WHERE e.exceptionHasRootCausePK.exceptionId = :exceptionId")
+            query = "SELECT e FROM ExceptionHasRootCause e WHERE "
+            + "e.exceptionHasRootCausePK.exceptionId = :exceptionId")
     , @NamedQuery(name = "ExceptionHasRootCause.findByExceptionReporterId",
-            query = "SELECT e FROM ExceptionHasRootCause e WHERE e.exceptionHasRootCausePK.exceptionReporterId = :exceptionReporterId")
+            query = "SELECT e FROM ExceptionHasRootCause e WHERE "
+            + "e.exceptionHasRootCausePK.exceptionReporterId = :exceptionReporterId")
     , @NamedQuery(name = "ExceptionHasRootCause.findByRootCauseId",
-            query = "SELECT e FROM ExceptionHasRootCause e WHERE e.exceptionHasRootCausePK.rootCauseId = :rootCauseId")
+            query = "SELECT e FROM ExceptionHasRootCause e WHERE "
+            + "e.exceptionHasRootCausePK.rootCauseId = :rootCauseId")
     , @NamedQuery(name = "ExceptionHasRootCause.findByRootCauseRootCauseTypeId",
-            query = "SELECT e FROM ExceptionHasRootCause e WHERE e.exceptionHasRootCausePK.rootCauseRootCauseTypeId = :rootCauseRootCauseTypeId")})
+            query = "SELECT e FROM ExceptionHasRootCause e WHERE "
+            + "e.exceptionHasRootCausePK.rootCauseRootCauseTypeId = :rootCauseRootCauseTypeId")})
 public class ExceptionHasRootCause implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -82,7 +86,7 @@ public class ExceptionHasRootCause implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        
         if (!(object instanceof ExceptionHasRootCause)) {
             return false;
         }
@@ -95,7 +99,8 @@ public class ExceptionHasRootCause implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.ExceptionHasRootCause[ exceptionHasRootCausePK=" + exceptionHasRootCausePK + " ]";
+        return "com.validation.manager.core.db.ExceptionHasRootCause[ "
+                + "exceptionHasRootCausePK=" + exceptionHasRootCausePK + " ]";
     }
 
 }

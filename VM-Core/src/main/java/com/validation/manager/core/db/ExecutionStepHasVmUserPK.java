@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.validation.manager.core.db;
 
 import java.io.Serializable;
@@ -54,7 +49,11 @@ public class ExecutionStepHasVmUserPK implements Serializable {
     public ExecutionStepHasVmUserPK() {
     }
 
-    public ExecutionStepHasVmUserPK(int executionStepTestCaseExecutionId, int executionStepStepId, int executionStepStepTestCaseId, int vmUserId, int vmUserExecutionStepTestCaseExecutionId, int vmUserExecutionStepStepId, int vmUserExecutionStepStepTestCaseId, int roleId) {
+    public ExecutionStepHasVmUserPK(int executionStepTestCaseExecutionId,
+            int executionStepStepId, int executionStepStepTestCaseId,
+            int vmUserId, int vmUserExecutionStepTestCaseExecutionId,
+            int vmUserExecutionStepStepId,
+            int vmUserExecutionStepStepTestCaseId, int roleId) {
         this.executionStepTestCaseExecutionId = executionStepTestCaseExecutionId;
         this.executionStepStepId = executionStepStepId;
         this.executionStepStepTestCaseId = executionStepStepTestCaseId;
@@ -145,7 +144,7 @@ public class ExecutionStepHasVmUserPK implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        
         if (!(object instanceof ExecutionStepHasVmUserPK)) {
             return false;
         }
@@ -176,6 +175,15 @@ public class ExecutionStepHasVmUserPK implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.ExecutionStepHasVmUserPK[ executionStepTestCaseExecutionId=" + executionStepTestCaseExecutionId + ", executionStepStepId=" + executionStepStepId + ", executionStepStepTestCaseId=" + executionStepStepTestCaseId + ", vmUserId=" + vmUserId + ", vmUserExecutionStepTestCaseExecutionId=" + vmUserExecutionStepTestCaseExecutionId + ", vmUserExecutionStepStepId=" + vmUserExecutionStepStepId + ", vmUserExecutionStepStepTestCaseId=" + vmUserExecutionStepStepTestCaseId + ", roleId=" + roleId + " ]";
+        return "com.validation.manager.core.db.ExecutionStepHasVmUserPK[ "
+                + "executionStepTestCaseExecutionId="
+                + executionStepTestCaseExecutionId + ", executionStepStepId="
+                + executionStepStepId + ", executionStepStepTestCaseId="
+                + executionStepStepTestCaseId + ", vmUserId=" + vmUserId
+                + ", vmUserExecutionStepTestCaseExecutionId="
+                + vmUserExecutionStepTestCaseExecutionId
+                + ", vmUserExecutionStepStepId=" + vmUserExecutionStepStepId
+                + ", vmUserExecutionStepStepTestCaseId="
+                + vmUserExecutionStepStepTestCaseId + ", roleId=" + roleId + " ]";
     }
 }

@@ -5,31 +5,31 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.UserStatus;
 import com.validation.manager.core.db.CorrectiveAction;
-import java.util.ArrayList;
-import java.util.List;
-import com.validation.manager.core.db.Role;
-import com.validation.manager.core.db.RootCause;
 import com.validation.manager.core.db.ExecutionStep;
-import com.validation.manager.core.db.UserTestProjectRole;
-import com.validation.manager.core.db.UserTestPlanRole;
-import com.validation.manager.core.db.UserModifiedRecord;
-import com.validation.manager.core.db.UserHasInvestigation;
-import com.validation.manager.core.db.UserAssigment;
 import com.validation.manager.core.db.ExecutionStepHasIssue;
 import com.validation.manager.core.db.ExecutionStepHasVmUser;
 import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.Role;
+import com.validation.manager.core.db.RootCause;
+import com.validation.manager.core.db.UserAssigment;
+import com.validation.manager.core.db.UserHasInvestigation;
+import com.validation.manager.core.db.UserModifiedRecord;
+import com.validation.manager.core.db.UserStatus;
+import com.validation.manager.core.db.UserTestPlanRole;
+import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -86,8 +86,8 @@ public class VmUserJpaController implements Serializable {
         if (vmUser.getExecutionStepHasVmUserList() == null) {
             vmUser.setExecutionStepHasVmUserList(new ArrayList<ExecutionStepHasVmUser>());
         }
-        if (vmUser.getHistoryList() == null) {
-            vmUser.setHistoryList(new ArrayList<History>());
+        if (vmUser.getHistoryModificationList() == null) {
+            vmUser.setHistoryModificationList(new ArrayList<History>());
         }
         EntityManager em = null;
         try {
@@ -176,12 +176,12 @@ public class VmUserJpaController implements Serializable {
                 attachedExecutionStepHasVmUserList.add(executionStepHasVmUserListExecutionStepHasVmUserToAttach);
             }
             vmUser.setExecutionStepHasVmUserList(attachedExecutionStepHasVmUserList);
-            List<History> attachedHistoryList = new ArrayList<History>();
-            for (History historyListHistoryToAttach : vmUser.getHistoryList()) {
-                historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
-                attachedHistoryList.add(historyListHistoryToAttach);
+            List<History> attachedHistoryModificationList = new ArrayList<History>();
+            for (History historyModificationListHistoryToAttach : vmUser.getHistoryModificationList()) {
+                historyModificationListHistoryToAttach = em.getReference(historyModificationListHistoryToAttach.getClass(), historyModificationListHistoryToAttach.getId());
+                attachedHistoryModificationList.add(historyModificationListHistoryToAttach);
             }
-            vmUser.setHistoryList(attachedHistoryList);
+            vmUser.setHistoryModificationList(attachedHistoryModificationList);
             em.persist(vmUser);
             if (userStatusId != null) {
                 userStatusId.getVmUserList().add(vmUser);
@@ -284,13 +284,13 @@ public class VmUserJpaController implements Serializable {
                     oldVmUserOfExecutionStepHasVmUserListExecutionStepHasVmUser = em.merge(oldVmUserOfExecutionStepHasVmUserListExecutionStepHasVmUser);
                 }
             }
-            for (History historyListHistory : vmUser.getHistoryList()) {
-                VmUser oldModifierIdOfHistoryListHistory = historyListHistory.getModifierId();
-                historyListHistory.setModifierId(vmUser);
-                historyListHistory = em.merge(historyListHistory);
-                if (oldModifierIdOfHistoryListHistory != null) {
-                    oldModifierIdOfHistoryListHistory.getHistoryList().remove(historyListHistory);
-                    oldModifierIdOfHistoryListHistory = em.merge(oldModifierIdOfHistoryListHistory);
+            for (History historyModificationListHistory : vmUser.getHistoryModificationList()) {
+                VmUser oldModifierIdOfHistoryModificationListHistory = historyModificationListHistory.getModifierId();
+                historyModificationListHistory.setModifierId(vmUser);
+                historyModificationListHistory = em.merge(historyModificationListHistory);
+                if (oldModifierIdOfHistoryModificationListHistory != null) {
+                    oldModifierIdOfHistoryModificationListHistory.getHistoryModificationList().remove(historyModificationListHistory);
+                    oldModifierIdOfHistoryModificationListHistory = em.merge(oldModifierIdOfHistoryModificationListHistory);
                 }
             }
             em.getTransaction().commit();
@@ -336,8 +336,8 @@ public class VmUserJpaController implements Serializable {
             List<ExecutionStepHasIssue> executionStepHasIssueListNew = vmUser.getExecutionStepHasIssueList();
             List<ExecutionStepHasVmUser> executionStepHasVmUserListOld = persistentVmUser.getExecutionStepHasVmUserList();
             List<ExecutionStepHasVmUser> executionStepHasVmUserListNew = vmUser.getExecutionStepHasVmUserList();
-            List<History> historyListOld = persistentVmUser.getHistoryList();
-            List<History> historyListNew = vmUser.getHistoryList();
+            List<History> historyModificationListOld = persistentVmUser.getHistoryModificationList();
+            List<History> historyModificationListNew = vmUser.getHistoryModificationList();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
@@ -395,12 +395,12 @@ public class VmUserJpaController implements Serializable {
                     illegalOrphanMessages.add("You must retain ExecutionStepHasVmUser " + executionStepHasVmUserListOldExecutionStepHasVmUser + " since its vmUser field is not nullable.");
                 }
             }
-            for (History historyListOldHistory : historyListOld) {
-                if (!historyListNew.contains(historyListOldHistory)) {
+            for (History historyModificationListOldHistory : historyModificationListOld) {
+                if (!historyModificationListNew.contains(historyModificationListOldHistory)) {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
-                    illegalOrphanMessages.add("You must retain History " + historyListOldHistory + " since its modifierId field is not nullable.");
+                    illegalOrphanMessages.add("You must retain History " + historyModificationListOldHistory + " since its modifierId field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -501,13 +501,13 @@ public class VmUserJpaController implements Serializable {
             }
             executionStepHasVmUserListNew = attachedExecutionStepHasVmUserListNew;
             vmUser.setExecutionStepHasVmUserList(executionStepHasVmUserListNew);
-            List<History> attachedHistoryListNew = new ArrayList<History>();
-            for (History historyListNewHistoryToAttach : historyListNew) {
-                historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
-                attachedHistoryListNew.add(historyListNewHistoryToAttach);
+            List<History> attachedHistoryModificationListNew = new ArrayList<History>();
+            for (History historyModificationListNewHistoryToAttach : historyModificationListNew) {
+                historyModificationListNewHistoryToAttach = em.getReference(historyModificationListNewHistoryToAttach.getClass(), historyModificationListNewHistoryToAttach.getId());
+                attachedHistoryModificationListNew.add(historyModificationListNewHistoryToAttach);
             }
-            historyListNew = attachedHistoryListNew;
-            vmUser.setHistoryList(historyListNew);
+            historyModificationListNew = attachedHistoryModificationListNew;
+            vmUser.setHistoryModificationList(historyModificationListNew);
             vmUser = em.merge(vmUser);
             if (userStatusIdOld != null && !userStatusIdOld.equals(userStatusIdNew)) {
                 userStatusIdOld.getVmUserList().remove(vmUser);
@@ -676,14 +676,14 @@ public class VmUserJpaController implements Serializable {
                     }
                 }
             }
-            for (History historyListNewHistory : historyListNew) {
-                if (!historyListOld.contains(historyListNewHistory)) {
-                    VmUser oldModifierIdOfHistoryListNewHistory = historyListNewHistory.getModifierId();
-                    historyListNewHistory.setModifierId(vmUser);
-                    historyListNewHistory = em.merge(historyListNewHistory);
-                    if (oldModifierIdOfHistoryListNewHistory != null && !oldModifierIdOfHistoryListNewHistory.equals(vmUser)) {
-                        oldModifierIdOfHistoryListNewHistory.getHistoryList().remove(historyListNewHistory);
-                        oldModifierIdOfHistoryListNewHistory = em.merge(oldModifierIdOfHistoryListNewHistory);
+            for (History historyModificationListNewHistory : historyModificationListNew) {
+                if (!historyModificationListOld.contains(historyModificationListNewHistory)) {
+                    VmUser oldModifierIdOfHistoryModificationListNewHistory = historyModificationListNewHistory.getModifierId();
+                    historyModificationListNewHistory.setModifierId(vmUser);
+                    historyModificationListNewHistory = em.merge(historyModificationListNewHistory);
+                    if (oldModifierIdOfHistoryModificationListNewHistory != null && !oldModifierIdOfHistoryModificationListNewHistory.equals(vmUser)) {
+                        oldModifierIdOfHistoryModificationListNewHistory.getHistoryModificationList().remove(historyModificationListNewHistory);
+                        oldModifierIdOfHistoryModificationListNewHistory = em.merge(oldModifierIdOfHistoryModificationListNewHistory);
                     }
                 }
             }
@@ -769,12 +769,12 @@ public class VmUserJpaController implements Serializable {
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the ExecutionStepHasVmUser " + executionStepHasVmUserListOrphanCheckExecutionStepHasVmUser + " in its executionStepHasVmUserList field has a non-nullable vmUser field.");
             }
-            List<History> historyListOrphanCheck = vmUser.getHistoryList();
-            for (History historyListOrphanCheckHistory : historyListOrphanCheck) {
+            List<History> historyModificationListOrphanCheck = vmUser.getHistoryModificationList();
+            for (History historyModificationListOrphanCheckHistory : historyModificationListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
-                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the History " + historyListOrphanCheckHistory + " in its historyList field has a non-nullable modifierId field.");
+                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the History " + historyModificationListOrphanCheckHistory + " in its historyModificationList field has a non-nullable modifierId field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

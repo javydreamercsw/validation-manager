@@ -3,67 +3,85 @@
  */
 package com.validation.manager.core.db.mapped;
 
-import com.validation.manager.core.AuditedObject;
+import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.VmUser;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Lob;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import java.util.List;
+import java.util.Objects;
 
-@MappedSuperclass
-public abstract class VMAuditedObject implements AuditedObject {
+public abstract class VMAuditedObject
+        implements Comparable<VMAuditedObject>, Serializable {
 
-    @Column(name = "reason")
-    @Lob
-    @Basic(optional = false)
-    @NotNull
-    @Size(max = 2147483647)
+    private Integer majorVersion = 0;
+    private Integer midVersion = 0;
+    private Integer minorVersion = 1;
     private String reason;
-
-    @Column(name = "modifier_id")
-    @Basic(optional = false)
-    @NotNull
-    private int modifierId;
-
-    @Column(name = "modification_time")
-    @Basic(optional = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    @NotNull
+    private VmUser modifierId;
     private Date modificationTime;
 
-    @Override
+    public Integer getMajorVersion() {
+        return this.majorVersion;
+    }
+
+    public void setMajorVersion(Integer majorVersion) {
+        this.majorVersion = majorVersion;
+    }
+
+    public Integer getMidVersion() {
+        return this.midVersion;
+    }
+
+    public void setMidVersion(Integer midVersion) {
+        this.midVersion = midVersion;
+    }
+
+    public Integer getMinorVersion() {
+        return this.minorVersion;
+    }
+
+    public void setMinorVersion(Integer minorVersion) {
+        this.minorVersion = minorVersion;
+    }
+
+    public VmUser getModifierId() {
+        return modifierId;
+    }
+
+    public void setModifierId(VmUser modifierId) {
+        this.modifierId = modifierId;
+    }
+
     public String getReason() {
         return this.reason;
     }
 
-    @Override
     public void setReason(String reason) {
         this.reason = reason;
     }
 
-    @Override
-    public Integer getModifierId() {
-        return this.modifierId;
-    }
-
-    @Override
-    public void setModifierId(int modifierId) {
-        this.modifierId = modifierId;
-    }
-
-    @Override
     public Date getModificationTime() {
         return this.modificationTime;
     }
 
-    @Override
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
     }
+
+    /**
+     * Get history for this entity.
+     *
+     * @return history
+     */
+    public abstract List<History> getHistoryList();
+
+    /**
+     * Set history for this entity
+     *
+     * @param historyList
+     */
+    public abstract void setHistoryList(List<History> historyList);
 
     /**
      * Update the fields.
@@ -76,10 +94,62 @@ public abstract class VMAuditedObject implements AuditedObject {
         target.setReason(source.getReason());
         target.setModificationTime(source.getModificationTime());
         target.setModifierId(source.getModifierId());
+        target.setMajorVersion(source.getMajorVersion());
+        target.setMidVersion(source.getMidVersion());
+        target.setMinorVersion(source.getMinorVersion());
+        target.setModifierId(source.getModifierId());
+        target.setReason(source.getReason());
+        target.setHistoryList(source.getHistoryList());
     }
 
     @Override
-    public boolean isChangeVersionable() {
-        return true;
+    public int compareTo(VMAuditedObject o) {
+        if (!Objects.equals(getMajorVersion(),
+                o.getMajorVersion())) {
+            return getMajorVersion() - o.getMajorVersion();
+        }//Same major version
+        else if (!Objects.equals(getMidVersion(),
+                o.getMidVersion())) {
+            return getMidVersion() - o.getMidVersion();
+        } //Same mid version
+        else if (!Objects.equals(getMinorVersion(),
+                o.getMinorVersion())) {
+            return getMinorVersion() - o.getMinorVersion();
+        }
+        //Everything the same
+        return 0;
     }
+
+    /**
+     * Add history to this entity.
+     *
+     * @param history History to add.
+     */
+    public void addHistory(History history) {
+        if (getHistoryList() == null) {
+            setHistoryList(new ArrayList<>());
+        }
+        getHistoryList().add(history);
+    }
+
+    /**
+     * Increase major version.
+     */
+    public void increaseMajorVersion() {
+        setMajorVersion(getMajorVersion() + 1);
+        setMidVersion(0);
+        setMinorVersion(0);
+    }
+
+    /**
+     * Increase major version.
+     */
+    public void increaseMidVersion() {
+        setMidVersion(getMidVersion() + 1);
+        setMinorVersion(0);
+    }
+
+    /**
+     * Increase minor is done by default when updating a record.
+     */
 }

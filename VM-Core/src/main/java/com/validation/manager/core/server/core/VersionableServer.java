@@ -1,5 +1,6 @@
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.db.History;
 import java.util.List;
 
 /**
@@ -14,5 +15,5 @@ public interface VersionableServer<T> {
      *
      * @return
      */
-    List<T> getVersions();
+    List<History> getHistoryList();
 }

@@ -86,7 +86,7 @@ public class BaselineServer extends Baseline
             List<Requirement> baselined = new ArrayList<>();
             for (Requirement o : requirements) {
                 RequirementServer rs = new RequirementServer(o);
-//                rs.increaseMajor();
+                rs.increaseMajorVersion();
                 rs.write2DB();
                 baselined.add(rs.getEntity());
             }

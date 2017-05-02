@@ -154,13 +154,12 @@ public class Fmea implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        
         if (!(object instanceof Fmea)) {
             return false;
         }
         Fmea other = (Fmea) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return this.id.equals(other.id);
     }
 
     @Override

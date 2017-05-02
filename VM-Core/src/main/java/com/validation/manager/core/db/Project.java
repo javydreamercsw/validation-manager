@@ -1,5 +1,6 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.db.mapped.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -39,7 +40,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT p FROM Project p WHERE p.id = :id")
     , @NamedQuery(name = "Project.findByName",
             query = "SELECT p FROM Project p WHERE p.name = :name")})
-public class Project implements Serializable {
+public class Project extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -78,6 +79,8 @@ public class Project implements Serializable {
     private Project parentProjectId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
     private List<RequirementSpec> requirementSpecList;
+    @ManyToMany(mappedBy = "projectList")
+    private List<History> historyList;
 
     public Project(String name) {
         this.name = name;
@@ -157,17 +160,30 @@ public class Project implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+
         if (!(object instanceof Project)) {
             return false;
         }
         Project other = (Project) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return this.id.equals(other.id);
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Project[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the historyList
+     */
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    /**
+     * @param historyList the historyList to set
+     */
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
     }
 }

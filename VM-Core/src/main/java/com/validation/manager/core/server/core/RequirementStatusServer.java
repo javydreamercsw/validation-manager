@@ -10,8 +10,7 @@ import com.validation.manager.core.db.controller.RequirementStatusJpaController;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public final class RequirementStatusServer extends RequirementStatus
-        implements EntityServer<RequirementStatus>/*,
-        VersionableServer<RequirementStatus> */ {
+        implements EntityServer<RequirementStatus> {
 
     public RequirementStatusServer(Integer id) {
         RequirementStatusJpaController controller
@@ -60,16 +59,4 @@ public final class RequirementStatusServer extends RequirementStatus
     public void update() {
         update(this, getEntity());
     }
-
-//    @Override
-//    public List<RequirementStatus> getHistoryList() {
-//        List<RequirementStatus> versions = new ArrayList<>();
-//        parameters.clear();
-//        parameters.put("id", getEntity().getId());
-//        namedQuery("RequirementStatus.findById",
-//                parameters).forEach((obj) -> {
-//                    versions.add((RequirementStatus) obj);
-//                });
-//        return versions;
-//    }
 }

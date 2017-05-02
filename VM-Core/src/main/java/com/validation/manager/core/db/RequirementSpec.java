@@ -68,7 +68,8 @@ public class RequirementSpec implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Project project;
-    @JoinColumn(name = "spec_level_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "spec_level_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private SpecLevel specLevel;
 
@@ -160,7 +161,7 @@ public class RequirementSpec implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+
         if (!(object instanceof RequirementSpec)) {
             return false;
         }

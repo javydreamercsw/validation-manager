@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RequirementSpecNodeServer extends RequirementSpecNode
+public final class RequirementSpecNodeServer extends RequirementSpecNode
         implements EntityServer<RequirementSpecNode> {
 
     public RequirementSpecNodeServer(RequirementSpec rs, String name,
@@ -37,31 +37,32 @@ public class RequirementSpecNodeServer extends RequirementSpecNode
 
     public RequirementSpecNodeServer(RequirementSpecNode rsn) {
         super(rsn.getRequirementSpecNodePK());
-        update(this, rsn);
+        update();
     }
 
     public RequirementSpecNodeServer(int requirementSpecId,
             int requirementSpecProjectId, int requirementSpecSpecLevelId) {
         super(requirementSpecId, requirementSpecProjectId,
                 requirementSpecSpecLevelId);
-        update(this, getEntity());
+        update();
     }
 
     @Override
     public int write2DB() throws Exception {
         RequirementSpecNode rsn;
-        if (getRequirementSpecNodePK() != null && getRequirementSpecNodePK().getId() > 0) {
+        if (getRequirementSpecNodePK() == null || getRequirementSpecNodePK().getId() == 0) {
+            rsn = new RequirementSpecNode();
+            update(rsn, this);
+            new RequirementSpecNodeJpaController(getEntityManagerFactory()).create(rsn);
+            setRequirementSpecNodePK(rsn.getRequirementSpecNodePK());
+        } else {
             rsn = new RequirementSpecNodeJpaController(
                     getEntityManagerFactory()).findRequirementSpecNode(
                     getRequirementSpecNodePK());
             update(rsn, this);
             new RequirementSpecNodeJpaController(getEntityManagerFactory()).edit(rsn);
-        } else {
-            rsn = new RequirementSpecNode();
-            update(rsn, this);
-            new RequirementSpecNodeJpaController(getEntityManagerFactory()).create(rsn);
         }
-        update(this, rsn);
+        update();
         return getRequirementSpecNodePK().getId();
     }
 
