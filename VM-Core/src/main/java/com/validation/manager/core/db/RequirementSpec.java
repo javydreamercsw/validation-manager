@@ -72,6 +72,8 @@ public class RequirementSpec implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private SpecLevel specLevel;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementSpec")
+    private List<Baseline> baselineList;
 
     public RequirementSpec() {
         super();
@@ -176,5 +178,15 @@ public class RequirementSpec implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RequirementSpec[ requirementSpecPK="
                 + requirementSpecPK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Baseline> getBaselineList() {
+        return baselineList;
+    }
+
+    public void setBaselineList(List<Baseline> baselineList) {
+        this.baselineList = baselineList;
     }
 }

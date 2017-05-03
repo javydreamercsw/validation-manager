@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.RiskControlHasRequirement;
-import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -52,9 +51,6 @@ public class RequirementJpaController implements Serializable {
         }
         if (requirement.getRiskControlHasRequirementList() == null) {
             requirement.setRiskControlHasRequirementList(new ArrayList<RiskControlHasRequirement>());
-        }
-        if (requirement.getBaselineList() == null) {
-            requirement.setBaselineList(new ArrayList<Baseline>());
         }
         if (requirement.getHistoryList() == null) {
             requirement.setHistoryList(new ArrayList<History>());
@@ -102,12 +98,6 @@ public class RequirementJpaController implements Serializable {
                 attachedRiskControlHasRequirementList.add(riskControlHasRequirementListRiskControlHasRequirementToAttach);
             }
             requirement.setRiskControlHasRequirementList(attachedRiskControlHasRequirementList);
-            List<Baseline> attachedBaselineList = new ArrayList<Baseline>();
-            for (Baseline baselineListBaselineToAttach : requirement.getBaselineList()) {
-                baselineListBaselineToAttach = em.getReference(baselineListBaselineToAttach.getClass(), baselineListBaselineToAttach.getId());
-                attachedBaselineList.add(baselineListBaselineToAttach);
-            }
-            requirement.setBaselineList(attachedBaselineList);
             List<History> attachedHistoryList = new ArrayList<History>();
             for (History historyListHistoryToAttach : requirement.getHistoryList()) {
                 historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
@@ -148,10 +138,6 @@ public class RequirementJpaController implements Serializable {
                     oldRequirementOfRiskControlHasRequirementListRiskControlHasRequirement = em.merge(oldRequirementOfRiskControlHasRequirementListRiskControlHasRequirement);
                 }
             }
-            for (Baseline baselineListBaseline : requirement.getBaselineList()) {
-                baselineListBaseline.getRequirementList().add(requirement);
-                baselineListBaseline = em.merge(baselineListBaseline);
-            }
             for (History historyListHistory : requirement.getHistoryList()) {
                 historyListHistory.getRequirementList().add(requirement);
                 historyListHistory = em.merge(historyListHistory);
@@ -185,8 +171,6 @@ public class RequirementJpaController implements Serializable {
             List<Step> stepListNew = requirement.getStepList();
             List<RiskControlHasRequirement> riskControlHasRequirementListOld = persistentRequirement.getRiskControlHasRequirementList();
             List<RiskControlHasRequirement> riskControlHasRequirementListNew = requirement.getRiskControlHasRequirementList();
-            List<Baseline> baselineListOld = persistentRequirement.getBaselineList();
-            List<Baseline> baselineListNew = requirement.getBaselineList();
             List<History> historyListOld = persistentRequirement.getHistoryList();
             List<History> historyListNew = requirement.getHistoryList();
             List<String> illegalOrphanMessages = null;
@@ -241,13 +225,6 @@ public class RequirementJpaController implements Serializable {
             }
             riskControlHasRequirementListNew = attachedRiskControlHasRequirementListNew;
             requirement.setRiskControlHasRequirementList(riskControlHasRequirementListNew);
-            List<Baseline> attachedBaselineListNew = new ArrayList<Baseline>();
-            for (Baseline baselineListNewBaselineToAttach : baselineListNew) {
-                baselineListNewBaselineToAttach = em.getReference(baselineListNewBaselineToAttach.getClass(), baselineListNewBaselineToAttach.getId());
-                attachedBaselineListNew.add(baselineListNewBaselineToAttach);
-            }
-            baselineListNew = attachedBaselineListNew;
-            requirement.setBaselineList(baselineListNew);
             List<History> attachedHistoryListNew = new ArrayList<History>();
             for (History historyListNewHistoryToAttach : historyListNew) {
                 historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
@@ -325,18 +302,6 @@ public class RequirementJpaController implements Serializable {
                         oldRequirementOfRiskControlHasRequirementListNewRiskControlHasRequirement.getRiskControlHasRequirementList().remove(riskControlHasRequirementListNewRiskControlHasRequirement);
                         oldRequirementOfRiskControlHasRequirementListNewRiskControlHasRequirement = em.merge(oldRequirementOfRiskControlHasRequirementListNewRiskControlHasRequirement);
                     }
-                }
-            }
-            for (Baseline baselineListOldBaseline : baselineListOld) {
-                if (!baselineListNew.contains(baselineListOldBaseline)) {
-                    baselineListOldBaseline.getRequirementList().remove(requirement);
-                    baselineListOldBaseline = em.merge(baselineListOldBaseline);
-                }
-            }
-            for (Baseline baselineListNewBaseline : baselineListNew) {
-                if (!baselineListOld.contains(baselineListNewBaseline)) {
-                    baselineListNewBaseline.getRequirementList().add(requirement);
-                    baselineListNewBaseline = em.merge(baselineListNewBaseline);
                 }
             }
             for (History historyListOldHistory : historyListOld) {
@@ -423,11 +388,6 @@ public class RequirementJpaController implements Serializable {
             for (Step stepListStep : stepList) {
                 stepListStep.getRequirementList().remove(requirement);
                 stepListStep = em.merge(stepListStep);
-            }
-            List<Baseline> baselineList = requirement.getBaselineList();
-            for (Baseline baselineListBaseline : baselineList) {
-                baselineListBaseline.getRequirementList().remove(requirement);
-                baselineListBaseline = em.merge(baselineListBaseline);
             }
             List<History> historyList = requirement.getHistoryList();
             for (History historyListHistory : historyList) {

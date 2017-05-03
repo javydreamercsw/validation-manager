@@ -50,6 +50,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT h FROM History h WHERE h.modificationTime = :modificationTime")})
 public class History implements Serializable {
 
+    @ManyToMany(mappedBy = "historyList")
+    private List<Baseline> baselineList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -253,5 +256,15 @@ public class History implements Serializable {
      */
     public void setProjectList(List<Project> projectList) {
         this.projectList = projectList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Baseline> getBaselineList() {
+        return baselineList;
+    }
+
+    public void setBaselineList(List<Baseline> baselineList) {
+        this.baselineList = baselineList;
     }
 }

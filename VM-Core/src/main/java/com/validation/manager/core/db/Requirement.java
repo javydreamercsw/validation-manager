@@ -112,8 +112,6 @@ public class Requirement extends Versionable implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
     private List<RiskControlHasRequirement> riskControlHasRequirementList;
     @ManyToMany(mappedBy = "requirementList")
-    private List<Baseline> baselineList;
-    @ManyToMany(mappedBy = "requirementList")
     private List<History> historyList;
 
     public Requirement() {
@@ -261,16 +259,6 @@ public class Requirement extends Versionable implements Serializable {
      */
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<Baseline> getBaselineList() {
-        return baselineList;
-    }
-
-    public void setBaselineList(List<Baseline> baselineList) {
-        this.baselineList = baselineList;
     }
 
     @XmlTransient

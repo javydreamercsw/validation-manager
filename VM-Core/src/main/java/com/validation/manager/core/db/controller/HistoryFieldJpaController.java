@@ -39,8 +39,8 @@ public class HistoryFieldJpaController implements Serializable {
         if (historyField.getHistoryFieldPK() == null) {
             historyField.setHistoryFieldPK(new HistoryFieldPK());
         }
-        historyField.getHistoryFieldPK().setHistoryId(historyField.getHistory().getId());
         historyField.getHistoryFieldPK().setFieldTypeId(historyField.getFieldType().getId());
+        historyField.getHistoryFieldPK().setHistoryId(historyField.getHistory().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -80,8 +80,8 @@ public class HistoryFieldJpaController implements Serializable {
     }
 
     public void edit(HistoryField historyField) throws NonexistentEntityException, Exception {
-        historyField.getHistoryFieldPK().setHistoryId(historyField.getHistory().getId());
         historyField.getHistoryFieldPK().setFieldTypeId(historyField.getFieldType().getId());
+        historyField.getHistoryFieldPK().setHistoryId(historyField.getHistory().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

@@ -1696,7 +1696,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 .getComponentCaption());
                         if (me == null) {
                             if (provider.shouldDisplay()) {
-                                Tab tab = tabSheet.addTab(provider
+                                tabSheet.addTab(provider
                                         .getContent(),
                                         translate(provider
                                                 .getComponentCaption()));
@@ -2418,13 +2418,13 @@ public class ValidationManagerUI extends UI implements VMUI {
         desc.setSizeFull();
         layout.addComponent(desc);
         Button cancel = new Button("Cancel");
-//        if (rs != null) {
-//            layout.addComponent(createRequirementHistoryTable("Included Requirements",
-//                    extractRequirements(rs)));
-//        } else {
-//            layout.addComponent(createRequirementHistoryTable("Included Requirements",
-//                    baseline.getRequirementList()));
-//        }
+        if (rs != null) {
+            layout.addComponent(createRequirementTable("Included Requirements",
+                    extractRequirements(rs)));
+        } else {
+            layout.addComponent(createRequirementTable("Included Requirements",
+                    baseline.getRequirementList()));
+        }
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             displayObject(tree.getValue());
@@ -2503,14 +2503,51 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
+    private Component createRequirementTable(String title,
+            List<Requirement> requirements) {
+        Grid grid = new Grid(title);
+        BeanItemContainer<Requirement> reqs
+                = new BeanItemContainer<>(Requirement.class);
+        GeneratedPropertyContainer wrapperCont
+                = new GeneratedPropertyContainer(reqs);
+        reqs.addAll(requirements);
+        grid.setContainerDataSource(wrapperCont);
+        grid.setHeightMode(HeightMode.ROW);
+        grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
+        wrapperCont.addGeneratedProperty("version",
+                new PropertyValueGenerator<String>() {
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+                Requirement req = (Requirement) itemId;
+                History v = req.getHistoryList().get(req.getHistoryList().size() - 1);
+                return v.getMajorVersion() + "." + v.getMidVersion()
+                        + "." + v.getMinorVersion();
+            }
+
+            @Override
+            public Class<String> getType() {
+                return String.class;
+            }
+        });
+        grid.setColumns("uniqueId", "version");
+        Grid.Column uniqueId = grid.getColumn("uniqueId");
+        uniqueId.setHeaderCaption("ID");
+        Grid.Column version = grid.getColumn("version");
+        version.setHeaderCaption("Version");
+        wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});
+        grid.setSizeFull();
+        return grid;
+    }
+
     private Component createRequirementHistoryTable(String title,
             List<History> historyItems) {
         Grid grid = new Grid(title);
-        BeanItemContainer<History> reqs
+        BeanItemContainer<History> histories
                 = new BeanItemContainer<>(History.class);
         GeneratedPropertyContainer wrapperCont
-                = new GeneratedPropertyContainer(reqs);
-        reqs.addAll(historyItems);
+                = new GeneratedPropertyContainer(histories);
+        histories.addAll(historyItems);
         grid.setContainerDataSource(wrapperCont);
         grid.setHeightMode(HeightMode.ROW);
         grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
@@ -2520,8 +2557,8 @@ public class ValidationManagerUI extends UI implements VMUI {
             @Override
             public String getValue(Item item, Object itemId, Object propertyId) {
                 History v = (History) itemId;
-                return v.getVersionMajor() + "." + v.getVersionMid()
-                        + "." + v.getVersionMinor();
+                return v.getMajorVersion() + "." + v.getMidVersion()
+                        + "." + v.getMinorVersion();
             }
 
             @Override
@@ -2614,12 +2651,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                 return String.class;
             }
         });
+        grid.setColumns("uniqueId", "description", "version", "modifier",
+                "modificationDate", "modificationReason");
         Grid.Column uniqueId = grid.getColumn("uniqueId");
         uniqueId.setHeaderCaption("ID");
         Grid.Column version = grid.getColumn("version");
         version.setHeaderCaption("Version");
-        grid.setColumns("uniqueId", "description", "version", "modifier",
-                "modificationDate", "modificationReason");
         Grid.Column description = grid.getColumn("description");
         description.setHeaderCaption("Description");
         wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});

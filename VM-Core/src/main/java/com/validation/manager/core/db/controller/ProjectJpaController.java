@@ -15,6 +15,7 @@ import com.validation.manager.core.db.TestProject;
 import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
@@ -45,6 +46,9 @@ public class ProjectJpaController implements Serializable {
         if (project.getRequirementSpecList() == null) {
             project.setRequirementSpecList(new ArrayList<RequirementSpec>());
         }
+        if (project.getHistoryList() == null) {
+            project.setHistoryList(new ArrayList<History>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -72,6 +76,12 @@ public class ProjectJpaController implements Serializable {
                 attachedRequirementSpecList.add(requirementSpecListRequirementSpecToAttach);
             }
             project.setRequirementSpecList(attachedRequirementSpecList);
+            List<History> attachedHistoryList = new ArrayList<History>();
+            for (History historyListHistoryToAttach : project.getHistoryList()) {
+                historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
+                attachedHistoryList.add(historyListHistoryToAttach);
+            }
+            project.setHistoryList(attachedHistoryList);
             em.persist(project);
             if (parentProjectId != null) {
                 parentProjectId.getProjectList().add(project);
@@ -99,6 +109,10 @@ public class ProjectJpaController implements Serializable {
                     oldProjectOfRequirementSpecListRequirementSpec = em.merge(oldProjectOfRequirementSpecListRequirementSpec);
                 }
             }
+            for (History historyListHistory : project.getHistoryList()) {
+                historyListHistory.getProjectList().add(project);
+                historyListHistory = em.merge(historyListHistory);
+            }
             em.getTransaction().commit();
         }
         finally {
@@ -122,6 +136,8 @@ public class ProjectJpaController implements Serializable {
             List<Project> projectListNew = project.getProjectList();
             List<RequirementSpec> requirementSpecListOld = persistentProject.getRequirementSpecList();
             List<RequirementSpec> requirementSpecListNew = project.getRequirementSpecList();
+            List<History> historyListOld = persistentProject.getHistoryList();
+            List<History> historyListNew = project.getHistoryList();
             List<String> illegalOrphanMessages = null;
             for (RequirementSpec requirementSpecListOldRequirementSpec : requirementSpecListOld) {
                 if (!requirementSpecListNew.contains(requirementSpecListOldRequirementSpec)) {
@@ -159,6 +175,13 @@ public class ProjectJpaController implements Serializable {
             }
             requirementSpecListNew = attachedRequirementSpecListNew;
             project.setRequirementSpecList(requirementSpecListNew);
+            List<History> attachedHistoryListNew = new ArrayList<History>();
+            for (History historyListNewHistoryToAttach : historyListNew) {
+                historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
+                attachedHistoryListNew.add(historyListNewHistoryToAttach);
+            }
+            historyListNew = attachedHistoryListNew;
+            project.setHistoryList(historyListNew);
             project = em.merge(project);
             if (parentProjectIdOld != null && !parentProjectIdOld.equals(parentProjectIdNew)) {
                 parentProjectIdOld.getProjectList().remove(project);
@@ -206,6 +229,18 @@ public class ProjectJpaController implements Serializable {
                         oldProjectOfRequirementSpecListNewRequirementSpec.getRequirementSpecList().remove(requirementSpecListNewRequirementSpec);
                         oldProjectOfRequirementSpecListNewRequirementSpec = em.merge(oldProjectOfRequirementSpecListNewRequirementSpec);
                     }
+                }
+            }
+            for (History historyListOldHistory : historyListOld) {
+                if (!historyListNew.contains(historyListOldHistory)) {
+                    historyListOldHistory.getProjectList().remove(project);
+                    historyListOldHistory = em.merge(historyListOldHistory);
+                }
+            }
+            for (History historyListNewHistory : historyListNew) {
+                if (!historyListOld.contains(historyListNewHistory)) {
+                    historyListNewHistory.getProjectList().add(project);
+                    historyListNewHistory = em.merge(historyListNewHistory);
                 }
             }
             em.getTransaction().commit();
@@ -265,6 +300,11 @@ public class ProjectJpaController implements Serializable {
             for (Project projectListProject : projectList) {
                 projectListProject.setParentProjectId(null);
                 projectListProject = em.merge(projectListProject);
+            }
+            List<History> historyList = project.getHistoryList();
+            for (History historyListHistory : historyList) {
+                historyListHistory.getProjectList().remove(project);
+                historyListHistory = em.merge(historyListHistory);
             }
             em.remove(project);
             em.getTransaction().commit();
