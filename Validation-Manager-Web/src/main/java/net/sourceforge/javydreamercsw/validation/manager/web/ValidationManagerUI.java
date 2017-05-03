@@ -1852,12 +1852,17 @@ public class ValidationManagerUI extends UI implements VMUI {
         tree.setItemIcon(rs, SPEC_ICON);
         // Set it to be a child.
         tree.setParent(rs, rs.getProject());
-        if (rs.getRequirementSpecNodeList().isEmpty()) {
+        if (rs.getRequirementSpecNodeList().isEmpty()
+                && rs.getBaselineList().isEmpty()) {
             //No children
             tree.setChildrenAllowed(rs, false);
         } else {
             rs.getRequirementSpecNodeList().forEach((rsn) -> {
                 addRequirementSpecsNode(rsn, tree);
+            });
+            //Add the baseline to the spec
+            rs.getBaselineList().forEach(bl -> {
+                addBaseline(bl, tree);
             });
         }
     }
@@ -1948,10 +1953,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         tree.setParent(req, req.getRequirementSpecNode());
         //No children
         tree.setChildrenAllowed(req, false);
-        //Add the baseline to the spec
-        req.getBaselineList().forEach(bl -> {
-            addBaseline(bl, tree);
-        });
     }
 
     private void addTestCaseExecutions(String parent, TestCaseExecution tce,
@@ -2419,11 +2420,15 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(desc);
         Button cancel = new Button("Cancel");
         if (rs != null) {
-            layout.addComponent(createRequirementTable("Included Requirements",
-                    extractRequirements(rs)));
+            List<History> potential = new ArrayList<>();
+            for (Requirement r : extractRequirements(rs)) {
+                potential.add(r.getHistoryList().get(r.getHistoryList().size() - 1));
+            }
+            layout.addComponent(createRequirementHistoryTable("Included Requirements",
+                    potential));
         } else {
-            layout.addComponent(createRequirementTable("Included Requirements",
-                    baseline.getRequirementList()));
+            layout.addComponent(createRequirementHistoryTable("Included Requirements",
+                    baseline.getHistoryList()));
         }
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -2501,43 +2506,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         binder.bindMemberFields(form);
         form.setSizeFull();
         setTabContent(main, form, REQUIREMENT_REVIEW);
-    }
-
-    private Component createRequirementTable(String title,
-            List<Requirement> requirements) {
-        Grid grid = new Grid(title);
-        BeanItemContainer<Requirement> reqs
-                = new BeanItemContainer<>(Requirement.class);
-        GeneratedPropertyContainer wrapperCont
-                = new GeneratedPropertyContainer(reqs);
-        reqs.addAll(requirements);
-        grid.setContainerDataSource(wrapperCont);
-        grid.setHeightMode(HeightMode.ROW);
-        grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
-        wrapperCont.addGeneratedProperty("version",
-                new PropertyValueGenerator<String>() {
-
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                Requirement req = (Requirement) itemId;
-                History v = req.getHistoryList().get(req.getHistoryList().size() - 1);
-                return v.getMajorVersion() + "." + v.getMidVersion()
-                        + "." + v.getMinorVersion();
-            }
-
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        grid.setColumns("uniqueId", "version");
-        Grid.Column uniqueId = grid.getColumn("uniqueId");
-        uniqueId.setHeaderCaption("ID");
-        Grid.Column version = grid.getColumn("version");
-        version.setHeaderCaption("Version");
-        wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});
-        grid.setSizeFull();
-        return grid;
     }
 
     private Component createRequirementHistoryTable(String title,
@@ -2643,7 +2611,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             @Override
             public String getValue(Item item, Object itemId, Object propertyId) {
                 History v = (History) itemId;
-                return translate(v.getReason());
+                return v.getReason() == null ? "null" : translate(v.getReason());
             }
 
             @Override
@@ -2669,9 +2637,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             tree.addItem(bl);
             tree.setItemCaption(bl, bl.getBaselineName());
             tree.setItemIcon(bl, BASELINE_ICON);
-            tree.setParent(bl, bl.getRequirementList().get(0)
-                    .getRequirementSpecNode()
-                    .getRequirementSpec());
+            tree.setParent(bl, bl.getRequirementSpec());
             //No children
             tree.setChildrenAllowed(bl, false);
         }
