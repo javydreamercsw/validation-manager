@@ -133,27 +133,27 @@ public class History implements Serializable {
         this.id = id;
     }
 
-    public int getVersionMajor() {
+    public int getMajorVersion() {
         return versionMajor;
     }
 
-    public void setVersionMajor(int versionMajor) {
+    public void setMajorVersion(int versionMajor) {
         this.versionMajor = versionMajor;
     }
 
-    public int getVersionMid() {
+    public int getMidVersion() {
         return versionMid;
     }
 
-    public void setVersionMid(int versionMid) {
+    public void setMidVersion(int versionMid) {
         this.versionMid = versionMid;
     }
 
-    public int getVersionMinor() {
+    public int getMinorVersion() {
         return versionMinor;
     }
 
-    public void setVersionMinor(int versionMinor) {
+    public void setMinorVersion(int versionMinor) {
         this.versionMinor = versionMinor;
     }
 

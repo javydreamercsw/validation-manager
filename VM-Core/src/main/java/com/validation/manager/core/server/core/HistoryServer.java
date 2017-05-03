@@ -43,9 +43,9 @@ public class HistoryServer extends History
         target.setModificationTime(source.getModificationTime());
         target.setModifierId(source.getModifierId());
         target.setReason(source.getReason());
-        target.setVersionMajor(source.getVersionMajor());
-        target.setVersionMid(source.getVersionMid());
-        target.setVersionMinor(source.getVersionMinor());
+        target.setMajorVersion(source.getMajorVersion());
+        target.setMidVersion(source.getMidVersion());
+        target.setMinorVersion(source.getMinorVersion());
         target.setHistoryFieldList(source.getHistoryFieldList());
         target.setVmSettingList(source.getVmSettingList());
         target.setProjectList(source.getProjectList());
@@ -60,23 +60,23 @@ public class HistoryServer extends History
      * Do a major version of the item
      */
     public void increaseMajor() {
-        setVersionMajor(getVersionMajor() + 1);
-        setVersionMid(0);
-        setVersionMinor(0);
+        setMajorVersion(getMajorVersion() + 1);
+        setMidVersion(0);
+        setMinorVersion(0);
     }
 
     /**
      * Do a medium version of the item
      */
     public void increaseMid() {
-        setVersionMid(getVersionMid() + 1);
-        setVersionMinor(0);
+        setMidVersion(getMidVersion() + 1);
+        setMinorVersion(0);
     }
 
     /**
      * Do a minor version of the item
      */
     public void increaseMinor() {
-        setVersionMinor(getVersionMinor() + 1);
+        setMinorVersion(getMinorVersion() + 1);
     }
 }

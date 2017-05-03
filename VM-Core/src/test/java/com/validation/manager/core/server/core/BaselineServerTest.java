@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -112,10 +113,12 @@ public class BaselineServerTest extends AbstractVMTestCase {
         assertEquals(desc, r.getEntity().getDescription());
         assertNotNull(r.getEntity().getCreationDate());
         assertEquals(REQS.size(), r.getEntity().getRequirementList().size());
-//        r.getEntity().getRequirementList().forEach(req -> {
-//            assertEquals(1, (int) req.getMajorVersion());
-//            assertEquals(0, (int) req.getMidVersion());
-//            assertEquals(0, (int) req.getMinorVersion());
-//        });
+        r.update();
+        r.getEntity().getRequirementList().forEach(req -> {
+            History current = req.getHistoryList().get(req.getHistoryList().size() - 1);
+            assertEquals(1, (int) current.getMajorVersion());
+            assertEquals(0, (int) current.getMidVersion());
+            assertEquals(0, (int) current.getMinorVersion());
+        });
     }
 }

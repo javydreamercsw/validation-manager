@@ -3,12 +3,14 @@
  */
 package com.validation.manager.core.db.mapped;
 
+import com.validation.manager.core.EntityServer;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
+import org.openide.util.Exceptions;
 
 @MappedSuperclass
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -30,9 +32,63 @@ public abstract class Versionable extends AuditedObject {
         this.dirty = dirty;
     }
 
+    /**
+     * Increase major version.
+     */
+    public void increaseMajorVersion() {
+        setMajorVersion(getMajorVersion() + 1);
+        setMidVersion(0);
+        setMinorVersion(0);
+        try {
+            if (this instanceof EntityServer) {
+                EntityServer vs = (EntityServer) this;
+                //Copy the version changes
+                AuditedObject ao = (AuditedObject) vs.getEntity();
+                ao.update(ao, this);
+                updateHistory(ao);
+            } else {
+                updateHistory(this);
+            }
+        }
+        catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
+    /**
+     * Increase major version.
+     */
+    public void increaseMidVersion() {
+        setMidVersion(getMidVersion() + 1);
+        setMinorVersion(0);
+        try {
+            if (this instanceof EntityServer) {
+                EntityServer vs = (EntityServer) this;
+                //Copy the version changes
+                AuditedObject ao = (AuditedObject) vs.getEntity();
+                ao.update(ao, this);
+                updateHistory(ao);
+            } else {
+                updateHistory(this);
+            }
+        }
+        catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
+    /**
+     * Increase minor is done by default when updating a record.
+     */
     @Override
     public void update(AuditedObject target, AuditedObject source) {
         ((Versionable) target).setDirty(((Versionable) source).getDirty());
         super.update(target, source);
+    }
+
+    @Override
+    public String toString() {
+        return "Version: " + getMajorVersion() + "." + getMidVersion() + "."
+                + getMinorVersion();
     }
 }
