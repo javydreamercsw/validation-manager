@@ -261,8 +261,6 @@ public class DataBaseManager {
 
     @SuppressWarnings("unchecked")
     public static List<Object> createdQuery(String query, Map<String, Object> parameters) {
-        EntityTransaction transaction = getEntityManager().getTransaction();
-        transaction.begin();
         Query q = getEntityManager().createQuery(query);
         if (parameters != null) {
             Iterator<Entry<String, Object>> entries = parameters.entrySet().iterator();
@@ -271,7 +269,6 @@ public class DataBaseManager {
                 q.setParameter(e.getKey(), e.getValue());
             }
         }
-        transaction.commit();
         return q.getResultList();
     }
 
@@ -285,34 +282,19 @@ public class DataBaseManager {
     }
 
     public static List<Object> nativeQuery(String query) {
-        EntityTransaction transaction = getEntityManager().getTransaction();
-        transaction.begin();
         List<Object> resultList
                 = getEntityManager().createNativeQuery(query).getResultList();
-        transaction.commit();
         return resultList;
     }
 
     public static <T extends Object> List<T> createdQuery(String query, T result) {
-        EntityTransaction transaction = getEntityManager().getTransaction();
-        transaction.begin();
         List<T> resultList
                 = getEntityManager().createQuery(query).getResultList();
-        transaction.commit();
         return resultList;
     }
 
     public static void nativeUpdateQuery(String query) {
-        boolean atomic = false;
-        EntityTransaction transaction = getEntityManager().getTransaction();
-        if (!getEntityManager().getTransaction().isActive()) {
-            transaction.begin();
-            atomic = true;
-        }
         getEntityManager().createNativeQuery(query).executeUpdate();
-        if (atomic) {
-            transaction.commit();
-        }
     }
 
     /**
