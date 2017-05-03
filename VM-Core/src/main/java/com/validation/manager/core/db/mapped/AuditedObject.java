@@ -91,14 +91,12 @@ public abstract class AuditedObject
      */
     public void update(AuditedObject target,
             AuditedObject source) {
-        target.setReason(source.getReason());
-        target.setModificationTime(source.getModificationTime());
-        target.setModifierId(source.getModifierId());
         target.setMajorVersion(source.getMajorVersion());
         target.setMidVersion(source.getMidVersion());
         target.setMinorVersion(source.getMinorVersion());
         target.setModifierId(source.getModifierId());
         target.setReason(source.getReason());
+        target.setModificationTime(source.getModificationTime());
         target.setHistoryList(source.getHistoryList());
     }
 
