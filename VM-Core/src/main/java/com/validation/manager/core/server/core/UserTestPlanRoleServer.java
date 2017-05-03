@@ -24,7 +24,7 @@ public final class UserTestPlanRoleServer extends UserTestPlanRole
     }
 
     public UserTestPlanRoleServer(UserTestPlanRolePK pk) {
-        super.setUserTestPlanRolePK(userTestPlanRolePK);
+        super.setUserTestPlanRolePK(pk);
         update();
     }
 
