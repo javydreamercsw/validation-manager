@@ -84,9 +84,9 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(1, instance.getHistoryList().size());
             int count = 1;
             for (History h : instance.getHistoryList()) {
-                assertEquals(0, h.getVersionMajor());
-                assertEquals(0, h.getVersionMid());
-                assertEquals(count, h.getVersionMinor());
+                assertEquals(0, h.getMajorVersion());
+                assertEquals(0, h.getMidVersion());
+                assertEquals(count, h.getMinorVersion());
                 count++;
             }
             Requirement target = new Requirement();
@@ -347,28 +347,43 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     "Description", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
-            assertEquals(1, rs.getHistoryList().size());
+            int historyCount = 1;
+            assertEquals(historyCount++, rs.getHistoryList().size());
             History history = rs.getHistoryList().get(rs
                     .getHistoryList().size() - 1);
-            assertEquals(0, history.getVersionMajor());
-            assertEquals(0, history.getVersionMid());
-            assertEquals(1, history.getVersionMinor());
+            assertEquals(0, history.getMajorVersion());
+            assertEquals(0, history.getMidVersion());
+            assertEquals(1, history.getMinorVersion());
             assertTrue(checkHistory(rs));
             rs.setDescription("desc 2");
             rs.write2DB();
-            assertEquals(2, rs.getHistoryList().size());
+            assertEquals(historyCount++, rs.getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
-            assertEquals(0, history.getVersionMajor());
-            assertEquals(0, history.getVersionMid());
-            assertEquals(2, history.getVersionMinor());
+            assertEquals(0, history.getMajorVersion());
+            assertEquals(0, history.getMidVersion());
+            assertEquals(2, history.getMinorVersion());
             assertTrue(checkHistory(rs));
             rs.setDescription("desc 3");
             rs.write2DB();
-            assertEquals(3, rs.getHistoryList().size());
+            assertEquals(historyCount++, rs.getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
-            assertEquals(0, history.getVersionMajor());
-            assertEquals(0, history.getVersionMid());
-            assertEquals(3, history.getVersionMinor());
+            assertEquals(0, history.getMajorVersion());
+            assertEquals(0, history.getMidVersion());
+            assertEquals(3, history.getMinorVersion());
+            assertTrue(checkHistory(rs));
+            rs.increaseMidVersion();
+            assertEquals(historyCount++, rs.getHistoryList().size());
+            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
+            assertEquals(0, history.getMajorVersion());
+            assertEquals(1, history.getMidVersion());
+            assertEquals(0, history.getMinorVersion());
+            assertTrue(checkHistory(rs));
+            rs.increaseMajorVersion();
+            assertEquals(historyCount++, rs.getHistoryList().size());
+            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
+            assertEquals(1, history.getMajorVersion());
+            assertEquals(0, history.getMidVersion());
+            assertEquals(0, history.getMinorVersion());
             assertTrue(checkHistory(rs));
         }
         catch (Exception ex) {
