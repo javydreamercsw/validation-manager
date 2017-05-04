@@ -23,25 +23,31 @@ public class UserTest extends AbstractVMTestCase {
         try {
             getLogger(UserTest.class.getSimpleName()).log(Level.INFO,
                     "Available users: {0}",
-                    new VmUserJpaController(getEntityManagerFactory()).getVmUserCount());
-            getLogger(UserTest.class.getSimpleName()).log(Level.INFO, "Create an user");
+                    new VmUserJpaController(getEntityManagerFactory())
+                            .getVmUserCount());
+            getLogger(UserTest.class.getSimpleName()).log(Level.INFO,
+                    "Create an user");
             VmUser u = new VmUser("test",
                     encrypt("password"), "test@test.com",
                     "first", "last", "en", new Date(),
-                    new UserStatusJpaController(getEntityManagerFactory()).findUserStatus(1), 0);
-            u.setUserStatusId(new UserStatusJpaController(getEntityManagerFactory()).findUserStatus(1));
-            u.setModifierId(1);
+                    new UserStatusJpaController(getEntityManagerFactory())
+                            .findUserStatus(1), 0);
+            u.setUserStatusId(new UserStatusJpaController(
+                    getEntityManagerFactory()).findUserStatus(1));
             new VmUserJpaController(getEntityManagerFactory()).create(u);
             parameters.clear();
             parameters.put("username", "test");
             result = namedQuery("VmUser.findByUsername", parameters);
             assertTrue(result.size() > 0);
             u = (VmUser) result.get(0);
-            getLogger(UserTest.class.getSimpleName()).log(Level.INFO, "Delete an user");
-            new VmUserJpaController(getEntityManagerFactory()).destroy(u.getId());
+            getLogger(UserTest.class.getSimpleName()).log(Level.INFO,
+                    "Delete an user");
+            new VmUserJpaController(getEntityManagerFactory())
+                    .destroy(u.getId());
             result = namedQuery("VmUser.findByUsername", parameters);
             assertTrue(result.isEmpty());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             fail(e.getMessage());
         }
     }

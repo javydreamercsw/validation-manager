@@ -11,30 +11,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 
 /**
  *
  * @author Javier A. Ortiz Bultron<javier.ortiz.78@gmail.com>
  */
-public class VMIdServer extends VmId implements EntityServer<VmId> {
+public final class VMIdServer extends VmId implements EntityServer<VmId> {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger LOG
+            = Logger.getLogger(VMIdServer.class.getSimpleName());
 
     public VMIdServer(Integer id) throws VMException {
-        VmIdJpaController controller = new VmIdJpaController(
-                getEntityManagerFactory());
-        VmId vmId = controller.findVmId(id);
-        if (vmId != null) {
-            update(this, vmId);
-        } else {
-            throw new VMException("VMId with id: " + id + " not found!");
-        }
+        super.setId(id);
+        update();
     }
 
     public VMIdServer(String tablename, int lastId) {
         super(tablename, lastId);
-        setId(0);
     }
 
     //write to db
@@ -44,23 +38,21 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
             VmIdJpaController controller = new VmIdJpaController(
                     getEntityManagerFactory());
             VmId vmId;
-            if (getId() > 0) {
-                vmId = controller.findVmId(getId());
-                vmId.setId(getId());
-                vmId.setLastId(getLastId());
-                vmId.setTableName(getTableName());
-                controller.edit(vmId);
-            } else {
+            if (getId() == null) {
                 vmId = new VmId();
-                vmId.setId(getId());
-                vmId.setLastId(getLastId());
-                vmId.setTableName(getTableName());
+                update(vmId, this);
                 controller.create(vmId);
+                setId(vmId.getId());
+            } else {
+                vmId = getEntity();
+                update(vmId, this);
+                controller.edit(vmId);
             }
+            update();
             return getId();
         }
         catch (Exception ex) {
-            getLogger(VMIdServer.class.getSimpleName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             throw new VMException(ex);
         }
     }
@@ -86,8 +78,7 @@ public class VMIdServer extends VmId implements EntityServer<VmId> {
         if (!result.isEmpty()) {
             return new VMIdServer(((VmId) result.get(0)).getId());
         } else {
-            Logger.getLogger(VMIdServer.class.getSimpleName())
-                    .log(Level.WARNING, "Unable to find VM id for: {0}", table);
+            LOG.log(Level.WARNING, "Unable to find VM id for: {0}", table);
             return null;
         }
     }

@@ -10,9 +10,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -71,12 +73,17 @@ public class Baseline implements Serializable {
     @Size(max = 2147483647)
     @Column(name = "description")
     private String description;
-    @JoinTable(name = "baseline_has_requirement", joinColumns = {
-        @JoinColumn(name = "baseline_id", referencedColumnName = "id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "requirement_id", referencedColumnName = "id")})
+    @JoinTable(name = "baseline_has_history", joinColumns = {
+        @JoinColumn(name = "baseline_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "history_id", referencedColumnName = "id")})
     @ManyToMany
-    private List<Requirement> requirementList;
+    private List<History> historyList;
+    @JoinColumns({
+        @JoinColumn(name = "requirement_spec_id", referencedColumnName = "id")
+        , @JoinColumn(name = "requirement_spec_project_id", referencedColumnName = "project_id")
+        , @JoinColumn(name = "requirement_spec_spec_level_id", referencedColumnName = "spec_level_id")})
+    @ManyToOne(optional = false)
+    private RequirementSpec requirementSpec;
 
     public Baseline() {
     }
@@ -110,16 +117,6 @@ public class Baseline implements Serializable {
         this.baselineName = baselineName;
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<Requirement> getRequirementList() {
-        return requirementList;
-    }
-
-    public void setRequirementList(List<Requirement> requirementList) {
-        this.requirementList = requirementList;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -129,13 +126,12 @@ public class Baseline implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+
         if (!(object instanceof Baseline)) {
             return false;
         }
         Baseline other = (Baseline) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return this.id.equals(other.id);
     }
 
     @Override
@@ -157,4 +153,21 @@ public class Baseline implements Serializable {
         this.description = description;
     }
 
+    @XmlTransient
+    @JsonIgnore
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
+    }
+
+    public RequirementSpec getRequirementSpec() {
+        return requirementSpec;
+    }
+
+    public void setRequirementSpec(RequirementSpec requirementSpec) {
+        this.requirementSpec = requirementSpec;
+    }
 }

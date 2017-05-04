@@ -11,7 +11,8 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementSpec;
+import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,23 +35,32 @@ public class BaselineJpaController implements Serializable {
     }
 
     public void create(Baseline baseline) {
-        if (baseline.getRequirementList() == null) {
-            baseline.setRequirementList(new ArrayList<Requirement>());
+        if (baseline.getHistoryList() == null) {
+            baseline.setHistoryList(new ArrayList<History>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
-            for (Requirement requirementListRequirementToAttach : baseline.getRequirementList()) {
-                requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getId());
-                attachedRequirementList.add(requirementListRequirementToAttach);
+            RequirementSpec requirementSpec = baseline.getRequirementSpec();
+            if (requirementSpec != null) {
+                requirementSpec = em.getReference(requirementSpec.getClass(), requirementSpec.getRequirementSpecPK());
+                baseline.setRequirementSpec(requirementSpec);
             }
-            baseline.setRequirementList(attachedRequirementList);
+            List<History> attachedHistoryList = new ArrayList<History>();
+            for (History historyListHistoryToAttach : baseline.getHistoryList()) {
+                historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
+                attachedHistoryList.add(historyListHistoryToAttach);
+            }
+            baseline.setHistoryList(attachedHistoryList);
             em.persist(baseline);
-            for (Requirement requirementListRequirement : baseline.getRequirementList()) {
-                requirementListRequirement.getBaselineList().add(baseline);
-                requirementListRequirement = em.merge(requirementListRequirement);
+            if (requirementSpec != null) {
+                requirementSpec.getBaselineList().add(baseline);
+                requirementSpec = em.merge(requirementSpec);
+            }
+            for (History historyListHistory : baseline.getHistoryList()) {
+                historyListHistory.getBaselineList().add(baseline);
+                historyListHistory = em.merge(historyListHistory);
             }
             em.getTransaction().commit();
         }
@@ -67,26 +77,40 @@ public class BaselineJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Baseline persistentBaseline = em.find(Baseline.class, baseline.getId());
-            List<Requirement> requirementListOld = persistentBaseline.getRequirementList();
-            List<Requirement> requirementListNew = baseline.getRequirementList();
-            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
-            for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
-                requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getId());
-                attachedRequirementListNew.add(requirementListNewRequirementToAttach);
+            RequirementSpec requirementSpecOld = persistentBaseline.getRequirementSpec();
+            RequirementSpec requirementSpecNew = baseline.getRequirementSpec();
+            List<History> historyListOld = persistentBaseline.getHistoryList();
+            List<History> historyListNew = baseline.getHistoryList();
+            if (requirementSpecNew != null) {
+                requirementSpecNew = em.getReference(requirementSpecNew.getClass(), requirementSpecNew.getRequirementSpecPK());
+                baseline.setRequirementSpec(requirementSpecNew);
             }
-            requirementListNew = attachedRequirementListNew;
-            baseline.setRequirementList(requirementListNew);
+            List<History> attachedHistoryListNew = new ArrayList<History>();
+            for (History historyListNewHistoryToAttach : historyListNew) {
+                historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
+                attachedHistoryListNew.add(historyListNewHistoryToAttach);
+            }
+            historyListNew = attachedHistoryListNew;
+            baseline.setHistoryList(historyListNew);
             baseline = em.merge(baseline);
-            for (Requirement requirementListOldRequirement : requirementListOld) {
-                if (!requirementListNew.contains(requirementListOldRequirement)) {
-                    requirementListOldRequirement.getBaselineList().remove(baseline);
-                    requirementListOldRequirement = em.merge(requirementListOldRequirement);
+            if (requirementSpecOld != null && !requirementSpecOld.equals(requirementSpecNew)) {
+                requirementSpecOld.getBaselineList().remove(baseline);
+                requirementSpecOld = em.merge(requirementSpecOld);
+            }
+            if (requirementSpecNew != null && !requirementSpecNew.equals(requirementSpecOld)) {
+                requirementSpecNew.getBaselineList().add(baseline);
+                requirementSpecNew = em.merge(requirementSpecNew);
+            }
+            for (History historyListOldHistory : historyListOld) {
+                if (!historyListNew.contains(historyListOldHistory)) {
+                    historyListOldHistory.getBaselineList().remove(baseline);
+                    historyListOldHistory = em.merge(historyListOldHistory);
                 }
             }
-            for (Requirement requirementListNewRequirement : requirementListNew) {
-                if (!requirementListOld.contains(requirementListNewRequirement)) {
-                    requirementListNewRequirement.getBaselineList().add(baseline);
-                    requirementListNewRequirement = em.merge(requirementListNewRequirement);
+            for (History historyListNewHistory : historyListNew) {
+                if (!historyListOld.contains(historyListNewHistory)) {
+                    historyListNewHistory.getBaselineList().add(baseline);
+                    historyListNewHistory = em.merge(historyListNewHistory);
                 }
             }
             em.getTransaction().commit();
@@ -121,10 +145,15 @@ public class BaselineJpaController implements Serializable {
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The baseline with id " + id + " no longer exists.", enfe);
             }
-            List<Requirement> requirementList = baseline.getRequirementList();
-            for (Requirement requirementListRequirement : requirementList) {
-                requirementListRequirement.getBaselineList().remove(baseline);
-                requirementListRequirement = em.merge(requirementListRequirement);
+            RequirementSpec requirementSpec = baseline.getRequirementSpec();
+            if (requirementSpec != null) {
+                requirementSpec.getBaselineList().remove(baseline);
+                requirementSpec = em.merge(requirementSpec);
+            }
+            List<History> historyList = baseline.getHistoryList();
+            for (History historyListHistory : historyList) {
+                historyListHistory.getBaselineList().remove(baseline);
+                historyListHistory = em.merge(historyListHistory);
             }
             em.remove(baseline);
             em.getTransaction().commit();

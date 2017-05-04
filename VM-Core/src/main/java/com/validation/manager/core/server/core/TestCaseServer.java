@@ -10,7 +10,6 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -23,14 +22,12 @@ public final class TestCaseServer extends TestCase
 
     public TestCaseServer(int id) {
         super(id);
-        TestCaseJpaController controller
-                = new TestCaseJpaController(getEntityManagerFactory());
-        TestCase temp = controller.findTestCase(getId());
-        update((TestCaseServer) this, temp);
+        update();
     }
 
     public TestCaseServer(TestCase tc) {
-        update((TestCaseServer) this, tc);
+        super.setId(tc.getId());
+        update();
     }
 
     public TestCaseServer(String name, Date creationDate) {
@@ -94,18 +91,10 @@ public final class TestCaseServer extends TestCase
             ss.setRequirementList(new ArrayList<>());
         }
         ss.write2DB();
-        List<String> processed = new ArrayList<>();
         if (requirements != null) {
-            for (Requirement req : requirements) {
-                //Make sure there are no duplicate requirements in list
-                if (!processed.contains(req.getUniqueId().trim())) {
-                    processed.add(req.getUniqueId().trim());
-                    Requirement max
-                            = Collections.max(new RequirementServer(req)
-                                    .getVersions(), null);
-                    ss.getRequirementList().add(max);
-                }
-            }
+            requirements.forEach((req) -> {
+                ss.getRequirementList().add(req);
+            });
         }
         ss.write2DB();
         update(this, getEntity());

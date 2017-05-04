@@ -1,5 +1,6 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.api.history.Auditable;
 import com.validation.manager.core.db.mapped.Login;
 import java.io.Serializable;
 import java.util.Date;
@@ -73,12 +74,14 @@ public class VmUser extends Login implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
+    @Auditable
     @Column(name = "username")
     private String username;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
     @Column(name = "password")
+    @Auditable
     private String password;
     @Pattern(regexp = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`"
             + "{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:"
@@ -87,21 +90,25 @@ public class VmUser extends Login implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 100)
+    @Auditable
     @Column(name = "email")
     private String email;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
     @Column(name = "first_name")
+    @Auditable
     private String firstName;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
     @Column(name = "last_name")
+    @Auditable
     private String lastName;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
+    @Auditable
     @Column(name = "locale")
     private String locale;
     @ManyToMany(mappedBy = "vmUserList")
@@ -131,6 +138,10 @@ public class VmUser extends Login implements Serializable {
     private List<UserAssigment> userAssigmentList1;
     @ManyToMany(mappedBy = "vmUserList")
     private List<ExecutionStepHasIssue> executionStepHasIssueList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
+    private List<ExecutionStepHasVmUser> executionStepHasVmUserList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "modifierId")
+    private List<History> historyModificationList;
 
     public VmUser() {
         super();
@@ -331,13 +342,12 @@ public class VmUser extends Login implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+
         if (!(object instanceof VmUser)) {
             return false;
         }
         VmUser other = (VmUser) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return this.id.equals(other.id);
     }
 
     @Override
@@ -353,5 +363,25 @@ public class VmUser extends Login implements Serializable {
 
     public void setExecutionStepHasIssueList(List<ExecutionStepHasIssue> executionStepHasIssueList) {
         this.executionStepHasIssueList = executionStepHasIssueList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepHasVmUser> getExecutionStepHasVmUserList() {
+        return executionStepHasVmUserList;
+    }
+
+    public void setExecutionStepHasVmUserList(List<ExecutionStepHasVmUser> executionStepHasVmUserList) {
+        this.executionStepHasVmUserList = executionStepHasVmUserList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<History> getHistoryModificationList() {
+        return historyModificationList;
+    }
+
+    public void setHistoryModificationList(List<History> historyList) {
+        this.historyModificationList = historyList;
     }
 }

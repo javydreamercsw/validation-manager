@@ -15,7 +15,8 @@ import static java.util.logging.Logger.getLogger;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class RiskControlServer extends RiskControl implements EntityServer<RiskControl> {
+public final class RiskControlServer extends RiskControl
+        implements EntityServer<RiskControl> {
 
     public RiskControlServer(RiskControlPK riskControlPK) {
         super(riskControlPK);
@@ -60,7 +61,8 @@ public class RiskControlServer extends RiskControl implements EntityServer<RiskC
                     getEntityManagerFactory())
                     .destroy(rc.getRiskControlPK());
             return true;
-        } catch (NonexistentEntityException | IllegalOrphanException ex) {
+        }
+        catch (NonexistentEntityException | IllegalOrphanException ex) {
             getLogger(RiskControlServer.class.getName()).log(
                     Level.SEVERE, null, ex);
         }

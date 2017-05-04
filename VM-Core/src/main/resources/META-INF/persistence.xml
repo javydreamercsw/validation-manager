@@ -9,13 +9,20 @@
     <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.ExceptionHasCorrectiveAction</class>
+    <class>com.validation.manager.core.db.ExceptionHasInvestigation</class>
+    <class>com.validation.manager.core.db.ExceptionHasRootCause</class>
     <class>com.validation.manager.core.db.ExecutionResult</class>
     <class>com.validation.manager.core.db.ExecutionStep</class>
     <class>com.validation.manager.core.db.ExecutionStepHasAttachment</class>
     <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
+    <class>com.validation.manager.core.db.ExecutionStepHasVmUser</class>
     <class>com.validation.manager.core.db.FailureMode</class>
+    <class>com.validation.manager.core.db.FieldType</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
+    <class>com.validation.manager.core.db.History</class>
+    <class>com.validation.manager.core.db.HistoryField</class>
     <class>com.validation.manager.core.db.Investigation</class>
     <class>com.validation.manager.core.db.Issue</class>
     <class>com.validation.manager.core.db.IssueResolution</class>
@@ -74,13 +81,20 @@
     <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.ExceptionHasCorrectiveAction</class>
+    <class>com.validation.manager.core.db.ExceptionHasInvestigation</class>
+    <class>com.validation.manager.core.db.ExceptionHasRootCause</class>
     <class>com.validation.manager.core.db.ExecutionResult</class>
     <class>com.validation.manager.core.db.ExecutionStep</class>
     <class>com.validation.manager.core.db.ExecutionStepHasAttachment</class>
     <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
+    <class>com.validation.manager.core.db.ExecutionStepHasVmUser</class>
     <class>com.validation.manager.core.db.FailureMode</class>
+    <class>com.validation.manager.core.db.FieldType</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
+    <class>com.validation.manager.core.db.History</class>
+    <class>com.validation.manager.core.db.HistoryField</class>
     <class>com.validation.manager.core.db.Investigation</class>
     <class>com.validation.manager.core.db.Issue</class>
     <class>com.validation.manager.core.db.IssueResolution</class>
@@ -141,13 +155,20 @@
     <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.ExceptionHasCorrectiveAction</class>
+    <class>com.validation.manager.core.db.ExceptionHasInvestigation</class>
+    <class>com.validation.manager.core.db.ExceptionHasRootCause</class>
     <class>com.validation.manager.core.db.ExecutionResult</class>
     <class>com.validation.manager.core.db.ExecutionStep</class>
     <class>com.validation.manager.core.db.ExecutionStepHasAttachment</class>
     <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
+    <class>com.validation.manager.core.db.ExecutionStepHasVmUser</class>
     <class>com.validation.manager.core.db.FailureMode</class>
+    <class>com.validation.manager.core.db.FieldType</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
+    <class>com.validation.manager.core.db.History</class>
+    <class>com.validation.manager.core.db.HistoryField</class>
     <class>com.validation.manager.core.db.Investigation</class>
     <class>com.validation.manager.core.db.Issue</class>
     <class>com.validation.manager.core.db.IssueResolution</class>

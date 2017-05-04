@@ -3,147 +3,92 @@
  */
 package com.validation.manager.core.db.mapped;
 
-import java.io.Serializable;
-import java.util.Objects;
+import com.validation.manager.core.EntityServer;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import org.openide.util.Exceptions;
 
 @MappedSuperclass
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "VERSIONABLE_TYPE")
-public abstract class Versionable extends VMAuditedObject
-        implements Comparable<Versionable>, Serializable {
-
-    @NotNull
-    @Column(name = "version_id")
-    private Integer versionId = 0;
-
-    @Column(name = "major_version")
-    @Basic(optional = false)
-    @NotNull
-    @Min(value = 0)
-    private Integer majorVersion = 0;
-
-    @Column(name = "mid_version")
-    @Basic(optional = false)
-    @NotNull
-    @Min(value = 0)
-    private Integer midVersion = 0;
-
-    @Column(name = "minor_version")
-    @Basic(optional = false)
-    @NotNull
-    @Min(value = 1)
-    private Integer minorVersion = 1;
+public abstract class Versionable extends AuditedObject {
 
     @Column(name = "dirty")
     @Basic(optional = false)
     private boolean dirty = false;
 
-    public Integer getMajorVersion() {
-        return this.majorVersion;
-    }
-
-    public void setMajorVersion(Integer majorVersion) {
-        this.majorVersion = majorVersion;
-    }
-
-    public Integer getMidVersion() {
-        return this.midVersion;
-    }
-
-    public void setMidVersion(Integer midVersion) {
-        this.midVersion = midVersion;
-    }
-
-    public Integer getMinorVersion() {
-        return this.minorVersion;
-    }
-
-    public void setMinorVersion(Integer minorVersion) {
-        this.minorVersion = minorVersion;
-    }
-
-    public boolean isDirty() {
+    public boolean getDirty() {
         return this.dirty;
     }
 
+    /**
+     * @param dirty the dirty to set
+     */
     public void setDirty(boolean dirty) {
         this.dirty = dirty;
     }
 
-    @Override
-    public String toString() {
-        return ", Version [ " + majorVersion
-                + "." + midVersion + "." + minorVersion + " ]";
-    }
-
-    @Override
-    public int compareTo(Versionable o) {
-        if (!Objects.equals(getMajorVersion(),
-                o.getMajorVersion())) {
-            return getMajorVersion() - o.getMajorVersion();
-        }//Same major version
-        else if (!Objects.equals(getMidVersion(),
-                o.getMidVersion())) {
-            return getMidVersion() - o.getMidVersion();
-        } //Same mid version
-        else if (!Objects.equals(getMinorVersion(),
-                o.getMinorVersion())) {
-            return getMinorVersion() - o.getMinorVersion();
-        }
-        //Everything the same
-        return 0;
-    }
-
-    public void update(Versionable target, Versionable source) {
-        target.setMajorVersion(source.getMajorVersion());
-        target.setMidVersion(source.getMidVersion());
-        target.setMinorVersion(source.getMinorVersion());
-        super.update(target, source);
-    }
-
     /**
-     * Do a major version of the item
+     * Increase major version.
      */
-    public void increaseMajor() {
+    public void increaseMajorVersion() {
         setMajorVersion(getMajorVersion() + 1);
         setMidVersion(0);
         setMinorVersion(0);
+        try {
+            if (this instanceof EntityServer) {
+                EntityServer vs = (EntityServer) this;
+                //Copy the version changes
+                AuditedObject ao = (AuditedObject) vs.getEntity();
+                ao.update(ao, this);
+                updateHistory(ao);
+            } else {
+                updateHistory(this);
+            }
+        }
+        catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     /**
-     * Do a medium version of the item
+     * Increase major version.
      */
-    public void increaseMid() {
+    public void increaseMidVersion() {
         setMidVersion(getMidVersion() + 1);
         setMinorVersion(0);
+        try {
+            if (this instanceof EntityServer) {
+                EntityServer vs = (EntityServer) this;
+                //Copy the version changes
+                AuditedObject ao = (AuditedObject) vs.getEntity();
+                ao.update(ao, this);
+                updateHistory(ao);
+            } else {
+                updateHistory(this);
+            }
+        }
+        catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     /**
-     * Do a minor version of the item
+     * Increase minor is done by default when updating a record.
      */
-    public void increaseMinor() {
-        setMinorVersion(getMinorVersion() + 1);
+    @Override
+    public void update(AuditedObject target, AuditedObject source) {
+        ((Versionable) target).setDirty(((Versionable) source).getDirty());
+        super.update(target, source);
     }
 
-    /**
-     * @return the versionId
-     */
-    public Integer getVersionId() {
-        return versionId;
-    }
-
-    /**
-     * @param versionId the versionId to set
-     */
-    public void setVersionId(Integer versionId) {
-        this.versionId = versionId;
+    @Override
+    public String toString() {
+        return "Version: " + getMajorVersion() + "." + getMidVersion() + "."
+                + getMinorVersion();
     }
 }

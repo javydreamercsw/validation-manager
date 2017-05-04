@@ -184,31 +184,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>install-gsp</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>mvn</executable>
-                            <arguments>
-                                <argument>install:install-file</argument>
-                                <argument>-Dfile=repo/gudosoft/gsqlparser/gsp/4.2/gsp-4.2.jar</argument>
-                                <argument>-DgroupId=gudosoft.gsqlparser</argument>
-                                <argument>-DartifactId=gsp</argument>
-                                <argument>-Dversion=4.2</argument>
-                                <argument>-Dpackaging=jar</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>

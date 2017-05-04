@@ -57,7 +57,7 @@ public class DataBaseManager {
     private static boolean demo;
     private static Long demoResetPeriod;
     private static DataBaseManager instance;
-    private static boolean versioning_enabled = false;
+    private static boolean versioning_enabled = true;
 
     /**
      * @return the versioning enabled
@@ -218,7 +218,7 @@ public class DataBaseManager {
                 }
                 final String JNDIDB = (String) ctx.lookup("java:comp/env/validation-manager/JNDIDB");
                 emf = createEntityManagerFactory(JNDIDB);
-                LOG.log(Level.INFO, "Using context defined database connection: {0}", JNDIDB);
+                LOG.log(Level.FINE, "Using context defined database connection: {0}", JNDIDB);
                 usingContext = true;
             }
             catch (NamingException e) {
@@ -261,8 +261,6 @@ public class DataBaseManager {
 
     @SuppressWarnings("unchecked")
     public static List<Object> createdQuery(String query, Map<String, Object> parameters) {
-        EntityTransaction transaction = getEntityManager().getTransaction();
-        transaction.begin();
         Query q = getEntityManager().createQuery(query);
         if (parameters != null) {
             Iterator<Entry<String, Object>> entries = parameters.entrySet().iterator();
@@ -271,7 +269,6 @@ public class DataBaseManager {
                 q.setParameter(e.getKey(), e.getValue());
             }
         }
-        transaction.commit();
         return q.getResultList();
     }
 
@@ -285,34 +282,19 @@ public class DataBaseManager {
     }
 
     public static List<Object> nativeQuery(String query) {
-        EntityTransaction transaction = getEntityManager().getTransaction();
-        transaction.begin();
         List<Object> resultList
                 = getEntityManager().createNativeQuery(query).getResultList();
-        transaction.commit();
         return resultList;
     }
 
     public static <T extends Object> List<T> createdQuery(String query, T result) {
-        EntityTransaction transaction = getEntityManager().getTransaction();
-        transaction.begin();
         List<T> resultList
                 = getEntityManager().createQuery(query).getResultList();
-        transaction.commit();
         return resultList;
     }
 
     public static void nativeUpdateQuery(String query) {
-        boolean atomic = false;
-        EntityTransaction transaction = getEntityManager().getTransaction();
-        if (!getEntityManager().getTransaction().isActive()) {
-            transaction.begin();
-            atomic = true;
-        }
         getEntityManager().createNativeQuery(query).executeUpdate();
-        if (atomic) {
-            transaction.commit();
-        }
     }
 
     /**
@@ -487,19 +469,20 @@ public class DataBaseManager {
         try {
             flyway.setDataSource(dataSource);
             flyway.setLocations("db.migration");
-            LOG.info("Starting migration...");
+            LOG.fine("Starting migration...");
             flyway.migrate();
-            LOG.info("Done!");
+            LOG.fine("Done!");
         }
         catch (FlywayException fe) {
             LOG.log(Level.SEVERE, "Unable to migrate data", fe);
             setState(DBState.ERROR);
         }
         try {
-            LOG.info("Validating migration...");
+            LOG.fine("Validating migration...");
             flyway.validate();
-            LOG.info("Done!");
-            setState(flyway.info().current().getState() == MigrationState.SUCCESS ? DBState.VALID : DBState.ERROR);
+            LOG.fine("Done!");
+            setState(flyway.info().current().getState()
+                    == MigrationState.SUCCESS ? DBState.VALID : DBState.ERROR);
         }
         catch (FlywayException fe) {
             LOG.log(Level.SEVERE, "Unable to validate", fe);
@@ -515,7 +498,7 @@ public class DataBaseManager {
         while (getState() != DBState.VALID
                 && getState() != DBState.UPDATED
                 && getState() != DBState.ERROR) {
-            LOG.log(Level.INFO,
+            LOG.log(Level.FINE,
                     "Waiting for DB initialization. Current state: {0}",
                     (getState() != null ? getState().name() : null));
             try {
@@ -525,7 +508,7 @@ public class DataBaseManager {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
-        LOG.log(Level.INFO, "DB ready, resuming...");
+        LOG.log(Level.FINE, "DB ready, resuming...");
     }
 
     /**
@@ -627,23 +610,23 @@ public class DataBaseManager {
         MigrationInfo status = flyway.info().current();
         if (status == null) {
             setState(DBState.NEED_INIT);
-            LOG.info("Initialize the metadata...");
+            LOG.fine("Initialize the metadata...");
             try {
                 flyway.init();
-                LOG.info("Done!");
+                LOG.fine("Done!");
             }
             catch (FlywayException fe) {
                 LOG.log(Level.SEVERE, "Unable to initialize database", fe);
                 setState(DBState.ERROR);
             }
         } else {
-            LOG.info("Database has Flyway metadata already...");
+            LOG.fine("Database has Flyway metadata already...");
             displayDBStatus(status);
         }
     }
 
     private static void displayDBStatus(MigrationInfo status) {
-        LOG.log(Level.INFO, "Description: {0}\nState: {1}\nVersion: {2}",
+        LOG.log(Level.FINE, "Description: {0}\nState: {1}\nVersion: {2}",
                 new Object[]{status.getDescription(), status.getState(), status.getVersion()});
     }
 }

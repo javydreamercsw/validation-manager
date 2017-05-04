@@ -1,7 +1,6 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.db.controller.RequirementJpaController;
+import com.validation.manager.core.api.history.Auditable;
 import com.validation.manager.core.db.mapped.Versionable;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -64,16 +63,19 @@ public class Requirement extends Versionable implements Serializable {
     @NotNull
     @Size(min = 1, max = 255)
     @Column(name = "unique_id")
+    @Auditable
     private String uniqueId;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(max = 2147483647)
     @Column(name = "description")
+    @Auditable
     private String description;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "notes")
+    @Auditable
     private String notes;
     @JoinTable(name = "requirement_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id")},
@@ -110,7 +112,7 @@ public class Requirement extends Versionable implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
     private List<RiskControlHasRequirement> riskControlHasRequirementList;
     @ManyToMany(mappedBy = "requirementList")
-    private List<Baseline> baselineList;
+    private List<History> historyList;
 
     public Requirement() {
         super();
@@ -125,26 +127,6 @@ public class Requirement extends Versionable implements Serializable {
         this.uniqueId = uniqueId;
         this.description = description;
         this.notes = notes;
-    }
-
-    public Requirement(String uniqueId, String description, String notes,
-            int major_version, int mid_version, int minor_version) {
-        this.uniqueId = uniqueId;
-        this.description = description;
-        this.notes = notes;
-        super.setMajorVersion(major_version);
-        super.setMidVersion(mid_version);
-        super.setMinorVersion(minor_version);
-        setRiskControlHasRequirementList(new ArrayList<>());
-        setRequirementList(new ArrayList<>());
-        setRequirementList1(new ArrayList<>());
-        setStepList(new ArrayList<>());
-    }
-
-    public Requirement(int major_version, int mid_version, int minor_version) {
-        super.setMajorVersion(major_version);
-        super.setMidVersion(mid_version);
-        super.setMinorVersion(minor_version);
         setRiskControlHasRequirementList(new ArrayList<>());
         setRequirementList(new ArrayList<>());
         setRequirementList1(new ArrayList<>());
@@ -248,13 +230,12 @@ public class Requirement extends Versionable implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+
         if (!(object instanceof Requirement)) {
             return false;
         }
         Requirement other = (Requirement) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return this.id.equals(other.id);
     }
 
     @Override
@@ -280,37 +261,15 @@ public class Requirement extends Versionable implements Serializable {
         this.id = id;
     }
 
-    @Override
-    public boolean isChangeVersionable() {
-        RequirementJpaController controller
-                = new RequirementJpaController(DataBaseManager
-                        .getEntityManagerFactory());
-        Requirement rs = controller.findRequirement(getId());
-        if (rs != null) {
-            String desc = rs.getDescription();
-            if (desc == null) {
-                desc = "";
-            }
-            String n = rs.getNotes();
-            if (n == null) {
-                n = "";
-            }
-            return !desc.equals(getDescription())
-                    || !n.equals(getNotes())
-                    || !rs.getUniqueId().trim()
-                            .equals(getUniqueId().trim());
-        }
-        //Is a new entity, nothing to do
-        return false;
-    }
-
     @XmlTransient
     @JsonIgnore
-    public List<Baseline> getBaselineList() {
-        return baselineList;
+    @Override
+    public List<History> getHistoryList() {
+        return historyList;
     }
 
-    public void setBaselineList(List<Baseline> baselineList) {
-        this.baselineList = baselineList;
+    @Override
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
     }
 }

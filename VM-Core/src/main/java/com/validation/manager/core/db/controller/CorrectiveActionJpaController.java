@@ -12,9 +12,11 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import com.validation.manager.core.db.ExceptionHasCorrectiveAction;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -37,6 +39,9 @@ public class CorrectiveActionJpaController implements Serializable {
         if (correctiveAction.getVmUserList() == null) {
             correctiveAction.setVmUserList(new ArrayList<VmUser>());
         }
+        if (correctiveAction.getExceptionHasCorrectiveActionList() == null) {
+            correctiveAction.setExceptionHasCorrectiveActionList(new ArrayList<ExceptionHasCorrectiveAction>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -47,10 +52,25 @@ public class CorrectiveActionJpaController implements Serializable {
                 attachedVmUserList.add(vmUserListVmUserToAttach);
             }
             correctiveAction.setVmUserList(attachedVmUserList);
+            List<ExceptionHasCorrectiveAction> attachedExceptionHasCorrectiveActionList = new ArrayList<ExceptionHasCorrectiveAction>();
+            for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach : correctiveAction.getExceptionHasCorrectiveActionList()) {
+                exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach = em.getReference(exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach.getClass(), exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach.getExceptionHasCorrectiveActionPK());
+                attachedExceptionHasCorrectiveActionList.add(exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach);
+            }
+            correctiveAction.setExceptionHasCorrectiveActionList(attachedExceptionHasCorrectiveActionList);
             em.persist(correctiveAction);
             for (VmUser vmUserListVmUser : correctiveAction.getVmUserList()) {
                 vmUserListVmUser.getCorrectiveActionList().add(correctiveAction);
                 vmUserListVmUser = em.merge(vmUserListVmUser);
+            }
+            for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListExceptionHasCorrectiveAction : correctiveAction.getExceptionHasCorrectiveActionList()) {
+                CorrectiveAction oldCorrectiveActionOfExceptionHasCorrectiveActionListExceptionHasCorrectiveAction = exceptionHasCorrectiveActionListExceptionHasCorrectiveAction.getCorrectiveAction();
+                exceptionHasCorrectiveActionListExceptionHasCorrectiveAction.setCorrectiveAction(correctiveAction);
+                exceptionHasCorrectiveActionListExceptionHasCorrectiveAction = em.merge(exceptionHasCorrectiveActionListExceptionHasCorrectiveAction);
+                if (oldCorrectiveActionOfExceptionHasCorrectiveActionListExceptionHasCorrectiveAction != null) {
+                    oldCorrectiveActionOfExceptionHasCorrectiveActionListExceptionHasCorrectiveAction.getExceptionHasCorrectiveActionList().remove(exceptionHasCorrectiveActionListExceptionHasCorrectiveAction);
+                    oldCorrectiveActionOfExceptionHasCorrectiveActionListExceptionHasCorrectiveAction = em.merge(oldCorrectiveActionOfExceptionHasCorrectiveActionListExceptionHasCorrectiveAction);
+                }
             }
             em.getTransaction().commit();
         }
@@ -61,7 +81,7 @@ public class CorrectiveActionJpaController implements Serializable {
         }
     }
 
-    public void edit(CorrectiveAction correctiveAction) throws NonexistentEntityException, Exception {
+    public void edit(CorrectiveAction correctiveAction) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -69,6 +89,20 @@ public class CorrectiveActionJpaController implements Serializable {
             CorrectiveAction persistentCorrectiveAction = em.find(CorrectiveAction.class, correctiveAction.getId());
             List<VmUser> vmUserListOld = persistentCorrectiveAction.getVmUserList();
             List<VmUser> vmUserListNew = correctiveAction.getVmUserList();
+            List<ExceptionHasCorrectiveAction> exceptionHasCorrectiveActionListOld = persistentCorrectiveAction.getExceptionHasCorrectiveActionList();
+            List<ExceptionHasCorrectiveAction> exceptionHasCorrectiveActionListNew = correctiveAction.getExceptionHasCorrectiveActionList();
+            List<String> illegalOrphanMessages = null;
+            for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListOldExceptionHasCorrectiveAction : exceptionHasCorrectiveActionListOld) {
+                if (!exceptionHasCorrectiveActionListNew.contains(exceptionHasCorrectiveActionListOldExceptionHasCorrectiveAction)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain ExceptionHasCorrectiveAction " + exceptionHasCorrectiveActionListOldExceptionHasCorrectiveAction + " since its correctiveAction field is not nullable.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
             List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
@@ -76,6 +110,13 @@ public class CorrectiveActionJpaController implements Serializable {
             }
             vmUserListNew = attachedVmUserListNew;
             correctiveAction.setVmUserList(vmUserListNew);
+            List<ExceptionHasCorrectiveAction> attachedExceptionHasCorrectiveActionListNew = new ArrayList<ExceptionHasCorrectiveAction>();
+            for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach : exceptionHasCorrectiveActionListNew) {
+                exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach = em.getReference(exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach.getClass(), exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach.getExceptionHasCorrectiveActionPK());
+                attachedExceptionHasCorrectiveActionListNew.add(exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach);
+            }
+            exceptionHasCorrectiveActionListNew = attachedExceptionHasCorrectiveActionListNew;
+            correctiveAction.setExceptionHasCorrectiveActionList(exceptionHasCorrectiveActionListNew);
             correctiveAction = em.merge(correctiveAction);
             for (VmUser vmUserListOldVmUser : vmUserListOld) {
                 if (!vmUserListNew.contains(vmUserListOldVmUser)) {
@@ -87,6 +128,17 @@ public class CorrectiveActionJpaController implements Serializable {
                 if (!vmUserListOld.contains(vmUserListNewVmUser)) {
                     vmUserListNewVmUser.getCorrectiveActionList().add(correctiveAction);
                     vmUserListNewVmUser = em.merge(vmUserListNewVmUser);
+                }
+            }
+            for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction : exceptionHasCorrectiveActionListNew) {
+                if (!exceptionHasCorrectiveActionListOld.contains(exceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction)) {
+                    CorrectiveAction oldCorrectiveActionOfExceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction = exceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction.getCorrectiveAction();
+                    exceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction.setCorrectiveAction(correctiveAction);
+                    exceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction = em.merge(exceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction);
+                    if (oldCorrectiveActionOfExceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction != null && !oldCorrectiveActionOfExceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction.equals(correctiveAction)) {
+                        oldCorrectiveActionOfExceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction.getExceptionHasCorrectiveActionList().remove(exceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction);
+                        oldCorrectiveActionOfExceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction = em.merge(oldCorrectiveActionOfExceptionHasCorrectiveActionListNewExceptionHasCorrectiveAction);
+                    }
                 }
             }
             em.getTransaction().commit();
@@ -108,7 +160,7 @@ public class CorrectiveActionJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -120,6 +172,17 @@ public class CorrectiveActionJpaController implements Serializable {
             }
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The correctiveAction with id " + id + " no longer exists.", enfe);
+            }
+            List<String> illegalOrphanMessages = null;
+            List<ExceptionHasCorrectiveAction> exceptionHasCorrectiveActionListOrphanCheck = correctiveAction.getExceptionHasCorrectiveActionList();
+            for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListOrphanCheckExceptionHasCorrectiveAction : exceptionHasCorrectiveActionListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This CorrectiveAction (" + correctiveAction + ") cannot be destroyed since the ExceptionHasCorrectiveAction " + exceptionHasCorrectiveActionListOrphanCheckExceptionHasCorrectiveAction + " in its exceptionHasCorrectiveActionList field has a non-nullable correctiveAction field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             List<VmUser> vmUserList = correctiveAction.getVmUserList();
             for (VmUser vmUserListVmUser : vmUserList) {

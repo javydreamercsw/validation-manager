@@ -62,6 +62,8 @@ import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.HistoryField;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -85,7 +87,6 @@ import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.mapped.Versionable;
 import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
@@ -93,6 +94,7 @@ import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import com.validation.manager.core.server.core.VMUserServer;
+import com.validation.manager.core.tool.Tool;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import com.validation.manager.core.tool.step.importer.StepImporter;
@@ -1128,16 +1130,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
-        try {
-            //Add a history section
-            List<Requirement> versions = new RequirementServer(req).getVersions();
-            if (!versions.isEmpty()) {
-                layout.addComponent(createRequirementHistoryTable(
-                        "History", versions));
-            }
-        } catch (VMException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -1153,8 +1145,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
                     req.setUniqueId(id.getValue().toString());
-                    req.setDescription(notes.getValue().toString());
-                    req.setRequirementSpecNode((RequirementSpecNode) tree.getValue());
+                    req.setNotes(notes.getValue().toString());
+                    req.setDescription(desc.getValue().toString());
+                    req.setRequirementSpecNode((RequirementSpecNode) tree
+                            .getValue());
                     new RequirementJpaController(DataBaseManager
                             .getEntityManagerFactory()).create(req);
                     form.setVisible(false);
@@ -1171,11 +1165,16 @@ public class ValidationManagerUI extends UI implements VMUI {
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
-                        binder.commit();
+                        RequirementServer rs = new RequirementServer(req);
+                        rs.setUniqueId(id.getValue().toString());
+                        rs.setNotes(notes.getValue().toString());
+                        rs.setDescription(desc.getValue().toString());
+                        rs.write2DB();
+                        form.setVisible(false);
                         //Recreate the tree to show the addition
-                        buildProjectTree(req);
-                        displayRequirement(req, false);
-                    } catch (FieldGroup.CommitException ex) {
+                        buildProjectTree(rs.getEntity());
+                        displayRequirement(rs.getEntity(), false);
+                    } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
@@ -1187,6 +1186,16 @@ public class ValidationManagerUI extends UI implements VMUI {
                 hl.addComponent(cancel);
                 layout.addComponent(hl);
             }
+        }
+        try {
+            //Add a history section
+            List<History> versions = new RequirementServer(req).getHistoryList();
+            if (!versions.isEmpty()) {
+                layout.addComponent(createRequirementHistoryTable(
+                        "History", versions));
+            }
+        } catch (VMException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
         binder.setBuffered(true);
         binder.setReadOnly(!edit);
@@ -1295,7 +1304,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                 LOG.log(Level.WARNING, "Unable to find TCE: " + tceIdS, nfe);
             }
             try {
-                int tcId = Integer.parseInt(item.substring(item.lastIndexOf("-") + 1));
+                int tcId = Integer.parseInt(item.substring(item
+                        .lastIndexOf("-") + 1));
                 LOG.log(Level.FINE, "{0}", tcId);
                 tcs = new TestCaseServer(tcId);
             } catch (NumberFormatException nfe) {
@@ -1335,8 +1345,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         edit.setEnabled(checkRight("testplan.planning"));
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayTestCaseExecution((TestCaseExecution) tree.getValue(),
-                            true);
+                    displayTestCaseExecution((TestCaseExecution) tree
+                            .getValue(), true);
                 });
         addTestCaseAssignment(menu);
         addExecutionDashboard(menu);
@@ -1455,14 +1465,16 @@ public class ValidationManagerUI extends UI implements VMUI {
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     Requirement r = new Requirement();
-                    r.setRequirementSpecNode((RequirementSpecNode) tree.getValue());
+                    r.setRequirementSpecNode((RequirementSpecNode) tree
+                            .getValue());
                     displayRequirement(r, true);
                 });
         ContextMenu.ContextMenuItem edit
                 = menu.addItem("Edit Requirement Spec Node", EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayRequirementSpecNode((RequirementSpecNode) tree.getValue(),
+                    displayRequirementSpecNode((RequirementSpecNode) tree
+                            .getValue(),
                             true);
                 });
         edit.setEnabled(checkRight("requirement.modify"));
@@ -1488,8 +1500,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                             //TODO: Display the excel file (partially), map columns and import
                             //Process the file
                             RequirementImporter importer
-                                    = new RequirementImporter(receiver.getFile(),
-                                            (RequirementSpecNode) tree.getValue());
+                                    = new RequirementImporter(receiver
+                                            .getFile(),
+                                            (RequirementSpecNode) tree
+                                                    .getValue());
 
                             importer.importFile(cb.getValue());
                             importer.processImport();
@@ -1583,7 +1597,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     LOG.log(Level.SEVERE, null, ex);
                                 }
                             }
-                            buildProjectTree(new TestCaseServer(tc.getId()).getEntity());
+                            buildProjectTree(new TestCaseServer(tc.getId())
+                                    .getEntity());
                             updateScreen();
                         } catch (TestCaseImportException ex) {
                             LOG.log(Level.SEVERE, "Error processing import!",
@@ -1682,8 +1697,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 .getComponentCaption());
                         if (me == null) {
                             if (provider.shouldDisplay()) {
-                                Tab tab = tabSheet.addTab(provider.getContent(),
-                                        translate(provider.getComponentCaption()));
+                                tabSheet.addTab(provider
+                                        .getContent(),
+                                        translate(provider
+                                                .getComponentCaption()));
                             }
                         } else {
                             provider.update();
@@ -1836,12 +1853,17 @@ public class ValidationManagerUI extends UI implements VMUI {
         tree.setItemIcon(rs, SPEC_ICON);
         // Set it to be a child.
         tree.setParent(rs, rs.getProject());
-        if (rs.getRequirementSpecNodeList().isEmpty()) {
+        if (rs.getRequirementSpecNodeList().isEmpty()
+                && rs.getBaselineList().isEmpty()) {
             //No children
             tree.setChildrenAllowed(rs, false);
         } else {
             rs.getRequirementSpecNodeList().forEach((rsn) -> {
                 addRequirementSpecsNode(rsn, tree);
+            });
+            //Add the baseline to the spec
+            rs.getBaselineList().forEach(bl -> {
+                addBaseline(bl, tree);
             });
         }
     }
@@ -1932,10 +1954,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         tree.setParent(req, req.getRequirementSpecNode());
         //No children
         tree.setChildrenAllowed(req, false);
-        //Add the baseline to the spec
-        req.getBaselineList().forEach(bl -> {
-            addBaseline(bl, tree);
-        });
     }
 
     private void addTestCaseExecutions(String parent, TestCaseExecution tce,
@@ -2001,7 +2019,8 @@ public class ValidationManagerUI extends UI implements VMUI {
             });
             children = true;
         }
-        List<TestCaseExecution> executions = TestCaseExecutionServer.getExecutions(p);
+        List<TestCaseExecution> executions = TestCaseExecutionServer
+                .getExecutions(p);
         if (!executions.isEmpty()) {
             String id = "executions" + p.getId();
             tree.addItem(id);
@@ -2042,9 +2061,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                             DragAndDropEvent dragEvent, Tree tree) {
                         HashSet<Object> allowed = new HashSet<>();
                         tree.getItemIds().stream().filter((itemId)
-                                -> (itemId instanceof Step)).forEachOrdered((itemId) -> {
-                            allowed.add(itemId);
-                        });
+                                -> (itemId instanceof Step))
+                                .forEachOrdered((itemId) -> {
+                                    allowed.add(itemId);
+                                });
                         return allowed;
                     }
                 };
@@ -2088,30 +2108,38 @@ public class ValidationManagerUI extends UI implements VMUI {
                             break;
                         case TOP: {
                             //for Steps we need to update the sequence number
-                            if (sourceItemId instanceof Step && targetItemId instanceof Step) {
+                            if (sourceItemId instanceof Step
+                                    && targetItemId instanceof Step) {
                                 Step targetItem = (Step) targetItemId;
                                 Step sourceItem = (Step) sourceItemId;
                                 StepJpaController stepController
-                                        = new StepJpaController(DataBaseManager.getEntityManagerFactory());
+                                        = new StepJpaController(DataBaseManager
+                                                .getEntityManagerFactory());
 //                                TestCaseJpaController tcController
 //                                        = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
                                 boolean valid = false;
-                                if (targetItem.getTestCase().equals(sourceItem.getTestCase())) {
+                                if (targetItem.getTestCase().equals(sourceItem
+                                        .getTestCase())) {
                                     //Same Test Case, just re-arrange
                                     LOG.info("Same Test Case!");
-                                    SortedMap<Integer, Step> map = new TreeMap<>();
-                                    targetItem.getTestCase().getStepList().forEach((s) -> {
-                                        map.put(s.getStepSequence(), s);
-                                    });
+                                    SortedMap<Integer, Step> map
+                                            = new TreeMap<>();
+                                    targetItem.getTestCase().getStepList()
+                                            .forEach((s) -> {
+                                                map.put(s.getStepSequence(), s);
+                                            });
                                     //Now swap the two that switched
                                     swapValues(map, sourceItem.getStepSequence(),
                                             targetItem.getStepSequence());
                                     //Now update the sequence numbers
                                     int count = 0;
-                                    for (Entry<Integer, Step> entry : map.entrySet()) {
-                                        entry.getValue().setStepSequence(++count);
+                                    for (Entry<Integer, Step> entry
+                                            : map.entrySet()) {
+                                        entry.getValue()
+                                                .setStepSequence(++count);
                                         try {
-                                            stepController.edit(entry.getValue());
+                                            stepController.edit(entry
+                                                    .getValue());
                                         } catch (Exception ex) {
                                             LOG.log(Level.SEVERE, null, ex);
                                         }
@@ -2168,10 +2196,13 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 }
                                 if (valid) {
                                     // Drop at the top of a subtree -> make it previous
-                                    Object parentId = container.getParent(targetItemId);
+                                    Object parentId
+                                            = container.getParent(targetItemId);
                                     container.setParent(sourceItemId, parentId);
-                                    container.moveAfterSibling(sourceItemId, targetItemId);
-                                    container.moveAfterSibling(targetItemId, sourceItemId);
+                                    container.moveAfterSibling(sourceItemId,
+                                            targetItemId);
+                                    container.moveAfterSibling(targetItemId,
+                                            sourceItemId);
                                     buildProjectTree(targetItem);
                                     updateScreen();
                                 }
@@ -2182,7 +2213,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                             // Drop below another item -> make it next
                             Object parentId = container.getParent(targetItemId);
                             container.setParent(sourceItemId, parentId);
-                            container.moveAfterSibling(sourceItemId, targetItemId);
+                            container.moveAfterSibling(sourceItemId,
+                                    targetItemId);
                             break;
                         }
                         default:
@@ -2355,24 +2387,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         displayBaseline(baseline, edit, null);
     }
 
-    private List<Requirement> extractRequirements(RequirementSpecNode rsn) {
-        ArrayList<Requirement> result = new ArrayList<>();
-        result.addAll(rsn.getRequirementList());
-        rsn.getRequirementSpecNodeList().forEach(rsn2 -> {
-            result.addAll(extractRequirements(rsn2));
-        });
-        result.addAll(rsn.getRequirementList());
-        return result;
-    }
-
-    private List<Requirement> extractRequirements(RequirementSpec rs) {
-        ArrayList<Requirement> result = new ArrayList<>();
-        rs.getRequirementSpecNodeList().forEach(rsn -> {
-            result.addAll(extractRequirements(rsn));
-        });
-        return result;
-    }
-
     private void displayBaseline(Baseline baseline,
             boolean edit, RequirementSpec rs) {
         Panel form = new Panel("Baseline Detail");
@@ -2389,11 +2403,15 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(desc);
         Button cancel = new Button("Cancel");
         if (rs != null) {
+            List<History> potential = new ArrayList<>();
+            for (Requirement r : Tool.extractRequirements(rs)) {
+                potential.add(r.getHistoryList().get(r.getHistoryList().size() - 1));
+            }
             layout.addComponent(createRequirementHistoryTable("Included Requirements",
-                    extractRequirements(rs)));
+                    potential));
         } else {
             layout.addComponent(createRequirementHistoryTable("Included Requirements",
-                    baseline.getRequirementList()));
+                    baseline.getHistoryList()));
         }
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -2412,18 +2430,22 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     .withMessage("This is not reversible as "
                                             + "requirements will be released to a new major version")
                                     .withYesButton(() -> {
-                                        Baseline entity = BaselineServer.createBaseline(
-                                                baseline.getBaselineName(),
-                                                baseline.getDescription(),
-                                                extractRequirements(rs)).getEntity();
+                                        Baseline entity = BaselineServer
+                                                .createBaseline(
+                                                        baseline.getBaselineName(),
+                                                        baseline.getDescription(),
+                                                        rs)
+                                                .getEntity();
                                         displayObject(entity, true);
                                     },
                                             ButtonOption.focus(),
-                                            ButtonOption.icon(VaadinIcons.CHECK))
+                                            ButtonOption
+                                                    .icon(VaadinIcons.CHECK))
                                     .withNoButton(() -> {
                                         displayObject(tree.getValue());
                                     },
-                                            ButtonOption.icon(VaadinIcons.CLOSE));
+                                            ButtonOption
+                                                    .icon(VaadinIcons.CLOSE));
                             prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
                             prompt.open();
                         } else {
@@ -2470,13 +2492,13 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private Component createRequirementHistoryTable(String title,
-            List<Requirement> requirements) {
+            List<History> historyItems) {
         Grid grid = new Grid(title);
-        BeanItemContainer<Requirement> reqs
-                = new BeanItemContainer<>(Requirement.class);
+        BeanItemContainer<History> histories
+                = new BeanItemContainer<>(History.class);
         GeneratedPropertyContainer wrapperCont
-                = new GeneratedPropertyContainer(reqs);
-        reqs.addAll(requirements);
+                = new GeneratedPropertyContainer(histories);
+        histories.addAll(historyItems);
         grid.setContainerDataSource(wrapperCont);
         grid.setHeightMode(HeightMode.ROW);
         grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
@@ -2485,7 +2507,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
             @Override
             public String getValue(Item item, Object itemId, Object propertyId) {
-                Versionable v = (Versionable) itemId;
+                History v = (History) itemId;
                 return v.getMajorVersion() + "." + v.getMidVersion()
                         + "." + v.getMinorVersion();
             }
@@ -2495,14 +2517,101 @@ public class ValidationManagerUI extends UI implements VMUI {
                 return String.class;
             }
         });
-        grid.setColumns("uniqueId", "description", "version");
+        wrapperCont.addGeneratedProperty("uniqueId",
+                new PropertyValueGenerator<String>() {
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+                History v = (History) itemId;
+                String result = "";
+                for (HistoryField hf : v.getHistoryFieldList()) {
+                    if (hf.getFieldName().equals("uniqueId")) {
+                        result = hf.getFieldValue();
+                        break;
+                    }
+                }
+                return result;
+            }
+
+            @Override
+            public Class<String> getType() {
+                return String.class;
+            }
+        });
+        wrapperCont.addGeneratedProperty("description",
+                new PropertyValueGenerator<String>() {
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+                History v = (History) itemId;
+                String result = "";
+                for (HistoryField hf : v.getHistoryFieldList()) {
+                    if (hf.getFieldName().equals("description")) {
+                        result = hf.getFieldValue();
+                        break;
+                    }
+                }
+                return result;
+            }
+
+            @Override
+            public Class<String> getType() {
+                return String.class;
+            }
+        });
+        wrapperCont.addGeneratedProperty("modifier",
+                new PropertyValueGenerator<String>() {
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+                History v = (History) itemId;
+                return v.getModifierId().getFirstName() + " "
+                        + v.getModifierId().getLastName();
+            }
+
+            @Override
+            public Class<String> getType() {
+                return String.class;
+            }
+        });
+        wrapperCont.addGeneratedProperty("modificationDate",
+                new PropertyValueGenerator<String>() {
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+                History v = (History) itemId;
+                return v.getModificationTime().toString();
+            }
+
+            @Override
+            public Class<String> getType() {
+                return String.class;
+            }
+        });
+        wrapperCont.addGeneratedProperty("modificationReason",
+                new PropertyValueGenerator<String>() {
+
+            @Override
+            public String getValue(Item item, Object itemId, Object propertyId) {
+                History v = (History) itemId;
+                return v.getReason() == null ? "null" : translate(v.getReason());
+            }
+
+            @Override
+            public Class<String> getType() {
+                return String.class;
+            }
+        });
+        grid.setColumns("uniqueId", "description", "version", "modifier",
+                "modificationDate", "modificationReason");
         Grid.Column uniqueId = grid.getColumn("uniqueId");
         uniqueId.setHeaderCaption("ID");
-        Grid.Column description = grid.getColumn("description");
-        description.setHeaderCaption("Description");
         Grid.Column version = grid.getColumn("version");
         version.setHeaderCaption("Version");
+        Grid.Column description = grid.getColumn("description");
+        description.setHeaderCaption("Description");
         wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});
+        grid.setSizeFull();
         return grid;
     }
 
@@ -2511,9 +2620,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             tree.addItem(bl);
             tree.setItemCaption(bl, bl.getBaselineName());
             tree.setItemIcon(bl, BASELINE_ICON);
-            tree.setParent(bl, bl.getRequirementList().get(0)
-                    .getRequirementSpecNode()
-                    .getRequirementSpec());
+            tree.setParent(bl, bl.getRequirementSpec());
             //No children
             tree.setChildrenAllowed(bl, false);
         }
@@ -2551,7 +2658,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         dashboard.setEnabled(checkRight("testplan.planning"));
         dashboard.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    addWindow(new ExecutionDashboard(extractTCE(tree.getValue())));
+                    addWindow(new ExecutionDashboard(extractTCE(tree
+                            .getValue())));
                 });
     }
 
@@ -2608,7 +2716,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         StringBuilder sb = new StringBuilder();
                         sb.append("Here is the standard output of the command:")
                                 .append("\n");
-                        String s = null;
+                        String s;
                         while ((s = stdInput.readLine()) != null) {
                             sb.append(s).append("\n");
                         }

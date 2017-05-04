@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -128,15 +127,6 @@ public class DemoBuilder {
         ps.getTestProjectList().add(tp.getEntity());
         //Save it
         ps.write2DB();
-    }
-
-    public static void main(String[] args) {
-        try {
-            DataBaseManager.setPersistenceUnitName("TestVMPU");
-            buildDemoProject();
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
     }
 
     private static void addDemoExecution(Project p)

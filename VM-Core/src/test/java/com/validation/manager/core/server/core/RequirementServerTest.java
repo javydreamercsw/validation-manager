@@ -1,7 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMException;
+import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -11,12 +11,12 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
-import org.junit.Before;
 import org.junit.Test;
 import org.openide.util.Exceptions;
 
@@ -31,59 +31,42 @@ public class RequirementServerTest extends AbstractVMTestCase {
     private Project p;
     private RequirementSpecNode rsns;
 
-    @Before
     @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        DataBaseManager.setVersioningEnabled(true);
-        RequirementSpec rss = null;
-        p = TestHelper.createProject("New Project", "Notes");
-        ProjectServer project = new ProjectServer(p);
-        project.setNotes("Notes 2");
-        project.write2DB();
-        assertTrue(new ProjectJpaController(
-                DataBaseManager.getEntityManagerFactory())
-                .findProject(project.getId()).getNotes().equals(project.getNotes()));
-        //Create requirements
-        System.out.println("Create Requirement Spec");
+    protected void postSetUp() {
         try {
-            rss = TestHelper.createRequirementSpec("Test", "Test",
-                    project, 1);
+            RequirementSpec rss = null;
+            p = TestHelper.createProject("New Project", "Notes");
+            ProjectServer project = new ProjectServer(p);
+            project.setNotes("Notes 2");
+            project.write2DB();
+            assertTrue(new ProjectJpaController(
+                    DataBaseManager.getEntityManagerFactory())
+                    .findProject(project.getId()).getNotes().equals(project.getNotes()));
+            //Create requirements
+            System.out.println("Create Requirement Spec");
+            try {
+                rss = TestHelper.createRequirementSpec("Test", "Test",
+                        project, 1);
+            }
+            catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+            System.out.println("Create Requirement Spec Node");
+            try {
+                rsns = TestHelper.createRequirementSpecNode(
+                        rss, "Test", "Test", "Test");
+            }
+            catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+                fail();
+            }
+        }
+        catch (NonexistentEntityException ex) {
+            Exceptions.printStackTrace(ex);
         }
         catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        System.out.println("Create Requirement Spec Node");
-        try {
-            rsns = TestHelper.createRequirementSpecNode(
-                    rss, "Test", "Test", "Test");
-        }
-        catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-    }
-
-    /**
-     * Test of deleteRequirement method, of class RequirementServer.
-     */
-    @Test
-    public void testDeleteRequirement() {
-        try {
-            System.out.println("deleteRequirement");
-            Requirement r = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
-                    "Notes", 1, 1);
-            RequirementServer.deleteRequirement(r);
-            parameters.clear();
-            parameters.put("id", r.getId());
-            assertTrue(DataBaseManager.namedQuery("Requirement.findById",
-                    parameters).isEmpty());
-        }
-        catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
+            Exceptions.printStackTrace(ex);
         }
     }
 
@@ -98,6 +81,14 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer instance = new RequirementServer(source);
+            assertEquals(1, instance.getHistoryList().size());
+            int count = 1;
+            for (History h : instance.getHistoryList()) {
+                assertEquals(0, h.getMajorVersion());
+                assertEquals(0, h.getMidVersion());
+                assertEquals(count, h.getMinorVersion());
+                count++;
+            }
             Requirement target = new Requirement();
             instance.update(target, source);
             assertEquals(instance.getUniqueId(), target.getUniqueId());
@@ -107,6 +98,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
                     target.getRequirementTypeId().getId());
             assertEquals(instance.getRequirementStatusId().getId(),
                     target.getRequirementStatusId().getId());
+            assertEquals(instance.getHistoryList().size(),
+                    target.getHistoryList().size());
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -250,47 +243,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
             });
             //No children
             assertEquals(0, rs2.getRequirementList1().size());
-            checkCircularDependency(req);
-            checkCircularDependency(req2);
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        }
-    }
-
-    private void checkCircularDependency(Requirement r) {
-        try {
-            RequirementServer rs = new RequirementServer(r);
-            rs.getVersions().stream().map((t)
-                    -> t).filter((temp)
-                    -> (temp.getRequirementList().size() > 0
-                    && temp.getRequirementList1().size() > 0)).map((temp) -> {
-                //Has both children and parents
-                LOG.log(Level.INFO,
-                        "Inspecting {0} for circular dependencies.",
-                        temp.getUniqueId());
-                return temp;
-            }).forEachOrdered((temp) -> {
-                temp.getRequirementList1().forEach((parent) -> {
-                    //Check all parents of this requirement
-                    parent.getRequirementList().stream().filter((child)
-                            -> (child.getUniqueId().equals(temp.getUniqueId())))
-                            .map((_item) -> {
-                                LOG.log(Level.SEVERE,
-                                        "Circular dependency "
-                                        + "detected between {0} and {1}",
-                                        new Object[]{temp.getUniqueId(),
-                                            parent.getUniqueId()});
-                                return _item;
-                            }).forEachOrdered((_item) -> {
-                        fail();
-                    }); //Check if the parent has this requirement as a child
-                });
-            }); //Detect circular relationships
-        }
-        catch (VMException ex) {
-            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -377,6 +333,58 @@ public class RequirementServerTest extends AbstractVMTestCase {
             r2.addChildRequirement(req);
             assertEquals(0, r2.getRequirementList1().size());
             assertEquals(1, r2.getRequirementList().size());
+        }
+        catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            fail();
+        }
+    }
+
+    @Test
+    public void testVersioning() {
+        try {
+            Requirement req = TestHelper.createRequirement("SRS-SW-0001",
+                    "Description", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1);
+            RequirementServer rs = new RequirementServer(req);
+            int historyCount = 1;
+            assertEquals(historyCount++, rs.getHistoryList().size());
+            History history = rs.getHistoryList().get(rs
+                    .getHistoryList().size() - 1);
+            assertEquals(0, history.getMajorVersion());
+            assertEquals(0, history.getMidVersion());
+            assertEquals(1, history.getMinorVersion());
+            assertTrue(checkHistory(rs));
+            rs.setDescription("desc 2");
+            rs.write2DB();
+            assertEquals(historyCount++, rs.getHistoryList().size());
+            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
+            assertEquals(0, history.getMajorVersion());
+            assertEquals(0, history.getMidVersion());
+            assertEquals(2, history.getMinorVersion());
+            assertTrue(checkHistory(rs));
+            rs.setDescription("desc 3");
+            rs.write2DB();
+            assertEquals(historyCount++, rs.getHistoryList().size());
+            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
+            assertEquals(0, history.getMajorVersion());
+            assertEquals(0, history.getMidVersion());
+            assertEquals(3, history.getMinorVersion());
+            assertTrue(checkHistory(rs));
+            rs.increaseMidVersion();
+            assertEquals(historyCount++, rs.getHistoryList().size());
+            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
+            assertEquals(0, history.getMajorVersion());
+            assertEquals(1, history.getMidVersion());
+            assertEquals(0, history.getMinorVersion());
+            assertTrue(checkHistory(rs));
+            rs.increaseMajorVersion();
+            assertEquals(historyCount++, rs.getHistoryList().size());
+            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
+            assertEquals(1, history.getMajorVersion());
+            assertEquals(0, history.getMidVersion());
+            assertEquals(0, history.getMinorVersion());
+            assertTrue(checkHistory(rs));
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);

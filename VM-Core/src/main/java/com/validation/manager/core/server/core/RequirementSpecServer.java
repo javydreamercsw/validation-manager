@@ -32,6 +32,7 @@ public final class RequirementSpecServer extends RequirementSpec
         setName(name);
         setModificationDate(new Date());
         setRequirementSpecNodeList(new ArrayList<>());
+        setBaselineList(new ArrayList<>());
     }
 
     public RequirementSpecServer(RequirementSpec rs) {
@@ -115,6 +116,7 @@ public final class RequirementSpecServer extends RequirementSpec
         target.setModificationDate(source.getModificationDate());
         target.setRequirementSpecNodeList(source.getRequirementSpecNodeList());
         target.setRequirementSpecPK(source.getRequirementSpecPK());
+        target.setBaselineList(source.getBaselineList());
     }
 
     public static List<Requirement> getRequirements(RequirementSpec spec) {

@@ -39,8 +39,8 @@ public class UserHasInvestigationJpaController implements Serializable {
         if (userHasInvestigation.getUserHasInvestigationPK() == null) {
             userHasInvestigation.setUserHasInvestigationPK(new UserHasInvestigationPK());
         }
-        userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
         userHasInvestigation.getUserHasInvestigationPK().setInvestigationId(userHasInvestigation.getInvestigation().getId());
+        userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -80,8 +80,8 @@ public class UserHasInvestigationJpaController implements Serializable {
     }
 
     public void edit(UserHasInvestigation userHasInvestigation) throws NonexistentEntityException, Exception {
-        userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
         userHasInvestigation.getUserHasInvestigationPK().setInvestigationId(userHasInvestigation.getInvestigation().getId());
+        userHasInvestigation.getUserHasInvestigationPK().setUserId(userHasInvestigation.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

@@ -1,7 +1,6 @@
 package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
@@ -26,7 +25,6 @@ public final class ProjectServer extends Project
     public ProjectServer(String name, String notes) {
         super(name);
         setNotes(notes);
-        setId(0);
         setProjectList(new ArrayList<>());
         setRequirementSpecList(new ArrayList<>());
         setTestProjectList(new ArrayList<>());
@@ -48,16 +46,16 @@ public final class ProjectServer extends Project
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
         Project p;
-        if (getId() != null && getId() > 0) {
-            p = new ProjectJpaController(getEntityManagerFactory())
-                    .findProject(getId());
-            update(p, this);
-            new ProjectJpaController(getEntityManagerFactory()).edit(p);
-        } else {
+        if (getId() == null) {
             p = new Project(getName());
             update(p, this);
             new ProjectJpaController(getEntityManagerFactory()).create(p);
             setId(p.getId());
+        } else {
+            p = new ProjectJpaController(getEntityManagerFactory())
+                    .findProject(getId());
+            update(p, this);
+            new ProjectJpaController(getEntityManagerFactory()).edit(p);
         }
         return getId();
     }
@@ -71,7 +69,8 @@ public final class ProjectServer extends Project
                 } else {
                     throw new VMException("Unable to delete project with Requirement Specifications!");
                 }
-            } catch (IllegalOrphanException | NonexistentEntityException ex) {
+            }
+            catch (IllegalOrphanException | NonexistentEntityException ex) {
                 getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
@@ -94,6 +93,7 @@ public final class ProjectServer extends Project
         target.setRequirementSpecList(source.getRequirementSpecList());
         target.setTestProjectList(source.getTestProjectList());
         target.setId(source.getId());
+        super.update(target, source);
     }
 
     public static List<Project> getProjects() {
@@ -131,18 +131,6 @@ public final class ProjectServer extends Project
     @Override
     public void update() {
         update(this, getEntity());
-    }
-
-    @Override
-    public List<Project> getVersions() {
-        List<Project> versions = new ArrayList<>();
-        parameters.clear();
-        parameters.put("id", getEntity().getId());
-        namedQuery("Project.findById",
-                parameters).forEach((obj) -> {
-                    versions.add((Project) obj);
-                });
-        return versions;
     }
 
     public void copy(Project newProject) {

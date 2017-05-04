@@ -5,16 +5,18 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.VmSetting;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.VmSetting;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -32,11 +34,24 @@ public class VmSettingJpaController implements Serializable {
     }
 
     public void create(VmSetting vmSetting) {
+        if (vmSetting.getHistoryList() == null) {
+            vmSetting.setHistoryList(new ArrayList<History>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            List<History> attachedHistoryList = new ArrayList<History>();
+            for (History historyListHistoryToAttach : vmSetting.getHistoryList()) {
+                historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
+                attachedHistoryList.add(historyListHistoryToAttach);
+            }
+            vmSetting.setHistoryList(attachedHistoryList);
             em.persist(vmSetting);
+            for (History historyListHistory : vmSetting.getHistoryList()) {
+                historyListHistory.getVmSettingList().add(vmSetting);
+                historyListHistory = em.merge(historyListHistory);
+            }
             em.getTransaction().commit();
         }
         finally {
@@ -51,7 +66,29 @@ public class VmSettingJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            VmSetting persistentVmSetting = em.find(VmSetting.class, vmSetting.getId());
+            List<History> historyListOld = persistentVmSetting.getHistoryList();
+            List<History> historyListNew = vmSetting.getHistoryList();
+            List<History> attachedHistoryListNew = new ArrayList<History>();
+            for (History historyListNewHistoryToAttach : historyListNew) {
+                historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
+                attachedHistoryListNew.add(historyListNewHistoryToAttach);
+            }
+            historyListNew = attachedHistoryListNew;
+            vmSetting.setHistoryList(historyListNew);
             vmSetting = em.merge(vmSetting);
+            for (History historyListOldHistory : historyListOld) {
+                if (!historyListNew.contains(historyListOldHistory)) {
+                    historyListOldHistory.getVmSettingList().remove(vmSetting);
+                    historyListOldHistory = em.merge(historyListOldHistory);
+                }
+            }
+            for (History historyListNewHistory : historyListNew) {
+                if (!historyListOld.contains(historyListNewHistory)) {
+                    historyListNewHistory.getVmSettingList().add(vmSetting);
+                    historyListNewHistory = em.merge(historyListNewHistory);
+                }
+            }
             em.getTransaction().commit();
         }
         catch (Exception ex) {
@@ -83,6 +120,11 @@ public class VmSettingJpaController implements Serializable {
             }
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The vmSetting with id " + id + " no longer exists.", enfe);
+            }
+            List<History> historyList = vmSetting.getHistoryList();
+            for (History historyListHistory : historyList) {
+                historyListHistory.getVmSettingList().remove(vmSetting);
+                historyListHistory = em.merge(historyListHistory);
             }
             em.remove(vmSetting);
             em.getTransaction().commit();

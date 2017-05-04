@@ -21,7 +21,8 @@ public final class VMSettingServer extends VmSetting
     public VMSettingServer(String setting) {
         VmSetting s = getSetting(setting);
         if (s != null) {
-            update(VMSettingServer.this, s);
+            super.setId(s.getId());
+            update();
         } else {
             throw new RuntimeException("Setting: " + setting
                     + " doesn't exist!");
@@ -31,7 +32,6 @@ public final class VMSettingServer extends VmSetting
     public VMSettingServer(String setting, boolean boolVal, int intVal,
             long longVal, String stringVal) {
         super(setting);
-        setId(0);
         setBoolVal(boolVal);
         setIntVal(intVal);
         setLongVal("" + longVal);
@@ -102,22 +102,12 @@ public final class VMSettingServer extends VmSetting
         target.setSetting(source.getSetting());
         target.setStringVal(source.getStringVal());
         target.setId(source.getId());
+        target.setHistoryList(source.getHistoryList());
+        super.update(target, source);
     }
 
     @Override
     public void update() {
         update(this, getEntity());
-    }
-
-    @Override
-    public List<VmSetting> getVersions() {
-        List<VmSetting> versions = new ArrayList<>();
-        parameters.clear();
-        parameters.put("id", getEntity().getId());
-        namedQuery("VmSetting.findById",
-                parameters).forEach((obj) -> {
-                    versions.add((VmSetting) obj);
-                });
-        return versions;
     }
 }

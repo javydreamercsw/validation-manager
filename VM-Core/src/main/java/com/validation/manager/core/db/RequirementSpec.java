@@ -68,9 +68,12 @@ public class RequirementSpec implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Project project;
-    @JoinColumn(name = "spec_level_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "spec_level_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private SpecLevel specLevel;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirementSpec")
+    private List<Baseline> baselineList;
 
     public RequirementSpec() {
         super();
@@ -160,7 +163,7 @@ public class RequirementSpec implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+
         if (!(object instanceof RequirementSpec)) {
             return false;
         }
@@ -175,5 +178,15 @@ public class RequirementSpec implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RequirementSpec[ requirementSpecPK="
                 + requirementSpecPK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Baseline> getBaselineList() {
+        return baselineList;
+    }
+
+    public void setBaselineList(List<Baseline> baselineList) {
+        this.baselineList = baselineList;
     }
 }

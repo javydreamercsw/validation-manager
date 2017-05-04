@@ -1,6 +1,9 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.api.history.Auditable;
+import com.validation.manager.core.db.mapped.Versionable;
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -34,7 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
             query = "SELECT v FROM VmSetting v WHERE v.boolVal = :boolVal")
     , @NamedQuery(name = "VmSetting.findByIntVal",
             query = "SELECT v FROM VmSetting v WHERE v.intVal = :intVal")})
-public class VmSetting implements Serializable {
+public class VmSetting extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -53,20 +57,27 @@ public class VmSetting implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
+    @Auditable
     @Column(name = "setting")
     private String setting;
+    @Auditable
     @Column(name = "bool_val")
     private Boolean boolVal;
+    @Auditable
     @Column(name = "int_val")
     private Integer intVal;
     @Lob
     @Size(max = 2147483647)
+    @Auditable
     @Column(name = "long_val")
     private String longVal;
     @Lob
     @Size(max = 2147483647)
+    @Auditable
     @Column(name = "string_val")
     private String stringVal;
+    @ManyToMany(mappedBy = "vmSettingList")
+    private List<History> historyList;
 
     public VmSetting() {
     }
@@ -132,17 +143,32 @@ public class VmSetting implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+
         if (!(object instanceof VmSetting)) {
             return false;
         }
         VmSetting other = (VmSetting) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return this.id.equals(other.id);
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.VmSetting[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the historyList
+     */
+    @Override
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    /**
+     * @param historyList the historyList to set
+     */
+    @Override
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
     }
 }

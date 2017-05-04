@@ -115,6 +115,8 @@ public class ExecutionStep implements Serializable {
     private List<ExecutionStepHasAttachment> executionStepHasAttachmentList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
     private List<ExecutionStepHasIssue> executionStepHasIssueList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
+    private List<ExecutionStepHasVmUser> executionStepHasVmUserList;
 
     public ExecutionStep() {
     }
@@ -265,7 +267,7 @@ public class ExecutionStep implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        
         if (!(object instanceof ExecutionStep)) {
             return false;
         }
@@ -316,5 +318,15 @@ public class ExecutionStep implements Serializable {
      */
     public void setReviewer(VmUser reviewer) {
         this.reviewer = reviewer;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepHasVmUser> getExecutionStepHasVmUserList() {
+        return executionStepHasVmUserList;
+    }
+
+    public void setExecutionStepHasVmUserList(List<ExecutionStepHasVmUser> executionStepHasVmUserList) {
+        this.executionStepHasVmUserList = executionStepHasVmUserList;
     }
 }

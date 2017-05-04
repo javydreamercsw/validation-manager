@@ -26,22 +26,27 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "attachment")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Attachment.findAll", query = "SELECT a FROM Attachment a")
-    , @NamedQuery(name = "Attachment.findById", query = "SELECT a FROM Attachment a WHERE a.attachmentPK.id = :id")
-    , @NamedQuery(name = "Attachment.findByAttachmentTypeId", query = "SELECT a FROM Attachment a WHERE a.attachmentPK.attachmentTypeId = :attachmentTypeId")
-    , @NamedQuery(name = "Attachment.findByStringValue", query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue")
-    , @NamedQuery(name = "Attachment.findByFileName", query = "SELECT a FROM Attachment a WHERE a.fileName = :fileName")})
+    @NamedQuery(name = "Attachment.findAll",
+            query = "SELECT a FROM Attachment a")
+    , @NamedQuery(name = "Attachment.findById",
+            query = "SELECT a FROM Attachment a WHERE a.attachmentPK.id = :id")
+    , @NamedQuery(name = "Attachment.findByAttachmentTypeId",
+            query = "SELECT a FROM Attachment a WHERE a.attachmentPK.attachmentTypeId = :attachmentTypeId")
+    , @NamedQuery(name = "Attachment.findByStringValue",
+            query = "SELECT a FROM Attachment a WHERE a.stringValue = :stringValue")
+    , @NamedQuery(name = "Attachment.findByFileName",
+            query = "SELECT a FROM Attachment a WHERE a.fileName = :fileName")})
 public class Attachment implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected AttachmentPK attachmentPK;
-    @Lob
-    @Column(name = "file")
-    private byte[] file;
     @Size(max = 255)
     @Column(name = "string_value")
     private String stringValue;
+    @Lob
+    @Column(name = "file")
+    private byte[] file;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "TEXT_VALUE")
@@ -49,7 +54,8 @@ public class Attachment implements Serializable {
     @Size(max = 255)
     @Column(name = "file_name")
     private String fileName;
-    @JoinColumn(name = "attachment_type_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "attachment_type_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private AttachmentType attachmentType;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "attachment")
@@ -72,14 +78,6 @@ public class Attachment implements Serializable {
 
     public void setAttachmentPK(AttachmentPK attachmentPK) {
         this.attachmentPK = attachmentPK;
-    }
-
-    public byte[] getFile() {
-        return file;
-    }
-
-    public void setFile(byte[] file) {
-        this.file = file;
     }
 
     public String getStringValue() {
@@ -133,20 +131,27 @@ public class Attachment implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        
         if (!(object instanceof Attachment)) {
             return false;
         }
         Attachment other = (Attachment) object;
-        if ((this.attachmentPK == null && other.attachmentPK != null) || (this.attachmentPK != null && !this.attachmentPK.equals(other.attachmentPK))) {
-            return false;
-        }
-        return true;
+        return !((this.attachmentPK == null && other.attachmentPK != null)
+                || (this.attachmentPK != null
+                && !this.attachmentPK.equals(other.attachmentPK)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.Attachment[ attachmentPK=" + attachmentPK + " ]";
+        return "com.validation.manager.core.db.Attachment[ attachmentPK="
+                + attachmentPK + " ]";
     }
 
+    public byte[] getFile() {
+        return file;
+    }
+
+    public void setFile(byte[] file) {
+        this.file = file;
+    }
 }

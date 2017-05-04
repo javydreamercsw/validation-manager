@@ -40,6 +40,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 public class Role implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
+    private List<ExecutionStepHasVmUser> executionStepHasVmUserList;
     @Id
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "RoleGen")
@@ -154,7 +156,7 @@ public class Role implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        
         if (!(object instanceof Role)) {
             return false;
         }
@@ -166,5 +168,15 @@ public class Role implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Role[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepHasVmUser> getExecutionStepHasVmUserList() {
+        return executionStepHasVmUserList;
+    }
+
+    public void setExecutionStepHasVmUserList(List<ExecutionStepHasVmUser> executionStepHasVmUserList) {
+        this.executionStepHasVmUserList = executionStepHasVmUserList;
     }
 }

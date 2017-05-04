@@ -26,15 +26,13 @@ public final class TestCaseExecutionServer extends TestCaseExecution
     }
 
     public TestCaseExecutionServer(int id) {
-        TestCaseExecution tces = new TestCaseExecutionJpaController(DataBaseManager
-                .getEntityManagerFactory()).findTestCaseExecution(id);
-        update(TestCaseExecutionServer.this, tces);
+        super.setId(id);
+        update();
     }
 
     public TestCaseExecutionServer(TestCaseExecution tce) {
-        TestCaseExecution tces = new TestCaseExecutionJpaController(DataBaseManager
-                .getEntityManagerFactory()).findTestCaseExecution(tce.getId());
-        update(TestCaseExecutionServer.this, tces);
+        super.setId(tce.getId());
+        update();
     }
 
     public TestCaseExecutionServer() {
@@ -58,12 +56,14 @@ public final class TestCaseExecutionServer extends TestCaseExecution
                 try {
                     econtroller.create(executionStep);
                     getExecutionStepList().add(executionStep);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
                 }
             });
             write2DB();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
     }
