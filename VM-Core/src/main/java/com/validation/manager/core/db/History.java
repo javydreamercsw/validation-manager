@@ -208,16 +208,26 @@ public class History implements Serializable {
             return false;
         }
         History other = (History) object;
-        return !((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id)));
+        return !((this.id == null && other.id != null) || (this.id != null
+                && !this.id.equals(other.id)));
     }
 
     @Override
     public String toString() {
+        StringBuilder sb = new StringBuilder("Fields: ");
+        getHistoryFieldList().forEach(hf -> {
+            if (!sb.toString().isEmpty()) {
+                sb.append(", ");
+            }
+            sb.append(hf.getFieldName())
+                    .append("= ")
+                    .append(hf.getFieldValue());
+        });
         return "History{" + "id=" + id + ", versionMajor=" + versionMajor
                 + ", versionMid=" + versionMid + ", versionMinor="
                 + versionMinor + ", reason=" + reason + ", modificationTime="
                 + modificationTime + ", modifierId=" + modifierId
-                + ", requirementList=" + requirementList + '}';
+                + "," + sb.toString() + '}';
     }
 
     @XmlTransient
