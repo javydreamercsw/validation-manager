@@ -124,6 +124,7 @@ import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
+import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceMatrix;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -1417,6 +1418,13 @@ public class ValidationManagerUI extends UI implements VMUI {
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayTestPlanning((Project) tree.getValue());
                 });
+        ContextMenu.ContextMenuItem trace
+                = menu.addItem("Trace Matrix", VaadinIcons.SPLIT);
+        trace.setEnabled(checkRight("testplan.planning"));
+        trace.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayTraceMatrix((Project) tree.getValue());
+                });
     }
 
     private void createRequirementMenu(ContextMenu menu) {
@@ -2624,6 +2632,16 @@ public class ValidationManagerUI extends UI implements VMUI {
             //No children
             tree.setChildrenAllowed(bl, false);
         }
+    }
+
+    private void displayTraceMatrix(Project project) {
+        VMWindow tm = new VMWindow("Trace Matrix");
+        Panel content = new Panel(new TraceMatrix(project));
+        content.setSizeFull();
+        tm.setContent(content);
+        tm.center();
+        tm.setSizeFull();
+        addWindow(tm);
     }
 
     public class TCEExtraction {
