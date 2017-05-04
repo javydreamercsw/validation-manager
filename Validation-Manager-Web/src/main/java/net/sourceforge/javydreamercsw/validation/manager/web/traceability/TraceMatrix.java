@@ -6,11 +6,11 @@ import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Grid;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 
 /**
  * Trace Matrix component. Traces relationship from requirements to test case
@@ -38,8 +38,7 @@ public class TraceMatrix extends Grid {
         //all the way to lower level.
         Map<Integer, List<Requirement>> map = new TreeMap<>();
         //TODO: Incorporate requirement level. For now assume all are same level.
-        ValidationManagerUI.getInstance()
-                .extractRequirements(p).forEach((r) -> {
+        Tool.extractRequirements(p).forEach((r) -> {
             if (!map.containsKey(1)) {
                 map.put(1, new ArrayList<>());
             }

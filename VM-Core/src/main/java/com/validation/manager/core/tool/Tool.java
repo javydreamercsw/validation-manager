@@ -1,5 +1,6 @@
 package com.validation.manager.core.tool;
 
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
@@ -40,8 +41,20 @@ public class Tool {
         list.addAll(newList);
     }
 
+    public static List<Requirement> extractRequirements(Project p) {
+        List<Requirement> result = new ArrayList<>();
+        p.getRequirementSpecList().forEach(rs -> {
+            result.addAll(extractRequirements(rs));
+        });
+        p.getProjectList().forEach(sub -> {
+            result.addAll(extractRequirements(sub));
+        });
+        return result;
+    }
+
     public static List<Requirement> extractRequirements(RequirementSpecNode rsn) {
         ArrayList<Requirement> result = new ArrayList<>();
+        result.addAll(rsn.getRequirementList());
         rsn.getRequirementSpecNodeList().forEach(rsn2 -> {
             result.addAll(extractRequirements(rsn2));
         });
