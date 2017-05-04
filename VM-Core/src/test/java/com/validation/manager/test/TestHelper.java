@@ -191,7 +191,7 @@ public class TestHelper {
         rss.write2DB();
         project.getRequirementSpecList().add(rss);
         new ProjectServer(project).write2DB();
-        return rss;
+        return rss.getEntity();
     }
 
     public static RequirementSpecNode createRequirementSpecNode(

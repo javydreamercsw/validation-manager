@@ -94,6 +94,7 @@ import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import com.validation.manager.core.server.core.VMUserServer;
+import com.validation.manager.core.tool.Tool;
 import com.validation.manager.core.tool.requirement.importer.RequirementImportException;
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import com.validation.manager.core.tool.step.importer.StepImporter;
@@ -2386,24 +2387,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         displayBaseline(baseline, edit, null);
     }
 
-    private List<Requirement> extractRequirements(RequirementSpecNode rsn) {
-        ArrayList<Requirement> result = new ArrayList<>();
-        result.addAll(rsn.getRequirementList());
-        rsn.getRequirementSpecNodeList().forEach(rsn2 -> {
-            result.addAll(extractRequirements(rsn2));
-        });
-        result.addAll(rsn.getRequirementList());
-        return result;
-    }
-
-    private List<Requirement> extractRequirements(RequirementSpec rs) {
-        ArrayList<Requirement> result = new ArrayList<>();
-        rs.getRequirementSpecNodeList().forEach(rsn -> {
-            result.addAll(extractRequirements(rsn));
-        });
-        return result;
-    }
-
     private void displayBaseline(Baseline baseline,
             boolean edit, RequirementSpec rs) {
         Panel form = new Panel("Baseline Detail");
@@ -2421,7 +2404,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         Button cancel = new Button("Cancel");
         if (rs != null) {
             List<History> potential = new ArrayList<>();
-            for (Requirement r : extractRequirements(rs)) {
+            for (Requirement r : Tool.extractRequirements(rs)) {
                 potential.add(r.getHistoryList().get(r.getHistoryList().size() - 1));
             }
             layout.addComponent(createRequirementHistoryTable("Included Requirements",
@@ -2451,7 +2434,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                                                 .createBaseline(
                                                         baseline.getBaselineName(),
                                                         baseline.getDescription(),
-                                                        extractRequirements(rs))
+                                                        rs)
                                                 .getEntity();
                                         displayObject(entity, true);
                                     },

@@ -4,10 +4,11 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.controller.BaselineJpaController;
+import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,7 +52,6 @@ public final class BaselineServer extends Baseline
             Baseline b = getEntity();
             update(b, this);
             c.edit(b);
-            setId(b.getId());
         }
         update();
         return getId();
@@ -79,7 +79,7 @@ public final class BaselineServer extends Baseline
     }
 
     public static BaselineServer createBaseline(String name, String desc,
-            List<Requirement> requirements) {
+            RequirementSpec spec) {
         BaselineServer b = new BaselineServer(new Date(), name);
         b.setDescription(desc);
         try {
@@ -87,12 +87,13 @@ public final class BaselineServer extends Baseline
             if (b.getHistoryList() == null) {
                 b.setHistoryList(new ArrayList<>());
             }
-            for (Requirement o : requirements) {
+            for (Requirement o : Tool.extractRequirements(spec)) {
                 RequirementServer rs = new RequirementServer(o);
                 rs.increaseMajorVersion();
                 b.getHistoryList().add(rs.getHistoryList().get(rs
                         .getHistoryList().size() - 1));
             }
+            b.setRequirementSpec(spec);
             b.write2DB();
         }
         catch (Exception ex) {
