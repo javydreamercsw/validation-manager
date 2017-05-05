@@ -9,8 +9,17 @@ import com.validation.manager.core.db.controller.HistoryJpaController;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class HistoryServer extends History
+public final class HistoryServer extends History
         implements EntityServer<History> {
+
+    public HistoryServer() {
+        super();
+    }
+
+    public HistoryServer(History history) {
+        super(history.getId());
+        update();
+    }
 
     @Override
     public int write2DB() throws Exception {
@@ -49,6 +58,8 @@ public class HistoryServer extends History
         target.setHistoryFieldList(source.getHistoryFieldList());
         target.setVmSettingList(source.getVmSettingList());
         target.setProjectList(source.getProjectList());
+        target.setExecutionStepList(source.getExecutionStepList());
+        target.setBaselineList(source.getBaselineList());
     }
 
     @Override

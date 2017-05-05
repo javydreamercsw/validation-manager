@@ -10,7 +10,9 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -117,6 +119,13 @@ public class ExecutionStep implements Serializable {
     private List<ExecutionStepHasIssue> executionStepHasIssueList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
     private List<ExecutionStepHasVmUser> executionStepHasVmUserList;
+    @JoinTable(name = "execution_step_has_history", joinColumns = {
+        @JoinColumn(name = "execution_step_test_case_execution_id", referencedColumnName = "test_case_execution_id")
+        , @JoinColumn(name = "execution_step_step_id", referencedColumnName = "step_id")
+        , @JoinColumn(name = "execution_step_step_test_case_id", referencedColumnName = "step_test_case_id")}, inverseJoinColumns = {
+        @JoinColumn(name = "history_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<History> historyList;
 
     public ExecutionStep() {
     }
@@ -267,7 +276,7 @@ public class ExecutionStep implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof ExecutionStep)) {
             return false;
         }
@@ -328,5 +337,15 @@ public class ExecutionStep implements Serializable {
 
     public void setExecutionStepHasVmUserList(List<ExecutionStepHasVmUser> executionStepHasVmUserList) {
         this.executionStepHasVmUserList = executionStepHasVmUserList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
     }
 }

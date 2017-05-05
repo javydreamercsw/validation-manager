@@ -2123,8 +2123,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 StepJpaController stepController
                                         = new StepJpaController(DataBaseManager
                                                 .getEntityManagerFactory());
-//                                TestCaseJpaController tcController
-//                                        = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
                                 boolean valid = false;
                                 if (targetItem.getTestCase().equals(sourceItem
                                         .getTestCase())) {
@@ -2275,6 +2273,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                         createTestPlanMenu(contextMenu);
                     } else if (tree.getValue() instanceof TestCaseExecution) {
                         createTestCaseExecutionPlanMenu(contextMenu);
+                    } else if (tree.getValue() instanceof Baseline) {
+                        createBaselineMenu(contextMenu);
                     }
                 };
         contextMenu.addContextMenuTreeListener(treeItemListener);
@@ -2444,7 +2444,11 @@ public class ValidationManagerUI extends UI implements VMUI {
                                                         baseline.getDescription(),
                                                         rs)
                                                 .getEntity();
-                                        displayObject(entity, true);
+
+                                        updateProjectList();
+                                        buildProjectTree(entity);
+                                        displayObject(entity, false);
+                                        updateScreen();
                                     },
                                             ButtonOption.focus(),
                                             ButtonOption
@@ -2642,6 +2646,10 @@ public class ValidationManagerUI extends UI implements VMUI {
         tm.center();
         tm.setSizeFull();
         addWindow(tm);
+    }
+
+    private void createBaselineMenu(ContextMenu menu) {
+
     }
 
     public class TCEExtraction {
