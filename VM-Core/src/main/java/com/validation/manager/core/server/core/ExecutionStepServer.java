@@ -80,6 +80,7 @@ public final class ExecutionStepServer extends ExecutionStep
         target.setExecutionStepHasIssueList(source.getExecutionStepHasIssueList());
         target.setReviewed(source.getReviewed());
         target.setReviewDate(source.getReviewDate());
+        target.setHistoryList(source.getHistoryList());
     }
 
     @Override
@@ -162,5 +163,20 @@ public final class ExecutionStepServer extends ExecutionStep
                     .getExecutionStepHasIssuePK());
             update();
         }
+    }
+
+    /**
+     * When the step is executed, this link the step with the current version of
+     * the requirement(s) linked to this step.
+     *
+     * @throws Exception
+     */
+    public void linkRequirements() throws Exception {
+        getHistoryList().clear();
+        getStep().getRequirementList().forEach(req -> {
+            getHistoryList().add(req.getHistoryList()
+                    .get(req.getHistoryList().size() - 1));
+        });
+        write2DB();
     }
 }
