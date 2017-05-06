@@ -8,6 +8,7 @@ dist: trusty
 jdk:
 - oraclejdk8
 - openjdk8
+script: git submodule update --init --recursive
 script: mvn install cobertura:cobertura -Dmaven.javadoc.skip=true -B -V
 
 after_success:
