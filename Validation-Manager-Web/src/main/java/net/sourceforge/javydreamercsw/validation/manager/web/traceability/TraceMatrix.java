@@ -7,6 +7,8 @@ import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
+import com.validation.manager.core.db.Baseline;
+import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.tool.Tool;
@@ -62,13 +64,13 @@ public class TraceMatrix extends Grid {
             public Label getValue(Item item, Object itemId, Object propertyId) {
                 Requirement v = (Requirement) itemId;
                 StringBuilder sb = new StringBuilder();
-                v.getHistoryList().stream().filter((h)
-                        -> (!h.getBaselineList().isEmpty()))
-                        .forEachOrdered((h) -> {
-                            h.getBaselineList().forEach((b) -> {
-                                sb.append(b.getBaselineName());
-                            });
-                        });
+                for (History h : v.getHistoryList()) {
+                    if (!h.getBaselineList().isEmpty()) {
+                        for (Baseline b : h.getBaselineList()) {
+                            sb.append(b.getBaselineName());
+                        }
+                    }
+                }
                 return new Label(sb.toString());
             }
 
