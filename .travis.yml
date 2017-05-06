@@ -8,6 +8,9 @@ dist: trusty
 jdk:
 - oraclejdk8
 - openjdk8
+script: cd WizardsForVaadin
+script: mvn install
+script: cd ..
 script: mvn install cobertura:cobertura -Dmaven.javadoc.skip=true -B -V
 
 after_success:
