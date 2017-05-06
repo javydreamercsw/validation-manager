@@ -54,7 +54,6 @@ public class Tool {
 
     public static List<Requirement> extractRequirements(RequirementSpecNode rsn) {
         ArrayList<Requirement> result = new ArrayList<>();
-        result.addAll(rsn.getRequirementList());
         rsn.getRequirementSpecNodeList().forEach(rsn2 -> {
             result.addAll(extractRequirements(rsn2));
         });
