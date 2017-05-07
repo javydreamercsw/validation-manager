@@ -230,5 +230,8 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
         assertEquals(0, instance.getHistoryList().size());
         instance.linkRequirements();
         assertEquals(5, instance.getEntity().getHistoryList().size());
+        instance.getHistoryList().forEach(h -> {
+            assertEquals(1, new HistoryServer(h).getExecutionStepList().size());
+        });
     }
 }

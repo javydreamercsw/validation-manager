@@ -174,8 +174,16 @@ public final class ExecutionStepServer extends ExecutionStep
     public void linkRequirements() throws Exception {
         getHistoryList().clear();
         getStep().getRequirementList().forEach(req -> {
-            getHistoryList().add(req.getHistoryList()
-                    .get(req.getHistoryList().size() - 1));
+            try {
+                HistoryServer hs = new HistoryServer(req.getHistoryList()
+                        .get(req.getHistoryList().size() - 1));
+                hs.getExecutionStepList().add(getEntity());
+                hs.write2DB();
+                getHistoryList().add(hs.getEntity());
+            }
+            catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         });
         write2DB();
     }
