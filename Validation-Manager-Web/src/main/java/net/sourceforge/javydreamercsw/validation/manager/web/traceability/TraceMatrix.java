@@ -7,8 +7,6 @@ import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
-import com.validation.manager.core.db.Baseline;
-import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.tool.Tool;
@@ -64,13 +62,16 @@ public class TraceMatrix extends Grid {
             public Label getValue(Item item, Object itemId, Object propertyId) {
                 Requirement v = (Requirement) itemId;
                 StringBuilder sb = new StringBuilder();
-                for (History h : v.getHistoryList()) {
-                    if (!h.getBaselineList().isEmpty()) {
-                        for (Baseline b : h.getBaselineList()) {
-                            sb.append(b.getBaselineName());
-                        }
-                    }
-                }
+                v.getHistoryList().stream().filter((h)
+                        -> (!h.getExecutionStepList().isEmpty()))
+                        .forEachOrdered((h) -> {
+                            h.getExecutionStepList().forEach((es) -> {
+                                if (!sb.toString().trim().isEmpty()) {
+                                    sb.append(", ");
+                                }
+                                sb.append(es.getStep().getTestCase().getName());
+                            });
+                        });
                 return new Label(sb.toString());
             }
 
@@ -80,7 +81,7 @@ public class TraceMatrix extends Grid {
             }
         });
         setHeightMode(HeightMode.ROW);
-        setHeightByRows(wrapperCont.size());
+        setHeightByRows(wrapperCont.size() > 25 ? 25 : wrapperCont.size());
         setColumns("uniqueId", "executions");
         Grid.Column uniqueId = getColumn("uniqueId");
         uniqueId.setHeaderCaption("ID");
@@ -88,5 +89,6 @@ public class TraceMatrix extends Grid {
         executions.setHeaderCaption("Execution(s)");
         executions.setRenderer(new ComponentRenderer());
         wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});
+        setSizeFull();
     }
 }
