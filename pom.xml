@@ -242,7 +242,6 @@
     <modules>
         <module>VM-Core</module>
         <module>Validation-Manager-Web</module>
-        <module>WizardsForVaadin</module>
     </modules>
     
     <profiles>

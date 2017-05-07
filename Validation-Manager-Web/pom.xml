@@ -131,11 +131,6 @@
         </dependency>
         <dependency>
             <groupId>org.vaadin.addons</groupId>
-            <artifactId>wizards-for-vaadin</artifactId>
-            <version>1.1.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.vaadin.addons</groupId>
             <artifactId>pdfviewer</artifactId>
             <version>1.2.2</version>
         </dependency>
@@ -163,6 +158,11 @@
             <groupId>de.datenhahn.vaadin</groupId>
             <artifactId>componentrenderer</artifactId>
             <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>wizards-for-vaadin</artifactId>
+            <version>2.0.1</version>
         </dependency>
     </dependencies>
     
