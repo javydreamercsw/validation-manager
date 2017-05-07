@@ -9,6 +9,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.Step;
 import com.validation.manager.core.tool.Tool;
 import de.datenhahn.vaadin.componentrenderer.ComponentRenderer;
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class TraceMatrix extends Grid {
         GeneratedPropertyContainer wrapperCont
                 = new GeneratedPropertyContainer(reqs);
         setContainerDataSource(wrapperCont);
-        wrapperCont.addGeneratedProperty("executions",
+        wrapperCont.addGeneratedProperty("coverage",
                 new PropertyValueGenerator<Label>() {
             @Override
             public Label getValue(Item item, Object itemId, Object propertyId) {
@@ -69,7 +70,10 @@ public class TraceMatrix extends Grid {
                                 if (!sb.toString().trim().isEmpty()) {
                                     sb.append(", ");
                                 }
-                                sb.append(es.getStep().getTestCase().getName());
+                                Step step = es.getStep();
+                                sb.append(step.getTestCase().getName())
+                                        .append(": Step")
+                                        .append(step.getStepSequence());
                             });
                         });
                 return new Label(sb.toString());
@@ -81,12 +85,12 @@ public class TraceMatrix extends Grid {
             }
         });
         setHeightMode(HeightMode.ROW);
-        setHeightByRows(wrapperCont.size() > 25 ? 25 : wrapperCont.size());
-        setColumns("uniqueId", "executions");
+        setHeightByRows(wrapperCont.size() > 15 ? 15 : wrapperCont.size());
+        setColumns("uniqueId", "coverage");
         Grid.Column uniqueId = getColumn("uniqueId");
         uniqueId.setHeaderCaption("ID");
-        Grid.Column executions = getColumn("executions");
-        executions.setHeaderCaption("Execution(s)");
+        Grid.Column executions = getColumn("coverage");
+        executions.setHeaderCaption("Coverage");
         executions.setRenderer(new ComponentRenderer());
         wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});
         setSizeFull();
