@@ -1212,6 +1212,22 @@ public class ValidationManagerUI extends UI implements VMUI {
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
+        if (req.getParentRequirementId() != null) {
+            TextField tf = new TextField("Parent");
+            tf.setValue(req.getParentRequirementId().getUniqueId());
+            layout.addComponent(tf);
+        }
+        if (!req.getRequirementList().isEmpty()) {
+            Grid grid = new Grid();
+            BeanItemContainer<Requirement> children
+                    = new BeanItemContainer<>(Requirement.class);
+            children.addAll(req.getRequirementList());
+            grid.setContainerDataSource(children);
+            grid.setColumns("uniqueId");
+            Grid.Column uniqueId = grid.getColumn("uniqueId");
+            uniqueId.setHeaderCaption("ID");
+            layout.addComponent(grid);
+        }
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -2172,7 +2188,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                             DragAndDropEvent dragEvent, Tree tree) {
                         HashSet<Object> allowed = new HashSet<>();
                         tree.getItemIds().stream().filter((itemId)
-                                -> (itemId instanceof Step))
+                                -> (itemId instanceof Step)
+                                || (itemId instanceof Requirement))
                                 .forEachOrdered((itemId) -> {
                                     allowed.add(itemId);
                                 });
@@ -2218,6 +2235,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             }
                             break;
                         case TOP: {
+                            boolean valid = false;
                             //for Steps we need to update the sequence number
                             if (sourceItemId instanceof Step
                                     && targetItemId instanceof Step) {
@@ -2226,7 +2244,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 StepJpaController stepController
                                         = new StepJpaController(DataBaseManager
                                                 .getEntityManagerFactory());
-                                boolean valid = false;
                                 if (targetItem.getTestCase().equals(sourceItem
                                         .getTestCase())) {
                                     //Same Test Case, just re-arrange
@@ -2303,18 +2320,18 @@ public class ValidationManagerUI extends UI implements VMUI {
 //                                    //Add it to the Test Case
 //                                    targetItem.getTestCase().getStepList().add(removed);
                                 }
-                                if (valid) {
-                                    // Drop at the top of a subtree -> make it previous
-                                    Object parentId
-                                            = container.getParent(targetItemId);
-                                    container.setParent(sourceItemId, parentId);
-                                    container.moveAfterSibling(sourceItemId,
-                                            targetItemId);
-                                    container.moveAfterSibling(targetItemId,
-                                            sourceItemId);
-                                    buildProjectTree(targetItem);
-                                    updateScreen();
-                                }
+                            }
+                            if (valid) {
+                                // Drop at the top of a subtree -> make it previous
+                                Object parentId
+                                        = container.getParent(targetItemId);
+                                container.setParent(sourceItemId, parentId);
+                                container.moveAfterSibling(sourceItemId,
+                                        targetItemId);
+                                container.moveAfterSibling(targetItemId,
+                                        sourceItemId);
+                                buildProjectTree(targetItemId);
+                                updateScreen();
                             }
                             break;
                         }
