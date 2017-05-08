@@ -1,9 +1,27 @@
 language: java
 sudo: false
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "BRrm/RtkKH2zxvDWGjMRhZSlbosKVtFh1uyrmMsRW/GvzdKN9j/cFgP7JYShQHRYWYTXkPTFnWiCU19t0kFzd5uRX1iTA7YN1KGdJ1M87RwGHuyPnJdtvNbM2Qt2p8PUeA8X0G8ZXuCBujpMRd0m8B3+WDmb4Yd9eagZLiK2e4jNC/9KZge8h4BQ0Hmz/K68/FXTCirhhFhL4DRvvY76h1/EXEWFx/2s6u34oXVStA3BqTxjQm1ucjxVgOwCMyf+EEEpM/lyIaReg2PcPgwkerXbLGTxl4uaiWmPV0jV41DjMPEIGH7tPgGzbznBaLB/paZLbth6x0wWWq8tumm4uyuaEJeQ9yrq17jTtgWn12PK9X7AWCTWWrYZ01a4K7ClvFiE+kqNW6GxC7fS/iEpL7Ew6Fj/mqCie3x5H6iF/syXA8c0eqHWWglWhhel1XgR+4JMdF6MkpZAoR1BkafBKewQyMacJL/GKwicsi4LtmUfcmKa7hI8IE2pSQnpJ6LDfzRXvuMxeFlfeqKxQtD6+eybhEtq7XFXKhGs8n2W8B5cuzfJ028UDHMvZke7s1ShTnLBtHji4lgqxKjLzjfnGC2I5GfEvIZ+4Ek+q7z0UYdQ5/83S5iWwIz8XDv2XRMVb2xU2NkCzAqjC9AOECifhhOKh6dt5V/shkx273/KKH4="
+
+before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 addons:
   apt:
     packages:
     - oracle-java8-installer
+  coverity_scan:
+    project:
+      name: "javydreamercsw/validation-manager"
+      description: "Validation Manager is a tool to handle all the cumbersome paperwork of regulated environment validations. Including Validation Plans, protocols, executions and exceptions. Keeping everything in one place and best of all paperless. "
+    notification_email: javier.ortiz.78@gmail.com
+    build_command_prepend: "mvn clean"
+    build_command: "mvn -DskipTests=true compile"
+    branch_pattern: master
+    
 dist: trusty
 jdk:
 - oraclejdk8
