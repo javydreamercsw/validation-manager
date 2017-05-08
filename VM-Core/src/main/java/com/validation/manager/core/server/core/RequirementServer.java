@@ -17,6 +17,7 @@ import com.validation.manager.core.tool.message.MessageHandler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Lookup;
@@ -126,7 +127,6 @@ public final class RequirementServer extends Requirement
         }
         target.setRequirementSpecNode(source.getRequirementSpecNode());
         target.setRequirementList(source.getRequirementList());
-        target.setRequirementList1(source.getRequirementList1());
         target.setRequirementStatusId(source.getRequirementStatusId());
         target.setRequirementTypeId(source.getRequirementTypeId());
         target.setRiskControlHasRequirementList(source
@@ -134,6 +134,7 @@ public final class RequirementServer extends Requirement
         target.setStepList(source.getStepList());
         target.setUniqueId(source.getUniqueId());
         target.setId(source.getId());
+        target.setParentRequirementId(source.getParentRequirementId());
         super.update(target, source);
     }
 
@@ -165,7 +166,7 @@ public final class RequirementServer extends Requirement
         if (!COVERAGE_MAP.containsKey(getCoverageMapID(getEntity()))) {
             LOG.log(Level.FINE, "Getting test coverage for: {0}...",
                     getUniqueId());
-            List<Requirement> children = getEntity().getRequirementList1();
+            List<Requirement> children = getEntity().getRequirementList();
             if (children.isEmpty()) {
                 LOG.log(Level.FINE, "No child requirements");
                 //Has test cases and no related requirements
@@ -217,25 +218,15 @@ public final class RequirementServer extends Requirement
         boolean circular = false;
         //Prevent circular dependencies
         for (Requirement r : getRequirementList()) {
-            if (child.getUniqueId().trim().equals(r.getUniqueId().trim())) {
+            if (Objects.equals(child.getId(), r.getId())) {
                 circular = true;
                 break;
             }
         }
         if (!circular) {
-            for (Requirement r : getRequirementList1()) {
-                if (child.getUniqueId().trim().equals(r.getUniqueId().trim())) {
-                    circular = true;
-                    break;
-                }
-            }
-        }
-        if (!circular) {
-            if (!getRequirementList1().contains(child)) {
-                getRequirementList1().add(child);
-                write2DB();
-                update();
-            }
+            getRequirementList().add(child);
+            write2DB();
+            update();
         } else {
             MessageHandler handler = Lookup.getDefault().lookup(MessageHandler.class);
             String message = new StringBuilder().append("Ignored addition of ")

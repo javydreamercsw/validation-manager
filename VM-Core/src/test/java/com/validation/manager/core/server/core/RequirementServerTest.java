@@ -214,7 +214,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
-            assertTrue(req.getRequirementList1().isEmpty());
+            assertTrue(req.getRequirementList().isEmpty());
             //Add a child
             RequirementServer rs = new RequirementServer(req);
             //Add a version to the requirement
@@ -223,26 +223,24 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.write2DB();
             rs.addChildRequirement(req2);
             //Should have one children now
-            rs.getRequirementList1().forEach((r) -> {
+            rs.getRequirementList().forEach((r) -> {
                 LOG.info(r.getUniqueId());
             });
-            assertEquals(1, rs.getRequirementList1().size());
+            assertEquals(1, rs.getRequirementList().size());
             rs.getRequirementList().forEach((r) -> {
                 LOG.info(r.getUniqueId());
             });
             //No parents
-            assertEquals(0, rs.getRequirementList().size());
+            assertNull(rs.getParentRequirementId());
             RequirementServer rs2 = new RequirementServer(req2);
             rs2.getRequirementList().forEach((r) -> {
                 LOG.info(r.getUniqueId());
             });
             //One parent
-            assertEquals(1, rs2.getRequirementList().size());
-            rs2.getRequirementList1().forEach((r) -> {
-                LOG.info(r.getUniqueId());
-            });
+            assertNotNull(rs2.getParentRequirementId());
+            LOG.info(rs2.getParentRequirementId().getUniqueId());
             //No children
-            assertEquals(0, rs2.getRequirementList1().size());
+            assertEquals(0, rs2.getRequirementList().size());
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -305,34 +303,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
             parent.write2DB();
             assertEquals(100, parent.getTestCoverage());
             assertEquals(100, rs.getTestCoverage());
-        }
-        catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-            fail();
-        }
-    }
-
-    /**
-     * Test of Circular Dependencies detection method, of class
-     * RequirementServer.
-     */
-    @Test
-    public void testCircularDependencies() {
-        try {
-            Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
-            Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
-            RequirementServer r1 = new RequirementServer(req);
-            RequirementServer r2 = new RequirementServer(req2);
-            r1.addChildRequirement(req2);
-            assertEquals(1, r1.getRequirementList1().size());
-            assertEquals(0, r1.getRequirementList().size());
-            //Get the change above from db.
-            r2.update();
-            r2.addChildRequirement(req);
-            assertEquals(0, r2.getRequirementList1().size());
-            assertEquals(1, r2.getRequirementList().size());
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);

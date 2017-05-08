@@ -77,14 +77,8 @@ public class Requirement extends Versionable implements Serializable {
     @Column(name = "notes")
     @Auditable
     private String notes;
-    @JoinTable(name = "requirement_has_requirement", joinColumns = {
-        @JoinColumn(name = "requirement_id", referencedColumnName = "id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "requirement_id1", referencedColumnName = "id")})
-    @ManyToMany
+    @OneToMany(mappedBy = "parentRequirementId")
     private List<Requirement> requirementList;
-    @ManyToMany(mappedBy = "requirementList")
-    private List<Requirement> requirementList1;
     @JoinTable(name = "step_has_requirement", joinColumns = {
         @JoinColumn(name = "requirement_id", referencedColumnName = "id")},
             inverseJoinColumns = {
@@ -93,8 +87,12 @@ public class Requirement extends Versionable implements Serializable {
                         referencedColumnName = "test_case_id")})
     @ManyToMany
     private List<Step> stepList;
+    @JoinColumn(name = "parent_requirement_id", referencedColumnName = "id")
+    @ManyToOne
+    private Requirement parentRequirementId;
     @JoinColumns({
-        @JoinColumn(name = "requirement_spec_node_id", referencedColumnName = "id")
+        @JoinColumn(name = "requirement_spec_node_id",
+                referencedColumnName = "id")
         , @JoinColumn(name = "requirement_spec_node_requirement_spec_id",
                 referencedColumnName = "requirement_spec_id")
         , @JoinColumn(name = "requirement_spec_node_requirement_spec_project_id",
@@ -129,8 +127,15 @@ public class Requirement extends Versionable implements Serializable {
         this.notes = notes;
         setRiskControlHasRequirementList(new ArrayList<>());
         setRequirementList(new ArrayList<>());
-        setRequirementList1(new ArrayList<>());
         setStepList(new ArrayList<>());
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUniqueId() {
@@ -167,14 +172,12 @@ public class Requirement extends Versionable implements Serializable {
         this.requirementList = requirementList;
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<Requirement> getRequirementList1() {
-        return requirementList1;
+    public Requirement getParentRequirementId() {
+        return parentRequirementId;
     }
 
-    public void setRequirementList1(List<Requirement> requirementList1) {
-        this.requirementList1 = requirementList1;
+    public void setParentRequirementId(Requirement parentRequirementId) {
+        this.parentRequirementId = parentRequirementId;
     }
 
     @XmlTransient
@@ -224,13 +227,12 @@ public class Requirement extends Versionable implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (getId() != null ? getId().hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
-
         if (!(object instanceof Requirement)) {
             return false;
         }
@@ -245,20 +247,6 @@ public class Requirement extends Versionable implements Serializable {
                 + ", description=" + getDescription()
                 + super.toString()
                 + " ]";
-    }
-
-    /**
-     * @return the id
-     */
-    public Integer getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     @XmlTransient
