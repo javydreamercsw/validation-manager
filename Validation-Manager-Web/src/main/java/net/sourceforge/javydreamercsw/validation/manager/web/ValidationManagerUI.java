@@ -297,10 +297,10 @@ public class ValidationManagerUI extends UI implements VMUI {
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(tce.getClass());
         binder.setItemDataSource(tce);
-        Field<?> scope = binder.buildAndBind("Scope", "scope");
-        layout.addComponent(scope);
         Field<?> name = binder.buildAndBind("Name", "name");
         layout.addComponent(name);
+        Field<?> scope = binder.buildAndBind("Scope", "scope");
+        layout.addComponent(scope);
         TextArea conclusion = new TextArea("Conclusion");
         binder.bind(conclusion, "conclusion");
         layout.addComponent(conclusion);
@@ -314,8 +314,8 @@ public class ValidationManagerUI extends UI implements VMUI {
             }
         });
         if (edit) {
-            TestCaseExecutionServer tces = new TestCaseExecutionServer(tce);
             if (tce.getId() == null) {
+                TestCaseExecutionServer tces = new TestCaseExecutionServer();
                 //Creating a new one
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
@@ -335,6 +335,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 hl.addComponent(cancel);
                 layout.addComponent(hl);
             } else {
+                TestCaseExecutionServer tces = new TestCaseExecutionServer(tce);
                 //Editing existing one
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
@@ -1329,11 +1330,21 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createRootMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Execution", PROJECT_ICON);
+                = menu.addItem("Create Project", PROJECT_ICON);
         create.setEnabled(checkRight("product.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject(new Project(), true);
+                });
+    }
+
+    private void createExecutionsMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Execution", EXECUTIONS_ICON);
+        create.setEnabled(checkRight("testplan.planning"));
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    displayTestCaseExecution(new TestCaseExecution(), true);
                 });
     }
 
@@ -1796,7 +1807,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         Field notes = binder.buildAndBind("Notes", "notes",
                 TextArea.class);
         notes.setSizeFull();
-        layout.addComponent(notes);
+        name.setRequired(true);
+        name.setRequiredError("Please provide a name.");
         layout.addComponent(name);
         layout.addComponent(notes);
         Button cancel = new Button("Cancel");
@@ -1813,8 +1825,15 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Creating a new one
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
+                    if (name.getValue() == null) {
+                        Notification.show(name.getRequiredError(),
+                                Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
                     p.setName(name.getValue().toString());
-                    p.setNotes(notes.getValue().toString());
+                    if (notes.getValue() != null) {
+                        p.setNotes(notes.getValue().toString());
+                    }
                     new ProjectJpaController(DataBaseManager
                             .getEntityManagerFactory()).create(p);
                     form.setVisible(false);
@@ -2265,6 +2284,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                         String val = (String) tree.getValue();
                         if (val.startsWith("tce")) {
                             createTestExecutionMenu(contextMenu);
+                        } else if (val.startsWith("executions")) {
+                            createExecutionsMenu(contextMenu);
                         } else {
                             //We are at the root
                             createRootMenu(contextMenu);
