@@ -210,28 +210,4 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
         instance.removeIssue(issue);
         assertEquals(0, instance.getExecutionStepHasIssueList().size());
     }
-
-    /**
-     * Test of linkRequirements method, of class ExecutionStepServer.
-     *
-     * @throws java.lang.Exception
-     */
-    @Test
-    public void testRequirmentLinking() throws Exception {
-        System.out.println("link requirements");
-        ProjectServer ps = new ProjectServer(ProjectServer.getProjects().get(0));
-        TestCaseExecutionServer tces
-                = new TestCaseExecutionServer(ps.getTestProjectList().get(0)
-                        .getTestPlanList().get(0).getTestCaseList().get(0)
-                        .getStepList().get(0).getExecutionStepList().get(0)
-                        .getTestCaseExecution());
-        ExecutionStepServer instance
-                = new ExecutionStepServer(tces.getExecutionStepList().get(0));
-        assertEquals(0, instance.getHistoryList().size());
-        instance.linkRequirements();
-        assertEquals(5, instance.getEntity().getHistoryList().size());
-        instance.getHistoryList().forEach(h -> {
-            assertEquals(1, new HistoryServer(h).getExecutionStepList().size());
-        });
-    }
 }

@@ -164,27 +164,4 @@ public final class ExecutionStepServer extends ExecutionStep
             update();
         }
     }
-
-    /**
-     * When the step is executed, this link the step with the current version of
-     * the requirement(s) linked to this step.
-     *
-     * @throws Exception
-     */
-    public void linkRequirements() throws Exception {
-        getHistoryList().clear();
-        getStep().getRequirementList().forEach(req -> {
-            try {
-                HistoryServer hs = new HistoryServer(req.getHistoryList()
-                        .get(req.getHistoryList().size() - 1));
-                hs.getExecutionStepList().add(getEntity());
-                hs.write2DB();
-                getHistoryList().add(hs.getEntity());
-            }
-            catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        });
-        write2DB();
-    }
 }

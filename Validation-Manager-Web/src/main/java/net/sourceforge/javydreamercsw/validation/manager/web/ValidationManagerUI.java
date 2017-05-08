@@ -24,6 +24,7 @@ import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
@@ -53,7 +54,6 @@ import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
@@ -88,6 +88,7 @@ import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.BaselineServer;
+import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
@@ -110,9 +111,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -126,7 +129,6 @@ import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUpload
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceMatrix;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 import org.vaadin.peter.contextmenu.ContextMenu;
@@ -291,6 +293,11 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayTestCaseExecution(TestCaseExecution tce, boolean edit) {
+        displayTestCaseExecution(tce, null, edit);
+    }
+
+    private void displayTestCaseExecution(TestCaseExecution tce,
+            ProjectServer ps, boolean edit) {
         Panel form = new Panel("Test Case Execution Detail");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
@@ -298,9 +305,12 @@ public class ValidationManagerUI extends UI implements VMUI {
         BeanFieldGroup binder = new BeanFieldGroup(tce.getClass());
         binder.setItemDataSource(tce);
         Field<?> name = binder.buildAndBind("Name", "name");
+        name.setRequired(true);
+        name.setRequiredError("Please provide a name.");
         layout.addComponent(name);
         Field<?> scope = binder.buildAndBind("Scope", "scope");
         layout.addComponent(scope);
+        //TODO: Show when finished
         TextArea conclusion = new TextArea("Conclusion");
         binder.bind(conclusion, "conclusion");
         layout.addComponent(conclusion);
@@ -319,15 +329,121 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Creating a new one
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
-                    tces.setConclusion(conclusion.getValue());
-                    tces.setScope(scope.getValue().toString());
-                    tces.setName(name.getValue().toString());
-                    try {
-                        tces.write2DB();
-                        tces.update(tce, tces.getEntity());
-                        displayObject(tce);
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, null, ex);
+                    if (name.getValue() == null) {
+                        Notification.show(name.getRequiredError(),
+                                Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
+                    Map<Requirement, History> history = new HashMap<>();
+                    if (ps != null) {
+                        List<Requirement> toApprove = new ArrayList<>();
+                        for (Requirement r : Tool.extractRequirements(ps)) {
+                            //Check each requirement and see if they have minor versions (last version is not baselined)
+                            History h = r.getHistoryList().get(r.getHistoryList().size() - 1);
+                            if (h.getMajorVersion() == 0
+                                    || h.getMidVersion() > 0
+                                    || h.getMinorVersion() > 0) {
+                                if (r.getHistoryList().size() == 1) {
+                                    //Nothing to choose from
+                                    history.put(r, h);
+                                } else {
+                                    toApprove.add(r);
+                                }
+                            } else {
+                                history.put(r, h);
+                            }
+                        }
+                        if (!toApprove.isEmpty()) {
+                            MessageBox mb = MessageBox.create();
+                            mb.asModal(true)
+                                    .withCaption("Non Baselined requirements detected!")
+                                    .withMessage("Some requirements are not baselined, "
+                                            + "please choose the versions to be tested "
+                                            + "under this execution.")
+                                    .withButtonAlignment(Alignment.MIDDLE_CENTER)
+                                    .withOkButton(() -> {
+                                        //Start the wizard
+                                        Wizard w = new Wizard();
+                                        Window sw = new VMWindow();
+                                        w.setDisplayedMaxTitles(3);
+                                        toApprove.forEach(r -> {
+                                            w.addStep(new SelectRequirementVersionStep(r));
+                                        });
+                                        w.addListener(new WizardProgressListener() {
+                                            @Override
+                                            public void activeStepChanged(WizardStepActivationEvent event) {
+                                                //Do nothing
+                                            }
+
+                                            @Override
+                                            public void stepSetChanged(WizardStepSetChangedEvent event) {
+                                                //Do nothing
+                                            }
+
+                                            @Override
+                                            public void wizardCompleted(WizardCompletedEvent event) {
+                                                //Process the selections
+                                                w.getSteps().forEach(s -> {
+                                                    SelectRequirementVersionStep step
+                                                            = (SelectRequirementVersionStep) s;
+                                                    history.put(step.getRequirement(),
+                                                            step.getHistory());
+                                                });
+                                                removeWindow(sw);
+                                            }
+
+                                            @Override
+                                            public void wizardCancelled(WizardCancelledEvent event) {
+                                                removeWindow(sw);
+                                            }
+                                        });
+                                        sw.setContent(w);
+                                        sw.center();
+                                        sw.setModal(true);
+                                        sw.setSizeFull();
+                                        addWindow(sw);
+                                    }, ButtonOption.focus(),
+                                            ButtonOption.icon(VaadinIcons.CHECK))
+                                    .withCancelButton(
+                                            ButtonOption.icon(VaadinIcons.CLOSE)
+                                    )
+                                    .open();
+                        }
+                    }
+                    if (!history.isEmpty()) {
+                        try {
+                            if (conclusion.getValue() != null) {
+                                tces.setConclusion(conclusion.getValue());
+                            }
+                            if (scope.getValue() != null) {
+                                tces.setScope(scope.getValue().toString());
+                            }
+                            tces.setName(name.getValue().toString());
+                            tces.write2DB();
+                            //Process the list
+                            ps.getTestProjects(true).forEach(tp -> {
+                                tces.addTestProject(tp);
+                            });
+                            //Now look thru the ExecutionSteps and assign the right version.
+                            tces.getExecutionStepList().forEach(es -> {
+                                try {
+                                    ExecutionStepServer ess = new ExecutionStepServer(es);
+                                    es.getStep().getRequirementList().forEach(r -> {
+                                        ess.getHistoryList().add(history.get(r));
+                                    });
+                                    ess.write2DB();
+                                } catch (Exception ex) {
+                                    LOG.log(Level.SEVERE, null, ex);
+                                }
+                            });
+                            tces.write2DB();
+                            tces.update(tce, tces.getEntity());
+                            updateProjectList();
+                            updateScreen();
+                            displayObject(tce);
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                        }
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
@@ -433,51 +549,14 @@ public class ValidationManagerUI extends UI implements VMUI {
                     "executionEnd");
             layout.addComponent(end);
         }
-        if (es.getExecutionTime() > 0) {
+        if (es.getExecutionTime() != null && es.getExecutionTime() > 0) {
             Field<?> time = binder.buildAndBind("Execution Time",
                     "executionTime");
             layout.addComponent(time);
         }
-        if (es.getStep().getRequirementList() != null
-                && !es.getStep().getRequirementList().isEmpty()) {
-            BeanItemContainer reqContainer
-                    = new BeanItemContainer<>(Requirement.class);
-            reqContainer.addAll(es.getStep().getRequirementList());
-            Grid reqGrid = new Grid(reqContainer);
-            reqGrid.setHeightMode(HeightMode.ROW);
-            reqGrid.setHeightByRows(reqContainer.size() > 5 ? 5 : reqContainer.size());
-            reqGrid.setCaption("Related Requirements");
-            reqGrid.setColumns("uniqueId");
-            Grid.Column reqColumn = reqGrid.getColumn("uniqueId");
-            reqColumn.setHeaderCaption("Requirement ID");
-            reqColumn.setRenderer(new ButtonRenderer(e -> {
-                //Show the requirement details in a window
-                VerticalLayout l = new VerticalLayout();
-                Window subWindow = new VMWindow(
-                        ((Requirement) e.getItemId()).getUniqueId()
-                        + " Details");
-                BeanFieldGroup<Requirement> b
-                        = new BeanFieldGroup<>(Requirement.class);
-                b.setItemDataSource((Requirement) e.getItemId());
-                b.setReadOnly(true);
-                Field<?> id = b.buildAndBind("Requirement ID", "uniqueId");
-                id.setReadOnly(true); //Read only flag set to true !!!
-                l.addComponent(id);
-                Field<?> desc = b.buildAndBind("Description", "description",
-                        TextArea.class);
-                desc.setReadOnly(true); //Read only flag set to true !!!
-                l.addComponent(desc);
-                Field<?> notes = b.buildAndBind("Notes", "notes",
-                        TextArea.class);
-                notes.setReadOnly(true); //Read only flag set to true !!!
-                l.addComponent(notes);
-                subWindow.setContent(l);
-                subWindow.setModal(true);
-                subWindow.center();
-                // Open it in the UI
-                addWindow(subWindow);
-            }));
-            layout.addComponent(reqGrid);
+        if (!es.getHistoryList().isEmpty()) {
+            layout.addComponent(createRequirementHistoryTable("Related Requirements",
+                    es.getHistoryList()));
         }
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
@@ -1344,7 +1423,11 @@ public class ValidationManagerUI extends UI implements VMUI {
         create.setEnabled(checkRight("testplan.planning"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayTestCaseExecution(new TestCaseExecution(), true);
+                    int projectId = Integer.parseInt(((String) tree.getValue())
+                            .substring("executions".length()));
+                    TestCaseExecution tce = new TestCaseExecution();
+                    displayTestCaseExecution(new TestCaseExecution(),
+                            new ProjectServer(projectId), true);
                 });
     }
 
@@ -1534,7 +1617,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             Notification.show("Importing unsuccessful!",
                                     Notification.Type.ERROR_MESSAGE);
                         } catch (VMException ex) {
-                            Exceptions.printStackTrace(ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         }
                     });
                     upload.addFailedListener((Upload.FailedEvent event1) -> {
@@ -2488,7 +2571,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         updateProjectList();
                         updateScreen();
                     } catch (FieldGroup.CommitException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
@@ -2775,7 +2858,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             sb.append(s).append("\n");
                         }
                     } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
                 } else {
                     LOG.warning("Invalid configuration for OpenOffice");

@@ -5,6 +5,7 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -135,5 +136,33 @@ public final class ProjectServer extends Project
 
     public void copy(Project newProject) {
         update(this, newProject);
+    }
+
+    /**
+     * Get the Test Projects for this project.
+     *
+     * @return Test projects for this project.
+     */
+    public List<TestProject> getTestProjects() {
+        return getTestProjects(false);
+    }
+
+    /**
+     * Get the Test Projects for this project.
+     *
+     * @param includeSubProjects true to include the sub projects as well.
+     *
+     * @return Test projects for this project.
+     */
+    public List<TestProject> getTestProjects(boolean includeSubProjects) {
+        List<TestProject> tps = new ArrayList<>();
+        tps.addAll(getTestProjectList());
+        if (includeSubProjects) {
+            for (Project p : getProjectList()) {
+                tps.addAll(new ProjectServer(p)
+                        .getTestProjects(includeSubProjects));
+            }
+        }
+        return tps;
     }
 }
