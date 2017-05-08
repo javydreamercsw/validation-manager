@@ -147,17 +147,13 @@ public final class TestCaseExecutionServer extends TestCaseExecution
      */
     public static List<TestCaseExecution> getExecutions(Project p) {
         List<TestCaseExecution> results = new ArrayList<>();
-        List<Integer> ids = new ArrayList<>();
         p.getTestProjectList().forEach(tp -> {
             tp.getTestPlanList().forEach(plan -> {
                 plan.getTestCaseList().forEach(tc -> {
                     tc.getStepList().forEach(s -> {
                         s.getExecutionStepList().forEach(es -> {
                             TestCaseExecution tce = es.getTestCaseExecution();
-                            if (!ids.contains(es.getStep().getTestCase().getId())) {
-                                results.add(tce);
-                                ids.add(es.getStep().getTestCase().getId());
-                            }
+                            results.add(tce);
                         });
                     });
                 });
