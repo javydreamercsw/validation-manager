@@ -148,6 +148,9 @@ public class DemoBuilder {
         tces.getExecutionStepList().stream().map((es)
                 -> new ExecutionStepServer(es)).forEachOrdered((ess)
                 -> {
+            ess.getStep().getRequirementList().forEach(req -> {
+                ess.getHistoryList().add(req.getHistoryList().get(0));
+            });
             ess.assignUser(r.nextBoolean() ? tester1.getEntity()
                     : tester2.getEntity(), assigner.getEntity());
         });
