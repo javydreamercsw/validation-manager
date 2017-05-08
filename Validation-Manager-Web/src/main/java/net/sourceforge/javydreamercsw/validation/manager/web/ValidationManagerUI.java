@@ -406,8 +406,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                                             ButtonOption.icon(VaadinIcons.CHECK))
                                     .withCancelButton(
                                             ButtonOption.icon(VaadinIcons.CLOSE)
-                                    )
-                                    .open();
+                                    ).getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                            mb.open();
                         }
                     }
                     if (!history.isEmpty()) {
