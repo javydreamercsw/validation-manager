@@ -420,22 +420,24 @@ public class ValidationManagerUI extends UI implements VMUI {
                             }
                             tces.setName(name.getValue().toString());
                             tces.write2DB();
-                            //Process the list
-                            ps.getTestProjects(true).forEach(tp -> {
-                                tces.addTestProject(tp);
-                            });
-                            //Now look thru the ExecutionSteps and assign the right version.
-                            tces.getExecutionStepList().forEach(es -> {
-                                try {
-                                    ExecutionStepServer ess = new ExecutionStepServer(es);
-                                    es.getStep().getRequirementList().forEach(r -> {
-                                        ess.getHistoryList().add(history.get(r));
-                                    });
-                                    ess.write2DB();
-                                } catch (Exception ex) {
-                                    LOG.log(Level.SEVERE, null, ex);
-                                }
-                            });
+                            if (ps != null) {
+                                //Process the list
+                                ps.getTestProjects(true).forEach(tp -> {
+                                    tces.addTestProject(tp);
+                                });
+                                //Now look thru the ExecutionSteps and assign the right version.
+                                tces.getExecutionStepList().forEach(es -> {
+                                    try {
+                                        ExecutionStepServer ess = new ExecutionStepServer(es);
+                                        es.getStep().getRequirementList().forEach(r -> {
+                                            ess.getHistoryList().add(history.get(r));
+                                        });
+                                        ess.write2DB();
+                                    } catch (Exception ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                    }
+                                });
+                            }
                             tces.write2DB();
                             tces.update(tce, tces.getEntity());
                             updateProjectList();
@@ -1204,7 +1206,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(id);
         Field desc = binder.buildAndBind("Description", "description",
                 TextArea.class);
-
         desc.setSizeFull();
         layout.addComponent(desc);
         Field notes = binder.buildAndBind("Notes", "notes",
