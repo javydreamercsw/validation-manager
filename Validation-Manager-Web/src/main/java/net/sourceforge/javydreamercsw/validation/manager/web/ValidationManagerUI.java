@@ -1215,10 +1215,11 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (req.getParentRequirementId() != null) {
             TextField tf = new TextField("Parent");
             tf.setValue(req.getParentRequirementId().getUniqueId());
+            tf.setReadOnly(true);
             layout.addComponent(tf);
         }
         if (!req.getRequirementList().isEmpty()) {
-            Grid grid = new Grid();
+            Grid grid = new Grid("Related Requirements");
             BeanItemContainer<Requirement> children
                     = new BeanItemContainer<>(Requirement.class);
             children.addAll(req.getRequirementList());
@@ -1226,6 +1227,8 @@ public class ValidationManagerUI extends UI implements VMUI {
             grid.setColumns("uniqueId");
             Grid.Column uniqueId = grid.getColumn("uniqueId");
             uniqueId.setHeaderCaption("ID");
+            grid.setHeightMode(HeightMode.ROW);
+            grid.setHeightByRows(children.size() > 5 ? 5 : children.size());
             layout.addComponent(grid);
         }
         Button cancel = new Button("Cancel");
