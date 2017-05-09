@@ -101,7 +101,7 @@ public final class RequirementServer extends Requirement
                     DataBaseManager.getEntityManagerFactory()).edit(req);
         } else {
             Requirement req = new Requirement(getUniqueId(), getDescription());
-            update(req, this);
+            update(this, req);
             new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(req);
             setId(req.getId());
@@ -119,12 +119,8 @@ public final class RequirementServer extends Requirement
 
     @Override
     public void update(Requirement target, Requirement source) {
-        if (source.getNotes() != null) {
-            target.setNotes(source.getNotes());
-        }
-        if (source.getDescription() != null) {
-            target.setDescription(source.getDescription());
-        }
+        target.setNotes(source.getNotes());
+        target.setDescription(source.getDescription());
         target.setRequirementSpecNode(source.getRequirementSpecNode());
         target.setRequirementList(source.getRequirementList());
         target.setRequirementStatusId(source.getRequirementStatusId());
@@ -223,12 +219,9 @@ public final class RequirementServer extends Requirement
                 break;
             }
         }
-        if (!circular) {
-            getRequirementList().add(child);
-            write2DB();
-            update();
-        } else {
-            MessageHandler handler = Lookup.getDefault().lookup(MessageHandler.class);
+        if (circular) {
+            MessageHandler handler = Lookup.getDefault()
+                    .lookup(MessageHandler.class);
             String message = new StringBuilder().append("Ignored addition of ")
                     .append(child.getUniqueId()).append(" as a children of ")
                     .append(getUniqueId())
@@ -239,6 +232,14 @@ public final class RequirementServer extends Requirement
             } else {
                 LOG.warning(message);
             }
+        } else {
+            RequirementServer cs = new RequirementServer(child);
+            cs.setParentRequirementId(getEntity());
+            cs.write2DB();
+            update();
+            assert Objects.equals(new RequirementServer(child)
+                    .getParentRequirementId().getId(), getId());
+            assert getEntity().getRequirementList().size() > 0;
         }
     }
 

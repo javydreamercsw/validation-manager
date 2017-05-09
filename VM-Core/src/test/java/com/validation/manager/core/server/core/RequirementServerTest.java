@@ -222,25 +222,15 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.setDescription("Modified requirement");
             rs.write2DB();
             rs.addChildRequirement(req2);
-            //Should have one children now
-            rs.getRequirementList().forEach((r) -> {
-                LOG.info(r.getUniqueId());
-            });
-            assertEquals(1, rs.getRequirementList().size());
-            rs.getRequirementList().forEach((r) -> {
-                LOG.info(r.getUniqueId());
-            });
-            //No parents
-            assertNull(rs.getParentRequirementId());
             RequirementServer rs2 = new RequirementServer(req2);
-            rs2.getRequirementList().forEach((r) -> {
-                LOG.info(r.getUniqueId());
-            });
+            //Should have one children now
+            assertEquals(1, rs.getEntity().getRequirementList().size());
+            //No parents
+            assertNull(rs.getEntity().getParentRequirementId());
             //One parent
-            assertNotNull(rs2.getParentRequirementId());
-            LOG.info(rs2.getParentRequirementId().getUniqueId());
+            assertNotNull(rs2.getEntity().getParentRequirementId());
             //No children
-            assertEquals(0, rs2.getRequirementList().size());
+            assertEquals(0, rs2.getEntity().getRequirementList().size());
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);

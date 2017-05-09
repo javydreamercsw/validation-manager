@@ -53,6 +53,9 @@ public class RequirementType implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
+    @NotNull
+    @Column(name = "level")
+    private Integer level = 0;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -116,7 +119,7 @@ public class RequirementType implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof RequirementType)) {
             return false;
         }
@@ -128,5 +131,19 @@ public class RequirementType implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RequirementType[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the level
+     */
+    public Integer getLevel() {
+        return level;
+    }
+
+    /**
+     * @param level the level to set
+     */
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 }
