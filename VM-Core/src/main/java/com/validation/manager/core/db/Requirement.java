@@ -245,8 +245,7 @@ public class Requirement extends Versionable implements Serializable {
         return "com.validation.manager.core.db.Requirement[ id=" + getId()
                 + ", uniqueId=" + getUniqueId()
                 + ", description=" + getDescription()
-                + super.toString()
-                + " ]";
+                + " " + super.toString() + " ]";
     }
 
     @XmlTransient
