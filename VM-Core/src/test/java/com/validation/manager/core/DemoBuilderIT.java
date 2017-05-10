@@ -60,10 +60,14 @@ public class DemoBuilderIT extends AbstractVMTestCase {
                 Tool.extractRequirements(p).forEach(r -> {
                     try {
                         RequirementServer rs = new RequirementServer(r);
-                        boolean hasParent = rs.getParentRequirementId() != null;
-                        boolean hasChildren = rs.getRequirementList().size() > 0;
                         assertTrue(rs.getParentRequirementId() != null
                                 || rs.getRequirementList().size() > 0);
+                        //Make sure all have a related step
+                        if (rs.getStepList().isEmpty()) {
+                            LOG.log(Level.INFO, "{0} has no steps!",
+                                    rs.getUniqueId());
+                        }
+//                        assertTrue(rs.getStepList().size() > 0);
                     }
                     catch (VMException ex) {
                         Exceptions.printStackTrace(ex);

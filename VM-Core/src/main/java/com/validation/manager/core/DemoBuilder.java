@@ -5,14 +5,18 @@ package com.validation.manager.core;
 
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.Step;
+import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
+import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
+import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
@@ -33,7 +37,7 @@ public class DemoBuilder {
 
     private static final Logger LOG
             = Logger.getLogger(DemoBuilder.class.getSimpleName());
-    private static int tcCounter, tpCounter, reqCounter;
+    private static int tcCounter = 1, tpCounter, reqCounter;
 
     public static void buildDemoProject() throws Exception {
         LOG.info("Creating demo projects...");
@@ -42,24 +46,50 @@ public class DemoBuilder {
                         .getEntityManagerFactory());
         Project rootProject = new Project("Demo");
         controller.create(rootProject);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 2; i++) {
             Project temp = new Project("Sub " + (i + 1));
             temp.setParentProjectId(rootProject);
             controller.create(temp);
             ProjectServer ps = new ProjectServer(temp);
             addDemoProjectRequirements(ps.getEntity());
             addDemoProjectTestProject(ps.getEntity());
-            addDemoExecution(ps.getEntity());
             rootProject.getProjectList().add(ps.getEntity());
         }
         addDemoProjectRequirements(rootProject);
         controller.edit(rootProject);
+        //Link requirements with steps
+        List<Requirement> requirements
+                = new RequirementJpaController(DataBaseManager
+                        .getEntityManagerFactory())
+                        .findRequirementEntities();
+        LOG.log(Level.INFO, "Total: {0}", requirements.size());
+        List<TestCase> tcs = new TestCaseJpaController(DataBaseManager
+                .getEntityManagerFactory()).findTestCaseEntities();
+        int amount = tcs.size();
+        int size = requirements.size() / amount;
+        int i = 0;
+        for (TestCase tc : tcs) {
+            for (Step step : tc.getStepList()) {
+                try {
+                    StepServer ss = new StepServer(step);
+                    ss.getRequirementList().addAll(requirements
+                            .subList(i * size, i * size + size));
+                    ss.write2DB();
+                }
+                catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            }
+            i++;
+        }
+        for (Project p : controller.findProjectEntities()) {
+            addDemoExecution(p);
+        }
         LOG.info("Done!");
     }
 
     private static void addDemoProjectRequirements(Project p)
             throws Exception {
-        tcCounter = 1;
         tpCounter = 1;
         reqCounter = 1;
         //Create User Needs spec
@@ -92,29 +122,6 @@ public class DemoBuilder {
                 count++;
             }
         });
-//        subSpecs.forEach(ss -> {
-//            ss.getRequirementSpecNodeList().forEach(nl -> {
-//                int count = 0;
-//                for (Requirement sr : nl.getRequirementList()) {
-//                    try {
-//                        Requirement r = un.getRequirementSpecNodeList()
-//                                .get(0).getRequirementList().get(count);
-////                        LOG.log(Level.INFO, "Adding {0} as child to {1}",
-////                                new Object[]{sr.getUniqueId(),
-////                                    r.getUniqueId()});
-//                        new RequirementServer(r)
-//                                .addChildRequirement(sr);
-//                        count++;
-//                    }
-//                    catch (VMException ex) {
-//                        LOG.log(Level.SEVERE, null, ex);
-//                    }
-//                    catch (Exception ex) {
-//                        LOG.log(Level.SEVERE, null, ex);
-//                    }
-//                }
-//            });
-//        });
         new ProjectJpaController(DataBaseManager
                 .getEntityManagerFactory()).edit(p);
     }
@@ -189,6 +196,7 @@ public class DemoBuilder {
         tps.setName("Test Plan #" + (tpCounter++));
         tps.setNotes("Notes");
         tps.write2DB();
+        int amount = 5;
         for (int i = 0; i < 5; i++) {
             //Add steps
             TestCaseServer tcs
@@ -196,15 +204,10 @@ public class DemoBuilder {
                             + (tcCounter++),
                             new Date());
             tcs.write2DB();
-            for (int j = 0; j < 5; j++) {
-                List<Requirement> requirements
-                        = new RequirementJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findRequirementEntities()
-                                .subList(j * 5, j * 5 + 5);
+            for (int j = 0; j < amount; j++) {
                 tcs.addStep((j + 1), "Step #" + (j + 1), "Note",
                         "Criteria",
-                        requirements);
+                        new ArrayList<>());
             }
             tcs.write2DB();
             tps.addTestCase(tcs.getEntity());
