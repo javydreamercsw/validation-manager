@@ -5,10 +5,6 @@
 @import "../../../VAADIN/addons/vaadin-icons/vaadin-icons.scss";
 
 
-/* Provided by pdfviewer-1.2.2.jar */
-@import "../../../VAADIN/addons/pdfviewer/pdfviewer.scss";
-
-
 /* Provided by componentrenderer-1.0.3.jar */
 @import "../../../VAADIN/addons/componentrenderer/componentrenderer.scss";
 
@@ -20,7 +16,6 @@
 /* Import and include this mixin into your project theme to include the addon themes */
 @mixin addons {
 	@include vaadin-icons;
-	@include pdfviewer;
 	@include componentrenderer;
 	@include contextmenu;
 }

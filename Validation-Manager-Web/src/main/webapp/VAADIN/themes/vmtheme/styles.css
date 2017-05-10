@@ -1567,57 +1567,6 @@ div.v-layout.v-horizontal.v-widget {
 	vertical-align: top;
 }
 
-.vmtheme .pdf-viewer .input-counter {
-	width: 60px;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-counter-box {
-	padding-left: 10px;
-	line-height: 37px;
-	font-weight: bolder;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-button-bar {
-	text-align: center;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-button-bar div {
-	display: inline-block;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-canvas {
-	cursor: move;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-navigation .v-button-previous {
-	border-radius: 5px 0 0 5px;
-	border-right: none;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-navigation .v-button-next {
-	border-radius: 0px 5px 5px 0px;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-size-box {
-	padding-left: 10px;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-size-box .v-button-decrease {
-	border-radius: 5px 0 0 5px;
-	border-right: none;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-size-box .v-button-increase {
-	border-radius: 0px;
-	border-right: none;
-}
-
-.vmtheme .pdf-viewer .pdf-viewer-size-box select:focus, .vmtheme .pdf-viewer .pdf-viewer-size-box select {
-	border-radius: 0px 5px 5px 0px;
-	height: 37px;
-	box-shadow: none;
-}
-
 .vmtheme .v-grid-cell > .cr-component-cell {
 	display: flex;
 	align-items: center;
