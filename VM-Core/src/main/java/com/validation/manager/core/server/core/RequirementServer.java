@@ -13,6 +13,7 @@ import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.tool.Tool;
 import com.validation.manager.core.tool.message.MessageHandler;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +102,7 @@ public final class RequirementServer extends Requirement
                     DataBaseManager.getEntityManagerFactory()).edit(req);
         } else {
             Requirement req = new Requirement(getUniqueId(), getDescription());
-            update(this, req);
+            update(req, this);
             new RequirementJpaController(
                     DataBaseManager.getEntityManagerFactory()).create(req);
             setId(req.getId());
@@ -138,7 +139,7 @@ public final class RequirementServer extends Requirement
         //Must be unique within a project.
         Project project
                 = req.getRequirementSpecNode().getRequirementSpec().getProject();
-        List<Requirement> requirements = ProjectServer.getRequirements(project);
+        List<Requirement> requirements = Tool.extractRequirements(project);
         int count = 0;
         for (Requirement r : requirements) {
             if (r.getUniqueId().equals(req.getUniqueId())) {
