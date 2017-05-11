@@ -24,6 +24,7 @@ import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -621,26 +622,27 @@ public class ValidationManagerUI extends UI implements VMUI {
         notes.setSizeFull();
         layout.addComponent(notes);
         tree.select(s);
-        Project p = getParentProject();
-        List<Requirement> reqs = ProjectServer.getRequirements(p);
-        Collections.sort(reqs, (Requirement o1, Requirement o2)
-                -> o1.getUniqueId().compareTo(o2.getUniqueId()));
-        BeanItemContainer<Requirement> requirementContainer
-                = new BeanItemContainer<>(Requirement.class, reqs);
-        TwinColSelect requirements
-                = new TwinColSelect("Linked Requirements");
-        requirements.setItemCaptionPropertyId("uniqueId");
-        requirements.setContainerDataSource(requirementContainer);
-        requirements.setRows(5);
-        requirements.setLeftColumnCaption("Available Requirements");
-        requirements.setRightColumnCaption("Linked Requirements");
-        if (s.getRequirementList() != null) {
-            s.getRequirementList().forEach((r) -> {
-                requirements.select(r);
+        if (!s.getRequirementList().isEmpty() && !edit) {
+            layout.addComponent(getDisplayRequirementList("Related Requirements",
+                    s.getRequirementList()));
+        } else {
+            AbstractSelect requirements = getRequirementSelectionComponent();
+            //Select the exisitng ones.
+            if (s.getRequirementList() != null) {
+                s.getRequirementList().forEach((r) -> {
+                    requirements.select(r);
+                });
+            }
+            requirements.addValueChangeListener(event -> {
+                Set<Requirement> selected
+                        = (Set<Requirement>) event.getProperty().getValue();
+                s.getRequirementList().clear();
+                selected.forEach(r -> {
+                    s.getRequirementList().add(r);
+                });
             });
+            layout.addComponent(requirements);
         }
-        requirements.setEnabled(edit);
-        layout.addComponent(requirements);
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -667,10 +669,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                         if (s.getRequirementList() == null) {
                             s.setRequirementList(new ArrayList<>());
                         }
-                        s.getRequirementList().clear();
-                        ((Set<Requirement>) requirements.getValue()).forEach((r) -> {
-                            s.getRequirementList().add(r);
-                        });
                         new StepJpaController(DataBaseManager
                                 .getEntityManagerFactory()).create(s);
                         form.setVisible(false);
@@ -703,10 +701,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                         if (s.getRequirementList() == null) {
                             s.setRequirementList(new ArrayList<>());
                         }
-                        s.getRequirementList().clear();
-                        ((Set<Requirement>) requirements.getValue()).forEach((r) -> {
-                            s.getRequirementList().add(r);
-                        });
                         new StepJpaController(DataBaseManager
                                 .getEntityManagerFactory()).edit(s);
                         displayStep(s, true);
@@ -1218,18 +1212,24 @@ public class ValidationManagerUI extends UI implements VMUI {
             tf.setReadOnly(true);
             layout.addComponent(tf);
         }
-        if (!req.getRequirementList().isEmpty()) {
-            Grid grid = new Grid("Related Requirements");
-            BeanItemContainer<Requirement> children
-                    = new BeanItemContainer<>(Requirement.class);
-            children.addAll(req.getRequirementList());
-            grid.setContainerDataSource(children);
-            grid.setColumns("uniqueId");
-            Grid.Column uniqueId = grid.getColumn("uniqueId");
-            uniqueId.setHeaderCaption("ID");
-            grid.setHeightMode(HeightMode.ROW);
-            grid.setHeightByRows(children.size() > 5 ? 5 : children.size());
-            layout.addComponent(grid);
+        if (!req.getRequirementList().isEmpty() && !edit) {
+            layout.addComponent(getDisplayRequirementList("Related Requirements",
+                    req.getRequirementList()));
+        } else if (edit) {
+            //Allow user to add children
+            AbstractSelect as = getRequirementSelectionComponent();
+            req.getRequirementList().forEach(sub -> {
+                as.select(sub);
+            });
+            as.addValueChangeListener(event -> {
+                Set<Requirement> selected
+                        = (Set<Requirement>) event.getProperty().getValue();
+                req.getRequirementList().clear();
+                selected.forEach(r -> {
+                    req.getRequirementList().add(r);
+                });
+            });
+            layout.addComponent(as);
         }
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
@@ -1267,9 +1267,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         RequirementServer rs = new RequirementServer(req);
-                        rs.setUniqueId(id.getValue().toString());
-                        rs.setNotes(notes.getValue().toString());
-                        rs.setDescription(desc.getValue().toString());
+                        rs.update(rs, req);
                         rs.write2DB();
                         form.setVisible(false);
                         //Recreate the tree to show the addition
@@ -2775,6 +2773,40 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createBaselineMenu(ContextMenu menu) {
 
+    }
+
+    private AbstractSelect getRequirementSelectionComponent() {
+        Project p = getParentProject();
+        List<Requirement> reqs = ProjectServer.getRequirements(p);
+        Collections.sort(reqs, (Requirement o1, Requirement o2)
+                -> o1.getUniqueId().compareTo(o2.getUniqueId()));
+        BeanItemContainer<Requirement> requirementContainer
+                = new BeanItemContainer<>(Requirement.class, reqs);
+        TwinColSelect requirements
+                = new TwinColSelect("Linked Requirements");
+        requirements.setItemCaptionPropertyId("uniqueId");
+        requirements.setContainerDataSource(requirementContainer);
+        requirements.setRows(5);
+        requirements.setLeftColumnCaption("Available Requirements");
+        requirements.setRightColumnCaption("Linked Requirements");
+        return requirements;
+    }
+
+    private Component getDisplayRequirementList(String title,
+            List<Requirement> requirementList) {
+        Grid grid = new Grid(title);
+        BeanItemContainer<Requirement> children
+                = new BeanItemContainer<>(Requirement.class);
+        children.addAll(requirementList);
+        grid.setContainerDataSource(children);
+        grid.setColumns("uniqueId");
+        Grid.Column uniqueId = grid.getColumn("uniqueId");
+        uniqueId.setHeaderCaption("ID");
+        grid.setHeightMode(HeightMode.ROW);
+        grid.setHeightByRows(children.size() > 5 ? 5 : children.size());
+        grid.setSizeFull();
+        children.sort(new Object[]{"uniqueId"}, new boolean[]{true});
+        return grid;
     }
 
     public class TCEExtraction {
