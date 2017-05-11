@@ -8,6 +8,7 @@ import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.tool.Tool;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
 import java.util.logging.Level;
@@ -27,7 +28,6 @@ public class ProjectServerTest extends AbstractVMTestCase {
     private Project p;
     private static final Logger LOG
             = Logger.getLogger(ProjectServerTest.class.getSimpleName());
-    private RequirementSpecNode rsns;
 
     @Override
     protected void postSetUp() {
@@ -52,7 +52,7 @@ public class ProjectServerTest extends AbstractVMTestCase {
             }
             System.out.println("Create Requirement Spec Node");
             try {
-                rsns = TestHelper.createRequirementSpecNode(
+                TestHelper.createRequirementSpecNode(
                         rss, "Test", "Test", "Test");
             }
             catch (Exception ex) {
@@ -87,11 +87,11 @@ public class ProjectServerTest extends AbstractVMTestCase {
                 printStackTrace(ex);
                 fail();
             }
-            assertTrue(ProjectServer.getRequirements(root).isEmpty());
+            assertTrue(Tool.extractRequirements(root).isEmpty());
             RequirementSpec mainSpec
                     = TestHelper.createRequirementSpec("Spec", "Desc", root, 1);
             assertTrue(!root.getRequirementSpecList().isEmpty());
-            assertEquals(0, ProjectServer.getRequirements(root).size());
+            assertEquals(0, Tool.extractRequirements(root).size());
             sub = TestHelper.addProject(root, "Sub", "Notes");
             System.out.println("Create Spec for sub project.");
             RequirementSpec spec = TestHelper.createRequirementSpec("Spec 2",
@@ -100,10 +100,10 @@ public class ProjectServerTest extends AbstractVMTestCase {
                     "Requirement Doc", "Desc", "Scope");
             Requirement req1 = TestHelper.createRequirement("REQ-001", "Desc",
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
-            assertEquals(1, ProjectServer.getRequirements(root).size());
+            assertEquals(1, Tool.extractRequirements(root).size());
             Requirement req2 = TestHelper.createRequirement("REQ-002", "Desc",
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
-            assertEquals(2, ProjectServer.getRequirements(root).size());
+            assertEquals(2, Tool.extractRequirements(root).size());
             TestHelper.addChildToRequirement(req1, req2);
             try {
                 ProjectServer.deleteProject(sub);

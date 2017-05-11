@@ -52,8 +52,7 @@ public final class ProjectServer extends Project
             new ProjectJpaController(getEntityManagerFactory()).create(p);
             setId(p.getId());
         } else {
-            p = new ProjectJpaController(getEntityManagerFactory())
-                    .findProject(getId());
+            p = getEntity();
             update(p, this);
             new ProjectJpaController(getEntityManagerFactory()).edit(p);
         }

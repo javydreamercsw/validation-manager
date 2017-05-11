@@ -4,6 +4,7 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.server.core.ProjectServer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,11 +43,17 @@ public class Tool {
     }
 
     public static List<Requirement> extractRequirements(Project p) {
+        ProjectServer ps;
+        if (p instanceof ProjectServer) {
+            ps = (ProjectServer) p;
+        } else {
+            ps = new ProjectServer(p);
+        }
         List<Requirement> result = new ArrayList<>();
-        p.getRequirementSpecList().forEach(rs -> {
+        ps.getRequirementSpecList().forEach(rs -> {
             result.addAll(extractRequirements(rs));
         });
-        p.getProjectList().forEach(sub -> {
+        ps.getProjectList().forEach(sub -> {
             result.addAll(extractRequirements(sub));
         });
         return result;

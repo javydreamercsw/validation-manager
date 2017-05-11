@@ -208,7 +208,7 @@ public class TestHelper {
         ProjectServer ps = new ProjectServer(root);
         ps.getProjectList().add(sub);
         ps.write2DB();
-        return ps.getEntity();
+        return new ProjectServer(sub).getEntity();
     }
 
     public static Requirement addChildToRequirement(Requirement parent,
