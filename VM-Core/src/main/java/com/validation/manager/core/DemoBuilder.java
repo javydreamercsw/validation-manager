@@ -243,6 +243,7 @@ public class DemoBuilder {
             ess.getStep().getRequirementList().forEach(req -> {
                 ess.getHistoryList().add(req.getHistoryList().get(0));
             });
+            ess.setStepHistory(ess.getStep().getHistoryList().get(0));
             ess.assignUser(r.nextBoolean() ? tester1.getEntity()
                     : tester2.getEntity(), assigner.getEntity());
         });

@@ -109,9 +109,14 @@ public class History implements Serializable {
     private List<Project> projectList;
     @ManyToMany(mappedBy = "historyList")
     private List<ExecutionStep> executionStepList;
-
     @ManyToMany(mappedBy = "historyList")
     private List<Baseline> baselineList;
+    @JoinTable(name = "step_has_history", joinColumns = {
+        @JoinColumn(name = "history_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "step_id", referencedColumnName = "id")
+        , @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id")})
+    @ManyToMany
+    private List<Step> stepList;
 
     public History() {
     }
@@ -288,5 +293,15 @@ public class History implements Serializable {
 
     public void setExecutionStepList(List<ExecutionStep> executionStepList) {
         this.executionStepList = executionStepList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Step> getStepList() {
+        return stepList;
+    }
+
+    public void setStepList(List<Step> stepList) {
+        this.stepList = stepList;
     }
 }

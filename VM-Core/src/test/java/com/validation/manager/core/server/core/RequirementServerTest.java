@@ -163,14 +163,14 @@ public class RequirementServerTest extends AbstractVMTestCase {
             int i = 1;
             for (; i < 6; i++) {
                 LOG.log(Level.INFO, "Adding step: {0}", i);
-                tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
+                tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i, "Result " + i);
                 Step step = tc.getStepList().get(i - 1);
                 TestHelper.addRequirementToStep(step, req);
                 new TestCaseServer(tc).write2DB();
                 assertEquals(1, new StepServer(step).getRequirementList().size());
             }
             LOG.log(Level.INFO, "Adding step: {0}", i);
-            tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
+            tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i, "Result " + i);
             Step step = tc.getStepList().get(i - 1);
             TestHelper.addRequirementToStep(step, req3);
             new TestCaseServer(tc).write2DB();
@@ -258,7 +258,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             TestCase tc = TestHelper.createTestCase("TC #1",
                     "Summary");
             TestHelper.addTestCaseToPlan(plan, tc);
-            TestCase step = TestHelper.addStep(tc, 1, "Test", "Test");
+            TestCase step = TestHelper.addStep(tc, 1, "Test", "Test", "Result ");
             rs.getStepList().add(step.getStepList().get(0));
             rs.write2DB();
             assertEquals(1, rs.getStepList().size());

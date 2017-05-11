@@ -8,6 +8,7 @@ import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
+import java.nio.charset.StandardCharsets;
 import org.junit.Test;
 import org.openide.util.Exceptions;
 
@@ -21,7 +22,7 @@ public class StepServerTest extends AbstractVMTestCase {
      * Test of getEntity method, of class StepServer.
      */
     @Test
-    public void testDatabase() {
+    public void testStepCreation() {
         try {
             System.out.println("Database interaction");
             System.out.println("Create a project");
@@ -37,7 +38,7 @@ public class StepServerTest extends AbstractVMTestCase {
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
             //Create Test Case
             TestCase tc = TestHelper.createTestCase("Dummy", "Summary");
-            tc = TestHelper.addStep(tc, 1, "Step " + 1, "Note " + 1);
+            tc = TestHelper.addStep(tc, 1, "Step " + 1, "Note " + 1, "Result " + 1);
             Step step = tc.getStepList().get(0);
             TestHelper.addRequirementToStep(step, req);
             new TestCaseServer(tc).write2DB();
@@ -59,7 +60,34 @@ public class StepServerTest extends AbstractVMTestCase {
             rs.update();
             assertEquals(1, ss.getRequirementList().size());
             assertEquals(0, rs.getStepList().size());
-        } catch (Exception ex) {
+            assertEquals(1, ss.getHistoryList().size());
+            ss.getHistoryList().forEach(h -> {
+                h.getHistoryFieldList().forEach(hf -> {
+
+                    switch (hf.getFieldName()) {
+                        case "text":
+                            assertEquals(new String(step.getText(),
+                                    StandardCharsets.UTF_8),
+                                    hf.getFieldValue());
+                            break;
+                        case "expectedResult":
+                            assertEquals(new String(step.getExpectedResult(),
+                                    StandardCharsets.UTF_8),
+                                    hf.getFieldValue());
+                            break;
+                        case "notes":
+                            assertEquals(step.getNotes(),
+                                    hf.getFieldValue());
+                            break;
+                        default:
+                            System.err.println("Unexpected field: "
+                                    + hf.getFieldName());
+                            fail();
+                    }
+                });
+            });
+        }
+        catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             fail();
         }

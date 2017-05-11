@@ -74,6 +74,7 @@ public final class StepServer extends Step implements EntityServer<Step> {
         target.setTestCase(source.getTestCase());
         target.setText(source.getText());
         target.setExecutionStepList(source.getExecutionStepList());
+        super.update(target, source);
     }
 
     @Override

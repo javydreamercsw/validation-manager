@@ -1,5 +1,7 @@
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.api.history.Auditable;
+import com.validation.manager.core.db.mapped.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -37,7 +39,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT s FROM Step s WHERE s.stepPK.testCaseId = :testCaseId")
     , @NamedQuery(name = "Step.findByStepSequence",
             query = "SELECT s FROM Step s WHERE s.stepSequence = :stepSequence")})
-public class Step implements Serializable {
+public class Step extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @EmbeddedId
@@ -50,13 +52,16 @@ public class Step implements Serializable {
     @NotNull
     @Lob
     @Column(name = "text")
+    @Auditable
     private byte[] text;
     @Lob
     @Column(name = "expected_result")
+    @Auditable
     private byte[] expectedResult;
     @Lob
     @Size(max = 2147483647)
     @Column(name = "notes")
+    @Auditable
     private String notes;
     @ManyToMany(mappedBy = "stepList")
     private List<Requirement> requirementList;
@@ -66,6 +71,8 @@ public class Step implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private TestCase testCase;
+    @ManyToMany(mappedBy = "stepList")
+    private List<History> historyList;
 
     public Step() {
     }
@@ -153,7 +160,6 @@ public class Step implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
         if (!(object instanceof Step)) {
             return false;
         }
@@ -165,6 +171,18 @@ public class Step implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    @Override
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    @Override
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
     }
 
     public byte[] getText() {

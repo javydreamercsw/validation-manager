@@ -15,6 +15,7 @@ import com.validation.manager.core.server.core.HistoryServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -155,7 +156,12 @@ public abstract class AuditedObject
                     Object o = FieldUtils.readField(FieldUtils.getField(v.getClass(),
                             hf.getFieldName(), true), v);
                     if ((o == null && !hf.getFieldValue().equals("null"))
-                            || (o != null && !o.equals(hf.getFieldValue()))) {
+                            || (!(o instanceof byte[]) && o != null
+                            && !o.equals(hf.getFieldValue()))
+                            || ((o instanceof byte[])
+                            && !new String((byte[]) o,
+                                    StandardCharsets.UTF_8)
+                                    .equals(hf.getFieldValue()))) {
                         return true;
                     }
                 }
@@ -233,6 +239,10 @@ public abstract class AuditedObject
             hf.setHistory(hs.getEntity());
             field.setAccessible(true);
             Object value = field.get(v);
+            if (value instanceof byte[]) {
+                byte[] bytes = (byte[]) value;
+                value = new String(bytes, StandardCharsets.UTF_8);
+            }
             hf.setFieldValue(value == null ? "null" : value.toString());
             hf.write2DB();
             hs.getHistoryFieldList().add(hf.getEntity());

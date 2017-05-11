@@ -571,11 +571,12 @@ public class ValidationManagerUI extends UI implements VMUI {
             }
         });
         if (edit) {
+            ExecutionStepServer ess = new ExecutionStepServer(es);
+            ess.update(ess, es);
             if (es.getExecutionStepPK() == null) {
                 //Creating a new one
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
-
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(save);
@@ -2777,7 +2778,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private AbstractSelect getRequirementSelectionComponent() {
         Project p = getParentProject();
-        List<Requirement> reqs = ProjectServer.getRequirements(p);
+        List<Requirement> reqs = Tool.extractRequirements(p);
         Collections.sort(reqs, (Requirement o1, Requirement o2)
                 -> o1.getUniqueId().compareTo(o2.getUniqueId()));
         BeanItemContainer<Requirement> requirementContainer

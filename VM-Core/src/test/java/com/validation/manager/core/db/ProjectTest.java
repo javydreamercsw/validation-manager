@@ -93,7 +93,7 @@ public class ProjectTest extends AbstractVMTestCase {
             //Add steps
             for (int i = 1; i < 6; i++) {
                 LOG.info(MessageFormat.format("Adding step: {0}", i));
-                tc = addStep(tc, i, "Step " + i, "Note " + i);
+                tc = addStep(tc, i, "Step " + i, "Note " + i, "Result " + i);
                 Step step = tc.getStepList().get(i - 1);
                 addRequirementToStep(step, r);
                 new TestCaseServer(tc).write2DB();

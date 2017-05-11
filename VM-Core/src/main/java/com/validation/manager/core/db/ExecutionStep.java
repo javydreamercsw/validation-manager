@@ -126,6 +126,9 @@ public class ExecutionStep implements Serializable {
         @JoinColumn(name = "history_id", referencedColumnName = "id")})
     @ManyToMany
     private List<History> historyList;
+    @JoinColumn(name = "step_history", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private History stepHistory;
 
     public ExecutionStep() {
     }
@@ -347,5 +350,13 @@ public class ExecutionStep implements Serializable {
 
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
+    }
+
+    public History getStepHistory() {
+        return stepHistory;
+    }
+
+    public void setStepHistory(History stepHistory) {
+        this.stepHistory = stepHistory;
     }
 }

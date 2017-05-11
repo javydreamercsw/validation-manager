@@ -125,11 +125,12 @@ public class TestHelper {
     }
 
     public static TestCase addStep(TestCase tc, int sequence,
-            String text, String note) throws PreexistingEntityException,
+            String text, String note, String result) throws PreexistingEntityException,
             Exception {
         StepServer s = new StepServer(tc, sequence, text);
         int amount = tc.getStepList().size();
         s.setNotes(note);
+        s.setExpectedResult(result.getBytes());
         s.write2DB();
         TestCaseServer tcs = new TestCaseServer(tc.getId());
         tcs.write2DB();
