@@ -5,9 +5,9 @@ import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
 import static com.validation.manager.core.server.core.ProjectServer.deleteProject;
-import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.tool.Tool;
 import com.validation.manager.test.AbstractVMTestCase;
 import static com.validation.manager.test.TestHelper.addRequirementToStep;
 import static com.validation.manager.test.TestHelper.addStep;
@@ -42,7 +42,8 @@ public class ProjectTest extends AbstractVMTestCase {
         if (p != null) {
             try {
                 deleteProject(p);
-            } catch (VMException ex) {
+            }
+            catch (VMException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
@@ -55,7 +56,7 @@ public class ProjectTest extends AbstractVMTestCase {
     public void testCreateAndDestroy() {
         try {
             p = createProject("New Project", "Notes");
-            assertEquals(0, getRequirements(p).size());
+            assertEquals(0, Tool.extractRequirements(p).size());
             ProjectServer project = new ProjectServer(p);
             project.setNotes("Notes 2");
             project.write2DB();
@@ -69,7 +70,8 @@ public class ProjectTest extends AbstractVMTestCase {
             try {
                 rss = createRequirementSpec("Test", "Test",
                         project, 1);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -78,7 +80,8 @@ public class ProjectTest extends AbstractVMTestCase {
             try {
                 rsns = createRequirementSpecNode(
                         rss, "Test", "Test", "Test");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -102,8 +105,10 @@ public class ProjectTest extends AbstractVMTestCase {
             TestPlan plan = createTestPlan(tp, "Notes", true, true);
             //Add test to plan
             addTestCaseToPlan(plan, tc);
-            assertEquals(1, getRequirements(project.getEntity()).size());
-        } catch (Exception ex) {
+            project.write2DB();
+            assertEquals(1, Tool.extractRequirements(project.getEntity()).size());
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }

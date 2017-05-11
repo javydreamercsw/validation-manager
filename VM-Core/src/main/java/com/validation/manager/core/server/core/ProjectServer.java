@@ -4,7 +4,6 @@ import static com.validation.manager.core.DataBaseManager.getEntityManagerFactor
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
-import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -111,22 +110,6 @@ public final class ProjectServer extends Project
                     children.add(p);
                 });
         return children;
-    }
-
-    public static List<Requirement> getRequirements(Project p) {
-        ProjectServer project = new ProjectServer(p);
-        ArrayList<Requirement> requirements = new ArrayList<>();
-        if (project.getRequirementSpecList() != null) {
-            project.getRequirementSpecList().forEach((rs) -> {
-                requirements.addAll(RequirementSpecServer.getRequirements(rs));
-            });
-        }
-        if (project.getProjectList() != null) {
-            project.getProjectList().forEach((sp) -> {
-                requirements.addAll(getRequirements(sp));
-            });
-        }
-        return requirements;
     }
 
     @Override
