@@ -78,15 +78,18 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.StepJpaController;
+import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
@@ -119,6 +122,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedMap;
@@ -483,7 +487,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, "testcase.view");
     }
 
-    private void displayExecutionStep(ExecutionStep es, boolean edit) {
+    private void displayExecutionStep(ExecutionStep es) {
         Panel form = new Panel("Execution Step Detail");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
@@ -555,32 +559,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 displayObject(es, false);
             }
         });
-        if (edit) {
-            ExecutionStepServer ess = new ExecutionStepServer(es);
-            ess.update(ess, es);
-            if (es.getExecutionStepPK() == null) {
-                //Creating a new one
-                Button save = new Button("Save");
-                save.addClickListener((Button.ClickEvent event) -> {
-                    //TODO
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            } else {
-                //Editing existing one
-                Button update = new Button("Update");
-                update.addClickListener((Button.ClickEvent event) -> {
-                    //TODO
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            }
-        }
-        binder.setReadOnly(!edit);
+        binder.setReadOnly(true);
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
@@ -1167,7 +1146,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             ExecutionStep es = (ExecutionStep) item;
             LOG.log(Level.FINE, "Selected: Test Case Execution #{0}",
                     es.getExecutionStepPK());
-            displayExecutionStep(es, edit);
+            displayExecutionStep(es);
         } else if (item instanceof Baseline) {
             Baseline es = (Baseline) item;
             LOG.log(Level.FINE, "Selected: Baseline #{0}",
@@ -1408,6 +1387,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void createTestExecutionMenu(ContextMenu menu) {
+        addDeleteExecution(menu);
         addTestCaseAssignment(menu);
         addExecutionDashboard(menu);
     }
@@ -1448,6 +1428,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     displayTestCaseExecution((TestCaseExecution) tree
                             .getValue(), true);
                 });
+        addDeleteExecution(menu);
         addTestCaseAssignment(menu);
         addExecutionDashboard(menu);
     }
@@ -2136,17 +2117,14 @@ public class ValidationManagerUI extends UI implements VMUI {
         }
         List<TestCaseExecution> executions = TestCaseExecutionServer
                 .getExecutions(p);
-        if (!executions.isEmpty()) {
-            String id = "executions" + p.getId();
-            tree.addItem(id);
-            tree.setItemCaption(id, "Executions");
-            tree.setItemIcon(id, EXECUTIONS_ICON);
-            tree.setParent(id, p);
-            executions.forEach((tce) -> {
-                addTestCaseExecutions(id, tce, tree);
-            });
-            children = true;
-        }
+        String id = "executions" + p.getId();
+        tree.addItem(id);
+        tree.setItemCaption(id, "Executions");
+        tree.setItemIcon(id, EXECUTIONS_ICON);
+        tree.setParent(id, p);
+        executions.forEach((tce) -> {
+            addTestCaseExecutions(id, tce, tree);
+        });
         if (!children) {
             // No subprojects
             tree.setChildrenAllowed(p, false);
@@ -2819,6 +2797,137 @@ public class ValidationManagerUI extends UI implements VMUI {
         grid.setSizeFull();
         children.sort(new Object[]{"uniqueId"}, new boolean[]{true});
         return grid;
+    }
+
+    private void addDeleteExecution(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Delete Execution", DELETE_ICON);
+        create.setEnabled(checkRight("testplan.planning"));
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    //Delete only if no execution has been started yet.
+                    TCEExtraction tcee = extractTCE(tree.getValue());
+                    TestCaseExecution tce = tcee.getTestCaseExecution();
+                    if (tce == null) {
+                        LOG.info("Invalid");
+                        Notification.show("Unable to delete!",
+                                "Error extracting information",
+                                Notification.Type.ERROR_MESSAGE);
+                    } else {
+                        TestCase tc = tcee.getTestCase();
+                        TestCaseExecutionServer tces
+                        = new TestCaseExecutionServer(tce);
+                        //Check that it's not being executed yet
+                        boolean canDelete = true;
+                        for (ExecutionStep es : tces.getExecutionStepList()) {
+                            if (tc == null || Objects.equals(es.getStep().getTestCase()
+                                    .getId(), tc.getId())) {
+                                if (es.getResultId() != null
+                                && es.getResultId().getResultName()
+                                        .equals("result.pending")) {
+                                    Notification.show("Unable to delete!",
+                                            "There is a result present in the execution.",
+                                            Notification.Type.ERROR_MESSAGE);
+                                    //It has a result other than pending.
+                                    canDelete = false;
+                                }
+                                if (!es.getExecutionStepHasAttachmentList()
+                                        .isEmpty()) {
+                                    //It has a result other than pending.
+                                    Notification.show("Unable to delete!",
+                                            "There are attachment present in the execution.",
+                                            Notification.Type.ERROR_MESSAGE);
+                                    canDelete = false;
+                                }
+                                if (!es.getExecutionStepHasIssueList()
+                                        .isEmpty()) {
+                                    //It has a result other than pending.
+                                    Notification.show("Unable to delete!",
+                                            "There are issues present in the execution.",
+                                            Notification.Type.ERROR_MESSAGE);
+                                    canDelete = false;
+                                }
+                                if (!canDelete) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (!canDelete) {
+                            MessageBox prompt = MessageBox.createQuestion()
+                                    .withCaption("Want to delete even with identified issues?")
+                                    .withMessage("There are attachment(s), issue(s) and/or comment(s) present in the execution.")
+                                    .withYesButton(() -> {
+                                        try {
+                                            if (tc != null) {
+                                                tces.removeTestCase(tc);
+                                            } else {
+                                                List<TestCase> toDelete = new ArrayList<>();
+                                                tces.getExecutionStepList().forEach(es -> {
+                                                    try {
+                                                        toDelete.add(es.getStep().getTestCase());
+                                                    } catch (Exception ex) {
+                                                        LOG.log(Level.SEVERE, null, ex);
+                                                    }
+                                                });
+                                                toDelete.forEach(t -> {
+                                                    try {
+                                                        tces.removeTestCase(t);
+                                                    } catch (Exception ex) {
+                                                        LOG.log(Level.SEVERE, null, ex);
+                                                    }
+                                                });
+                                                new TestCaseExecutionJpaController(DataBaseManager
+                                                        .getEntityManagerFactory())
+                                                        .destroy(tce.getId());
+                                            }
+                                            updateProjectList();
+                                            updateScreen();
+                                            displayObject(tces.getEntity());
+                                        } catch (Exception ex) {
+                                            LOG.log(Level.SEVERE, null, ex);
+                                        }
+                                    },
+                                            ButtonOption.focus(),
+                                            ButtonOption
+                                                    .icon(VaadinIcons.CHECK))
+                                    .withNoButton(() -> {
+                                        displayObject(tces.getEntity());
+                                    },
+                                            ButtonOption
+                                                    .icon(VaadinIcons.CLOSE));
+                            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                            prompt.open();
+                        }
+                        if (canDelete) {
+                            try {
+                                if (tc != null) {
+                                    tces.removeTestCase(tc);
+                                } else {
+                                    ExecutionStepJpaController c
+                                    = new ExecutionStepJpaController(DataBaseManager
+                                            .getEntityManagerFactory());
+                                    tces.getExecutionStepList().forEach(es -> {
+                                        try {
+                                            c.destroy(es.getExecutionStepPK());
+                                        } catch (IllegalOrphanException | NonexistentEntityException ex) {
+                                            LOG.log(Level.SEVERE, null, ex);
+                                        }
+                                    });
+                                    new TestCaseExecutionJpaController(DataBaseManager
+                                            .getEntityManagerFactory())
+                                            .destroy(tce.getId());
+                                }
+                                updateProjectList();
+                                updateScreen();
+                                displayObject(tces.getEntity());
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                            }
+                        } else {
+                            //Notify the user
+                        }
+                    }
+                });
     }
 
     public class TCEExtraction {
