@@ -27,7 +27,7 @@ jdk:
 - oraclejdk8
 - openjdk8
 script: git submodule update --init --recursive
-script: mvn install -Dmaven.javadoc.skip=true -B -V --also-make-dependents
+script: mvn install cobertura:cobertura -Dmaven.javadoc.skip=true -B -V --also-make-dependents
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
