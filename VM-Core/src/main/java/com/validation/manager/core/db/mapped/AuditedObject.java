@@ -146,7 +146,7 @@ public abstract class AuditedObject
         getHistoryList().add(history);
     }
 
-    private synchronized boolean auditable(AuditedObject v) {
+    public static synchronized boolean auditable(AuditedObject v) {
         History current;
         if (v.getHistoryList() != null && !v.getHistoryList().isEmpty()) {
             current = v.getHistoryList().get(v.getHistoryList().size() - 1);
@@ -164,8 +164,7 @@ public abstract class AuditedObject
                                     .equals(hf.getFieldValue()))) {
                         return true;
                     }
-                }
-                catch (SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+                } catch (SecurityException | IllegalArgumentException | IllegalAccessException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             }
@@ -191,8 +190,7 @@ public abstract class AuditedObject
                 try {
                     //By default blame system
                     hs.setModifierId(new VMUserServer(1).getEntity());
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             }
