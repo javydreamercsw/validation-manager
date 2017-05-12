@@ -109,6 +109,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -507,24 +508,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                 return defaultFactory.createField(dataType, fieldType);
             }
         });
-        BeanItemContainer stepContainer = new BeanItemContainer<>(Step.class);
-        stepContainer.addBean(es.getStep());
-        Grid grid = new Grid(stepContainer);
-        grid.setCaption("Step Details");
-        grid.setContainerDataSource(stepContainer);
-        grid.setColumns("text", "expectedResult", "notes");
-        grid.setHeightMode(HeightMode.ROW);
-        grid.setHeightByRows(1);
-        Grid.Column textColumn = grid.getColumn("text");
-        textColumn.setHeaderCaption("Text");
-        textColumn.setConverter(new ByteToStringConverter());
-        Grid.Column resultColumn = grid.getColumn("expectedResult");
-        resultColumn.setHeaderCaption("Expected Result");
-        resultColumn.setConverter(new ByteToStringConverter());
-        Grid.Column notesColumn = grid.getColumn("notes");
-        notesColumn.setHeaderCaption("Notes");
-        grid.setSizeFull();
-        layout.addComponent(grid);
+        layout.addComponent(createStepHistoryTable("Step Details",
+                Arrays.asList(es.getStepHistory()), false));
         if (es.getResultId() != null) {
             Field<?> result = binder.buildAndBind("Result",
                     "resultId.resultName");
@@ -577,6 +562,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Creating a new one
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
+                    //TODO
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(save);
@@ -586,7 +572,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Editing existing one
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
-
+                    //TODO
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(update);
@@ -2627,8 +2613,10 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
-    private Component createRequirementHistoryTable(String title,
-            List<History> historyItems) {
+    private Grid getHistoryTable(String title,
+            List<History> historyItems, String sortByField,
+            boolean showVersionFields,
+            String... fields) {
         Grid grid = new Grid(title);
         BeanItemContainer<History> histories
                 = new BeanItemContainer<>(History.class);
@@ -2638,116 +2626,139 @@ public class ValidationManagerUI extends UI implements VMUI {
         grid.setContainerDataSource(wrapperCont);
         grid.setHeightMode(HeightMode.ROW);
         grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
-        wrapperCont.addGeneratedProperty("version",
-                new PropertyValueGenerator<String>() {
+        for (String field : fields) {
+            wrapperCont.addGeneratedProperty(field,
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                return v.getMajorVersion() + "." + v.getMidVersion()
-                        + "." + v.getMinorVersion();
-            }
-
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("uniqueId",
-                new PropertyValueGenerator<String>() {
-
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                String result = "";
-                for (HistoryField hf : v.getHistoryFieldList()) {
-                    if (hf.getFieldName().equals("uniqueId")) {
-                        result = hf.getFieldValue();
-                        break;
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    String result = "";
+                    for (HistoryField hf : v.getHistoryFieldList()) {
+                        if (hf.getFieldName().equals(field)) {
+                            result = hf.getFieldValue();
+                            break;
+                        }
                     }
+                    return result;
                 }
-                return result;
-            }
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("description",
-                new PropertyValueGenerator<String>() {
-
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                String result = "";
-                for (HistoryField hf : v.getHistoryFieldList()) {
-                    if (hf.getFieldName().equals("description")) {
-                        result = hf.getFieldValue();
-                        break;
-                    }
+                @Override
+                public Class<String> getType() {
+                    return String.class;
                 }
-                return result;
-            }
+            });
+        }
+        if (showVersionFields) {
+            wrapperCont.addGeneratedProperty("version",
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("modifier",
-                new PropertyValueGenerator<String>() {
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    return v.getMajorVersion() + "." + v.getMidVersion()
+                            + "." + v.getMinorVersion();
+                }
 
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                return v.getModifierId().getFirstName() + " "
-                        + v.getModifierId().getLastName();
-            }
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });
+            wrapperCont.addGeneratedProperty("modifier",
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("modificationDate",
-                new PropertyValueGenerator<String>() {
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    return v.getModifierId().getFirstName() + " "
+                            + v.getModifierId().getLastName();
+                }
 
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                return v.getModificationTime().toString();
-            }
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });
+            wrapperCont.addGeneratedProperty("modificationDate",
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("modificationReason",
-                new PropertyValueGenerator<String>() {
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    return v.getModificationTime().toString();
+                }
 
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                return v.getReason() == null ? "null" : translate(v.getReason());
-            }
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });
+            wrapperCont.addGeneratedProperty("modificationReason",
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        grid.setColumns("uniqueId", "description", "version", "modifier",
-                "modificationDate", "modificationReason");
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    return v.getReason() == null ? "null" : translate(v.getReason());
+                }
+
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });
+        }
+        List<String> fieldList = new ArrayList<>();
+        //Add specified fields
+        fieldList.addAll(Arrays.asList(fields));
+        if (showVersionFields) {
+            //Add default fields
+            fieldList.add("version");
+            fieldList.add("modifier");
+            fieldList.add("modificationDate");
+            fieldList.add("modificationReason");
+        }
+        grid.setColumns(fieldList.toArray());
+        if (showVersionFields) {
+            Grid.Column version = grid.getColumn("version");
+            version.setHeaderCaption("Version");
+            Grid.Column mod = grid.getColumn("modifier");
+            mod.setHeaderCaption("Modifier");
+            Grid.Column modDate = grid.getColumn("modificationDate");
+            modDate.setHeaderCaption("Modification Date");
+            Grid.Column modReason = grid.getColumn("modificationReason");
+            modReason.setHeaderCaption("Modification Reason");
+        }
+        if (sortByField != null && !sortByField.trim().isEmpty()) {
+            wrapperCont.sort(new Object[]{sortByField}, new boolean[]{true});
+        }
+        grid.setSizeFull();
+        return grid;
+    }
+
+    private Component createStepHistoryTable(String title,
+            List<History> historyItems, boolean showVersionFields) {
+        Grid grid = getHistoryTable(title, historyItems, null,
+                showVersionFields,
+                "text", "expectedResult", "notes");
+        Grid.Column text = grid.getColumn("text");
+        text.setHeaderCaption("Step Text");
+        Grid.Column result = grid.getColumn("expectedResult");
+        result.setHeaderCaption("Expected Result");
+        Grid.Column notes = grid.getColumn("notes");
+        notes.setHeaderCaption("Notes");
+        return grid;
+    }
+
+    private Component createRequirementHistoryTable(String title,
+            List<History> historyItems) {
+        Grid grid = getHistoryTable(title, historyItems, "uniqueId", true,
+                "uniqueId", "description", "notes");
         Grid.Column uniqueId = grid.getColumn("uniqueId");
         uniqueId.setHeaderCaption("ID");
-        Grid.Column version = grid.getColumn("version");
-        version.setHeaderCaption("Version");
         Grid.Column description = grid.getColumn("description");
         description.setHeaderCaption("Description");
-        wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});
-        grid.setSizeFull();
         return grid;
     }
 
