@@ -176,6 +176,7 @@ public class Project extends Versionable implements Serializable {
     /**
      * @return the historyList
      */
+    @Override
     public List<History> getHistoryList() {
         return historyList;
     }
@@ -183,6 +184,7 @@ public class Project extends Versionable implements Serializable {
     /**
      * @param historyList the historyList to set
      */
+    @Override
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
     }
