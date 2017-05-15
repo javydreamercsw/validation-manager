@@ -43,7 +43,8 @@ public class VersionListener {
                 && DataBaseManager.isVersioningEnabled()) {
             try {
                 Versionable v = (Versionable) entity;
-                if (v.getReason() == null) {
+                if (v.getReason() == null
+                        || v.getReason().equals("audit.general.creation")) {
                     v.setReason("audit.general.modified");
                 }
                 v.updateHistory();
