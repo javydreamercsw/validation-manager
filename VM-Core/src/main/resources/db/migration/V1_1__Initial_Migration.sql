@@ -79,6 +79,7 @@ INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 12);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 2);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 5);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 6);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 8);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 9);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 12);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 16);
