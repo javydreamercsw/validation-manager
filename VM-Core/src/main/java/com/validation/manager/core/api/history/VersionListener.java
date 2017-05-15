@@ -1,13 +1,13 @@
 package com.validation.manager.core.api.history;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.mapped.Versionable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import org.eclipse.persistence.jpa.JpaEntityManager;
-import org.eclipse.persistence.sessions.CopyGroup;
 
 /**
  *
@@ -17,6 +17,27 @@ public class VersionListener {
 
     private final static Logger LOG
             = Logger.getLogger(VersionListener.class.getSimpleName());
+
+    @PostLoad
+    public synchronized void onLoad(Object entity) {
+        if (entity instanceof Versionable
+                && DataBaseManager.isVersioningEnabled()) {
+            try {
+                //Load the audit values from last time
+                Versionable v = (Versionable) entity;
+                if (!v.getHistoryList().isEmpty()) {
+                    History h = v.getHistoryList().get(v.getHistoryList()
+                            .size() - 1);
+                    v.setMajorVersion(h.getMajorVersion());
+                    v.setMidVersion(h.getMidVersion());
+                    v.setMinorVersion(h.getMinorVersion());
+                }
+            }
+            catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 
     @PrePersist
     public synchronized void onCreation(Object entity) {
@@ -53,13 +74,5 @@ public class VersionListener {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
-    }
-
-    public Versionable cloneEntity(Versionable entity) {
-        CopyGroup group = new CopyGroup();
-        group.setShouldResetPrimaryKey(true);
-        Versionable copy = (Versionable) DataBaseManager.getEntityManager()
-                .unwrap(JpaEntityManager.class).copy(entity, group);
-        return copy;
     }
 }

@@ -317,6 +317,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(1, history.getMinorVersion());
             assertEquals(1, (int) history.getModifierId().getId());
             assertEquals("audit.general.creation", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.setDescription("desc 2");
             rs.write2DB();
@@ -327,11 +328,12 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(2, history.getMinorVersion());
             assertEquals(1, (int) history.getModifierId().getId());
             assertEquals("audit.general.modified", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.setDescription("desc 3");
             VmUser test = TestHelper.createUser("Test", "pass", "email",
                     "first", "last");
-            rs.setModifierId(test);
+            rs.setModifierId(test.getId());
             rs.setReason("Test");
             rs.write2DB();
             assertEquals(historyCount++, rs.getHistoryList().size());
@@ -341,6 +343,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(3, history.getMinorVersion());
             assertEquals((int) test.getId(), (int) history.getModifierId().getId());
             assertEquals("Test", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.increaseMidVersion();
             assertEquals(historyCount++, rs.getHistoryList().size());
@@ -348,6 +351,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(0, history.getMajorVersion());
             assertEquals(1, history.getMidVersion());
             assertEquals(0, history.getMinorVersion());
+            //TODO: Handle mid and major chanes on system
+            //assertEquals(1, (int) history.getModifierId().getId());
+            //assertEquals("tbd", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.increaseMajorVersion();
             assertEquals(historyCount++, rs.getHistoryList().size());
@@ -355,6 +362,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(1, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
             assertEquals(0, history.getMinorVersion());
+            //TODO: Handle mid and major chanes on system
+            //assertEquals(1, (int) history.getModifierId().getId());
+            //assertEquals("tbd", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
         }
         catch (Exception ex) {

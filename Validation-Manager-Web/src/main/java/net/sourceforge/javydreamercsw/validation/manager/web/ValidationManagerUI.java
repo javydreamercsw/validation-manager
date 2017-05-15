@@ -11,6 +11,7 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -78,6 +79,7 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.BaselineJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
@@ -91,6 +93,8 @@ import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.mapped.Versionable;
+import com.validation.manager.core.db.mapped.Versionable.CHANGE_LEVEL;
 import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
@@ -105,6 +109,7 @@ import com.validation.manager.core.tool.requirement.importer.RequirementImporter
 import com.validation.manager.core.tool.step.importer.StepImporter;
 import com.validation.manager.core.tool.step.importer.TestCaseImportException;
 import de.steinwedel.messagebox.ButtonOption;
+import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
 import java.io.BufferedReader;
 import java.io.File;
@@ -247,24 +252,26 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Editing existing one
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        rsn.setName(name.getValue().toString());
-                        rsn.setDescription(desc.getValue().toString());
-                        rsn.setScope(scope.getValue().toString());
-                        new RequirementSpecNodeJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(rsn);
-                        displayRequirementSpecNode(rsn, true);
-                    } catch (FieldGroup.CommitException | NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    }
+                    rsn.setName(name.getValue().toString());
+                    rsn.setDescription(desc.getValue().toString());
+                    rsn.setScope(scope.getValue().toString());
+                    handleVerioning(rsn, () -> {
+                        try {
+                            new RequirementSpecNodeJpaController(DataBaseManager
+                                    .getEntityManagerFactory()).edit(rsn);
+                            displayRequirementSpecNode(rsn, true);
+                        } catch (NonexistentEntityException ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                            Notification.show("Error updating record!",
+                                    ex.getLocalizedMessage(),
+                                    Notification.Type.ERROR_MESSAGE);
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                            Notification.show("Error updating record!",
+                                    ex.getLocalizedMessage(),
+                                    Notification.Type.ERROR_MESSAGE);
+                        }
+                    });
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(update);
@@ -467,9 +474,23 @@ public class ValidationManagerUI extends UI implements VMUI {
                     tces.setScope(scope.getValue().toString());
                     tces.setName(name.getValue().toString());
                     try {
-                        tces.write2DB();
-                        tces.update(tce, tces.getEntity());
-                        displayObject(tce);
+                        handleVerioning(tces, () -> {
+                            try {
+                                tces.write2DB();
+                                tces.update(tce, tces.getEntity());
+                                displayObject(tce);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
@@ -667,10 +688,24 @@ public class ValidationManagerUI extends UI implements VMUI {
                         if (s.getRequirementList() == null) {
                             s.setRequirementList(new ArrayList<>());
                         }
-                        new StepJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(s);
-                        displayStep(s, true);
-                    } catch (Exception ex) {
+                        handleVerioning(s, () -> {
+                            try {
+                                new StepJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(s);
+                                displayStep(s, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
+                    } catch (UnsupportedEncodingException | NumberFormatException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
@@ -762,20 +797,24 @@ public class ValidationManagerUI extends UI implements VMUI {
                         t.setCreationDate((Date) creation.getValue());
                         t.setActive((Boolean) active.getValue());
                         t.setIsOpen((Boolean) open.getValue());
-                        new TestCaseJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(t);
-                        displayTestCase(t, true);
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (Exception ex) {
+                        handleVerioning(t, () -> {
+                            try {
+                                new TestCaseJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(t);
+                                displayTestCase(t, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
+                    } catch (UnsupportedEncodingException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
@@ -860,19 +899,23 @@ public class ValidationManagerUI extends UI implements VMUI {
                         tp.setNotes(notes.getValue().toString());
                         tp.setActive((Boolean) open.getValue());
                         tp.setIsOpen((Boolean) open.getValue());
-                        new TestPlanJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(tp);
-                        displayTestPlan(tp, true);
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        handleVerioning(tp, () -> {
+                            try {
+                                new TestPlanJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(tp);
+                                displayTestPlan(tp, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
@@ -953,19 +996,23 @@ public class ValidationManagerUI extends UI implements VMUI {
                         tp.setName(name.getValue().toString());
                         tp.setNotes(notes.getValue().toString());
                         tp.setActive((Boolean) active.getValue());
-                        new TestProjectJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(tp);
-                        displayTestProject(tp, true);
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        handleVerioning(tp, () -> {
+                            try {
+                                new TestProjectJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(tp);
+                                displayTestProject(tp, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
@@ -1065,19 +1112,23 @@ public class ValidationManagerUI extends UI implements VMUI {
                         rs.setName(name.getValue().toString());
                         rs.setModificationDate(new Date());
                         rs.setSpecLevel((SpecLevel) level.getValue());
-                        new RequirementSpecJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(rs);
-                        displayRequirementSpec(rs, true);
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        handleVerioning(rs, () -> {
+                            try {
+                                new RequirementSpecJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(rs);
+                                displayRequirementSpec(rs, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
@@ -1233,13 +1284,29 @@ public class ValidationManagerUI extends UI implements VMUI {
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         RequirementServer rs = new RequirementServer(req);
-                        rs.update(rs, req);
-                        rs.write2DB();
+                        rs.setDescription(((TextArea) desc).getValue());
+                        rs.setNotes(((TextArea) notes).getValue());
+                        rs.setUniqueId(((TextField) id).getValue());
+                        handleVerioning(rs, () -> {
+                            try {
+                                rs.write2DB();
+                                //Recreate the tree to show the addition
+                                buildProjectTree(rs.getEntity());
+                                displayRequirement(rs.getEntity(), false);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                         form.setVisible(false);
-                        //Recreate the tree to show the addition
-                        buildProjectTree(rs.getEntity());
-                        displayRequirement(rs.getEntity(), false);
-                    } catch (Exception ex) {
+                    } catch (VMException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
@@ -1920,14 +1987,26 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Editing existing one
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        binder.commit();
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    }
+                    handleVerioning(p, () -> {
+                        try {
+                            p.setName(name.getValue().toString());
+                            if (notes.getValue() != null) {
+                                p.setNotes(notes.getValue().toString());
+                            }
+                            new ProjectJpaController(DataBaseManager
+                                    .getEntityManagerFactory()).edit(p);
+                        } catch (NonexistentEntityException ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                            Notification.show("Error updating record!",
+                                    ex.getLocalizedMessage(),
+                                    Notification.Type.ERROR_MESSAGE);
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                            Notification.show("Error updating record!",
+                                    ex.getLocalizedMessage(),
+                                    Notification.Type.ERROR_MESSAGE);
+                        }
+                    });
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(update);
@@ -1935,11 +2014,17 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             }
         }
-        binder.setBuffered(true);
-        binder.setReadOnly(!edit);
+
+        binder.setBuffered(
+                true);
+        binder.setReadOnly(
+                !edit);
         binder.bindMemberFields(form);
+
         form.setSizeFull();
-        setTabContent(main, form, "project.viewer");
+
+        setTabContent(main, form,
+                "project.viewer");
     }
 
     private void addRequirementSpec(RequirementSpec rs, Tree tree) {
@@ -2461,11 +2546,13 @@ public class ValidationManagerUI extends UI implements VMUI {
             }
         }
         return false;
+
     }
 
     private void displayTestPlanning(Project p) {
         DesignerScreenProvider provider = Lookup.getDefault()
-                .lookup(DesignerScreenProvider.class);
+                .lookup(DesignerScreenProvider.class
+                );
         if (provider != null && p != null) {
             provider.setProject(p);
             updateScreen();
@@ -2494,7 +2581,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         Field<?> id = binder.buildAndBind("Name", "baselineName");
         layout.addComponent(id);
         Field desc = binder.buildAndBind("Description", "description",
-                TextArea.class);
+                TextArea.class
+        );
         desc.setSizeFull();
         layout.addComponent(desc);
         Button cancel = new Button("Cancel");
@@ -2532,7 +2620,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                                                         baseline.getDescription(),
                                                         rs)
                                                 .getEntity();
-
                                         updateProjectList();
                                         buildProjectTree(entity);
                                         displayObject(entity, false);
@@ -2567,11 +2654,26 @@ public class ValidationManagerUI extends UI implements VMUI {
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
-                        binder.commit();
-                        //Recreate the tree to show the addition
-                        buildProjectTree(baseline);
-                        displayBaseline(baseline, false);
-                    } catch (FieldGroup.CommitException ex) {
+                        handleVerioning(baseline, () -> {
+                            try {
+                                new BaselineJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(baseline);
+                                //Recreate the tree to show the addition
+                                buildProjectTree(baseline);
+                                displayBaseline(baseline, false);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
+                    } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
@@ -2597,7 +2699,8 @@ public class ValidationManagerUI extends UI implements VMUI {
             String... fields) {
         Grid grid = new Grid(title);
         BeanItemContainer<History> histories
-                = new BeanItemContainer<>(History.class);
+                = new BeanItemContainer<>(History.class
+                );
         GeneratedPropertyContainer wrapperCont
                 = new GeneratedPropertyContainer(histories);
         histories.addAll(historyItems);
@@ -2771,7 +2874,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         Collections.sort(reqs, (Requirement o1, Requirement o2)
                 -> o1.getUniqueId().compareTo(o2.getUniqueId()));
         BeanItemContainer<Requirement> requirementContainer
-                = new BeanItemContainer<>(Requirement.class, reqs);
+                = new BeanItemContainer<>(Requirement.class,
+                        reqs);
         TwinColSelect requirements
                 = new TwinColSelect("Linked Requirements");
         requirements.setItemCaptionPropertyId("uniqueId");
@@ -2786,7 +2890,8 @@ public class ValidationManagerUI extends UI implements VMUI {
             List<Requirement> requirementList) {
         Grid grid = new Grid(title);
         BeanItemContainer<Requirement> children
-                = new BeanItemContainer<>(Requirement.class);
+                = new BeanItemContainer<>(Requirement.class
+                );
         children.addAll(requirementList);
         grid.setContainerDataSource(children);
         grid.setColumns("uniqueId");
@@ -2928,6 +3033,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         }
                     }
                 });
+
     }
 
     public class TCEExtraction {
@@ -2965,6 +3071,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     addWindow(new ExecutionDashboard(extractTCE(tree
                             .getValue())));
                 });
+
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
@@ -3041,5 +3148,71 @@ public class ValidationManagerUI extends UI implements VMUI {
                 LOG.warning("Missing configuration for Open Office!");
             }
         }
+    }
+
+    private void handleVerioning(Object o, Runnable r) {
+        if (o instanceof Versionable) {
+            Versionable ao = (Versionable) o;
+            if (Versionable.auditable(ao)) {
+                //Set user changing to the current user
+                ao.setModifierId(getUser().getId());
+                //Now check the level of the change
+                CHANGE_LEVEL level = CHANGE_LEVEL.MINOR;
+                History latest = ao.getHistoryList().get(ao.getHistoryList()
+                        .size() - 1);
+                if (ao.getMajorVersion() > latest.getMajorVersion()) {
+                    level = CHANGE_LEVEL.MAJOR;
+                } else if (ao.getMidVersion() > latest.getMidVersion()) {
+                    level = CHANGE_LEVEL.MODERATE;
+                }
+                switch (level) {
+                    case MAJOR:
+                    //Fall thru
+                    case MODERATE:
+                    //Fall thru
+                    default:
+                        showVersioningPrompt(ao, r);
+                        break;
+                }
+            }
+        }
+    }
+
+    private void showVersioningPrompt(Versionable ao, Runnable r) {
+        VerticalLayout layout = new VerticalLayout();
+        TextArea message = new TextArea();
+        message.setValue("Please document the reasons for the "
+                + "change to this item. This will be kep in "
+                + "the history of the record along with user "
+                + "and date the change is done.");
+        message.setReadOnly(true);
+        message.setSizeFull();
+        TextArea desc = new TextArea("Reason");
+        desc.setSizeFull();
+        layout.addComponent(message);
+        layout.addComponent(desc);
+        //Prompt user with reason for change
+        MessageBox prompt = MessageBox.createQuestion();
+        prompt.withCaption("Please provide a reason for the change.")
+                .withMessage(layout)
+                .withYesButton(() -> {
+                    ao.setReason(desc.getValue());
+                    r.run();
+                },
+                        ButtonOption.focus(),
+                        ButtonOption
+                                .icon(VaadinIcons.CHECK),
+                        ButtonOption.disable())
+                .withNoButton(ButtonOption
+                        .icon(VaadinIcons.CLOSE));
+        prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        desc.addTextChangeListener((TextChangeEvent event1) -> {
+            //Enable if there is a description change.
+            prompt.getButton(ButtonType.YES)
+                    .setEnabled(!event1.getText().trim().isEmpty());
+        });
+        prompt.getWindow().setWidth(50, Unit.PERCENTAGE);
+        prompt.getWindow().setHeight(50, Unit.PERCENTAGE);
+        prompt.open();
     }
 }
