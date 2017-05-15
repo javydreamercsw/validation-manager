@@ -47,19 +47,20 @@ public final class HistoryServer extends History
 
     @Override
     public void update(History target, History source) {
-        target.setRequirementList(source.getRequirementList());
+        target.setBaselineList(source.getBaselineList());
+        target.setExecutionStepList(source.getExecutionStepList());
+        target.setHistoryFieldList(source.getHistoryFieldList());
         target.setId(source.getId());
-        target.setModificationTime(source.getModificationTime());
-        target.setModifierId(source.getModifierId());
-        target.setReason(source.getReason());
         target.setMajorVersion(source.getMajorVersion());
         target.setMidVersion(source.getMidVersion());
         target.setMinorVersion(source.getMinorVersion());
-        target.setHistoryFieldList(source.getHistoryFieldList());
-        target.setVmSettingList(source.getVmSettingList());
+        target.setModificationTime(source.getModificationTime());
+        target.setModifierId(source.getModifierId());
         target.setProjectList(source.getProjectList());
-        target.setExecutionStepList(source.getExecutionStepList());
-        target.setBaselineList(source.getBaselineList());
+        target.setReason(source.getReason());
+        target.setRequirementList(source.getRequirementList());
+        target.setStepList(source.getStepList());
+        target.setVmSettingList(source.getVmSettingList());
     }
 
     @Override

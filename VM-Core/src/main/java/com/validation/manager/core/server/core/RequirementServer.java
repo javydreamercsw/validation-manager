@@ -120,18 +120,18 @@ public final class RequirementServer extends Requirement
 
     @Override
     public void update(Requirement target, Requirement source) {
-        target.setNotes(source.getNotes());
         target.setDescription(source.getDescription());
-        target.setRequirementSpecNode(source.getRequirementSpecNode());
+        target.setHistoryList(source.getHistoryList());
+        target.setId(source.getId());
+        target.setNotes(source.getNotes());
+        target.setParentRequirementId(source.getParentRequirementId());
         target.setRequirementList(source.getRequirementList());
+        target.setRequirementSpecNode(source.getRequirementSpecNode());
         target.setRequirementStatusId(source.getRequirementStatusId());
         target.setRequirementTypeId(source.getRequirementTypeId());
-        target.setRiskControlHasRequirementList(source
-                .getRiskControlHasRequirementList());
+        target.setRiskControlHasRequirementList(source.getRiskControlHasRequirementList());
         target.setStepList(source.getStepList());
         target.setUniqueId(source.getUniqueId());
-        target.setId(source.getId());
-        target.setParentRequirementId(source.getParentRequirementId());
         super.update(target, source);
     }
 
