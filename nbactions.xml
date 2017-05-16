@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>CUSTOM-Prepare Release</actionName>
+        <displayName>Prepare Release</displayName>
+        <goals>
+            <goal>release:prepare</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>CUSTOM-Release Rollback</actionName>
+        <displayName>Release Rollback</displayName>
+        <goals>
+            <goal>release:rollback</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>CUSTOM-Release Clean</actionName>
+        <displayName>Release Clean</displayName>
+        <goals>
+            <goal>release:clean</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>CUSTOM-Release Perform</actionName>
+        <displayName>Perform Release</displayName>
+        <goals>
+            <goal>release:perform</goal>
+        </goals>
+    </action>
+</actions>
