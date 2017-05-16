@@ -1,8 +1,6 @@
-package com.validation.manager.core.db.mapped;
+package com.validation.manager.core.api.history;
 
-import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
-import com.validation.manager.core.api.history.Auditable;
 import com.validation.manager.core.db.FieldType;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.HistoryField;
@@ -262,7 +260,8 @@ public abstract class Versionable implements Comparable<Versionable>,
                     || current.getMinorVersion() < v.getMinorVersion();
         }
         //No history so it is auditable.
-        return true;
+        return !FieldUtils.getFieldsListWithAnnotation(v.getClass(),
+                Auditable.class).isEmpty();
     }
 
     public void updateHistory() throws Exception {
@@ -338,6 +337,5 @@ public abstract class Versionable implements Comparable<Versionable>,
         }
         hs.write2DB();
         v.addHistory(hs.getEntity());
-        DataBaseManager.getEntityManager().persist(v);
     }
 }

@@ -1,7 +1,7 @@
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.api.history.Auditable;
-import com.validation.manager.core.db.mapped.Versionable;
+import com.validation.manager.core.api.history.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -71,7 +71,7 @@ public class Step extends Versionable implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private TestCase testCase;
-    @ManyToMany(mappedBy = "stepList")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
     private List<History> historyList;
 
     public Step() {
@@ -173,6 +173,14 @@ public class Step extends Versionable implements Serializable {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
     }
 
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
+    }
+
     @XmlTransient
     @JsonIgnore
     @Override
@@ -183,13 +191,5 @@ public class Step extends Versionable implements Serializable {
     @Override
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
-    }
-
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
     }
 }

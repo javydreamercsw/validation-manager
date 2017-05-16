@@ -41,8 +41,8 @@ public class ExecutionStepHasVmUserJpaController implements Serializable {
             executionStepHasVmUser.setExecutionStepHasVmUserPK(new ExecutionStepHasVmUserPK());
         }
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setRoleId(executionStepHasVmUser.getRole().getId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setVmUserId(executionStepHasVmUser.getVmUser().getId());
         EntityManager em = null;
@@ -94,8 +94,8 @@ public class ExecutionStepHasVmUserJpaController implements Serializable {
 
     public void edit(ExecutionStepHasVmUser executionStepHasVmUser) throws NonexistentEntityException, Exception {
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setRoleId(executionStepHasVmUser.getRole().getId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setVmUserId(executionStepHasVmUser.getVmUser().getId());
         EntityManager em = null;

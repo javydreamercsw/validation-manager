@@ -56,11 +56,11 @@ public final class HistoryServer extends History
         target.setMinorVersion(source.getMinorVersion());
         target.setModificationTime(source.getModificationTime());
         target.setModifierId(source.getModifierId());
-        target.setProjectList(source.getProjectList());
         target.setReason(source.getReason());
-        target.setRequirementList(source.getRequirementList());
-        target.setStepList(source.getStepList());
-        target.setVmSettingList(source.getVmSettingList());
+        target.setProjectId(source.getProjectId());
+        target.setStep(source.getStep());
+        target.setRequirementId(source.getRequirementId());
+        target.setVmSettingId(source.getVmSettingId());
     }
 
     @Override

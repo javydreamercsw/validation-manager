@@ -2,7 +2,6 @@ package com.validation.manager.core.api.history;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.History;
-import com.validation.manager.core.db.mapped.Versionable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.PostLoad;

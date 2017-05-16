@@ -140,8 +140,13 @@ public class RequirementJpaController implements Serializable {
                 }
             }
             for (History historyListHistory : requirement.getHistoryList()) {
-                historyListHistory.getRequirementList().add(requirement);
+                Requirement oldRequirementIdOfHistoryListHistory = historyListHistory.getRequirementId();
+                historyListHistory.setRequirementId(requirement);
                 historyListHistory = em.merge(historyListHistory);
+                if (oldRequirementIdOfHistoryListHistory != null) {
+                    oldRequirementIdOfHistoryListHistory.getHistoryList().remove(historyListHistory);
+                    oldRequirementIdOfHistoryListHistory = em.merge(oldRequirementIdOfHistoryListHistory);
+                }
             }
             em.getTransaction().commit();
         }
@@ -305,14 +310,19 @@ public class RequirementJpaController implements Serializable {
             }
             for (History historyListOldHistory : historyListOld) {
                 if (!historyListNew.contains(historyListOldHistory)) {
-                    historyListOldHistory.getRequirementList().remove(requirement);
+                    historyListOldHistory.setRequirementId(null);
                     historyListOldHistory = em.merge(historyListOldHistory);
                 }
             }
             for (History historyListNewHistory : historyListNew) {
                 if (!historyListOld.contains(historyListNewHistory)) {
-                    historyListNewHistory.getRequirementList().add(requirement);
+                    Requirement oldRequirementIdOfHistoryListNewHistory = historyListNewHistory.getRequirementId();
+                    historyListNewHistory.setRequirementId(requirement);
                     historyListNewHistory = em.merge(historyListNewHistory);
+                    if (oldRequirementIdOfHistoryListNewHistory != null && !oldRequirementIdOfHistoryListNewHistory.equals(requirement)) {
+                        oldRequirementIdOfHistoryListNewHistory.getHistoryList().remove(historyListNewHistory);
+                        oldRequirementIdOfHistoryListNewHistory = em.merge(oldRequirementIdOfHistoryListNewHistory);
+                    }
                 }
             }
             em.getTransaction().commit();
@@ -390,7 +400,7 @@ public class RequirementJpaController implements Serializable {
             }
             List<History> historyList = requirement.getHistoryList();
             for (History historyListHistory : historyList) {
-                historyListHistory.getRequirementList().remove(requirement);
+                historyListHistory.setRequirementId(null);
                 historyListHistory = em.merge(historyListHistory);
             }
             em.remove(requirement);

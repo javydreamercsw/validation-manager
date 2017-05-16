@@ -39,6 +39,11 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             + "r.description = :description")})
 public class RequirementType implements Serializable {
 
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "level")
+    private int level;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -53,9 +58,6 @@ public class RequirementType implements Serializable {
     @NotNull
     @Column(name = "id")
     private Integer id;
-    @NotNull
-    @Column(name = "level")
-    private Integer level = 0;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -124,8 +126,7 @@ public class RequirementType implements Serializable {
             return false;
         }
         RequirementType other = (RequirementType) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return !this.id.equals(other.id);
     }
 
     @Override
@@ -136,14 +137,14 @@ public class RequirementType implements Serializable {
     /**
      * @return the level
      */
-    public Integer getLevel() {
+    public int getLevel() {
         return level;
     }
 
     /**
      * @param level the level to set
      */
-    public void setLevel(Integer level) {
+    public void setLevel(int level) {
         this.level = level;
     }
 }

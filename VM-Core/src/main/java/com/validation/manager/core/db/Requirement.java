@@ -1,7 +1,7 @@
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.api.history.Auditable;
-import com.validation.manager.core.db.mapped.Versionable;
+import com.validation.manager.core.api.history.Versionable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +109,7 @@ public class Requirement extends Versionable implements Serializable {
     private RequirementType requirementTypeId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "requirement")
     private List<RiskControlHasRequirement> riskControlHasRequirementList;
-    @ManyToMany(mappedBy = "requirementList")
+    @OneToMany(mappedBy = "requirementId")
     private List<History> historyList;
 
     public Requirement() {

@@ -60,9 +60,9 @@ public class ExecutionStepJpaController implements Serializable {
         if (executionStep.getHistoryList() == null) {
             executionStep.setHistoryList(new ArrayList<History>());
         }
+        executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
         executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
         executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
-        executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -211,9 +211,9 @@ public class ExecutionStepJpaController implements Serializable {
     }
 
     public void edit(ExecutionStep executionStep) throws IllegalOrphanException, NonexistentEntityException, Exception {
+        executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
         executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
         executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
-        executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
