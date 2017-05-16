@@ -30,6 +30,10 @@ public class VersionListener {
                     v.setMajorVersion(h.getMajorVersion());
                     v.setMidVersion(h.getMidVersion());
                     v.setMinorVersion(h.getMinorVersion());
+                } else {
+                    v.setMajorVersion(0);
+                    v.setMidVersion(0);
+                    v.setMinorVersion(1);
                 }
             }
             catch (Exception ex) {
