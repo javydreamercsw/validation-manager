@@ -30,7 +30,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
     private static final Logger LOG
             = getLogger(RequirementServerTest.class.getName());
     private Project p;
-    private RequirementSpecNode rsns;
+    private RequirementSpecNode rsn;
 
     @Override
     protected void postSetUp() {
@@ -55,7 +55,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             }
             System.out.println("Create Requirement Spec Node");
             try {
-                rsns = TestHelper.createRequirementSpecNode(
+                rsn = TestHelper.createRequirementSpecNode(
                         rss, "Test", "Test", "Test");
             }
             catch (Exception ex) {
@@ -79,7 +79,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("update");
             Requirement source = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer instance = new RequirementServer(source);
             assertEquals(1, instance.getHistoryList().size());
@@ -116,15 +116,15 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("isDuplicate");
             Requirement source = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement source2 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             assertEquals(false, RequirementServer.isDuplicate(source));
             assertEquals(false, RequirementServer.isDuplicate(source2));
             Requirement source3 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             assertEquals(true, RequirementServer.isDuplicate(source3));
         }
@@ -142,19 +142,19 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("getTestCoverage");
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req3 = TestHelper.createRequirement("SRS-SW-0003",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req4 = TestHelper.createRequirement("SRS-SW-0004",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement userReq = TestHelper.createRequirement("PS-SW-0001",
-                    "Sample User requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample User requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
             assertEquals(0, rs.getTestCoverage());
@@ -210,10 +210,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("Child And Parent Requirements");
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             assertTrue(req.getRequirementList().isEmpty());
             //Add a child
@@ -250,7 +250,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             //Enable versioning
             DataBaseManager.setVersioningEnabled(true);
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+                    "Description", rsn.getRequirementSpecNodePK(), "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
             //Add a test case covering this test case
             TestProject tp = TestHelper.createTestProject("Test Project");
@@ -282,7 +282,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(100, rs.getTestCoverage());
             //Add a parent requirement
             Requirement r = TestHelper.createRequirement("PS-0001",
-                    "Description", rsns.getRequirementSpecNodePK(),
+                    "Description", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer parent = new RequirementServer(r);
             parent.addChildRequirement(req);
@@ -305,7 +305,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
     public void testVersioning() {
         try {
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Description", rsns.getRequirementSpecNodePK(),
+                    "Description", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
             int historyCount = 1;
@@ -351,7 +351,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(0, history.getMajorVersion());
             assertEquals(1, history.getMidVersion());
             assertEquals(0, history.getMinorVersion());
-            //TODO: Handle mid and major chanes on system
+            //TODO: Handle mid and major changes on system
             //assertEquals(1, (int) history.getModifierId().getId());
             //assertEquals("tbd", history.getReason());
             assertNotNull(history.getModificationTime());
@@ -362,11 +362,17 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(1, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
             assertEquals(0, history.getMinorVersion());
-            //TODO: Handle mid and major chanes on system
+            //TODO: Handle mid and major changes on system
             //assertEquals(1, (int) history.getModifierId().getId());
             //assertEquals("tbd", history.getReason());
             assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
+            //Test for issue #25
+            //Disconnet to the database
+            DataBaseManager.close();
+            //Reconnect
+            rs.update();
+            assertEquals(historyCount, rs.getHistoryList().size());
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);
