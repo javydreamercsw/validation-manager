@@ -27,10 +27,6 @@ public abstract class Login implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastModified;
 
-    public Login() {
-        super();
-    }
-
     public int getAttempts() {
         return this.attempts;
     }

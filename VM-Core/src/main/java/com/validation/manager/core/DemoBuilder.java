@@ -162,6 +162,9 @@ public class DemoBuilder {
                             case 5:
                                 header = "SRS";
                                 break;
+                            default:
+                                header = "SRS";
+                                break;
                         }
                         RequirementServer req
                                 = new RequirementServer(header

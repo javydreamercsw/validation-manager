@@ -62,6 +62,8 @@ import com.validation.manager.core.DemoBuilder;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
+import com.validation.manager.core.api.history.Versionable;
+import com.validation.manager.core.api.history.Versionable.CHANGE_LEVEL;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.History;
@@ -93,8 +95,6 @@ import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.api.history.Versionable;
-import com.validation.manager.core.api.history.Versionable.CHANGE_LEVEL;
 import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
@@ -1477,7 +1477,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     int projectId = Integer.parseInt(((String) tree.getValue())
                             .substring("executions".length()));
-                    TestCaseExecution tce = new TestCaseExecution();
                     displayTestCaseExecution(new TestCaseExecution(),
                             new ProjectServer(projectId), true);
                 });
@@ -2447,7 +2446,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     } else if (tree.getValue() instanceof TestCaseExecution) {
                         createTestCaseExecutionPlanMenu(contextMenu);
                     } else if (tree.getValue() instanceof Baseline) {
-                        createBaselineMenu(contextMenu);
+//                        createBaselineMenu(contextMenu);
                     }
                 };
         contextMenu.addContextMenuTreeListener(treeItemListener);
@@ -2864,10 +2863,9 @@ public class ValidationManagerUI extends UI implements VMUI {
         addWindow(tm);
     }
 
-    private void createBaselineMenu(ContextMenu menu) {
-
-    }
-
+//    private void createBaselineMenu(ContextMenu menu) {
+//        //TODO:
+//    }
     private AbstractSelect getRequirementSelectionComponent() {
         Project p = getParentProject();
         List<Requirement> reqs = Tool.extractRequirements(p);
@@ -3029,7 +3027,9 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 LOG.log(Level.SEVERE, null, ex);
                             }
                         } else {
-                            //Notify the user
+                            Notification.show("Unable to delete!",
+                                    "There are issues present in the execution.",
+                                    Notification.Type.ERROR_MESSAGE);
                         }
                     }
                 });
