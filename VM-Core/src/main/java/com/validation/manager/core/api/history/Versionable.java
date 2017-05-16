@@ -259,7 +259,7 @@ public abstract class Versionable implements Comparable<Versionable>,
                     || current.getMidVersion() < v.getMidVersion()
                     || current.getMinorVersion() < v.getMinorVersion();
         }
-        //No history so it is auditable.
+        //No history so it is auditable if it has marked fields for audit.
         return !FieldUtils.getFieldsListWithAnnotation(v.getClass(),
                 Auditable.class).isEmpty();
     }
