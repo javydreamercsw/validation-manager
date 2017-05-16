@@ -127,6 +127,7 @@ public abstract class Versionable implements Comparable<Versionable>,
                 Versionable ao = (Versionable) vs.getEntity();
                 ao.update(ao, this);
                 updateHistory(ao);
+                vs.write2DB();
             } else {
                 updateHistory(this);
             }
@@ -149,6 +150,7 @@ public abstract class Versionable implements Comparable<Versionable>,
                 Versionable v = (Versionable) vs.getEntity();
                 v.update(v, this);
                 updateHistory(v);
+                vs.write2DB();
             } else {
                 updateHistory(this);
             }
@@ -173,6 +175,12 @@ public abstract class Versionable implements Comparable<Versionable>,
         target.setReason(source.getReason());
         target.setModificationTime(source.getModificationTime());
         target.setHistoryList(source.getHistoryList());
+        try {
+            target.updateHistory();
+        }
+        catch (Exception ex) {
+            LOG.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+        }
     }
 
     @Override
@@ -284,8 +292,12 @@ public abstract class Versionable implements Comparable<Versionable>,
             } else {
                 hs.setModifierId(new VMUserServer(v.getModifierId()).getEntity());
             }
-            hs.setReason(v.getReason());
+
             if (v.getHistoryList() != null && !v.getHistoryList().isEmpty()) {
+                if (v.getReason() == null
+                        || v.getReason().equals("audit.general.creation")) {
+                    v.setReason("audit.general.modified");
+                }
                 History last = v.getHistoryList().get(v.getHistoryList().size() - 1);
                 if ((v.getMajorVersion() == 0 && v.getMidVersion() == 0) // It has default values
                         || last.getMajorVersion() == v.getMajorVersion() // Or it has a higher mid/major version assigned.
@@ -298,7 +310,12 @@ public abstract class Versionable implements Comparable<Versionable>,
                     hs.setMidVersion(v.getMidVersion());
                     hs.setMinorVersion(v.getMinorVersion());
                 }
+            } else {
+                if (v.getReason() == null) {
+                    v.setReason("audit.general.creation");
+                }
             }
+            hs.setReason(v.getReason());
             hs.setModificationTime(v.getModificationTime() == null
                     ? new Date() : v.getModificationTime());
             hs.write2DB();

@@ -95,8 +95,7 @@ public class History implements Serializable {
     private List<ExecutionStep> executionStepList;
     @ManyToMany(mappedBy = "historyList")
     private List<Baseline> baselineList;
-    @JoinColumn(name = "requirement_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumn(name = "requirement_id", referencedColumnName = "id")
     @ManyToOne(optional = true)
     private Requirement requirementId;
     @JoinColumn(name = "project_id", referencedColumnName = "id")

@@ -3,7 +3,6 @@ package com.validation.manager.core.server.core;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNodePK;
@@ -121,7 +120,6 @@ public final class RequirementServer extends Requirement
     @Override
     public void update(Requirement target, Requirement source) {
         target.setDescription(source.getDescription());
-        target.setHistoryList(source.getHistoryList());
         target.setId(source.getId());
         target.setNotes(source.getNotes());
         target.setParentRequirementId(source.getParentRequirementId());
@@ -241,17 +239,6 @@ public final class RequirementServer extends Requirement
             assert Objects.equals(new RequirementServer(child)
                     .getParentRequirementId().getId(), getId());
             assert getEntity().getRequirementList().size() > 0;
-        }
-    }
-
-    @Override
-    public void addHistory(History history) {
-        super.addHistory(history);
-        try {
-            write2DB();
-        }
-        catch (Exception e) {
-            LOG.log(Level.SEVERE, null, e);
         }
     }
 }

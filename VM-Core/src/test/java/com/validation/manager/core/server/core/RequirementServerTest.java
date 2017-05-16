@@ -358,7 +358,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.increaseMajorVersion();
-            assertEquals(historyCount++, rs.getHistoryList().size());
+            assertEquals(historyCount, rs.getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
             assertEquals(1, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
