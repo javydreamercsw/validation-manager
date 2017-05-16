@@ -11,6 +11,7 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.HistoryJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.test.AbstractVMTestCase;
@@ -367,11 +368,15 @@ public class RequirementServerTest extends AbstractVMTestCase {
             //assertEquals("tbd", history.getReason());
             assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
+            int total = new HistoryJpaController(DataBaseManager
+                    .getEntityManagerFactory()).getHistoryCount();
             //Test for issue #25
             //Disconnet to the database
             DataBaseManager.close();
             //Reconnect
             rs.update();
+            assertEquals(total, new HistoryJpaController(DataBaseManager
+                    .getEntityManagerFactory()).getHistoryCount());
             assertEquals(historyCount, rs.getHistoryList().size());
         }
         catch (Exception ex) {
