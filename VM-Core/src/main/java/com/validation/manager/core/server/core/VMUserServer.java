@@ -518,4 +518,9 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         ess.write2DB();
         update();
     }
+
+    @Override
+    public String toString() {
+        return getFirstName() + " " + getLastName();
+    }
 }
