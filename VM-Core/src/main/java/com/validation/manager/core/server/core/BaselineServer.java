@@ -89,8 +89,10 @@ public final class BaselineServer extends Baseline
             }
             for (Requirement o : Tool.extractRequirements(spec)) {
                 RequirementServer rs = new RequirementServer(o);
-                rs.setReason("baseline.creation");
-                rs.increaseMajorVersion();
+                if (rs.getMidVersion() > 0 || rs.getMinorVersion() > 0) {
+                    rs.setReason("baseline.creation");
+                    rs.increaseMajorVersion();
+                }
                 b.getHistoryList().add(rs.getHistoryList().get(rs
                         .getHistoryList().size() - 1));
             }
