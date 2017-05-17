@@ -241,6 +241,7 @@ public abstract class Versionable implements Comparable<Versionable>,
 
     public static synchronized boolean auditable(Versionable v) {
         History current;
+        boolean result = false;
         if (v.getHistoryList() != null && !v.getHistoryList().isEmpty()) {
             current = v.getHistoryList().get(v.getHistoryList().size() - 1);
             for (HistoryField hf : current.getHistoryFieldList()) {
@@ -255,7 +256,7 @@ public abstract class Versionable implements Comparable<Versionable>,
                             && !new String((byte[]) o,
                                     StandardCharsets.UTF_8)
                                     .equals(hf.getFieldValue()))) {
-                        return true;
+                        result = true;
                     }
                 }
                 catch (SecurityException | IllegalArgumentException | IllegalAccessException ex) {
@@ -263,9 +264,12 @@ public abstract class Versionable implements Comparable<Versionable>,
                 }
             }
             //As last check the version fields for changes (i.e. baselineing, etc.)
-            return current.getMajorVersion() < v.getMajorVersion()
-                    || current.getMidVersion() < v.getMidVersion()
-                    || current.getMinorVersion() < v.getMinorVersion();
+            if (!result) {
+                result = current.getMajorVersion() < v.getMajorVersion()
+                        || current.getMidVersion() < v.getMidVersion()
+                        || current.getMinorVersion() < v.getMinorVersion();
+            }
+            return result;
         }
         //No history so it is auditable if it has marked fields for audit.
         return !FieldUtils.getFieldsListWithAnnotation(v.getClass(),
@@ -303,6 +307,8 @@ public abstract class Versionable implements Comparable<Versionable>,
                         || last.getMajorVersion() == v.getMajorVersion() // Or it has a higher mid/major version assigned.
                         && last.getMidVersion() == v.getMidVersion()) {
                     //Make it one more than latest
+                    hs.setMajorVersion(v.getMajorVersion());
+                    hs.setMidVersion(v.getMidVersion());
                     hs.setMinorVersion(last.getMinorVersion() + 1);
                 } else {
                     //Copy values from object as it was forced changed.
@@ -321,6 +327,13 @@ public abstract class Versionable implements Comparable<Versionable>,
             hs.write2DB();
             //Check the fields to be placed in history
             updateFields(hs, v);
+        }
+        if (v.getHistoryList() != null && v.getHistoryList().size() > 0) {
+            History current = v.getHistoryList().get(v.getHistoryList().size() - 1);
+            //Update the version the object holds
+            v.setMajorVersion(current.getMajorVersion());
+            v.setMidVersion(current.getMidVersion());
+            v.setMinorVersion(current.getMinorVersion());
         }
     }
 

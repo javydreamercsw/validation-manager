@@ -1,6 +1,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -99,15 +100,28 @@ public class BaselineServerTest extends AbstractVMTestCase {
             assertEquals(name, r.getEntity().getBaselineName());
             assertEquals(desc, r.getEntity().getDescription());
             assertNotNull(r.getEntity().getCreationDate());
-            r.getEntity().getHistoryList().forEach(hf -> {
-                LOG.info(hf.toString());
-            });
             assertEquals(REQS.size(), r.getEntity().getHistoryList().size());
+            LOG.log(Level.INFO, "Baseline: {0}", r.getBaselineName());
             r.getEntity().getHistoryList().forEach(current -> {
+                LOG.info(current.toString());
                 assertEquals(1, (int) current.getMajorVersion());
                 assertEquals(0, (int) current.getMidVersion());
                 assertEquals(0, (int) current.getMinorVersion());
             });
+            RequirementServer rs = new RequirementServer(REQS.get(0));
+            rs.setDescription("Temp");
+            rs.write2DB();
+            BaselineServer r2 = BaselineServer.createBaseline(name + 2, desc + 2,
+                    new RequirementSpecServer(rss).getEntity());
+            int count = 0;
+            LOG.log(Level.INFO, "Baseline: {0}", r2.getBaselineName());
+            for (History current : r2.getEntity().getHistoryList()) {
+                LOG.info(current.toString());
+                assertEquals(count == 0 ? 2 : 1, (int) current.getMajorVersion());
+                assertEquals(0, (int) current.getMidVersion());
+                assertEquals(0, (int) current.getMinorVersion());
+                count++;
+            }
         }
         catch (NonexistentEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
