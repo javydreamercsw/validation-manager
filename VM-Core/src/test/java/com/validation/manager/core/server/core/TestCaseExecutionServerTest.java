@@ -1,6 +1,5 @@
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
@@ -36,17 +35,17 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
     private RequirementSpecNode rsns = null;
     private TestCaseServer tcs;
     private TestProjectServer tps;
-    private Project p;
+    private ProjectServer ps;
 
     @Override
     protected void postSetUp() {
         try {
-            p = TestHelper.createProject("Project", "Notes");
+            ps = new ProjectServer(TestHelper.createProject("Project", "Notes"));
             //Create requirements
             LOG.info("Create Requirement Spec");
             try {
                 rss = createRequirementSpec("Test", "Test",
-                        p, 1);
+                        ps.getEntity(), 1);
             }
             catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
@@ -81,7 +80,7 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             tps = new TestProjectServer(TestHelper.createTestProject("TP"));
             TestPlan plan = TestHelper.createTestPlan(tps.getEntity(), "Notes", true, true);
             TestHelper.addTestCaseToPlan(plan, tcs.getEntity());
-            TestHelper.addTestProjectToProject(tps.getEntity(), p);
+            TestHelper.addTestProjectToProject(tps.getEntity(), ps.getEntity());
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);
@@ -112,11 +111,13 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             issue.setDescription("Description");
             issue.setCreationTime(new Date());
             issue.setIssueType(IssueTypeServer.getType("observation.name"));
+            issue.write2DB();
             VMUserServer user = new VMUserServer(6);
             AttachmentServer attachment = new AttachmentServer();
             attachment.setTextValue("Test");
             attachment.setAttachmentType(AttachmentTypeServer
                     .getTypeForExtension("comment"));
+            attachment.write2DB();
             instance.getExecutionStepList().forEach(es -> {
                 ExecutionStepServer ess = new ExecutionStepServer(es);
                 try {
@@ -174,12 +175,13 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
     public void testGetExecutions() {
         try {
             System.out.println("getExecutions");
-            List<TestCaseExecution> r = TestCaseExecutionServer.getExecutions(p);
+            List<TestCaseExecution> r
+                    = TestCaseExecutionServer.getExecutions(ps.getEntity());
             assertEquals(0, r.size());
             TestCaseExecutionServer instance = new TestCaseExecutionServer();
             instance.write2DB();
             instance.addTestCase(tcs.getEntity());
-            r = TestCaseExecutionServer.getExecutions(p);
+            r = TestCaseExecutionServer.getExecutions(ps.getEntity());
             assertEquals(tcs.getEntity().getStepList().size(), r.size());
         }
         catch (Exception ex) {

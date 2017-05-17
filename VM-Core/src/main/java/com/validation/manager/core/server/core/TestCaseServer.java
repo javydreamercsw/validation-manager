@@ -48,8 +48,8 @@ public final class TestCaseServer extends TestCase
             temp.setCreationDate(new Date());
             controller.create(temp);
             setId(temp.getId());
-            update();
         }
+        update();
         return getId();
     }
 

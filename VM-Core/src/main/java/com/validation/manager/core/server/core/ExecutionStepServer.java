@@ -2,10 +2,12 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Attachment;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepHasAttachment;
 import com.validation.manager.core.db.ExecutionStepHasIssue;
 import com.validation.manager.core.db.ExecutionStepPK;
+import com.validation.manager.core.db.Issue;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ExecutionStepHasAttachmentJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepHasIssueJpaController;
@@ -105,8 +107,6 @@ public final class ExecutionStepServer extends ExecutionStep
         ExecutionStepHasAttachmentJpaController controller
                 = new ExecutionStepHasAttachmentJpaController(DataBaseManager
                         .getEntityManagerFactory());
-        //Make sure attachemtn exists in database
-        attachment.write2DB();
         esha.setAttachment(attachment.getEntity());
         esha.setExecutionStep(getEntity());
         esha.setCreationTime(new Date());
@@ -121,17 +121,17 @@ public final class ExecutionStepServer extends ExecutionStep
         ExecutionStepHasIssueJpaController controller
                 = new ExecutionStepHasIssueJpaController(DataBaseManager
                         .getEntityManagerFactory());
-        issue.write2DB();
         eshi.setIssue(issue.getEntity());
         eshi.setExecutionStep(getEntity());
         eshi.setVmUserList(new ArrayList<>());
         eshi.getVmUserList().add(user.getEntity());
         controller.create(eshi);
         getExecutionStepHasIssueList().add(eshi);
+        write2DB();
         update();
     }
 
-    public void removeAttachment(AttachmentServer attachment) throws Exception {
+    public void removeAttachment(Attachment attachment) throws Exception {
         ExecutionStepHasAttachment toRemove = null;
         for (ExecutionStepHasAttachment esha : getExecutionStepHasAttachmentList()) {
             if (esha.getAttachment().getAttachmentPK().getId()
@@ -148,7 +148,7 @@ public final class ExecutionStepServer extends ExecutionStep
         }
     }
 
-    public void removeIssue(IssueServer issue) throws NonexistentEntityException {
+    public void removeIssue(Issue issue) throws NonexistentEntityException {
         ExecutionStepHasIssue toRemove = null;
         for (ExecutionStepHasIssue eshi : getExecutionStepHasIssueList()) {
             if (eshi.getIssue().getIssuePK().getId()

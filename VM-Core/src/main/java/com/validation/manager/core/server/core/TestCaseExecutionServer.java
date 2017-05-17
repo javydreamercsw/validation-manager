@@ -8,11 +8,7 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.controller.AttachmentJpaController;
-import com.validation.manager.core.db.controller.ExecutionStepHasAttachmentJpaController;
-import com.validation.manager.core.db.controller.ExecutionStepHasIssueJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
-import com.validation.manager.core.db.controller.IssueJpaController;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -186,33 +182,25 @@ public final class TestCaseExecutionServer extends TestCaseExecution
                         .getEntityManagerFactory());
         toDelete.forEach(es -> {
             try {
-                es.getExecutionStepHasAttachmentList().forEach(att -> {
+                ExecutionStepServer ess = new ExecutionStepServer(es);
+                ess.getExecutionStepHasAttachmentList().forEach(att -> {
                     try {
-                        new ExecutionStepHasAttachmentJpaController(DataBaseManager
-                                .getEntityManagerFactory()).destroy(att
-                                .getExecutionStepHasAttachmentPK());
-                        new AttachmentJpaController(DataBaseManager
-                                .getEntityManagerFactory()).destroy(att.getAttachment()
-                                .getAttachmentPK());
+                        ess.removeAttachment(att.getAttachment());
                     }
-                    catch (IllegalOrphanException | NonexistentEntityException ex) {
+                    catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 });
-                es.getExecutionStepHasIssueList().forEach(issue -> {
+                ess.getExecutionStepHasIssueList().forEach(issue -> {
                     try {
-                        new ExecutionStepHasIssueJpaController(DataBaseManager
-                                .getEntityManagerFactory()).destroy(issue
-                                .getExecutionStepHasIssuePK());
-                        new IssueJpaController(DataBaseManager
-                                .getEntityManagerFactory()).destroy(issue
-                                .getIssue().getIssuePK());
+                        ess.removeIssue(issue.getIssue());
                     }
-                    catch (IllegalOrphanException | NonexistentEntityException ex) {
+                    catch (NonexistentEntityException ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 });
-                c.destroy(es.getExecutionStepPK());
+                ess.getEntity();
+                c.destroy(ess.getExecutionStepPK());
             }
             catch (IllegalOrphanException | NonexistentEntityException ex) {
                 Exceptions.printStackTrace(ex);
