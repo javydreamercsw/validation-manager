@@ -97,7 +97,7 @@ public final class TestCaseServer extends TestCase
             });
         }
         ss.write2DB();
-        update(this, getEntity());
+        update();
         assert getStepList().size() > amount;
         return ss.getEntity();
     }

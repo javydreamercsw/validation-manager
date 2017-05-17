@@ -127,13 +127,9 @@ public class TestHelper {
     public static TestCase addStep(TestCase tc, int sequence,
             String text, String note, String result) throws PreexistingEntityException,
             Exception {
-        StepServer s = new StepServer(tc, sequence, text);
-        int amount = tc.getStepList().size();
-        s.setNotes(note);
-        s.setExpectedResult(result.getBytes());
-        s.write2DB();
         TestCaseServer tcs = new TestCaseServer(tc.getId());
-        tcs.write2DB();
+        int amount = tcs.getStepList().size();
+        tcs.addStep(sequence, text, note, note, null);
         assertEquals(amount + 1, tcs.getStepList().size());
         return tcs.getEntity();
     }
@@ -153,6 +149,7 @@ public class TestHelper {
         plan.setNotes(notes);
         plan.setTestProject(tp);
         plan.write2DB();
+        tp.getTestPlanList().add(plan.getEntity());
         return plan.getEntity();
     }
 
@@ -163,6 +160,7 @@ public class TestHelper {
         tps.getTestCaseList().add(testCase);
         tps.write2DB();
         tps.update(plan, tps);
+        testCase.getTestPlanList().add(plan);
         assertTrue(plan.getTestCaseList().size() > testInPlan);
     }
 
@@ -194,6 +192,7 @@ public class TestHelper {
         ps.getTestProjectList().add(tp);
         ps.write2DB();
         assertTrue(ps.getEntity().getTestProjectList().size() > current);
+        tp.getProjectList().add(project);
     }
 
     public static void addRequirementToStep(Step step, Requirement req)

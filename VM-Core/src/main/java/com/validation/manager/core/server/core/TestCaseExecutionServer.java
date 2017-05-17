@@ -56,13 +56,15 @@ public final class TestCaseExecutionServer extends TestCaseExecution
                     = new ExecutionStepJpaController(DataBaseManager
                             .getEntityManagerFactory());
             tc.getStepList().forEach((s) -> {
-                ExecutionStep executionStep = new ExecutionStep(getId(),
+                ExecutionStep es = new ExecutionStep(getId(),
                         s.getStepPK().getId(), s.getStepPK().getTestCaseId());
-                executionStep.setStep(s);
-                executionStep.setTestCaseExecution(getEntity());
+                es.setStep(s);
+                es.setStepHistory(s.getHistoryList()
+                        .get(s.getHistoryList().size() - 1));
+                es.setTestCaseExecution(getEntity());
                 try {
-                    econtroller.create(executionStep);
-                    getExecutionStepList().add(executionStep);
+                    econtroller.create(es);
+                    getExecutionStepList().add(es);
                 }
                 catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
@@ -86,12 +88,13 @@ public final class TestCaseExecutionServer extends TestCaseExecution
             tce = new TestCaseExecution();
             update(tce, this);
             controller.create(tce);
+            setId(tce.getId());
         } else {
             tce = controller.findTestCaseExecution(getId());
             update(tce, this);
             controller.edit(tce);
         }
-        update(this, tce);
+        update();
         return getId();
     }
 

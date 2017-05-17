@@ -5,10 +5,8 @@ import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.Step;
-import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestProject;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
 import static com.validation.manager.test.TestHelper.createRequirement;
@@ -36,9 +34,8 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             = getLogger(TestCaseExecutionServerTest.class.getName());
     private RequirementSpec rss = null;
     private RequirementSpecNode rsns = null;
-    private TestCase tc;
     private TestCaseServer tcs;
-    private TestProject tp;
+    private TestProjectServer tps;
     private Project p;
 
     @Override
@@ -68,8 +65,7 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             //Create Test Case
-            tc = createTestCase("Dummy", "Summary");
-            tcs = new TestCaseServer(tc);
+            tcs = new TestCaseServer(createTestCase("Dummy", "Summary"));
             //Add steps
             List<Requirement> reqs = new ArrayList<>();
             reqs.add(r);
@@ -82,10 +78,10 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
                 assertEquals(i, tcs.getStepList().size());
                 assertEquals(i, new RequirementServer(r).getStepList().size());
             }
-            tp = TestHelper.createTestProject("TP");
-            TestPlan plan = TestHelper.createTestPlan(tp, "Notes", true, true);
-            TestHelper.addTestCaseToPlan(plan, tc);
-            TestHelper.addTestProjectToProject(tp, p);
+            tps = new TestProjectServer(TestHelper.createTestProject("TP"));
+            TestPlan plan = TestHelper.createTestPlan(tps.getEntity(), "Notes", true, true);
+            TestHelper.addTestCaseToPlan(plan, tcs.getEntity());
+            TestHelper.addTestProjectToProject(tps.getEntity(), p);
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);
@@ -102,13 +98,13 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             TestCaseExecutionServer instance = new TestCaseExecutionServer();
             instance.write2DB();
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
-            instance.addTestCase(tc);
-            assertEquals(tc.getStepList().size(),
+            instance.addTestCase(tcs.getEntity());
+            assertEquals(tcs.getStepList().size(),
                     instance.getEntity().getExecutionStepList().size());
-            instance.removeTestCase(tc);
+            instance.removeTestCase(tcs.getEntity());
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
-            instance.addTestCase(tc);
-            assertEquals(tc.getStepList().size(),
+            instance.addTestCase(tcs.getEntity());
+            assertEquals(tcs.getStepList().size(),
                     instance.getEntity().getExecutionStepList().size());
             //Add issues and attachments to the step
             IssueServer issue = new IssueServer();
@@ -116,13 +112,11 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             issue.setDescription("Description");
             issue.setCreationTime(new Date());
             issue.setIssueType(IssueTypeServer.getType("observation.name"));
-            issue.write2DB();
             VMUserServer user = new VMUserServer(6);
             AttachmentServer attachment = new AttachmentServer();
             attachment.setTextValue("Test");
             attachment.setAttachmentType(AttachmentTypeServer
                     .getTypeForExtension("comment"));
-            attachment.write2DB();
             instance.getExecutionStepList().forEach(es -> {
                 ExecutionStepServer ess = new ExecutionStepServer(es);
                 try {
@@ -133,7 +127,7 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
                     Exceptions.printStackTrace(ex);
                 }
             });
-            instance.removeTestCase(tc);
+            instance.removeTestCase(tcs.getEntity());
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
         }
         catch (Exception ex) {
@@ -152,10 +146,19 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             TestCaseExecutionServer instance = new TestCaseExecutionServer();
             instance.write2DB();
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
-            instance.addTestProject(tp);
-            assertEquals(tc.getStepList().size(),
+            instance.addTestProject(tps.getEntity());
+            assertTrue(tcs.getStepList().size() > 0);
+            assertEquals(tcs.getStepList().size(),
                     instance.getEntity().getExecutionStepList().size());
-            instance.removeTestCase(tc);
+            instance.getEntity().getExecutionStepList().forEach(es -> {
+                assertNotNull(es.getStep());
+                assertNotNull(es.getStepHistory());
+                assertFalse(es.getLocked());
+                assertNull(es.getResultId());
+                assertNull(es.getReviewResultId());
+                assertNotNull(es.getTestCaseExecution());
+            });
+            instance.removeTestCase(tcs.getEntity());
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
         }
         catch (Exception ex) {
@@ -175,9 +178,9 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             assertEquals(0, r.size());
             TestCaseExecutionServer instance = new TestCaseExecutionServer();
             instance.write2DB();
-            instance.addTestCase(tc);
+            instance.addTestCase(tcs.getEntity());
             r = TestCaseExecutionServer.getExecutions(p);
-            assertEquals(tc.getStepList().size(), r.size());
+            assertEquals(tcs.getEntity().getStepList().size(), r.size());
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);
