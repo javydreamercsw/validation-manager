@@ -12,6 +12,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.VmSetting;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +50,13 @@ public class VmSettingJpaController implements Serializable {
             vmSetting.setHistoryList(attachedHistoryList);
             em.persist(vmSetting);
             for (History historyListHistory : vmSetting.getHistoryList()) {
-                historyListHistory.getVmSettingList().add(vmSetting);
+                VmSetting oldVmSettingIdOfHistoryListHistory = historyListHistory.getVmSettingId();
+                historyListHistory.setVmSettingId(vmSetting);
                 historyListHistory = em.merge(historyListHistory);
+                if (oldVmSettingIdOfHistoryListHistory != null) {
+                    oldVmSettingIdOfHistoryListHistory.getHistoryList().remove(historyListHistory);
+                    oldVmSettingIdOfHistoryListHistory = em.merge(oldVmSettingIdOfHistoryListHistory);
+                }
             }
             em.getTransaction().commit();
         }
@@ -61,7 +67,7 @@ public class VmSettingJpaController implements Serializable {
         }
     }
 
-    public void edit(VmSetting vmSetting) throws NonexistentEntityException, Exception {
+    public void edit(VmSetting vmSetting) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -69,6 +75,18 @@ public class VmSettingJpaController implements Serializable {
             VmSetting persistentVmSetting = em.find(VmSetting.class, vmSetting.getId());
             List<History> historyListOld = persistentVmSetting.getHistoryList();
             List<History> historyListNew = vmSetting.getHistoryList();
+            List<String> illegalOrphanMessages = null;
+            for (History historyListOldHistory : historyListOld) {
+                if (!historyListNew.contains(historyListOldHistory)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain History " + historyListOldHistory + " since its vmSettingId field is not nullable.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
             List<History> attachedHistoryListNew = new ArrayList<History>();
             for (History historyListNewHistoryToAttach : historyListNew) {
                 historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
@@ -77,16 +95,15 @@ public class VmSettingJpaController implements Serializable {
             historyListNew = attachedHistoryListNew;
             vmSetting.setHistoryList(historyListNew);
             vmSetting = em.merge(vmSetting);
-            for (History historyListOldHistory : historyListOld) {
-                if (!historyListNew.contains(historyListOldHistory)) {
-                    historyListOldHistory.getVmSettingList().remove(vmSetting);
-                    historyListOldHistory = em.merge(historyListOldHistory);
-                }
-            }
             for (History historyListNewHistory : historyListNew) {
                 if (!historyListOld.contains(historyListNewHistory)) {
-                    historyListNewHistory.getVmSettingList().add(vmSetting);
+                    VmSetting oldVmSettingIdOfHistoryListNewHistory = historyListNewHistory.getVmSettingId();
+                    historyListNewHistory.setVmSettingId(vmSetting);
                     historyListNewHistory = em.merge(historyListNewHistory);
+                    if (oldVmSettingIdOfHistoryListNewHistory != null && !oldVmSettingIdOfHistoryListNewHistory.equals(vmSetting)) {
+                        oldVmSettingIdOfHistoryListNewHistory.getHistoryList().remove(historyListNewHistory);
+                        oldVmSettingIdOfHistoryListNewHistory = em.merge(oldVmSettingIdOfHistoryListNewHistory);
+                    }
                 }
             }
             em.getTransaction().commit();
@@ -108,7 +125,7 @@ public class VmSettingJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -121,10 +138,16 @@ public class VmSettingJpaController implements Serializable {
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The vmSetting with id " + id + " no longer exists.", enfe);
             }
-            List<History> historyList = vmSetting.getHistoryList();
-            for (History historyListHistory : historyList) {
-                historyListHistory.getVmSettingList().remove(vmSetting);
-                historyListHistory = em.merge(historyListHistory);
+            List<String> illegalOrphanMessages = null;
+            List<History> historyListOrphanCheck = vmSetting.getHistoryList();
+            for (History historyListOrphanCheckHistory : historyListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This VmSetting (" + vmSetting + ") cannot be destroyed since the History " + historyListOrphanCheckHistory + " in its historyList field has a non-nullable vmSettingId field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             em.remove(vmSetting);
             em.getTransaction().commit();

@@ -559,7 +559,6 @@ public class ExecutionWizardStep implements WizardStep {
                 if (reviewer && getStep().getReviewDate() == null) {
                     getStep().setReviewDate(new Date());
                 }
-                getStep().write2DB();
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }

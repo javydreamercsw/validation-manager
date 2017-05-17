@@ -79,6 +79,7 @@ INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (9, 12);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 2);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 5);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 6);
+INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 8);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 9);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 12);
 INSERT INTO `role_has_right` (`role_id`, `right_id`) VALUES (10, 16);
@@ -92,7 +93,7 @@ INSERT INTO `assignment_status` (`id`, `name`, `description`) VALUES (2, 'assign
 INSERT INTO `assignment_status` (`id`, `name`, `description`) VALUES (3, 'assignment.status.completed', 'assignment.status.completed.desc');
 INSERT INTO `assignment_status` (`id`, `name`, `description`) VALUES (4, 'assignment.status..todo.urgent', 'assignment.status.todo.urgent.desc');
 INSERT INTO `assignment_status` (`id`, `name`, `description`) VALUES (5, 'assignment.status.todo', 'assignment.status.todo.desc');
-/*Add requirement types
+/*Add requirement types*/
 INSERT INTO `requirement_type` (`id`, `name`, `description`, `level`) VALUES (1, 'UN', 'User Need', 0);
 INSERT INTO `requirement_type` (`id`, `name`, `description`, `level`) VALUES (2, 'PS', 'Product Specification', 1);
 INSERT INTO `requirement_type` (`id`, `name`, `description`, `level`) VALUES (3, 'SA', 'System Architecture', 2);
@@ -100,11 +101,7 @@ INSERT INTO `requirement_type` (`id`, `name`, `description`, `level`) VALUES (4,
 INSERT INTO `requirement_type` (`id`, `name`, `description`, `level`) VALUES (5, 'SW', 'Software', 3);
 INSERT INTO `requirement_type` (`id`, `name`, `description`, `level`) VALUES (6, 'Labeling', 'Labeling requirements', 1);
 INSERT INTO `requirement_type` (`id`, `name`, `description`, `level`) VALUES (7, 'Standards', 'Related to applicable standards', 1);
-*/
-INSERT INTO `requirement_type` (`id`, `name`, `description`) VALUES (1, 'HW', 'Hardware');
-INSERT INTO `requirement_type` (`id`, `name`, `description`) VALUES (2, 'SW', 'Software');
-INSERT INTO `requirement_type` (`id`, `name`, `description`) VALUES (3, 'Labeling', 'Labeling requirements');
-INSERT INTO `requirement_type` (`id`, `name`, `description`) VALUES (4, 'Standards', 'Testing related to applicable standards');
+
 /*Add requirement statuses*/
 INSERT INTO `requirement_status` (`id`, `status`) VALUES (1, 'general.open');
 INSERT INTO `requirement_status` (`id`, `status`) VALUES (2, 'general.approved');

@@ -110,8 +110,13 @@ public class ProjectJpaController implements Serializable {
                 }
             }
             for (History historyListHistory : project.getHistoryList()) {
-                historyListHistory.getProjectList().add(project);
+                Project oldProjectIdOfHistoryListHistory = historyListHistory.getProjectId();
+                historyListHistory.setProjectId(project);
                 historyListHistory = em.merge(historyListHistory);
+                if (oldProjectIdOfHistoryListHistory != null) {
+                    oldProjectIdOfHistoryListHistory.getHistoryList().remove(historyListHistory);
+                    oldProjectIdOfHistoryListHistory = em.merge(oldProjectIdOfHistoryListHistory);
+                }
             }
             em.getTransaction().commit();
         }
@@ -145,6 +150,14 @@ public class ProjectJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain RequirementSpec " + requirementSpecListOldRequirementSpec + " since its project field is not nullable.");
+                }
+            }
+            for (History historyListOldHistory : historyListOld) {
+                if (!historyListNew.contains(historyListOldHistory)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain History " + historyListOldHistory + " since its projectId field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -231,16 +244,15 @@ public class ProjectJpaController implements Serializable {
                     }
                 }
             }
-            for (History historyListOldHistory : historyListOld) {
-                if (!historyListNew.contains(historyListOldHistory)) {
-                    historyListOldHistory.getProjectList().remove(project);
-                    historyListOldHistory = em.merge(historyListOldHistory);
-                }
-            }
             for (History historyListNewHistory : historyListNew) {
                 if (!historyListOld.contains(historyListNewHistory)) {
-                    historyListNewHistory.getProjectList().add(project);
+                    Project oldProjectIdOfHistoryListNewHistory = historyListNewHistory.getProjectId();
+                    historyListNewHistory.setProjectId(project);
                     historyListNewHistory = em.merge(historyListNewHistory);
+                    if (oldProjectIdOfHistoryListNewHistory != null && !oldProjectIdOfHistoryListNewHistory.equals(project)) {
+                        oldProjectIdOfHistoryListNewHistory.getHistoryList().remove(historyListNewHistory);
+                        oldProjectIdOfHistoryListNewHistory = em.merge(oldProjectIdOfHistoryListNewHistory);
+                    }
                 }
             }
             em.getTransaction().commit();
@@ -283,6 +295,13 @@ public class ProjectJpaController implements Serializable {
                 }
                 illegalOrphanMessages.add("This Project (" + project + ") cannot be destroyed since the RequirementSpec " + requirementSpecListOrphanCheckRequirementSpec + " in its requirementSpecList field has a non-nullable project field.");
             }
+            List<History> historyListOrphanCheck = project.getHistoryList();
+            for (History historyListOrphanCheckHistory : historyListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Project (" + project + ") cannot be destroyed since the History " + historyListOrphanCheckHistory + " in its historyList field has a non-nullable projectId field.");
+            }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
@@ -300,11 +319,6 @@ public class ProjectJpaController implements Serializable {
             for (Project projectListProject : projectList) {
                 projectListProject.setParentProjectId(null);
                 projectListProject = em.merge(projectListProject);
-            }
-            List<History> historyList = project.getHistoryList();
-            for (History historyListHistory : historyList) {
-                historyListHistory.getProjectList().remove(project);
-                historyListHistory = em.merge(historyListHistory);
             }
             em.remove(project);
             em.getTransaction().commit();

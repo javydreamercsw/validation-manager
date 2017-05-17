@@ -38,7 +38,6 @@ public final class ExecutionStepServer extends ExecutionStep
 
     @Override
     public int write2DB() throws Exception {
-
         if (getExecutionStepPK() == null) {
             ExecutionStep es = new ExecutionStep();
             update(es, this);
@@ -80,6 +79,8 @@ public final class ExecutionStepServer extends ExecutionStep
         target.setExecutionStepHasIssueList(source.getExecutionStepHasIssueList());
         target.setReviewed(source.getReviewed());
         target.setReviewDate(source.getReviewDate());
+        target.setHistoryList(source.getHistoryList());
+        target.setStepHistory(source.getStepHistory());
     }
 
     @Override

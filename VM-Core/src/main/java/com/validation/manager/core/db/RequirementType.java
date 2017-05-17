@@ -39,6 +39,11 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             + "r.description = :description")})
 public class RequirementType implements Serializable {
 
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "level")
+    private int level;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -116,17 +121,30 @@ public class RequirementType implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof RequirementType)) {
             return false;
         }
         RequirementType other = (RequirementType) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return !this.id.equals(other.id);
     }
 
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RequirementType[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the level
+     */
+    public int getLevel() {
+        return level;
+    }
+
+    /**
+     * @param level the level to set
+     */
+    public void setLevel(int level) {
+        this.level = level;
     }
 }

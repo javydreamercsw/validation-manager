@@ -355,6 +355,7 @@ public class DataBaseManager {
         getEntityManager().close();
         getEntityManagerFactory().close();
         emf = null;
+        em = null;
     }
 
     public static EntityTransaction getTransaction() {

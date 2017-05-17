@@ -1,16 +1,15 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.traceability;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Grid;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.Resource;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.TreeTable;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.tool.Tool;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 
 /**
  * Trace Matrix component. Traces relationship from requirements to test case
@@ -18,7 +17,7 @@ import java.util.TreeMap;
  *
  * @author Javier Ortiz Bultron<javier.ortiz.78@gmail.com>
  */
-public class TraceMatrix extends Grid {
+public class TraceMatrix extends TreeTable {
 
     private final Project p;
 
@@ -34,31 +33,92 @@ public class TraceMatrix extends Grid {
     }
 
     private void init() {
-        //Let's build the trace matrix. First we link higher level requiremest
-        //all the way to lower level.
-        Map<Integer, List<Requirement>> map = new TreeMap<>();
-        //TODO: Incorporate requirement level. For now assume all are same level.
+        addContainerProperty(ValidationManagerUI.getInstance()
+                .translate("general.requirement"),
+                String.class, "");
+        addContainerProperty(ValidationManagerUI.getInstance()
+                .translate("general.test.case"),
+                Label.class, "");
+        addContainerProperty(ValidationManagerUI.getInstance()
+                .translate("general.result"),
+                Label.class, "");
         Tool.extractRequirements(p).forEach((r) -> {
-            if (!map.containsKey(1)) {
-                map.put(1, new ArrayList<>());
+            if (r.getParentRequirementId() == null) {
+                addRequirement(r);
             }
-            map.get(1).add(r);
         });
-        BeanItemContainer<Requirement> reqs
-                = new BeanItemContainer<>(Requirement.class);
-        map.entrySet().forEach((entry) -> {
-            reqs.addAll(entry.getValue());
+        setAnimationsEnabled(true);
+        for (Object item : getItemIds().toArray()) {
+            expandItem(item);
+        }
+        setSizeFull();
+    }
+
+    private void expandItem(Object item) {
+        setCollapsed(item, false);
+        if (hasChildren(item)) {
+            getChildren(item).forEach(child -> {
+                expandItem(child);
+            });
+        }
+    }
+
+    private void addRequirement(Requirement r) {
+        addItem(new Object[]{r.getUniqueId(),
+            new Label(), new Label()}, r.getUniqueId());
+        addTestCases(r);
+        //Add children
+        r.getRequirementList().forEach(child -> {
+            addRequirement(child);
+            setParent(child.getUniqueId(), r.getUniqueId());
         });
-        GeneratedPropertyContainer wrapperCont
-                = new GeneratedPropertyContainer(reqs);
-        setContainerDataSource(wrapperCont);
-        setHeightMode(HeightMode.ROW);
-        setHeightByRows(wrapperCont.size());
-        setColumns("uniqueId"/*, "executions"*/);
-        Grid.Column uniqueId = getColumn("uniqueId");
-        uniqueId.setHeaderCaption("ID");
-//        Grid.Column executions = getColumn("executions");
-//        executions.setHeaderCaption("Execution(s)");
-        wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});
+        setItemIcon(r.getUniqueId(), VMUI.REQUIREMENT_ICON);
+    }
+
+    private void addTestCases(Requirement r) {
+        r.getHistoryList().forEach(h -> {
+            h.getExecutionStepList().forEach(es -> {
+                TestCase tc = es.getStep().getTestCase();
+                Label label = new Label(tc.getName());
+                label.setIcon(VMUI.TEST_ICON);
+                if (!containsId("tc-" + tc.getId())) {
+                    addItem(new Object[]{"",
+                        label, new Label()}, "tc-" + tc.getId());
+                    setParent("tc-" + tc.getId(), r.getUniqueId());
+                }
+                if (es.getResultId() != null
+                        && !containsId(es.getExecutionStepPK())) {
+                    String result = es.getResultId().getResultName();
+                    Label resultLabel
+                            = new Label(ValidationManagerUI.getInstance()
+                                    .translate(result));
+                    addItem(new Object[]{"",
+                        new Label("Step #" + es.getStep().getStepSequence()),
+                        resultLabel}, es.getExecutionStepPK());
+                    setChildrenAllowed(es.getExecutionStepPK(), false);
+                    setParent(es.getExecutionStepPK(), "tc-" + tc.getId());
+                    //Completed. Now check result
+                    Resource icon;
+                    switch (result) {
+                        case "result.pass":
+                            icon = VaadinIcons.CHECK;
+                            break;
+                        case "result.fail":
+                            icon = VaadinIcons.CLOSE;
+                            break;
+                        case "result.blocked":
+                            icon = VaadinIcons.PAUSE;
+                            break;
+                        case "result.progress":
+                            icon = VaadinIcons.AUTOMATION;
+                            break;
+                        default:
+                            icon = VaadinIcons.CLOCK;
+                            break;
+                    }
+                    resultLabel.setIcon(icon);
+                }
+            });
+        });
     }
 }

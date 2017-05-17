@@ -8,10 +8,17 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.controller.AttachmentJpaController;
+import com.validation.manager.core.db.controller.ExecutionStepHasAttachmentJpaController;
+import com.validation.manager.core.db.controller.ExecutionStepHasIssueJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
+import com.validation.manager.core.db.controller.IssueJpaController;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.openide.util.Exceptions;
 
 /**
@@ -147,22 +154,67 @@ public final class TestCaseExecutionServer extends TestCaseExecution
      */
     public static List<TestCaseExecution> getExecutions(Project p) {
         List<TestCaseExecution> results = new ArrayList<>();
-        List<Integer> ids = new ArrayList<>();
         p.getTestProjectList().forEach(tp -> {
             tp.getTestPlanList().forEach(plan -> {
                 plan.getTestCaseList().forEach(tc -> {
                     tc.getStepList().forEach(s -> {
                         s.getExecutionStepList().forEach(es -> {
-                            TestCaseExecution tce = es.getTestCaseExecution();
-                            if (!ids.contains(es.getStep().getTestCase().getId())) {
-                                results.add(tce);
-                                ids.add(es.getStep().getTestCase().getId());
-                            }
+                            results.add(es.getTestCaseExecution());
                         });
                     });
                 });
             });
         });
         return results;
+    }
+
+    public void removeTestCase(TestCase tc) throws Exception {
+        List<ExecutionStep> toDelete = new ArrayList<>();
+        getExecutionStepList().forEach(es -> {
+            if (Objects.equals(es.getStep().getTestCase()
+                    .getId(), tc.getId())) {
+                //Same test case
+                toDelete.add(es);
+            }
+        });
+        getExecutionStepList().removeAll(toDelete);
+        ExecutionStepJpaController c
+                = new ExecutionStepJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        toDelete.forEach(es -> {
+            try {
+                es.getExecutionStepHasAttachmentList().forEach(att -> {
+                    try {
+                        new ExecutionStepHasAttachmentJpaController(DataBaseManager
+                                .getEntityManagerFactory()).destroy(att
+                                .getExecutionStepHasAttachmentPK());
+                        new AttachmentJpaController(DataBaseManager
+                                .getEntityManagerFactory()).destroy(att.getAttachment()
+                                .getAttachmentPK());
+                    }
+                    catch (IllegalOrphanException | NonexistentEntityException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                });
+                es.getExecutionStepHasIssueList().forEach(issue -> {
+                    try {
+                        new ExecutionStepHasIssueJpaController(DataBaseManager
+                                .getEntityManagerFactory()).destroy(issue
+                                .getExecutionStepHasIssuePK());
+                        new IssueJpaController(DataBaseManager
+                                .getEntityManagerFactory()).destroy(issue
+                                .getIssue().getIssuePK());
+                    }
+                    catch (IllegalOrphanException | NonexistentEntityException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                });
+                c.destroy(es.getExecutionStepPK());
+            }
+            catch (IllegalOrphanException | NonexistentEntityException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        });
+        write2DB();
     }
 }

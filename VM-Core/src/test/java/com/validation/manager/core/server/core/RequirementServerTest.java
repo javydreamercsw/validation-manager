@@ -10,6 +10,8 @@ import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.HistoryJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.test.AbstractVMTestCase;
@@ -29,7 +31,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
     private static final Logger LOG
             = getLogger(RequirementServerTest.class.getName());
     private Project p;
-    private RequirementSpecNode rsns;
+    private RequirementSpecNode rsn;
 
     @Override
     protected void postSetUp() {
@@ -54,7 +56,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             }
             System.out.println("Create Requirement Spec Node");
             try {
-                rsns = TestHelper.createRequirementSpecNode(
+                rsn = TestHelper.createRequirementSpecNode(
                         rss, "Test", "Test", "Test");
             }
             catch (Exception ex) {
@@ -78,7 +80,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("update");
             Requirement source = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer instance = new RequirementServer(source);
             assertEquals(1, instance.getHistoryList().size());
@@ -115,15 +117,15 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("isDuplicate");
             Requirement source = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement source2 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             assertEquals(false, RequirementServer.isDuplicate(source));
             assertEquals(false, RequirementServer.isDuplicate(source2));
             Requirement source3 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             assertEquals(true, RequirementServer.isDuplicate(source3));
         }
@@ -141,19 +143,19 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("getTestCoverage");
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req3 = TestHelper.createRequirement("SRS-SW-0003",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req4 = TestHelper.createRequirement("SRS-SW-0004",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement userReq = TestHelper.createRequirement("PS-SW-0001",
-                    "Sample User requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample User requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
             assertEquals(0, rs.getTestCoverage());
@@ -163,14 +165,14 @@ public class RequirementServerTest extends AbstractVMTestCase {
             int i = 1;
             for (; i < 6; i++) {
                 LOG.log(Level.INFO, "Adding step: {0}", i);
-                tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
+                tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i, "Result " + i);
                 Step step = tc.getStepList().get(i - 1);
                 TestHelper.addRequirementToStep(step, req);
                 new TestCaseServer(tc).write2DB();
                 assertEquals(1, new StepServer(step).getRequirementList().size());
             }
             LOG.log(Level.INFO, "Adding step: {0}", i);
-            tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i);
+            tc = TestHelper.addStep(tc, i, "Step " + i, "Note " + i, "Result " + i);
             Step step = tc.getStepList().get(i - 1);
             TestHelper.addRequirementToStep(step, req3);
             new TestCaseServer(tc).write2DB();
@@ -209,12 +211,12 @@ public class RequirementServerTest extends AbstractVMTestCase {
         try {
             System.out.println("Child And Parent Requirements");
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Sample requirement", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
-            assertTrue(req.getRequirementList1().isEmpty());
+            assertTrue(req.getRequirementList().isEmpty());
             //Add a child
             RequirementServer rs = new RequirementServer(req);
             //Add a version to the requirement
@@ -222,27 +224,15 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.setDescription("Modified requirement");
             rs.write2DB();
             rs.addChildRequirement(req2);
-            //Should have one children now
-            rs.getRequirementList1().forEach((r) -> {
-                LOG.info(r.getUniqueId());
-            });
-            assertEquals(1, rs.getRequirementList1().size());
-            rs.getRequirementList().forEach((r) -> {
-                LOG.info(r.getUniqueId());
-            });
-            //No parents
-            assertEquals(0, rs.getRequirementList().size());
             RequirementServer rs2 = new RequirementServer(req2);
-            rs2.getRequirementList().forEach((r) -> {
-                LOG.info(r.getUniqueId());
-            });
+            //Should have one children now
+            assertEquals(1, rs.getEntity().getRequirementList().size());
+            //No parents
+            assertNull(rs.getEntity().getParentRequirementId());
             //One parent
-            assertEquals(1, rs2.getRequirementList().size());
-            rs2.getRequirementList1().forEach((r) -> {
-                LOG.info(r.getUniqueId());
-            });
+            assertNotNull(rs2.getEntity().getParentRequirementId());
             //No children
-            assertEquals(0, rs2.getRequirementList1().size());
+            assertEquals(0, rs2.getEntity().getRequirementList().size());
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -261,7 +251,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             //Enable versioning
             DataBaseManager.setVersioningEnabled(true);
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
+                    "Description", rsn.getRequirementSpecNodePK(), "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
             //Add a test case covering this test case
             TestProject tp = TestHelper.createTestProject("Test Project");
@@ -270,7 +260,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             TestCase tc = TestHelper.createTestCase("TC #1",
                     "Summary");
             TestHelper.addTestCaseToPlan(plan, tc);
-            TestCase step = TestHelper.addStep(tc, 1, "Test", "Test");
+            TestCase step = TestHelper.addStep(tc, 1, "Test", "Test", "Result ");
             rs.getStepList().add(step.getStepList().get(0));
             rs.write2DB();
             assertEquals(1, rs.getStepList().size());
@@ -293,7 +283,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(100, rs.getTestCoverage());
             //Add a parent requirement
             Requirement r = TestHelper.createRequirement("PS-0001",
-                    "Description", rsns.getRequirementSpecNodePK(),
+                    "Description", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer parent = new RequirementServer(r);
             parent.addChildRequirement(req);
@@ -312,39 +302,11 @@ public class RequirementServerTest extends AbstractVMTestCase {
         }
     }
 
-    /**
-     * Test of Circular Dependencies detection method, of class
-     * RequirementServer.
-     */
-    @Test
-    public void testCircularDependencies() {
-        try {
-            Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
-            Requirement req2 = TestHelper.createRequirement("SRS-SW-0002",
-                    "Description", rsns.getRequirementSpecNodePK(), "Notes", 1, 1);
-            RequirementServer r1 = new RequirementServer(req);
-            RequirementServer r2 = new RequirementServer(req2);
-            r1.addChildRequirement(req2);
-            assertEquals(1, r1.getRequirementList1().size());
-            assertEquals(0, r1.getRequirementList().size());
-            //Get the change above from db.
-            r2.update();
-            r2.addChildRequirement(req);
-            assertEquals(0, r2.getRequirementList1().size());
-            assertEquals(1, r2.getRequirementList().size());
-        }
-        catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-            fail();
-        }
-    }
-
     @Test
     public void testVersioning() {
         try {
             Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Description", rsns.getRequirementSpecNodePK(),
+                    "Description", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             RequirementServer rs = new RequirementServer(req);
             int historyCount = 1;
@@ -354,6 +316,9 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(0, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
             assertEquals(1, history.getMinorVersion());
+            assertEquals(1, (int) history.getModifierId().getId());
+            assertEquals("audit.general.creation", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.setDescription("desc 2");
             rs.write2DB();
@@ -362,14 +327,24 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(0, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
             assertEquals(2, history.getMinorVersion());
+            assertEquals(1, (int) history.getModifierId().getId());
+            assertEquals("audit.general.modified", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.setDescription("desc 3");
+            VmUser test = TestHelper.createUser("Test", "pass", "email",
+                    "first", "last");
+            rs.setModifierId(test.getId());
+            rs.setReason("Test");
             rs.write2DB();
             assertEquals(historyCount++, rs.getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
             assertEquals(0, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
             assertEquals(3, history.getMinorVersion());
+            assertEquals((int) test.getId(), (int) history.getModifierId().getId());
+            assertEquals("Test", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.increaseMidVersion();
             assertEquals(historyCount++, rs.getHistoryList().size());
@@ -377,14 +352,32 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(0, history.getMajorVersion());
             assertEquals(1, history.getMidVersion());
             assertEquals(0, history.getMinorVersion());
+            //TODO: Handle mid and major changes on system
+            //assertEquals(1, (int) history.getModifierId().getId());
+            //assertEquals("tbd", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.increaseMajorVersion();
-            assertEquals(historyCount++, rs.getHistoryList().size());
+            assertEquals(historyCount, rs.getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
             assertEquals(1, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
             assertEquals(0, history.getMinorVersion());
+            //TODO: Handle mid and major changes on system
+            //assertEquals(1, (int) history.getModifierId().getId());
+            //assertEquals("tbd", history.getReason());
+            assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
+            int total = new HistoryJpaController(DataBaseManager
+                    .getEntityManagerFactory()).getHistoryCount();
+            //Test for issue #25
+            //Disconnet to the database
+            DataBaseManager.close();
+            //Reconnect
+            rs.update();
+            assertEquals(total, new HistoryJpaController(DataBaseManager
+                    .getEntityManagerFactory()).getHistoryCount());
+            assertEquals(historyCount, rs.getHistoryList().size());
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);

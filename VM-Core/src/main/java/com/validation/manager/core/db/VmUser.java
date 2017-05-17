@@ -1,7 +1,7 @@
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.api.history.Auditable;
-import com.validation.manager.core.db.mapped.Login;
+import com.validation.manager.core.api.history.Login;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;

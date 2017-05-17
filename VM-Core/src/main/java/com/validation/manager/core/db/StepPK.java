@@ -65,7 +65,7 @@ public class StepPK implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof StepPK)) {
             return false;
         }

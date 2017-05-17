@@ -3,7 +3,6 @@ package com.validation.manager.core.server.core;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNodePK;
@@ -13,10 +12,12 @@ import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.tool.Tool;
 import com.validation.manager.core.tool.message.MessageHandler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Lookup;
@@ -118,22 +119,17 @@ public final class RequirementServer extends Requirement
 
     @Override
     public void update(Requirement target, Requirement source) {
-        if (source.getNotes() != null) {
-            target.setNotes(source.getNotes());
-        }
-        if (source.getDescription() != null) {
-            target.setDescription(source.getDescription());
-        }
-        target.setRequirementSpecNode(source.getRequirementSpecNode());
+        target.setDescription(source.getDescription());
+        target.setId(source.getId());
+        target.setNotes(source.getNotes());
+        target.setParentRequirementId(source.getParentRequirementId());
         target.setRequirementList(source.getRequirementList());
-        target.setRequirementList1(source.getRequirementList1());
+        target.setRequirementSpecNode(source.getRequirementSpecNode());
         target.setRequirementStatusId(source.getRequirementStatusId());
         target.setRequirementTypeId(source.getRequirementTypeId());
-        target.setRiskControlHasRequirementList(source
-                .getRiskControlHasRequirementList());
+        target.setRiskControlHasRequirementList(source.getRiskControlHasRequirementList());
         target.setStepList(source.getStepList());
         target.setUniqueId(source.getUniqueId());
-        target.setId(source.getId());
         super.update(target, source);
     }
 
@@ -141,7 +137,7 @@ public final class RequirementServer extends Requirement
         //Must be unique within a project.
         Project project
                 = req.getRequirementSpecNode().getRequirementSpec().getProject();
-        List<Requirement> requirements = ProjectServer.getRequirements(project);
+        List<Requirement> requirements = Tool.extractRequirements(project);
         int count = 0;
         for (Requirement r : requirements) {
             if (r.getUniqueId().equals(req.getUniqueId())) {
@@ -165,7 +161,7 @@ public final class RequirementServer extends Requirement
         if (!COVERAGE_MAP.containsKey(getCoverageMapID(getEntity()))) {
             LOG.log(Level.FINE, "Getting test coverage for: {0}...",
                     getUniqueId());
-            List<Requirement> children = getEntity().getRequirementList1();
+            List<Requirement> children = getEntity().getRequirementList();
             if (children.isEmpty()) {
                 LOG.log(Level.FINE, "No child requirements");
                 //Has test cases and no related requirements
@@ -217,27 +213,14 @@ public final class RequirementServer extends Requirement
         boolean circular = false;
         //Prevent circular dependencies
         for (Requirement r : getRequirementList()) {
-            if (child.getUniqueId().trim().equals(r.getUniqueId().trim())) {
+            if (Objects.equals(child.getId(), r.getId())) {
                 circular = true;
                 break;
             }
         }
-        if (!circular) {
-            for (Requirement r : getRequirementList1()) {
-                if (child.getUniqueId().trim().equals(r.getUniqueId().trim())) {
-                    circular = true;
-                    break;
-                }
-            }
-        }
-        if (!circular) {
-            if (!getRequirementList1().contains(child)) {
-                getRequirementList1().add(child);
-                write2DB();
-                update();
-            }
-        } else {
-            MessageHandler handler = Lookup.getDefault().lookup(MessageHandler.class);
+        if (circular) {
+            MessageHandler handler = Lookup.getDefault()
+                    .lookup(MessageHandler.class);
             String message = new StringBuilder().append("Ignored addition of ")
                     .append(child.getUniqueId()).append(" as a children of ")
                     .append(getUniqueId())
@@ -248,17 +231,14 @@ public final class RequirementServer extends Requirement
             } else {
                 LOG.warning(message);
             }
-        }
-    }
-
-    @Override
-    public void addHistory(History history) {
-        super.addHistory(history);
-        try {
-            write2DB();
-        }
-        catch (Exception e) {
-            LOG.log(Level.SEVERE, null, e);
+        } else {
+            RequirementServer cs = new RequirementServer(child);
+            cs.setParentRequirementId(getEntity());
+            cs.write2DB();
+            update();
+            assert Objects.equals(new RequirementServer(child)
+                    .getParentRequirementId().getId(), getId());
+            assert getEntity().getRequirementList().size() > 0;
         }
     }
 }

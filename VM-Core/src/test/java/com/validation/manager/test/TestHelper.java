@@ -14,11 +14,7 @@ import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
-import com.validation.manager.core.db.controller.TestCaseJpaController;
-import com.validation.manager.core.db.controller.TestPlanJpaController;
-import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
-import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
@@ -55,8 +51,7 @@ public class TestHelper {
         temp.setUserStatusId(new UserStatusJpaController(
                 getEntityManagerFactory()).findUserStatus(1));
         temp.write2DB();
-        return new VmUserJpaController(
-                getEntityManagerFactory()).findVmUser(temp.getId());
+        return temp.getEntity();
     }
 
     public static void deleteUser(VmUser user) throws NonexistentEntityException,
@@ -83,14 +78,8 @@ public class TestHelper {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
-        Project p = new ProjectJpaController(
-                getEntityManagerFactory()).findProject(ps.getId());
-        assertTrue(new ProjectJpaController(
-                getEntityManagerFactory()).findProject(p.getId()) != null);
-        assertTrue(new ProjectJpaController(
-                getEntityManagerFactory())
-                .findProject(p.getId()).getNotes().equals(p.getNotes()));
-        return p;
+        assertTrue(ps.getEntity() != null);
+        return ps.getEntity();
     }
 
     public static void destroyProject(Project p) throws IllegalOrphanException,
@@ -107,10 +96,8 @@ public class TestHelper {
         tc.setActive(true);
         tc.setIsOpen(true);
         tc.setSummary(summary.getBytes());
-        TestCaseJpaController controller = new TestCaseJpaController(
-                getEntityManagerFactory());
         tc.write2DB();
-        return controller.findTestCase(tc.getId());
+        return tc.getEntity();
     }
 
     public static Requirement createRequirement(String id, String desc,
@@ -119,9 +106,8 @@ public class TestHelper {
         RequirementServer req = new RequirementServer(id, desc, p, notes,
                 requirementType, requirementStatus);
         req.write2DB();
-        return new RequirementJpaController(
-                getEntityManagerFactory())
-                .findRequirement(req.getId());
+        assert req.getEntity().getRequirementSpecNode() != null;
+        return req.getEntity();
     }
 
     public static void destroyRequirement(Requirement r)
@@ -139,18 +125,17 @@ public class TestHelper {
     }
 
     public static TestCase addStep(TestCase tc, int sequence,
-            String text, String note) throws PreexistingEntityException,
+            String text, String note, String result) throws PreexistingEntityException,
             Exception {
         StepServer s = new StepServer(tc, sequence, text);
         int amount = tc.getStepList().size();
         s.setNotes(note);
+        s.setExpectedResult(result.getBytes());
         s.write2DB();
         TestCaseServer tcs = new TestCaseServer(tc.getId());
         tcs.write2DB();
         assertEquals(amount + 1, tcs.getStepList().size());
-        return new TestCaseJpaController(
-                getEntityManagerFactory())
-                .findTestCase(tc.getId());
+        return tcs.getEntity();
     }
 
     public static TestProject createTestProject(String name)
@@ -158,8 +143,7 @@ public class TestHelper {
             Exception {
         TestProjectServer tps = new TestProjectServer("Test Project", true);
         tps.write2DB();
-        return new TestProjectJpaController(
-                getEntityManagerFactory()).findTestProject(tps.getId());
+        return tps.getEntity();
     }
 
     public static TestPlan createTestPlan(TestProject tp, String notes,
@@ -169,9 +153,7 @@ public class TestHelper {
         plan.setNotes(notes);
         plan.setTestProject(tp);
         plan.write2DB();
-        return new TestPlanJpaController(
-                getEntityManagerFactory())
-                .findTestPlan(plan.getTestPlanPK());
+        return plan.getEntity();
     }
 
     public static void addTestCaseToPlan(TestPlan plan, TestCase testCase)
@@ -180,7 +162,8 @@ public class TestHelper {
         TestPlanServer tps = new TestPlanServer(plan);
         tps.getTestCaseList().add(testCase);
         tps.write2DB();
-        assertTrue(tps.getTestCaseList().size() > testInPlan);
+        tps.update(plan, tps);
+        assertTrue(plan.getTestCaseList().size() > testInPlan);
     }
 
     public static RequirementSpec createRequirementSpec(String name,
@@ -189,7 +172,7 @@ public class TestHelper {
         RequirementSpecServer rss = new RequirementSpecServer(name, description,
                 project.getId(), specLevelId);
         rss.write2DB();
-        project.getRequirementSpecList().add(rss);
+        project.getRequirementSpecList().add(rss.getEntity());
         new ProjectServer(project).write2DB();
         return rss.getEntity();
     }
@@ -200,7 +183,7 @@ public class TestHelper {
         RequirementSpecNodeServer rsns = new RequirementSpecNodeServer(rss,
                 name, description, scope);
         rsns.write2DB();
-        return rsns;
+        return rsns.getEntity();
     }
 
     public static void addTestProjectToProject(TestProject tp, Project project)
@@ -210,21 +193,23 @@ public class TestHelper {
         int current = ps.getTestProjectList().size();
         ps.getTestProjectList().add(tp);
         ps.write2DB();
-        assertTrue(ps.getTestProjectList().size() > current);
+        assertTrue(ps.getEntity().getTestProjectList().size() > current);
     }
 
     public static void addRequirementToStep(Step step, Requirement req)
             throws Exception {
         StepServer ss = new StepServer(step);
         ss.addRequirement(req);
+        ss.write2DB();
     }
 
     public static Project addProject(Project root, String name, String notes)
             throws NonexistentEntityException, Exception {
         Project sub = createProject(name, notes);
-        root.getProjectList().add(sub);
-        new ProjectServer(root).write2DB();
-        return sub;
+        ProjectServer ps = new ProjectServer(root);
+        ps.getProjectList().add(sub);
+        ps.write2DB();
+        return new ProjectServer(sub).getEntity();
     }
 
     public static Requirement addChildToRequirement(Requirement parent,

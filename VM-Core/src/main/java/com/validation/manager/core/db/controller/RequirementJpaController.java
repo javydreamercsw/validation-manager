@@ -10,10 +10,10 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.RequirementStatus;
 import com.validation.manager.core.db.RequirementType;
-import com.validation.manager.core.db.Requirement;
 import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.Step;
@@ -43,9 +43,6 @@ public class RequirementJpaController implements Serializable {
         if (requirement.getRequirementList() == null) {
             requirement.setRequirementList(new ArrayList<Requirement>());
         }
-        if (requirement.getRequirementList1() == null) {
-            requirement.setRequirementList1(new ArrayList<Requirement>());
-        }
         if (requirement.getStepList() == null) {
             requirement.setStepList(new ArrayList<Step>());
         }
@@ -59,6 +56,11 @@ public class RequirementJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            Requirement parentRequirementId = requirement.getParentRequirementId();
+            if (parentRequirementId != null) {
+                parentRequirementId = em.getReference(parentRequirementId.getClass(), parentRequirementId.getId());
+                requirement.setParentRequirementId(parentRequirementId);
+            }
             RequirementSpecNode requirementSpecNode = requirement.getRequirementSpecNode();
             if (requirementSpecNode != null) {
                 requirementSpecNode = em.getReference(requirementSpecNode.getClass(), requirementSpecNode.getRequirementSpecNodePK());
@@ -80,12 +82,6 @@ public class RequirementJpaController implements Serializable {
                 attachedRequirementList.add(requirementListRequirementToAttach);
             }
             requirement.setRequirementList(attachedRequirementList);
-            List<Requirement> attachedRequirementList1 = new ArrayList<Requirement>();
-            for (Requirement requirementList1RequirementToAttach : requirement.getRequirementList1()) {
-                requirementList1RequirementToAttach = em.getReference(requirementList1RequirementToAttach.getClass(), requirementList1RequirementToAttach.getId());
-                attachedRequirementList1.add(requirementList1RequirementToAttach);
-            }
-            requirement.setRequirementList1(attachedRequirementList1);
             List<Step> attachedStepList = new ArrayList<Step>();
             for (Step stepListStepToAttach : requirement.getStepList()) {
                 stepListStepToAttach = em.getReference(stepListStepToAttach.getClass(), stepListStepToAttach.getStepPK());
@@ -105,6 +101,10 @@ public class RequirementJpaController implements Serializable {
             }
             requirement.setHistoryList(attachedHistoryList);
             em.persist(requirement);
+            if (parentRequirementId != null) {
+                parentRequirementId.getRequirementList().add(requirement);
+                parentRequirementId = em.merge(parentRequirementId);
+            }
             if (requirementSpecNode != null) {
                 requirementSpecNode.getRequirementList().add(requirement);
                 requirementSpecNode = em.merge(requirementSpecNode);
@@ -118,12 +118,13 @@ public class RequirementJpaController implements Serializable {
                 requirementTypeId = em.merge(requirementTypeId);
             }
             for (Requirement requirementListRequirement : requirement.getRequirementList()) {
-                requirementListRequirement.getRequirementList().add(requirement);
+                Requirement oldParentRequirementIdOfRequirementListRequirement = requirementListRequirement.getParentRequirementId();
+                requirementListRequirement.setParentRequirementId(requirement);
                 requirementListRequirement = em.merge(requirementListRequirement);
-            }
-            for (Requirement requirementList1Requirement : requirement.getRequirementList1()) {
-                requirementList1Requirement.getRequirementList().add(requirement);
-                requirementList1Requirement = em.merge(requirementList1Requirement);
+                if (oldParentRequirementIdOfRequirementListRequirement != null) {
+                    oldParentRequirementIdOfRequirementListRequirement.getRequirementList().remove(requirementListRequirement);
+                    oldParentRequirementIdOfRequirementListRequirement = em.merge(oldParentRequirementIdOfRequirementListRequirement);
+                }
             }
             for (Step stepListStep : requirement.getStepList()) {
                 stepListStep.getRequirementList().add(requirement);
@@ -139,8 +140,13 @@ public class RequirementJpaController implements Serializable {
                 }
             }
             for (History historyListHistory : requirement.getHistoryList()) {
-                historyListHistory.getRequirementList().add(requirement);
+                Requirement oldRequirementIdOfHistoryListHistory = historyListHistory.getRequirementId();
+                historyListHistory.setRequirementId(requirement);
                 historyListHistory = em.merge(historyListHistory);
+                if (oldRequirementIdOfHistoryListHistory != null) {
+                    oldRequirementIdOfHistoryListHistory.getHistoryList().remove(historyListHistory);
+                    oldRequirementIdOfHistoryListHistory = em.merge(oldRequirementIdOfHistoryListHistory);
+                }
             }
             em.getTransaction().commit();
         }
@@ -157,6 +163,8 @@ public class RequirementJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Requirement persistentRequirement = em.find(Requirement.class, requirement.getId());
+            Requirement parentRequirementIdOld = persistentRequirement.getParentRequirementId();
+            Requirement parentRequirementIdNew = requirement.getParentRequirementId();
             RequirementSpecNode requirementSpecNodeOld = persistentRequirement.getRequirementSpecNode();
             RequirementSpecNode requirementSpecNodeNew = requirement.getRequirementSpecNode();
             RequirementStatus requirementStatusIdOld = persistentRequirement.getRequirementStatusId();
@@ -165,8 +173,6 @@ public class RequirementJpaController implements Serializable {
             RequirementType requirementTypeIdNew = requirement.getRequirementTypeId();
             List<Requirement> requirementListOld = persistentRequirement.getRequirementList();
             List<Requirement> requirementListNew = requirement.getRequirementList();
-            List<Requirement> requirementList1Old = persistentRequirement.getRequirementList1();
-            List<Requirement> requirementList1New = requirement.getRequirementList1();
             List<Step> stepListOld = persistentRequirement.getStepList();
             List<Step> stepListNew = requirement.getStepList();
             List<RiskControlHasRequirement> riskControlHasRequirementListOld = persistentRequirement.getRiskControlHasRequirementList();
@@ -184,6 +190,10 @@ public class RequirementJpaController implements Serializable {
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            if (parentRequirementIdNew != null) {
+                parentRequirementIdNew = em.getReference(parentRequirementIdNew.getClass(), parentRequirementIdNew.getId());
+                requirement.setParentRequirementId(parentRequirementIdNew);
             }
             if (requirementSpecNodeNew != null) {
                 requirementSpecNodeNew = em.getReference(requirementSpecNodeNew.getClass(), requirementSpecNodeNew.getRequirementSpecNodePK());
@@ -204,13 +214,6 @@ public class RequirementJpaController implements Serializable {
             }
             requirementListNew = attachedRequirementListNew;
             requirement.setRequirementList(requirementListNew);
-            List<Requirement> attachedRequirementList1New = new ArrayList<Requirement>();
-            for (Requirement requirementList1NewRequirementToAttach : requirementList1New) {
-                requirementList1NewRequirementToAttach = em.getReference(requirementList1NewRequirementToAttach.getClass(), requirementList1NewRequirementToAttach.getId());
-                attachedRequirementList1New.add(requirementList1NewRequirementToAttach);
-            }
-            requirementList1New = attachedRequirementList1New;
-            requirement.setRequirementList1(requirementList1New);
             List<Step> attachedStepListNew = new ArrayList<Step>();
             for (Step stepListNewStepToAttach : stepListNew) {
                 stepListNewStepToAttach = em.getReference(stepListNewStepToAttach.getClass(), stepListNewStepToAttach.getStepPK());
@@ -233,6 +236,14 @@ public class RequirementJpaController implements Serializable {
             historyListNew = attachedHistoryListNew;
             requirement.setHistoryList(historyListNew);
             requirement = em.merge(requirement);
+            if (parentRequirementIdOld != null && !parentRequirementIdOld.equals(parentRequirementIdNew)) {
+                parentRequirementIdOld.getRequirementList().remove(requirement);
+                parentRequirementIdOld = em.merge(parentRequirementIdOld);
+            }
+            if (parentRequirementIdNew != null && !parentRequirementIdNew.equals(parentRequirementIdOld)) {
+                parentRequirementIdNew.getRequirementList().add(requirement);
+                parentRequirementIdNew = em.merge(parentRequirementIdNew);
+            }
             if (requirementSpecNodeOld != null && !requirementSpecNodeOld.equals(requirementSpecNodeNew)) {
                 requirementSpecNodeOld.getRequirementList().remove(requirement);
                 requirementSpecNodeOld = em.merge(requirementSpecNodeOld);
@@ -259,26 +270,19 @@ public class RequirementJpaController implements Serializable {
             }
             for (Requirement requirementListOldRequirement : requirementListOld) {
                 if (!requirementListNew.contains(requirementListOldRequirement)) {
-                    requirementListOldRequirement.getRequirementList().remove(requirement);
+                    requirementListOldRequirement.setParentRequirementId(null);
                     requirementListOldRequirement = em.merge(requirementListOldRequirement);
                 }
             }
             for (Requirement requirementListNewRequirement : requirementListNew) {
                 if (!requirementListOld.contains(requirementListNewRequirement)) {
-                    requirementListNewRequirement.getRequirementList().add(requirement);
+                    Requirement oldParentRequirementIdOfRequirementListNewRequirement = requirementListNewRequirement.getParentRequirementId();
+                    requirementListNewRequirement.setParentRequirementId(requirement);
                     requirementListNewRequirement = em.merge(requirementListNewRequirement);
-                }
-            }
-            for (Requirement requirementList1OldRequirement : requirementList1Old) {
-                if (!requirementList1New.contains(requirementList1OldRequirement)) {
-                    requirementList1OldRequirement.getRequirementList().remove(requirement);
-                    requirementList1OldRequirement = em.merge(requirementList1OldRequirement);
-                }
-            }
-            for (Requirement requirementList1NewRequirement : requirementList1New) {
-                if (!requirementList1Old.contains(requirementList1NewRequirement)) {
-                    requirementList1NewRequirement.getRequirementList().add(requirement);
-                    requirementList1NewRequirement = em.merge(requirementList1NewRequirement);
+                    if (oldParentRequirementIdOfRequirementListNewRequirement != null && !oldParentRequirementIdOfRequirementListNewRequirement.equals(requirement)) {
+                        oldParentRequirementIdOfRequirementListNewRequirement.getRequirementList().remove(requirementListNewRequirement);
+                        oldParentRequirementIdOfRequirementListNewRequirement = em.merge(oldParentRequirementIdOfRequirementListNewRequirement);
+                    }
                 }
             }
             for (Step stepListOldStep : stepListOld) {
@@ -306,14 +310,19 @@ public class RequirementJpaController implements Serializable {
             }
             for (History historyListOldHistory : historyListOld) {
                 if (!historyListNew.contains(historyListOldHistory)) {
-                    historyListOldHistory.getRequirementList().remove(requirement);
+                    historyListOldHistory.setRequirementId(null);
                     historyListOldHistory = em.merge(historyListOldHistory);
                 }
             }
             for (History historyListNewHistory : historyListNew) {
                 if (!historyListOld.contains(historyListNewHistory)) {
-                    historyListNewHistory.getRequirementList().add(requirement);
+                    Requirement oldRequirementIdOfHistoryListNewHistory = historyListNewHistory.getRequirementId();
+                    historyListNewHistory.setRequirementId(requirement);
                     historyListNewHistory = em.merge(historyListNewHistory);
+                    if (oldRequirementIdOfHistoryListNewHistory != null && !oldRequirementIdOfHistoryListNewHistory.equals(requirement)) {
+                        oldRequirementIdOfHistoryListNewHistory.getHistoryList().remove(historyListNewHistory);
+                        oldRequirementIdOfHistoryListNewHistory = em.merge(oldRequirementIdOfHistoryListNewHistory);
+                    }
                 }
             }
             em.getTransaction().commit();
@@ -359,6 +368,11 @@ public class RequirementJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
+            Requirement parentRequirementId = requirement.getParentRequirementId();
+            if (parentRequirementId != null) {
+                parentRequirementId.getRequirementList().remove(requirement);
+                parentRequirementId = em.merge(parentRequirementId);
+            }
             RequirementSpecNode requirementSpecNode = requirement.getRequirementSpecNode();
             if (requirementSpecNode != null) {
                 requirementSpecNode.getRequirementList().remove(requirement);
@@ -376,13 +390,8 @@ public class RequirementJpaController implements Serializable {
             }
             List<Requirement> requirementList = requirement.getRequirementList();
             for (Requirement requirementListRequirement : requirementList) {
-                requirementListRequirement.getRequirementList().remove(requirement);
+                requirementListRequirement.setParentRequirementId(null);
                 requirementListRequirement = em.merge(requirementListRequirement);
-            }
-            List<Requirement> requirementList1 = requirement.getRequirementList1();
-            for (Requirement requirementList1Requirement : requirementList1) {
-                requirementList1Requirement.getRequirementList().remove(requirement);
-                requirementList1Requirement = em.merge(requirementList1Requirement);
             }
             List<Step> stepList = requirement.getStepList();
             for (Step stepListStep : stepList) {
@@ -391,7 +400,7 @@ public class RequirementJpaController implements Serializable {
             }
             List<History> historyList = requirement.getHistoryList();
             for (History historyListHistory : historyList) {
-                historyListHistory.getRequirementList().remove(requirement);
+                historyListHistory.setRequirementId(null);
                 historyListHistory = em.merge(historyListHistory);
             }
             em.remove(requirement);

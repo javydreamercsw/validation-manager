@@ -49,7 +49,8 @@ public class TestCaseServerTest extends AbstractVMTestCase {
         try {
             rss = createRequirementSpec("Test", "Test",
                     project, 1);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -58,7 +59,8 @@ public class TestCaseServerTest extends AbstractVMTestCase {
         try {
             rsns = createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }

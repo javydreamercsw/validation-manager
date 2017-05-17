@@ -1,6 +1,6 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.db.mapped.Versionable;
+import com.validation.manager.core.api.history.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
@@ -79,7 +79,7 @@ public class Project extends Versionable implements Serializable {
     private Project parentProjectId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
     private List<RequirementSpec> requirementSpecList;
-    @ManyToMany(mappedBy = "projectList")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "projectId")
     private List<History> historyList;
 
     public Project(String name) {
@@ -173,16 +173,14 @@ public class Project extends Versionable implements Serializable {
         return "com.validation.manager.core.db.Project[ id=" + id + " ]";
     }
 
-    /**
-     * @return the historyList
-     */
+    @XmlTransient
+    @JsonIgnore
+    @Override
     public List<History> getHistoryList() {
         return historyList;
     }
 
-    /**
-     * @param historyList the historyList to set
-     */
+    @Override
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
     }

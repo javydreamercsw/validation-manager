@@ -11,7 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
+import javax.persistence.JoinColumns;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -49,9 +49,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     , @NamedQuery(name = "History.findByModificationTime",
             query = "SELECT h FROM History h WHERE h.modificationTime = :modificationTime")})
 public class History implements Serializable {
-
-    @ManyToMany(mappedBy = "historyList")
-    private List<Baseline> baselineList;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -94,22 +91,25 @@ public class History implements Serializable {
     @JoinColumn(name = "modifier_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private VmUser modifierId;
-    @JoinTable(name = "requirement_has_history", joinColumns = {
-        @JoinColumn(name = "history_id", referencedColumnName = "id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "requirement_id", referencedColumnName = "id")})
-    @ManyToMany
-    private List<Requirement> requirementList;
-    @JoinTable(name = "vm_setting_has_history", joinColumns = {
-        @JoinColumn(name = "history_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "vm_setting_id", referencedColumnName = "id")})
-    @ManyToMany
-    private List<VmSetting> vmSettingList;
-    @JoinTable(name = "project_has_history", joinColumns = {
-        @JoinColumn(name = "history_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "project_id", referencedColumnName = "id")})
-    @ManyToMany
-    private List<Project> projectList;
+    @ManyToMany(mappedBy = "historyList")
+    private List<ExecutionStep> executionStepList;
+    @ManyToMany(mappedBy = "historyList")
+    private List<Baseline> baselineList;
+    @JoinColumn(name = "requirement_id", referencedColumnName = "id")
+    @ManyToOne(optional = true)
+    private Requirement requirementId;
+    @JoinColumn(name = "project_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Project projectId;
+    @JoinColumns({
+        @JoinColumn(name = "step_id", referencedColumnName = "id")
+        , @JoinColumn(name = "step_test_case_id",
+                referencedColumnName = "test_case_id")})
+    @ManyToOne(optional = false)
+    private Step step;
+    @JoinColumn(name = "vm_setting_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private VmSetting vmSettingId;
 
     public History() {
     }
@@ -232,49 +232,53 @@ public class History implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<Requirement> getRequirementList() {
-        return requirementList;
-    }
-
-    public void setRequirementList(List<Requirement> requirementList) {
-        this.requirementList = requirementList;
-    }
-
-    /**
-     * @return the vmSettingList
-     */
-    public List<VmSetting> getVmSettingList() {
-        return vmSettingList;
-    }
-
-    /**
-     * @param vmSettingList the vmSettingList to set
-     */
-    public void setVmSettingList(List<VmSetting> vmSettingList) {
-        this.vmSettingList = vmSettingList;
-    }
-
-    /**
-     * @return the projectList
-     */
-    public List<Project> getProjectList() {
-        return projectList;
-    }
-
-    /**
-     * @param projectList the projectList to set
-     */
-    public void setProjectList(List<Project> projectList) {
-        this.projectList = projectList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
     public List<Baseline> getBaselineList() {
         return baselineList;
     }
 
     public void setBaselineList(List<Baseline> baselineList) {
         this.baselineList = baselineList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStep> getExecutionStepList() {
+        return executionStepList;
+    }
+
+    public void setExecutionStepList(List<ExecutionStep> executionStepList) {
+        this.executionStepList = executionStepList;
+    }
+
+    public Requirement getRequirementId() {
+        return requirementId;
+    }
+
+    public void setRequirementId(Requirement requirement) {
+        this.requirementId = requirement;
+    }
+
+    public Project getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Project projectId) {
+        this.projectId = projectId;
+    }
+
+    public Step getStep() {
+        return step;
+    }
+
+    public void setStep(Step step) {
+        this.step = step;
+    }
+
+    public VmSetting getVmSettingId() {
+        return vmSettingId;
+    }
+
+    public void setVmSettingId(VmSetting vmSettingId) {
+        this.vmSettingId = vmSettingId;
     }
 }

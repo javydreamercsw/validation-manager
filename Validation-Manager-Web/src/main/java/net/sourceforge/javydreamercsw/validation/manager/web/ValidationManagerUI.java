@@ -11,6 +11,7 @@ import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.Transferable;
 import com.vaadin.event.dd.DragAndDropEvent;
@@ -24,6 +25,8 @@ import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
@@ -53,13 +56,14 @@ import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.renderers.ButtonRenderer;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
+import com.validation.manager.core.api.history.Versionable;
+import com.validation.manager.core.api.history.Versionable.CHANGE_LEVEL;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.History;
@@ -77,17 +81,22 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.BaselineJpaController;
+import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.StepJpaController;
+import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.BaselineServer;
+import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
@@ -100,6 +109,7 @@ import com.validation.manager.core.tool.requirement.importer.RequirementImporter
 import com.validation.manager.core.tool.step.importer.StepImporter;
 import com.validation.manager.core.tool.step.importer.TestCaseImportException;
 import de.steinwedel.messagebox.ButtonOption;
+import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
 import java.io.BufferedReader;
 import java.io.File;
@@ -107,13 +117,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedMap;
@@ -126,7 +140,6 @@ import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUpload
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceMatrix;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 import org.vaadin.peter.contextmenu.ContextMenu;
@@ -239,24 +252,26 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Editing existing one
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        rsn.setName(name.getValue().toString());
-                        rsn.setDescription(desc.getValue().toString());
-                        rsn.setScope(scope.getValue().toString());
-                        new RequirementSpecNodeJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(rsn);
-                        displayRequirementSpecNode(rsn, true);
-                    } catch (FieldGroup.CommitException | NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    }
+                    rsn.setName(name.getValue().toString());
+                    rsn.setDescription(desc.getValue().toString());
+                    rsn.setScope(scope.getValue().toString());
+                    handleVerioning(rsn, () -> {
+                        try {
+                            new RequirementSpecNodeJpaController(DataBaseManager
+                                    .getEntityManagerFactory()).edit(rsn);
+                            displayRequirementSpecNode(rsn, true);
+                        } catch (NonexistentEntityException ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                            Notification.show("Error updating record!",
+                                    ex.getLocalizedMessage(),
+                                    Notification.Type.ERROR_MESSAGE);
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                            Notification.show("Error updating record!",
+                                    ex.getLocalizedMessage(),
+                                    Notification.Type.ERROR_MESSAGE);
+                        }
+                    });
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(update);
@@ -291,16 +306,24 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayTestCaseExecution(TestCaseExecution tce, boolean edit) {
+        displayTestCaseExecution(tce, null, edit);
+    }
+
+    private void displayTestCaseExecution(TestCaseExecution tce,
+            ProjectServer ps, boolean edit) {
         Panel form = new Panel("Test Case Execution Detail");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(tce.getClass());
         binder.setItemDataSource(tce);
+        Field<?> name = binder.buildAndBind("Name", "name");
+        name.setRequired(true);
+        name.setRequiredError("Please provide a name.");
+        layout.addComponent(name);
         Field<?> scope = binder.buildAndBind("Scope", "scope");
         layout.addComponent(scope);
-        Field<?> name = binder.buildAndBind("Name", "name");
-        layout.addComponent(name);
+        //TODO: Show when finished
         TextArea conclusion = new TextArea("Conclusion");
         binder.bind(conclusion, "conclusion");
         layout.addComponent(conclusion);
@@ -314,20 +337,128 @@ public class ValidationManagerUI extends UI implements VMUI {
             }
         });
         if (edit) {
-            TestCaseExecutionServer tces = new TestCaseExecutionServer(tce);
             if (tce.getId() == null) {
+                TestCaseExecutionServer tces = new TestCaseExecutionServer();
                 //Creating a new one
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
-                    tces.setConclusion(conclusion.getValue());
-                    tces.setScope(scope.getValue().toString());
-                    tces.setName(name.getValue().toString());
-                    try {
-                        tces.write2DB();
-                        tces.update(tce, tces.getEntity());
-                        displayObject(tce);
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, null, ex);
+                    if (name.getValue() == null) {
+                        Notification.show(name.getRequiredError(),
+                                Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
+                    Map<Requirement, History> history = new HashMap<>();
+                    if (ps != null) {
+                        List<Requirement> toApprove = new ArrayList<>();
+                        for (Requirement r : Tool.extractRequirements(ps)) {
+                            //Check each requirement and see if they have minor versions (last version is not baselined)
+                            History h = r.getHistoryList().get(r.getHistoryList().size() - 1);
+                            if (h.getMajorVersion() == 0
+                                    || h.getMidVersion() > 0
+                                    || h.getMinorVersion() > 0) {
+                                if (r.getHistoryList().size() == 1) {
+                                    //Nothing to choose from
+                                    history.put(r, h);
+                                } else {
+                                    toApprove.add(r);
+                                }
+                            } else {
+                                history.put(r, h);
+                            }
+                        }
+                        if (!toApprove.isEmpty()) {
+                            MessageBox mb = MessageBox.create();
+                            mb.asModal(true)
+                                    .withCaption("Non Baselined requirements detected!")
+                                    .withMessage("Some requirements are not baselined, "
+                                            + "please choose the versions to be tested "
+                                            + "under this execution.")
+                                    .withButtonAlignment(Alignment.MIDDLE_CENTER)
+                                    .withOkButton(() -> {
+                                        //Start the wizard
+                                        Wizard w = new Wizard();
+                                        Window sw = new VMWindow();
+                                        w.setDisplayedMaxTitles(3);
+                                        toApprove.forEach(r -> {
+                                            w.addStep(new SelectRequirementVersionStep(r));
+                                        });
+                                        w.addListener(new WizardProgressListener() {
+                                            @Override
+                                            public void activeStepChanged(WizardStepActivationEvent event) {
+                                                //Do nothing
+                                            }
+
+                                            @Override
+                                            public void stepSetChanged(WizardStepSetChangedEvent event) {
+                                                //Do nothing
+                                            }
+
+                                            @Override
+                                            public void wizardCompleted(WizardCompletedEvent event) {
+                                                //Process the selections
+                                                w.getSteps().forEach(s -> {
+                                                    SelectRequirementVersionStep step
+                                                            = (SelectRequirementVersionStep) s;
+                                                    history.put(step.getRequirement(),
+                                                            step.getHistory());
+                                                });
+                                                removeWindow(sw);
+                                            }
+
+                                            @Override
+                                            public void wizardCancelled(WizardCancelledEvent event) {
+                                                removeWindow(sw);
+                                            }
+                                        });
+                                        sw.setContent(w);
+                                        sw.center();
+                                        sw.setModal(true);
+                                        sw.setSizeFull();
+                                        addWindow(sw);
+                                    }, ButtonOption.focus(),
+                                            ButtonOption.icon(VaadinIcons.CHECK))
+                                    .withCancelButton(
+                                            ButtonOption.icon(VaadinIcons.CLOSE)
+                                    ).getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                            mb.open();
+                        }
+                    }
+                    if (!history.isEmpty()) {
+                        try {
+                            if (conclusion.getValue() != null) {
+                                tces.setConclusion(conclusion.getValue());
+                            }
+                            if (scope.getValue() != null) {
+                                tces.setScope(scope.getValue().toString());
+                            }
+                            tces.setName(name.getValue().toString());
+                            tces.write2DB();
+                            if (ps != null) {
+                                //Process the list
+                                ps.getTestProjects(true).forEach(tp -> {
+                                    tces.addTestProject(tp);
+                                });
+                                //Now look thru the ExecutionSteps and assign the right version.
+                                tces.getExecutionStepList().forEach(es -> {
+                                    try {
+                                        ExecutionStepServer ess = new ExecutionStepServer(es);
+                                        es.getStep().getRequirementList().forEach(r -> {
+                                            ess.getHistoryList().add(history.get(r));
+                                        });
+                                        ess.write2DB();
+                                    } catch (Exception ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                    }
+                                });
+                            }
+                            tces.write2DB();
+                            tces.update(tce, tces.getEntity());
+                            updateProjectList();
+                            updateScreen();
+                            displayObject(tce);
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                        }
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
@@ -335,6 +466,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 hl.addComponent(cancel);
                 layout.addComponent(hl);
             } else {
+                TestCaseExecutionServer tces = new TestCaseExecutionServer(tce);
                 //Editing existing one
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
@@ -342,9 +474,23 @@ public class ValidationManagerUI extends UI implements VMUI {
                     tces.setScope(scope.getValue().toString());
                     tces.setName(name.getValue().toString());
                     try {
-                        tces.write2DB();
-                        tces.update(tce, tces.getEntity());
-                        displayObject(tce);
+                        handleVerioning(tces, () -> {
+                            try {
+                                tces.write2DB();
+                                tces.update(tce, tces.getEntity());
+                                displayObject(tce);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
@@ -362,7 +508,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, "testcase.view");
     }
 
-    private void displayExecutionStep(ExecutionStep es, boolean edit) {
+    private void displayExecutionStep(ExecutionStep es) {
         Panel form = new Panel("Execution Step Detail");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
@@ -387,24 +533,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                 return defaultFactory.createField(dataType, fieldType);
             }
         });
-        BeanItemContainer stepContainer = new BeanItemContainer<>(Step.class);
-        stepContainer.addBean(es.getStep());
-        Grid grid = new Grid(stepContainer);
-        grid.setCaption("Step Details");
-        grid.setContainerDataSource(stepContainer);
-        grid.setColumns("text", "expectedResult", "notes");
-        grid.setHeightMode(HeightMode.ROW);
-        grid.setHeightByRows(1);
-        Grid.Column textColumn = grid.getColumn("text");
-        textColumn.setHeaderCaption("Text");
-        textColumn.setConverter(new ByteToStringConverter());
-        Grid.Column resultColumn = grid.getColumn("expectedResult");
-        resultColumn.setHeaderCaption("Expected Result");
-        resultColumn.setConverter(new ByteToStringConverter());
-        Grid.Column notesColumn = grid.getColumn("notes");
-        notesColumn.setHeaderCaption("Notes");
-        grid.setSizeFull();
-        layout.addComponent(grid);
+        layout.addComponent(createStepHistoryTable("Step Details",
+                Arrays.asList(es.getStepHistory()), false));
         if (es.getResultId() != null) {
             Field<?> result = binder.buildAndBind("Result",
                     "resultId.resultName");
@@ -432,51 +562,14 @@ public class ValidationManagerUI extends UI implements VMUI {
                     "executionEnd");
             layout.addComponent(end);
         }
-        if (es.getExecutionTime() > 0) {
+        if (es.getExecutionTime() != null && es.getExecutionTime() > 0) {
             Field<?> time = binder.buildAndBind("Execution Time",
                     "executionTime");
             layout.addComponent(time);
         }
-        if (es.getStep().getRequirementList() != null
-                && !es.getStep().getRequirementList().isEmpty()) {
-            BeanItemContainer reqContainer
-                    = new BeanItemContainer<>(Requirement.class);
-            reqContainer.addAll(es.getStep().getRequirementList());
-            Grid reqGrid = new Grid(reqContainer);
-            reqGrid.setHeightMode(HeightMode.ROW);
-            reqGrid.setHeightByRows(reqContainer.size() > 5 ? 5 : reqContainer.size());
-            reqGrid.setCaption("Related Requirements");
-            reqGrid.setColumns("uniqueId");
-            Grid.Column reqColumn = reqGrid.getColumn("uniqueId");
-            reqColumn.setHeaderCaption("Requirement ID");
-            reqColumn.setRenderer(new ButtonRenderer(e -> {
-                //Show the requirement details in a window
-                VerticalLayout l = new VerticalLayout();
-                Window subWindow = new VMWindow(
-                        ((Requirement) e.getItemId()).getUniqueId()
-                        + " Details");
-                BeanFieldGroup<Requirement> b
-                        = new BeanFieldGroup<>(Requirement.class);
-                b.setItemDataSource((Requirement) e.getItemId());
-                b.setReadOnly(true);
-                Field<?> id = b.buildAndBind("Requirement ID", "uniqueId");
-                id.setReadOnly(true); //Read only flag set to true !!!
-                l.addComponent(id);
-                Field<?> desc = b.buildAndBind("Description", "description",
-                        TextArea.class);
-                desc.setReadOnly(true); //Read only flag set to true !!!
-                l.addComponent(desc);
-                Field<?> notes = b.buildAndBind("Notes", "notes",
-                        TextArea.class);
-                notes.setReadOnly(true); //Read only flag set to true !!!
-                l.addComponent(notes);
-                subWindow.setContent(l);
-                subWindow.setModal(true);
-                subWindow.center();
-                // Open it in the UI
-                addWindow(subWindow);
-            }));
-            layout.addComponent(reqGrid);
+        if (!es.getHistoryList().isEmpty()) {
+            layout.addComponent(createRequirementHistoryTable("Related Requirements",
+                    es.getHistoryList()));
         }
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
@@ -487,30 +580,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 displayObject(es, false);
             }
         });
-        if (edit) {
-            if (es.getExecutionStepPK() == null) {
-                //Creating a new one
-                Button save = new Button("Save");
-                save.addClickListener((Button.ClickEvent event) -> {
-
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            } else {
-                //Editing existing one
-                Button update = new Button("Update");
-                update.addClickListener((Button.ClickEvent event) -> {
-
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            }
-        }
-        binder.setReadOnly(!edit);
+        binder.setReadOnly(true);
         binder.bindMemberFields(form);
         layout.setSizeFull();
         form.setSizeFull();
@@ -539,26 +609,27 @@ public class ValidationManagerUI extends UI implements VMUI {
         notes.setSizeFull();
         layout.addComponent(notes);
         tree.select(s);
-        Project p = getParentProject();
-        List<Requirement> reqs = ProjectServer.getRequirements(p);
-        Collections.sort(reqs, (Requirement o1, Requirement o2)
-                -> o1.getUniqueId().compareTo(o2.getUniqueId()));
-        BeanItemContainer<Requirement> requirementContainer
-                = new BeanItemContainer<>(Requirement.class, reqs);
-        TwinColSelect requirements
-                = new TwinColSelect("Linked Requirements");
-        requirements.setItemCaptionPropertyId("uniqueId");
-        requirements.setContainerDataSource(requirementContainer);
-        requirements.setRows(5);
-        requirements.setLeftColumnCaption("Available Requirements");
-        requirements.setRightColumnCaption("Linked Requirements");
-        if (s.getRequirementList() != null) {
-            s.getRequirementList().forEach((r) -> {
-                requirements.select(r);
+        if (!s.getRequirementList().isEmpty() && !edit) {
+            layout.addComponent(getDisplayRequirementList("Related Requirements",
+                    s.getRequirementList()));
+        } else {
+            AbstractSelect requirements = getRequirementSelectionComponent();
+            //Select the exisitng ones.
+            if (s.getRequirementList() != null) {
+                s.getRequirementList().forEach((r) -> {
+                    requirements.select(r);
+                });
+            }
+            requirements.addValueChangeListener(event -> {
+                Set<Requirement> selected
+                        = (Set<Requirement>) event.getProperty().getValue();
+                s.getRequirementList().clear();
+                selected.forEach(r -> {
+                    s.getRequirementList().add(r);
+                });
             });
+            layout.addComponent(requirements);
         }
-        requirements.setEnabled(edit);
-        layout.addComponent(requirements);
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -585,10 +656,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                         if (s.getRequirementList() == null) {
                             s.setRequirementList(new ArrayList<>());
                         }
-                        s.getRequirementList().clear();
-                        ((Set<Requirement>) requirements.getValue()).forEach((r) -> {
-                            s.getRequirementList().add(r);
-                        });
                         new StepJpaController(DataBaseManager
                                 .getEntityManagerFactory()).create(s);
                         form.setVisible(false);
@@ -621,14 +688,24 @@ public class ValidationManagerUI extends UI implements VMUI {
                         if (s.getRequirementList() == null) {
                             s.setRequirementList(new ArrayList<>());
                         }
-                        s.getRequirementList().clear();
-                        ((Set<Requirement>) requirements.getValue()).forEach((r) -> {
-                            s.getRequirementList().add(r);
+                        handleVerioning(s, () -> {
+                            try {
+                                new StepJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(s);
+                                displayStep(s, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
                         });
-                        new StepJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(s);
-                        displayStep(s, true);
-                    } catch (Exception ex) {
+                    } catch (UnsupportedEncodingException | NumberFormatException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
@@ -720,20 +797,24 @@ public class ValidationManagerUI extends UI implements VMUI {
                         t.setCreationDate((Date) creation.getValue());
                         t.setActive((Boolean) active.getValue());
                         t.setIsOpen((Boolean) open.getValue());
-                        new TestCaseJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(t);
-                        displayTestCase(t, true);
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (Exception ex) {
+                        handleVerioning(t, () -> {
+                            try {
+                                new TestCaseJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(t);
+                                displayTestCase(t, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
+                    } catch (UnsupportedEncodingException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
@@ -818,19 +899,23 @@ public class ValidationManagerUI extends UI implements VMUI {
                         tp.setNotes(notes.getValue().toString());
                         tp.setActive((Boolean) open.getValue());
                         tp.setIsOpen((Boolean) open.getValue());
-                        new TestPlanJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(tp);
-                        displayTestPlan(tp, true);
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        handleVerioning(tp, () -> {
+                            try {
+                                new TestPlanJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(tp);
+                                displayTestPlan(tp, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
@@ -911,19 +996,23 @@ public class ValidationManagerUI extends UI implements VMUI {
                         tp.setName(name.getValue().toString());
                         tp.setNotes(notes.getValue().toString());
                         tp.setActive((Boolean) active.getValue());
-                        new TestProjectJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(tp);
-                        displayTestProject(tp, true);
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        handleVerioning(tp, () -> {
+                            try {
+                                new TestProjectJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(tp);
+                                displayTestProject(tp, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
@@ -1023,19 +1112,23 @@ public class ValidationManagerUI extends UI implements VMUI {
                         rs.setName(name.getValue().toString());
                         rs.setModificationDate(new Date());
                         rs.setSpecLevel((SpecLevel) level.getValue());
-                        new RequirementSpecJpaController(DataBaseManager
-                                .getEntityManagerFactory()).edit(rs);
-                        displayRequirementSpec(rs, true);
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    } catch (NonexistentEntityException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        handleVerioning(rs, () -> {
+                            try {
+                                new RequirementSpecJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(rs);
+                                displayRequirementSpec(rs, true);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
@@ -1104,7 +1197,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             ExecutionStep es = (ExecutionStep) item;
             LOG.log(Level.FINE, "Selected: Test Case Execution #{0}",
                     es.getExecutionStepPK());
-            displayExecutionStep(es, edit);
+            displayExecutionStep(es);
         } else if (item instanceof Baseline) {
             Baseline es = (Baseline) item;
             LOG.log(Level.FINE, "Selected: Baseline #{0}",
@@ -1124,13 +1217,37 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(id);
         Field desc = binder.buildAndBind("Description", "description",
                 TextArea.class);
-
         desc.setSizeFull();
         layout.addComponent(desc);
         Field notes = binder.buildAndBind("Notes", "notes",
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
+        if (req.getParentRequirementId() != null) {
+            TextField tf = new TextField("Parent");
+            tf.setValue(req.getParentRequirementId().getUniqueId());
+            tf.setReadOnly(true);
+            layout.addComponent(tf);
+        }
+        if (!req.getRequirementList().isEmpty() && !edit) {
+            layout.addComponent(getDisplayRequirementList("Related Requirements",
+                    req.getRequirementList()));
+        } else if (edit) {
+            //Allow user to add children
+            AbstractSelect as = getRequirementSelectionComponent();
+            req.getRequirementList().forEach(sub -> {
+                as.select(sub);
+            });
+            as.addValueChangeListener(event -> {
+                Set<Requirement> selected
+                        = (Set<Requirement>) event.getProperty().getValue();
+                req.getRequirementList().clear();
+                selected.forEach(r -> {
+                    req.getRequirementList().add(r);
+                });
+            });
+            layout.addComponent(as);
+        }
         Button cancel = new Button("Cancel");
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -1167,15 +1284,29 @@ public class ValidationManagerUI extends UI implements VMUI {
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         RequirementServer rs = new RequirementServer(req);
-                        rs.setUniqueId(id.getValue().toString());
-                        rs.setNotes(notes.getValue().toString());
-                        rs.setDescription(desc.getValue().toString());
-                        rs.write2DB();
+                        rs.setDescription(((TextArea) desc).getValue());
+                        rs.setNotes(((TextArea) notes).getValue());
+                        rs.setUniqueId(((TextField) id).getValue());
+                        handleVerioning(rs, () -> {
+                            try {
+                                rs.write2DB();
+                                //Recreate the tree to show the addition
+                                buildProjectTree(rs.getEntity());
+                                displayRequirement(rs.getEntity(), false);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
                         form.setVisible(false);
-                        //Recreate the tree to show the addition
-                        buildProjectTree(rs.getEntity());
-                        displayRequirement(rs.getEntity(), false);
-                    } catch (Exception ex) {
+                    } catch (VMException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
@@ -1323,17 +1454,31 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void createTestExecutionMenu(ContextMenu menu) {
+        addDeleteExecution(menu);
         addTestCaseAssignment(menu);
         addExecutionDashboard(menu);
     }
 
     private void createRootMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Execution", PROJECT_ICON);
+                = menu.addItem("Create Project", PROJECT_ICON);
         create.setEnabled(checkRight("product.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject(new Project(), true);
+                });
+    }
+
+    private void createExecutionsMenu(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Create Execution", EXECUTIONS_ICON);
+        create.setEnabled(checkRight("testplan.planning"));
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    int projectId = Integer.parseInt(((String) tree.getValue())
+                            .substring("executions".length()));
+                    displayTestCaseExecution(new TestCaseExecution(),
+                            new ProjectServer(projectId), true);
                 });
     }
 
@@ -1349,6 +1494,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     displayTestCaseExecution((TestCaseExecution) tree
                             .getValue(), true);
                 });
+        addDeleteExecution(menu);
         addTestCaseAssignment(menu);
         addExecutionDashboard(menu);
     }
@@ -1523,7 +1669,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             Notification.show("Importing unsuccessful!",
                                     Notification.Type.ERROR_MESSAGE);
                         } catch (VMException ex) {
-                            Exceptions.printStackTrace(ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         }
                     });
                     upload.addFailedListener((Upload.FailedEvent event1) -> {
@@ -1796,7 +1942,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         Field notes = binder.buildAndBind("Notes", "notes",
                 TextArea.class);
         notes.setSizeFull();
-        layout.addComponent(notes);
+        name.setRequired(true);
+        name.setRequiredError("Please provide a name.");
         layout.addComponent(name);
         layout.addComponent(notes);
         Button cancel = new Button("Cancel");
@@ -1813,8 +1960,15 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Creating a new one
                 Button save = new Button("Save");
                 save.addClickListener((Button.ClickEvent event) -> {
+                    if (name.getValue() == null) {
+                        Notification.show(name.getRequiredError(),
+                                Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
                     p.setName(name.getValue().toString());
-                    p.setNotes(notes.getValue().toString());
+                    if (notes.getValue() != null) {
+                        p.setNotes(notes.getValue().toString());
+                    }
                     new ProjectJpaController(DataBaseManager
                             .getEntityManagerFactory()).create(p);
                     form.setVisible(false);
@@ -1832,14 +1986,26 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Editing existing one
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        binder.commit();
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    }
+                    handleVerioning(p, () -> {
+                        try {
+                            p.setName(name.getValue().toString());
+                            if (notes.getValue() != null) {
+                                p.setNotes(notes.getValue().toString());
+                            }
+                            new ProjectJpaController(DataBaseManager
+                                    .getEntityManagerFactory()).edit(p);
+                        } catch (NonexistentEntityException ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                            Notification.show("Error updating record!",
+                                    ex.getLocalizedMessage(),
+                                    Notification.Type.ERROR_MESSAGE);
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                            Notification.show("Error updating record!",
+                                    ex.getLocalizedMessage(),
+                                    Notification.Type.ERROR_MESSAGE);
+                        }
+                    });
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(update);
@@ -1847,11 +2013,17 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             }
         }
-        binder.setBuffered(true);
-        binder.setReadOnly(!edit);
+
+        binder.setBuffered(
+                true);
+        binder.setReadOnly(
+                !edit);
         binder.bindMemberFields(form);
+
         form.setSizeFull();
-        setTabContent(main, form, "project.viewer");
+
+        setTabContent(main, form,
+                "project.viewer");
     }
 
     private void addRequirementSpec(RequirementSpec rs, Tree tree) {
@@ -2029,17 +2201,14 @@ public class ValidationManagerUI extends UI implements VMUI {
         }
         List<TestCaseExecution> executions = TestCaseExecutionServer
                 .getExecutions(p);
-        if (!executions.isEmpty()) {
-            String id = "executions" + p.getId();
-            tree.addItem(id);
-            tree.setItemCaption(id, "Executions");
-            tree.setItemIcon(id, EXECUTIONS_ICON);
-            tree.setParent(id, p);
-            executions.forEach((tce) -> {
-                addTestCaseExecutions(id, tce, tree);
-            });
-            children = true;
-        }
+        String id = "executions" + p.getId();
+        tree.addItem(id);
+        tree.setItemCaption(id, "Executions");
+        tree.setItemIcon(id, EXECUTIONS_ICON);
+        tree.setParent(id, p);
+        executions.forEach((tce) -> {
+            addTestCaseExecutions(id, tce, tree);
+        });
         if (!children) {
             // No subprojects
             tree.setChildrenAllowed(p, false);
@@ -2069,7 +2238,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                             DragAndDropEvent dragEvent, Tree tree) {
                         HashSet<Object> allowed = new HashSet<>();
                         tree.getItemIds().stream().filter((itemId)
-                                -> (itemId instanceof Step))
+                                -> (itemId instanceof Step)
+                                || (itemId instanceof Requirement))
                                 .forEachOrdered((itemId) -> {
                                     allowed.add(itemId);
                                 });
@@ -2115,6 +2285,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             }
                             break;
                         case TOP: {
+                            boolean valid = false;
                             //for Steps we need to update the sequence number
                             if (sourceItemId instanceof Step
                                     && targetItemId instanceof Step) {
@@ -2123,9 +2294,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 StepJpaController stepController
                                         = new StepJpaController(DataBaseManager
                                                 .getEntityManagerFactory());
-//                                TestCaseJpaController tcController
-//                                        = new TestCaseJpaController(DataBaseManager.getEntityManagerFactory());
-                                boolean valid = false;
                                 if (targetItem.getTestCase().equals(sourceItem
                                         .getTestCase())) {
                                     //Same Test Case, just re-arrange
@@ -2202,18 +2370,18 @@ public class ValidationManagerUI extends UI implements VMUI {
 //                                    //Add it to the Test Case
 //                                    targetItem.getTestCase().getStepList().add(removed);
                                 }
-                                if (valid) {
-                                    // Drop at the top of a subtree -> make it previous
-                                    Object parentId
-                                            = container.getParent(targetItemId);
-                                    container.setParent(sourceItemId, parentId);
-                                    container.moveAfterSibling(sourceItemId,
-                                            targetItemId);
-                                    container.moveAfterSibling(targetItemId,
-                                            sourceItemId);
-                                    buildProjectTree(targetItem);
-                                    updateScreen();
-                                }
+                            }
+                            if (valid) {
+                                // Drop at the top of a subtree -> make it previous
+                                Object parentId
+                                        = container.getParent(targetItemId);
+                                container.setParent(sourceItemId, parentId);
+                                container.moveAfterSibling(sourceItemId,
+                                        targetItemId);
+                                container.moveAfterSibling(targetItemId,
+                                        sourceItemId);
+                                buildProjectTree(targetItemId);
+                                updateScreen();
                             }
                             break;
                         }
@@ -2267,6 +2435,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                         String val = (String) tree.getValue();
                         if (val.startsWith("tce")) {
                             createTestExecutionMenu(contextMenu);
+                        } else if (val.startsWith("executions")) {
+                            createExecutionsMenu(contextMenu);
                         } else {
                             //We are at the root
                             createRootMenu(contextMenu);
@@ -2275,6 +2445,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                         createTestPlanMenu(contextMenu);
                     } else if (tree.getValue() instanceof TestCaseExecution) {
                         createTestCaseExecutionPlanMenu(contextMenu);
+                    } else if (tree.getValue() instanceof Baseline) {
+//                        createBaselineMenu(contextMenu);
                     }
                 };
         contextMenu.addContextMenuTreeListener(treeItemListener);
@@ -2373,11 +2545,13 @@ public class ValidationManagerUI extends UI implements VMUI {
             }
         }
         return false;
+
     }
 
     private void displayTestPlanning(Project p) {
         DesignerScreenProvider provider = Lookup.getDefault()
-                .lookup(DesignerScreenProvider.class);
+                .lookup(DesignerScreenProvider.class
+                );
         if (provider != null && p != null) {
             provider.setProject(p);
             updateScreen();
@@ -2406,7 +2580,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         Field<?> id = binder.buildAndBind("Name", "baselineName");
         layout.addComponent(id);
         Field desc = binder.buildAndBind("Description", "description",
-                TextArea.class);
+                TextArea.class
+        );
         desc.setSizeFull();
         layout.addComponent(desc);
         Button cancel = new Button("Cancel");
@@ -2444,7 +2619,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                                                         baseline.getDescription(),
                                                         rs)
                                                 .getEntity();
-                                        displayObject(entity, true);
+                                        updateProjectList();
+                                        buildProjectTree(entity);
+                                        displayObject(entity, false);
+                                        updateScreen();
                                     },
                                             ButtonOption.focus(),
                                             ButtonOption
@@ -2463,7 +2641,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         updateProjectList();
                         updateScreen();
                     } catch (FieldGroup.CommitException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
@@ -2475,11 +2653,26 @@ public class ValidationManagerUI extends UI implements VMUI {
                 Button update = new Button("Update");
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
-                        binder.commit();
-                        //Recreate the tree to show the addition
-                        buildProjectTree(baseline);
-                        displayBaseline(baseline, false);
-                    } catch (FieldGroup.CommitException ex) {
+                        handleVerioning(baseline, () -> {
+                            try {
+                                new BaselineJpaController(DataBaseManager
+                                        .getEntityManagerFactory()).edit(baseline);
+                                //Recreate the tree to show the addition
+                                buildProjectTree(baseline);
+                                displayBaseline(baseline, false);
+                            } catch (NonexistentEntityException ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                                Notification.show("Error updating record!",
+                                        ex.getLocalizedMessage(),
+                                        Notification.Type.ERROR_MESSAGE);
+                            }
+                        });
+                    } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show("Error updating record!",
                                 ex.getLocalizedMessage(),
@@ -2499,127 +2692,153 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
-    private Component createRequirementHistoryTable(String title,
-            List<History> historyItems) {
+    private Grid getHistoryTable(String title,
+            List<History> historyItems, String sortByField,
+            boolean showVersionFields,
+            String... fields) {
         Grid grid = new Grid(title);
         BeanItemContainer<History> histories
-                = new BeanItemContainer<>(History.class);
+                = new BeanItemContainer<>(History.class
+                );
         GeneratedPropertyContainer wrapperCont
                 = new GeneratedPropertyContainer(histories);
         histories.addAll(historyItems);
         grid.setContainerDataSource(wrapperCont);
         grid.setHeightMode(HeightMode.ROW);
         grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
-        wrapperCont.addGeneratedProperty("version",
-                new PropertyValueGenerator<String>() {
+        for (String field : fields) {
+            wrapperCont.addGeneratedProperty(field,
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                return v.getMajorVersion() + "." + v.getMidVersion()
-                        + "." + v.getMinorVersion();
-            }
-
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("uniqueId",
-                new PropertyValueGenerator<String>() {
-
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                String result = "";
-                for (HistoryField hf : v.getHistoryFieldList()) {
-                    if (hf.getFieldName().equals("uniqueId")) {
-                        result = hf.getFieldValue();
-                        break;
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    String result = "";
+                    for (HistoryField hf : v.getHistoryFieldList()) {
+                        if (hf.getFieldName().equals(field)) {
+                            result = hf.getFieldValue();
+                            break;
+                        }
                     }
+                    return result;
                 }
-                return result;
-            }
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("description",
-                new PropertyValueGenerator<String>() {
-
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                String result = "";
-                for (HistoryField hf : v.getHistoryFieldList()) {
-                    if (hf.getFieldName().equals("description")) {
-                        result = hf.getFieldValue();
-                        break;
-                    }
+                @Override
+                public Class<String> getType() {
+                    return String.class;
                 }
-                return result;
-            }
+            });
+        }
+        if (showVersionFields) {
+            wrapperCont.addGeneratedProperty("version",
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("modifier",
-                new PropertyValueGenerator<String>() {
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    return v.getMajorVersion() + "." + v.getMidVersion()
+                            + "." + v.getMinorVersion();
+                }
 
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                return v.getModifierId().getFirstName() + " "
-                        + v.getModifierId().getLastName();
-            }
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });
+            wrapperCont.addGeneratedProperty("modifier",
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("modificationDate",
-                new PropertyValueGenerator<String>() {
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    return v.getModifierId().getFirstName() + " "
+                            + v.getModifierId().getLastName();
+                }
 
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                return v.getModificationTime().toString();
-            }
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });
+            wrapperCont.addGeneratedProperty("modificationDate",
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        wrapperCont.addGeneratedProperty("modificationReason",
-                new PropertyValueGenerator<String>() {
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    return v.getModificationTime().toString();
+                }
 
-            @Override
-            public String getValue(Item item, Object itemId, Object propertyId) {
-                History v = (History) itemId;
-                return v.getReason() == null ? "null" : translate(v.getReason());
-            }
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });
+            wrapperCont.addGeneratedProperty("modificationReason",
+                    new PropertyValueGenerator<String>() {
 
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
-        grid.setColumns("uniqueId", "description", "version", "modifier",
-                "modificationDate", "modificationReason");
+                @Override
+                public String getValue(Item item, Object itemId, Object propertyId) {
+                    History v = (History) itemId;
+                    return v.getReason() == null ? "null" : translate(v.getReason());
+                }
+
+                @Override
+                public Class<String> getType() {
+                    return String.class;
+                }
+            });
+        }
+        List<String> fieldList = new ArrayList<>();
+        //Add specified fields
+        fieldList.addAll(Arrays.asList(fields));
+        if (showVersionFields) {
+            //Add default fields
+            fieldList.add("version");
+            fieldList.add("modifier");
+            fieldList.add("modificationDate");
+            fieldList.add("modificationReason");
+        }
+        grid.setColumns(fieldList.toArray());
+        if (showVersionFields) {
+            Grid.Column version = grid.getColumn("version");
+            version.setHeaderCaption("Version");
+            Grid.Column mod = grid.getColumn("modifier");
+            mod.setHeaderCaption("Modifier");
+            Grid.Column modDate = grid.getColumn("modificationDate");
+            modDate.setHeaderCaption("Modification Date");
+            Grid.Column modReason = grid.getColumn("modificationReason");
+            modReason.setHeaderCaption("Modification Reason");
+        }
+        if (sortByField != null && !sortByField.trim().isEmpty()) {
+            wrapperCont.sort(new Object[]{sortByField}, new boolean[]{true});
+        }
+        grid.setSizeFull();
+        return grid;
+    }
+
+    private Component createStepHistoryTable(String title,
+            List<History> historyItems, boolean showVersionFields) {
+        Grid grid = getHistoryTable(title, historyItems, null,
+                showVersionFields,
+                "text", "expectedResult", "notes");
+        Grid.Column text = grid.getColumn("text");
+        text.setHeaderCaption("Step Text");
+        Grid.Column result = grid.getColumn("expectedResult");
+        result.setHeaderCaption("Expected Result");
+        Grid.Column notes = grid.getColumn("notes");
+        notes.setHeaderCaption("Notes");
+        return grid;
+    }
+
+    private Component createRequirementHistoryTable(String title,
+            List<History> historyItems) {
+        Grid grid = getHistoryTable(title, historyItems, "uniqueId", true,
+                "uniqueId", "description", "notes");
         Grid.Column uniqueId = grid.getColumn("uniqueId");
         uniqueId.setHeaderCaption("ID");
-        Grid.Column version = grid.getColumn("version");
-        version.setHeaderCaption("Version");
         Grid.Column description = grid.getColumn("description");
         description.setHeaderCaption("Description");
-        wrapperCont.sort(new Object[]{"uniqueId"}, new boolean[]{true});
-        grid.setSizeFull();
         return grid;
     }
 
@@ -2642,6 +2861,179 @@ public class ValidationManagerUI extends UI implements VMUI {
         tm.center();
         tm.setSizeFull();
         addWindow(tm);
+    }
+
+//    private void createBaselineMenu(ContextMenu menu) {
+//        //TODO:
+//    }
+    private AbstractSelect getRequirementSelectionComponent() {
+        Project p = getParentProject();
+        List<Requirement> reqs = Tool.extractRequirements(p);
+        Collections.sort(reqs, (Requirement o1, Requirement o2)
+                -> o1.getUniqueId().compareTo(o2.getUniqueId()));
+        BeanItemContainer<Requirement> requirementContainer
+                = new BeanItemContainer<>(Requirement.class,
+                        reqs);
+        TwinColSelect requirements
+                = new TwinColSelect("Linked Requirements");
+        requirements.setItemCaptionPropertyId("uniqueId");
+        requirements.setContainerDataSource(requirementContainer);
+        requirements.setRows(5);
+        requirements.setLeftColumnCaption("Available Requirements");
+        requirements.setRightColumnCaption("Linked Requirements");
+        return requirements;
+    }
+
+    private Component getDisplayRequirementList(String title,
+            List<Requirement> requirementList) {
+        Grid grid = new Grid(title);
+        BeanItemContainer<Requirement> children
+                = new BeanItemContainer<>(Requirement.class
+                );
+        children.addAll(requirementList);
+        grid.setContainerDataSource(children);
+        grid.setColumns("uniqueId");
+        Grid.Column uniqueId = grid.getColumn("uniqueId");
+        uniqueId.setHeaderCaption("ID");
+        grid.setHeightMode(HeightMode.ROW);
+        grid.setHeightByRows(children.size() > 5 ? 5 : children.size());
+        grid.setSizeFull();
+        children.sort(new Object[]{"uniqueId"}, new boolean[]{true});
+        return grid;
+    }
+
+    private void addDeleteExecution(ContextMenu menu) {
+        ContextMenu.ContextMenuItem create
+                = menu.addItem("Delete Execution", DELETE_ICON);
+        create.setEnabled(checkRight("testplan.planning"));
+        create.addItemClickListener(
+                (ContextMenu.ContextMenuItemClickEvent event) -> {
+                    //Delete only if no execution has been started yet.
+                    TCEExtraction tcee = extractTCE(tree.getValue());
+                    TestCaseExecution tce = tcee.getTestCaseExecution();
+                    if (tce == null) {
+                        LOG.info("Invalid");
+                        Notification.show("Unable to delete!",
+                                "Error extracting information",
+                                Notification.Type.ERROR_MESSAGE);
+                    } else {
+                        TestCase tc = tcee.getTestCase();
+                        TestCaseExecutionServer tces
+                        = new TestCaseExecutionServer(tce);
+                        //Check that it's not being executed yet
+                        boolean canDelete = true;
+                        for (ExecutionStep es : tces.getExecutionStepList()) {
+                            if (tc == null || Objects.equals(es.getStep().getTestCase()
+                                    .getId(), tc.getId())) {
+                                if (es.getResultId() != null
+                                && es.getResultId().getResultName()
+                                        .equals("result.pending")) {
+                                    Notification.show("Unable to delete!",
+                                            "There is a result present in the execution.",
+                                            Notification.Type.ERROR_MESSAGE);
+                                    //It has a result other than pending.
+                                    canDelete = false;
+                                }
+                                if (!es.getExecutionStepHasAttachmentList()
+                                        .isEmpty()) {
+                                    //It has a result other than pending.
+                                    Notification.show("Unable to delete!",
+                                            "There are attachment present in the execution.",
+                                            Notification.Type.ERROR_MESSAGE);
+                                    canDelete = false;
+                                }
+                                if (!es.getExecutionStepHasIssueList()
+                                        .isEmpty()) {
+                                    //It has a result other than pending.
+                                    Notification.show("Unable to delete!",
+                                            "There are issues present in the execution.",
+                                            Notification.Type.ERROR_MESSAGE);
+                                    canDelete = false;
+                                }
+                                if (!canDelete) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (!canDelete) {
+                            MessageBox prompt = MessageBox.createQuestion()
+                                    .withCaption("Want to delete even with identified issues?")
+                                    .withMessage("There are attachment(s), issue(s) and/or comment(s) present in the execution.")
+                                    .withYesButton(() -> {
+                                        try {
+                                            if (tc != null) {
+                                                tces.removeTestCase(tc);
+                                            } else {
+                                                List<TestCase> toDelete = new ArrayList<>();
+                                                tces.getExecutionStepList().forEach(es -> {
+                                                    try {
+                                                        toDelete.add(es.getStep().getTestCase());
+                                                    } catch (Exception ex) {
+                                                        LOG.log(Level.SEVERE, null, ex);
+                                                    }
+                                                });
+                                                toDelete.forEach(t -> {
+                                                    try {
+                                                        tces.removeTestCase(t);
+                                                    } catch (Exception ex) {
+                                                        LOG.log(Level.SEVERE, null, ex);
+                                                    }
+                                                });
+                                                new TestCaseExecutionJpaController(DataBaseManager
+                                                        .getEntityManagerFactory())
+                                                        .destroy(tce.getId());
+                                            }
+                                            updateProjectList();
+                                            updateScreen();
+                                            displayObject(tces.getEntity());
+                                        } catch (Exception ex) {
+                                            LOG.log(Level.SEVERE, null, ex);
+                                        }
+                                    },
+                                            ButtonOption.focus(),
+                                            ButtonOption
+                                                    .icon(VaadinIcons.CHECK))
+                                    .withNoButton(() -> {
+                                        displayObject(tces.getEntity());
+                                    },
+                                            ButtonOption
+                                                    .icon(VaadinIcons.CLOSE));
+                            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                            prompt.open();
+                        }
+                        if (canDelete) {
+                            try {
+                                if (tc != null) {
+                                    tces.removeTestCase(tc);
+                                } else {
+                                    ExecutionStepJpaController c
+                                    = new ExecutionStepJpaController(DataBaseManager
+                                            .getEntityManagerFactory());
+                                    tces.getExecutionStepList().forEach(es -> {
+                                        try {
+                                            c.destroy(es.getExecutionStepPK());
+                                        } catch (IllegalOrphanException | NonexistentEntityException ex) {
+                                            LOG.log(Level.SEVERE, null, ex);
+                                        }
+                                    });
+                                    new TestCaseExecutionJpaController(DataBaseManager
+                                            .getEntityManagerFactory())
+                                            .destroy(tce.getId());
+                                }
+                                updateProjectList();
+                                updateScreen();
+                                displayObject(tces.getEntity());
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, null, ex);
+                            }
+                        } else {
+                            Notification.show("Unable to delete!",
+                                    "There are issues present in the execution.",
+                                    Notification.Type.ERROR_MESSAGE);
+                        }
+                    }
+                });
+
     }
 
     public class TCEExtraction {
@@ -2679,6 +3071,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     addWindow(new ExecutionDashboard(extractTCE(tree
                             .getValue())));
                 });
+
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
@@ -2746,7 +3139,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             sb.append(s).append("\n");
                         }
                     } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
                 } else {
                     LOG.warning("Invalid configuration for OpenOffice");
@@ -2755,5 +3148,71 @@ public class ValidationManagerUI extends UI implements VMUI {
                 LOG.warning("Missing configuration for Open Office!");
             }
         }
+    }
+
+    private void handleVerioning(Object o, Runnable r) {
+        if (o instanceof Versionable) {
+            Versionable ao = (Versionable) o;
+            if (Versionable.auditable(ao)) {
+                //Set user changing to the current user
+                ao.setModifierId(getUser().getId());
+                //Now check the level of the change
+                CHANGE_LEVEL level = CHANGE_LEVEL.MINOR;
+                History latest = ao.getHistoryList().get(ao.getHistoryList()
+                        .size() - 1);
+                if (ao.getMajorVersion() > latest.getMajorVersion()) {
+                    level = CHANGE_LEVEL.MAJOR;
+                } else if (ao.getMidVersion() > latest.getMidVersion()) {
+                    level = CHANGE_LEVEL.MODERATE;
+                }
+                switch (level) {
+                    case MAJOR:
+                    //Fall thru
+                    case MODERATE:
+                    //Fall thru
+                    default:
+                        showVersioningPrompt(ao, r);
+                        break;
+                }
+            }
+        }
+    }
+
+    private void showVersioningPrompt(Versionable ao, Runnable r) {
+        VerticalLayout layout = new VerticalLayout();
+        TextArea message = new TextArea();
+        message.setValue("Please document the reasons for the "
+                + "change to this item. This will be kep in "
+                + "the history of the record along with user "
+                + "and date the change is done.");
+        message.setReadOnly(true);
+        message.setSizeFull();
+        TextArea desc = new TextArea("Reason");
+        desc.setSizeFull();
+        layout.addComponent(message);
+        layout.addComponent(desc);
+        //Prompt user with reason for change
+        MessageBox prompt = MessageBox.createQuestion();
+        prompt.withCaption("Please provide a reason for the change.")
+                .withMessage(layout)
+                .withYesButton(() -> {
+                    ao.setReason(desc.getValue());
+                    r.run();
+                },
+                        ButtonOption.focus(),
+                        ButtonOption
+                                .icon(VaadinIcons.CHECK),
+                        ButtonOption.disable())
+                .withNoButton(ButtonOption
+                        .icon(VaadinIcons.CLOSE));
+        prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        desc.addTextChangeListener((TextChangeEvent event1) -> {
+            //Enable if there is a description change.
+            prompt.getButton(ButtonType.YES)
+                    .setEnabled(!event1.getText().trim().isEmpty());
+        });
+        prompt.getWindow().setWidth(50, Unit.PERCENTAGE);
+        prompt.getWindow().setHeight(50, Unit.PERCENTAGE);
+        prompt.open();
     }
 }

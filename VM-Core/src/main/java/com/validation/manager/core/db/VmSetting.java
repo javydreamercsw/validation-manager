@@ -1,24 +1,27 @@
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.api.history.Auditable;
-import com.validation.manager.core.db.mapped.Versionable;
+import com.validation.manager.core.api.history.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
@@ -76,7 +79,7 @@ public class VmSetting extends Versionable implements Serializable {
     @Auditable
     @Column(name = "string_val")
     private String stringVal;
-    @ManyToMany(mappedBy = "vmSettingList")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmSettingId")
     private List<History> historyList;
 
     public VmSetting() {
@@ -156,9 +159,8 @@ public class VmSetting extends Versionable implements Serializable {
         return "com.validation.manager.core.db.VmSetting[ id=" + id + " ]";
     }
 
-    /**
-     * @return the historyList
-     */
+    @XmlTransient
+    @JsonIgnore
     @Override
     public List<History> getHistoryList() {
         return historyList;

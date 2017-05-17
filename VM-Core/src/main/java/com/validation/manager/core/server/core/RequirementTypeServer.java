@@ -56,6 +56,7 @@ public final class RequirementTypeServer extends RequirementType
         target.setName(source.getName());
         target.setId(source.getId());
         target.setRequirementList(source.getRequirementList());
+        target.setLevel(source.getLevel());
     }
 
     @Override

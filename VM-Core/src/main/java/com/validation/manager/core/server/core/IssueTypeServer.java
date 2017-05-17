@@ -12,20 +12,19 @@ import com.validation.manager.core.db.controller.IssueTypeJpaController;
 public class IssueTypeServer extends IssueType
         implements EntityServer<IssueType> {
 
-    private static final IssueTypeJpaController c
-            = new IssueTypeJpaController(DataBaseManager.getEntityManagerFactory());
-
     @Override
     public int write2DB() throws Exception {
         if (getId() == null) {
             IssueType i = new IssueType();
             update(i, this);
-            c.create(i);
+            new IssueTypeJpaController(DataBaseManager
+                    .getEntityManagerFactory()).create(i);
             update(this, i);
         } else {
             IssueType i = getEntity();
             update(i, this);
-            c.edit(i);
+            new IssueTypeJpaController(DataBaseManager
+                    .getEntityManagerFactory()).edit(i);
             update(this, i);
         }
         return getId();
@@ -33,7 +32,8 @@ public class IssueTypeServer extends IssueType
 
     @Override
     public IssueType getEntity() {
-        return c.findIssueType(getId());
+        return new IssueTypeJpaController(DataBaseManager
+                .getEntityManagerFactory()).findIssueType(getId());
     }
 
     @Override
@@ -56,7 +56,8 @@ public class IssueTypeServer extends IssueType
      */
     public static IssueType getType(String typename) {
         IssueType result = null;
-        for (IssueType type : c.findIssueTypeEntities()) {
+        for (IssueType type : new IssueTypeJpaController(DataBaseManager
+                .getEntityManagerFactory()).findIssueTypeEntities()) {
             if (type.getTypeName().equals(typename)) {
                 result = type;
                 break;

@@ -9,7 +9,7 @@ import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.mapped.Versionable;
+import com.validation.manager.core.api.history.Versionable;
 import com.validation.manager.core.server.core.VMUserServer;
 import static com.validation.manager.core.tool.MD5.encrypt;
 import static com.validation.manager.test.TestHelper.deleteUser;

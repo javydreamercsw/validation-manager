@@ -265,77 +265,80 @@ public abstract class ExecutionScreen extends AbstractProvider {
     @Override
     public void update() {
         testCaseTree.removeAllItems();
-        ProjectServer.getProjects().forEach(p -> {
-            if (p.getParentProjectId() == null) {
-                testCaseTree.addItem(new Object[]{p.getName(),
-                    "", "",}, "p" + p.getId());
-                testCaseTree.setItemIcon("p" + p.getId(),
-                        ValidationManagerUI.PROJECT_ICON);
-                p.getProjectList().forEach(sp -> {
-                    //Add subprojects
-                    testCaseTree.addItem(new Object[]{sp.getName(),
-                        "", "",}, "p" + sp.getId());
-                    testCaseTree.setParent("p" + sp.getId(), "p" + p.getId());
-                    testCaseTree.setItemIcon("p" + sp.getId(),
+        if (ValidationManagerUI.getInstance().getUser() != null) {
+            ProjectServer.getProjects().forEach(p -> {
+                if (p.getParentProjectId() == null) {
+                    testCaseTree.addItem(new Object[]{p.getName(),
+                        "", "",}, "p" + p.getId());
+                    testCaseTree.setItemIcon("p" + p.getId(),
                             ValidationManagerUI.PROJECT_ICON);
-                    //Add applicable Executions
-                    Map<Integer, ExecutionStep> tests = new HashMap<>();
-                    sp.getTestProjectList().forEach(test -> {
-                        test.getTestPlanList().forEach(tp -> {
-                            tp.getTestCaseList().forEach(testCase -> {
-                                List<Integer> tcids = new ArrayList<>();
-                                testCase.getStepList().forEach(s -> {
-                                    s.getExecutionStepList().forEach(es -> {
-                                        TestCaseExecution tce = es.getTestCaseExecution();
-                                        testCaseTree.addItem(new Object[]{tce.getName(),
-                                            "", "",}, "tce" + tce.getId());
-                                        testCaseTree.setParent("tce" + tce.getId(),
-                                                "p" + sp.getId());
-                                        testCaseTree.setItemIcon("tce" + tce.getId(),
-                                                ValidationManagerUI.EXECUTION_ICON);
-                                        if (this instanceof QualityScreenProvider
-                                                && es.getLocked()
-                                                || es.getAssignee().getId()
-                                                        .equals(ValidationManagerUI.getInstance()
-                                                                .getUser().getId())) {
-                                            TestCase tc = es.getStep().getTestCase();
-                                            if (!tcids.contains(tc.getId())) {
-                                                tcids.add(tc.getId());
-                                                DateTimeFormatter format
-                                                        = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
-                                                LocalDateTime time
-                                                        = LocalDateTime.ofInstant(es.getAssignedTime()
-                                                                .toInstant(), ZoneId.systemDefault());
-                                                String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
-                                                        + "-" + es.getStep().getStepPK().getId()
-                                                        + "-" + tc.getId();
-                                                testCaseTree.addItem(new Object[]{tc.getName(),
-                                                    tc.getSummary(), format.format(time),},
-                                                        key);
-                                                testCaseTree.setParent(key, "tce"
-                                                        + tce.getId());
-                                                testCaseTree.setItemIcon(key,
-                                                        ValidationManagerUI.TEST_ICON);
-                                                testCaseTree.setChildrenAllowed(key, false);
+                    p.getProjectList().forEach(sp -> {
+                        //Add subprojects
+                        testCaseTree.addItem(new Object[]{sp.getName(),
+                            "", "",}, "p" + sp.getId());
+                        testCaseTree.setParent("p" + sp.getId(), "p" + p.getId());
+                        testCaseTree.setItemIcon("p" + sp.getId(),
+                                ValidationManagerUI.PROJECT_ICON);
+                        //Add applicable Executions
+                        Map<Integer, ExecutionStep> tests = new HashMap<>();
+                        sp.getTestProjectList().forEach(test -> {
+                            test.getTestPlanList().forEach(tp -> {
+                                tp.getTestCaseList().forEach(testCase -> {
+                                    List<Integer> tcids = new ArrayList<>();
+                                    testCase.getStepList().forEach(s -> {
+                                        s.getExecutionStepList().forEach(es -> {
+                                            TestCaseExecution tce = es.getTestCaseExecution();
+                                            testCaseTree.addItem(new Object[]{tce.getName(),
+                                                "", "",}, "tce" + tce.getId());
+                                            testCaseTree.setParent("tce" + tce.getId(),
+                                                    "p" + sp.getId());
+                                            testCaseTree.setItemIcon("tce" + tce.getId(),
+                                                    ValidationManagerUI.EXECUTION_ICON);
+                                            if (this instanceof QualityScreenProvider
+                                                    && es.getLocked()
+                                                    || (es.getAssignee() != null
+                                                    && es.getAssignee().getId()
+                                                            .equals(ValidationManagerUI.getInstance()
+                                                                    .getUser().getId()))) {
+                                                TestCase tc = es.getStep().getTestCase();
+                                                if (!tcids.contains(tc.getId())) {
+                                                    tcids.add(tc.getId());
+                                                    DateTimeFormatter format
+                                                            = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
+                                                    LocalDateTime time
+                                                            = LocalDateTime.ofInstant(es.getAssignedTime()
+                                                                    .toInstant(), ZoneId.systemDefault());
+                                                    String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
+                                                            + "-" + es.getStep().getStepPK().getId()
+                                                            + "-" + tc.getId();
+                                                    testCaseTree.addItem(new Object[]{tc.getName(),
+                                                        tc.getSummary(), format.format(time),},
+                                                            key);
+                                                    testCaseTree.setParent(key, "tce"
+                                                            + tce.getId());
+                                                    testCaseTree.setItemIcon(key,
+                                                            ValidationManagerUI.TEST_ICON);
+                                                    testCaseTree.setChildrenAllowed(key, false);
+                                                }
                                             }
-                                        }
+                                        });
                                     });
+                                    tcids.clear();
                                 });
-                                tcids.clear();
                             });
                         });
-                    });
-                    //Make columns autofit
-                    int count = 0;
-                    for (Object id : testCaseTree.getVisibleColumns()) {
-                        if (count < 2) {
-                            testCaseTree.setColumnExpandRatio(id, 1.0f);
+                        //Make columns autofit
+                        int count = 0;
+                        for (Object id : testCaseTree.getVisibleColumns()) {
+                            if (count < 2) {
+                                testCaseTree.setColumnExpandRatio(id, 1.0f);
+                            }
+                            count++;
                         }
-                        count++;
-                    }
-                    testCaseTree.setSizeFull();
-                });
-            }
-        });
+                        testCaseTree.setSizeFull();
+                    });
+                }
+            });
+        }
     }
 }

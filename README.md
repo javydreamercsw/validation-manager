@@ -2,6 +2,10 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/390b17b2843d4f29afde2f0194252b99)](https://www.codacy.com/app/javydreamercsw/validation-manager?utm_source=github.com&utm_medium=referral&utm_content=javydreamercsw/validation-manager&utm_campaign=badger)
 [![Build Status](https://travis-ci.org/javydreamercsw/validation-manager.svg?branch=master)](https://travis-ci.org/javydreamercsw/validation-manager)
+<a href="https://scan.coverity.com/projects/javydreamercsw-validation-manager">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/12634/badge.svg"/>
+</a>
 
 
 Welcome to Validation Manager Repository!

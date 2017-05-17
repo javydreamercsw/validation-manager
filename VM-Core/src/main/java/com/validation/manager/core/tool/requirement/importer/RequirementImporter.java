@@ -12,7 +12,8 @@ import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import static com.validation.manager.core.server.core.ProjectServer.getRequirements;
+import com.validation.manager.core.server.core.RequirementSpecNodeServer;
+import com.validation.manager.core.tool.Tool;
 import com.validation.manager.core.tool.message.MessageHandler;
 import com.validation.manager.core.tool.table.extractor.TableExtractor;
 import java.io.File;
@@ -86,7 +87,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         List<Requirement> importedRequirements = new ArrayList<>();
         try {
             importedRequirements.addAll(importFile(false));
-        } catch (UnsupportedOperationException | VMException ex) {
+        }
+        catch (UnsupportedOperationException | VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
         return importedRequirements;
@@ -219,19 +221,23 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                     queue.put(requirement.getUniqueId(),
                                             requirement);
                                 }
-                            } catch (IllegalOrphanException | NonexistentEntityException ex) {
+                            }
+                            catch (IllegalOrphanException | NonexistentEntityException ex) {
                                 Exceptions.printStackTrace(ex);
                             }
                         }
                     }
-                } catch (InvalidFormatException | IOException ex) {
+                }
+                catch (InvalidFormatException | IOException ex) {
                     LOG.log(Level.SEVERE, null, ex);
-                } finally {
+                }
+                finally {
                     try {
                         if (inp != null) {
                             inp.close();
                         }
-                    } catch (IOException ex) {
+                    }
+                    catch (IOException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }
@@ -296,7 +302,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                             }
                         }
                     }
-                } catch (IOException | ClassNotFoundException ex) {
+                }
+                catch (IOException | ClassNotFoundException ex) {
                     Exceptions.printStackTrace(ex);
                 }
             } else {
@@ -318,7 +325,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             IllegalOrphanException, NonexistentEntityException {
         Project project = requirement.getRequirementSpecNode()
                 .getRequirementSpec().getProject();
-        List<Requirement> existing = getRequirements(project);
+        List<Requirement> existing = Tool.extractRequirements(project);
         LOG.log(Level.INFO, "Processing: {0}", requirement.getUniqueId());
         boolean exists = false;
         for (Requirement r : existing) {
@@ -365,12 +372,16 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             for (Requirement r : queue.values()) {
                 processRequirement(r);
             }
+            RequirementSpecNodeServer rsns = new RequirementSpecNodeServer(rsn);
+            rsns.update(rsn, rsns);
             queue.clear();
             return true;
-        } catch (NonexistentEntityException ex) {
+        }
+        catch (NonexistentEntityException ex) {
             Exceptions.printStackTrace(ex);
             throw new RequirementImportException(ex.getLocalizedMessage());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Exceptions.printStackTrace(ex);
             throw new RequirementImportException(ex.getLocalizedMessage());
         }
@@ -402,9 +413,11 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         try (FileOutputStream out = new FileOutputStream(template)) {
             wb.write(out);
             out.close();
-        } catch (FileNotFoundException e) {
+        }
+        catch (FileNotFoundException e) {
             LOG.log(Level.SEVERE, null, e);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             LOG.log(Level.SEVERE, null, e);
         }
         return template;
@@ -414,9 +427,11 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         try {
             File file = exportTemplate();
             System.out.println(file.getAbsolutePath());
-        } catch (FileNotFoundException | InvalidFormatException ex) {
+        }
+        catch (FileNotFoundException | InvalidFormatException ex) {
             LOG.log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
     }

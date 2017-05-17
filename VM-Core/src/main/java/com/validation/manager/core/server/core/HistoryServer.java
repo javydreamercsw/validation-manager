@@ -9,8 +9,17 @@ import com.validation.manager.core.db.controller.HistoryJpaController;
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-public class HistoryServer extends History
+public final class HistoryServer extends History
         implements EntityServer<History> {
+
+    public HistoryServer() {
+        super();
+    }
+
+    public HistoryServer(History history) {
+        super(history.getId());
+        update();
+    }
 
     @Override
     public int write2DB() throws Exception {
@@ -38,17 +47,20 @@ public class HistoryServer extends History
 
     @Override
     public void update(History target, History source) {
-        target.setRequirementList(source.getRequirementList());
+        target.setBaselineList(source.getBaselineList());
+        target.setExecutionStepList(source.getExecutionStepList());
+        target.setHistoryFieldList(source.getHistoryFieldList());
         target.setId(source.getId());
-        target.setModificationTime(source.getModificationTime());
-        target.setModifierId(source.getModifierId());
-        target.setReason(source.getReason());
         target.setMajorVersion(source.getMajorVersion());
         target.setMidVersion(source.getMidVersion());
         target.setMinorVersion(source.getMinorVersion());
-        target.setHistoryFieldList(source.getHistoryFieldList());
-        target.setVmSettingList(source.getVmSettingList());
-        target.setProjectList(source.getProjectList());
+        target.setModificationTime(source.getModificationTime());
+        target.setModifierId(source.getModifierId());
+        target.setReason(source.getReason());
+        target.setProjectId(source.getProjectId());
+        target.setStep(source.getStep());
+        target.setRequirementId(source.getRequirementId());
+        target.setVmSettingId(source.getVmSettingId());
     }
 
     @Override
