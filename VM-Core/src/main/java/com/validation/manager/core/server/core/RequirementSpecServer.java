@@ -37,7 +37,7 @@ public final class RequirementSpecServer extends RequirementSpec
 
     public RequirementSpecServer(RequirementSpec rs) {
         super(rs.getRequirementSpecPK());
-        update((RequirementSpecServer) this, rs);
+        update();
     }
 
     /**
