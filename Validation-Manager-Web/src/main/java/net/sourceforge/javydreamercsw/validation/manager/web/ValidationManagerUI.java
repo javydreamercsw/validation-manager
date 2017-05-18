@@ -2704,8 +2704,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = new GeneratedPropertyContainer(histories);
         histories.addAll(historyItems);
         grid.setContainerDataSource(wrapperCont);
-        grid.setHeightMode(HeightMode.ROW);
-        grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
+        if (wrapperCont.size() > 0) {
+            grid.setHeightMode(HeightMode.ROW);
+            grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
+        }
         for (String field : fields) {
             wrapperCont.addGeneratedProperty(field,
                     new PropertyValueGenerator<String>() {
@@ -2854,13 +2856,17 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayTraceMatrix(Project project) {
-        VMWindow tm = new VMWindow("Trace Matrix");
-        Panel content = new Panel(new TraceMatrix(project));
-        content.setSizeFull();
-        tm.setContent(content);
-        tm.center();
-        tm.setSizeFull();
-        addWindow(tm);
+        VMWindow w = new VMWindow("Trace Matrix");
+        TraceMatrix tm = new TraceMatrix(project);
+        VerticalSplitPanel vs = new VerticalSplitPanel();
+        vs.setSplitPosition(10, Unit.PERCENTAGE);
+        vs.setFirstComponent(tm.getMenu());
+        vs.setSecondComponent(tm);
+        vs.setSizeFull();
+        w.setContent(vs);
+        w.center();
+        w.setSizeFull();
+        addWindow(w);
     }
 
 //    private void createBaselineMenu(ContextMenu menu) {
