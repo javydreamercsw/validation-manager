@@ -137,7 +137,7 @@ public class TraceMatrix extends TreeTable {
                 label.setIcon(VMUI.TEST_ICON);
                 Object rId = buildId(r);
                 Object tcID = buildId(tc, rId);
-                Object esId = buildId(es);
+                Object esId = buildId(es, rId);
                 if (!containsId(tcID)) {
                     addItem(new Object[]{"",
                         label, new Label(), new Label()}, tcID);
@@ -202,7 +202,8 @@ public class TraceMatrix extends TreeTable {
     public Component getMenu() {
         HorizontalLayout hl = new HorizontalLayout();
         ComboBox baseline = new ComboBox("Filter by Baseline");
-        baseline.setReadOnly(true);
+        baseline.setTextInputAllowed(false);
+        baseline.setNewItemsAllowed(false);
         Tool.extractRequirements(p).forEach(r -> {
             r.getHistoryList().forEach(h -> {
                 h.getBaselineList().forEach(b -> {
@@ -216,9 +217,18 @@ public class TraceMatrix extends TreeTable {
         baseline.addValueChangeListener(event -> {
             removeAllItems();
             Baseline b = (Baseline) baseline.getValue();
-            b.getHistoryList().forEach(h -> {
-                addRequirement(h.getRequirementId());
-            });
+            if (b == null) {
+                //None selected, no filtering
+                Tool.extractRequirements(p).forEach((r) -> {
+                    if (r.getParentRequirementId() == null) {
+                        addRequirement(r);
+                    }
+                });
+            } else {
+                b.getHistoryList().forEach(h -> {
+                    addRequirement(h.getRequirementId());
+                });
+            }
         });
         hl.addComponent(baseline);
         return hl;
