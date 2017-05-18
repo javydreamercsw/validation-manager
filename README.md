@@ -27,8 +27,7 @@ This is a Netbeans Project using Maven as build mechanism. Installing Netbeans 8
 ### Contribution guidelines ###
 
 * Writing tests: New code needs related test cases.
-* Code review
-* Other guidelines
+* Translations: You can contribute translating this application [here](https://poeditor.com/join/project/SNB1elXqmH)
 
 ### Who do I talk to? ###
 
