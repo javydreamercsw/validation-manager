@@ -15,6 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
         <openoffice.version>4.1.2</openoffice.version>
+        <vaadin.version>7.7.9</vaadin.version>
     </properties>
     <repositories>
         <repository>
@@ -198,6 +199,7 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <debug>false</debug>
                 </configuration>
             </plugin>
             <!-- As we are doing "inplace" GWT compilation, ensure the widgetset -->
@@ -252,6 +254,7 @@
                     <style>OBF</style>
                     <strict>true</strict>
                     <runTarget>http://localhost:8080/Validation-Manager-Web</runTarget>
+                    <logLevel>ERROR</logLevel>
                 </configuration>
                 <executions>
                     <execution>

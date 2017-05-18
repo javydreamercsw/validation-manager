@@ -201,7 +201,8 @@ public class TraceMatrix extends TreeTable {
 
     public Component getMenu() {
         HorizontalLayout hl = new HorizontalLayout();
-        ComboBox baseline = new ComboBox("Filter by Baseline");
+        ComboBox baseline = new ComboBox(ValidationManagerUI.RB
+                .getString("baseline.filter"));
         baseline.setTextInputAllowed(false);
         baseline.setNewItemsAllowed(false);
         Tool.extractRequirements(p).forEach(r -> {

@@ -33,8 +33,10 @@ import org.vaadin.teemu.wizards.WizardStep;
 public class AssignUserStep implements WizardStep {
 
     private final Object key;
-    private final TreeTable testTree = new TreeTable("Available Tests");
-    private final OptionGroup userGroup = new OptionGroup("Available Testers");
+    private final TreeTable testTree
+            = new TreeTable(ValidationManagerUI.RB.getString("available.tests"));
+    private final OptionGroup userGroup
+            = new OptionGroup(ValidationManagerUI.RB.getString("available.tester"));
     private TestCaseExecutionServer tce = null;
     private TestCaseServer tc = null;
     private static final Logger LOG
@@ -48,7 +50,7 @@ public class AssignUserStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return "Assign Test Case(s)";
+        return ValidationManagerUI.RB.getString("assign.test.case");
     }
 
     @Override
@@ -69,8 +71,10 @@ public class AssignUserStep implements WizardStep {
                         testCases.add(es.getStep().getTestCase());
                     });
         }
-        testTree.addContainerProperty("Name", TreeTableCheckBox.class, "");
-        testTree.addContainerProperty("Description", String.class, "");
+        testTree.addContainerProperty(ValidationManagerUI.RB.
+                getString("general.name"), TreeTableCheckBox.class, "");
+        testTree.addContainerProperty(ValidationManagerUI.RB.
+                getString("general.description"), String.class, "");
         testTree.setWidth("20em");
         testCases.forEach((t) -> {
             testTree.addItem(new Object[]{new TreeTableCheckBox(testTree,
@@ -105,7 +109,8 @@ public class AssignUserStep implements WizardStep {
         List<Integer> testCaseIds = new ArrayList<>();
         for (Object id : testTree.getItemIds()) {
             Item item = testTree.getItem(id);
-            Object val = item.getItemProperty("Name").getValue();
+            Object val = item.getItemProperty(ValidationManagerUI.RB.
+                    getString("general.name")).getValue();
             if (val instanceof TreeTableCheckBox) {
                 TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
                 if (ttcb.getValue()) {
@@ -115,8 +120,8 @@ public class AssignUserStep implements WizardStep {
             }
         }
         if (!selectedTestCase) {
-            Notification.show("Unable to proceed",
-                    "Please select at least one Test Case prior to continuing.",
+            Notification.show(ValidationManagerUI.RB.getString("unable.to.proceed"),
+                    ValidationManagerUI.RB.getString("select.test.case.message"),
                     Notification.Type.WARNING_MESSAGE);
             return false;
         }

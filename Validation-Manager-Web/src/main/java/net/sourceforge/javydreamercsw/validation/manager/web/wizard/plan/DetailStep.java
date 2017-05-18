@@ -36,27 +36,30 @@ public class DetailStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return "Add Details";
+        return ValidationManagerUI.RB.getString("add.details");
     }
 
     @Override
     public Component getContent() {
-        Panel form = new Panel("Execution Detail");
+        Panel form = new Panel(ValidationManagerUI.RB.getString("execution.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(TestCaseExecution.class);
         binder.setItemDataSource(tce);
-        TextArea name = new TextArea("Name");
+        TextArea name = new TextArea(ValidationManagerUI.RB.
+                getString("general.name"));
         name.setConverter(new ByteToStringConverter());
         binder.bind(name, "name");
         layout.addComponent(name);
-        TextArea scope = new TextArea("Scope");
+        TextArea scope = new TextArea(ValidationManagerUI.RB.
+                getString("general.scope"));
         scope.setConverter(new ByteToStringConverter());
         binder.bind(scope, "scope");
         layout.addComponent(scope);
         if (tce.getId() != null) {
-            TextArea conclusion = new TextArea("Conclusion");
+            TextArea conclusion = new TextArea(ValidationManagerUI.RB.
+                    getString("general.comclusion"));
             conclusion.setConverter(new ByteToStringConverter());
             binder.bind(conclusion, "conclusion");
             layout.addComponent(conclusion);

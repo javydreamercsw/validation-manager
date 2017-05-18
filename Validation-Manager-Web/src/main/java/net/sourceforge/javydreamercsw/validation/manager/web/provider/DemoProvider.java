@@ -22,12 +22,11 @@ public class DemoProvider extends AbstractProvider {
         VmUserJpaController controller
                 = new VmUserJpaController(DataBaseManager
                         .getEntityManagerFactory());
-        layout.addComponent(new Label("<h1>Welcome to "
-                + "Validation Manager Demo instance</h1>",
+        layout.addComponent(new Label("<h1>" + ValidationManagerUI.RB
+                .getString("demo.tab.title") + "</h1>",
                 ContentMode.HTML));
-        layout.addComponent(new Label("Below you can find the "
-                + "various accounts that exist in the demo so "
-                + "you can explore."));
+        layout.addComponent(new Label(ValidationManagerUI.RB
+                .getString("demo.tab.message")));
         StringBuilder sb = new StringBuilder("<ul>");
         controller.findVmUserEntities().stream().filter((u)
                 -> (u.getId() < 1000)).forEachOrdered((u) -> {
@@ -36,11 +35,17 @@ public class DemoProvider extends AbstractProvider {
                 if (u.getPassword() != null
                         && u.getPassword().equals(MD5
                                 .encrypt(u.getUsername()))) {
-                    sb.append("<li><b>User name:</b> ")
+                    sb.append("<li><b>").append(ValidationManagerUI.RB
+                            .getString("general.username")).append(":</b> ")
+                            .append(u.getUsername()).append(", <b>")
+                            .append(ValidationManagerUI.RB
+                                    .getString("general.password"))
+                            .append(":</b> ")
                             .append(u.getUsername())
-                            .append(", <b>Password:</b> ")
-                            .append(u.getUsername())
-                            .append(" <b>Role</b>: ")
+                            .append(" <b>")
+                            .append(ValidationManagerUI.RB
+                                    .getString("general.role"))
+                            .append(":</b> ")
                             .append(ValidationManagerUI.getInstance()
                                     .translate(u.getRoleList().get(0)
                                             .getDescription()))

@@ -36,8 +36,8 @@ public class AdminScreenProvider extends AbstractProvider {
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         sl.addComponent(split);
         //Build left side
-        Tree sTree = new Tree("Settings");
-        adminSheet.addTab(sl, "Settings");
+        Tree sTree = new Tree(ValidationManagerUI.RB.getString("general.settings"));
+        adminSheet.addTab(sl, ValidationManagerUI.RB.getString("general.settings"));
         VMSettingServer.getSettings().stream().map((s) -> {
             sTree.addItem(s);
             sTree.setChildrenAllowed(s, false);
@@ -71,41 +71,43 @@ public class AdminScreenProvider extends AbstractProvider {
     }
 
     private Component displaySetting(VmSetting s) {
-        Panel form = new Panel("Setting Detail");
+        Panel form = new Panel(ValidationManagerUI.RB.getString("setting.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
         binder.setItemDataSource(s);
-        Field<?> id = binder.buildAndBind("Setting", "setting");
+        Field<?> id = binder.buildAndBind(ValidationManagerUI.RB
+                .getString("general.setting"), "setting");
         layout.addComponent(id);
-        Field bool = binder.buildAndBind("Boolean Value", "boolVal");
+        Field bool = binder.buildAndBind(ValidationManagerUI.RB
+                .getString("bool.value"), "boolVal");
         bool.setSizeFull();
         layout.addComponent(bool);
-        Field integerVal = binder.buildAndBind("Integer Value", "intVal");
+        Field integerVal = binder.buildAndBind(ValidationManagerUI.RB.getString("int.value"), "intVal");
         integerVal.setSizeFull();
         layout.addComponent(integerVal);
-        Field longVal = binder.buildAndBind("Long Value", "longVal");
+        Field longVal = binder.buildAndBind(ValidationManagerUI.RB.getString("long.val"), "longVal");
         longVal.setSizeFull();
         layout.addComponent(longVal);
-        Field stringVal = binder.buildAndBind("String Value", "stringVal",
+        Field stringVal = binder.buildAndBind(ValidationManagerUI.RB.getString("string.val"), "stringVal",
                 TextArea.class);
         stringVal.setStyleName(ValoTheme.TEXTAREA_LARGE);
         stringVal.setSizeFull();
         layout.addComponent(stringVal);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(ValidationManagerUI.RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
         });
         //Editing existing one
-        Button update = new Button("Update");
+        Button update = new Button(ValidationManagerUI.RB.getString("general.update"));
         update.addClickListener((Button.ClickEvent event) -> {
             try {
                 binder.commit();
                 displaySetting(s);
             } catch (FieldGroup.CommitException ex) {
                 LOG.log(Level.SEVERE, null, ex);
-                Notification.show("Error updating record!",
+                Notification.show(ValidationManagerUI.RB.getString("general.error.record.creation"),
                         ex.getLocalizedMessage(),
                         Notification.Type.ERROR_MESSAGE);
             }

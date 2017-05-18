@@ -97,8 +97,8 @@ public final class ExecutionWindow extends VMWindow {
             public void wizardCompleted(WizardCompletedEvent event) {
                 if (reviewer) {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption("Do you want to release the test case?")
-                            .withMessage("Released test cases are commited and can no "
+                            .withCaption(ValidationManagerUI.RB.getString("release.test.case.title"))
+                            .withMessage(ValidationManagerUI.RB.getString("release.test.case.message")
                                     + "longer be modified.\nIt would be equivalent "
                                     + "to documenting in paper.")
                             .withYesButton(() -> {
@@ -127,10 +127,8 @@ public final class ExecutionWindow extends VMWindow {
                     prompt.open();
                 } else {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption("Do you want to lock the test case?")
-                            .withMessage("Locked test cases are commited and can no "
-                                    + "longer be modified.\nIt would be equivalent "
-                                    + "to documenting in paper.")
+                            .withCaption(ValidationManagerUI.RB.getString("lock.test.case.title"))
+                            .withMessage(ValidationManagerUI.RB.getString("lock.test.case.message"))
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)

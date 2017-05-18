@@ -53,8 +53,10 @@ public class QualityScreenProvider extends ExecutionScreen {
             for (ExecutionStep es : c.findExecutionStepEntities()) {
                 if (es.getLocked() && !es.getReviewed()) {
                     //It has been assigned but not started
-                    Notification.show("Quality Review Pending",
-                            "You have test case(s) pending review.",
+                    Notification.show(ValidationManagerUI.RB
+                            .getString("quality.review.pending.title"),
+                            ValidationManagerUI.RB
+                                    .getString("quality.review.pending.message"),
                             Notification.Type.TRAY_NOTIFICATION);
                     break;
                 }

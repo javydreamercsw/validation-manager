@@ -37,7 +37,8 @@ import net.sourceforge.javydreamercsw.validation.manager.web.quality.QualityScre
 public abstract class ExecutionScreen extends AbstractProvider {
 
     private ExecutionWindow executionWindow = null;
-    private final TreeTable testCaseTree = new TreeTable("Available Tests");
+    private final TreeTable testCaseTree
+            = new TreeTable(ValidationManagerUI.RB.getString("available.tests"));
 
     public ExecutionScreen() {
         testCaseTree.setAnimationsEnabled(true);
@@ -241,7 +242,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
         if (executionWindow == null) {
             executionWindow = new ExecutionWindow(executions, tcID,
                     this instanceof QualityScreenProvider);
-            executionWindow.setCaption("Test Execution");
+            executionWindow.setCaption(ValidationManagerUI.RB.getString("test.execution"));
             executionWindow.setVisible(true);
             executionWindow.setClosable(false);
             executionWindow.setResizable(false);

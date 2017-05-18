@@ -24,7 +24,8 @@ public class SelectTestCasesStep implements WizardStep {
 
     private final Project p;
     private final Wizard w;
-    private final TreeTable testTree = new TreeTable("Available Tests");
+    private final TreeTable testTree = new TreeTable(ValidationManagerUI.RB
+            .getString("available.tests"));
     private final List<Integer> projects = new ArrayList<>();
     private static final Logger LOG
             = Logger.getLogger(SelectTestCasesStep.class.getSimpleName());
@@ -36,7 +37,7 @@ public class SelectTestCasesStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return "Select Test Cases";
+        return ValidationManagerUI.RB.getString("select.test.case");
     }
 
     @Override
@@ -46,8 +47,10 @@ public class SelectTestCasesStep implements WizardStep {
         HorizontalLayout menu = new HorizontalLayout();
         if (p != null) {
             //Show the Test Plans for the selected project (including sub projects
-            testTree.addContainerProperty("Name", TreeTableCheckBox.class, "");
-            testTree.addContainerProperty("Description", String.class, "");
+            testTree.addContainerProperty(ValidationManagerUI.RB.
+                    getString("general.name"), TreeTableCheckBox.class, "");
+            testTree.addContainerProperty(ValidationManagerUI.RB.
+                    getString("general.description"), String.class, "");
             testTree.setWidth("20em");
             addProjectTestPlanning(testTree, p);
         }
@@ -66,8 +69,8 @@ public class SelectTestCasesStep implements WizardStep {
             LOG.log(Level.FINE, "Test Case: {0}", i);
         });
         if (testCases.isEmpty()) {
-            Notification.show("Unable to proceed",
-                    "Please select at least one Test Case prior to continuing.",
+            Notification.show(ValidationManagerUI.RB.getString("unable.to.proceed"),
+                    ValidationManagerUI.RB.getString("select.test.case.message"),
                     Notification.Type.WARNING_MESSAGE);
             return false;
         }
@@ -152,7 +155,8 @@ public class SelectTestCasesStep implements WizardStep {
                 if (id.startsWith("tc")) {
                     //Is a Test Case
                     Item item = testTree.getItem(id);
-                    Object val = item.getItemProperty("Name").getValue();
+                    Object val = item.getItemProperty(ValidationManagerUI.RB.
+                            getString("general.name")).getValue();
                     if (val instanceof TreeTableCheckBox) {
                         TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
                         if (ttcb.getValue()) {

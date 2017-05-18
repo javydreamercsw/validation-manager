@@ -15,7 +15,7 @@ public class SelectRequirementVersionStep implements WizardStep {
 
     private History h;
     private final Requirement r;
-    private final ComboBox history = new ComboBox("History");
+    private final ComboBox history = new ComboBox(java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.history"));
 
     public SelectRequirementVersionStep(Requirement r) {
         this.r = r;

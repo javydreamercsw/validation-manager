@@ -37,8 +37,9 @@ public class TesterScreenProvider extends ExecutionScreen {
                     .getExecutionStepList()) {
                 if (es.getExecutionStart() == null) {
                     //It has been assigned but not started
-                    Notification.show("Test Pending",
-                            "You have test case(s) pending execution.",
+                    Notification.show(ValidationManagerUI.RB
+                            .getString("test.pending.title"),
+                            ValidationManagerUI.RB.getString("test.pending.message"),
                             Notification.Type.TRAY_NOTIFICATION);
                     break;
                 }

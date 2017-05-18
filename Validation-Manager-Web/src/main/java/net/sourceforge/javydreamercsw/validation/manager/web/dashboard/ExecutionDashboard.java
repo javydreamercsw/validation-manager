@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI.TCEExtraction;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -41,7 +42,7 @@ public final class ExecutionDashboard extends VMWindow {
     }
 
     private void init() {
-        setCaption("Execution Dashboard");
+        setCaption(ValidationManagerUI.RB.getString("execution.dash"));
         center();
         setHeight(100, Unit.PERCENTAGE);
         setWidth(100, Unit.PERCENTAGE);
@@ -66,9 +67,9 @@ public final class ExecutionDashboard extends VMWindow {
         });
         //Build bar graph
         JFreeChart chart = ChartFactory.createBarChart3D(
-                "Execution Progress", // chart title
-                "Test Case",
-                "Amount",
+                ValidationManagerUI.RB.getString("execution.progress"), // chart title
+                ValidationManagerUI.RB.getString("test.case"),
+                ValidationManagerUI.RB.getString("general.amount"),
                 dataset, // data
                 PlotOrientation.VERTICAL,
                 true, // include legend

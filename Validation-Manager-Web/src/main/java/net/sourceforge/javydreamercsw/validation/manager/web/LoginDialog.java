@@ -23,24 +23,24 @@ import com.validation.manager.core.server.core.VMUserServer;
 @SuppressWarnings("serial")
 public final class LoginDialog extends VMWindow {
 
-    private final ShortcutAction enterKey = new ShortcutAction("Login",
+    private final ShortcutAction enterKey = new ShortcutAction(java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.login"),
             ShortcutAction.KeyCode.ENTER, null);
 
-    private final TextField name = new TextField("Username");
-    private final PasswordField password = new PasswordField("Password");
+    private final TextField name = new TextField(java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.username"));
+    private final PasswordField password = new PasswordField(java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.password"));
 
-    private final Button loginButton = new Button("Log In",
+    private final Button loginButton = new Button(java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.login"),
             (ClickEvent event) -> {
-        tryToLogIn();
-    });
+                tryToLogIn();
+            });
 
-    private final Button cancelButton = new Button("Cancel",
+    private final Button cancelButton = new Button(java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.cancel"),
             (ClickEvent event) -> {
-        LoginDialog.this.close();
-    });
+                LoginDialog.this.close();
+            });
 
     public LoginDialog(ValidationManagerUI menu) {
-        super(menu, "Account login");
+        super(menu, java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.login"));
         init();
     }
 
@@ -55,12 +55,12 @@ public final class LoginDialog extends VMWindow {
         layout.addComponent(password);
         name.focus();
         StringLengthValidator nameVal = new StringLengthValidator(
-                "Username must be 5 or more characters!");
+                java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("password.length.message"));
         nameVal.setMinLength(5);
         name.addValidator(nameVal);
         name.setImmediate(true);
         StringLengthValidator passVal = new StringLengthValidator(
-                "Password can't be empty!");
+                java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("password.empty.message"));
         passVal.setMinLength(3);
         password.addValidator(passVal);
         password.setImmediate(true);
@@ -100,8 +100,8 @@ public final class LoginDialog extends VMWindow {
             if (menu != null) {
                 menu.setUser(null);
             }
-            new Notification("Invalid credentials",
-                    "\nIncorrect username/password.",
+            new Notification(java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.login.invalid.title"),
+                    java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.login.invalid.message"),
                     Notification.Type.WARNING_MESSAGE, true)
                     .show(Page.getCurrent());
             password.setValue("");

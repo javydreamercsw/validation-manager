@@ -158,19 +158,19 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 public class ValidationManagerUI extends UI implements VMUI {
 
     private VMUserServer user = null;
+    public static final ResourceBundle RB = ResourceBundle.getBundle(
+            "com.validation.manager.resources.VMMessages");
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
     private static VMDemoResetThread reset = null;
     private LoginDialog loginWindow = null;
-    private final String projTreeRoot = "Available Projects";
+    private final String projTreeRoot = RB.getString("project.root.label");
     private Component left;
     private final TabSheet tabSheet = new TabSheet();
     private final List<Project> projects = new ArrayList<>();
     private Tree tree;
     private Tab main;
     private final List<String> roles = new ArrayList<>();
-    private static final ResourceBundle RB = ResourceBundle.getBundle(
-            "com.validation.manager.resources.VMMessages");
     private final String REQUIREMENT_REVIEW = "requirement.view";
 
     /**
@@ -196,21 +196,21 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void displayRequirementSpecNode(RequirementSpecNode rsn,
             boolean edit) {
-        Panel form = new Panel("Requirement Specification Node Detail");
+        Panel form = new Panel(RB.getString("requirement.spec.note.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(rsn.getClass());
         binder.setItemDataSource(rsn);
-        Field<?> name = binder.buildAndBind("Name", "name");
+        Field<?> name = binder.buildAndBind(RB.getString("general.name"), "name");
         layout.addComponent(name);
-        Field desc = binder.buildAndBind("Description", "description",
+        Field desc = binder.buildAndBind(RB.getString("general.description"), "description",
                 TextArea.class);
         desc.setSizeFull();
         layout.addComponent(desc);
-        Field<?> scope = binder.buildAndBind("Scope", "scope");
+        Field<?> scope = binder.buildAndBind(RB.getString("general.scope"), "scope");
         layout.addComponent(scope);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (rsn.getRequirementSpecNodePK() == null) {
@@ -222,7 +222,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (edit) {
             if (rsn.getRequirementSpecNodePK() == null) {
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
                         rsn.setName(name.getValue().toString());
@@ -239,7 +239,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         updateScreen();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error creating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -250,7 +250,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             } else {
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     rsn.setName(name.getValue().toString());
                     rsn.setDescription(desc.getValue().toString());
@@ -262,12 +262,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                             displayRequirementSpecNode(rsn, true);
                         } catch (NonexistentEntityException ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show("Error updating record!",
+                            Notification.show(RB.getString("general.error.record.creation"),
                                     ex.getLocalizedMessage(),
                                     Notification.Type.ERROR_MESSAGE);
                         } catch (Exception ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show("Error updating record!",
+                            Notification.show(RB.getString("general.error.record.creation"),
                                     ex.getLocalizedMessage(),
                                     Notification.Type.ERROR_MESSAGE);
                         }
@@ -311,23 +311,23 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void displayTestCaseExecution(TestCaseExecution tce,
             ProjectServer ps, boolean edit) {
-        Panel form = new Panel("Test Case Execution Detail");
+        Panel form = new Panel(RB.getString("test.case.execution.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(tce.getClass());
         binder.setItemDataSource(tce);
-        Field<?> name = binder.buildAndBind("Name", "name");
+        Field<?> name = binder.buildAndBind(RB.getString("general.name"), "name");
         name.setRequired(true);
-        name.setRequiredError("Please provide a name.");
+        name.setRequiredError(RB.getString("missing.name.message"));
         layout.addComponent(name);
-        Field<?> scope = binder.buildAndBind("Scope", "scope");
+        Field<?> scope = binder.buildAndBind(RB.getString("general.scope"), "scope");
         layout.addComponent(scope);
         //TODO: Show when finished
-        TextArea conclusion = new TextArea("Conclusion");
+        TextArea conclusion = new TextArea(RB.getString("general.conclusion"));
         binder.bind(conclusion, "conclusion");
         layout.addComponent(conclusion);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (tce.getId() == null) {
@@ -340,7 +340,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             if (tce.getId() == null) {
                 TestCaseExecutionServer tces = new TestCaseExecutionServer();
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     if (name.getValue() == null) {
                         Notification.show(name.getRequiredError(),
@@ -369,10 +369,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                         if (!toApprove.isEmpty()) {
                             MessageBox mb = MessageBox.create();
                             mb.asModal(true)
-                                    .withCaption("Non Baselined requirements detected!")
-                                    .withMessage("Some requirements are not baselined, "
+                                    .withCaption(RB.getString("missing.baseline.requirement.title"))
+                                    .withMessage(RB.getString("missing.baseline.requirement.message")
                                             + "please choose the versions to be tested "
-                                            + "under this execution.")
+                                            + RB.getString("UNDER THIS EXECUTION."))
                                     .withButtonAlignment(Alignment.MIDDLE_CENTER)
                                     .withOkButton(() -> {
                                         //Start the wizard
@@ -468,7 +468,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             } else {
                 TestCaseExecutionServer tces = new TestCaseExecutionServer(tce);
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     tces.setConclusion(conclusion.getValue());
                     tces.setScope(scope.getValue().toString());
@@ -481,12 +481,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayObject(tce);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
@@ -509,7 +509,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayExecutionStep(ExecutionStep es) {
-        Panel form = new Panel("Execution Step Detail");
+        Panel form = new Panel(RB.getString("execution.step.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
@@ -524,7 +524,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     BeanItemContainer<VmUser> userEntityContainer
                             = new BeanItemContainer<>(VmUser.class);
                     userEntityContainer.addBean(es.getAssignee());
-                    Field field = new TextField(es.getAssignee() == null ? "N/A"
+                    Field field = new TextField(es.getAssignee() == null ? RB.getString("general.not.applicable")
                             : es.getAssignee().getFirstName() + " "
                             + es.getAssignee().getLastName());
                     return fieldType.cast(field);
@@ -533,45 +533,45 @@ public class ValidationManagerUI extends UI implements VMUI {
                 return defaultFactory.createField(dataType, fieldType);
             }
         });
-        layout.addComponent(createStepHistoryTable("Step Details",
+        layout.addComponent(createStepHistoryTable(RB.getString("step.detail"),
                 Arrays.asList(es.getStepHistory()), false));
         if (es.getResultId() != null) {
-            Field<?> result = binder.buildAndBind("Result",
+            Field<?> result = binder.buildAndBind(RB.getString("general.result"),
                     "resultId.resultName");
             layout.addComponent(result);
         }
         if (es.getComment() != null) {
-            TextArea comment = new TextArea("Comment");
+            TextArea comment = new TextArea(RB.getString("general.comment"));
             binder.bind(comment, "comment");
             layout.addComponent(comment);
         }
         if (es.getAssignee() != null) {
-            TextField assignee = new TextField("Assignee");
+            TextField assignee = new TextField(RB.getString("general.assignee"));
             VmUser u = es.getAssignee();
             assignee.setValue(u.getFirstName() + " " + u.getLastName());
             assignee.setReadOnly(true);
             layout.addComponent(assignee);
         }
         if (es.getExecutionStart() != null) {
-            Field<?> start = binder.buildAndBind("Execution Start",
+            Field<?> start = binder.buildAndBind(RB.getString("execution.start"),
                     "executionStart");
             layout.addComponent(start);
         }
         if (es.getExecutionEnd() != null) {
-            Field<?> end = binder.buildAndBind("Execution End",
+            Field<?> end = binder.buildAndBind(RB.getString("execution.end"),
                     "executionEnd");
             layout.addComponent(end);
         }
         if (es.getExecutionTime() != null && es.getExecutionTime() > 0) {
-            Field<?> time = binder.buildAndBind("Execution Time",
+            Field<?> time = binder.buildAndBind(RB.getString("execution.time"),
                     "executionTime");
             layout.addComponent(time);
         }
         if (!es.getHistoryList().isEmpty()) {
-            layout.addComponent(createRequirementHistoryTable("Related Requirements",
+            layout.addComponent(createRequirementHistoryTable(RB.getString("related.requirements"),
                     es.getHistoryList()));
         }
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (es.getExecutionStepPK() == null) {
@@ -588,29 +588,29 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayStep(Step s, boolean edit) {
-        Panel form = new Panel("Step Detail");
+        Panel form = new Panel(RB.getString("step.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
         binder.setItemDataSource(s);
-        Field<?> sequence = binder.buildAndBind("Sequence", "stepSequence");
+        Field<?> sequence = binder.buildAndBind(RB.getString("general.sequence"), "stepSequence");
         layout.addComponent(sequence);
-        TextArea text = new TextArea("Text");
+        TextArea text = new TextArea(RB.getString("general.text"));
         text.setConverter(new ByteToStringConverter());
         binder.bind(text, "text");
         layout.addComponent(text);
-        TextArea result = new TextArea("Expected Result");
+        TextArea result = new TextArea(RB.getString("expected.result"));
         result.setConverter(new ByteToStringConverter());
         binder.bind(result, "expectedResult");
         layout.addComponent(result);
-        Field notes = binder.buildAndBind("Notes", "notes",
+        Field notes = binder.buildAndBind(RB.getString("general.notes"), "notes",
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
         tree.select(s);
         if (!s.getRequirementList().isEmpty() && !edit) {
-            layout.addComponent(getDisplayRequirementList("Related Requirements",
+            layout.addComponent(getDisplayRequirementList(RB.getString("related.requirements"),
                     s.getRequirementList()));
         } else {
             AbstractSelect requirements = getRequirementSelectionComponent();
@@ -630,7 +630,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             });
             layout.addComponent(requirements);
         }
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (s.getStepPK() == null) {
@@ -642,7 +642,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (edit) {
             if (s.getStepPK() == null) {
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
                         s.setExpectedResult(((TextArea) result).getValue()
@@ -666,7 +666,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         updateScreen();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error creating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -677,7 +677,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             } else {
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         s.setExpectedResult(((TextArea) result).getValue()
@@ -695,19 +695,19 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayStep(s, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
                     } catch (UnsupportedEncodingException | NumberFormatException ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -726,28 +726,28 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayTestCase(TestCase t, boolean edit) {
-        Panel form = new Panel("Test Detail");
+        Panel form = new Panel(RB.getString("test.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(t.getClass());
         binder.setItemDataSource(t);
-        Field<?> name = binder.buildAndBind("Name", "name");
+        Field<?> name = binder.buildAndBind(RB.getString("general.name"), "name");
         layout.addComponent(name);
-        TextArea summary = new TextArea("Summary");
+        TextArea summary = new TextArea(RB.getString("general.summary"));
         summary.setConverter(new ByteToStringConverter());
         binder.bind(summary, "summary");
         layout.addComponent(summary);
-        PopupDateField creation = new PopupDateField("Created on");
+        PopupDateField creation = new PopupDateField(RB.getString("general.creation.date"));
         creation.setResolution(Resolution.SECOND);
         creation.setDateFormat("MM-dd-yyyy hh:hh:ss");
         binder.bind(creation, "creationDate");
         layout.addComponent(creation);
-        Field<?> active = binder.buildAndBind("Active", "active");
+        Field<?> active = binder.buildAndBind(RB.getString("general.active"), "active");
         layout.addComponent(active);
-        Field<?> open = binder.buildAndBind("Open", "isOpen");
+        Field<?> open = binder.buildAndBind(RB.getString("general.open"), "isOpen");
         layout.addComponent(open);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (t.getId() == null) {
@@ -759,7 +759,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (edit) {
             if (t.getId() == null) {
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
                         t.setName(name.getValue().toString());
@@ -778,7 +778,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         updateScreen();
                     } catch (UnsupportedEncodingException ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error creating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -789,7 +789,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             } else {
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         t.setName(name.getValue().toString());
@@ -804,19 +804,19 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayTestCase(t, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
                     } catch (UnsupportedEncodingException ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -836,23 +836,23 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayTestPlan(TestPlan tp, boolean edit) {
-        Panel form = new Panel("Test Plan Detail");
+        Panel form = new Panel(RB.getString("test.plan.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(tp.getClass());
         binder.setItemDataSource(tp);
-        Field<?> name = binder.buildAndBind("Name", "name");
+        Field<?> name = binder.buildAndBind(RB.getString("general.name"), "name");
         layout.addComponent(name);
-        Field notes = binder.buildAndBind("Notes", "notes",
+        Field notes = binder.buildAndBind(RB.getString("general.notes"), "notes",
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
-        Field<?> active = binder.buildAndBind("Active", "active");
+        Field<?> active = binder.buildAndBind(RB.getString("general.active"), "active");
         layout.addComponent(active);
-        Field<?> open = binder.buildAndBind("Open", "isOpen");
+        Field<?> open = binder.buildAndBind(RB.getString("general.open"), "isOpen");
         layout.addComponent(open);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (tp.getTestPlanPK() == null) {
@@ -864,7 +864,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (edit) {
             if (tp.getTestPlanPK() == null) {
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
                         tp.setName(name.getValue().toString());
@@ -881,7 +881,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         updateScreen();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error creating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -892,7 +892,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             } else {
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         tp.setName(name.getValue().toString());
@@ -906,19 +906,19 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayTestPlan(tp, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -937,21 +937,21 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayTestProject(TestProject tp, boolean edit) {
-        Panel form = new Panel("Test Project Detail");
+        Panel form = new Panel(RB.getString("test.project.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(tp.getClass());
         binder.setItemDataSource(tp);
-        Field<?> name = binder.buildAndBind("Name", "name");
+        Field<?> name = binder.buildAndBind(RB.getString("general.name"), "name");
         layout.addComponent(name);
-        Field notes = binder.buildAndBind("Notes", "notes",
+        Field notes = binder.buildAndBind(RB.getString("general.notes"), "notes",
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
-        Field<?> active = binder.buildAndBind("Active", "active");
+        Field<?> active = binder.buildAndBind(RB.getString("general.active"), "active");
         layout.addComponent(active);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (tp.getId() == null) {
@@ -963,7 +963,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (edit) {
             if (tp.getId() == null) {
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
                         tp.setName(name.getValue().toString());
@@ -979,7 +979,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         updateScreen();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error creating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -990,7 +990,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             } else {
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         tp.setName(name.getValue().toString());
@@ -1003,19 +1003,19 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayTestProject(tp, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -1034,19 +1034,19 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayRequirementSpec(RequirementSpec rs, boolean edit) {
-        Panel form = new Panel("Requirement Specification Detail");
+        Panel form = new Panel(RB.getString("requirement.spec.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(rs.getClass());
         binder.setItemDataSource(rs);
-        Field<?> name = binder.buildAndBind("Name", "name");
+        Field<?> name = binder.buildAndBind(RB.getString("general.name"), "name");
         layout.addComponent(name);
-        Field desc = binder.buildAndBind("Description", "description",
+        Field desc = binder.buildAndBind(RB.getString("general.description"), "description",
                 TextArea.class);
         desc.setSizeFull();
         layout.addComponent(desc);
-        Field<?> date = binder.buildAndBind("Modification Date",
+        Field<?> date = binder.buildAndBind(RB.getString("general.modification.data"),
                 "modificationDate");
         layout.addComponent(date);
         date.setEnabled(false);
@@ -1056,14 +1056,14 @@ public class ValidationManagerUI extends UI implements VMUI {
         List<SpecLevel> levels = controller.findSpecLevelEntities();
         BeanItemContainer<SpecLevel> specLevelContainer
                 = new BeanItemContainer<>(SpecLevel.class, levels);
-        ComboBox level = new ComboBox("Spec Level");
+        ComboBox level = new ComboBox(RB.getString("spec.level"));
         level.setContainerDataSource(specLevelContainer);
         level.getItemIds().forEach(id -> {
             level.setItemCaption(id, translate(((SpecLevel) id).getName()));
         });
         binder.bind(level, "specLevel");
         layout.addComponent(level);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (rs.getRequirementSpecPK() == null) {
@@ -1075,7 +1075,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (edit) {
             if (rs.getRequirementSpecPK() == null) {
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
                         rs.setName(name.getValue().toString());
@@ -1095,7 +1095,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         updateScreen();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error creating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -1106,7 +1106,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             } else {
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         rs.setName(name.getValue().toString());
@@ -1119,19 +1119,19 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayRequirementSpec(rs, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
+                        Notification.show(RB.getString("general.error.record.creation!"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -1207,30 +1207,30 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayRequirement(Requirement req, boolean edit) {
-        Panel form = new Panel("Requirement Detail");
+        Panel form = new Panel(RB.getString("requirement.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(req.getClass());
         binder.setItemDataSource(req);
-        Field<?> id = binder.buildAndBind("Requirement ID", "uniqueId");
+        Field<?> id = binder.buildAndBind(RB.getString("requirement.id"), "uniqueId");
         layout.addComponent(id);
-        Field desc = binder.buildAndBind("Description", "description",
+        Field desc = binder.buildAndBind(RB.getString("general.description"), "description",
                 TextArea.class);
         desc.setSizeFull();
         layout.addComponent(desc);
-        Field notes = binder.buildAndBind("Notes", "notes",
+        Field notes = binder.buildAndBind(RB.getString("general.notes"), "notes",
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
         if (req.getParentRequirementId() != null) {
-            TextField tf = new TextField("Parent");
+            TextField tf = new TextField(RB.getString("general.parent"));
             tf.setValue(req.getParentRequirementId().getUniqueId());
             tf.setReadOnly(true);
             layout.addComponent(tf);
         }
         if (!req.getRequirementList().isEmpty() && !edit) {
-            layout.addComponent(getDisplayRequirementList("Related Requirements",
+            layout.addComponent(getDisplayRequirementList(RB.getString("related.requirements"),
                     req.getRequirementList()));
         } else if (edit) {
             //Allow user to add children
@@ -1248,7 +1248,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             });
             layout.addComponent(as);
         }
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (req.getId() == null) {
@@ -1260,7 +1260,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (edit) {
             if (req.getId() == null) {
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     req.setUniqueId(id.getValue().toString());
                     req.setNotes(notes.getValue().toString());
@@ -1280,7 +1280,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             } else {
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         RequirementServer rs = new RequirementServer(req);
@@ -1295,12 +1295,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayRequirement(rs.getEntity(), false);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation!"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
@@ -1308,7 +1308,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         form.setVisible(false);
                     } catch (VMException ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -1324,7 +1324,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             List<History> versions = new RequirementServer(req).getHistoryList();
             if (!versions.isEmpty()) {
                 layout.addComponent(createRequirementHistoryTable(
-                        "History", versions));
+                        RB.getString("general.history"), versions));
             }
         } catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -1385,7 +1385,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void addTestCaseAssignment(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Assign Test Case Execution", ASSIGN_ICON);
+                = menu.addItem(RB.getString("assign.test.case.execution"), ASSIGN_ICON);
         create.setEnabled(checkRight("testplan.planning"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1461,7 +1461,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createRootMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Project", PROJECT_ICON);
+                = menu.addItem(RB.getString("create.project"), PROJECT_ICON);
         create.setEnabled(checkRight("product.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1471,12 +1471,12 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createExecutionsMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Execution", EXECUTIONS_ICON);
+                = menu.addItem(RB.getString("create.execution"), EXECUTIONS_ICON);
         create.setEnabled(checkRight("testplan.planning"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     int projectId = Integer.parseInt(((String) tree.getValue())
-                            .substring("executions".length()));
+                            .substring(RB.getString("general.execution").length()));
                     displayTestCaseExecution(new TestCaseExecution(),
                             new ProjectServer(projectId), true);
                 });
@@ -1484,10 +1484,10 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createTestCaseExecutionPlanMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Execution Step", SPEC_ICON);
+                = menu.addItem(RB.getString("create.execution.step"), SPEC_ICON);
         create.setEnabled(checkRight("testplan.planning"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Execution", EXECUTION_ICON);
+                = menu.addItem(RB.getString("edit.execution"), EXECUTION_ICON);
         edit.setEnabled(checkRight("testplan.planning"));
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1501,10 +1501,10 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createTestPlanMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Test Case", SPEC_ICON);
+                = menu.addItem(RB.getString("create.test.case"), SPEC_ICON);
         create.setEnabled(checkRight("testplan.planning"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Test Plan", SPEC_ICON);
+                = menu.addItem(RB.getString("edit.test.plan"), SPEC_ICON);
         edit.setEnabled(checkRight("testplan.planning"));
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1523,7 +1523,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createProjectMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Sub Project", PROJECT_ICON);
+                = menu.addItem(RB.getString("create.sub.project"), PROJECT_ICON);
         create.setEnabled(checkRight("requirement.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1532,7 +1532,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     displayProject(project, true);
                 });
         ContextMenu.ContextMenuItem createSpec
-                = menu.addItem("Create Requirement Spec", SPEC_ICON);
+                = menu.addItem(RB.getString("create.req.spec"), SPEC_ICON);
         createSpec.setEnabled(checkRight("requirement.modify"));
         createSpec.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1541,10 +1541,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                     displayRequirementSpec(rs, true);
                 });
         ContextMenu.ContextMenuItem createTest
-                = menu.addItem("Create Test Suite", TEST_SUITE_ICON);
+                = menu.addItem(RB.getString("create.test.suite"), TEST_SUITE_ICON);
         createTest.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Project", EDIT_ICON);
+                = menu.addItem(RB.getString("edit.project"), EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayProject((Project) tree.getValue(), true);
@@ -1558,14 +1558,14 @@ public class ValidationManagerUI extends UI implements VMUI {
                     displayTestProject(tp, true);
                 });
         ContextMenu.ContextMenuItem plan
-                = menu.addItem("Plan Testing", PLAN_ICON);
+                = menu.addItem(RB.getString("plan.testing"), PLAN_ICON);
         plan.setEnabled(checkRight("testplan.planning"));
         plan.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayTestPlanning((Project) tree.getValue());
                 });
         ContextMenu.ContextMenuItem trace
-                = menu.addItem("Trace Matrix", VaadinIcons.SPLIT);
+                = menu.addItem(RB.getString("trace.matrix"), VaadinIcons.SPLIT);
         trace.setEnabled(checkRight("testplan.planning"));
         trace.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1575,7 +1575,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createRequirementMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Requirement", EDIT_ICON);
+                = menu.addItem(RB.getString("edit.req"), EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayRequirement((Requirement) tree.getValue(),
@@ -1586,10 +1586,10 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createRequirementSpecMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Requirement Spec Node", SPEC_ICON);
+                = menu.addItem(RB.getString("create.req.spec.node"), SPEC_ICON);
         create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Requirement Spec", SPEC_ICON);
+                = menu.addItem(RB.getString("edit.req.spec"), SPEC_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayRequirementSpec((RequirementSpec) tree.getValue(),
@@ -1603,7 +1603,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     displayRequirementSpecNode(rs, true);
                 });
         ContextMenu.ContextMenuItem baseline
-                = menu.addItem("Baseline Specification", BASELINE_ICON);
+                = menu.addItem(RB.getString("baseline.spec"), BASELINE_ICON);
         baseline.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayBaseline(new Baseline(), true,
@@ -1614,7 +1614,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createRequirementSpecNodeMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Requirement", VaadinIcons.PLUS);
+                = menu.addItem(RB.getString("create.requiremnet"), VaadinIcons.PLUS);
         create.setEnabled(checkRight("requirement.modify"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1624,7 +1624,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     displayRequirement(r, true);
                 });
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Requirement Spec Node", EDIT_ICON);
+                = menu.addItem(RB.getString("edit.req.spec.node"), EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayRequirementSpecNode((RequirementSpecNode) tree
@@ -1633,21 +1633,21 @@ public class ValidationManagerUI extends UI implements VMUI {
                 });
         edit.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem importRequirement
-                = menu.addItem("Import Requirements", IMPORT_ICON);
+                = menu.addItem(RB.getString("import.requirement"), IMPORT_ICON);
         importRequirement.setEnabled(checkRight("requirement.modify"));
         importRequirement.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     // Create a sub-window and set the content
-                    Window subWindow = new VMWindow("Import Requirements");
+                    Window subWindow = new VMWindow(RB.getString("import.requirement"));
                     VerticalLayout subContent = new VerticalLayout();
                     subWindow.setContent(subContent);
 
                     //Add a checkbox to know if file has headers or not
-                    CheckBox cb = new CheckBox("File has header row?");
+                    CheckBox cb = new CheckBox(RB.getString("file.has.header"));
 
                     FileUploader receiver = new FileUploader();
                     Upload upload
-                    = new Upload("Upload Excel Spreadsheet here", receiver);
+                    = new Upload(RB.getString("uplod.excel"), receiver);
                     upload.addSucceededListener((Upload.SucceededEvent event1) -> {
                         try {
                             subWindow.close();
@@ -1664,9 +1664,9 @@ public class ValidationManagerUI extends UI implements VMUI {
                             buildProjectTree(tree.getValue());
                             updateScreen();
                         } catch (RequirementImportException ex) {
-                            LOG.log(Level.SEVERE, "Error processing import!",
+                            LOG.log(Level.SEVERE, RB.getString("import.error"),
                                     ex);
-                            Notification.show("Importing unsuccessful!",
+                            Notification.show(RB.getString("import.unsuccessful"),
                                     Notification.Type.ERROR_MESSAGE);
                         } catch (VMException ex) {
                             LOG.log(Level.SEVERE, null, ex);
@@ -1675,7 +1675,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     upload.addFailedListener((Upload.FailedEvent event1) -> {
                         LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
                                 event1.getReason());
-                        Notification.show("Upload unsuccessful!",
+                        Notification.show(RB.getString("upload.unsuccessful"),
                                 Notification.Type.ERROR_MESSAGE);
                         subWindow.close();
                     });
@@ -1692,10 +1692,10 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createTestCaseMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Step", VaadinIcons.PLUS);
+                = menu.addItem(RB.getString("create.step"), VaadinIcons.PLUS);
         create.setEnabled(checkRight("requirement.modify"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Test Case", EDIT_ICON);
+                = menu.addItem(RB.getString("edit.test.case"), EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayTestCase((TestCase) tree.getValue(), true);
@@ -1710,21 +1710,22 @@ public class ValidationManagerUI extends UI implements VMUI {
                     displayStep(s, true);
                 });
         ContextMenu.ContextMenuItem importSteps
-                = menu.addItem("Import Steps", IMPORT_ICON);
+                = menu.addItem(RB.getString("import.step"), IMPORT_ICON);
         importSteps.setEnabled(checkRight("requirement.modify"));
         importSteps.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     // Create a sub-window and set the content
-                    Window subWindow = new VMWindow("Import Test Case Steps");
+                    Window subWindow
+                    = new VMWindow(RB.getString("import.test.case.step"));
                     VerticalLayout subContent = new VerticalLayout();
                     subWindow.setContent(subContent);
 
                     //Add a checkbox to know if file has headers or not
-                    CheckBox cb = new CheckBox("File has header row?");
+                    CheckBox cb = new CheckBox(RB.getString("file.has.header"));
 
                     FileUploader receiver = new FileUploader();
                     Upload upload
-                    = new Upload("Upload Excel Spreadsheet here", receiver);
+                    = new Upload(RB.getString("upload.excel"), receiver);
                     upload.addSucceededListener((Upload.SucceededEvent event1) -> {
                         try {
                             subWindow.close();
@@ -1755,16 +1756,16 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     .getEntity());
                             updateScreen();
                         } catch (TestCaseImportException ex) {
-                            LOG.log(Level.SEVERE, "Error processing import!",
+                            LOG.log(Level.SEVERE, RB.getString("import.error"),
                                     ex);
-                            Notification.show("Importing unsuccessful!",
+                            Notification.show(RB.getString("import.unsuccessful"),
                                     Notification.Type.ERROR_MESSAGE);
                         }
                     });
                     upload.addFailedListener((Upload.FailedEvent event1) -> {
                         LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
                                 event1.getReason());
-                        Notification.show("Upload unsuccessful!",
+                        Notification.show(RB.getString("upload.unsuccessful"),
                                 Notification.Type.ERROR_MESSAGE);
                         subWindow.close();
                     });
@@ -1782,7 +1783,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createStepMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Step", EDIT_ICON);
+                = menu.addItem(RB.getString("edit.step"), EDIT_ICON);
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
                     displayStep((Step) tree.getValue(), true);
@@ -1792,10 +1793,11 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createTestProjectMenu(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Create Test Plan", VaadinIcons.PLUS);
+                = menu.addItem(RB.getString("create.test.plan"),
+                        VaadinIcons.PLUS);
         create.setEnabled(checkRight("testplan.planning"));
         ContextMenu.ContextMenuItem edit
-                = menu.addItem("Edit Test Project", EDIT_ICON);
+                = menu.addItem(RB.getString("edit.test.project"), EDIT_ICON);
         edit.setEnabled(checkRight("testplan.planning"));
         edit.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -1842,7 +1844,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         //Build the right component
         if (hsplit.getSecondComponent() == null) {
             if (main == null) {
-                main = tabSheet.addTab(new VerticalLayout(), "Main");
+                main = tabSheet.addTab(new VerticalLayout(),
+                        RB.getString("general.main"));
             }
             Lookup.getDefault().lookupAll(IMainContentProvider.class)
                     .forEach((provider) -> {
@@ -1886,7 +1889,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         gl.addComponent(new Image("", LOGO), 0, 0);
         if (getUser() != null) {
             //Logout button
-            Button logout = new Button("Log out");
+            Button logout = new Button(RB.getString("general.logout"));
             logout.addClickListener((Button.ClickEvent event) -> {
                 try {
                     user.write2DB();
@@ -1932,21 +1935,21 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void displayProject(Project p, boolean edit) {
         // Bind it to a component
-        Panel form = new Panel("Project Detail");
+        Panel form = new Panel(RB.getString("project.detail"));
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         BeanFieldGroup binder = new BeanFieldGroup(p.getClass());
         binder.setItemDataSource(p);
-        Field<?> name = binder.buildAndBind("Name", "name");
-        Field notes = binder.buildAndBind("Notes", "notes",
+        Field<?> name = binder.buildAndBind(RB.getString("general.name"), "name");
+        Field notes = binder.buildAndBind(RB.getString("general.notes"), "notes",
                 TextArea.class);
         notes.setSizeFull();
         name.setRequired(true);
-        name.setRequiredError("Please provide a name.");
+        name.setRequiredError(RB.getString("missing.name.message"));
         layout.addComponent(name);
         layout.addComponent(notes);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
             if (p.getId() == null) {
@@ -1958,7 +1961,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (edit) {
             if (p.getId() == null) {
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     if (name.getValue() == null) {
                         Notification.show(name.getRequiredError(),
@@ -1984,7 +1987,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             } else {
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("generl.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     handleVerioning(p, () -> {
                         try {
@@ -1996,12 +1999,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     .getEntityManagerFactory()).edit(p);
                         } catch (NonexistentEntityException ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show("Error updating record!",
+                            Notification.show(RB.getString("general.error.record.creation"),
                                     ex.getLocalizedMessage(),
                                     Notification.Type.ERROR_MESSAGE);
                         } catch (Exception ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show("Error updating record!",
+                            Notification.show(RB.getString("general.error.record.creation"),
                                     ex.getLocalizedMessage(),
                                     Notification.Type.ERROR_MESSAGE);
                         }
@@ -2203,7 +2206,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 .getExecutions(p);
         String id = "executions" + p.getId();
         tree.addItem(id);
-        tree.setItemCaption(id, "Executions");
+        tree.setItemCaption(id, RB.getString("general.execution"));
         tree.setItemIcon(id, EXECUTIONS_ICON);
         tree.setParent(id, p);
         executions.forEach((tce) -> {
@@ -2455,7 +2458,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         tree.setSizeFull();
         updateProjectList();
         updateScreen();
-        Page.getCurrent().setTitle("Validation Manager");
+        Page.getCurrent().setTitle(RB.getString("app.name"));
     }
 
     private static <V> void swapValues(SortedMap m, int i0, int i1) {
@@ -2571,29 +2574,29 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void displayBaseline(Baseline baseline,
             boolean edit, RequirementSpec rs) {
-        Panel form = new Panel("Baseline Detail");
+        Panel form = new Panel(RB.getString("baseline.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(baseline.getClass());
         binder.setItemDataSource(baseline);
-        Field<?> id = binder.buildAndBind("Name", "baselineName");
+        Field<?> id = binder.buildAndBind(RB.getString("general.name"), "baselineName");
         layout.addComponent(id);
-        Field desc = binder.buildAndBind("Description", "description",
+        Field desc = binder.buildAndBind(RB.getString("general.description"), "description",
                 TextArea.class
         );
         desc.setSizeFull();
         layout.addComponent(desc);
-        Button cancel = new Button("Cancel");
+        Button cancel = new Button(RB.getString("general.cancel"));
         if (rs != null) {
             List<History> potential = new ArrayList<>();
             for (Requirement r : Tool.extractRequirements(rs)) {
                 potential.add(r.getHistoryList().get(r.getHistoryList().size() - 1));
             }
-            layout.addComponent(createRequirementHistoryTable("Included Requirements",
+            layout.addComponent(createRequirementHistoryTable(RB.getString("included.requirements"),
                     potential));
         } else {
-            layout.addComponent(createRequirementHistoryTable("Included Requirements",
+            layout.addComponent(createRequirementHistoryTable(RB.getString("included.requirements"),
                     baseline.getHistoryList()));
         }
         cancel.addClickListener((Button.ClickEvent event) -> {
@@ -2603,14 +2606,14 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (edit) {
             if (baseline.getId() == null) {
                 //Creating a new one
-                Button save = new Button("Save");
+                Button save = new Button(RB.getString("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
                     try {
                         binder.commit();
                         if (rs != null) {
                             MessageBox prompt = MessageBox.createQuestion()
-                                    .withCaption("Do you want to create the baseline?")
-                                    .withMessage("This is not reversible as "
+                                    .withCaption(RB.getString("save.baseline.title"))
+                                    .withMessage(RB.getString("save.baseine.message")
                                             + "requirements will be released to a new major version")
                                     .withYesButton(() -> {
                                         Baseline entity = BaselineServer
@@ -2650,7 +2653,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 layout.addComponent(hl);
             } else {
                 //Editing existing one
-                Button update = new Button("Update");
+                Button update = new Button(RB.getString("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         handleVerioning(baseline, () -> {
@@ -2662,19 +2665,19 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayBaseline(baseline, false);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show("Error updating record!",
+                                Notification.show(RB.getString("general.error.record.creation"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show("Error updating record!",
+                        Notification.show(RB.getString("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -2804,13 +2807,13 @@ public class ValidationManagerUI extends UI implements VMUI {
         grid.setColumns(fieldList.toArray());
         if (showVersionFields) {
             Grid.Column version = grid.getColumn("version");
-            version.setHeaderCaption("Version");
+            version.setHeaderCaption(RB.getString("general.version"));
             Grid.Column mod = grid.getColumn("modifier");
-            mod.setHeaderCaption("Modifier");
+            mod.setHeaderCaption(RB.getString("general.modifier"));
             Grid.Column modDate = grid.getColumn("modificationDate");
-            modDate.setHeaderCaption("Modification Date");
+            modDate.setHeaderCaption(RB.getString("modification.date"));
             Grid.Column modReason = grid.getColumn("modificationReason");
-            modReason.setHeaderCaption("Modification Reason");
+            modReason.setHeaderCaption(RB.getString("general.reason"));
         }
         if (sortByField != null && !sortByField.trim().isEmpty()) {
             wrapperCont.sort(new Object[]{sortByField}, new boolean[]{true});
@@ -2825,11 +2828,11 @@ public class ValidationManagerUI extends UI implements VMUI {
                 showVersionFields,
                 "text", "expectedResult", "notes");
         Grid.Column text = grid.getColumn("text");
-        text.setHeaderCaption("Step Text");
+        text.setHeaderCaption(RB.getString("step.text"));
         Grid.Column result = grid.getColumn("expectedResult");
-        result.setHeaderCaption("Expected Result");
+        result.setHeaderCaption(RB.getString("expected.result"));
         Grid.Column notes = grid.getColumn("notes");
-        notes.setHeaderCaption("Notes");
+        notes.setHeaderCaption(RB.getString("general.notes"));
         return grid;
     }
 
@@ -2838,9 +2841,9 @@ public class ValidationManagerUI extends UI implements VMUI {
         Grid grid = getHistoryTable(title, historyItems, "uniqueId", true,
                 "uniqueId", "description", "notes");
         Grid.Column uniqueId = grid.getColumn("uniqueId");
-        uniqueId.setHeaderCaption("ID");
+        uniqueId.setHeaderCaption(RB.getString("unique.id"));
         Grid.Column description = grid.getColumn("description");
-        description.setHeaderCaption("Description");
+        description.setHeaderCaption(RB.getString("general.description"));
         return grid;
     }
 
@@ -2856,7 +2859,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayTraceMatrix(Project project) {
-        VMWindow w = new VMWindow("Trace Matrix");
+        VMWindow w = new VMWindow(RB.getString("trace.matrix"));
         TraceMatrix tm = new TraceMatrix(project);
         VerticalSplitPanel vs = new VerticalSplitPanel();
         vs.setSplitPosition(10, Unit.PERCENTAGE);
@@ -2881,12 +2884,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = new BeanItemContainer<>(Requirement.class,
                         reqs);
         TwinColSelect requirements
-                = new TwinColSelect("Linked Requirements");
+                = new TwinColSelect(RB.getString("linked.requirement"));
         requirements.setItemCaptionPropertyId("uniqueId");
         requirements.setContainerDataSource(requirementContainer);
         requirements.setRows(5);
-        requirements.setLeftColumnCaption("Available Requirements");
-        requirements.setRightColumnCaption("Linked Requirements");
+        requirements.setLeftColumnCaption(RB.getString("available.requirement"));
+        requirements.setRightColumnCaption(RB.getString("linked.requirement"));
         return requirements;
     }
 
@@ -2900,7 +2903,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         grid.setContainerDataSource(children);
         grid.setColumns("uniqueId");
         Grid.Column uniqueId = grid.getColumn("uniqueId");
-        uniqueId.setHeaderCaption("ID");
+        uniqueId.setHeaderCaption(RB.getString("unique.id"));
         grid.setHeightMode(HeightMode.ROW);
         grid.setHeightByRows(children.size() > 5 ? 5 : children.size());
         grid.setSizeFull();
@@ -2910,7 +2913,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void addDeleteExecution(ContextMenu menu) {
         ContextMenu.ContextMenuItem create
-                = menu.addItem("Delete Execution", DELETE_ICON);
+                = menu.addItem(RB.getString("delete.execution"), DELETE_ICON);
         create.setEnabled(checkRight("testplan.planning"));
         create.addItemClickListener(
                 (ContextMenu.ContextMenuItemClickEvent event) -> {
@@ -2919,8 +2922,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                     TestCaseExecution tce = tcee.getTestCaseExecution();
                     if (tce == null) {
                         LOG.info("Invalid");
-                        Notification.show("Unable to delete!",
-                                "Error extracting information",
+                        Notification.show(RB.getString("delete.error"),
+                                RB.getString("extract.error"),
                                 Notification.Type.ERROR_MESSAGE);
                     } else {
                         TestCase tc = tcee.getTestCase();
@@ -2934,8 +2937,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 if (es.getResultId() != null
                                 && es.getResultId().getResultName()
                                         .equals("result.pending")) {
-                                    Notification.show("Unable to delete!",
-                                            "There is a result present in the execution.",
+                                    Notification.show(RB.getString("delete.error"),
+                                            RB.getString("result.present"),
                                             Notification.Type.ERROR_MESSAGE);
                                     //It has a result other than pending.
                                     canDelete = false;
@@ -2943,16 +2946,16 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 if (!es.getExecutionStepHasAttachmentList()
                                         .isEmpty()) {
                                     //It has a result other than pending.
-                                    Notification.show("Unable to delete!",
-                                            "There are attachment present in the execution.",
+                                    Notification.show(RB.getString("delete.error"),
+                                            RB.getString("attachment.present"),
                                             Notification.Type.ERROR_MESSAGE);
                                     canDelete = false;
                                 }
                                 if (!es.getExecutionStepHasIssueList()
                                         .isEmpty()) {
                                     //It has a result other than pending.
-                                    Notification.show("Unable to delete!",
-                                            "There are issues present in the execution.",
+                                    Notification.show(RB.getString("delete.error"),
+                                            RB.getString("issue.present"),
                                             Notification.Type.ERROR_MESSAGE);
                                     canDelete = false;
                                 }
@@ -2963,8 +2966,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                         }
                         if (!canDelete) {
                             MessageBox prompt = MessageBox.createQuestion()
-                                    .withCaption("Want to delete even with identified issues?")
-                                    .withMessage("There are attachment(s), issue(s) and/or comment(s) present in the execution.")
+                                    .withCaption(RB.getString("delete.with.issues.title"))
+                                    .withMessage(RB.getString("delete.with.issues.message"))
                                     .withYesButton(() -> {
                                         try {
                                             if (tc != null) {
@@ -3033,8 +3036,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 LOG.log(Level.SEVERE, null, ex);
                             }
                         } else {
-                            Notification.show("Unable to delete!",
-                                    "There are issues present in the execution.",
+                            Notification.show(RB.getString("delete.error!"),
+                                    RB.getString("delete.with.issues.message"),
                                     Notification.Type.ERROR_MESSAGE);
                         }
                     }
@@ -3069,7 +3072,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void addExecutionDashboard(ContextMenu menu) {
         ContextMenu.ContextMenuItem dashboard
-                = menu.addItem("View Execution Dashboard",
+                = menu.addItem(RB.getString("view.execution.dash"),
                         VaadinIcons.DASHBOARD);
         dashboard.setEnabled(checkRight("testplan.planning"));
         dashboard.addItemClickListener(
@@ -3187,19 +3190,19 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void showVersioningPrompt(Versionable ao, Runnable r) {
         VerticalLayout layout = new VerticalLayout();
         TextArea message = new TextArea();
-        message.setValue("Please document the reasons for the "
+        message.setValue(RB.getString("missing.reason.message")
                 + "change to this item. This will be kep in "
                 + "the history of the record along with user "
                 + "and date the change is done.");
         message.setReadOnly(true);
         message.setSizeFull();
-        TextArea desc = new TextArea("Reason");
+        TextArea desc = new TextArea(RB.getString("general.reason"));
         desc.setSizeFull();
         layout.addComponent(message);
         layout.addComponent(desc);
         //Prompt user with reason for change
         MessageBox prompt = MessageBox.createQuestion();
-        prompt.withCaption("Please provide a reason for the change.")
+        prompt.withCaption(RB.getString("missing.reason.title"))
                 .withMessage(layout)
                 .withYesButton(() -> {
                     ao.setReason(desc.getValue());
