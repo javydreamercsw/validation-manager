@@ -7,6 +7,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import org.openide.util.Lookup;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
@@ -36,30 +37,27 @@ public class DetailStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return ValidationManagerUI.RB.getString("add.details");
+        return "add.details";
     }
 
     @Override
     public Component getContent() {
-        Panel form = new Panel(ValidationManagerUI.RB.getString("execution.detail"));
+        Panel form = new Panel("execution.detail");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(TestCaseExecution.class);
         binder.setItemDataSource(tce);
-        TextArea name = new TextArea(ValidationManagerUI.RB.
-                getString("general.name"));
+        TextArea name = new TextArea("general.name");
         name.setConverter(new ByteToStringConverter());
         binder.bind(name, "name");
         layout.addComponent(name);
-        TextArea scope = new TextArea(ValidationManagerUI.RB.
-                getString("general.scope"));
+        TextArea scope = new TextArea("general.scope");
         scope.setConverter(new ByteToStringConverter());
         binder.bind(scope, "scope");
         layout.addComponent(scope);
         if (tce.getId() != null) {
-            TextArea conclusion = new TextArea(ValidationManagerUI.RB.
-                    getString("general.comclusion"));
+            TextArea conclusion = new TextArea("general.comclusion");
             conclusion.setConverter(new ByteToStringConverter());
             binder.bind(conclusion, "conclusion");
             layout.addComponent(conclusion);
@@ -88,7 +86,7 @@ public class DetailStep implements WizardStep {
             }
             try {
                 tces.write2DB();
-                ValidationManagerUI ui = ValidationManagerUI.getInstance();
+                VMUI ui = Lookup.getDefault().lookup(VMUI.class);
                 ui.buildProjectTree(ui.getSelectdValue());
                 ui.updateProjectList();
                 ui.updateScreen();

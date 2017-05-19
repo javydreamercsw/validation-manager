@@ -3,10 +3,11 @@ package net.sourceforge.javydreamercsw.validation.manager.web.provider;
 import com.vaadin.ui.Component;
 import com.validation.manager.core.AbstractProvider;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.Project;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
@@ -39,13 +40,13 @@ public class DesignerScreenProvider extends AbstractProvider {
             @Override
             public void wizardCompleted(WizardCompletedEvent event) {
                 p = null;
-                ValidationManagerUI.getInstance().updateScreen();
+                Lookup.getDefault().lookup(VMUI.class).updateScreen();
             }
 
             @Override
             public void wizardCancelled(WizardCancelledEvent event) {
                 p = null;
-                ValidationManagerUI.getInstance().updateScreen();
+                Lookup.getDefault().lookup(VMUI.class).updateScreen();
             }
         });
         return w;
@@ -58,8 +59,8 @@ public class DesignerScreenProvider extends AbstractProvider {
 
     @Override
     public boolean shouldDisplay() {
-        return ValidationManagerUI.getInstance().getUser() != null
-                && ValidationManagerUI.getInstance()
+        return Lookup.getDefault().lookup(VMUI.class).getUser() != null
+                && Lookup.getDefault().lookup(VMUI.class)
                         .checkRight("testplan.planning") && p != null;
     }
 

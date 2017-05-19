@@ -6,14 +6,13 @@ package net.sourceforge.javydreamercsw.validation.manager.web.dashboard;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.server.core.ExecutionResultServer;
+import com.validation.manager.core.tool.TCEExtraction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI.TCEExtraction;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -42,7 +41,7 @@ public final class ExecutionDashboard extends VMWindow {
     }
 
     private void init() {
-        setCaption(ValidationManagerUI.RB.getString("execution.dash"));
+        setCaption("execution.dash");
         center();
         setHeight(100, Unit.PERCENTAGE);
         setWidth(100, Unit.PERCENTAGE);
@@ -67,9 +66,9 @@ public final class ExecutionDashboard extends VMWindow {
         });
         //Build bar graph
         JFreeChart chart = ChartFactory.createBarChart3D(
-                ValidationManagerUI.RB.getString("execution.progress"), // chart title
-                ValidationManagerUI.RB.getString("test.case"),
-                ValidationManagerUI.RB.getString("general.amount"),
+                "execution.progress", // chart title
+                "test.case",
+                "general.amount",
                 dataset, // data
                 PlotOrientation.VERTICAL,
                 true, // include legend
