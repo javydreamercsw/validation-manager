@@ -1647,7 +1647,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
                     FileUploader receiver = new FileUploader();
                     Upload upload
-                    = new Upload(RB.getString("uplod.excel"), receiver);
+                    = new Upload(RB.getString("upload.excel"), receiver);
                     upload.addSucceededListener((Upload.SucceededEvent event1) -> {
                         try {
                             subWindow.close();
