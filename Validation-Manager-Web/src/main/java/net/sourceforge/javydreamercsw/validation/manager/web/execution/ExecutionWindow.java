@@ -5,6 +5,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
@@ -13,6 +14,7 @@ import java.util.TreeMap;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
 import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
@@ -97,10 +99,8 @@ public final class ExecutionWindow extends VMWindow {
             public void wizardCompleted(WizardCompletedEvent event) {
                 if (reviewer) {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption(ValidationManagerUI.RB.getString("release.test.case.title"))
-                            .withMessage(ValidationManagerUI.RB.getString("release.test.case.message")
-                                    + "longer be modified.\nIt would be equivalent "
-                                    + "to documenting in paper.")
+                            .withCaption("release.test.case.title")
+                            .withMessage("release.test.case.message")
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)
@@ -114,7 +114,7 @@ public final class ExecutionWindow extends VMWindow {
                                                 }
                                                 ess.setReviewed(true);
                                                 ess.write2DB();
-                                                ValidationManagerUI.getInstance()
+                                                Lookup.getDefault().lookup(VMUI.class)
                                                         .updateScreen();
                                             } catch (Exception ex) {
                                                 Exceptions.printStackTrace(ex);
@@ -127,8 +127,8 @@ public final class ExecutionWindow extends VMWindow {
                     prompt.open();
                 } else {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption(ValidationManagerUI.RB.getString("lock.test.case.title"))
-                            .withMessage(ValidationManagerUI.RB.getString("lock.test.case.message"))
+                            .withCaption("lock.test.case.title")
+                            .withMessage("lock.test.case.message")
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)
@@ -138,7 +138,7 @@ public final class ExecutionWindow extends VMWindow {
                                             try {
                                                 ess.setLocked(true);
                                                 ess.write2DB();
-                                                ValidationManagerUI.getInstance()
+                                                Lookup.getDefault().lookup(VMUI.class)
                                                         .updateScreen();
                                             } catch (Exception ex) {
                                                 Exceptions.printStackTrace(ex);
@@ -150,12 +150,12 @@ public final class ExecutionWindow extends VMWindow {
                     prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
                     prompt.open();
                 }
-                ValidationManagerUI.getInstance().removeWindow(ExecutionWindow.this);
+                Lookup.getDefault().lookup(VMUI.class).removeWindow(ExecutionWindow.this);
             }
 
             @Override
             public void wizardCancelled(WizardCancelledEvent event) {
-                ValidationManagerUI.getInstance().removeWindow(ExecutionWindow.this);
+                Lookup.getDefault().lookup(VMUI.class).removeWindow(ExecutionWindow.this);
             }
         });
         layout.addComponent(execution);

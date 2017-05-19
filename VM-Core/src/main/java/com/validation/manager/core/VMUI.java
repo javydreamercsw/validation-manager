@@ -8,6 +8,8 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  *
@@ -67,4 +69,12 @@ public interface VMUI {
     public Collection<Window> getWindows();
 
     public boolean removeWindow(Window window);
+
+    public Locale getLocale();
+
+    public void setLocale(Locale l);
+
+    public VMUI getInstance();
+
+    public ResourceBundle getResourceBundle();
 }

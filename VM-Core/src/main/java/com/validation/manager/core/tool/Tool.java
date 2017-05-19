@@ -4,13 +4,18 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.TestCaseExecutionServer;
+import com.validation.manager.core.server.core.TestCaseServer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 
 /**
@@ -18,6 +23,9 @@ import javax.swing.ImageIcon;
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
 public class Tool {
+
+    private static final Logger LOG
+            = Logger.getLogger(Tool.class.getSimpleName());
 
     public static ImageIcon createImageIcon(String path, String description) {
         return createImageIcon(path, description, null);
@@ -74,5 +82,39 @@ public class Tool {
             result.addAll(extractRequirements(rsn));
         });
         return result;
+    }
+
+    public static TCEExtraction extractTCE(Object key) {
+        TestCaseExecutionServer tce = null;
+        TestCaseServer tcs = null;
+        if (key instanceof String) {
+            String item = (String) key;
+            String tceIdS = item.substring(item.indexOf("-") + 1,
+                    item.lastIndexOf("-"));
+            try {
+                int tceId = Integer.parseInt(tceIdS);
+                LOG.log(Level.FINE, "{0}", tceId);
+                tce = new TestCaseExecutionServer(tceId);
+            }
+            catch (NumberFormatException nfe) {
+                LOG.log(Level.WARNING, "Unable to find TCE: " + tceIdS, nfe);
+            }
+            try {
+                int tcId = Integer.parseInt(item.substring(item
+                        .lastIndexOf("-") + 1));
+                LOG.log(Level.FINE, "{0}", tcId);
+                tcs = new TestCaseServer(tcId);
+            }
+            catch (NumberFormatException nfe) {
+                LOG.log(Level.WARNING, "Unable to find TCE: " + tceIdS, nfe);
+            }
+        } else if (key instanceof TestCaseExecution) {
+            //It is a TestCaseExecution
+            tce = new TestCaseExecutionServer((TestCaseExecution) key);
+        } else {
+            LOG.log(Level.SEVERE, "Unexpected key: {0}", key);
+            tce = null;
+        }
+        return new TCEExtraction(tce, tcs);
     }
 }

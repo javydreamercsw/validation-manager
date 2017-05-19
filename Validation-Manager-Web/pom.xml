@@ -254,7 +254,7 @@
                     <style>OBF</style>
                     <strict>true</strict>
                     <runTarget>http://localhost:8080/Validation-Manager-Web</runTarget>
-                    <logLevel>ERROR</logLevel>
+                    <logLevel>INFO</logLevel>
                 </configuration>
                 <executions>
                     <execution>

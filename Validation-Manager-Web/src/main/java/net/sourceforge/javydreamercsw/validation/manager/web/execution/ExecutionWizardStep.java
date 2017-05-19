@@ -23,6 +23,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
@@ -72,11 +73,9 @@ public class ExecutionWizardStep implements WizardStep {
 
     private final Wizard w;
     private final ExecutionStepServer step;
-    private final ComboBox result = new ComboBox(ValidationManagerUI.RB
-            .getString("general.result"));
-    private final ComboBox review = new ComboBox(ValidationManagerUI.RB
-            .getString("quality.review"));
-    private final ComboBox issueType = new ComboBox(ValidationManagerUI.RB.getString("issue.type"));
+    private final ComboBox result = new ComboBox("general.result");
+    private final ComboBox review = new ComboBox("quality.review");
+    private final ComboBox issueType = new ComboBox("issue.type");
     private Button attach;
     private Button bug;
     private Button comment;
@@ -95,13 +94,12 @@ public class ExecutionWizardStep implements WizardStep {
         issueType.setSizeFull();
         issueType.setReadOnly(false);
         issueType.setRequired(true);
-        issueType.setRequiredError(ValidationManagerUI.RB
-                .getString("missing.type"));
+        issueType.setRequiredError("missing.type");
         IssueTypeJpaController it
                 = new IssueTypeJpaController(DataBaseManager
                         .getEntityManagerFactory());
         it.findIssueTypeEntities().forEach(type -> {
-            String item = ValidationManagerUI.getInstance()
+            String item = Lookup.getDefault().lookup(VMUI.class)
                     .translate(type.getTypeName());
             issueType.addItem(type.getTypeName());
             issueType.setItemCaption(type.getTypeName(), item);
@@ -119,19 +117,17 @@ public class ExecutionWizardStep implements WizardStep {
         });
         result.setReadOnly(false);
         result.setRequired(true);
-        result.setRequiredError(ValidationManagerUI.RB
-                .getString("missing.result"));
+        result.setRequiredError("missing.result");
         result.setTextInputAllowed(false);
         review.setReadOnly(false);
         review.setRequired(true);
-        review.setRequiredError(ValidationManagerUI.RB
-                .getString("missing.reviiew.result"));
+        review.setRequiredError("missing.reviiew.result");
         review.setTextInputAllowed(false);
         ReviewResultJpaController c2
                 = new ReviewResultJpaController(DataBaseManager
                         .getEntityManagerFactory());
         c2.findReviewResultEntities().forEach(r -> {
-            String item = ValidationManagerUI.getInstance()
+            String item = Lookup.getDefault().lookup(VMUI.class)
                     .translate(r.getReviewName());
             review.addItem(r.getReviewName());
             review.setItemCaption(r.getReviewName(), item);
@@ -153,7 +149,7 @@ public class ExecutionWizardStep implements WizardStep {
                 = new ExecutionResultJpaController(DataBaseManager
                         .getEntityManagerFactory());
         c.findExecutionResultEntities().forEach(r -> {
-            String item = ValidationManagerUI.getInstance()
+            String item = Lookup.getDefault().lookup(VMUI.class)
                     .translate(r.getResultName());
             result.addItem(r.getResultName());
             result.setItemCaption(r.getResultName(), item);
@@ -185,7 +181,7 @@ public class ExecutionWizardStep implements WizardStep {
     @Override
     public Component getContent() {
         getStep().update();
-        Panel form = new Panel(ValidationManagerUI.RB.getString("step.detail"));
+        Panel form = new Panel("step.detail");
         if (getStep().getExecutionStart() == null) {
             //Set the start date.
             getStep().setExecutionStart(new Date());
@@ -195,19 +191,17 @@ public class ExecutionWizardStep implements WizardStep {
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(getStep().getStep().getClass());
         binder.setItemDataSource(getStep().getStep());
-        TextArea text = new TextArea(ValidationManagerUI.RB
-                .getString("general.text"));
+        TextArea text = new TextArea("general.text");
         text.setConverter(new ByteToStringConverter());
         binder.bind(text, "text");
         text.setSizeFull();
         layout.addComponent(text);
-        Field notes = binder.buildAndBind(ValidationManagerUI.RB
-                .getString("general.notes"), "notes",
+        Field notes = binder.buildAndBind("general.notes", "notes",
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
         if (getStep().getExecutionStart() != null) {
-            start = new DateField(ValidationManagerUI.RB.getString("start.date"));
+            start = new DateField("start.date");
             start.setResolution(Resolution.SECOND);
             start.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
@@ -216,7 +210,8 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(start);
         }
         if (getStep().getExecutionEnd() != null) {
-            end = new DateField(ValidationManagerUI.RB.getString("end.date"));
+            end = new DateField(Lookup.getDefault().lookup(VMUI.class)
+                    .translate("end.date"));
             end.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
             end.setResolution(Resolution.SECOND);
@@ -238,7 +233,8 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add Reviewer name
         if (getStep().getReviewer() != null) {
-            TextField reviewerField = new TextField(ValidationManagerUI
+            TextField reviewerField = new TextField(Lookup.getDefault()
+                    .lookup(VMUI.class)
                     .getInstance().translate("general.reviewer"));
             reviewerField.setValue(getStep().getReviewer().getFirstName() + " "
                     + getStep().getReviewer().getLastName());
@@ -246,7 +242,8 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(reviewerField);
         }
         if (getStep().getReviewDate() != null) {
-            reviewDate = new DateField(ValidationManagerUI.RB.getString("review.date"));
+            reviewDate = new DateField(Lookup.getDefault().lookup(VMUI.class)
+                    .translate("review.date"));
             reviewDate.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
             reviewDate.setResolution(Resolution.SECOND);
@@ -255,7 +252,7 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(reviewDate);
         }
         if (VMSettingServer.getSetting("show.expected.result").getBoolVal()) {
-            TextArea expectedResult = new TextArea(ValidationManagerUI.RB.getString("expected.result"));
+            TextArea expectedResult = new TextArea("expected.result");
             expectedResult.setConverter(new ByteToStringConverter());
             binder.bind(expectedResult, "expectedResult");
             expectedResult.setSizeFull();
@@ -263,11 +260,11 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add the Attachments
         HorizontalLayout attachments = new HorizontalLayout();
-        attachments.setCaption(ValidationManagerUI.RB.getString("general.attachment"));
+        attachments.setCaption("general.attachment");
         HorizontalLayout comments = new HorizontalLayout();
-        comments.setCaption(ValidationManagerUI.RB.getString("general.comments"));
+        comments.setCaption("general.comments");
         HorizontalLayout issues = new HorizontalLayout();
-        issues.setCaption(ValidationManagerUI.RB.getString("general.issue"));
+        issues.setCaption("general.issue");
         int commentCounter = 0;
         int issueCounter = 0;
         for (ExecutionStepHasIssue ei : getStep().getExecutionStepHasIssueList()) {
@@ -333,11 +330,11 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add the menu
         HorizontalLayout hl = new HorizontalLayout();
-        attach = new Button(ValidationManagerUI.RB.getString("add.attachment"));
+        attach = new Button("add.attachment");
         attach.setIcon(VaadinIcons.PAPERCLIP);
         attach.addClickListener((Button.ClickEvent event) -> {
             //Show dialog to upload file.
-            Window dialog = new VMWindow(ValidationManagerUI.RB.getString("attach.file"));
+            Window dialog = new VMWindow("attach.file");
             VerticalLayout vl = new VerticalLayout();
             MultiFileUpload multiFileUpload = new MultiFileUpload() {
                 @Override
@@ -365,22 +362,22 @@ public class ExecutionWizardStep implements WizardStep {
                     }
                 }
             };
-            multiFileUpload.setCaption(ValidationManagerUI.RB.getString("select.files.attach"));
+            multiFileUpload.setCaption("select.files.attach");
             vl.addComponent(multiFileUpload);
             dialog.setContent(vl);
             dialog.setHeight(25, Sizeable.Unit.PERCENTAGE);
             dialog.setWidth(25, Sizeable.Unit.PERCENTAGE);
             dialog.center();
-            ValidationManagerUI.getInstance().addWindow(dialog);
+            Lookup.getDefault().lookup(VMUI.class).addWindow(dialog);
         });
         hl.addComponent(attach);
-        bug = new Button(ValidationManagerUI.RB.getString("create.issue"));
+        bug = new Button("create.issue");
         bug.setIcon(VaadinIcons.BUG);
         bug.addClickListener((Button.ClickEvent event) -> {
             displayIssue(new IssueServer());
         });
         hl.addComponent(bug);
-        comment = new Button(ValidationManagerUI.RB.getString("add.comment"));
+        comment = new Button("add.comment");
         comment.setIcon(VaadinIcons.CLIPBOARD_TEXT);
         comment.addClickListener((Button.ClickEvent event) -> {
             AttachmentServer as = new AttachmentServer();
@@ -401,7 +398,7 @@ public class ExecutionWizardStep implements WizardStep {
     }
 
     private void displayIssue(IssueServer is) {
-        Panel form = new Panel(ValidationManagerUI.RB.getString("general.issue"));
+        Panel form = new Panel("general.issue");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         if (is.getIssuePK() == null) {
@@ -410,17 +407,15 @@ public class ExecutionWizardStep implements WizardStep {
         }
         BeanFieldGroup binder = new BeanFieldGroup(is.getClass());
         binder.setItemDataSource(is);
-        Field title = binder.buildAndBind(ValidationManagerUI.RB
-                .getString("general.summary"), "title",
+        Field title = binder.buildAndBind("general.summary", "title",
                 TextField.class);
         title.setSizeFull();
         layout.addComponent(title);
-        Field desc = binder.buildAndBind(ValidationManagerUI.RB
-                .getString("general.description"), "description",
+        Field desc = binder.buildAndBind("general.description", "description",
                 TextArea.class);
         desc.setSizeFull();
         layout.addComponent(desc);
-        DateField creation = (DateField) binder.buildAndBind(ValidationManagerUI.RB.getString("creation.time"),
+        DateField creation = (DateField) binder.buildAndBind("creation.time",
                 "creationTime",
                 DateField.class);
         creation.setReadOnly(true);
@@ -458,7 +453,7 @@ public class ExecutionWizardStep implements WizardStep {
                             if (getStep().getExecutionStepHasIssueList() == null) {
                                 getStep().setExecutionStepHasIssueList(new ArrayList<>());
                             }
-                            getStep().addIssue(issue, ValidationManagerUI
+                            getStep().addIssue(issue, Lookup.getDefault().lookup(VMUI.class)
                                     .getInstance().getUser());
                             getStep().write2DB();
                         }
@@ -470,7 +465,7 @@ public class ExecutionWizardStep implements WizardStep {
                         ButtonOption.icon(VaadinIcons.CHECK),
                         ButtonOption.disable())
                 .withCancelButton(ButtonOption.icon(VaadinIcons.CLOSE));
-        mb.getWindow().setCaption(ValidationManagerUI.RB.getString("issue.detail"));
+        mb.getWindow().setCaption("issue.detail");
         mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
         ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) -> {
             //Enable if there is a description change.
@@ -488,13 +483,12 @@ public class ExecutionWizardStep implements WizardStep {
     }
 
     private void displayComment(AttachmentServer as) {
-        Panel form = new Panel(ValidationManagerUI.RB.getString("general.comment"));
+        Panel form = new Panel("general.comment");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         BeanFieldGroup binder = new BeanFieldGroup(as.getClass());
         binder.setItemDataSource(as);
-        Field desc = binder.buildAndBind(ValidationManagerUI.RB
-                .getString("general.text"), "textValue",
+        Field desc = binder.buildAndBind("general.text", "textValue",
                 TextArea.class);
         desc.setSizeFull();
         layout.addComponent(desc);
@@ -526,7 +520,7 @@ public class ExecutionWizardStep implements WizardStep {
                         ButtonOption.icon(VaadinIcons.CHECK),
                         ButtonOption.disable())
                 .withCancelButton(ButtonOption.icon(VaadinIcons.CLOSE));
-        mb.getWindow().setCaption(ValidationManagerUI.RB.getString("enter.comment"));
+        mb.getWindow().setCaption("enter.comment");
         mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
         ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) -> {
             //Enable only when there is a comment.
@@ -543,11 +537,11 @@ public class ExecutionWizardStep implements WizardStep {
         String answer = ((String) result.getValue());
         String answer2 = ((String) review.getValue());
         if (answer == null) {
-            Notification.show(ValidationManagerUI.RB.getString("unable.to.proceed"),
+            Notification.show("unable.to.proceed",
                     result.getRequiredError(),
                     Notification.Type.WARNING_MESSAGE);
         } else if (reviewer && answer2 == null) {
-            Notification.show(ValidationManagerUI.RB.getString("unable.to.proceed"),
+            Notification.show("unable.to.proceed",
                     review.getRequiredError(),
                     Notification.Type.WARNING_MESSAGE);
         } else {
@@ -569,7 +563,7 @@ public class ExecutionWizardStep implements WizardStep {
                                 newReview.getId())) {
                     getStep().setReviewResultId(newReview);
                     //Set end date to null to reflect update
-                    getStep().setReviewer(ValidationManagerUI.getInstance().getUser());
+                    getStep().setReviewer(Lookup.getDefault().lookup(VMUI.class).getUser());
                 }
                 if (getStep().getExecutionEnd() == null) {
                     getStep().setExecutionEnd(new Date());
@@ -612,8 +606,8 @@ public class ExecutionWizardStep implements WizardStep {
                 LOG.log(Level.WARNING,
                         "Unable to find OpenOffice and/or LibreOffice "
                         + "installation at: {0}", home);
-                Notification.show(ValidationManagerUI.RB.getString("unable.to.render.pdf.title"),
-                        ValidationManagerUI.RB.getString("unable.to.render.pdf.message"),
+                Notification.show("unable.to.render.pdf.title",
+                        "unable.to.render.pdf.message",
                         Notification.Type.ERROR_MESSAGE);
                 return false;
             }
@@ -621,8 +615,8 @@ public class ExecutionWizardStep implements WizardStep {
                 LOG.log(Level.WARNING,
                         "Unable to find OpenOffice and/or LibreOffice "
                         + "installation at port: {0}", port);
-                Notification.show(ValidationManagerUI.RB.getString("unable.to.render.pdf.title"),
-                        ValidationManagerUI.RB.getString("unable.to.render.pdf.port"),
+                Notification.show("unable.to.render.pdf.title",
+                        "unable.to.render.pdf.port",
                         Notification.Type.ERROR_MESSAGE);
                 return false;
             }
@@ -667,7 +661,7 @@ public class ExecutionWizardStep implements WizardStep {
             for (IFileDisplay fd : Lookup.getDefault()
                     .lookupAll(IFileDisplay.class)) {
                 if (fd.supportFile(new File(name))) {
-                    ValidationManagerUI.getInstance()
+                    Lookup.getDefault().lookup(VMUI.class)
                             .addWindow(fd.getViewer(fd.loadFile(name,
                                     bytes)));
                     ableToDisplay = true;
@@ -684,7 +678,7 @@ public class ExecutionWizardStep implements WizardStep {
                         + ".pdf");
                 getPDFRendering(source, dest);
                 if (dest.exists()) {
-                    ValidationManagerUI.getInstance().addWindow(pdf.getViewer(dest));
+                    Lookup.getDefault().lookup(VMUI.class).addWindow(pdf.getViewer(dest));
                     ableToDisplay = true;
                 }
             }
@@ -694,8 +688,8 @@ public class ExecutionWizardStep implements WizardStep {
                     + name, ex);
         }
         if (!ableToDisplay) {
-            Notification.show(ValidationManagerUI.RB.getString("unable.to.render.pdf.title"),
-                    ValidationManagerUI.RB.getString("unable.to.render.pdf.message"),
+            Notification.show("unable.to.render.pdf.title",
+                    "unable.to.render.pdf.message",
                     Notification.Type.ERROR_MESSAGE);
         }
     }
@@ -704,7 +698,7 @@ public class ExecutionWizardStep implements WizardStep {
         MessageBox mb = MessageBox.createQuestion();
         mb.setData(data);
         mb.asModal(true)
-                .withMessage(new Label(ValidationManagerUI.RB.getString("remove.item.title")))
+                .withMessage(new Label("remove.item.title"))
                 .withButtonAlignment(Alignment.MIDDLE_CENTER)
                 .withYesButton(() -> {
                     try {
@@ -743,7 +737,7 @@ public class ExecutionWizardStep implements WizardStep {
                     }
                 },
                         ButtonOption.icon(VaadinIcons.CLOSE));
-        mb.getWindow().setCaption(ValidationManagerUI.RB.getString("issue.details"));
+        mb.getWindow().setCaption("issue.details");
         mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
         return mb;
     }

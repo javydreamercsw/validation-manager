@@ -1,8 +1,11 @@
 package com.validation.manager.core;
 
+import com.vaadin.ui.Component;
+import com.vaadin.ui.HasComponents;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import java.util.logging.Logger;
+import org.openide.util.Lookup;
 
 public abstract class AbstractProvider implements IMainContentProvider {
 
@@ -11,7 +14,12 @@ public abstract class AbstractProvider implements IMainContentProvider {
 
     @Override
     public void update() {
-        //Do nothing by default
+        Component c = getContent();
+        if (c instanceof HasComponents) {
+            VMUI instance = Lookup.getDefault().lookup(VMUI.class).getInstance();
+            VaadinUtils.updateLocale((HasComponents) c, instance.getLocale(),
+                    instance.getResourceBundle());
+        }
     }
 
     @Override

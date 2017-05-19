@@ -16,7 +16,7 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.tool.Tool;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import org.openide.util.Lookup;
 
 /**
  * Trace Matrix component. Traces relationship from requirements to test case
@@ -40,17 +40,13 @@ public class TraceMatrix extends TreeTable {
     }
 
     private void init() {
-        addContainerProperty(ValidationManagerUI.getInstance()
-                .translate("general.requirement"),
+        addContainerProperty("general.requirement",
                 String.class, "");
-        addContainerProperty(ValidationManagerUI.getInstance()
-                .translate("general.test.case"),
+        addContainerProperty("general.test.case",
                 Label.class, "");
-        addContainerProperty(ValidationManagerUI.getInstance()
-                .translate("general.result"),
+        addContainerProperty("general.result",
                 Label.class, "");
-        addContainerProperty(ValidationManagerUI.getInstance()
-                .translate("general.issue"),
+        addContainerProperty("general.issue",
                 Label.class, "");
         Tool.extractRequirements(p).forEach((r) -> {
             if (r.getParentRequirementId() == null) {
@@ -146,7 +142,7 @@ public class TraceMatrix extends TreeTable {
                 if (es.getResultId() != null) {
                     String result = es.getResultId().getResultName();
                     Label resultLabel
-                            = new Label(ValidationManagerUI.getInstance()
+                            = new Label(Lookup.getDefault().lookup(VMUI.class)
                                     .translate(result));
                     addItem(new Object[]{"",
                         new Label("Step #" + es.getStep().getStepSequence()),
@@ -188,7 +184,7 @@ public class TraceMatrix extends TreeTable {
     private void addIssues(ExecutionStep es) {
         for (ExecutionStepHasIssue eshi : es.getExecutionStepHasIssueList()) {
             int issueNumber = eshi.getIssue().getIssuePK().getId();
-            Label label = new Label("Issue #" + issueNumber);
+            Label label = new Label("general.issue" + "#" + issueNumber);
             label.setIcon(VaadinIcons.BUG);
             Object esId = buildId(eshi.getExecutionStep());
             Object issueId = buildId(eshi.getIssue(), esId);
@@ -201,8 +197,7 @@ public class TraceMatrix extends TreeTable {
 
     public Component getMenu() {
         HorizontalLayout hl = new HorizontalLayout();
-        ComboBox baseline = new ComboBox(ValidationManagerUI.RB
-                .getString("baseline.filter"));
+        ComboBox baseline = new ComboBox("baseline.filter");
         baseline.setTextInputAllowed(false);
         baseline.setNewItemsAllowed(false);
         Tool.extractRequirements(p).forEach(r -> {

@@ -17,6 +17,8 @@ import com.validation.manager.core.server.core.RoleServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.VMUserServer;
+import com.validation.manager.core.tool.TCEExtraction;
+import com.validation.manager.core.tool.Tool;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +36,9 @@ public class AssignUserStep implements WizardStep {
 
     private final Object key;
     private final TreeTable testTree
-            = new TreeTable(ValidationManagerUI.RB.getString("available.tests"));
+            = new TreeTable("available.tests");
     private final OptionGroup userGroup
-            = new OptionGroup(ValidationManagerUI.RB.getString("available.tester"));
+            = new OptionGroup("available.tester");
     private TestCaseExecutionServer tce = null;
     private TestCaseServer tc = null;
     private static final Logger LOG
@@ -50,7 +52,7 @@ public class AssignUserStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return ValidationManagerUI.RB.getString("assign.test.case");
+        return "assign.test.case";
     }
 
     @Override
@@ -58,8 +60,7 @@ public class AssignUserStep implements WizardStep {
         VerticalLayout l = new VerticalLayout();
         List<TestCase> testCases = new ArrayList<>();
         List<VmUser> users = new ArrayList<>();
-        ValidationManagerUI.TCEExtraction extracted
-                = ValidationManagerUI.getInstance().extractTCE(key);
+        TCEExtraction extracted = Tool.extractTCE(key);
         tc = extracted.getTestCase();
         tce = extracted.getTestCaseExecution();
         if (tc != null) {
@@ -71,10 +72,10 @@ public class AssignUserStep implements WizardStep {
                         testCases.add(es.getStep().getTestCase());
                     });
         }
-        testTree.addContainerProperty(ValidationManagerUI.RB.
-                getString("general.name"), TreeTableCheckBox.class, "");
-        testTree.addContainerProperty(ValidationManagerUI.RB.
-                getString("general.description"), String.class, "");
+        testTree.addContainerProperty("general.name",
+                TreeTableCheckBox.class, "");
+        testTree.addContainerProperty("general.description",
+                String.class, "");
         testTree.setWidth("20em");
         testCases.forEach((t) -> {
             testTree.addItem(new Object[]{new TreeTableCheckBox(testTree,
@@ -109,8 +110,7 @@ public class AssignUserStep implements WizardStep {
         List<Integer> testCaseIds = new ArrayList<>();
         for (Object id : testTree.getItemIds()) {
             Item item = testTree.getItem(id);
-            Object val = item.getItemProperty(ValidationManagerUI.RB.
-                    getString("general.name")).getValue();
+            Object val = item.getItemProperty("general.name").getValue();
             if (val instanceof TreeTableCheckBox) {
                 TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
                 if (ttcb.getValue()) {
@@ -120,8 +120,8 @@ public class AssignUserStep implements WizardStep {
             }
         }
         if (!selectedTestCase) {
-            Notification.show(ValidationManagerUI.RB.getString("unable.to.proceed"),
-                    ValidationManagerUI.RB.getString("select.test.case.message"),
+            Notification.show("unable.to.proceed",
+                    "select.test.case.message",
                     Notification.Type.WARNING_MESSAGE);
             return false;
         }
