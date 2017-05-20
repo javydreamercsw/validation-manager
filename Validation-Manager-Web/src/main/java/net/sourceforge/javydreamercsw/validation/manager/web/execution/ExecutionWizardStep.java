@@ -209,12 +209,16 @@ public class ExecutionWizardStep implements WizardStep {
         if (getStep().getExecutionStart() != null) {
             start = new DateField(ValidationManagerUI.RB.getString("start.date"));
             start.setResolution(Resolution.SECOND);
+            start.setDateFormat(VMSettingServer.getSetting("date.format")
+                    .getStringVal());
             start.setValue(getStep().getExecutionStart());
             start.setReadOnly(true);
             layout.addComponent(start);
         }
         if (getStep().getExecutionEnd() != null) {
             end = new DateField(ValidationManagerUI.RB.getString("end.date"));
+            end.setDateFormat(VMSettingServer.getSetting("date.format")
+                    .getStringVal());
             end.setResolution(Resolution.SECOND);
             end.setValue(getStep().getExecutionEnd());
             end.setReadOnly(true);
@@ -243,6 +247,8 @@ public class ExecutionWizardStep implements WizardStep {
         }
         if (getStep().getReviewDate() != null) {
             reviewDate = new DateField(ValidationManagerUI.RB.getString("review.date"));
+            reviewDate.setDateFormat(VMSettingServer.getSetting("date.format")
+                    .getStringVal());
             reviewDate.setResolution(Resolution.SECOND);
             reviewDate.setValue(getStep().getReviewDate());
             reviewDate.setReadOnly(true);
@@ -418,6 +424,8 @@ public class ExecutionWizardStep implements WizardStep {
                 "creationTime",
                 DateField.class);
         creation.setReadOnly(true);
+        creation.setDateFormat(VMSettingServer.getSetting("date.format")
+                .getStringVal());
         creation.setResolution(Resolution.SECOND);
         layout.addComponent(creation);
         //Add the result
