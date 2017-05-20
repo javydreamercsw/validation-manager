@@ -740,7 +740,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(summary);
         PopupDateField creation = new PopupDateField(RB.getString("general.creation.date"));
         creation.setResolution(Resolution.SECOND);
-        creation.setDateFormat("MM-dd-yyyy hh:hh:ss");
+        creation.setDateFormat(VMSettingServer.getSetting("date.format").getStringVal());
         binder.bind(creation, "creationDate");
         layout.addComponent(creation);
         Field<?> active = binder.buildAndBind(RB.getString("general.active"), "active");
