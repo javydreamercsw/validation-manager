@@ -10,8 +10,6 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.validation.manager.core.AbstractProvider;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.TestCase;
@@ -29,8 +27,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.execution.ExecutionWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.quality.QualityScreenProvider;
-import org.openide.util.Lookup;
 
 /**
  *
@@ -48,7 +46,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
                 String.class, "");
         testCaseTree.addGeneratedColumn("general.status",
                 (Table source, Object itemId, Object columnId) -> {
-                    if (Lookup.getDefault().lookup(VMUI.class)
+                    if (ValidationManagerUI.getInstance()
                             .translate("general.status").equals(columnId)
                     && itemId instanceof String) {
                         String id = (String) itemId;
@@ -81,7 +79,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
                         }
                         if (locked) {
                             label2.setIcon(VaadinIcons.LOCK);
-                            label2.setDescription(Lookup.getDefault().lookup(VMUI.class)
+                            label2.setDescription(ValidationManagerUI
                                     .getInstance().translate("message.locked"));
                         }
                         if (!summary.isEmpty()) {
@@ -103,9 +101,9 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                 //All is pass
                                 message = "result.pass";
                             }
-                            label.setCaption(Lookup.getDefault().lookup(VMUI.class)
+                            label.setCaption(ValidationManagerUI
                                     .getInstance().translate(message));
-                            label.setDescription(Lookup.getDefault().lookup(VMUI.class)
+                            label.setDescription(ValidationManagerUI
                                     .getInstance().translate(message));
                             //Completed. Now check result
                             switch (message) {
@@ -162,11 +160,11 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     }
                     if (!isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof TesterScreenProvider) {
-                        actions.add(new Action(Lookup.getDefault().lookup(VMUI.class)
+                        actions.add(new Action(ValidationManagerUI.getInstance()
                                 .translate("general.execute")));
                     } else if (isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof QualityScreenProvider) {
-                        actions.add(new Action(Lookup.getDefault().lookup(VMUI.class)
+                        actions.add(new Action(ValidationManagerUI.getInstance()
                                 .translate("general.review")));
                     }
                 }
@@ -223,6 +221,13 @@ public abstract class ExecutionScreen extends AbstractProvider {
         return summary;
     }
 
+    @Override
+    public boolean shouldDisplay() {
+        return ValidationManagerUI.getInstance().getUser() != null
+                && ValidationManagerUI.getInstance()
+                        .checkRight("system.configuration");
+    }
+
     protected ExecutionStepPK extractExecutionStepPK(String itemId) {
         String id = itemId.substring(2); //Remove es
         int esId;
@@ -240,7 +245,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
         if (executionWindow == null) {
             executionWindow = new ExecutionWindow(executions, tcID,
                     this instanceof QualityScreenProvider);
-            executionWindow.setCaption(Lookup.getDefault().lookup(VMUI.class)
+            executionWindow.setCaption(ValidationManagerUI.getInstance()
                     .translate("test.execution"));
             executionWindow.setVisible(true);
             executionWindow.setClosable(false);
@@ -249,8 +254,8 @@ public abstract class ExecutionScreen extends AbstractProvider {
             executionWindow.setModal(true);
             executionWindow.setSizeFull();
         }
-        if (!Lookup.getDefault().lookup(VMUI.class).getWindows().contains(executionWindow)) {
-            Lookup.getDefault().lookup(VMUI.class).addWindow(executionWindow);
+        if (!ValidationManagerUI.getInstance().getWindows().contains(executionWindow)) {
+            ValidationManagerUI.getInstance().addWindow(executionWindow);
         }
     }
 
@@ -265,13 +270,13 @@ public abstract class ExecutionScreen extends AbstractProvider {
     @Override
     public void update() {
         if (executionWindow != null) {
-            executionWindow.setCaption(Lookup.getDefault().lookup(VMUI.class)
+            executionWindow.setCaption(ValidationManagerUI.getInstance()
                     .translate("test.execution"));
         }
-        testCaseTree.setCaption(Lookup.getDefault().lookup(VMUI.class)
+        testCaseTree.setCaption(ValidationManagerUI.getInstance()
                 .translate("available.tests"));
         testCaseTree.removeAllItems();
-        if (Lookup.getDefault().lookup(VMUI.class).getUser() != null) {
+        if (ValidationManagerUI.getInstance().getUser() != null) {
             ProjectServer.getProjects().forEach(p -> {
                 if (p.getParentProjectId() == null) {
                     testCaseTree.addItem(new Object[]{p.getName(),
@@ -304,7 +309,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                                     && es.getLocked()
                                                     || (es.getAssignee() != null
                                                     && es.getAssignee().getId()
-                                                            .equals(Lookup.getDefault().lookup(VMUI.class)
+                                                            .equals(ValidationManagerUI.getInstance()
                                                                     .getUser().getId()))) {
                                                 TestCase tc = es.getStep().getTestCase();
                                                 if (!tcids.contains(tc.getId())) {
@@ -345,6 +350,11 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     });
                 }
             });
+        }
+        //Update column titles
+        for (String h : testCaseTree.getColumnHeaders()) {
+            testCaseTree.setColumnHeader(h, ValidationManagerUI
+                    .getInstance().translate(h));
         }
     }
 }

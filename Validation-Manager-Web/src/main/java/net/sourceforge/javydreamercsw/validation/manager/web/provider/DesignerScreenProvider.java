@@ -1,13 +1,11 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.provider;
 
 import com.vaadin.ui.Component;
-import com.validation.manager.core.AbstractProvider;
 import com.validation.manager.core.IMainContentProvider;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.Project;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
-import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
@@ -16,7 +14,7 @@ import org.vaadin.teemu.wizards.event.WizardProgressListener;
 import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
 import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
-@ServiceProvider(service = IMainContentProvider.class, position = 4)
+@ServiceProvider(service = IMainContentProvider.class, position = 3)
 public class DesignerScreenProvider extends AbstractProvider {
 
     private Project p;
@@ -40,13 +38,13 @@ public class DesignerScreenProvider extends AbstractProvider {
             @Override
             public void wizardCompleted(WizardCompletedEvent event) {
                 p = null;
-                Lookup.getDefault().lookup(VMUI.class).updateScreen();
+                ValidationManagerUI.getInstance().updateScreen();
             }
 
             @Override
             public void wizardCancelled(WizardCancelledEvent event) {
                 p = null;
-                Lookup.getDefault().lookup(VMUI.class).updateScreen();
+                ValidationManagerUI.getInstance().updateScreen();
             }
         });
         return w;
@@ -59,8 +57,8 @@ public class DesignerScreenProvider extends AbstractProvider {
 
     @Override
     public boolean shouldDisplay() {
-        return Lookup.getDefault().lookup(VMUI.class).getUser() != null
-                && Lookup.getDefault().lookup(VMUI.class)
+        return ValidationManagerUI.getInstance().getUser() != null
+                && ValidationManagerUI.getInstance()
                         .checkRight("testplan.planning") && p != null;
     }
 

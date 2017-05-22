@@ -1,11 +1,14 @@
-package com.validation.manager.core;
+package net.sourceforge.javydreamercsw.validation.manager.web.provider;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
+import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.VMUI;
+import com.validation.manager.core.VaadinUtils;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import java.util.logging.Logger;
-import org.openide.util.Lookup;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 
 public abstract class AbstractProvider implements IMainContentProvider {
 
@@ -16,7 +19,7 @@ public abstract class AbstractProvider implements IMainContentProvider {
     public void update() {
         Component c = getContent();
         if (c instanceof HasComponents) {
-            VMUI instance = Lookup.getDefault().lookup(VMUI.class).getInstance();
+            VMUI instance = ValidationManagerUI.getInstance();
             VaadinUtils.updateLocale((HasComponents) c, instance.getLocale(),
                     instance.getResourceBundle());
         }

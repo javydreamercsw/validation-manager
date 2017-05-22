@@ -16,7 +16,7 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.tool.Tool;
-import org.openide.util.Lookup;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 
 /**
  * Trace Matrix component. Traces relationship from requirements to test case
@@ -142,7 +142,7 @@ public class TraceMatrix extends TreeTable {
                 if (es.getResultId() != null) {
                     String result = es.getResultId().getResultName();
                     Label resultLabel
-                            = new Label(Lookup.getDefault().lookup(VMUI.class)
+                            = new Label(ValidationManagerUI.getInstance()
                                     .translate(result));
                     addItem(new Object[]{"",
                         new Label("Step #" + es.getStep().getStepSequence()),

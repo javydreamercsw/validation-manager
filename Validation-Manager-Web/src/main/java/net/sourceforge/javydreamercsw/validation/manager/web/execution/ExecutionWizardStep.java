@@ -23,7 +23,6 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
@@ -99,7 +98,7 @@ public class ExecutionWizardStep implements WizardStep {
                 = new IssueTypeJpaController(DataBaseManager
                         .getEntityManagerFactory());
         it.findIssueTypeEntities().forEach(type -> {
-            String item = Lookup.getDefault().lookup(VMUI.class)
+            String item = ValidationManagerUI.getInstance()
                     .translate(type.getTypeName());
             issueType.addItem(type.getTypeName());
             issueType.setItemCaption(type.getTypeName(), item);
@@ -127,7 +126,7 @@ public class ExecutionWizardStep implements WizardStep {
                 = new ReviewResultJpaController(DataBaseManager
                         .getEntityManagerFactory());
         c2.findReviewResultEntities().forEach(r -> {
-            String item = Lookup.getDefault().lookup(VMUI.class)
+            String item = ValidationManagerUI.getInstance()
                     .translate(r.getReviewName());
             review.addItem(r.getReviewName());
             review.setItemCaption(r.getReviewName(), item);
@@ -149,7 +148,7 @@ public class ExecutionWizardStep implements WizardStep {
                 = new ExecutionResultJpaController(DataBaseManager
                         .getEntityManagerFactory());
         c.findExecutionResultEntities().forEach(r -> {
-            String item = Lookup.getDefault().lookup(VMUI.class)
+            String item = ValidationManagerUI.getInstance()
                     .translate(r.getResultName());
             result.addItem(r.getResultName());
             result.setItemCaption(r.getResultName(), item);
@@ -210,7 +209,7 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(start);
         }
         if (getStep().getExecutionEnd() != null) {
-            end = new DateField(Lookup.getDefault().lookup(VMUI.class)
+            end = new DateField(ValidationManagerUI.getInstance()
                     .translate("end.date"));
             end.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
@@ -233,8 +232,7 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add Reviewer name
         if (getStep().getReviewer() != null) {
-            TextField reviewerField = new TextField(Lookup.getDefault()
-                    .lookup(VMUI.class)
+            TextField reviewerField = new TextField(ValidationManagerUI
                     .getInstance().translate("general.reviewer"));
             reviewerField.setValue(getStep().getReviewer().getFirstName() + " "
                     + getStep().getReviewer().getLastName());
@@ -242,7 +240,7 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(reviewerField);
         }
         if (getStep().getReviewDate() != null) {
-            reviewDate = new DateField(Lookup.getDefault().lookup(VMUI.class)
+            reviewDate = new DateField(ValidationManagerUI.getInstance()
                     .translate("review.date"));
             reviewDate.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
@@ -368,7 +366,7 @@ public class ExecutionWizardStep implements WizardStep {
             dialog.setHeight(25, Sizeable.Unit.PERCENTAGE);
             dialog.setWidth(25, Sizeable.Unit.PERCENTAGE);
             dialog.center();
-            Lookup.getDefault().lookup(VMUI.class).addWindow(dialog);
+            ValidationManagerUI.getInstance().addWindow(dialog);
         });
         hl.addComponent(attach);
         bug = new Button("create.issue");
@@ -453,7 +451,7 @@ public class ExecutionWizardStep implements WizardStep {
                             if (getStep().getExecutionStepHasIssueList() == null) {
                                 getStep().setExecutionStepHasIssueList(new ArrayList<>());
                             }
-                            getStep().addIssue(issue, Lookup.getDefault().lookup(VMUI.class)
+                            getStep().addIssue(issue, ValidationManagerUI
                                     .getInstance().getUser());
                             getStep().write2DB();
                         }
@@ -563,7 +561,7 @@ public class ExecutionWizardStep implements WizardStep {
                                 newReview.getId())) {
                     getStep().setReviewResultId(newReview);
                     //Set end date to null to reflect update
-                    getStep().setReviewer(Lookup.getDefault().lookup(VMUI.class).getUser());
+                    getStep().setReviewer(ValidationManagerUI.getInstance().getUser());
                 }
                 if (getStep().getExecutionEnd() == null) {
                     getStep().setExecutionEnd(new Date());
@@ -661,7 +659,7 @@ public class ExecutionWizardStep implements WizardStep {
             for (IFileDisplay fd : Lookup.getDefault()
                     .lookupAll(IFileDisplay.class)) {
                 if (fd.supportFile(new File(name))) {
-                    Lookup.getDefault().lookup(VMUI.class)
+                    ValidationManagerUI.getInstance()
                             .addWindow(fd.getViewer(fd.loadFile(name,
                                     bytes)));
                     ableToDisplay = true;
@@ -678,7 +676,7 @@ public class ExecutionWizardStep implements WizardStep {
                         + ".pdf");
                 getPDFRendering(source, dest);
                 if (dest.exists()) {
-                    Lookup.getDefault().lookup(VMUI.class).addWindow(pdf.getViewer(dest));
+                    ValidationManagerUI.getInstance().addWindow(pdf.getViewer(dest));
                     ableToDisplay = true;
                 }
             }

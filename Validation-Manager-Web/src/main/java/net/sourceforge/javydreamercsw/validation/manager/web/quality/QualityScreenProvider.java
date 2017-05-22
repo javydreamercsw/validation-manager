@@ -7,20 +7,19 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.server.core.VMSettingServer;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.tester.ExecutionScreen;
-import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
  */
-@ServiceProvider(service = IMainContentProvider.class, position = 3)
+@ServiceProvider(service = IMainContentProvider.class, position = 2)
 public class QualityScreenProvider extends ExecutionScreen {
 
     @Override
@@ -31,8 +30,8 @@ public class QualityScreenProvider extends ExecutionScreen {
     @Override
     public boolean shouldDisplay() {
         VmSetting setting = VMSettingServer.getSetting("quality.review");
-        return Lookup.getDefault().lookup(VMUI.class).getUser() != null
-                && Lookup.getDefault().lookup(VMUI.class)
+        return ValidationManagerUI.getInstance().getUser() != null
+                && ValidationManagerUI.getInstance()
                         .checkRight("quality.assurance")
                 && setting != null
                 && setting.getBoolVal();
@@ -54,8 +53,10 @@ public class QualityScreenProvider extends ExecutionScreen {
             for (ExecutionStep es : c.findExecutionStepEntities()) {
                 if (es.getLocked() && !es.getReviewed()) {
                     //It has been assigned but not started
-                    Notification.show("quality.review.pending.title",
-                            "quality.review.pending.message",
+                    Notification.show(ValidationManagerUI.getInstance()
+                            .translate("quality.review.pending.title"),
+                            ValidationManagerUI.getInstance()
+                                    .translate("quality.review.pending.message"),
                             Notification.Type.TRAY_NOTIFICATION);
                     break;
                 }

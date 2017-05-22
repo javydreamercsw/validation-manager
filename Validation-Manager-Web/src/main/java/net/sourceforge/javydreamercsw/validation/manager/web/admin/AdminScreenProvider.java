@@ -13,19 +13,19 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.validation.manager.core.AbstractProvider;
 import com.validation.manager.core.IMainContentProvider;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.server.core.VMSettingServer;
 import java.util.logging.Level;
-import org.openide.util.Lookup;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.lookup.ServiceProvider;
 
-@ServiceProvider(service = IMainContentProvider.class)
+@ServiceProvider(service = IMainContentProvider.class, position = 4)
 public class AdminScreenProvider extends AbstractProvider {
 
     @Override
@@ -37,16 +37,16 @@ public class AdminScreenProvider extends AbstractProvider {
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         sl.addComponent(split);
         //Build left side
-        Tree sTree = new Tree(Lookup.getDefault().lookup(VMUI.class)
+        Tree sTree = new Tree(ValidationManagerUI.getInstance()
                 .translate("general.settings"));
-        adminSheet.addTab(sl, Lookup.getDefault().lookup(VMUI.class)
+        adminSheet.addTab(sl, ValidationManagerUI.getInstance()
                 .translate("general.settings"));
         VMSettingServer.getSettings().stream().map((s) -> {
             sTree.addItem(s);
             sTree.setChildrenAllowed(s, false);
             return s;
         }).forEachOrdered((s) -> {
-            sTree.setItemCaption(s, Lookup.getDefault().lookup(VMUI.class)
+            sTree.setItemCaption(s, ValidationManagerUI.getInstance()
                     .translate(s.getSetting()));
         });
         split.setFirstComponent(sTree);
@@ -63,53 +63,52 @@ public class AdminScreenProvider extends AbstractProvider {
 
     @Override
     public String getComponentCaption() {
-        return Lookup.getDefault().lookup(VMUI.class)
-                .translate("admin.tab.name");
+        return "admin.tab.name";
     }
 
     @Override
     public boolean shouldDisplay() {
-        return Lookup.getDefault().lookup(VMUI.class).getUser() != null
-                && Lookup.getDefault().lookup(VMUI.class)
+        return ValidationManagerUI.getInstance().getUser() != null
+                && ValidationManagerUI.getInstance()
                         .checkRight("system.configuration");
     }
 
     private Component displaySetting(VmSetting s) {
-        Panel form = new Panel(Lookup.getDefault().lookup(VMUI.class)
+        Panel form = new Panel(ValidationManagerUI.getInstance()
                 .translate("setting.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
         binder.setItemDataSource(s);
-        Field<?> id = binder.buildAndBind(Lookup.getDefault().lookup(VMUI.class)
+        Field<?> id = (TextField) binder.buildAndBind(ValidationManagerUI.getInstance()
                 .translate("general.setting"), "setting");
         layout.addComponent(id);
-        Field bool = binder.buildAndBind(Lookup.getDefault().lookup(VMUI.class)
+        Field bool = binder.buildAndBind(ValidationManagerUI.getInstance()
                 .translate("bool.value"), "boolVal");
         bool.setSizeFull();
         layout.addComponent(bool);
-        Field integerVal = binder.buildAndBind(Lookup.getDefault().lookup(VMUI.class)
+        Field integerVal = binder.buildAndBind(ValidationManagerUI.getInstance()
                 .translate("int.value"), "intVal");
         integerVal.setSizeFull();
         layout.addComponent(integerVal);
-        Field longVal = binder.buildAndBind(Lookup.getDefault().lookup(VMUI.class)
+        Field longVal = binder.buildAndBind(ValidationManagerUI.getInstance()
                 .translate("long.val"), "longVal");
         longVal.setSizeFull();
         layout.addComponent(longVal);
-        Field stringVal = binder.buildAndBind(Lookup.getDefault().lookup(VMUI.class)
+        Field stringVal = binder.buildAndBind(ValidationManagerUI.getInstance()
                 .translate("string.val"), "stringVal",
                 TextArea.class);
         stringVal.setStyleName(ValoTheme.TEXTAREA_LARGE);
         stringVal.setSizeFull();
         layout.addComponent(stringVal);
-        Button cancel = new Button(Lookup.getDefault().lookup(VMUI.class)
+        Button cancel = new Button(ValidationManagerUI.getInstance()
                 .translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
         });
         //Editing existing one
-        Button update = new Button(Lookup.getDefault().lookup(VMUI.class)
+        Button update = new Button(ValidationManagerUI.getInstance()
                 .translate("general.update"));
         update.addClickListener((Button.ClickEvent event) -> {
             try {
@@ -117,8 +116,8 @@ public class AdminScreenProvider extends AbstractProvider {
                 displaySetting(s);
             } catch (FieldGroup.CommitException ex) {
                 LOG.log(Level.SEVERE, null, ex);
-                Notification.show(Lookup.getDefault().lookup(VMUI.class)
-                        .translate("general.error.record.creation"),
+                Notification.show(ValidationManagerUI.getInstance()
+                        .translate("general.error.record.update"),
                         ex.getLocalizedMessage(),
                         Notification.Type.ERROR_MESSAGE);
             }
