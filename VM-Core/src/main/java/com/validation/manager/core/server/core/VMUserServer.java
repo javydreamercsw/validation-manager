@@ -443,6 +443,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         target.setPassword(source.getPassword());
         target.setFirstName(source.getFirstName());
         target.setLastName(source.getLastName());
+        target.setLocale(source.getLocale());
         target.setEmail(source.getEmail());
         target.setAttempts(source.getAttempts());
         target.setLastModified(source.getLastModified());
@@ -452,6 +453,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         target.setUserAssigmentList(source.getUserAssigmentList());
         target.setUserAssigmentList1(source.getUserAssigmentList1());
         target.setUserHasInvestigationList(source.getUserHasInvestigationList());
+        target.setUsername(source.getUsername());
         target.setRootCauseList(source.getRootCauseList());
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setUserTestProjectRoleList(source.getUserTestProjectRoleList());

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
-import org.openide.util.Lookup;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
@@ -86,7 +86,7 @@ public class DetailStep implements WizardStep {
             }
             try {
                 tces.write2DB();
-                VMUI ui = Lookup.getDefault().lookup(VMUI.class);
+                VMUI ui = ValidationManagerUI.getInstance();
                 ui.buildProjectTree(ui.getSelectdValue());
                 ui.updateProjectList();
                 ui.updateScreen();

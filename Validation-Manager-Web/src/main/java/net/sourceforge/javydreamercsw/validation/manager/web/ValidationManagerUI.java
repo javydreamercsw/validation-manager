@@ -1,5 +1,6 @@
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
+import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
@@ -134,6 +135,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -144,7 +146,6 @@ import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerSc
 import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceMatrix;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
 import org.openide.util.Lookup;
-import org.openide.util.lookup.ServiceProvider;
 import org.vaadin.peter.contextmenu.ContextMenu;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
 import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTreeItemEvent;
@@ -157,7 +158,7 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 @Theme("vmtheme")
 @SuppressWarnings("serial")
-@ServiceProvider(service = VMUI.class)
+@PreserveOnRefresh
 public class ValidationManagerUI extends UI implements VMUI {
 
     private VMUserServer user = null;
@@ -175,6 +176,23 @@ public class ValidationManagerUI extends UI implements VMUI {
     private Tab main;
     private final List<String> roles = new ArrayList<>();
     private final String REQUIREMENT_REVIEW = "requirement.view";
+    private static final ArrayList<Locale> LOCALES = new ArrayList<>();
+
+    static {
+        ResourceBundle locale = ResourceBundle
+                .getBundle("com.validation.manager.resources.Locale");
+        String list = locale.getString("AvailableLocales");
+        StringTokenizer st = new StringTokenizer(list, ",");
+        LOCALES.add(Locale.ENGLISH);
+        while (st.hasMoreTokens()) {
+            Locale loc = getLocale(st.nextToken());
+            LOG.log(Level.INFO, "Add Locale: {0}", loc);
+            if (!LOCALES.contains(loc)) {
+                LOCALES.add(loc);
+            }
+        }
+        LOCALES.trimToSize();
+    }
 
     /**
      * @return the user
@@ -184,7 +202,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         return user;
     }
 
-    @Override
     public Tree getTree() {
         return tree;
     }
@@ -198,12 +215,32 @@ public class ValidationManagerUI extends UI implements VMUI {
         super.setLocale(locale);
     }
 
+    public List<Locale> getSupportedLocales() {
+        return getAvailableLocales();
+    }
+
     /**
      * @param user the user to set
      */
-    protected void setUser(VMUserServer user) {
+    public void setUser(VMUserServer user) {
         this.user = user;
-        setLocale(new Locale("es"));
+        if (user != null) {
+            user.update();
+            Locale l;
+            if (user.getLocale() == null) {
+                //Default locale
+                l = Locale.ENGLISH;
+                user.setLocale(l.getLanguage());
+                try {
+                    user.write2DB();
+                } catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            } else {
+                l = new Locale(user.getLocale());
+            }
+            setLocale(l);
+        }
         updateScreen();
     }
 
@@ -278,12 +315,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                             displayRequirementSpecNode(rsn, true);
                         } catch (NonexistentEntityException ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(translate("general.error.record.creation"),
+                            Notification.show(translate("general.error.record.update"),
                                     ex.getLocalizedMessage(),
                                     Notification.Type.ERROR_MESSAGE);
                         } catch (Exception ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(translate("general.error.record.creation"),
+                            Notification.show(translate("general.error.record.update"),
                                     ex.getLocalizedMessage(),
                                     Notification.Type.ERROR_MESSAGE);
                         }
@@ -497,12 +534,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayObject(tce);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
@@ -629,8 +666,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         layout.addComponent(notes);
         tree.select(s);
         if (!s.getRequirementList().isEmpty() && !edit) {
-            layout.addComponent(getDisplayRequirementList(RB
-                    .getString("related.requirements"),
+            layout.addComponent(getDisplayRequirementList("related.requirements",
                     s.getRequirementList()));
         } else {
             AbstractSelect requirements = getRequirementSelectionComponent();
@@ -715,12 +751,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayStep(s, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
@@ -762,7 +798,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         PopupDateField creation = new PopupDateField(RB
                 .getString("general.creation.date"));
         creation.setResolution(Resolution.SECOND);
-        creation.setDateFormat(VMSettingServer.getSetting("date.format").getStringVal());
+        creation.setDateFormat(VMSettingServer.getSetting("date.format")
+                .getStringVal());
         binder.bind(creation, "creationDate");
         layout.addComponent(creation);
         Field<?> active = binder.buildAndBind(translate("general.active"),
@@ -828,12 +865,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayTestCase(t, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
@@ -934,12 +971,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayTestPlan(tp, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
@@ -1034,12 +1071,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayTestProject(tp, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
@@ -1150,19 +1187,19 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayRequirementSpec(rs, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(translate("general.error.record.creation!"),
+                        Notification.show(translate("general.error.record.update"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -1264,8 +1301,8 @@ public class ValidationManagerUI extends UI implements VMUI {
             layout.addComponent(tf);
         }
         if (!req.getRequirementList().isEmpty() && !edit) {
-            layout.addComponent(getDisplayRequirementList(RB
-                    .getString("related.requirements"),
+            layout.addComponent(getDisplayRequirementList(
+                    translate("related.requirements"),
                     req.getRequirementList()));
         } else if (edit) {
             //Allow user to add children
@@ -1330,12 +1367,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayRequirement(rs.getEntity(), false);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation!"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
@@ -1343,7 +1380,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         form.setVisible(false);
                     } catch (VMException ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(translate("general.error.record.creation"),
+                        Notification.show(translate("general.error.record.update"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -1372,7 +1409,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     // @return the current application instance
-    public ValidationManagerUI getInstance() {
+    public static ValidationManagerUI getInstance() {
         return (ValidationManagerUI) ValidationManagerUI
                 .getCurrent();
     }
@@ -1858,6 +1895,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         } else {
             main.setCaption(translate("general.main"));
         }
+        tabSheet.removeAllComponents();
         Lookup.getDefault().lookupAll(IMainContentProvider.class)
                 .forEach((provider) -> {
                     Iterator<Component> it = tabSheet.iterator();
@@ -1874,7 +1912,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         provider.update();
                     }
                     //Hide if needed
-                    if (!provider.shouldDisplay()) {
+                    if (me != null && !provider.shouldDisplay()) {
                         tabSheet.removeComponent(me);
                     }
                 });
@@ -1905,6 +1943,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     user.write2DB();
                     user = null;
                     main = null;
+                    setLocale(Locale.ENGLISH);
                     updateScreen();
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -2009,12 +2048,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     .getEntityManagerFactory()).edit(p);
                         } catch (NonexistentEntityException ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(translate("general.error.record.creation"),
+                            Notification.show(translate("general.error.record.update"),
                                     ex.getLocalizedMessage(),
                                     Notification.Type.ERROR_MESSAGE);
                         } catch (Exception ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(translate("general.error.record.creation"),
+                            Notification.show(translate("general.error.record.update"),
                                     ex.getLocalizedMessage(),
                                     Notification.Type.ERROR_MESSAGE);
                         }
@@ -2186,7 +2225,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         }
     }
 
-    @Override
     public void addProject(Project p, Tree tree) {
         tree.addItem(p);
         tree.setItemCaption(p, p.getName());
@@ -2527,7 +2565,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         return result;
     }
 
-    private boolean checkAnyRights(List<String> rights) {
+    public boolean checkAnyRights(List<String> rights) {
         boolean result = false;
         if (rights.stream().anyMatch((r) -> (checkRight(r)))) {
             return true;
@@ -2558,7 +2596,6 @@ public class ValidationManagerUI extends UI implements VMUI {
             }
         }
         return false;
-
     }
 
     private void displayTestPlanning(Project p) {
@@ -2675,19 +2712,19 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 displayBaseline(baseline, false);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(translate("general.error.record.creation"),
+                                Notification.show(translate("general.error.record.update"),
                                         ex.getLocalizedMessage(),
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(translate("general.error.record.creation"),
+                        Notification.show(translate("general.error.record.update"),
                                 ex.getLocalizedMessage(),
                                 Notification.Type.ERROR_MESSAGE);
                     }
@@ -2854,6 +2891,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         uniqueId.setHeaderCaption(translate("unique.id"));
         Grid.Column description = grid.getColumn("description");
         description.setHeaderCaption(translate("general.description"));
+        Grid.Column notes = grid.getColumn("notes");
+        notes.setHeaderCaption(translate("general.notes"));
         return grid;
     }
 
@@ -2907,8 +2946,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             List<Requirement> requirementList) {
         Grid grid = new Grid(title);
         BeanItemContainer<Requirement> children
-                = new BeanItemContainer<>(Requirement.class
-                );
+                = new BeanItemContainer<>(Requirement.class);
         children.addAll(requirementList);
         grid.setContainerDataSource(children);
         grid.setColumns("uniqueId");
@@ -3213,5 +3251,33 @@ public class ValidationManagerUI extends UI implements VMUI {
         prompt.getWindow().setWidth(50, Unit.PERCENTAGE);
         prompt.getWindow().setHeight(50, Unit.PERCENTAGE);
         prompt.open();
+    }
+
+    public static Locale getLocale(String loc) {
+        Locale locale = Locale.ENGLISH;
+        if (loc != null) {
+            String[] locales = loc.split("_");
+            switch (locales.length) {
+                case 1:
+                    locale = new Locale(locales[0]);
+                    break;
+                case 2:
+                    locale = new Locale(locales[0], locales[1]);
+                    break;
+                case 3:
+                    locale = new Locale(locales[0], locales[1], locales[2]);
+                    break;
+                default:
+                    locale = Locale.getDefault();
+            }
+        }
+        return locale;
+    }
+
+    /**
+     * @return the LOCALES
+     */
+    public static List<Locale> getAvailableLocales() {
+        return Collections.unmodifiableList(LOCALES);
     }
 }

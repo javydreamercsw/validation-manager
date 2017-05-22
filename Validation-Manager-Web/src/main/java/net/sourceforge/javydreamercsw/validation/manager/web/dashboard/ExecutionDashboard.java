@@ -3,7 +3,6 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.dashboard;
 
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.server.core.ExecutionResultServer;
 import com.validation.manager.core.tool.TCEExtraction;
@@ -13,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.openide.util.Lookup;
 import org.vaadin.addon.JFreeChartWrapper;
 
 /**
@@ -57,7 +56,7 @@ public final class ExecutionDashboard extends VMWindow {
                         dataset.addValue(new Double(entry.getValue()
                                 .get(er.getResultName())),
                                 entry.getKey(),
-                                Lookup.getDefault().lookup(VMUI.class)
+                                ValidationManagerUI.getInstance()
                                         .translate(er.getResultName())
                         );
                     }

@@ -1,5 +1,6 @@
 package com.validation.manager.core;
 
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import java.io.UnsupportedEncodingException;
@@ -19,9 +20,9 @@ public class VaadinUtilsTest {
      * Test of updateLocale method, of class VaadinUtils.
      */
     @Test
-    public void testUpdateLocale() {
+    public void testUpdateLocaleId() {
         try {
-            System.out.println("updateLocale");
+            System.out.println("updateLocaleId");
             String key = "demo.tab.message";
             VerticalLayout vl = new VerticalLayout();
             Label l = new Label();
@@ -33,6 +34,40 @@ public class VaadinUtilsTest {
             VaadinUtils.updateLocale(vl, new Locale("es"), rb);
             assertEquals(new String(rb.getString(key)
                     .getBytes("ISO-8859-1"), "UTF-8"), l.getCaption());
+        }
+        catch (UnsupportedEncodingException ex) {
+            Exceptions.printStackTrace(ex);
+            fail();
+        }
+    }
+
+    /**
+     * Test of updateLocale method, of class VaadinUtils.
+     */
+    @Test
+    public void testUpdateLocaleCaption() {
+        try {
+            System.out.println("updateLocaleCaption");
+            ResourceBundle rb = ResourceBundle.getBundle(
+                    "com.validation.manager.resources.VMMessages",
+                    new Locale("es"));
+            VerticalLayout vl = new VerticalLayout();
+            String message = "This is a test: select.test.case and "
+                    + "select.test.case.message";
+            Label l = new Label(message);
+            //Now test complex captions
+            Button b = new Button(message);
+            vl.addComponent(l);
+            vl.addComponent(b);
+            VaadinUtils.updateLocale(vl, new Locale("es"), rb);
+            String expected = message.replaceAll("select.test.case.message",
+                    new String(rb.getString("select.test.case.message")
+                            .getBytes("ISO-8859-1"), "UTF-8"))
+                    .replaceAll("select.test.case",
+                            new String(rb.getString("select.test.case")
+                                    .getBytes("ISO-8859-1"), "UTF-8"));
+            assertEquals(expected, b.getCaption());
+            assertEquals(expected, l.getValue());
         }
         catch (UnsupportedEncodingException ex) {
             Exceptions.printStackTrace(ex);

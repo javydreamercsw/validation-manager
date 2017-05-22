@@ -3,12 +3,11 @@ package net.sourceforge.javydreamercsw.validation.manager.web.tester;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.validation.manager.core.IMainContentProvider;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
-import org.openide.util.Lookup;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.lookup.ServiceProvider;
 
-@ServiceProvider(service = IMainContentProvider.class, position = 2)
+@ServiceProvider(service = IMainContentProvider.class, position = 1)
 public class TesterScreenProvider extends ExecutionScreen {
 
     @Override
@@ -18,10 +17,10 @@ public class TesterScreenProvider extends ExecutionScreen {
 
     @Override
     public boolean shouldDisplay() {
-        return Lookup.getDefault().lookup(VMUI.class).getUser() != null
-                && !Lookup.getDefault().lookup(VMUI.class).getUser()
+        return ValidationManagerUI.getInstance().getUser() != null
+                && !ValidationManagerUI.getInstance().getUser()
                         .getExecutionStepList().isEmpty()
-                && Lookup.getDefault().lookup(VMUI.class).checkRight("testplan.execute");
+                && ValidationManagerUI.getInstance().checkRight("testplan.execute");
     }
 
     @Override
@@ -34,12 +33,14 @@ public class TesterScreenProvider extends ExecutionScreen {
     @Override
     public void processNotification() {
         if (shouldDisplay()) {
-            for (ExecutionStep es : Lookup.getDefault().lookup(VMUI.class).getUser()
+            for (ExecutionStep es : ValidationManagerUI.getInstance().getUser()
                     .getExecutionStepList()) {
                 if (es.getExecutionStart() == null) {
                     //It has been assigned but not started
-                    Notification.show("test.pending.title",
-                            "test.pending.message",
+                    Notification.show(ValidationManagerUI.getInstance()
+                            .translate("test.pending.title"),
+                            ValidationManagerUI.getInstance()
+                                    .translate("test.pending.message"),
                             Notification.Type.TRAY_NOTIFICATION);
                     break;
                 }

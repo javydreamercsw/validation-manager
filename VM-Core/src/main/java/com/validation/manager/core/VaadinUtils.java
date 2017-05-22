@@ -21,12 +21,17 @@
  */
 package com.validation.manager.core;
 
+import com.vaadin.data.Property;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
 import com.vaadin.ui.UI;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +41,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:javier.ortiz.78@gmail.com">Javier Ortiz Bultron</a>
  * Based on code from: <a href="mailto:rmuller@xiam.nl">Ronald K. Muller</a>
+ * https://gist.github.com/rmuller/10980706
  */
 public final class VaadinUtils {
 
@@ -71,10 +77,19 @@ public final class VaadinUtils {
      *
      * }
      *
-     * String key = "demo.tab.message";
+     *      String key = "demo.tab.message";
      *      VerticalLayout vl = new VerticalLayout();
-     *      Label l = new Label();
-     *      l.setId(key);
+     *      Button b = new Button(key);
+     *      vl.addComponent(b);
+     *      ResourceBundle rb = ResourceBundle.getBundle(
+     *              "resource.bundle",
+     *              new Locale("es"));
+     *      VaadinUtils.updateLocale(vl, new Locale("es"), rb);
+     *
+     *      It also works with components implementing Property:
+     *
+     *      VerticalLayout vl = new VerticalLayout();
+     *      Label l = new Label(key);
      *      vl.addComponent(l);
      *      ResourceBundle rb = ResourceBundle.getBundle(
      *              "resource.bundle",
@@ -98,6 +113,13 @@ public final class VaadinUtils {
         final long time = System.currentTimeMillis();
         walkComponentTree(ui, (Component c) -> {
             String id = c.getId();
+            String caption;
+            if (c instanceof Property
+                    && ((Property) c).getValue() instanceof String) {
+                caption = (String) ((Property) c).getValue();
+            } else {
+                caption = c.getCaption();
+            }
             if (id != null && !id.trim().isEmpty()) {
                 if (rb.containsKey(id)) {
                     try {
@@ -107,6 +129,29 @@ public final class VaadinUtils {
                     catch (UnsupportedEncodingException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
+                }
+            } else if (caption != null && !caption.trim().isEmpty()) {
+                /**
+                 * This is a more complex scenario where the caption uses more
+                 * than one key for translation. Sort the keys in reverse so
+                 * substitutions are correct.
+                 */
+                final SortedSet<String> ss = new TreeSet<>(Collections.reverseOrder());
+                for (Enumeration<String> e = rb.getKeys(); e.hasMoreElements();) {
+                    try {
+                        String key = e.nextElement();
+                        ss.add(key);
+                        caption = caption.replaceAll(key, new String(rb.getString(key)
+                                .getBytes("ISO-8859-1"), "UTF-8"));
+                    }
+                    catch (UnsupportedEncodingException ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                }
+                if (c instanceof Property) {
+                    ((Property) c).setValue(caption);
+                } else {
+                    c.setCaption(caption);
                 }
             }
         });
@@ -132,15 +177,4 @@ public final class VaadinUtils {
             }
         }
     }
-
-    // keyToMethodName("user.caption", 5) -> "setCaption"
-    private static String keyToMethodName(final String key, final int prefixLen) {
-        final int n = key.length() - prefixLen;
-        final char[] buffer = new char[n + 3];
-        "set".getChars(0, 3, buffer, 0);
-        key.getChars(prefixLen, prefixLen + n, buffer, 3);
-        buffer[3] = Character.toUpperCase(buffer[3]);
-        return new String(buffer);
-    }
-
 }

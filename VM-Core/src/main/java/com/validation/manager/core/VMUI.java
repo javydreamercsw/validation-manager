@@ -2,9 +2,7 @@ package com.validation.manager.core;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.Tree;
 import com.vaadin.ui.Window;
-import com.validation.manager.core.db.Project;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Collection;
 import java.util.List;
@@ -36,10 +34,6 @@ public interface VMUI {
     VaadinIcons BASELINE_ICON = VaadinIcons.INSERT;
     VaadinIcons DELETE_ICON = VaadinIcons.DEL_A;
     final ThemeResource LOGO = new ThemeResource("vm_logo.png");
-
-    Tree getTree();
-
-    void addProject(Project p, Tree tree);
 
     void buildProjectTree();
 
@@ -73,8 +67,6 @@ public interface VMUI {
     public Locale getLocale();
 
     public void setLocale(Locale l);
-
-    public VMUI getInstance();
 
     public ResourceBundle getResourceBundle();
 }
