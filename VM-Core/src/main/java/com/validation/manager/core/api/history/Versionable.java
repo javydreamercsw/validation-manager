@@ -285,7 +285,7 @@ public abstract class Versionable implements Comparable<Versionable>,
         if (auditable(v)) {
             //Add history of creation
             HistoryServer hs = new HistoryServer();
-            if (v.getModifierId() < 0) {
+            if (v.getModifierId() <= 0) {
                 try {
                     //By default blame system
                     hs.setModifierId(new VMUserServer(1).getEntity());
