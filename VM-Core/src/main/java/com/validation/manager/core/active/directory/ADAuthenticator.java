@@ -17,8 +17,6 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
@@ -30,6 +28,7 @@ public class ADAuthenticator {
     private final String domain;
     private final String ldapHost;
     private final String searchBase;
+    private final String filter;
 
     public ADAuthenticator() {
         this.domain = VMSettingServer.getSetting("ad.domain").getStringVal();
@@ -37,19 +36,22 @@ public class ADAuthenticator {
                 .getStringVal();
         this.searchBase = VMSettingServer.getSetting("ad.root")
                 .getStringVal();//e.g. dc=abbl,dc=org
+        this.filter = VMSettingServer.getSetting("ad.filter")
+                .getStringVal();//e.g. (&(objectClass=user)(sAMAccountName=%u)
     }
 
-    public ADAuthenticator(String domain, String host, String dn) {
+    public ADAuthenticator(String domain, String host, String dn, String filter) {
         this.domain = domain;
         this.ldapHost = host;
         this.searchBase = dn;
+        this.filter = filter;
     }
 
-    public Map authenticate(String user, String pass) {
+    public Map<String, Object> authenticate(String user, String pass) {
         //Check if Active DIrectory autehntication is active.
         if (VMSettingServer.getSetting("ad.enabled").getBoolVal()) {
-            String returnedAtts[] = {"sn", "givenName", "mail"};
-            String searchFilter = "(&(objectClass=user)(sAMAccountName=" + user + "))";
+            String returnedAtts[] = {"sn", "cn", "mail"};
+            String searchFilter = filter.replaceAll("%u", user);
 
             //Create the search controls
             SearchControls searchCtls = new SearchControls();
@@ -59,7 +61,8 @@ public class ADAuthenticator {
             searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
             Hashtable env = new Hashtable();
-            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            env.put(Context.INITIAL_CONTEXT_FACTORY,
+                    "com.sun.jndi.ldap.LdapCtxFactory");
             env.put(Context.PROVIDER_URL, ldapHost);
             env.put(Context.SECURITY_AUTHENTICATION, "simple");
             env.put(Context.SECURITY_PRINCIPAL, user + "@" + domain);
@@ -76,7 +79,7 @@ public class ADAuthenticator {
                     Attributes attrs = sr.getAttributes();
                     Map amap = null;
                     if (attrs != null) {
-                        amap = new HashMap();
+                        amap = new HashMap<>();
                         NamingEnumeration ne = attrs.getAll();
                         while (ne.hasMore()) {
                             Attribute attr = (Attribute) ne.next();
@@ -92,26 +95,5 @@ public class ADAuthenticator {
             }
         }
         return null;
-    }
-
-    /**
-     * Find Active Directory Server
-     *
-     *
-     * @param domain Domain to search into
-     * @return LDAP Host
-     * @throws javax.naming.NamingException
-     */
-    public static String getADServer(String domain)
-            throws NamingException {
-        Hashtable env = new Hashtable();
-        env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
-        env.put("java.naming.provider.url", "dns:");
-        DirContext ctx = new InitialDirContext(env);
-        Attributes attrs = ctx.getAttributes("_ldap._tcp.dc._msdcs."
-                + domain, new String[]{"SRV"});
-        String record = (String) attrs.get("SRV").get();
-        String[] s = record.split(" ");
-        return s[s.length - 1].substring(0, s[s.length - 1].length() - 1);
     }
 }
