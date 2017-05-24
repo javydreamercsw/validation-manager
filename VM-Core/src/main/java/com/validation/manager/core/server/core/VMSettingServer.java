@@ -102,7 +102,6 @@ public final class VMSettingServer extends VmSetting
         target.setSetting(source.getSetting());
         target.setStringVal(source.getStringVal());
         target.setId(source.getId());
-        target.setHistoryList(source.getHistoryList());
         super.update(target, source);
     }
 
