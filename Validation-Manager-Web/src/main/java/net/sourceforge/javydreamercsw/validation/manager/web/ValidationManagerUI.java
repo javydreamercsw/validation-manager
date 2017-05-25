@@ -99,6 +99,8 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
+import com.validation.manager.core.server.core.NotificationServer;
+import com.validation.manager.core.server.core.NotificationTypeServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
@@ -1949,7 +1951,34 @@ public class ValidationManagerUI extends UI implements VMUI {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             });
-            gl.addComponent(logout, 2, 0);
+            gl.addComponent(logout, 1, 0);
+            //Notification Button
+            if (getUser().getNotificationList().isEmpty()
+                    && DataBaseManager.isDemo()) {
+                //For demo add a notification for users
+                try {
+                    NotificationServer ns = new NotificationServer();
+                    ns.setAuthor(new VMUserServer(1).getEntity());
+                    ns.setTargetUser(getUser().getEntity());
+                    ns.setContent("Welcome to ValidationManager!");
+                    ns.setNotificationType(NotificationTypeServer
+                            .getType("general.notification"));
+                    ns.write2DB();
+                } catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            }
+            Button notification = new Button();
+            if (getUser().getPendingNotifications().size() > 0) {
+                notification.setCaption(""
+                        + getUser().getPendingNotifications().size()); //any number, count, etc
+            }
+            notification.setHtmlContentAllowed(true);
+            notification.setIcon(VaadinIcons.BELL);
+            notification.addClickListener((Button.ClickEvent event) -> {
+                //Show notifications
+            });
+            gl.addComponent(notification, 2, 0);
         }
         gl.setSizeFull();
         return gl;

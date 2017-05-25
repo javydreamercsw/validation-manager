@@ -27,6 +27,8 @@
     <class>com.validation.manager.core.db.Issue</class>
     <class>com.validation.manager.core.db.IssueResolution</class>
     <class>com.validation.manager.core.db.IssueType</class>
+    <class>com.validation.manager.core.db.Notification</class>
+    <class>com.validation.manager.core.db.NotificationType</class>
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>
@@ -99,6 +101,8 @@
     <class>com.validation.manager.core.db.Issue</class>
     <class>com.validation.manager.core.db.IssueResolution</class>
     <class>com.validation.manager.core.db.IssueType</class>
+    <class>com.validation.manager.core.db.Notification</class>
+    <class>com.validation.manager.core.db.NotificationType</class>
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>
@@ -173,6 +177,8 @@
     <class>com.validation.manager.core.db.Issue</class>
     <class>com.validation.manager.core.db.IssueResolution</class>
     <class>com.validation.manager.core.db.IssueType</class>
+    <class>com.validation.manager.core.db.Notification</class>
+    <class>com.validation.manager.core.db.NotificationType</class>
     <class>com.validation.manager.core.db.Project</class>
     <class>com.validation.manager.core.db.Requirement</class>
     <class>com.validation.manager.core.db.RequirementSpec</class>

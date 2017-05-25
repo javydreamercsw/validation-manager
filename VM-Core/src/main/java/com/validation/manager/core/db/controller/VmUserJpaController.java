@@ -5,31 +5,32 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.UserStatus;
 import com.validation.manager.core.db.CorrectiveAction;
-import java.util.ArrayList;
-import java.util.List;
-import com.validation.manager.core.db.Role;
-import com.validation.manager.core.db.RootCause;
 import com.validation.manager.core.db.ExecutionStep;
-import com.validation.manager.core.db.UserTestProjectRole;
-import com.validation.manager.core.db.UserTestPlanRole;
-import com.validation.manager.core.db.UserModifiedRecord;
-import com.validation.manager.core.db.UserHasInvestigation;
-import com.validation.manager.core.db.UserAssigment;
 import com.validation.manager.core.db.ExecutionStepHasIssue;
 import com.validation.manager.core.db.ExecutionStepHasVmUser;
 import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.Notification;
+import com.validation.manager.core.db.Role;
+import com.validation.manager.core.db.RootCause;
+import com.validation.manager.core.db.UserAssigment;
+import com.validation.manager.core.db.UserHasInvestigation;
+import com.validation.manager.core.db.UserModifiedRecord;
+import com.validation.manager.core.db.UserStatus;
+import com.validation.manager.core.db.UserTestPlanRole;
+import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -88,6 +89,12 @@ public class VmUserJpaController implements Serializable {
         }
         if (vmUser.getHistoryModificationList() == null) {
             vmUser.setHistoryModificationList(new ArrayList<History>());
+        }
+        if (vmUser.getNotificationList() == null) {
+            vmUser.setNotificationList(new ArrayList<Notification>());
+        }
+        if (vmUser.getNotificationList1() == null) {
+            vmUser.setNotificationList1(new ArrayList<Notification>());
         }
         EntityManager em = null;
         try {
@@ -182,6 +189,18 @@ public class VmUserJpaController implements Serializable {
                 attachedHistoryModificationList.add(historyModificationListHistoryToAttach);
             }
             vmUser.setHistoryModificationList(attachedHistoryModificationList);
+            List<Notification> attachedNotificationList = new ArrayList<Notification>();
+            for (Notification notificationListNotificationToAttach : vmUser.getNotificationList()) {
+                notificationListNotificationToAttach = em.getReference(notificationListNotificationToAttach.getClass(), notificationListNotificationToAttach.getNotificationPK());
+                attachedNotificationList.add(notificationListNotificationToAttach);
+            }
+            vmUser.setNotificationList(attachedNotificationList);
+            List<Notification> attachedNotificationList1 = new ArrayList<Notification>();
+            for (Notification notificationList1NotificationToAttach : vmUser.getNotificationList1()) {
+                notificationList1NotificationToAttach = em.getReference(notificationList1NotificationToAttach.getClass(), notificationList1NotificationToAttach.getNotificationPK());
+                attachedNotificationList1.add(notificationList1NotificationToAttach);
+            }
+            vmUser.setNotificationList1(attachedNotificationList1);
             em.persist(vmUser);
             if (userStatusId != null) {
                 userStatusId.getVmUserList().add(vmUser);
@@ -293,6 +312,24 @@ public class VmUserJpaController implements Serializable {
                     oldModifierIdOfHistoryModificationListHistory = em.merge(oldModifierIdOfHistoryModificationListHistory);
                 }
             }
+            for (Notification notificationListNotification : vmUser.getNotificationList()) {
+                VmUser oldTargetOfNotificationListNotification = notificationListNotification.getTargetUser();
+                notificationListNotification.setTargetUser(vmUser);
+                notificationListNotification = em.merge(notificationListNotification);
+                if (oldTargetOfNotificationListNotification != null) {
+                    oldTargetOfNotificationListNotification.getNotificationList().remove(notificationListNotification);
+                    oldTargetOfNotificationListNotification = em.merge(oldTargetOfNotificationListNotification);
+                }
+            }
+            for (Notification notificationList1Notification : vmUser.getNotificationList1()) {
+                VmUser oldAuthorOfNotificationList1Notification = notificationList1Notification.getAuthor();
+                notificationList1Notification.setAuthor(vmUser);
+                notificationList1Notification = em.merge(notificationList1Notification);
+                if (oldAuthorOfNotificationList1Notification != null) {
+                    oldAuthorOfNotificationList1Notification.getNotificationList1().remove(notificationList1Notification);
+                    oldAuthorOfNotificationList1Notification = em.merge(oldAuthorOfNotificationList1Notification);
+                }
+            }
             em.getTransaction().commit();
         }
         finally {
@@ -338,6 +375,10 @@ public class VmUserJpaController implements Serializable {
             List<ExecutionStepHasVmUser> executionStepHasVmUserListNew = vmUser.getExecutionStepHasVmUserList();
             List<History> historyModificationListOld = persistentVmUser.getHistoryModificationList();
             List<History> historyModificationListNew = vmUser.getHistoryModificationList();
+            List<Notification> notificationListOld = persistentVmUser.getNotificationList();
+            List<Notification> notificationListNew = vmUser.getNotificationList();
+            List<Notification> notificationList1Old = persistentVmUser.getNotificationList1();
+            List<Notification> notificationList1New = vmUser.getNotificationList1();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
@@ -401,6 +442,22 @@ public class VmUserJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain History " + historyModificationListOldHistory + " since its modifierId field is not nullable.");
+                }
+            }
+            for (Notification notificationListOldNotification : notificationListOld) {
+                if (!notificationListNew.contains(notificationListOldNotification)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Notification " + notificationListOldNotification + " since its target field is not nullable.");
+                }
+            }
+            for (Notification notificationList1OldNotification : notificationList1Old) {
+                if (!notificationList1New.contains(notificationList1OldNotification)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Notification " + notificationList1OldNotification + " since its author field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -508,6 +565,20 @@ public class VmUserJpaController implements Serializable {
             }
             historyModificationListNew = attachedHistoryModificationListNew;
             vmUser.setHistoryModificationList(historyModificationListNew);
+            List<Notification> attachedNotificationListNew = new ArrayList<Notification>();
+            for (Notification notificationListNewNotificationToAttach : notificationListNew) {
+                notificationListNewNotificationToAttach = em.getReference(notificationListNewNotificationToAttach.getClass(), notificationListNewNotificationToAttach.getNotificationPK());
+                attachedNotificationListNew.add(notificationListNewNotificationToAttach);
+            }
+            notificationListNew = attachedNotificationListNew;
+            vmUser.setNotificationList(notificationListNew);
+            List<Notification> attachedNotificationList1New = new ArrayList<Notification>();
+            for (Notification notificationList1NewNotificationToAttach : notificationList1New) {
+                notificationList1NewNotificationToAttach = em.getReference(notificationList1NewNotificationToAttach.getClass(), notificationList1NewNotificationToAttach.getNotificationPK());
+                attachedNotificationList1New.add(notificationList1NewNotificationToAttach);
+            }
+            notificationList1New = attachedNotificationList1New;
+            vmUser.setNotificationList1(notificationList1New);
             vmUser = em.merge(vmUser);
             if (userStatusIdOld != null && !userStatusIdOld.equals(userStatusIdNew)) {
                 userStatusIdOld.getVmUserList().remove(vmUser);
@@ -687,6 +758,28 @@ public class VmUserJpaController implements Serializable {
                     }
                 }
             }
+            for (Notification notificationListNewNotification : notificationListNew) {
+                if (!notificationListOld.contains(notificationListNewNotification)) {
+                    VmUser oldTargetOfNotificationListNewNotification = notificationListNewNotification.getTargetUser();
+                    notificationListNewNotification.setTargetUser(vmUser);
+                    notificationListNewNotification = em.merge(notificationListNewNotification);
+                    if (oldTargetOfNotificationListNewNotification != null && !oldTargetOfNotificationListNewNotification.equals(vmUser)) {
+                        oldTargetOfNotificationListNewNotification.getNotificationList().remove(notificationListNewNotification);
+                        oldTargetOfNotificationListNewNotification = em.merge(oldTargetOfNotificationListNewNotification);
+                    }
+                }
+            }
+            for (Notification notificationList1NewNotification : notificationList1New) {
+                if (!notificationList1Old.contains(notificationList1NewNotification)) {
+                    VmUser oldAuthorOfNotificationList1NewNotification = notificationList1NewNotification.getAuthor();
+                    notificationList1NewNotification.setAuthor(vmUser);
+                    notificationList1NewNotification = em.merge(notificationList1NewNotification);
+                    if (oldAuthorOfNotificationList1NewNotification != null && !oldAuthorOfNotificationList1NewNotification.equals(vmUser)) {
+                        oldAuthorOfNotificationList1NewNotification.getNotificationList1().remove(notificationList1NewNotification);
+                        oldAuthorOfNotificationList1NewNotification = em.merge(oldAuthorOfNotificationList1NewNotification);
+                    }
+                }
+            }
             em.getTransaction().commit();
         }
         catch (Exception ex) {
@@ -775,6 +868,20 @@ public class VmUserJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the History " + historyModificationListOrphanCheckHistory + " in its historyModificationList field has a non-nullable modifierId field.");
+            }
+            List<Notification> notificationListOrphanCheck = vmUser.getNotificationList();
+            for (Notification notificationListOrphanCheckNotification : notificationListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the Notification " + notificationListOrphanCheckNotification + " in its notificationList field has a non-nullable target field.");
+            }
+            List<Notification> notificationList1OrphanCheck = vmUser.getNotificationList1();
+            for (Notification notificationList1OrphanCheckNotification : notificationList1OrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the Notification " + notificationList1OrphanCheckNotification + " in its notificationList1 field has a non-nullable author field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

@@ -10,6 +10,7 @@ import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.CorrectiveAction;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.Notification;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
@@ -476,6 +477,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         target.setExecutionStepList(source.getExecutionStepList());
         target.setExecutionStepList1(source.getExecutionStepList1());
         target.setExecutionStepHasIssueList(source.getExecutionStepHasIssueList());
+        target.setNotificationList(source.getNotificationList());
+        target.setNotificationList1(source.getNotificationList1());
 //        super.update(target, source);
     }
 
@@ -524,5 +527,16 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     @Override
     public String toString() {
         return getFirstName() + " " + getLastName();
+    }
+
+    public List<Notification> getPendingNotifications() {
+        update();
+        List<Notification> pending = new ArrayList<>();
+        getNotificationList().forEach(n -> {
+            if (n.getAcknowledgeDate() == null) {
+                pending.add(n);
+            }
+        });
+        return pending;
     }
 }

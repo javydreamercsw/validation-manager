@@ -38,15 +38,8 @@
 
     <inherits name="pl.pdfviewer.WidgetSet" />
 
-    
-
     <inherits name="org.tepi.imageviewer.WidgetSet" />
 
-    
-
-    
-
-    
-
     <inherits name="de.datenhahn.vaadin.componentrenderer.ComponentRendererWidgetSet" />
+    
 </module>

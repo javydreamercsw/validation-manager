@@ -142,6 +142,10 @@ public class VmUser extends Login implements Serializable {
     private List<ExecutionStepHasVmUser> executionStepHasVmUserList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "modifierId")
     private List<History> historyModificationList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "targetUser")
+    private List<Notification> notificationList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "author")
+    private List<Notification> notificationList1;
 
     public VmUser() {
         super();
@@ -383,5 +387,25 @@ public class VmUser extends Login implements Serializable {
 
     public void setHistoryModificationList(List<History> historyList) {
         this.historyModificationList = historyList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Notification> getNotificationList() {
+        return notificationList;
+    }
+
+    public void setNotificationList(List<Notification> notificationList) {
+        this.notificationList = notificationList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Notification> getNotificationList1() {
+        return notificationList1;
+    }
+
+    public void setNotificationList1(List<Notification> notificationList1) {
+        this.notificationList1 = notificationList1;
     }
 }
