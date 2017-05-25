@@ -15,7 +15,8 @@ public class SelectRequirementVersionStep implements WizardStep {
 
     private History h;
     private final Requirement r;
-    private final ComboBox history = new ComboBox(java.util.ResourceBundle.getBundle("com/validation/manager/resources/VMMessages").getString("general.history"));
+    private final ComboBox history = new ComboBox(ValidationManagerUI
+            .getInstance().translate("general.history"));
 
     public SelectRequirementVersionStep(Requirement r) {
         this.r = r;
@@ -29,7 +30,8 @@ public class SelectRequirementVersionStep implements WizardStep {
     @Override
     public Component getContent() {
         BeanItemContainer<History> historyContainer
-                = new BeanItemContainer<>(History.class, getRequirement().getHistoryList());
+                = new BeanItemContainer<>(History.class,
+                        getRequirement().getHistoryList());
         history.setContainerDataSource(historyContainer);
         history.getItemIds().forEach(id -> {
             History temp = ((History) id);
