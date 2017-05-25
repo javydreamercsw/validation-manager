@@ -341,7 +341,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
-    private void setTabContent(Tab target, Component content,
+    public void setTabContent(Tab target, Component content,
             String permission) {
         Layout l = (Layout) target.getComponent();
         if (l != null) {
@@ -1865,7 +1865,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         }
     }
 
-    private Component findMainProvider(String id) {
+    public Component findMainProvider(String id) {
         Iterator<Component> it = tabSheet.iterator();
         Component me = null;
         while (it.hasNext()) {
@@ -1976,7 +1976,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             notification.setHtmlContentAllowed(true);
             notification.setIcon(VaadinIcons.BELL);
             notification.addClickListener((Button.ClickEvent event) -> {
-                //Show notifications
+                //TODO: Show notifications screen
             });
             gl.addComponent(notification, 2, 0);
         }
@@ -2629,8 +2629,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void displayTestPlanning(Project p) {
         DesignerScreenProvider provider = Lookup.getDefault()
-                .lookup(DesignerScreenProvider.class
-                );
+                .lookup(DesignerScreenProvider.class);
         if (provider != null && p != null) {
             provider.setProject(p);
             updateScreen();
