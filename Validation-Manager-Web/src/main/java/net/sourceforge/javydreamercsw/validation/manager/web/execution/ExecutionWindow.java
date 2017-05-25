@@ -97,8 +97,10 @@ public final class ExecutionWindow extends VMWindow {
             public void wizardCompleted(WizardCompletedEvent event) {
                 if (reviewer) {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption("release.test.case.title")
-                            .withMessage("release.test.case.message")
+                            .withCaption(ValidationManagerUI.getInstance()
+                                    .translate("release.test.case.title"))
+                            .withMessage(ValidationManagerUI.getInstance()
+                                    .translate("release.test.case.message"))
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)
@@ -125,8 +127,10 @@ public final class ExecutionWindow extends VMWindow {
                     prompt.open();
                 } else {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption("lock.test.case.title")
-                            .withMessage("lock.test.case.message")
+                            .withCaption(ValidationManagerUI.getInstance()
+                                    .translate("lock.test.case.title"))
+                            .withMessage(ValidationManagerUI.getInstance()
+                                    .translate("lock.test.case.message"))
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)
