@@ -2,9 +2,14 @@ package net.sourceforge.javydreamercsw.validation.manager.web.notification;
 
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.converter.Converter;
+import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.Grid.SingleSelectionModel;
+import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.TextArea;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.db.Notification;
@@ -42,9 +47,15 @@ public class NotificationScreenProvider extends AbstractProvider {
         ValidationManagerUI.getInstance().getUser().getNotificationList().forEach(n -> {
             container.addBean(n);
         });
+        HorizontalSplitPanel vs = new HorizontalSplitPanel();
+        vs.setSplitPosition(25, Sizeable.Unit.PERCENTAGE);
+        TextArea text = new TextArea(ValidationManagerUI.getInstance()
+                .translate("general.text"));
+        text.setWordwrap(true);
+        text.setSizeFull();
         Grid grid = new Grid(ValidationManagerUI.getInstance()
                 .translate("general.notifications"), container);
-        grid.setColumns("notificationType", "author", "creationDate", "content");
+        grid.setColumns("notificationType", "author", "creationDate");
         Column nt = grid.getColumn("notificationType");
         nt.setHeaderCaption(ValidationManagerUI.getInstance()
                 .translate("notification.type"));
@@ -89,10 +100,22 @@ public class NotificationScreenProvider extends AbstractProvider {
         Column creation = grid.getColumn("creationDate");
         creation.setHeaderCaption(ValidationManagerUI.getInstance()
                 .translate("creation.time"));
-        Column content = grid.getColumn("content");
-        content.setHeaderCaption(ValidationManagerUI.getInstance()
-                .translate("general.text"));
+        grid.setSelectionMode(SelectionMode.SINGLE);
         grid.setSizeFull();
-        return grid;
+        grid.addSelectionListener(selectionEvent -> { // Java 8
+            // Get selection from the selection model
+            Object selected = ((SingleSelectionModel) grid.getSelectionModel())
+                    .getSelectedRow();
+            if (selected != null) {
+                text.setReadOnly(false);
+                Notification n = (Notification) selected;
+                text.setValue(n.getContent());
+                text.setReadOnly(true);
+            }
+        });
+        vs.setFirstComponent(grid);
+        vs.setSecondComponent(text);
+        vs.setSizeFull();
+        return vs;
     }
 }

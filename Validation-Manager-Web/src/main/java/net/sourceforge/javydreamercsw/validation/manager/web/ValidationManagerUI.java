@@ -66,6 +66,8 @@ import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.history.Versionable;
 import com.validation.manager.core.api.history.Versionable.CHANGE_LEVEL;
+import com.validation.manager.core.api.notification.INotificationManager;
+import com.validation.manager.core.api.notification.NotificationTypes;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.History;
@@ -99,8 +101,6 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
-import com.validation.manager.core.server.core.NotificationServer;
-import com.validation.manager.core.server.core.NotificationTypeServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
@@ -407,7 +407,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     Map<Requirement, History> history = new HashMap<>();
                     if (ps != null) {
                         List<Requirement> toApprove = new ArrayList<>();
-                        for (Requirement r : Tool.extractRequirements(ps)) {
+                        Tool.extractRequirements(ps).forEach((r) -> {
                             //Check each requirement and see if they have minor versions (last version is not baselined)
                             History h = r.getHistoryList().get(r.getHistoryList().size() - 1);
                             if (h.getMajorVersion() == 0
@@ -422,7 +422,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             } else {
                                 history.put(r, h);
                             }
-                        }
+                        });
                         if (!toApprove.isEmpty()) {
                             MessageBox mb = MessageBox.create();
                             mb.asModal(true)
@@ -1957,13 +1957,11 @@ public class ValidationManagerUI extends UI implements VMUI {
                     && DataBaseManager.isDemo()) {
                 //For demo add a notification for users
                 try {
-                    NotificationServer ns = new NotificationServer();
-                    ns.setAuthor(new VMUserServer(1).getEntity());
-                    ns.setTargetUser(getUser().getEntity());
-                    ns.setContent("Welcome to ValidationManager!");
-                    ns.setNotificationType(NotificationTypeServer
-                            .getType("general.notification"));
-                    ns.write2DB();
+                    Lookup.getDefault().lookup(INotificationManager.class)
+                            .addNotification("Welcome to ValidationManager!",
+                                    NotificationTypes.GENERAL,
+                                    getUser().getEntity(),
+                                    new VMUserServer(1).getEntity());
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
@@ -2665,9 +2663,9 @@ public class ValidationManagerUI extends UI implements VMUI {
         Button cancel = new Button(translate("general.cancel"));
         if (rs != null) {
             List<History> potential = new ArrayList<>();
-            for (Requirement r : Tool.extractRequirements(rs)) {
+            Tool.extractRequirements(rs).forEach((r) -> {
                 potential.add(r.getHistoryList().get(r.getHistoryList().size() - 1));
-            }
+            });
             layout.addComponent(createRequirementHistoryTable(translate("included.requirements"),
                     potential));
         } else {
