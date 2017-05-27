@@ -1905,10 +1905,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                             .getComponentCaption());
                     if (me == null) {
                         if (provider.shouldDisplay()) {
-                            tabSheet.addTab(provider
-                                    .getContent(),
-                                    translate(provider
-                                            .getComponentCaption()));
+                            tabSheet.addTab(provider.getContent(),
+                                    translate(provider.getComponentCaption()));
                         }
                     } else {
                         provider.update();
