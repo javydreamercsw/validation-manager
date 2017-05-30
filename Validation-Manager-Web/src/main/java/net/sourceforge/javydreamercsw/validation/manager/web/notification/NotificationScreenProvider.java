@@ -8,8 +8,8 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Grid.SingleSelectionModel;
-import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.VerticalSplitPanel;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.db.Notification;
@@ -48,7 +48,7 @@ public class NotificationScreenProvider extends AbstractProvider {
                 .forEach(n -> {
                     container.addBean(n);
                 });
-        HorizontalSplitPanel vs = new HorizontalSplitPanel();
+        VerticalSplitPanel vs = new VerticalSplitPanel();
         vs.setSplitPosition(25, Sizeable.Unit.PERCENTAGE);
         TextArea text = new TextArea(ValidationManagerUI.getInstance()
                 .translate("general.text"));
