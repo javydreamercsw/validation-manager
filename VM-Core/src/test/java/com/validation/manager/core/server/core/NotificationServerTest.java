@@ -25,7 +25,7 @@ public class NotificationServerTest extends AbstractVMTestCase {
         instance.setContent("Hello there!");
         instance.setCreationDate(new Date());
         instance.setNotificationType(NotificationTypeServer
-                .getType("test.notification"));
+                .getType("notification.test.pending"));
         instance.setTargetUser(target.getEntity());
         assertEquals(0, author.getNotificationList().size());
         assertEquals(0, target.getNotificationList().size());
