@@ -1,5 +1,7 @@
-package com.validation.manager.core.api.internationalization;
+package com.validation.manager.core.spi.internationalization;
 
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.api.internationalization.LocaleListener;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.ResourceBundle;
