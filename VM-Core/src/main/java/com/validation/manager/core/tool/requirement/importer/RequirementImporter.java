@@ -47,7 +47,7 @@ import static org.openide.util.Lookup.getDefault;
 /**
  * Import Requirements into database
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class RequirementImporter implements ImporterInterface<Requirement> {
 

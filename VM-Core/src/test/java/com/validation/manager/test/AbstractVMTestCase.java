@@ -33,7 +33,7 @@ import org.junit.Before;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public abstract class AbstractVMTestCase extends TestCase {
 

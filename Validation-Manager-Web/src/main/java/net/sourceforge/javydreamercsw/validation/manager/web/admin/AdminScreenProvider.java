@@ -18,15 +18,21 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.server.core.VMSettingServer;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = IMainContentProvider.class, position = 4)
 public class AdminScreenProvider extends AbstractProvider {
+
+    private static final Logger LOG
+            = Logger.getLogger(IMainContentProvider.class.getSimpleName());
 
     @Override
     public Component getContent() {
@@ -37,16 +43,16 @@ public class AdminScreenProvider extends AbstractProvider {
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         sl.addComponent(split);
         //Build left side
-        Tree sTree = new Tree(ValidationManagerUI.getInstance()
+        Tree sTree = new Tree(Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("general.settings"));
-        adminSheet.addTab(sl, ValidationManagerUI.getInstance()
+        adminSheet.addTab(sl, Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("general.settings"));
         VMSettingServer.getSettings().stream().map((s) -> {
             sTree.addItem(s);
             sTree.setChildrenAllowed(s, false);
             return s;
         }).forEachOrdered((s) -> {
-            sTree.setItemCaption(s, ValidationManagerUI.getInstance()
+            sTree.setItemCaption(s, Lookup.getDefault().lookup(InternationalizationProvider.class)
                     .translate(s.getSetting()));
         });
         split.setFirstComponent(sTree);
@@ -74,41 +80,41 @@ public class AdminScreenProvider extends AbstractProvider {
     }
 
     private Component displaySetting(VmSetting s) {
-        Panel form = new Panel(ValidationManagerUI.getInstance()
+        Panel form = new Panel(Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("setting.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
         binder.setItemDataSource(s);
-        Field<?> id = (TextField) binder.buildAndBind(ValidationManagerUI.getInstance()
+        Field<?> id = (TextField) binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("general.setting"), "setting");
         layout.addComponent(id);
-        Field bool = binder.buildAndBind(ValidationManagerUI.getInstance()
+        Field bool = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("bool.value"), "boolVal");
         bool.setSizeFull();
         layout.addComponent(bool);
-        Field integerVal = binder.buildAndBind(ValidationManagerUI.getInstance()
+        Field integerVal = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("int.value"), "intVal");
         integerVal.setSizeFull();
         layout.addComponent(integerVal);
-        Field longVal = binder.buildAndBind(ValidationManagerUI.getInstance()
+        Field longVal = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("long.val"), "longVal");
         longVal.setSizeFull();
         layout.addComponent(longVal);
-        Field stringVal = binder.buildAndBind(ValidationManagerUI.getInstance()
+        Field stringVal = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("string.val"), "stringVal",
                 TextArea.class);
         stringVal.setStyleName(ValoTheme.TEXTAREA_LARGE);
         stringVal.setSizeFull();
         layout.addComponent(stringVal);
-        Button cancel = new Button(ValidationManagerUI.getInstance()
+        Button cancel = new Button(Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
         });
         //Editing existing one
-        Button update = new Button(ValidationManagerUI.getInstance()
+        Button update = new Button(Lookup.getDefault().lookup(InternationalizationProvider.class)
                 .translate("general.update"));
         update.addClickListener((Button.ClickEvent event) -> {
             try {
@@ -116,7 +122,7 @@ public class AdminScreenProvider extends AbstractProvider {
                 displaySetting(s);
             } catch (FieldGroup.CommitException ex) {
                 LOG.log(Level.SEVERE, null, ex);
-                Notification.show(ValidationManagerUI.getInstance()
+                Notification.show(Lookup.getDefault().lookup(InternationalizationProvider.class)
                         .translate("general.error.record.update"),
                         ex.getLocalizedMessage(),
                         Notification.Type.ERROR_MESSAGE);

@@ -6,15 +6,19 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.tool.MD5;
 import java.util.logging.Level;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import java.util.logging.Logger;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = IMainContentProvider.class)
 public class DemoProvider extends AbstractProvider {
 
+    private static final Logger LOG
+            = Logger.getLogger(DemoProvider.class.getSimpleName());
     private VerticalLayout layout;
 
     @Override
@@ -55,7 +59,8 @@ public class DemoProvider extends AbstractProvider {
                             .append(" <b>")
                             .append("general.role")
                             .append(":</b> ")
-                            .append(ValidationManagerUI.getInstance()
+                            .append(Lookup.getDefault()
+                                    .lookup(InternationalizationProvider.class)
                                     .translate(u.getRoleList().get(0)
                                             .getDescription()))
                             .append("</li>");

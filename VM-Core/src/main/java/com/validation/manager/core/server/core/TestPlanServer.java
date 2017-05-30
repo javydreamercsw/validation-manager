@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class TestPlanServer extends TestPlan
         implements EntityServer<TestPlan> {

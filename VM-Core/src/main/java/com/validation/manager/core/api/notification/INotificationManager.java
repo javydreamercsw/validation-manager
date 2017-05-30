@@ -5,7 +5,7 @@ import com.validation.manager.core.db.VmUser;
 /**
  * This handles the notification from the system.
  *
- * @author Javier Ortiz Bultron<javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultronjavier.ortiz.78@gmail.com
  */
 public interface INotificationManager {
 

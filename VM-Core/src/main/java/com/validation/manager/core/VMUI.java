@@ -7,11 +7,10 @@ import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public interface VMUI {
 
@@ -35,12 +34,32 @@ public interface VMUI {
     VaadinIcons DELETE_ICON = VaadinIcons.DEL_A;
     final ThemeResource LOGO = new ThemeResource("vm_logo.png");
 
+    /**
+     * Create and populate the project tree.
+     */
     void buildProjectTree();
 
+    /**
+     * Create and populate the project tree. Select the provided object in the
+     * tree.
+     *
+     * @param item Item to select.
+     */
     void buildProjectTree(Object item);
 
+    /**
+     * Display the specified object.
+     *
+     * @param item Item to display.
+     * @param edit True if it should be displayed in edit mode.
+     */
     void displayObject(Object item, boolean edit);
 
+    /**
+     * Get the selected object from the tree.
+     *
+     * @return Selected object or null if none selected.
+     */
     Object getSelectdValue();
 
     /**
@@ -48,25 +67,72 @@ public interface VMUI {
      */
     VMUserServer getUser();
 
-    String translate(String mess);
-
+    /**
+     * Refresh the project list. Useful to show changes.
+     */
     void updateProjectList();
 
+    /**
+     * Update the screen to show changes.
+     */
     void updateScreen();
 
+    /**
+     * Check if the current user has the specified right.
+     *
+     * @param right Right to check
+     * @return true if it has the right, false otherwise.
+     */
     boolean checkRight(String right);
 
+    /**
+     * Check the provided rights against the current user.
+     *
+     * @param rights Rights to check
+     * @return true if it has all the right, false otherwise.
+     */
     boolean checkAllRights(List<String> rights);
 
+    /**
+     * Add a window to the UI
+     *
+     * @param window
+     */
     public void addWindow(Window window);
 
+    /**
+     * Get windows.
+     *
+     * @return available windows.
+     */
     public Collection<Window> getWindows();
 
+    /**
+     * Remove a window from UI.
+     *
+     * @param window Window to remove.
+     * @return true if was able to remove.
+     */
     public boolean removeWindow(Window window);
 
+    /**
+     * Current locale.
+     *
+     * @return Current locale
+     */
     public Locale getLocale();
 
+    /**
+     * Change the locale.
+     *
+     * @param l New locale.
+     */
     public void setLocale(Locale l);
 
-    public ResourceBundle getResourceBundle();
+    /**
+     * Show tab with provided id.
+     *
+     * @param id Id to search for.
+     */
+    public void showTab(String id);
 }

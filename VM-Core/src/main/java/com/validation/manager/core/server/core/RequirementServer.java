@@ -24,7 +24,7 @@ import org.openide.util.Lookup;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class RequirementServer extends Requirement
         implements EntityServer<Requirement>, VersionableServer<Requirement> {

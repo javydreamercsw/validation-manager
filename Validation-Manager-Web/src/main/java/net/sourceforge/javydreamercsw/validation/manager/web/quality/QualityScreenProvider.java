@@ -7,17 +7,19 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.server.core.VMSettingServer;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.tester.ExecutionScreen;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 @ServiceProvider(service = IMainContentProvider.class, position = 2)
 public class QualityScreenProvider extends ExecutionScreen {
@@ -53,9 +55,9 @@ public class QualityScreenProvider extends ExecutionScreen {
             for (ExecutionStep es : c.findExecutionStepEntities()) {
                 if (es.getLocked() && !es.getReviewed()) {
                     //It has been assigned but not started
-                    Notification.show(ValidationManagerUI.getInstance()
+                    Notification.show(Lookup.getDefault().lookup(InternationalizationProvider.class)
                             .translate("quality.review.pending.title"),
-                            ValidationManagerUI.getInstance()
+                            Lookup.getDefault().lookup(InternationalizationProvider.class)
                                     .translate("quality.review.pending.message"),
                             Notification.Type.TRAY_NOTIFICATION);
                     break;

@@ -13,40 +13,48 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMUserServer;
+import org.openide.util.Lookup;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 @SuppressWarnings("serial")
 public final class LoginDialog extends VMWindow {
 
     private final ShortcutAction enterKey
-            = new ShortcutAction(ValidationManagerUI.getInstance()
+            = new ShortcutAction(Lookup.getDefault()
+                    .lookup(InternationalizationProvider.class)
                     .translate("general.login"),
                     ShortcutAction.KeyCode.ENTER, null);
 
-    private final TextField name = new TextField(ValidationManagerUI
-            .getInstance().translate("general.username"));
-    private final PasswordField password = new PasswordField(ValidationManagerUI
-            .getInstance().translate("general.password"));
+    private final TextField name = new TextField(Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate("general.username"));
+    private final PasswordField password = new PasswordField(Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate("general.password"));
 
-    private final Button loginButton = new Button(ValidationManagerUI
-            .getInstance().translate("general.login"),
+    private final Button loginButton = new Button(Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate("general.login"),
             (ClickEvent event) -> {
                 tryToLogIn();
             });
 
-    private final Button cancelButton = new Button(ValidationManagerUI
-            .getInstance().translate("general.cancel"),
+    private final Button cancelButton = new Button(Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate("general.cancel"),
             (ClickEvent event) -> {
                 LoginDialog.this.close();
             });
 
     public LoginDialog(ValidationManagerUI menu) {
-        super(menu, ValidationManagerUI.getInstance()
+        super(menu, Lookup.getDefault()
+                .lookup(InternationalizationProvider.class)
                 .translate("general.login"));
         init();
     }
@@ -62,13 +70,15 @@ public final class LoginDialog extends VMWindow {
         layout.addComponent(password);
         name.focus();
         StringLengthValidator nameVal = new StringLengthValidator(
-                ValidationManagerUI.getInstance().
+                Lookup.getDefault()
+                        .lookup(InternationalizationProvider.class).
                         translate("password.length.message"));
         nameVal.setMinLength(5);
         name.addValidator(nameVal);
         name.setImmediate(true);
         StringLengthValidator passVal = new StringLengthValidator(
-                ValidationManagerUI.getInstance().
+                Lookup.getDefault()
+                        .lookup(InternationalizationProvider.class).
                         translate("password.empty.message"));
         passVal.setMinLength(3);
         password.addValidator(passVal);
@@ -109,9 +119,11 @@ public final class LoginDialog extends VMWindow {
             if (menu != null) {
                 menu.setUser(null);
             }
-            new Notification(ValidationManagerUI.getInstance().
+            new Notification(Lookup.getDefault()
+                    .lookup(InternationalizationProvider.class).
                     translate("general.login.invalid.title"),
-                    ValidationManagerUI.getInstance().
+                    Lookup.getDefault()
+                            .lookup(InternationalizationProvider.class).
                             translate("general.login.invalid.message"),
                     Notification.Type.WARNING_MESSAGE, true)
                     .show(Page.getCurrent());

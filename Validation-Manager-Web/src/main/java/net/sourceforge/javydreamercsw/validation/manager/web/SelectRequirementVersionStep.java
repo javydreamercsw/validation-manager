@@ -3,20 +3,23 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Requirement;
+import org.openide.util.Lookup;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class SelectRequirementVersionStep implements WizardStep {
 
     private History h;
     private final Requirement r;
-    private final ComboBox history = new ComboBox(ValidationManagerUI
-            .getInstance().translate("general.history"));
+    private final ComboBox history = new ComboBox(Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate("general.history"));
 
     public SelectRequirementVersionStep(Requirement r) {
         this.r = r;

@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class RequirementSpecNodeServer extends RequirementSpecNode
         implements EntityServer<RequirementSpecNode> {

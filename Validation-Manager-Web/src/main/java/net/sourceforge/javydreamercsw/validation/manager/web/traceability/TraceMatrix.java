@@ -8,6 +8,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TreeTable;
 import com.validation.manager.core.VMUI;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepHasIssue;
@@ -16,13 +17,13 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.tool.Tool;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import org.openide.util.Lookup;
 
 /**
  * Trace Matrix component. Traces relationship from requirements to test case
  * steps including results and issues.
  *
- * @author Javier Ortiz Bultron<javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultronjavier.ortiz.78@gmail.com
  */
 public class TraceMatrix extends TreeTable {
 
@@ -142,10 +143,15 @@ public class TraceMatrix extends TreeTable {
                 if (es.getResultId() != null) {
                     String result = es.getResultId().getResultName();
                     Label resultLabel
-                            = new Label(ValidationManagerUI.getInstance()
+                            = new Label(Lookup.getDefault()
+                                    .lookup(InternationalizationProvider.class)
                                     .translate(result));
                     addItem(new Object[]{"",
-                        new Label("Step #" + es.getStep().getStepSequence()),
+                        new Label(
+                        Lookup.getDefault()
+                        .lookup(InternationalizationProvider.class)
+                        .translate("general.step")
+                        + " #" + es.getStep().getStepSequence()),
                         resultLabel, new Label()}, esId);
                     setParent(esId, tcID);
                     //Completed. Now check result

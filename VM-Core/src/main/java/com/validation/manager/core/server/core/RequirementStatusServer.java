@@ -7,7 +7,7 @@ import com.validation.manager.core.db.controller.RequirementStatusJpaController;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class RequirementStatusServer extends RequirementStatus
         implements EntityServer<RequirementStatus> {

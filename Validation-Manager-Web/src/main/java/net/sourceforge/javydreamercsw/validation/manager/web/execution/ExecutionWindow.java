@@ -5,6 +5,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
@@ -13,6 +14,7 @@ import java.util.TreeMap;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
 import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
@@ -22,7 +24,7 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class ExecutionWindow extends VMWindow {
 
@@ -97,9 +99,9 @@ public final class ExecutionWindow extends VMWindow {
             public void wizardCompleted(WizardCompletedEvent event) {
                 if (reviewer) {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption(ValidationManagerUI.getInstance()
+                            .withCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
                                     .translate("release.test.case.title"))
-                            .withMessage(ValidationManagerUI.getInstance()
+                            .withMessage(Lookup.getDefault().lookup(InternationalizationProvider.class)
                                     .translate("release.test.case.message"))
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
@@ -127,9 +129,9 @@ public final class ExecutionWindow extends VMWindow {
                     prompt.open();
                 } else {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption(ValidationManagerUI.getInstance()
+                            .withCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
                                     .translate("lock.test.case.title"))
-                            .withMessage(ValidationManagerUI.getInstance()
+                            .withMessage(Lookup.getDefault().lookup(InternationalizationProvider.class)
                                     .translate("lock.test.case.message"))
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)

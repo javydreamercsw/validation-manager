@@ -7,7 +7,7 @@ import java.util.Locale;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class UserToStringConverter implements Converter<String, VmUser> {
 

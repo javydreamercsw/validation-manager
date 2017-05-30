@@ -19,23 +19,29 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.core.tool.MD5;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
  * The provider for the profile tab to manage your account.
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 @ServiceProvider(service = IMainContentProvider.class, position = 5)
 public class ProfileProvider extends AbstractProvider {
+
+    private static final Logger LOG
+            = Logger.getLogger(ProfileProvider.class.getSimpleName());
 
     @Override
     public boolean shouldDisplay() {
@@ -57,31 +63,31 @@ public class ProfileProvider extends AbstractProvider {
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(user.getClass());
         binder.setItemDataSource(user);
-        Field<?> fn = binder.buildAndBind(ValidationManagerUI.getInstance().
+        Field<?> fn = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class).
                 translate("general.first.name"),
                 "firstName", TextField.class);
         layout.addComponent(fn);
-        Field<?> ln = binder.buildAndBind(ValidationManagerUI.getInstance().
+        Field<?> ln = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class).
                 translate("general.last.name"),
                 "lastName", TextField.class);
         layout.addComponent(ln);
-        Field<?> username = binder.buildAndBind(ValidationManagerUI.getInstance().
+        Field<?> username = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class).
                 translate("general.username"),
                 "username", TextField.class);
         layout.addComponent(username);
         PasswordField pw = (PasswordField) binder.buildAndBind(
-                ValidationManagerUI.getInstance().
+                Lookup.getDefault().lookup(InternationalizationProvider.class).
                         translate("general.password"),
                 "password", PasswordField.class);
         PasswordChangeListener listener = new PasswordChangeListener();
         pw.addTextChangeListener(listener);
         pw.setConverter(new UserPasswordConverter());
         layout.addComponent(pw);
-        Field<?> email = binder.buildAndBind(ValidationManagerUI.getInstance().
+        Field<?> email = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class).
                 translate("general.email"),
                 "email", TextField.class);
         layout.addComponent(email);
-        ComboBox locale = new ComboBox(ValidationManagerUI.getInstance().
+        ComboBox locale = new ComboBox(Lookup.getDefault().lookup(InternationalizationProvider.class).
                 translate("general.locale"));
         ValidationManagerUI.getAvailableLocales().forEach(l -> {
             locale.addItem(l.toString());
@@ -90,7 +96,7 @@ public class ProfileProvider extends AbstractProvider {
             locale.setValue(user.getLocale());
         }
         layout.addComponent(locale);
-        Button update = new Button(ValidationManagerUI.getInstance().
+        Button update = new Button(Lookup.getDefault().lookup(InternationalizationProvider.class).
                 translate("general.update"));
         update.addClickListener((Button.ClickEvent event) -> {
             try {
@@ -105,14 +111,16 @@ public class ProfileProvider extends AbstractProvider {
                     //Different password. Prompt for confirmation
                     MessageBox mb = MessageBox.create();
                     VerticalLayout vl = new VerticalLayout();
-                    Label l = new Label(ValidationManagerUI.getInstance().
+                    Label l = new Label(Lookup.getDefault().lookup(InternationalizationProvider.class).
                             translate("password.confirm.pw.message"));
                     vl.addComponent(l);
-                    PasswordField np = new PasswordField(ValidationManagerUI
-                            .getInstance().translate("general.password"));
+                    PasswordField np = new PasswordField(Lookup.getDefault()
+                            .lookup(InternationalizationProvider.class)
+                            .translate("general.password"));
                     vl.addComponent(np);
                     mb.asModal(true)
-                            .withCaption(ValidationManagerUI.getInstance().
+                            .withCaption(Lookup.getDefault()
+                                    .lookup(InternationalizationProvider.class).
                                     translate("password.confirm.pw"))
                             .withMessage(vl)
                             .withButtonAlignment(Alignment.MIDDLE_CENTER)
@@ -122,11 +130,11 @@ public class ProfileProvider extends AbstractProvider {
                                         us.setHashPassword(true);
                                         us.setPassword(np.getValue());
                                         us.write2DB();
-                                        Notification.show(ValidationManagerUI.getInstance().
+                                        Notification.show(Lookup.getDefault().lookup(InternationalizationProvider.class).
                                                 translate("audit.user.account.password.change"),
                                                 Notification.Type.ASSISTIVE_NOTIFICATION);
                                     } else {
-                                        Notification.show(ValidationManagerUI.getInstance().
+                                        Notification.show(Lookup.getDefault().lookup(InternationalizationProvider.class).
                                                 translate("password.does.not.match"),
                                                 Notification.Type.WARNING_MESSAGE);
                                     }
@@ -147,13 +155,14 @@ public class ProfileProvider extends AbstractProvider {
                 ValidationManagerUI.getInstance().setUser(us);
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
-                Notification.show(ValidationManagerUI.getInstance().
+                Notification.show(Lookup.getDefault().lookup(InternationalizationProvider.class).
                         translate("general.error.record.update"),
                         ex.getLocalizedMessage(),
                         Notification.Type.ERROR_MESSAGE);
             }
         });
-        Button cancel = new Button(ValidationManagerUI.getInstance().
+        Button cancel = new Button(Lookup.getDefault()
+                .lookup(InternationalizationProvider.class).
                 translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();

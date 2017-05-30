@@ -22,7 +22,7 @@ import org.vaadin.teemu.wizards.WizardStep;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class DetailStep implements WizardStep {
 

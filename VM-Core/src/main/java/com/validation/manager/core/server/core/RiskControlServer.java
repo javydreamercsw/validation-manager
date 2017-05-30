@@ -13,7 +13,7 @@ import static java.util.logging.Logger.getLogger;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class RiskControlServer extends RiskControl
         implements EntityServer<RiskControl> {

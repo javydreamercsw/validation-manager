@@ -23,6 +23,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
@@ -66,7 +67,7 @@ import org.vaadin.teemu.wizards.WizardStep;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class ExecutionWizardStep implements WizardStep {
 
@@ -98,7 +99,7 @@ public class ExecutionWizardStep implements WizardStep {
                 = new IssueTypeJpaController(DataBaseManager
                         .getEntityManagerFactory());
         it.findIssueTypeEntities().forEach(type -> {
-            String item = ValidationManagerUI.getInstance()
+            String item = Lookup.getDefault().lookup(InternationalizationProvider.class)
                     .translate(type.getTypeName());
             issueType.addItem(type.getTypeName());
             issueType.setItemCaption(type.getTypeName(), item);
@@ -126,7 +127,7 @@ public class ExecutionWizardStep implements WizardStep {
                 = new ReviewResultJpaController(DataBaseManager
                         .getEntityManagerFactory());
         c2.findReviewResultEntities().forEach(r -> {
-            String item = ValidationManagerUI.getInstance()
+            String item = Lookup.getDefault().lookup(InternationalizationProvider.class)
                     .translate(r.getReviewName());
             review.addItem(r.getReviewName());
             review.setItemCaption(r.getReviewName(), item);
@@ -148,7 +149,7 @@ public class ExecutionWizardStep implements WizardStep {
                 = new ExecutionResultJpaController(DataBaseManager
                         .getEntityManagerFactory());
         c.findExecutionResultEntities().forEach(r -> {
-            String item = ValidationManagerUI.getInstance()
+            String item = Lookup.getDefault().lookup(InternationalizationProvider.class)
                     .translate(r.getResultName());
             result.addItem(r.getResultName());
             result.setItemCaption(r.getResultName(), item);
@@ -209,7 +210,7 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(start);
         }
         if (getStep().getExecutionEnd() != null) {
-            end = new DateField(ValidationManagerUI.getInstance()
+            end = new DateField(Lookup.getDefault().lookup(InternationalizationProvider.class)
                     .translate("end.date"));
             end.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
@@ -232,15 +233,17 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add Reviewer name
         if (getStep().getReviewer() != null) {
-            TextField reviewerField = new TextField(ValidationManagerUI
-                    .getInstance().translate("general.reviewer"));
+            TextField reviewerField = new TextField(Lookup.getDefault()
+                    .lookup(InternationalizationProvider.class)
+                    .translate("general.reviewer"));
             reviewerField.setValue(getStep().getReviewer().getFirstName() + " "
                     + getStep().getReviewer().getLastName());
             reviewerField.setReadOnly(true);
             layout.addComponent(reviewerField);
         }
         if (getStep().getReviewDate() != null) {
-            reviewDate = new DateField(ValidationManagerUI.getInstance()
+            reviewDate = new DateField(Lookup.getDefault()
+                    .lookup(InternationalizationProvider.class)
                     .translate("review.date"));
             reviewDate.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());

@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class DemoBuilder {
 

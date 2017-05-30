@@ -5,15 +5,13 @@ import com.vaadin.ui.HasComponents;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.VaadinUtils;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
-import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import org.openide.util.Lookup;
 
 public abstract class AbstractProvider implements IMainContentProvider {
-
-    protected static final Logger LOG
-            = Logger.getLogger(AbstractProvider.class.getSimpleName());
 
     @Override
     public void update() {
@@ -21,7 +19,8 @@ public abstract class AbstractProvider implements IMainContentProvider {
         if (c instanceof HasComponents) {
             VMUI instance = ValidationManagerUI.getInstance();
             VaadinUtils.updateLocale((HasComponents) c, instance.getLocale(),
-                    instance.getResourceBundle());
+                    Lookup.getDefault().lookup(InternationalizationProvider.class)
+                            .getResourceBundle());
         }
     }
 

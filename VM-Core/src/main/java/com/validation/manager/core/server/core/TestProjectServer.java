@@ -14,7 +14,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class TestProjectServer extends TestProject
         implements EntityServer<TestProject> {

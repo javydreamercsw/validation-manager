@@ -8,7 +8,7 @@ import com.validation.manager.core.db.controller.HistoryFieldJpaController;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class HistoryFieldServer extends HistoryField
         implements EntityServer<HistoryField> {

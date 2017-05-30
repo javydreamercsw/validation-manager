@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class TimestampAdapter extends XmlAdapter<java.util.Date, java.sql.Timestamp> {
 

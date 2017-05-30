@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author Javier A. Ortiz Bultron<javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultronjavier.ortiz.78@gmail.com
  */
 public final class VMIdServer extends VmId implements EntityServer<VmId> {
 

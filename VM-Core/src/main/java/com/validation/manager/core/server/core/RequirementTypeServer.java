@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class RequirementTypeServer extends RequirementType
         implements EntityServer<RequirementType> {

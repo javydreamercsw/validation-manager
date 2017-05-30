@@ -15,7 +15,7 @@ import org.openide.util.Exceptions;
 
 /**
  *
- * @author Javier Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class DemoBuilderIT extends AbstractVMTestCase {
 

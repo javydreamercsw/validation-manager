@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 @Entity
 @Table(name = "user_test_plan_role")

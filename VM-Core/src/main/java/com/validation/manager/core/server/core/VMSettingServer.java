@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class VMSettingServer extends VmSetting
         implements EntityServer<VmSetting>, VersionableServer<VmSetting> {

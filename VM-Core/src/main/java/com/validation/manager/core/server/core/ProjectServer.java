@@ -15,7 +15,7 @@ import static java.util.logging.Logger.getLogger;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class ProjectServer extends Project
         implements EntityServer<Project>, VersionableServer<Project> {

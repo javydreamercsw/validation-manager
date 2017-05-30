@@ -15,7 +15,7 @@ import pl.pdfviewer.PdfViewer;
  * This class creates a PDF with the iText library. This class implements the
  * StreamSource interface which defines the getStream method.
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 @ServiceProvider(service = IFileDisplay.class)
 public class PDFDisplay extends AbstractFileDisplay {

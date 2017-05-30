@@ -9,7 +9,7 @@ import java.util.Date;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class NotificationServer extends Notification
         implements EntityServer<Notification> {

@@ -7,7 +7,7 @@ import com.validation.manager.core.db.controller.IssueJpaController;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class IssueServer extends Issue
         implements EntityServer<Issue> {

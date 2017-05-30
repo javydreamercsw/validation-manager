@@ -11,7 +11,7 @@ import javax.persistence.PrePersist;
 /**
  * Work around issue with sequencing on H2 databases on Linux
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class VMIdGenerator {
 
