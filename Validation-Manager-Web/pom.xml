@@ -4,18 +4,21 @@
     <parent>
         <artifactId>Validation-Manager</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.4.1-SNAPSHOT</version>
+        <version>0.3.1-SNAPSHOT</version>
     </parent>
     
     <artifactId>Validation-Manager-Web</artifactId>
     <packaging>war</packaging>
     <name>Validation Manager Web</name>
+    <description>Validation Manager web interface.</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
         <openoffice.version>4.1.2</openoffice.version>
         <vaadin.version>7.7.9</vaadin.version>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
     <repositories>
         <repository>
@@ -175,12 +178,17 @@
     </dependencies>
     
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <!-- Run annotation processors on src/main/java sources -->
             <plugin>
                 <groupId>org.bsc.maven</groupId>
                 <artifactId>maven-processor-plugin</artifactId>
-                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>process</id>
@@ -195,7 +203,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -206,7 +213,6 @@
             <!-- directory is cleaned properly -->
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.0.0</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -218,8 +224,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.1.0</version>
                 <configuration>
+                    <archive>                   
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
                         <resource>
@@ -329,5 +340,4 @@
             </plugins>
         </pluginManagement>
     </build>
-    <description>Validation Manager web interface.</description>
 </project>
