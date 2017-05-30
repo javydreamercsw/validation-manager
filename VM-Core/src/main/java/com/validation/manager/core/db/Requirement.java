@@ -1,7 +1,7 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.api.history.Auditable;
-import com.validation.manager.core.api.history.Versionable;
+import com.validation.manager.core.history.Auditable;
+import com.validation.manager.core.history.Versionable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

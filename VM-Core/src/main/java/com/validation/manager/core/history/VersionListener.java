@@ -1,4 +1,4 @@
-package com.validation.manager.core.api.history;
+package com.validation.manager.core.history;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.History;
@@ -39,41 +39,4 @@ public class VersionListener {
             }
         }
     }
-
-//    @PrePersist
-//    public synchronized void onCreation(Object entity) {
-//        //Handle audit
-//        if (entity instanceof Versionable
-//                && DataBaseManager.isVersioningEnabled()) {
-//            try {
-//                Versionable v = (Versionable) entity;
-//                if (v.getReason() == null) {
-//                    v.setReason("audit.general.creation");
-//                }
-//                v.updateHistory();
-//            }
-//            catch (Exception ex) {
-//                LOG.log(Level.SEVERE, null, ex);
-//            }
-//        }
-//    }
-//
-//    @PreUpdate
-//    public synchronized void onChange(Object entity) {
-//        //Handle audit
-//        if (entity instanceof Versionable
-//                && DataBaseManager.isVersioningEnabled()) {
-//            try {
-//                Versionable v = (Versionable) entity;
-//                if (v.getReason() == null
-//                        || v.getReason().equals("audit.general.creation")) {
-//                    v.setReason("audit.general.modified");
-//                }
-//                v.updateHistory();
-//            }
-//            catch (Exception ex) {
-//                LOG.log(Level.SEVERE, null, ex);
-//            }
-//        }
-//    }
 }

@@ -1,6 +1,6 @@
 package com.validation.manager.core.db;
 
-import com.validation.manager.core.api.history.Versionable;
+import com.validation.manager.core.history.Versionable;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;

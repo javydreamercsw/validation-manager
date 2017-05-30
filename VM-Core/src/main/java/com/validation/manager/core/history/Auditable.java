@@ -1,4 +1,4 @@
-package com.validation.manager.core.api.history;
+package com.validation.manager.core.history;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

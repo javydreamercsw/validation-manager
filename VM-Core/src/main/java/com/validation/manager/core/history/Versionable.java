@@ -1,4 +1,4 @@
-package com.validation.manager.core.api.history;
+package com.validation.manager.core.history;
 
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.FieldType;
