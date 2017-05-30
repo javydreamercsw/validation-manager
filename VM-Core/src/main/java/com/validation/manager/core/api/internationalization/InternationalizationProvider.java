@@ -6,7 +6,7 @@ import java.util.ResourceBundle;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public interface InternationalizationProvider {
+public interface InternationalizationProvider extends LocaleListener {
 
     /**
      * Translate a string.

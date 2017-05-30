@@ -13,7 +13,7 @@ import org.openide.util.lookup.ServiceProviders;
     @ServiceProvider(service = InternationalizationProvider.class, position = 1)
     ,@ServiceProvider(service = LocaleListener.class)})
 public class DefaultInternationalizationProvider
-        implements InternationalizationProvider, LocaleListener {
+        implements InternationalizationProvider {
 
     private ResourceBundle RB = ResourceBundle.getBundle(
             "com.validation.manager.resources.VMMessages", Locale.getDefault());
