@@ -44,9 +44,10 @@ public class NotificationScreenProvider extends AbstractProvider {
         //On top put a list of notifications
         BeanItemContainer<Notification> container
                 = new BeanItemContainer<>(Notification.class);
-        ValidationManagerUI.getInstance().getUser().getNotificationList().forEach(n -> {
-            container.addBean(n);
-        });
+        ValidationManagerUI.getInstance().getUser().getNotificationList()
+                .forEach(n -> {
+                    container.addBean(n);
+                });
         HorizontalSplitPanel vs = new HorizontalSplitPanel();
         vs.setSplitPosition(25, Sizeable.Unit.PERCENTAGE);
         TextArea text = new TextArea(ValidationManagerUI.getInstance()
@@ -116,6 +117,7 @@ public class NotificationScreenProvider extends AbstractProvider {
         vs.setFirstComponent(grid);
         vs.setSecondComponent(text);
         vs.setSizeFull();
+        vs.setId(getComponentCaption());
         return vs;
     }
 }
