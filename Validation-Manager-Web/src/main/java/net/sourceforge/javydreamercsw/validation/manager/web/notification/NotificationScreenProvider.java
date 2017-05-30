@@ -1,5 +1,6 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.notification;
 
+import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.shared.ui.grid.HeightMode;
@@ -39,6 +40,8 @@ public class NotificationScreenProvider extends AbstractProvider {
     private static final Logger LOG
             = Logger.getLogger(NotificationScreenProvider.class.getSimpleName());
     private VerticalLayout vs = null;
+    private final InternationalizationProvider TRANSLATOR = Lookup.getDefault()
+            .lookup(InternationalizationProvider.class);
 
     @Override
     public boolean shouldDisplay() {
@@ -74,21 +77,18 @@ public class NotificationScreenProvider extends AbstractProvider {
 //        See: https://github.com/vaadin/framework/issues/9460
 //        VerticalSplitPanel vs = new VerticalSplitPanel();
 //        vs.setSplitPosition(25, Sizeable.Unit.PERCENTAGE);
-        TextArea text = new TextArea(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                .translate("general.text"));
+        TextArea text = new TextArea(TRANSLATOR.translate("general.text"));
         text.setWordwrap(true);
         text.setReadOnly(true);
         text.setSizeFull();
-        Grid grid = new Grid(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                .translate("general.notifications"), container);
+        Grid grid = new Grid(TRANSLATOR.translate("general.notifications"), container);
         grid.setColumns("notificationType", "author", "creationDate");
         if (container.size() > 0) {
             grid.setHeightMode(HeightMode.ROW);
             grid.setHeightByRows(container.size() > 5 ? 5 : container.size());
         }
         Column nt = grid.getColumn("notificationType");
-        nt.setHeaderCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                .translate("notification.type"));
+        nt.setHeaderCaption(TRANSLATOR.translate("notification.type"));
         nt.setConverter(new Converter<String, NotificationType>() {
             @Override
             public NotificationType convertToModel(String value,
@@ -125,14 +125,13 @@ public class NotificationScreenProvider extends AbstractProvider {
         });
         Column author = grid.getColumn("author");
         author.setConverter(new UserToStringConverter());
-        author.setHeaderCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                .translate("notification.author"));
+        author.setHeaderCaption(TRANSLATOR.translate("notification.author"));
         Column creation = grid.getColumn("creationDate");
-        creation.setHeaderCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                .translate("creation.time"));
+        creation.setHeaderCaption(TRANSLATOR.translate("creation.time"));
         grid.setSelectionMode(SelectionMode.SINGLE);
         grid.setSizeFull();
-        grid.addSelectionListener(selectionEvent -> { // Java 8
+        ContextMenu menu = new ContextMenu(grid, true);
+        grid.addSelectionListener(selectionEvent -> {
             // Get selection from the selection model
             Object selected = ((SingleSelectionModel) grid.getSelectionModel())
                     .getSelectedRow();

@@ -119,9 +119,9 @@
             <version>${vaadin.icons.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.vaadin.addons</groupId>
-            <artifactId>contextmenu</artifactId>
-            <version>4.5</version>
+            <groupId>com.vaadin.addon</groupId>
+            <artifactId>vaadin-context-menu</artifactId>
+            <version>0.7.5</version>
         </dependency>
         <dependency>
             <groupId>org.vaadin.addons</groupId>

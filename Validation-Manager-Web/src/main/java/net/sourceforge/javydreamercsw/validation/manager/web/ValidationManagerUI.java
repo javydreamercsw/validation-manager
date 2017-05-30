@@ -1,5 +1,7 @@
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
+import com.vaadin.addon.contextmenu.ContextMenu;
+import com.vaadin.addon.contextmenu.MenuItem;
 import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
@@ -65,8 +67,6 @@ import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.NotificationProvider;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
-import com.validation.manager.core.history.Versionable;
-import com.validation.manager.core.history.Versionable.CHANGE_LEVEL;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.api.internationalization.LocaleListener;
 import com.validation.manager.core.api.notification.INotificationManager;
@@ -102,6 +102,8 @@ import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.history.Versionable;
+import com.validation.manager.core.history.Versionable.CHANGE_LEVEL;
 import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
@@ -154,9 +156,6 @@ import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerSc
 import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceMatrix;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
 import org.openide.util.Lookup;
-import org.vaadin.peter.contextmenu.ContextMenu;
-import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedListener;
-import org.vaadin.peter.contextmenu.ContextMenu.ContextMenuOpenedOnTreeItemEvent;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
 import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
@@ -1471,42 +1470,41 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void addTestCaseAssignment(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
+        MenuItem create
                 = menu.addItem(TRANSLATOR.translate("assign.test.case.execution"),
-                        ASSIGN_ICON);
+                        ASSIGN_ICON, (MenuItem selectedItem) -> {
+                            Wizard w = new Wizard();
+                            Window sw = new VMWindow();
+                            w.addStep(new AssignUserStep(ValidationManagerUI.this,
+                                    tree.getValue()));
+                            w.addListener(new WizardProgressListener() {
+                                @Override
+                                public void activeStepChanged(WizardStepActivationEvent event) {
+                                    //Do nothing
+                                }
+
+                                @Override
+                                public void stepSetChanged(WizardStepSetChangedEvent event) {
+                                    //Do nothing
+                                }
+
+                                @Override
+                                public void wizardCompleted(WizardCompletedEvent event) {
+                                    removeWindow(sw);
+                                }
+
+                                @Override
+                                public void wizardCancelled(WizardCancelledEvent event) {
+                                    removeWindow(sw);
+                                }
+                            });
+                            sw.setContent(w);
+                            sw.center();
+                            sw.setModal(true);
+                            sw.setSizeFull();
+                            addWindow(sw);
+                        });
         create.setEnabled(checkRight("testplan.planning"));
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    Wizard w = new Wizard();
-                    Window sw = new VMWindow();
-                    w.addStep(new AssignUserStep(this, tree.getValue()));
-                    w.addListener(new WizardProgressListener() {
-                        @Override
-                        public void activeStepChanged(WizardStepActivationEvent event) {
-                            //Do nothing
-                        }
-
-                        @Override
-                        public void stepSetChanged(WizardStepSetChangedEvent event) {
-                            //Do nothing
-                        }
-
-                        @Override
-                        public void wizardCompleted(WizardCompletedEvent event) {
-                            removeWindow(sw);
-                        }
-
-                        @Override
-                        public void wizardCancelled(WizardCancelledEvent event) {
-                            removeWindow(sw);
-                        }
-                    });
-                    sw.setContent(w);
-                    sw.center();
-                    sw.setModal(true);
-                    sw.setSizeFull();
-                    addWindow(sw);
-                });
     }
 
     private void createTestExecutionMenu(ContextMenu menu) {
@@ -1516,355 +1514,348 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void createRootMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
-                = menu.addItem(TRANSLATOR.translate("create.project"), PROJECT_ICON);
+        MenuItem create
+                = menu.addItem(TRANSLATOR.translate("create.project"),
+                        PROJECT_ICON, (MenuItem selectedItem) -> {
+                            displayProject(new Project(), true);
+                        });
         create.setEnabled(checkRight("product.modify"));
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayProject(new Project(), true);
-                });
     }
 
     private void createExecutionsMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
-                = menu.addItem(TRANSLATOR.translate("create.execution"), EXECUTIONS_ICON);
+        MenuItem create
+                = menu.addItem(TRANSLATOR.translate("create.execution"),
+                        EXECUTIONS_ICON, (MenuItem selectedItem) -> {
+                            int projectId = Integer.parseInt(((String) tree.getValue())
+                                    .substring(TRANSLATOR.translate("general.execution").length()));
+                            displayTestCaseExecution(new TestCaseExecution(),
+                                    new ProjectServer(projectId), true);
+                        });
         create.setEnabled(checkRight("testplan.planning"));
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    int projectId = Integer.parseInt(((String) tree.getValue())
-                            .substring(TRANSLATOR.translate("general.execution").length()));
-                    displayTestCaseExecution(new TestCaseExecution(),
-                            new ProjectServer(projectId), true);
-                });
     }
 
     private void createTestCaseExecutionPlanMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
-                = menu.addItem(TRANSLATOR.translate("create.execution.step"), SPEC_ICON);
+        MenuItem create
+                = menu.addItem(TRANSLATOR.translate("create.execution.step"),
+                        SPEC_ICON, (MenuItem selectedItem) -> {
+                            //TODO: Do something?
+                        });
         create.setEnabled(checkRight("testplan.planning"));
-        ContextMenu.ContextMenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.execution"), EXECUTION_ICON);
+        MenuItem edit
+                = menu.addItem(TRANSLATOR.translate("edit.execution"),
+                        EXECUTION_ICON, (MenuItem selectedItem) -> {
+                            displayTestCaseExecution((TestCaseExecution) tree
+                                    .getValue(), true);
+                        });
         edit.setEnabled(checkRight("testplan.planning"));
-        edit.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayTestCaseExecution((TestCaseExecution) tree
-                            .getValue(), true);
-                });
         addDeleteExecution(menu);
         addTestCaseAssignment(menu);
         addExecutionDashboard(menu);
     }
 
     private void createTestPlanMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
-                = menu.addItem(TRANSLATOR.translate("create.test.case"), SPEC_ICON);
+        MenuItem create
+                = menu.addItem(TRANSLATOR.translate("create.test.case"),
+                        SPEC_ICON,
+                        (MenuItem selectedItem) -> {
+                            TestCase tc = new TestCase();
+                            tc.setTestPlanList(new ArrayList<>());
+                            tc.getTestPlanList().add((TestPlan) tree.getValue());
+                            tc.setCreationDate(new Date());
+                            displayTestCase(tc, true);
+                        });
         create.setEnabled(checkRight("testplan.planning"));
-        ContextMenu.ContextMenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.test.plan"), SPEC_ICON);
+        MenuItem edit
+                = menu.addItem(TRANSLATOR.translate("edit.test.plan"),
+                        SPEC_ICON, (MenuItem selectedItem) -> {
+                            displayTestPlan((TestPlan) tree.getValue(),
+                                    true);
+                        });
         edit.setEnabled(checkRight("testplan.planning"));
-        edit.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayTestPlan((TestPlan) tree.getValue(),
-                            true);
-                });
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    TestCase tc = new TestCase();
-                    tc.setTestPlanList(new ArrayList<>());
-                    tc.getTestPlanList().add((TestPlan) tree.getValue());
-                    tc.setCreationDate(new Date());
-                    displayTestCase(tc, true);
-                });
     }
 
     private void createProjectMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
-                = menu.addItem(TRANSLATOR.translate("create.sub.project"), PROJECT_ICON);
+        MenuItem create
+                = menu.addItem(TRANSLATOR.translate("create.sub.project"),
+                        PROJECT_ICON,
+                        (MenuItem selectedItem) -> {
+                            Project project = new Project();
+                            project.setParentProjectId((Project) tree.getValue());
+                            displayProject(project, true);
+                        });
         create.setEnabled(checkRight("requirement.modify"));
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    Project project = new Project();
-                    project.setParentProjectId((Project) tree.getValue());
-                    displayProject(project, true);
-                });
-        ContextMenu.ContextMenuItem createSpec
-                = menu.addItem(TRANSLATOR.translate("create.req.spec"), SPEC_ICON);
+        MenuItem createSpec
+                = menu.addItem(TRANSLATOR.translate("create.req.spec"),
+                        SPEC_ICON,
+                        (MenuItem selectedItem) -> {
+                            RequirementSpec rs = new RequirementSpec();
+                            rs.setProject((Project) tree.getValue());
+                            displayRequirementSpec(rs, true);
+                        });
         createSpec.setEnabled(checkRight("requirement.modify"));
-        createSpec.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    RequirementSpec rs = new RequirementSpec();
-                    rs.setProject((Project) tree.getValue());
-                    displayRequirementSpec(rs, true);
-                });
-        ContextMenu.ContextMenuItem createTest
-                = menu.addItem(TRANSLATOR.translate("create.test.suite"), TEST_SUITE_ICON);
+        MenuItem createTest
+                = menu.addItem(TRANSLATOR.translate("create.test.suite"),
+                        TEST_SUITE_ICON,
+                        (MenuItem selectedItem) -> {
+                            TestProject tp = new TestProject();
+                            tp.setProjectList(new ArrayList<>());
+                            tp.getProjectList().add((Project) tree.getValue());
+                            displayTestProject(tp, true);
+                        });
         createTest.setEnabled(checkRight("requirement.modify"));
-        ContextMenu.ContextMenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.project"), EDIT_ICON);
-        edit.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayProject((Project) tree.getValue(), true);
-                });
+        MenuItem edit
+                = menu.addItem(TRANSLATOR.translate("edit.project"),
+                        EDIT_ICON,
+                        (MenuItem selectedItem) -> {
+                            displayProject((Project) tree.getValue(), true);
+                        });
         edit.setEnabled(checkRight("product.modify"));
-        createTest.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    TestProject tp = new TestProject();
-                    tp.setProjectList(new ArrayList<>());
-                    tp.getProjectList().add((Project) tree.getValue());
-                    displayTestProject(tp, true);
-                });
-        ContextMenu.ContextMenuItem plan
-                = menu.addItem(TRANSLATOR.translate("plan.testing"), PLAN_ICON);
+        MenuItem plan
+                = menu.addItem(TRANSLATOR.translate("plan.testing"),
+                        PLAN_ICON, (MenuItem selectedItem) -> {
+                            displayTestPlanning((Project) tree.getValue());
+                        });
         plan.setEnabled(checkRight("testplan.planning"));
-        plan.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayTestPlanning((Project) tree.getValue());
-                });
-        ContextMenu.ContextMenuItem trace
-                = menu.addItem(TRANSLATOR.translate("trace.matrix"), VaadinIcons.SPLIT);
+        MenuItem trace
+                = menu.addItem(TRANSLATOR.translate("trace.matrix"),
+                        VaadinIcons.SPLIT,
+                        (MenuItem selectedItem) -> {
+                            displayTraceMatrix((Project) tree.getValue());
+                        });
         trace.setEnabled(checkRight("testplan.planning"));
-        trace.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayTraceMatrix((Project) tree.getValue());
-                });
     }
 
     private void createRequirementMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.req"), EDIT_ICON);
-        edit.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayRequirement((Requirement) tree.getValue(),
-                            true);
-                });
+        MenuItem edit
+                = menu.addItem(TRANSLATOR.translate("edit.req"),
+                        EDIT_ICON,
+                        (MenuItem selectedItem) -> {
+                            displayRequirement((Requirement) tree.getValue(),
+                                    true);
+                        });
         edit.setEnabled(checkRight("requirement.modify"));
     }
 
     private void createRequirementSpecMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
-                = menu.addItem(TRANSLATOR.translate("create.req.spec.node"), SPEC_ICON);
+        MenuItem create
+                = menu.addItem(TRANSLATOR.translate("create.req.spec.node"),
+                        SPEC_ICON, (MenuItem selectedItem) -> {
+                            RequirementSpecNode rs = new RequirementSpecNode();
+                            rs.setRequirementSpec((RequirementSpec) tree.getValue());
+                            displayRequirementSpecNode(rs, true);
+                        });
         create.setEnabled(checkRight("requirement.modify"));
-        ContextMenu.ContextMenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.req.spec"), SPEC_ICON);
-        edit.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayRequirementSpec((RequirementSpec) tree.getValue(),
-                            true);
-                });
+        MenuItem edit
+                = menu.addItem(TRANSLATOR.translate("edit.req.spec"),
+                        SPEC_ICON,
+                        (MenuItem selectedItem) -> {
+                            displayRequirementSpec((RequirementSpec) tree.getValue(),
+                                    true);
+                        });
         edit.setEnabled(checkRight("requirement.modify"));
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    RequirementSpecNode rs = new RequirementSpecNode();
-                    rs.setRequirementSpec((RequirementSpec) tree.getValue());
-                    displayRequirementSpecNode(rs, true);
-                });
-        ContextMenu.ContextMenuItem baseline
-                = menu.addItem(TRANSLATOR.translate("baseline.spec"), BASELINE_ICON);
-        baseline.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayBaseline(new Baseline(), true,
-                            (RequirementSpec) tree.getValue());
-                });
+        MenuItem baseline
+                = menu.addItem(TRANSLATOR.translate("baseline.spec"),
+                        BASELINE_ICON,
+                        (MenuItem selectedItem) -> {
+                            displayBaseline(new Baseline(), true,
+                                    (RequirementSpec) tree.getValue());
+                        });
         baseline.setEnabled(checkRight("testcase.modify"));
     }
 
     private void createRequirementSpecNodeMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
-                = menu.addItem(TRANSLATOR.translate("create.requiremnet"), VaadinIcons.PLUS);
+        MenuItem create
+                = menu.addItem(TRANSLATOR.translate("create.requiremnet"),
+                        VaadinIcons.PLUS, (MenuItem selectedItem) -> {
+                            Requirement r = new Requirement();
+                            r.setRequirementSpecNode((RequirementSpecNode) tree
+                                    .getValue());
+                            displayRequirement(r, true);
+                        });
         create.setEnabled(checkRight("requirement.modify"));
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    Requirement r = new Requirement();
-                    r.setRequirementSpecNode((RequirementSpecNode) tree
-                            .getValue());
-                    displayRequirement(r, true);
-                });
-        ContextMenu.ContextMenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.req.spec.node"), EDIT_ICON);
-        edit.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayRequirementSpecNode((RequirementSpecNode) tree
-                            .getValue(),
-                            true);
-                });
+        MenuItem edit
+                = menu.addItem(TRANSLATOR.translate("edit.req.spec.node"),
+                        EDIT_ICON,
+                        (MenuItem selectedItem) -> {
+                            displayRequirementSpecNode((RequirementSpecNode) tree
+                                    .getValue(),
+                                    true);
+                        });
         edit.setEnabled(checkRight("requirement.modify"));
-        ContextMenu.ContextMenuItem importRequirement
-                = menu.addItem(TRANSLATOR.translate("import.requirement"), IMPORT_ICON);
+        MenuItem importRequirement
+                = menu.addItem(TRANSLATOR.translate("import.requirement"),
+                        IMPORT_ICON,
+                        (MenuItem selectedItem) -> {// Create a sub-window and set the content
+                            Window subWindow = new VMWindow(TRANSLATOR
+                                    .translate("import.requirement"));
+                            VerticalLayout subContent = new VerticalLayout();
+                            subWindow.setContent(subContent);
+
+                            //Add a checkbox to know if file has headers or not
+                            CheckBox cb = new CheckBox(TRANSLATOR.translate("file.has.header"));
+
+                            FileUploader receiver = new FileUploader();
+                            Upload upload
+                            = new Upload(TRANSLATOR.translate("upload.excel"), receiver);
+                            upload.addSucceededListener((Upload.SucceededEvent event1) -> {
+                                try {
+                                    subWindow.close();
+                                    //TODO: Display the excel file (partially), map columns and import
+                                    //Process the file
+                                    RequirementImporter importer
+                                            = new RequirementImporter(receiver
+                                                    .getFile(),
+                                                    (RequirementSpecNode) tree
+                                                            .getValue());
+
+                                    importer.importFile(cb.getValue());
+                                    importer.processImport();
+                                    buildProjectTree(tree.getValue());
+                                    updateScreen();
+                                } catch (RequirementImportException ex) {
+                                    LOG.log(Level.SEVERE, TRANSLATOR.translate("import.error"),
+                                            ex);
+                                    Notification.show(TRANSLATOR.translate("import.unsuccessful"),
+                                            Notification.Type.ERROR_MESSAGE);
+                                } catch (VMException ex) {
+                                    LOG.log(Level.SEVERE, null, ex);
+                                }
+                            });
+                            upload.addFailedListener((Upload.FailedEvent event1) -> {
+                                LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
+                                        event1.getReason());
+                                Notification.show(TRANSLATOR.translate("upload.unsuccessful"),
+                                        Notification.Type.ERROR_MESSAGE);
+                                subWindow.close();
+                            });
+                            subContent.addComponent(cb);
+                            subContent.addComponent(upload);
+
+                            // Center it in the browser window
+                            subWindow.center();
+
+                            // Open it in the UI
+                            addWindow(subWindow);
+                        });
         importRequirement.setEnabled(checkRight("requirement.modify"));
-        importRequirement.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    // Create a sub-window and set the content
-                    Window subWindow = new VMWindow(TRANSLATOR.translate("import.requirement"));
-                    VerticalLayout subContent = new VerticalLayout();
-                    subWindow.setContent(subContent);
-
-                    //Add a checkbox to know if file has headers or not
-                    CheckBox cb = new CheckBox(TRANSLATOR.translate("file.has.header"));
-
-                    FileUploader receiver = new FileUploader();
-                    Upload upload
-                    = new Upload(TRANSLATOR.translate("upload.excel"), receiver);
-                    upload.addSucceededListener((Upload.SucceededEvent event1) -> {
-                        try {
-                            subWindow.close();
-                            //TODO: Display the excel file (partially), map columns and import
-                            //Process the file
-                            RequirementImporter importer
-                                    = new RequirementImporter(receiver
-                                            .getFile(),
-                                            (RequirementSpecNode) tree
-                                                    .getValue());
-
-                            importer.importFile(cb.getValue());
-                            importer.processImport();
-                            buildProjectTree(tree.getValue());
-                            updateScreen();
-                        } catch (RequirementImportException ex) {
-                            LOG.log(Level.SEVERE, TRANSLATOR.translate("import.error"),
-                                    ex);
-                            Notification.show(TRANSLATOR.translate("import.unsuccessful"),
-                                    Notification.Type.ERROR_MESSAGE);
-                        } catch (VMException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
-                        }
-                    });
-                    upload.addFailedListener((Upload.FailedEvent event1) -> {
-                        LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
-                                event1.getReason());
-                        Notification.show(TRANSLATOR.translate("upload.unsuccessful"),
-                                Notification.Type.ERROR_MESSAGE);
-                        subWindow.close();
-                    });
-                    subContent.addComponent(cb);
-                    subContent.addComponent(upload);
-
-                    // Center it in the browser window
-                    subWindow.center();
-
-                    // Open it in the UI
-                    addWindow(subWindow);
-                });
     }
 
     private void createTestCaseMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
-                = menu.addItem(TRANSLATOR.translate("create.step"), VaadinIcons.PLUS);
-        create.setEnabled(checkRight("requirement.modify"));
-        ContextMenu.ContextMenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.test.case"), EDIT_ICON);
-        edit.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayTestCase((TestCase) tree.getValue(), true);
-                });
-        edit.setEnabled(checkRight("testcase.modify"));
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    TestCase tc = (TestCase) tree.getValue();
-                    Step s = new Step();
-                    s.setStepSequence(tc.getStepList().size() + 1);
-                    s.setTestCase(tc);
-                    displayStep(s, true);
-                });
-        ContextMenu.ContextMenuItem importSteps
-                = menu.addItem(TRANSLATOR.translate("import.step"), IMPORT_ICON);
-        importSteps.setEnabled(checkRight("requirement.modify"));
-        importSteps.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    // Create a sub-window and set the content
-                    Window subWindow
-                    = new VMWindow(TRANSLATOR.translate("import.test.case.step"));
-                    VerticalLayout subContent = new VerticalLayout();
-                    subWindow.setContent(subContent);
-
-                    //Add a checkbox to know if file has headers or not
-                    CheckBox cb = new CheckBox(TRANSLATOR.translate("file.has.header"));
-
-                    FileUploader receiver = new FileUploader();
-                    Upload upload
-                    = new Upload(TRANSLATOR.translate("upload.excel"), receiver);
-                    upload.addSucceededListener((Upload.SucceededEvent event1) -> {
-                        try {
-                            subWindow.close();
-                            //TODO: Display the excel file (partially), map columns and import
-                            //Process the file
+        MenuItem create
+                = menu.addItem(TRANSLATOR.translate("create.step"),
+                        VaadinIcons.PLUS,
+                        (MenuItem selectedItem) -> {
                             TestCase tc = (TestCase) tree.getValue();
-                            StepImporter importer
-                                    = new StepImporter(receiver.getFile(), tc);
-                            importer.importFile(cb.getValue());
-                            importer.processImport();
-                            SortedMap<Integer, Step> map = new TreeMap<>();
-                            tc.getStepList().forEach((s) -> {
-                                map.put(s.getStepSequence(), s);
-                            });
-                            //Now update the sequence numbers
-                            int count = 0;
-                            for (Entry<Integer, Step> entry : map.entrySet()) {
-                                entry.getValue().setStepSequence(++count);
+                            Step s = new Step();
+                            s.setStepSequence(tc.getStepList().size() + 1);
+                            s.setTestCase(tc);
+                            displayStep(s, true);
+                        });
+        create.setEnabled(checkRight("requirement.modify"));
+        MenuItem edit
+                = menu.addItem(TRANSLATOR.translate("edit.test.case"),
+                        EDIT_ICON,
+                        (MenuItem selectedItem) -> {
+                            displayTestCase((TestCase) tree.getValue(), true);
+                        });
+        edit.setEnabled(checkRight("testcase.modify"));
+        MenuItem importSteps
+                = menu.addItem(TRANSLATOR.translate("import.step"),
+                        IMPORT_ICON,
+                        (MenuItem selectedItem) -> { // Create a sub-window and set the content
+                            Window subWindow
+                            = new VMWindow(TRANSLATOR.translate("import.test.case.step"));
+                            VerticalLayout subContent = new VerticalLayout();
+                            subWindow.setContent(subContent);
+
+                            //Add a checkbox to know if file has headers or not
+                            CheckBox cb = new CheckBox(TRANSLATOR.translate("file.has.header"));
+
+                            FileUploader receiver = new FileUploader();
+                            Upload upload
+                            = new Upload(TRANSLATOR.translate("upload.excel"), receiver);
+                            upload.addSucceededListener((Upload.SucceededEvent event1) -> {
                                 try {
-                                    new StepJpaController(DataBaseManager
-                                            .getEntityManagerFactory())
-                                            .edit(entry.getValue());
-                                } catch (Exception ex) {
-                                    LOG.log(Level.SEVERE, null, ex);
+                                    subWindow.close();
+                                    //TODO: Display the excel file (partially), map columns and import
+                                    //Process the file
+                                    TestCase tc = (TestCase) tree.getValue();
+                                    StepImporter importer
+                                            = new StepImporter(receiver.getFile(), tc);
+                                    importer.importFile(cb.getValue());
+                                    importer.processImport();
+                                    SortedMap<Integer, Step> map = new TreeMap<>();
+                                    tc.getStepList().forEach((s) -> {
+                                        map.put(s.getStepSequence(), s);
+                                    });
+                                    //Now update the sequence numbers
+                                    int count = 0;
+                                    for (Entry<Integer, Step> entry : map.entrySet()) {
+                                        entry.getValue().setStepSequence(++count);
+                                        try {
+                                            new StepJpaController(DataBaseManager
+                                                    .getEntityManagerFactory())
+                                                    .edit(entry.getValue());
+                                        } catch (Exception ex) {
+                                            LOG.log(Level.SEVERE, null, ex);
+                                        }
+                                    }
+                                    buildProjectTree(new TestCaseServer(tc.getId())
+                                            .getEntity());
+                                    updateScreen();
+                                } catch (TestCaseImportException ex) {
+                                    LOG.log(Level.SEVERE, TRANSLATOR.translate("import.error"),
+                                            ex);
+                                    Notification.show(TRANSLATOR.translate("import.unsuccessful"),
+                                            Notification.Type.ERROR_MESSAGE);
                                 }
-                            }
-                            buildProjectTree(new TestCaseServer(tc.getId())
-                                    .getEntity());
-                            updateScreen();
-                        } catch (TestCaseImportException ex) {
-                            LOG.log(Level.SEVERE, TRANSLATOR.translate("import.error"),
-                                    ex);
-                            Notification.show(TRANSLATOR.translate("import.unsuccessful"),
-                                    Notification.Type.ERROR_MESSAGE);
-                        }
-                    });
-                    upload.addFailedListener((Upload.FailedEvent event1) -> {
-                        LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
-                                event1.getReason());
-                        Notification.show(TRANSLATOR.translate("upload.unsuccessful"),
-                                Notification.Type.ERROR_MESSAGE);
-                        subWindow.close();
-                    });
-                    subContent.addComponent(cb);
-                    subContent.addComponent(upload);
+                            });
+                            upload.addFailedListener((Upload.FailedEvent event1) -> {
+                                LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
+                                        event1.getReason());
+                                Notification.show(TRANSLATOR.translate("upload.unsuccessful"),
+                                        Notification.Type.ERROR_MESSAGE);
+                                subWindow.close();
+                            });
+                            subContent.addComponent(cb);
+                            subContent.addComponent(upload);
 
-                    // Center it in the browser window
-                    subWindow.center();
+                            // Center it in the browser window
+                            subWindow.center();
 
-                    // Open it in the UI
-                    addWindow(subWindow);
-                });
+                            // Open it in the UI
+                            addWindow(subWindow);
+                        });
+        importSteps.setEnabled(checkRight("requirement.modify"));
         addExecutionDashboard(menu);
     }
 
     private void createStepMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.step"), EDIT_ICON);
-        edit.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayStep((Step) tree.getValue(), true);
-                });
+        MenuItem edit
+                = menu.addItem(TRANSLATOR.translate("edit.step"), EDIT_ICON,
+                        (MenuItem selectedItem) -> {
+                            displayStep((Step) tree.getValue(), true);
+                        });
         edit.setEnabled(checkRight("testcase.modify"));
     }
 
     private void createTestProjectMenu(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
+        MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.test.plan"),
-                        VaadinIcons.PLUS);
+                        VaadinIcons.PLUS,
+                        (MenuItem selectedItem) -> {
+                            TestPlan tp = new TestPlan();
+                            tp.setTestProject((TestProject) tree.getValue());
+                            displayTestPlan(tp, true);
+                        });
         create.setEnabled(checkRight("testplan.planning"));
-        ContextMenu.ContextMenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.test.project"), EDIT_ICON);
+        MenuItem edit
+                = menu.addItem(TRANSLATOR.translate("edit.test.project"),
+                        EDIT_ICON,
+                        (MenuItem selectedItem) -> {
+                            displayTestProject((TestProject) tree.getValue(), true);
+                        });
         edit.setEnabled(checkRight("testplan.planning"));
-        edit.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    displayTestProject((TestProject) tree.getValue(), true);
-                });
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    TestPlan tp = new TestPlan();
-                    tp.setTestProject((TestProject) tree.getValue());
-                    displayTestPlan(tp, true);
-                });
     }
 
     public Component findMainProvider(String id) {
@@ -2533,44 +2524,43 @@ public class ValidationManagerUI extends UI implements VMUI {
                 }
             }
         });
-        ContextMenu contextMenu = new ContextMenu();
-        contextMenu.setAsContextMenuOf(tree);
-        ContextMenuOpenedListener.TreeListener treeItemListener
-                = (ContextMenuOpenedOnTreeItemEvent event) -> {
-                    contextMenu.removeAllItems();
-                    if (tree.getValue() instanceof Project) {
-                        createProjectMenu(contextMenu);
-                    } else if (tree.getValue() instanceof Requirement) {
-                        createRequirementMenu(contextMenu);
-                    } else if (tree.getValue() instanceof RequirementSpec) {
-                        createRequirementSpecMenu(contextMenu);
-                    } else if (tree.getValue() instanceof RequirementSpecNode) {
-                        createRequirementSpecNodeMenu(contextMenu);
-                    } else if (tree.getValue() instanceof TestProject) {
-                        createTestProjectMenu(contextMenu);
-                    } else if (tree.getValue() instanceof Step) {
-                        createStepMenu(contextMenu);
-                    } else if (tree.getValue() instanceof TestCase) {
-                        createTestCaseMenu(contextMenu);
-                    } else if (tree.getValue() instanceof String) {
-                        String val = (String) tree.getValue();
-                        if (val.startsWith("tce")) {
-                            createTestExecutionMenu(contextMenu);
-                        } else if (val.startsWith("executions")) {
-                            createExecutionsMenu(contextMenu);
-                        } else {
-                            //We are at the root
-                            createRootMenu(contextMenu);
-                        }
-                    } else if (tree.getValue() instanceof TestPlan) {
-                        createTestPlanMenu(contextMenu);
-                    } else if (tree.getValue() instanceof TestCaseExecution) {
-                        createTestCaseExecutionPlanMenu(contextMenu);
-                    } else if (tree.getValue() instanceof Baseline) {
-//                        createBaselineMenu(contextMenu);
+        ContextMenu contextMenu = new ContextMenu(tree, true);
+        tree.addItemClickListener((ItemClickEvent event) -> {
+            if (event.getButton() == MouseButton.RIGHT) {
+                contextMenu.removeItems();
+                if (tree.getValue() instanceof Project) {
+                    createProjectMenu(contextMenu);
+                } else if (tree.getValue() instanceof Requirement) {
+                    createRequirementMenu(contextMenu);
+                } else if (tree.getValue() instanceof RequirementSpec) {
+                    createRequirementSpecMenu(contextMenu);
+                } else if (tree.getValue() instanceof RequirementSpecNode) {
+                    createRequirementSpecNodeMenu(contextMenu);
+                } else if (tree.getValue() instanceof TestProject) {
+                    createTestProjectMenu(contextMenu);
+                } else if (tree.getValue() instanceof Step) {
+                    createStepMenu(contextMenu);
+                } else if (tree.getValue() instanceof TestCase) {
+                    createTestCaseMenu(contextMenu);
+                } else if (tree.getValue() instanceof String) {
+                    String val = (String) tree.getValue();
+                    if (val.startsWith("tce")) {
+                        createTestExecutionMenu(contextMenu);
+                    } else if (val.startsWith("executions")) {
+                        createExecutionsMenu(contextMenu);
+                    } else {
+                        //We are at the root
+                        createRootMenu(contextMenu);
                     }
-                };
-        contextMenu.addContextMenuTreeListener(treeItemListener);
+                } else if (tree.getValue() instanceof TestPlan) {
+                    createTestPlanMenu(contextMenu);
+                } else if (tree.getValue() instanceof TestCaseExecution) {
+                    createTestCaseExecutionPlanMenu(contextMenu);
+                } else if (tree.getValue() instanceof Baseline) {
+//                        createBaselineMenu(contextMenu);
+                }
+            }
+        });
         tree.setImmediate(true);
         tree.expandItem(projTreeRoot);
         tree.setSizeFull();
@@ -3029,150 +3019,146 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void addDeleteExecution(ContextMenu menu) {
-        ContextMenu.ContextMenuItem create
-                = menu.addItem(TRANSLATOR.translate("delete.execution"), DELETE_ICON);
-        create.setEnabled(checkRight("testplan.planning"));
-        create.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    //Delete only if no execution has been started yet.
-                    TCEExtraction tcee = Tool.extractTCE(tree.getValue());
-                    TestCaseExecution tce = tcee.getTestCaseExecution();
-                    if (tce == null) {
-                        LOG.info("Invalid");
-                        Notification.show(TRANSLATOR.translate("delete.error"),
-                                TRANSLATOR.translate("extract.error"),
-                                Notification.Type.ERROR_MESSAGE);
-                    } else {
-                        TestCase tc = tcee.getTestCase();
-                        TestCaseExecutionServer tces
-                        = new TestCaseExecutionServer(tce);
-                        //Check that it's not being executed yet
-                        boolean canDelete = true;
-                        for (ExecutionStep es : tces.getExecutionStepList()) {
-                            if (tc == null || Objects.equals(es.getStep().getTestCase()
-                                    .getId(), tc.getId())) {
-                                if (es.getResultId() != null
-                                && es.getResultId().getResultName()
-                                        .equals("result.pending")) {
-                                    Notification.show(TRANSLATOR.translate("delete.error"),
-                                            TRANSLATOR.translate("result.present"),
-                                            Notification.Type.ERROR_MESSAGE);
-                                    //It has a result other than pending.
-                                    canDelete = false;
-                                }
-                                if (!es.getExecutionStepHasAttachmentList()
-                                        .isEmpty()) {
-                                    //It has a result other than pending.
-                                    Notification.show(TRANSLATOR.translate("delete.error"),
-                                            TRANSLATOR.translate("attachment.present"),
-                                            Notification.Type.ERROR_MESSAGE);
-                                    canDelete = false;
-                                }
-                                if (!es.getExecutionStepHasIssueList()
-                                        .isEmpty()) {
-                                    //It has a result other than pending.
-                                    Notification.show(TRANSLATOR.translate("delete.error"),
-                                            TRANSLATOR.translate("issue.present"),
-                                            Notification.Type.ERROR_MESSAGE);
-                                    canDelete = false;
+        MenuItem create
+                = menu.addItem(TRANSLATOR.translate("delete.execution"),
+                        DELETE_ICON,
+                        (MenuItem selectedItem) -> {//Delete only if no execution has been started yet.
+                            TCEExtraction tcee = Tool.extractTCE(tree.getValue());
+                            TestCaseExecution tce = tcee.getTestCaseExecution();
+                            if (tce == null) {
+                                LOG.info("Invalid");
+                                Notification.show(TRANSLATOR.translate("delete.error"),
+                                        TRANSLATOR.translate("extract.error"),
+                                        Notification.Type.ERROR_MESSAGE);
+                            } else {
+                                TestCase tc = tcee.getTestCase();
+                                TestCaseExecutionServer tces
+                                = new TestCaseExecutionServer(tce);
+                                //Check that it's not being executed yet
+                                boolean canDelete = true;
+                                for (ExecutionStep es : tces.getExecutionStepList()) {
+                                    if (tc == null || Objects.equals(es.getStep().getTestCase()
+                                            .getId(), tc.getId())) {
+                                        if (es.getResultId() != null
+                                        && es.getResultId().getResultName()
+                                                .equals("result.pending")) {
+                                            Notification.show(TRANSLATOR.translate("delete.error"),
+                                                    TRANSLATOR.translate("result.present"),
+                                                    Notification.Type.ERROR_MESSAGE);
+                                            //It has a result other than pending.
+                                            canDelete = false;
+                                        }
+                                        if (!es.getExecutionStepHasAttachmentList()
+                                                .isEmpty()) {
+                                            //It has a result other than pending.
+                                            Notification.show(TRANSLATOR.translate("delete.error"),
+                                                    TRANSLATOR.translate("attachment.present"),
+                                                    Notification.Type.ERROR_MESSAGE);
+                                            canDelete = false;
+                                        }
+                                        if (!es.getExecutionStepHasIssueList()
+                                                .isEmpty()) {
+                                            //It has a result other than pending.
+                                            Notification.show(TRANSLATOR.translate("delete.error"),
+                                                    TRANSLATOR.translate("issue.present"),
+                                                    Notification.Type.ERROR_MESSAGE);
+                                            canDelete = false;
+                                        }
+                                        if (!canDelete) {
+                                            break;
+                                        }
+                                    }
                                 }
                                 if (!canDelete) {
-                                    break;
+                                    MessageBox prompt = MessageBox.createQuestion()
+                                            .withCaption(TRANSLATOR.translate("delete.with.issues.title"))
+                                            .withMessage(TRANSLATOR.translate("delete.with.issues.message"))
+                                            .withYesButton(() -> {
+                                                try {
+                                                    if (tc != null) {
+                                                        tces.removeTestCase(tc);
+                                                    } else {
+                                                        List<TestCase> toDelete = new ArrayList<>();
+                                                        tces.getExecutionStepList().forEach(es -> {
+                                                            try {
+                                                                toDelete.add(es.getStep().getTestCase());
+                                                            } catch (Exception ex) {
+                                                                LOG.log(Level.SEVERE, null, ex);
+                                                            }
+                                                        });
+                                                        toDelete.forEach(t -> {
+                                                            try {
+                                                                tces.removeTestCase(t);
+                                                            } catch (Exception ex) {
+                                                                LOG.log(Level.SEVERE, null, ex);
+                                                            }
+                                                        });
+                                                        new TestCaseExecutionJpaController(DataBaseManager
+                                                                .getEntityManagerFactory())
+                                                                .destroy(tce.getId());
+                                                    }
+                                                    updateProjectList();
+                                                    updateScreen();
+                                                    displayObject(tces.getEntity());
+                                                } catch (Exception ex) {
+                                                    LOG.log(Level.SEVERE, null, ex);
+                                                }
+                                            },
+                                                    ButtonOption.focus(),
+                                                    ButtonOption
+                                                            .icon(VaadinIcons.CHECK))
+                                            .withNoButton(() -> {
+                                                displayObject(tces.getEntity());
+                                            },
+                                                    ButtonOption
+                                                            .icon(VaadinIcons.CLOSE));
+                                    prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                                    prompt.open();
                                 }
-                            }
-                        }
-                        if (!canDelete) {
-                            MessageBox prompt = MessageBox.createQuestion()
-                                    .withCaption(TRANSLATOR.translate("delete.with.issues.title"))
-                                    .withMessage(TRANSLATOR.translate("delete.with.issues.message"))
-                                    .withYesButton(() -> {
-                                        try {
-                                            if (tc != null) {
-                                                tces.removeTestCase(tc);
-                                            } else {
-                                                List<TestCase> toDelete = new ArrayList<>();
-                                                tces.getExecutionStepList().forEach(es -> {
-                                                    try {
-                                                        toDelete.add(es.getStep().getTestCase());
-                                                    } catch (Exception ex) {
-                                                        LOG.log(Level.SEVERE, null, ex);
-                                                    }
-                                                });
-                                                toDelete.forEach(t -> {
-                                                    try {
-                                                        tces.removeTestCase(t);
-                                                    } catch (Exception ex) {
-                                                        LOG.log(Level.SEVERE, null, ex);
-                                                    }
-                                                });
-                                                new TestCaseExecutionJpaController(DataBaseManager
-                                                        .getEntityManagerFactory())
-                                                        .destroy(tce.getId());
-                                            }
-                                            updateProjectList();
-                                            updateScreen();
-                                            displayObject(tces.getEntity());
-                                        } catch (Exception ex) {
-                                            LOG.log(Level.SEVERE, null, ex);
+                                if (canDelete) {
+                                    try {
+                                        if (tc != null) {
+                                            tces.removeTestCase(tc);
+                                        } else {
+                                            ExecutionStepJpaController c
+                                            = new ExecutionStepJpaController(DataBaseManager
+                                                    .getEntityManagerFactory());
+                                            tces.getExecutionStepList().forEach(es -> {
+                                                try {
+                                                    c.destroy(es.getExecutionStepPK());
+                                                } catch (IllegalOrphanException | NonexistentEntityException ex) {
+                                                    LOG.log(Level.SEVERE, null, ex);
+                                                }
+                                            });
+                                            new TestCaseExecutionJpaController(DataBaseManager
+                                                    .getEntityManagerFactory())
+                                                    .destroy(tce.getId());
                                         }
-                                    },
-                                            ButtonOption.focus(),
-                                            ButtonOption
-                                                    .icon(VaadinIcons.CHECK))
-                                    .withNoButton(() -> {
+                                        updateProjectList();
+                                        updateScreen();
                                         displayObject(tces.getEntity());
-                                    },
-                                            ButtonOption
-                                                    .icon(VaadinIcons.CLOSE));
-                            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-                            prompt.open();
-                        }
-                        if (canDelete) {
-                            try {
-                                if (tc != null) {
-                                    tces.removeTestCase(tc);
+                                    } catch (Exception ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                    }
                                 } else {
-                                    ExecutionStepJpaController c
-                                    = new ExecutionStepJpaController(DataBaseManager
-                                            .getEntityManagerFactory());
-                                    tces.getExecutionStepList().forEach(es -> {
-                                        try {
-                                            c.destroy(es.getExecutionStepPK());
-                                        } catch (IllegalOrphanException | NonexistentEntityException ex) {
-                                            LOG.log(Level.SEVERE, null, ex);
-                                        }
-                                    });
-                                    new TestCaseExecutionJpaController(DataBaseManager
-                                            .getEntityManagerFactory())
-                                            .destroy(tce.getId());
+                                    Notification.show(TRANSLATOR.translate("delete.error!"),
+                                            TRANSLATOR.translate("delete.with.issues.message"),
+                                            Notification.Type.ERROR_MESSAGE);
                                 }
-                                updateProjectList();
-                                updateScreen();
-                                displayObject(tces.getEntity());
-                            } catch (Exception ex) {
-                                LOG.log(Level.SEVERE, null, ex);
                             }
-                        } else {
-                            Notification.show(TRANSLATOR.translate("delete.error!"),
-                                    TRANSLATOR.translate("delete.with.issues.message"),
-                                    Notification.Type.ERROR_MESSAGE);
-                        }
-                    }
-                });
-
+                        });
+        create.setEnabled(checkRight("testplan.planning"));
     }
 
     private void addExecutionDashboard(ContextMenu menu) {
-        ContextMenu.ContextMenuItem dashboard
+        MenuItem dashboard
                 = menu.addItem(TRANSLATOR.translate("view.execution.dash"),
-                        VaadinIcons.DASHBOARD);
+                        VaadinIcons.DASHBOARD,
+                        (MenuItem selectedItem) -> {
+                            addWindow(new ExecutionDashboard(Tool.extractTCE(tree
+                                    .getValue())));
+                        });
         dashboard.setEnabled(checkRight("testplan.planning"));
-        dashboard.addItemClickListener(
-                (ContextMenu.ContextMenuItemClickEvent event) -> {
-                    addWindow(new ExecutionDashboard(Tool.extractTCE(tree
-                            .getValue())));
-                });
-
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
