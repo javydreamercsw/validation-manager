@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,18 +17,18 @@ package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.Notification;
 import com.validation.manager.core.db.NotificationPK;
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.NotificationType;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -79,7 +79,7 @@ public class NotificationJpaController implements Serializable {
                 targetUser = em.merge(targetUser);
             }
             if (author != null) {
-                author.getNotificationList().add(notification);
+                author.getNotificationList1().add(notification);
                 author = em.merge(author);
             }
             em.getTransaction().commit();
@@ -140,11 +140,11 @@ public class NotificationJpaController implements Serializable {
                 targetUserNew = em.merge(targetUserNew);
             }
             if (authorOld != null && !authorOld.equals(authorNew)) {
-                authorOld.getNotificationList().remove(notification);
+                authorOld.getNotificationList1().remove(notification);
                 authorOld = em.merge(authorOld);
             }
             if (authorNew != null && !authorNew.equals(authorOld)) {
-                authorNew.getNotificationList().add(notification);
+                authorNew.getNotificationList1().add(notification);
                 authorNew = em.merge(authorNew);
             }
             em.getTransaction().commit();
