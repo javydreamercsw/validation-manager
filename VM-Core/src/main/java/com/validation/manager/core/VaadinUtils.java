@@ -1,11 +1,5 @@
-/* VaadinUtils.java
- *
- * Created: 2014-03-20 (Year-Month-Day)
- * Character encoding: UTF-8
- *
- ****************************************** LICENSE *******************************************
- *
- * Copyright (c) 2014 XIAM Solutions B.V. (http://www.xiam.nl)
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
