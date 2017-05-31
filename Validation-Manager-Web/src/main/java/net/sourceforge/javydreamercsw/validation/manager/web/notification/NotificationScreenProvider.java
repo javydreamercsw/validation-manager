@@ -2,23 +2,16 @@ package net.sourceforge.javydreamercsw.validation.manager.web.notification;
 
 import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.addon.contextmenu.MenuItem;
-import com.vaadin.data.Container.Filter;
-import com.vaadin.data.Item;
-import com.vaadin.data.Property;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.converter.Converter;
-import com.vaadin.data.util.filter.SimpleStringFilter;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Grid.HeaderCell;
-import com.vaadin.ui.Grid.HeaderRow;
 import com.vaadin.ui.Grid.SelectionMode;
 import com.vaadin.ui.Grid.SingleSelectionModel;
 import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.DataBaseManager;
@@ -29,6 +22,8 @@ import com.validation.manager.core.db.Notification;
 import com.validation.manager.core.db.NotificationType;
 import com.validation.manager.core.db.controller.NotificationTypeJpaController;
 import com.validation.manager.core.server.core.NotificationServer;
+import com.validation.manager.core.server.core.VMSettingServer;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -38,6 +33,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
+import org.vaadin.gridutil.cell.GridCellFilter;
 
 /**
  *
@@ -90,60 +86,23 @@ public class NotificationScreenProvider extends AbstractProvider {
         text.setWordwrap(true);
         text.setReadOnly(true);
         text.setSizeFull();
-        Grid grid = new Grid(TRANSLATOR.translate("general.notifications"), container);
+        Grid grid = new Grid(TRANSLATOR.translate("general.notifications"),
+                container);
         grid.setColumns("notificationType", "author", "creationDate", "archieved");
         if (container.size() > 0) {
             grid.setHeightMode(HeightMode.ROW);
             grid.setHeightByRows(container.size() > 5 ? 5 : container.size());
         }
-        // Create a header row to hold column filters
-        HeaderRow filterRow = grid.appendHeaderRow();
-
-        // Set up a filter for all columns
-        grid.getContainerDataSource()
-                .getContainerPropertyIds().forEach((pid) -> {
-                    HeaderCell cell = filterRow.getCell(pid);
-                    if (pid.equals("archieved")) {
-                        CheckBox filterField = new CheckBox();
-                        filterField.addValueChangeListener((Property.ValueChangeEvent change) -> {
-                            // Can't modify filters so need to replace
-                            container.removeContainerFilters(pid);
-
-                            container.addContainerFilter(new Filter() {
-                                @Override
-                                public boolean passesFilter(Object itemId,
-                                        Item item) throws UnsupportedOperationException {
-                                    return item instanceof Notification
-                                            && ((Notification) item)
-                                                    .getArchieved() == filterField.getValue();
-                                }
-
-                                @Override
-                                public boolean appliesToProperty(Object propertyId) {
-                                    return propertyId == "archieved";
-                                }
-                            });
-                        });
-                    } else {
-                        // Have an input field to use for filter
-                        TextField filterField = new TextField();
-                        filterField.setColumns(8);
-
-                        // Update filter When the filter input is changed
-                        filterField.addTextChangeListener(change -> {
-                            // Can't modify filters so need to replace
-                            container.removeContainerFilters(pid);
-
-                            // (Re)create the filter if necessary
-                            if (!change.getText().isEmpty()) {
-                                container.addContainerFilter(
-                                        new SimpleStringFilter(pid,
-                                                change.getText(), true, false));
-                            }
-                        });
-                        cell.setComponent(filterField);
-                    }
-                });
+        GridCellFilter filter = new GridCellFilter(grid);
+        filter.setBooleanFilter("archieved",
+                new GridCellFilter.BooleanRepresentation(VaadinIcons.CHECK,
+                        TRANSLATOR.translate("general.yes")),
+                new GridCellFilter.BooleanRepresentation(VaadinIcons.CLOSE,
+                        TRANSLATOR.translate("general.no")));
+        filter.setDateFilter("creationDate",
+                new SimpleDateFormat(VMSettingServer.getSetting("date.format")
+                        .getStringVal()), true);
+        grid.sort("creationDate");
         Column nt = grid.getColumn("notificationType");
         nt.setHeaderCaption(TRANSLATOR.translate("notification.type"));
         nt.setConverter(new Converter<String, NotificationType>() {
@@ -185,6 +144,34 @@ public class NotificationScreenProvider extends AbstractProvider {
         author.setHeaderCaption(TRANSLATOR.translate("notification.author"));
         Column creation = grid.getColumn("creationDate");
         creation.setHeaderCaption(TRANSLATOR.translate("creation.time"));
+        Column archive = grid.getColumn("archieved");
+        archive.setHeaderCaption(TRANSLATOR.translate("general.archived"));
+        archive.setConverter(new Converter<String, Boolean>() {
+            @Override
+            public Boolean convertToModel(String value,
+                    Class<? extends Boolean> targetType,
+                    Locale locale) throws Converter.ConversionException {
+                return value.equals(TRANSLATOR.translate("general.yes"));
+            }
+
+            @Override
+            public String convertToPresentation(Boolean value,
+                    Class<? extends String> targetType, Locale locale)
+                    throws Converter.ConversionException {
+                return value ? TRANSLATOR.translate("general.yes")
+                        : TRANSLATOR.translate("general.no");
+            }
+
+            @Override
+            public Class<Boolean> getModelType() {
+                return Boolean.class;
+            }
+
+            @Override
+            public Class<String> getPresentationType() {
+                return String.class;
+            }
+        });
         grid.setSelectionMode(SelectionMode.SINGLE);
         grid.setSizeFull();
         ContextMenu menu = new ContextMenu(grid, true);
