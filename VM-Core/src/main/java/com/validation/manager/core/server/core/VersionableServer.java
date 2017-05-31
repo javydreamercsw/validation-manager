@@ -6,14 +6,14 @@ import java.util.List;
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
- * @param <T>
+ * @param <T> Class
  */
 public interface VersionableServer<T> {
 
     /**
      * Get the versions of this entity.
      *
-     * @return
+     * @return History list.
      */
     List<History> getHistoryList();
 }

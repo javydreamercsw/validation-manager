@@ -14,10 +14,10 @@ public class ReviewResultServer extends ReviewResult
         implements EntityServer<ReviewResult> {
 
     public static ReviewResult getReview(String review) {
-        parameters.clear();
-        parameters.put("reviewName", review);
+        PARAMETERS.clear();
+        PARAMETERS.put("reviewName", review);
         List r = DataBaseManager.namedQuery("ReviewResult.findByReviewName",
-                parameters);
+                PARAMETERS);
         if (r.isEmpty()) {
             return null;
         } else {

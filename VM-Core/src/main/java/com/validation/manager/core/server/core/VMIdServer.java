@@ -72,9 +72,9 @@ public final class VMIdServer extends VmId implements EntityServer<VmId> {
     }
 
     public static VMIdServer getVMId(String table) throws VMException {
-        parameters.clear();
-        parameters.put("tableName", table);
-        List<Object> result = namedQuery("VmId.findByTableName", parameters);
+        PARAMETERS.clear();
+        PARAMETERS.put("tableName", table);
+        List<Object> result = namedQuery("VmId.findByTableName", PARAMETERS);
         if (!result.isEmpty()) {
             return new VMIdServer(((VmId) result.get(0)).getId());
         } else {

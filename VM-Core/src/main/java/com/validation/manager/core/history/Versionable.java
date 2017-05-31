@@ -163,8 +163,8 @@ public abstract class Versionable implements Comparable<Versionable>,
     /**
      * Increase minor is done by default when updating a record.
      *
-     * @param target
-     * @param source
+     * @param target Target of the update.
+     * @param source Source of the update
      */
     public void update(Versionable target, Versionable source) {
         target.setDirty(source.getDirty());
@@ -205,7 +205,7 @@ public abstract class Versionable implements Comparable<Versionable>,
     /**
      * Set history for this entity
      *
-     * @param historyList
+     * @param historyList History list to set.
      */
     public abstract void setHistoryList(List<History> historyList);
 

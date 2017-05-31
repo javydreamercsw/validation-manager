@@ -74,11 +74,11 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     + "' AND u.userStatusId.id <> 2");
             //throw exception if no result found
             if (result.isEmpty()) {
-                parameters.clear();
-                parameters.put("username", attrUN);
+                PARAMETERS.clear();
+                PARAMETERS.put("username", attrUN);
                 result
                         = namedQuery("VmUser.findByUsername",
-                                parameters);
+                                PARAMETERS);
                 //The username is valid but wrong password. Increase the login attempts.
                 if (result.size() > 0) {
                     increaseAttempts = true;
@@ -328,10 +328,10 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
 
     public static void deleteUser(VmUser user) {
         if (user != null) {
-            parameters.clear();
-            parameters.put("id", user.getId());
+            PARAMETERS.clear();
+            PARAMETERS.put("id", user.getId());
             VmUser temp = (VmUser) namedQuery("VmUser.findById",
-                    parameters).get(0);
+                    PARAMETERS).get(0);
             try {
                 for (CorrectiveAction ca : temp.getCorrectiveActionList()) {
                     new CorrectiveActionJpaController(
@@ -365,10 +365,10 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     new UserTestProjectRoleJpaController(
                             getEntityManagerFactory()).destroy(rc.getUserTestProjectRolePK());
                 }
-                parameters.clear();
-                parameters.put("id", temp.getId());
+                PARAMETERS.clear();
+                PARAMETERS.put("id", temp.getId());
                 temp = (VmUser) namedQuery("VmUser.findById",
-                        parameters).get(0);
+                        PARAMETERS).get(0);
                 new VmUserJpaController(
                         getEntityManagerFactory()).destroy(temp.getId());
             }
@@ -392,13 +392,13 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     public static boolean validCredentials(String username,
             String password, boolean encrypt) {
         try {
-            parameters.clear();
-            parameters.put("username", username);
-            parameters.put("password", encrypt
+            PARAMETERS.clear();
+            PARAMETERS.put("username", username);
+            PARAMETERS.put("password", encrypt
                     ? encrypt(password.replaceAll("'", "\\\\'")) : password);
             return !createdQuery("SELECT x FROM VmUser x "
                     + "WHERE x.username = :username and x.password = :password",
-                    parameters).isEmpty();
+                    PARAMETERS).isEmpty();
         }
         catch (VMException e) {
             getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, e);
@@ -413,14 +413,14 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     public static VmUser getUser(String username,
             String password, boolean encrypt) {
         try {
-            parameters.clear();
-            parameters.put("username", username);
-            parameters.put("password", encrypt
+            PARAMETERS.clear();
+            PARAMETERS.put("username", username);
+            PARAMETERS.put("password", encrypt
                     ? encrypt(password.replaceAll("'", "\\\\'")) : password);
             if (validCredentials(username, password, encrypt)) {
                 return (VmUser) createdQuery("SELECT x FROM VmUser x "
                         + "WHERE x.username = :username and x.password = :password",
-                        parameters).get(0);
+                        PARAMETERS).get(0);
             } else {
                 return null;
             }

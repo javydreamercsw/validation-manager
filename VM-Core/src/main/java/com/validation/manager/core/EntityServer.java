@@ -8,12 +8,14 @@ import java.util.HashMap;
  * @param <T> Entity
  */
 public interface EntityServer<T> {
-    static HashMap parameters = new HashMap();
+
+    static HashMap PARAMETERS = new HashMap();
+
     /**
      * Write Entity to database
      *
      * @return Id for entity (new if just created)
-     * @throws Exception
+     * @throws Exception if there was an issue updating the database.
      */
     public int write2DB() throws Exception;
 
@@ -21,7 +23,7 @@ public interface EntityServer<T> {
      * Gets the entity represented by this EntityServer. Easy method to access
      * underlying entity for use with controllers and such.
      *
-     * @return
+     * @return The entity.
      */
     public T getEntity();
 
@@ -32,7 +34,7 @@ public interface EntityServer<T> {
      * @param source object to update from.
      */
     public void update(T target, T source);
-    
+
     /**
      * Update the enclosed entity.
      *

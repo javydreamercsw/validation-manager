@@ -43,14 +43,14 @@ public final class VMSettingServer extends VmSetting
      * Get setting from database
      *
      * @param s Setting name to retrieve
-     * @return
+     * @return Setting with the specified name.
      */
     @SuppressWarnings("unchecked")
     public static VmSetting getSetting(String s) {
-        parameters.clear();
-        parameters.put("setting", s);
+        PARAMETERS.clear();
+        PARAMETERS.put("setting", s);
         result = namedQuery("VmSetting.findBySetting",
-                parameters);
+                PARAMETERS);
         if (result.isEmpty()) {
             return null;
         } else {

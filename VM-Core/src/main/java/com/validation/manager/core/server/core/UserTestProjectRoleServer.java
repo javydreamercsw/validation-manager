@@ -24,8 +24,9 @@ public final class UserTestProjectRoleServer extends UserTestProjectRole
     /**
      * Persist to database
      *
-     * @throws PreexistingEntityException
-     * @throws Exception
+     * @throws PreexistingEntityException If entity already exists and tried to
+     * be re-created.
+     * @throws Exception If something goes wrong writing to the database.
      */
     @Override
     public int write2DB() throws PreexistingEntityException, Exception {

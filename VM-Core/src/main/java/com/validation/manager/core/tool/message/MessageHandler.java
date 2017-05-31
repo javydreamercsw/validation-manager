@@ -25,28 +25,28 @@ public interface MessageHandler {
     /**
      * Show an information dialog
      *
-     * @param message
+     * @param message Message
      */
     public void info(String message);
 
     /**
      * Show an question dialog
      *
-     * @param message
+     * @param message Message
      */
     public void question(String message);
 
     /**
      * Show an warning dialog
      *
-     * @param message
+     * @param message Message
      */
     public void warn(String message);
 
     /**
      * Show an plain dialog
      *
-     * @param message
+     * @param message Message
      */
     public void plain(String message);
 }

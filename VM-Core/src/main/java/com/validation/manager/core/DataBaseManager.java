@@ -552,7 +552,7 @@ public class DataBaseManager {
      *
      * @param first first string to compare
      * @param second second string to compare
-     * @return
+     * @return true if same, false otherwise
      */
     public static boolean compareNumberStrings(String first, String second) {
         return compareNumberStrings(first, second, ".");
@@ -564,7 +564,7 @@ public class DataBaseManager {
      * @param first first string to compare
      * @param second second string to compare
      * @param separator separator of fields (i.e. for 2.1.0 is '.')
-     * @return
+     * @return true if same, false otherwise
      */
     public static boolean compareNumberStrings(String first, String second,
             String separator) {

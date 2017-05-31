@@ -28,8 +28,8 @@ public class JPAEclipseLinkSessionCustomizer implements SessionCustomizer {
      * Get a dataSource connection and set it on the session with
      * lookupType=STRING_LOOKUP
      *
-     * @param session
-     * @throws java.lang.Exception
+     * @param session Session
+     * @throws java.lang.Exception If an error occurs.
      */
     @Override
     public void customize(Session session) throws Exception {
@@ -51,17 +51,18 @@ public class JPAEclipseLinkSessionCustomizer implements SessionCustomizer {
             connector.setLookupType(JNDIConnector.STRING_LOOKUP);
 
             // if you are specifying both JTA and non-JTA in your persistence.xml then set both connectors to be safe
-            JNDIConnector writeConnector = 
-                    (JNDIConnector) session.getLogin().getConnector();
+            JNDIConnector writeConnector
+                    = (JNDIConnector) session.getLogin().getConnector();
             writeConnector.setLookupType(JNDIConnector.STRING_LOOKUP);
-            JNDIConnector readConnector = 
-                    (JNDIConnector) ((DatabaseLogin) ((ServerSession) session)
+            JNDIConnector readConnector
+                    = (JNDIConnector) ((DatabaseLogin) ((ServerSession) session)
                             .getReadConnectionPool().getLogin()).getConnector();
             readConnector.setLookupType(JNDIConnector.STRING_LOOKUP);
 
             // Set the new connection on the session
             session.getLogin().setConnector(connector);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOG.log(Level.SEVERE, JNDI_DATASOURCE_NAME, e);
         }
     }

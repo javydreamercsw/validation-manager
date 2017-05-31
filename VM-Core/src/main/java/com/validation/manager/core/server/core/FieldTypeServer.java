@@ -14,9 +14,9 @@ public class FieldTypeServer extends FieldType
         implements EntityServer<FieldType> {
 
     public static FieldType findType(String simpleName) {
-        parameters.clear();
-        parameters.put("typeName", simpleName);
-        List r = DataBaseManager.namedQuery("FieldType.findByTypeName", parameters);
+        PARAMETERS.clear();
+        PARAMETERS.put("typeName", simpleName);
+        List r = DataBaseManager.namedQuery("FieldType.findByTypeName", PARAMETERS);
         return r.isEmpty() ? null : (FieldType) r.get(0);
     }
 

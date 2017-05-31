@@ -53,10 +53,10 @@ public class ExecutionResultServer extends ExecutionResult
     }
 
     public static ExecutionResult getResult(String result) {
-        parameters.clear();
-        parameters.put("resultName", result);
+        PARAMETERS.clear();
+        PARAMETERS.put("resultName", result);
         List r = DataBaseManager.namedQuery("ExecutionResult.findByResultName",
-                parameters);
+                PARAMETERS);
         if (r.isEmpty()) {
             return null;
         } else {

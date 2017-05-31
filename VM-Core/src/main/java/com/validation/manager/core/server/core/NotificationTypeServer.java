@@ -14,11 +14,11 @@ public class NotificationTypeServer extends NotificationType
         implements EntityServer<NotificationType> {
 
     public static NotificationType getType(String type) {
-        parameters.clear();
-        parameters.put("typeName", type);
+        PARAMETERS.clear();
+        PARAMETERS.put("typeName", type);
         List<Object> result = DataBaseManager
                 .namedQuery("NotificationType.findByTypeName",
-                        parameters);
+                        PARAMETERS);
         if (result.isEmpty()) {
             return null;
         }

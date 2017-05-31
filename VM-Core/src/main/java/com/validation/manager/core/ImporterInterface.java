@@ -5,7 +5,7 @@ import java.util.List;
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
- * @param <T>
+ * @param <T> Class type for template.
  */
 public interface ImporterInterface<T> {
 
@@ -30,7 +30,7 @@ public interface ImporterInterface<T> {
      * Process the imported data.
      *
      * @return true if processed successfully, false otherwise.
-     * @throws VMException
+     * @throws VMException if there was an issue during import.
      */
     boolean processImport() throws VMException;
 }

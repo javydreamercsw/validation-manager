@@ -96,7 +96,7 @@ public interface VMUI {
     /**
      * Add a window to the UI
      *
-     * @param window
+     * @param window Window to add.
      */
     public void addWindow(Window window);
 
