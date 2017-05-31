@@ -1,14 +1,26 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.validation.manager.core.server.core;
 
-import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.Step;
-import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestProject;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
 import static com.validation.manager.test.TestHelper.createRequirement;
@@ -28,7 +40,7 @@ import org.openide.util.Exceptions;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class TestCaseExecutionServerTest extends AbstractVMTestCase {
 
@@ -36,20 +48,19 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             = getLogger(TestCaseExecutionServerTest.class.getName());
     private RequirementSpec rss = null;
     private RequirementSpecNode rsns = null;
-    private TestCase tc;
     private TestCaseServer tcs;
-    private TestProject tp;
-    private Project p;
+    private TestProjectServer tps;
+    private ProjectServer ps;
 
     @Override
     protected void postSetUp() {
         try {
-            p = TestHelper.createProject("Project", "Notes");
+            ps = new ProjectServer(TestHelper.createProject("Project", "Notes"));
             //Create requirements
             LOG.info("Create Requirement Spec");
             try {
                 rss = createRequirementSpec("Test", "Test",
-                        p, 1);
+                        ps.getEntity(), 1);
             }
             catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
@@ -68,8 +79,7 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
                     "Sample requirement", rsns.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
             //Create Test Case
-            tc = createTestCase("Dummy", "Summary");
-            tcs = new TestCaseServer(tc);
+            tcs = new TestCaseServer(createTestCase("Dummy", "Summary"));
             //Add steps
             List<Requirement> reqs = new ArrayList<>();
             reqs.add(r);
@@ -82,10 +92,10 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
                 assertEquals(i, tcs.getStepList().size());
                 assertEquals(i, new RequirementServer(r).getStepList().size());
             }
-            tp = TestHelper.createTestProject("TP");
-            TestPlan plan = TestHelper.createTestPlan(tp, "Notes", true, true);
-            TestHelper.addTestCaseToPlan(plan, tc);
-            TestHelper.addTestProjectToProject(tp, p);
+            tps = new TestProjectServer(TestHelper.createTestProject("TP"));
+            TestPlan plan = TestHelper.createTestPlan(tps.getEntity(), "Notes", true, true);
+            TestHelper.addTestCaseToPlan(plan, tcs.getEntity());
+            TestHelper.addTestProjectToProject(tps.getEntity(), ps.getEntity());
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);
@@ -102,13 +112,13 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             TestCaseExecutionServer instance = new TestCaseExecutionServer();
             instance.write2DB();
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
-            instance.addTestCase(tc);
-            assertEquals(tc.getStepList().size(),
+            instance.addTestCase(tcs.getEntity());
+            assertEquals(tcs.getStepList().size(),
                     instance.getEntity().getExecutionStepList().size());
-            instance.removeTestCase(tc);
+            instance.removeTestCase(tcs.getEntity());
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
-            instance.addTestCase(tc);
-            assertEquals(tc.getStepList().size(),
+            instance.addTestCase(tcs.getEntity());
+            assertEquals(tcs.getStepList().size(),
                     instance.getEntity().getExecutionStepList().size());
             //Add issues and attachments to the step
             IssueServer issue = new IssueServer();
@@ -133,7 +143,7 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
                     Exceptions.printStackTrace(ex);
                 }
             });
-            instance.removeTestCase(tc);
+            instance.removeTestCase(tcs.getEntity());
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
         }
         catch (Exception ex) {
@@ -152,10 +162,19 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
             TestCaseExecutionServer instance = new TestCaseExecutionServer();
             instance.write2DB();
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
-            instance.addTestProject(tp);
-            assertEquals(tc.getStepList().size(),
+            instance.addTestProject(tps.getEntity());
+            assertTrue(tcs.getStepList().size() > 0);
+            assertEquals(tcs.getStepList().size(),
                     instance.getEntity().getExecutionStepList().size());
-            instance.removeTestCase(tc);
+            instance.getEntity().getExecutionStepList().forEach(es -> {
+                assertNotNull(es.getStep());
+                assertNotNull(es.getStepHistory());
+                assertFalse(es.getLocked());
+                assertNull(es.getResultId());
+                assertNull(es.getReviewResultId());
+                assertNotNull(es.getTestCaseExecution());
+            });
+            instance.removeTestCase(tcs.getEntity());
             assertEquals(0, instance.getEntity().getExecutionStepList().size());
         }
         catch (Exception ex) {
@@ -171,13 +190,14 @@ public class TestCaseExecutionServerTest extends AbstractVMTestCase {
     public void testGetExecutions() {
         try {
             System.out.println("getExecutions");
-            List<TestCaseExecution> r = TestCaseExecutionServer.getExecutions(p);
+            List<TestCaseExecution> r
+                    = TestCaseExecutionServer.getExecutions(ps.getEntity());
             assertEquals(0, r.size());
             TestCaseExecutionServer instance = new TestCaseExecutionServer();
             instance.write2DB();
-            instance.addTestCase(tc);
-            r = TestCaseExecutionServer.getExecutions(p);
-            assertEquals(tc.getStepList().size(), r.size());
+            instance.addTestCase(tcs.getEntity());
+            r = TestCaseExecutionServer.getExecutions(ps.getEntity());
+            assertEquals(tcs.getEntity().getStepList().size(), r.size());
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);

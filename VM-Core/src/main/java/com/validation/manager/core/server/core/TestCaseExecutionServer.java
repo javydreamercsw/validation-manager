@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
@@ -8,11 +23,7 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.controller.AttachmentJpaController;
-import com.validation.manager.core.db.controller.ExecutionStepHasAttachmentJpaController;
-import com.validation.manager.core.db.controller.ExecutionStepHasIssueJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
-import com.validation.manager.core.db.controller.IssueJpaController;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -23,7 +34,7 @@ import org.openide.util.Exceptions;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class TestCaseExecutionServer extends TestCaseExecution
         implements EntityServer<TestCaseExecution> {
@@ -56,13 +67,15 @@ public final class TestCaseExecutionServer extends TestCaseExecution
                     = new ExecutionStepJpaController(DataBaseManager
                             .getEntityManagerFactory());
             tc.getStepList().forEach((s) -> {
-                ExecutionStep executionStep = new ExecutionStep(getId(),
+                ExecutionStep es = new ExecutionStep(getId(),
                         s.getStepPK().getId(), s.getStepPK().getTestCaseId());
-                executionStep.setStep(s);
-                executionStep.setTestCaseExecution(getEntity());
+                es.setStep(s);
+                es.setStepHistory(s.getHistoryList()
+                        .get(s.getHistoryList().size() - 1));
+                es.setTestCaseExecution(getEntity());
                 try {
-                    econtroller.create(executionStep);
-                    getExecutionStepList().add(executionStep);
+                    econtroller.create(es);
+                    getExecutionStepList().add(es);
                 }
                 catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
@@ -86,12 +99,13 @@ public final class TestCaseExecutionServer extends TestCaseExecution
             tce = new TestCaseExecution();
             update(tce, this);
             controller.create(tce);
+            setId(tce.getId());
         } else {
             tce = controller.findTestCaseExecution(getId());
             update(tce, this);
             controller.edit(tce);
         }
-        update(this, tce);
+        update();
         return getId();
     }
 
@@ -183,33 +197,25 @@ public final class TestCaseExecutionServer extends TestCaseExecution
                         .getEntityManagerFactory());
         toDelete.forEach(es -> {
             try {
-                es.getExecutionStepHasAttachmentList().forEach(att -> {
+                ExecutionStepServer ess = new ExecutionStepServer(es);
+                ess.getExecutionStepHasAttachmentList().forEach(att -> {
                     try {
-                        new ExecutionStepHasAttachmentJpaController(DataBaseManager
-                                .getEntityManagerFactory()).destroy(att
-                                .getExecutionStepHasAttachmentPK());
-                        new AttachmentJpaController(DataBaseManager
-                                .getEntityManagerFactory()).destroy(att.getAttachment()
-                                .getAttachmentPK());
+                        ess.removeAttachment(att.getAttachment());
                     }
-                    catch (IllegalOrphanException | NonexistentEntityException ex) {
+                    catch (Exception ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 });
-                es.getExecutionStepHasIssueList().forEach(issue -> {
+                ess.getExecutionStepHasIssueList().forEach(issue -> {
                     try {
-                        new ExecutionStepHasIssueJpaController(DataBaseManager
-                                .getEntityManagerFactory()).destroy(issue
-                                .getExecutionStepHasIssuePK());
-                        new IssueJpaController(DataBaseManager
-                                .getEntityManagerFactory()).destroy(issue
-                                .getIssue().getIssuePK());
+                        ess.removeIssue(issue.getIssue());
                     }
-                    catch (IllegalOrphanException | NonexistentEntityException ex) {
+                    catch (NonexistentEntityException ex) {
                         Exceptions.printStackTrace(ex);
                     }
                 });
-                c.destroy(es.getExecutionStepPK());
+                ess.getEntity();
+                c.destroy(ess.getExecutionStepPK());
             }
             catch (IllegalOrphanException | NonexistentEntityException ex) {
                 Exceptions.printStackTrace(ex);

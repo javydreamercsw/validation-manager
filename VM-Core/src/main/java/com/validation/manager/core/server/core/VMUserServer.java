@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
@@ -10,6 +25,7 @@ import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.CorrectiveAction;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.Notification;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
@@ -47,7 +63,7 @@ import org.openide.util.Exceptions;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
 
@@ -73,11 +89,11 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     + "' AND u.userStatusId.id <> 2");
             //throw exception if no result found
             if (result.isEmpty()) {
-                parameters.clear();
-                parameters.put("username", attrUN);
+                PARAMETERS.clear();
+                PARAMETERS.put("username", attrUN);
                 result
                         = namedQuery("VmUser.findByUsername",
-                                parameters);
+                                PARAMETERS);
                 //The username is valid but wrong password. Increase the login attempts.
                 if (result.size() > 0) {
                     increaseAttempts = true;
@@ -327,10 +343,10 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
 
     public static void deleteUser(VmUser user) {
         if (user != null) {
-            parameters.clear();
-            parameters.put("id", user.getId());
+            PARAMETERS.clear();
+            PARAMETERS.put("id", user.getId());
             VmUser temp = (VmUser) namedQuery("VmUser.findById",
-                    parameters).get(0);
+                    PARAMETERS).get(0);
             try {
                 for (CorrectiveAction ca : temp.getCorrectiveActionList()) {
                     new CorrectiveActionJpaController(
@@ -364,10 +380,10 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     new UserTestProjectRoleJpaController(
                             getEntityManagerFactory()).destroy(rc.getUserTestProjectRolePK());
                 }
-                parameters.clear();
-                parameters.put("id", temp.getId());
+                PARAMETERS.clear();
+                PARAMETERS.put("id", temp.getId());
                 temp = (VmUser) namedQuery("VmUser.findById",
-                        parameters).get(0);
+                        PARAMETERS).get(0);
                 new VmUserJpaController(
                         getEntityManagerFactory()).destroy(temp.getId());
             }
@@ -391,13 +407,13 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     public static boolean validCredentials(String username,
             String password, boolean encrypt) {
         try {
-            parameters.clear();
-            parameters.put("username", username);
-            parameters.put("password", encrypt
+            PARAMETERS.clear();
+            PARAMETERS.put("username", username);
+            PARAMETERS.put("password", encrypt
                     ? encrypt(password.replaceAll("'", "\\\\'")) : password);
             return !createdQuery("SELECT x FROM VmUser x "
                     + "WHERE x.username = :username and x.password = :password",
-                    parameters).isEmpty();
+                    PARAMETERS).isEmpty();
         }
         catch (VMException e) {
             getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, e);
@@ -412,14 +428,14 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     public static VmUser getUser(String username,
             String password, boolean encrypt) {
         try {
-            parameters.clear();
-            parameters.put("username", username);
-            parameters.put("password", encrypt
+            PARAMETERS.clear();
+            PARAMETERS.put("username", username);
+            PARAMETERS.put("password", encrypt
                     ? encrypt(password.replaceAll("'", "\\\\'")) : password);
             if (validCredentials(username, password, encrypt)) {
                 return (VmUser) createdQuery("SELECT x FROM VmUser x "
                         + "WHERE x.username = :username and x.password = :password",
-                        parameters).get(0);
+                        PARAMETERS).get(0);
             } else {
                 return null;
             }
@@ -443,6 +459,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         target.setPassword(source.getPassword());
         target.setFirstName(source.getFirstName());
         target.setLastName(source.getLastName());
+        target.setLocale(source.getLocale());
         target.setEmail(source.getEmail());
         target.setAttempts(source.getAttempts());
         target.setLastModified(source.getLastModified());
@@ -452,6 +469,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         target.setUserAssigmentList(source.getUserAssigmentList());
         target.setUserAssigmentList1(source.getUserAssigmentList1());
         target.setUserHasInvestigationList(source.getUserHasInvestigationList());
+        target.setUsername(source.getUsername());
         target.setRootCauseList(source.getRootCauseList());
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setUserTestProjectRoleList(source.getUserTestProjectRoleList());
@@ -474,6 +492,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         target.setExecutionStepList(source.getExecutionStepList());
         target.setExecutionStepList1(source.getExecutionStepList1());
         target.setExecutionStepHasIssueList(source.getExecutionStepHasIssueList());
+        target.setNotificationList(source.getNotificationList());
+        target.setNotificationList1(source.getNotificationList1());
 //        super.update(target, source);
     }
 
@@ -517,5 +537,21 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         ess.setAssigner(getEntity());
         ess.write2DB();
         update();
+    }
+
+    @Override
+    public String toString() {
+        return getFirstName() + " " + getLastName();
+    }
+
+    public List<Notification> getPendingNotifications() {
+        update();
+        List<Notification> pending = new ArrayList<>();
+        getNotificationList().forEach(n -> {
+            if (n.getAcknowledgeDate() == null) {
+                pending.add(n);
+            }
+        });
+        return pending;
     }
 }

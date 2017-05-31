@@ -4,17 +4,21 @@
     <parent>
         <artifactId>Validation-Manager</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.3</version>
+        <version>0.3.1</version>
     </parent>
     
     <artifactId>Validation-Manager-Web</artifactId>
     <packaging>war</packaging>
     <name>Validation Manager Web</name>
+    <description>Validation Manager web interface.</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
         <openoffice.version>4.1.2</openoffice.version>
+        <vaadin.version>7.7.9</vaadin.version>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
     <repositories>
         <repository>
@@ -115,9 +119,9 @@
             <version>${vaadin.icons.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.vaadin.addons</groupId>
-            <artifactId>contextmenu</artifactId>
-            <version>4.5</version>
+            <groupId>com.vaadin.addon</groupId>
+            <artifactId>vaadin-context-menu</artifactId>
+            <version>0.7.5</version>
         </dependency>
         <dependency>
             <groupId>org.vaadin.addons</groupId>
@@ -162,17 +166,34 @@
         <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>wizards-for-vaadin</artifactId>
-            <version>1.1.2-SNAPSHOT</version>
+            <version>1.1.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>vaadin-grid-util</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>vaadin-excel-exporter</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+        -->
     </dependencies>
     
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <!-- Run annotation processors on src/main/java sources -->
             <plugin>
                 <groupId>org.bsc.maven</groupId>
                 <artifactId>maven-processor-plugin</artifactId>
-                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>process</id>
@@ -187,17 +208,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <debug>false</debug>
                 </configuration>
             </plugin>
             <!-- As we are doing "inplace" GWT compilation, ensure the widgetset -->
             <!-- directory is cleaned properly -->
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.0.0</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -209,8 +229,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.1.0</version>
                 <configuration>
+                    <archive>                   
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
                         <resource>
@@ -245,10 +270,11 @@
                     <style>OBF</style>
                     <strict>true</strict>
                     <runTarget>http://localhost:8080/Validation-Manager-Web</runTarget>
+                    <logLevel>INFO</logLevel>
                 </configuration>
                 <executions>
                     <execution>
-                        <configuration></configuration>
+                        <configuration />
                         <goals>
                             <goal>clean</goal>
                             <goal>resources</goal>
@@ -296,7 +322,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore></ignore>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -319,5 +345,4 @@
             </plugins>
         </pluginManagement>
     </build>
-    <description>Validation Manager web interface.</description>
 </project>

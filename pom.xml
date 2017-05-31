@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>Validation-Manager</artifactId>
-    <version>0.3</version>
+    <version>0.3.1</version>
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <packaging>pom</packaging>
-    
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>9</version>
-    </parent>
     
     <prerequisites>
         <maven>3.3.9</maven>
@@ -21,17 +13,6 @@
 
     <name>Validation Manager</name>
     <url>https://sourceforge.net/projects/validationmgr/</url>
-    
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <issueManagement>
         <system>jira</system>
@@ -48,21 +29,32 @@
     </developers>
     <licenses>
         <license>
-            <name>CDDL-1.0</name>
-            <url>http://www.opensource.org/licenses/cddl1.php</url>
-            <comments>Common Development and Distribution License</comments>
+            <name>Apache 2.0</name>
+            <url>https://opensource.org/licenses/Apache-2.0</url>
+            <comments>Apache License, Version 2.0</comments>
         </license>
     </licenses>
     <scm>
         <url>https://github.com/javydreamercsw/validation-manager</url>
         <connection>scm:git:https://github.com/javydreamercsw/validation-manager.git</connection>
         <developerConnection>scm:git:https://github.com/javydreamercsw/validation-manager.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>Validation-Manager-0.3.1</tag>
     </scm>
     <ciManagement>
-        <system>Jenkins</system>
-        <url>https://xinco.ci.cloudbees.com/</url>
+        <system>Travis CI</system>
+        <url>https://travis-ci.org/javydreamercsw/validation-manager</url>
     </ciManagement>
+    
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-cy6ergn0m-maven</id>
+            <name>bintray-plugins</name>
+            <url>http://dl.bintray.com/cy6ergn0m/maven</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -80,6 +72,15 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.bsc.maven</groupId>
+                    <artifactId>maven-processor-plugin</artifactId>
+                    <version>3.3.1</version>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>1.6</version>
@@ -92,7 +93,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>com.vaadin</groupId>
@@ -165,30 +166,33 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>2.8.2</version>
                 </plugin>
-                <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.8</version>
-                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatupe.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <failOnError>false</failOnError>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>cy.github</groupId>
+                <artifactId>github-release-plugin</artifactId>
+                <version>0.5.2</version>
+
+                <configuration>
+                    <tagName>${project.artifactId}-${project.version}</tagName>
+                    <preRelease>true</preRelease>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>gh-upload</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

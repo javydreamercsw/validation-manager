@@ -1,10 +1,23 @@
-/*
- * This handles all the test execution activities.
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
@@ -13,6 +26,7 @@ import java.util.TreeMap;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
 import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
@@ -22,7 +36,7 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class ExecutionWindow extends VMWindow {
 
@@ -97,10 +111,10 @@ public final class ExecutionWindow extends VMWindow {
             public void wizardCompleted(WizardCompletedEvent event) {
                 if (reviewer) {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption("Do you want to release the test case?")
-                            .withMessage("Released test cases are commited and can no "
-                                    + "longer be modified.\nIt would be equivalent "
-                                    + "to documenting in paper.")
+                            .withCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                                    .translate("release.test.case.title"))
+                            .withMessage(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                                    .translate("release.test.case.message"))
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)
@@ -127,10 +141,10 @@ public final class ExecutionWindow extends VMWindow {
                     prompt.open();
                 } else {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption("Do you want to lock the test case?")
-                            .withMessage("Locked test cases are commited and can no "
-                                    + "longer be modified.\nIt would be equivalent "
-                                    + "to documenting in paper.")
+                            .withCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                                    .translate("lock.test.case.title"))
+                            .withMessage(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                                    .translate("lock.test.case.message"))
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)

@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.validation.manager.core.server;
 
 import com.validation.manager.core.VMException;
@@ -28,8 +43,8 @@ public class JPAEclipseLinkSessionCustomizer implements SessionCustomizer {
      * Get a dataSource connection and set it on the session with
      * lookupType=STRING_LOOKUP
      *
-     * @param session
-     * @throws java.lang.Exception
+     * @param session Session
+     * @throws java.lang.Exception If an error occurs.
      */
     @Override
     public void customize(Session session) throws Exception {
@@ -51,17 +66,18 @@ public class JPAEclipseLinkSessionCustomizer implements SessionCustomizer {
             connector.setLookupType(JNDIConnector.STRING_LOOKUP);
 
             // if you are specifying both JTA and non-JTA in your persistence.xml then set both connectors to be safe
-            JNDIConnector writeConnector = 
-                    (JNDIConnector) session.getLogin().getConnector();
+            JNDIConnector writeConnector
+                    = (JNDIConnector) session.getLogin().getConnector();
             writeConnector.setLookupType(JNDIConnector.STRING_LOOKUP);
-            JNDIConnector readConnector = 
-                    (JNDIConnector) ((DatabaseLogin) ((ServerSession) session)
+            JNDIConnector readConnector
+                    = (JNDIConnector) ((DatabaseLogin) ((ServerSession) session)
                             .getReadConnectionPool().getLogin()).getConnector();
             readConnector.setLookupType(JNDIConnector.STRING_LOOKUP);
 
             // Set the new connection on the session
             session.getLogin().setConnector(connector);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOG.log(Level.SEVERE, JNDI_DATASOURCE_NAME, e);
         }
     }

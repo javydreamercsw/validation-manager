@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
@@ -11,7 +26,7 @@ import java.util.List;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class VMSettingServer extends VmSetting
         implements EntityServer<VmSetting>, VersionableServer<VmSetting> {
@@ -43,14 +58,14 @@ public final class VMSettingServer extends VmSetting
      * Get setting from database
      *
      * @param s Setting name to retrieve
-     * @return
+     * @return Setting with the specified name.
      */
     @SuppressWarnings("unchecked")
     public static VmSetting getSetting(String s) {
-        parameters.clear();
-        parameters.put("setting", s);
+        PARAMETERS.clear();
+        PARAMETERS.put("setting", s);
         result = namedQuery("VmSetting.findBySetting",
-                parameters);
+                PARAMETERS);
         if (result.isEmpty()) {
             return null;
         } else {

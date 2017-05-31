@@ -1,18 +1,30 @@
-/*
- * This is the Execution dashboard window
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.dashboard;
 
-import com.validation.manager.core.VMUI;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.server.core.ExecutionResultServer;
+import com.validation.manager.core.tool.TCEExtraction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
-import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI.TCEExtraction;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -22,7 +34,7 @@ import org.vaadin.addon.JFreeChartWrapper;
 
 /**
  *
- * @author Javier Ortiz Bultron<javier.ortiz.78@gmail.com>
+ * @author Javier Ortiz Bultronjavier.ortiz.78@gmail.com
  */
 public final class ExecutionDashboard extends VMWindow {
 
@@ -41,7 +53,7 @@ public final class ExecutionDashboard extends VMWindow {
     }
 
     private void init() {
-        setCaption("Execution Dashboard");
+        setCaption("execution.dash");
         center();
         setHeight(100, Unit.PERCENTAGE);
         setWidth(100, Unit.PERCENTAGE);
@@ -57,7 +69,7 @@ public final class ExecutionDashboard extends VMWindow {
                         dataset.addValue(new Double(entry.getValue()
                                 .get(er.getResultName())),
                                 entry.getKey(),
-                                Lookup.getDefault().lookup(VMUI.class)
+                                Lookup.getDefault().lookup(InternationalizationProvider.class)
                                         .translate(er.getResultName())
                         );
                     }
@@ -66,9 +78,9 @@ public final class ExecutionDashboard extends VMWindow {
         });
         //Build bar graph
         JFreeChart chart = ChartFactory.createBarChart3D(
-                "Execution Progress", // chart title
-                "Test Case",
-                "Amount",
+                "execution.progress", // chart title
+                "test.case",
+                "general.amount",
                 dataset, // data
                 PlotOrientation.VERTICAL,
                 true, // include legend

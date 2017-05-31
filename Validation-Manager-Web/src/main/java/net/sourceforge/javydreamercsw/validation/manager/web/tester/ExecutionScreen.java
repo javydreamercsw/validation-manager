@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.sourceforge.javydreamercsw.validation.manager.web.tester;
 
 import com.vaadin.event.Action;
@@ -10,7 +25,7 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.validation.manager.core.AbstractProvider;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.TestCase;
@@ -28,26 +43,27 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.execution.ExecutionWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.quality.QualityScreenProvider;
+import org.openide.util.Lookup;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public abstract class ExecutionScreen extends AbstractProvider {
 
     private ExecutionWindow executionWindow = null;
-    private final TreeTable testCaseTree = new TreeTable("Available Tests");
+    private final TreeTable testCaseTree
+            = new TreeTable("available.tests");
 
     public ExecutionScreen() {
         testCaseTree.setAnimationsEnabled(true);
-        testCaseTree.addContainerProperty(ValidationManagerUI.getInstance()
-                .translate("general.name"),
+        testCaseTree.addContainerProperty("general.name",
                 String.class, "");
-        testCaseTree.addGeneratedColumn(ValidationManagerUI.getInstance()
-                .translate("general.status"),
+        testCaseTree.addGeneratedColumn("general.status",
                 (Table source, Object itemId, Object columnId) -> {
-                    if (ValidationManagerUI.getInstance()
+                    if (Lookup.getDefault().lookup(InternationalizationProvider.class)
                             .translate("general.status").equals(columnId)
                     && itemId instanceof String) {
                         String id = (String) itemId;
@@ -80,8 +96,8 @@ public abstract class ExecutionScreen extends AbstractProvider {
                         }
                         if (locked) {
                             label2.setIcon(VaadinIcons.LOCK);
-                            label2.setDescription(ValidationManagerUI
-                                    .getInstance().translate("message.locked"));
+                            label2.setDescription(Lookup.getDefault()
+                                    .lookup(InternationalizationProvider.class).translate("message.locked"));
                         }
                         if (!summary.isEmpty()) {
                             if (summary.containsKey("result.fail")) {
@@ -102,10 +118,12 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                 //All is pass
                                 message = "result.pass";
                             }
-                            label.setCaption(ValidationManagerUI
-                                    .getInstance().translate(message));
-                            label.setDescription(ValidationManagerUI
-                                    .getInstance().translate(message));
+                            label.setCaption(Lookup.getDefault()
+                                    .lookup(InternationalizationProvider.class)
+                                    .translate(message));
+                            label.setDescription(Lookup.getDefault()
+                                    .lookup(InternationalizationProvider.class)
+                                    .translate(message));
                             //Completed. Now check result
                             switch (message) {
                                 case "result.pass":
@@ -132,17 +150,15 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     }
                     return new Label();
                 });
-        testCaseTree.addContainerProperty(ValidationManagerUI.getInstance()
-                .translate("general.summary"),
+        testCaseTree.addContainerProperty("general.summary",
                 String.class, "");
-        testCaseTree.addContainerProperty(ValidationManagerUI.getInstance()
-                .translate("general.assignment.date"),
+        testCaseTree.addContainerProperty("general.assignment.date",
                 String.class, "");
-        testCaseTree.setVisibleColumns(new Object[]{ValidationManagerUI
-            .getInstance().translate("general.name"),
-            ValidationManagerUI.getInstance().translate("general.status"),
-            ValidationManagerUI.getInstance().translate("general.summary"),
-            ValidationManagerUI.getInstance().translate("general.assignment.date")});
+        testCaseTree.setVisibleColumns(new Object[]{
+            "general.name",
+            "general.status",
+            "general.summary",
+            "general.assignment.date"});
         testCaseTree.addActionHandler(new Action.Handler() {
             @Override
             public Action[] getActions(Object target, Object sender) {
@@ -163,11 +179,11 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     }
                     if (!isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof TesterScreenProvider) {
-                        actions.add(new Action(ValidationManagerUI.getInstance()
+                        actions.add(new Action(Lookup.getDefault().lookup(InternationalizationProvider.class)
                                 .translate("general.execute")));
                     } else if (isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof QualityScreenProvider) {
-                        actions.add(new Action(ValidationManagerUI.getInstance()
+                        actions.add(new Action(Lookup.getDefault().lookup(InternationalizationProvider.class)
                                 .translate("general.review")));
                     }
                 }
@@ -224,6 +240,13 @@ public abstract class ExecutionScreen extends AbstractProvider {
         return summary;
     }
 
+    @Override
+    public boolean shouldDisplay() {
+        return ValidationManagerUI.getInstance().getUser() != null
+                && ValidationManagerUI.getInstance()
+                        .checkRight("system.configuration");
+    }
+
     protected ExecutionStepPK extractExecutionStepPK(String itemId) {
         String id = itemId.substring(2); //Remove es
         int esId;
@@ -241,7 +264,8 @@ public abstract class ExecutionScreen extends AbstractProvider {
         if (executionWindow == null) {
             executionWindow = new ExecutionWindow(executions, tcID,
                     this instanceof QualityScreenProvider);
-            executionWindow.setCaption("Test Execution");
+            executionWindow.setCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                    .translate("test.execution"));
             executionWindow.setVisible(true);
             executionWindow.setClosable(false);
             executionWindow.setResizable(false);
@@ -264,6 +288,12 @@ public abstract class ExecutionScreen extends AbstractProvider {
 
     @Override
     public void update() {
+        if (executionWindow != null) {
+            executionWindow.setCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                    .translate("test.execution"));
+        }
+        testCaseTree.setCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                .translate("available.tests"));
         testCaseTree.removeAllItems();
         if (ValidationManagerUI.getInstance().getUser() != null) {
             ProjectServer.getProjects().forEach(p -> {
@@ -339,6 +369,11 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     });
                 }
             });
+        }
+        //Update column titles
+        for (String h : testCaseTree.getColumnHeaders()) {
+            testCaseTree.setColumnHeader(h, Lookup.getDefault()
+                    .lookup(InternationalizationProvider.class).translate(h));
         }
     }
 }

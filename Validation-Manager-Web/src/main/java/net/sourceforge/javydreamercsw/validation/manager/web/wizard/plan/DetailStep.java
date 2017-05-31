@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -7,6 +22,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -21,7 +37,7 @@ import org.vaadin.teemu.wizards.WizardStep;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class DetailStep implements WizardStep {
 
@@ -36,27 +52,27 @@ public class DetailStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return "Add Details";
+        return "add.details";
     }
 
     @Override
     public Component getContent() {
-        Panel form = new Panel("Execution Detail");
+        Panel form = new Panel("execution.detail");
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(TestCaseExecution.class);
         binder.setItemDataSource(tce);
-        TextArea name = new TextArea("Name");
+        TextArea name = new TextArea("general.name");
         name.setConverter(new ByteToStringConverter());
         binder.bind(name, "name");
         layout.addComponent(name);
-        TextArea scope = new TextArea("Scope");
+        TextArea scope = new TextArea("general.scope");
         scope.setConverter(new ByteToStringConverter());
         binder.bind(scope, "scope");
         layout.addComponent(scope);
         if (tce.getId() != null) {
-            TextArea conclusion = new TextArea("Conclusion");
+            TextArea conclusion = new TextArea("general.comclusion");
             conclusion.setConverter(new ByteToStringConverter());
             binder.bind(conclusion, "conclusion");
             layout.addComponent(conclusion);
@@ -85,7 +101,7 @@ public class DetailStep implements WizardStep {
             }
             try {
                 tces.write2DB();
-                ValidationManagerUI ui = ValidationManagerUI.getInstance();
+                VMUI ui = ValidationManagerUI.getInstance();
                 ui.buildProjectTree(ui.getSelectdValue());
                 ui.updateProjectList();
                 ui.updateScreen();

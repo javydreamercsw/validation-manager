@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
 import com.vaadin.data.validator.StringLengthValidator;
@@ -13,34 +28,49 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMUserServer;
+import org.openide.util.Lookup;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 @SuppressWarnings("serial")
 public final class LoginDialog extends VMWindow {
 
-    private final ShortcutAction enterKey = new ShortcutAction("Login",
-            ShortcutAction.KeyCode.ENTER, null);
+    private final ShortcutAction enterKey
+            = new ShortcutAction(Lookup.getDefault()
+                    .lookup(InternationalizationProvider.class)
+                    .translate("general.login"),
+                    ShortcutAction.KeyCode.ENTER, null);
 
-    private final TextField name = new TextField("Username");
-    private final PasswordField password = new PasswordField("Password");
+    private final TextField name = new TextField(Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate("general.username"));
+    private final PasswordField password = new PasswordField(Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate("general.password"));
 
-    private final Button loginButton = new Button("Log In",
+    private final Button loginButton = new Button(Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate("general.login"),
             (ClickEvent event) -> {
-        tryToLogIn();
-    });
+                tryToLogIn();
+            });
 
-    private final Button cancelButton = new Button("Cancel",
+    private final Button cancelButton = new Button(Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate("general.cancel"),
             (ClickEvent event) -> {
-        LoginDialog.this.close();
-    });
+                LoginDialog.this.close();
+            });
 
     public LoginDialog(ValidationManagerUI menu) {
-        super(menu, "Account login");
+        super(menu, Lookup.getDefault()
+                .lookup(InternationalizationProvider.class)
+                .translate("general.login"));
         init();
     }
 
@@ -55,12 +85,16 @@ public final class LoginDialog extends VMWindow {
         layout.addComponent(password);
         name.focus();
         StringLengthValidator nameVal = new StringLengthValidator(
-                "Username must be 5 or more characters!");
+                Lookup.getDefault()
+                        .lookup(InternationalizationProvider.class).
+                        translate("password.length.message"));
         nameVal.setMinLength(5);
         name.addValidator(nameVal);
         name.setImmediate(true);
         StringLengthValidator passVal = new StringLengthValidator(
-                "Password can't be empty!");
+                Lookup.getDefault()
+                        .lookup(InternationalizationProvider.class).
+                        translate("password.empty.message"));
         passVal.setMinLength(3);
         password.addValidator(passVal);
         password.setImmediate(true);
@@ -100,8 +134,12 @@ public final class LoginDialog extends VMWindow {
             if (menu != null) {
                 menu.setUser(null);
             }
-            new Notification("Invalid credentials",
-                    "\nIncorrect username/password.",
+            new Notification(Lookup.getDefault()
+                    .lookup(InternationalizationProvider.class).
+                    translate("general.login.invalid.title"),
+                    Lookup.getDefault()
+                            .lookup(InternationalizationProvider.class).
+                            translate("general.login.invalid.message"),
                     Notification.Type.WARNING_MESSAGE, true)
                     .show(Page.getCurrent());
             password.setValue("");

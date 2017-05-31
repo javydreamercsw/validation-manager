@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.validation.manager.test;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
@@ -37,7 +52,7 @@ import static org.junit.Assert.fail;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class TestHelper {
 
@@ -127,13 +142,9 @@ public class TestHelper {
     public static TestCase addStep(TestCase tc, int sequence,
             String text, String note, String result) throws PreexistingEntityException,
             Exception {
-        StepServer s = new StepServer(tc, sequence, text);
-        int amount = tc.getStepList().size();
-        s.setNotes(note);
-        s.setExpectedResult(result.getBytes());
-        s.write2DB();
         TestCaseServer tcs = new TestCaseServer(tc.getId());
-        tcs.write2DB();
+        int amount = tcs.getStepList().size();
+        tcs.addStep(sequence, text, note, note, null);
         assertEquals(amount + 1, tcs.getStepList().size());
         return tcs.getEntity();
     }
@@ -153,6 +164,7 @@ public class TestHelper {
         plan.setNotes(notes);
         plan.setTestProject(tp);
         plan.write2DB();
+        tp.getTestPlanList().add(plan.getEntity());
         return plan.getEntity();
     }
 
@@ -163,6 +175,7 @@ public class TestHelper {
         tps.getTestCaseList().add(testCase);
         tps.write2DB();
         tps.update(plan, tps);
+        testCase.getTestPlanList().add(plan);
         assertTrue(plan.getTestCaseList().size() > testInPlan);
     }
 
@@ -194,6 +207,7 @@ public class TestHelper {
         ps.getTestProjectList().add(tp);
         ps.write2DB();
         assertTrue(ps.getEntity().getTestProjectList().size() > current);
+        tp.getProjectList().add(project);
     }
 
     public static void addRequirementToStep(Step step, Requirement req)

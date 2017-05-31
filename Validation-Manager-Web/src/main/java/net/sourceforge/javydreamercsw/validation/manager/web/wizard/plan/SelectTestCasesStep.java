@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
 import com.vaadin.data.Item;
@@ -18,13 +33,13 @@ import org.vaadin.teemu.wizards.WizardStep;
 
 /**
  *
- * @author Javier A. Ortiz Bultron <javier.ortiz.78@gmail.com>
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class SelectTestCasesStep implements WizardStep {
 
     private final Project p;
     private final Wizard w;
-    private final TreeTable testTree = new TreeTable("Available Tests");
+    private final TreeTable testTree = new TreeTable("available.tests");
     private final List<Integer> projects = new ArrayList<>();
     private static final Logger LOG
             = Logger.getLogger(SelectTestCasesStep.class.getSimpleName());
@@ -36,7 +51,7 @@ public class SelectTestCasesStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return "Select Test Cases";
+        return "select.test.case";
     }
 
     @Override
@@ -46,8 +61,10 @@ public class SelectTestCasesStep implements WizardStep {
         HorizontalLayout menu = new HorizontalLayout();
         if (p != null) {
             //Show the Test Plans for the selected project (including sub projects
-            testTree.addContainerProperty("Name", TreeTableCheckBox.class, "");
-            testTree.addContainerProperty("Description", String.class, "");
+            testTree.addContainerProperty("general.name",
+                    TreeTableCheckBox.class, "");
+            testTree.addContainerProperty("general.description",
+                    String.class, "");
             testTree.setWidth("20em");
             addProjectTestPlanning(testTree, p);
         }
@@ -66,8 +83,8 @@ public class SelectTestCasesStep implements WizardStep {
             LOG.log(Level.FINE, "Test Case: {0}", i);
         });
         if (testCases.isEmpty()) {
-            Notification.show("Unable to proceed",
-                    "Please select at least one Test Case prior to continuing.",
+            Notification.show("unable.to.proceed",
+                    "select.test.case.message",
                     Notification.Type.WARNING_MESSAGE);
             return false;
         }
@@ -152,7 +169,7 @@ public class SelectTestCasesStep implements WizardStep {
                 if (id.startsWith("tc")) {
                     //Is a Test Case
                     Item item = testTree.getItem(id);
-                    Object val = item.getItemProperty("Name").getValue();
+                    Object val = item.getItemProperty("general.name").getValue();
                     if (val instanceof TreeTableCheckBox) {
                         TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
                         if (ttcb.getValue()) {
