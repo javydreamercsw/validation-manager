@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -190,7 +190,7 @@ public class NotificationScreenProvider extends AbstractProvider {
         grid.setSelectionMode(SelectionMode.SINGLE);
         grid.setSizeFull();
         ContextMenu menu = new ContextMenu(grid, true);
-        menu.addItem("notification.mark.unread",
+        menu.addItem(TRANSLATOR.translate("notification.mark.unread"),
                 (MenuItem selectedItem) -> {
                     Object selected = ((SingleSelectionModel) grid.getSelectionModel())
                             .getSelectedRow();
@@ -206,7 +206,7 @@ public class NotificationScreenProvider extends AbstractProvider {
                         }
                     }
                 });
-        menu.addItem("notification.archive",
+        menu.addItem(TRANSLATOR.translate("notification.archive"),
                 (MenuItem selectedItem) -> {
                     Object selected = ((SingleSelectionModel) grid.getSelectionModel())
                             .getSelectedRow();
