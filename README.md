@@ -6,6 +6,7 @@
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/12634/badge.svg"/>
 </a>
+[![Stories in Ready](https://badge.waffle.io/javydreamercsw/validation-manager.png?label=ready&title=Ready)](http://waffle.io/javydreamercsw/validation-manager)
 
 
 Welcome to Validation Manager Repository!
