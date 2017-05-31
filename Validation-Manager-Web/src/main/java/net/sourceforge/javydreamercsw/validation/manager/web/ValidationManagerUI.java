@@ -1906,14 +1906,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                 hsplit.setFirstComponent(left);
             }
         }
-        //Build the right component
-        if (main == null) {
-            main = tabSheet.addTab(new VerticalLayout(),
-                    TRANSLATOR.translate("general.main"));
-        } else {
-            main.setCaption(TRANSLATOR.translate("general.main"));
-        }
         tabSheet.removeAllComponents();
+        //Build the right component
+        main = tabSheet.addTab(new VerticalLayout(),
+                TRANSLATOR.translate("general.main"));
         Lookup.getDefault().lookupAll(IMainContentProvider.class)
                 .forEach((provider) -> {
                     Iterator<Component> it = tabSheet.iterator();
