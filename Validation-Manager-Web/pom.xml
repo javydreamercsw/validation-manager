@@ -4,7 +4,7 @@
     <parent>
         <artifactId>Validation-Manager</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.3.1-SNAPSHOT</version>
+        <version>0.3.1</version>
     </parent>
     
     <artifactId>Validation-Manager-Web</artifactId>
@@ -274,7 +274,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <configuration></configuration>
+                        <configuration />
                         <goals>
                             <goal>clean</goal>
                             <goal>resources</goal>
@@ -322,7 +322,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore></ignore>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
