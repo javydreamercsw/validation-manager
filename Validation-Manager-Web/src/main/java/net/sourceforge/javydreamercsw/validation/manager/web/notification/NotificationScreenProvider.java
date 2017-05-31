@@ -190,7 +190,7 @@ public class NotificationScreenProvider extends AbstractProvider {
         grid.setSelectionMode(SelectionMode.SINGLE);
         grid.setSizeFull();
         ContextMenu menu = new ContextMenu(grid, true);
-        menu.addItem("notification.mark.unread",
+        menu.addItem(TRANSLATOR.translate("notification.mark.unread"),
                 (MenuItem selectedItem) -> {
                     Object selected = ((SingleSelectionModel) grid.getSelectionModel())
                             .getSelectedRow();
@@ -206,7 +206,7 @@ public class NotificationScreenProvider extends AbstractProvider {
                         }
                     }
                 });
-        menu.addItem("notification.archive",
+        menu.addItem(TRANSLATOR.translate("notification.archive"),
                 (MenuItem selectedItem) -> {
                     Object selected = ((SingleSelectionModel) grid.getSelectionModel())
                             .getSelectedRow();
@@ -252,3 +252,4 @@ public class NotificationScreenProvider extends AbstractProvider {
         vs.setId(getComponentCaption());
     }
 }
+
