@@ -31,9 +31,9 @@
     </developers>
     <licenses>
         <license>
-            <name>CDDL-1.0</name>
-            <url>http://www.opensource.org/licenses/cddl1.php</url>
-            <comments>Common Development and Distribution License</comments>
+            <name>Apache 2.0</name>
+            <url>https://opensource.org/licenses/Apache-2.0</url>
+            <comments>Apache License, Version 2.0</comments>
         </license>
     </licenses>
     <scm>
@@ -43,9 +43,20 @@
         <tag>HEAD</tag>
     </scm>
     <ciManagement>
-        <system>Jenkins</system>
-        <url>https://xinco.ci.cloudbees.com/</url>
+        <system>Travis CI</system>
+        <url>https://travis-ci.org/javydreamercsw/validation-manager</url>
     </ciManagement>
+    
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-cy6ergn0m-maven</id>
+            <name>bintray-plugins</name>
+            <url>http://dl.bintray.com/cy6ergn0m/maven</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -161,11 +172,33 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <failOnError>false</failOnError>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>cy.github</groupId>
+                <artifactId>github-release-plugin</artifactId>
+                <version>0.5.2</version>
+
+                <configuration>
+                    <tagName>${project.artifactId}-${project.version}</tagName>
+                    <preRelease>true</preRelease>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>gh-upload</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
