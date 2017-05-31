@@ -70,6 +70,10 @@ public class Notification implements Serializable {
     @JoinColumn(name = "author", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private VmUser author;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "archieved")
+    private boolean archieved;
 
     public Notification() {
     }
@@ -167,6 +171,14 @@ public class Notification implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Notification[ notificationPK=" + notificationPK + " ]";
+    }
+
+    public boolean getArchieved() {
+        return archieved;
+    }
+
+    public void setArchieved(boolean archieved) {
+        this.archieved = archieved;
     }
 
 }

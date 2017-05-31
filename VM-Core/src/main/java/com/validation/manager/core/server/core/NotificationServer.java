@@ -65,6 +65,7 @@ public class NotificationServer extends Notification
         target.setNotificationPK(source.getNotificationPK());
         target.setNotificationType(source.getNotificationType());
         target.setTargetUser(source.getTargetUser());
+        target.setArchieved(source.getArchieved());
     }
 
     @Override
