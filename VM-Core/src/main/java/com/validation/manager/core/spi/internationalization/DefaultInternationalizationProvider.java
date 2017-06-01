@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,9 @@
  */
 package com.validation.manager.core.spi.internationalization;
 
+import com.vaadin.ui.UI;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
-import com.validation.manager.core.api.internationalization.LocaleListener;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -24,26 +25,36 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
-import org.openide.util.lookup.ServiceProviders;
 
-@ServiceProviders({
-    @ServiceProvider(service = InternationalizationProvider.class, position = 1)
-    ,@ServiceProvider(service = LocaleListener.class)})
+@ServiceProvider(service = InternationalizationProvider.class, position = 1)
 public class DefaultInternationalizationProvider
         implements InternationalizationProvider {
 
-    private ResourceBundle RB = ResourceBundle.getBundle(
-            "com.validation.manager.resources.VMMessages", Locale.getDefault());
     private static final Logger LOG
             = Logger.getLogger(DefaultInternationalizationProvider.class
                     .getSimpleName());
 
     @Override
     public String translate(String mess) {
+        return translate(mess, new Locale(((VMUI) UI.getCurrent())
+                .getUser().getLocale()));
+    }
+
+    @Override
+    public ResourceBundle getResourceBundle() {
+        return ResourceBundle.getBundle(
+                "com.validation.manager.resources.VMMessages");
+    }
+
+    @Override
+    public String translate(String mess, Locale locale) {
         try {
-            if (RB.containsKey(mess)) {
-                return RB.containsKey(mess) ? new String(RB.getString(mess)
-                        .getBytes("ISO-8859-1"), "UTF-8") : mess;
+            ResourceBundle bundle = ResourceBundle.getBundle(
+                    "com.validation.manager.resources.VMMessages", locale);
+            if (bundle.containsKey(mess)) {
+                return bundle.containsKey(mess)
+                        ? new String(bundle.getString(mess)
+                                .getBytes("ISO-8859-1"), "UTF-8") : mess;
             } else {
                 //Try to search on any other provider
                 for (InternationalizationProvider i
@@ -60,16 +71,5 @@ public class DefaultInternationalizationProvider
             LOG.log(Level.SEVERE, null, ex);
         }
         return mess;
-    }
-
-    @Override
-    public void setlocale(Locale locale) {
-        RB = ResourceBundle.getBundle(
-                "com.validation.manager.resources.VMMessages", locale);
-    }
-
-    @Override
-    public ResourceBundle getResourceBundle() {
-        return RB;
     }
 }

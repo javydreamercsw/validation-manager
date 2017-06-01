@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.admin;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
@@ -33,11 +34,15 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.api.email.IEmailManager;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.server.core.VMSettingServer;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.Lookup;
@@ -48,36 +53,23 @@ public class AdminScreenProvider extends AbstractProvider {
 
     private static final Logger LOG
             = Logger.getLogger(IMainContentProvider.class.getSimpleName());
+    private static final InternationalizationProvider TRANSLATOR
+            = Lookup.getDefault().lookup(InternationalizationProvider.class);
 
     @Override
     public Component getContent() {
         TabSheet adminSheet = new TabSheet();
         VerticalLayout layout = new VerticalLayout();
         //Build setting tab
-        VerticalLayout sl = new VerticalLayout();
-        HorizontalSplitPanel split = new HorizontalSplitPanel();
-        sl.addComponent(split);
+        Component sl = getSettingTab();
+        //Build email setting tab
+        Component s2 = getEmailSettingTab();
         //Build left side
-        Tree sTree = new Tree(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        adminSheet.addTab(sl, TRANSLATOR
                 .translate("general.settings"));
-        adminSheet.addTab(sl, Lookup.getDefault().lookup(InternationalizationProvider.class)
-                .translate("general.settings"));
-        VMSettingServer.getSettings().stream().map((s) -> {
-            sTree.addItem(s);
-            sTree.setChildrenAllowed(s, false);
-            return s;
-        }).forEachOrdered((s) -> {
-            sTree.setItemCaption(s, Lookup.getDefault().lookup(InternationalizationProvider.class)
-                    .translate(s.getSetting()));
-        });
-        split.setFirstComponent(sTree);
+        adminSheet.addTab(s2, TRANSLATOR
+                .translate("general.email.settings"));
         layout.addComponent(adminSheet);
-        sTree.addValueChangeListener((Property.ValueChangeEvent event) -> {
-            if (sTree.getValue() instanceof VmSetting) {
-                split.setSecondComponent(
-                        displaySetting((VmSetting) sTree.getValue()));
-            }
-        });
         layout.setId(getComponentCaption());
         return layout;
     }
@@ -95,41 +87,44 @@ public class AdminScreenProvider extends AbstractProvider {
     }
 
     private Component displaySetting(VmSetting s) {
-        Panel form = new Panel(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        return displaySetting(s, false);
+    }
+
+    private Component displaySetting(VmSetting s, boolean edit) {
+        Panel form = new Panel(TRANSLATOR
                 .translate("setting.detail"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
         binder.setItemDataSource(s);
-        Field<?> id = (TextField) binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        Field<?> id = (TextField) binder.buildAndBind(TRANSLATOR
                 .translate("general.setting"), "setting");
         layout.addComponent(id);
-        Field bool = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        Field bool = binder.buildAndBind(TRANSLATOR
                 .translate("bool.value"), "boolVal");
         bool.setSizeFull();
         layout.addComponent(bool);
-        Field integerVal = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        Field integerVal = binder.buildAndBind(TRANSLATOR
                 .translate("int.value"), "intVal");
         integerVal.setSizeFull();
         layout.addComponent(integerVal);
-        Field longVal = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        Field longVal = binder.buildAndBind(TRANSLATOR
                 .translate("long.val"), "longVal");
         longVal.setSizeFull();
         layout.addComponent(longVal);
-        Field stringVal = binder.buildAndBind(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        Field stringVal = binder.buildAndBind(TRANSLATOR
                 .translate("string.val"), "stringVal",
                 TextArea.class);
-        stringVal.setStyleName(ValoTheme.TEXTAREA_LARGE);
         stringVal.setSizeFull();
         layout.addComponent(stringVal);
-        Button cancel = new Button(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        Button cancel = new Button(TRANSLATOR
                 .translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
         });
         //Editing existing one
-        Button update = new Button(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        Button update = new Button(TRANSLATOR
                 .translate("general.update"));
         update.addClickListener((Button.ClickEvent event) -> {
             try {
@@ -137,7 +132,7 @@ public class AdminScreenProvider extends AbstractProvider {
                 displaySetting(s);
             } catch (FieldGroup.CommitException ex) {
                 LOG.log(Level.SEVERE, null, ex);
-                Notification.show(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                Notification.show(TRANSLATOR
                         .translate("general.error.record.update"),
                         ex.getLocalizedMessage(),
                         Notification.Type.ERROR_MESSAGE);
@@ -151,7 +146,7 @@ public class AdminScreenProvider extends AbstractProvider {
             layout.addComponent(hl);
         }
         binder.setBuffered(true);
-        binder.setReadOnly(false);
+        binder.setReadOnly(edit);
         binder.bindMemberFields(form);
         //The version settigns are not modifiable from the GUI
         binder.setEnabled(blocked);
@@ -159,5 +154,113 @@ public class AdminScreenProvider extends AbstractProvider {
         id.setEnabled(false);
         form.setSizeFull();
         return form;
+    }
+
+    private Component getEmailSettingTab() {
+        VerticalLayout s2 = new VerticalLayout();
+        HorizontalSplitPanel split2 = new HorizontalSplitPanel();
+        s2.addComponent(split2);
+        Tree sTree2 = new Tree(TRANSLATOR
+                .translate("general.email.settings"));
+        sTree2.addValueChangeListener((Property.ValueChangeEvent event) -> {
+            if (sTree2.getValue() instanceof VmSetting) {
+                VmSetting vmSetting = (VmSetting) sTree2.getValue();
+                split2.setSecondComponent(
+                        displaySetting(vmSetting,
+                                !vmSetting.getSetting().equals("mail.enable")));
+            }
+        });
+        split2.setFirstComponent(sTree2);
+        VMSettingServer.getSettings().stream().map((s) -> {
+            if (s.getSetting().startsWith("mail")) {
+                sTree2.addItem(s);
+                sTree2.setChildrenAllowed(s, false);
+            }
+            return s;
+        }).forEachOrdered((s) -> {
+            if (s.getSetting().startsWith("mail")) {
+                sTree2.setItemCaption(s, TRANSLATOR
+                        .translate(s.getSetting()));
+            }
+        });
+        Button testEmail = new Button(TRANSLATOR
+                .translate("general.email.settings.test"),
+                listener -> {
+                    //Show a window to test email settings
+                    VMWindow w = new VMWindow(TRANSLATOR
+                            .translate("general.email.settings.test"));
+                    w.setModal(true);
+                    VerticalLayout vl = new VerticalLayout();
+                    TextField to = new TextField(TRANSLATOR.translate("general.email.to"));
+                    TextField from = new TextField(TRANSLATOR.translate("general.email.from"));
+                    TextField subject = new TextField(TRANSLATOR.translate("general.email.subject"));
+                    TextArea mess = new TextArea(TRANSLATOR.translate("general.email.message"));
+                    mess.setSizeFull();
+                    TextArea output = new TextArea(TRANSLATOR.translate("general.output"));
+                    output.setReadOnly(true);
+                    output.setSizeFull();
+                    Button send = new Button(TRANSLATOR.translate("general.email.send"),
+                            l -> {
+                                try {
+                                    Lookup.getDefault().lookup(IEmailManager.class)
+                                            .sendEmail(to.getValue(), null,
+                                                    from.getValue(),
+                                                    subject.getValue(),
+                                                    mess.getValue());
+                                    output.setValue(TRANSLATOR.translate("general.email.settings.test.success"));
+                                    //Successful, update the enable setting.
+                                    VMSettingServer enable = new VMSettingServer("mail.enable");
+                                    enable.setBoolVal(true);
+                                    enable.write2DB();
+                                } catch (Exception ex) {
+                                    LOG.log(Level.SEVERE, null, ex);
+                                    StringWriter sw = new StringWriter();
+                                    ex.printStackTrace(new PrintWriter(sw));
+                                    output.setReadOnly(false);
+                                    output.setValue(sw.toString());
+                                    output.setReadOnly(true);
+                                }
+                            });
+                    vl.addComponent(to);
+                    vl.addComponent(from);
+                    vl.addComponent(subject);
+                    vl.addComponent(mess);
+                    vl.addComponent(send);
+                    vl.addComponent(output);
+                    w.setContent(vl);
+                    w.setHeight(75, Sizeable.Unit.PERCENTAGE);
+                    w.setWidth(75, Sizeable.Unit.PERCENTAGE);
+                    ValidationManagerUI.getInstance().addWindow(w);
+                });
+        s2.addComponent(testEmail);
+        return s2;
+    }
+
+    private Component getSettingTab() {
+        VerticalLayout sl = new VerticalLayout();
+        HorizontalSplitPanel split1 = new HorizontalSplitPanel();
+        sl.addComponent(split1);
+        Tree sTree = new Tree(TRANSLATOR
+                .translate("general.settings"));
+        split1.setFirstComponent(sTree);
+        sTree.addValueChangeListener((Property.ValueChangeEvent event) -> {
+            if (sTree.getValue() instanceof VmSetting) {
+                split1.setSecondComponent(
+                        displaySetting((VmSetting) sTree.getValue()));
+            }
+        });
+        VMSettingServer.getSettings().stream().map((s) -> {
+            if (!s.getSetting().startsWith("mail")) {
+                sTree.addItem(s);
+                sTree.setChildrenAllowed(s, false);
+            }
+            return s;
+        }).forEachOrdered((s) -> {
+            if (!s.getSetting().startsWith("mail")) {
+                sTree.setItemCaption(s, TRANSLATOR
+                        .translate(s.getSetting()));
+            }
+        });
+        return sl;
     }
 }

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,14 @@
  */
 package com.validation.manager.core.api.internationalization;
 
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public interface InternationalizationProvider extends LocaleListener {
+public interface InternationalizationProvider {
 
     /**
      * Translate a string.
@@ -30,6 +31,15 @@ public interface InternationalizationProvider extends LocaleListener {
      * @return Translated string or the same string if no translation found.
      */
     public String translate(String mess);
+
+    /**
+     * Translate a string.
+     *
+     * @param mess String to translate
+     * @param l Locale to translate into.
+     * @return Translated string or the same string if no translation found.
+     */
+    public String translate(String mess, Locale l);
 
     /**
      * Get the ResourceBundle.
