@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,6 +76,7 @@ public final class HistoryServer extends History
         target.setStep(source.getStep());
         target.setRequirementId(source.getRequirementId());
         target.setVmSettingId(source.getVmSettingId());
+        target.setVmUserId(source.getVmUserId());
     }
 
     @Override

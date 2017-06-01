@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -90,6 +90,11 @@ public class HistoryJpaController implements Serializable {
                 vmSettingId = em.getReference(vmSettingId.getClass(), vmSettingId.getId());
                 history.setVmSettingId(vmSettingId);
             }
+            VmUser vmUserId = history.getVmUserId();
+            if (vmUserId != null) {
+                vmUserId = em.getReference(vmUserId.getClass(), vmUserId.getId());
+                history.setVmUserId(vmUserId);
+            }
             List<HistoryField> attachedHistoryFieldList = new ArrayList<HistoryField>();
             for (HistoryField historyFieldListHistoryFieldToAttach : history.getHistoryFieldList()) {
                 historyFieldListHistoryFieldToAttach = em.getReference(historyFieldListHistoryFieldToAttach.getClass(), historyFieldListHistoryFieldToAttach.getHistoryFieldPK());
@@ -128,6 +133,10 @@ public class HistoryJpaController implements Serializable {
             if (vmSettingId != null) {
                 vmSettingId.getHistoryList().add(history);
                 vmSettingId = em.merge(vmSettingId);
+            }
+            if (vmUserId != null) {
+                vmUserId.getHistoryModificationList().add(history);
+                vmUserId = em.merge(vmUserId);
             }
             for (HistoryField historyFieldListHistoryField : history.getHistoryFieldList()) {
                 History oldHistoryOfHistoryFieldListHistoryField = historyFieldListHistoryField.getHistory();
@@ -171,6 +180,8 @@ public class HistoryJpaController implements Serializable {
             Step stepNew = history.getStep();
             VmSetting vmSettingIdOld = persistentHistory.getVmSettingId();
             VmSetting vmSettingIdNew = history.getVmSettingId();
+            VmUser vmUserIdOld = persistentHistory.getVmUserId();
+            VmUser vmUserIdNew = history.getVmUserId();
             List<HistoryField> historyFieldListOld = persistentHistory.getHistoryFieldList();
             List<HistoryField> historyFieldListNew = history.getHistoryFieldList();
             List<Baseline> baselineListOld = persistentHistory.getBaselineList();
@@ -208,6 +219,10 @@ public class HistoryJpaController implements Serializable {
             if (vmSettingIdNew != null) {
                 vmSettingIdNew = em.getReference(vmSettingIdNew.getClass(), vmSettingIdNew.getId());
                 history.setVmSettingId(vmSettingIdNew);
+            }
+            if (vmUserIdNew != null) {
+                vmUserIdNew = em.getReference(vmUserIdNew.getClass(), vmUserIdNew.getId());
+                history.setVmUserId(vmUserIdNew);
             }
             List<HistoryField> attachedHistoryFieldListNew = new ArrayList<HistoryField>();
             for (HistoryField historyFieldListNewHistoryFieldToAttach : historyFieldListNew) {
@@ -270,6 +285,14 @@ public class HistoryJpaController implements Serializable {
             if (vmSettingIdNew != null && !vmSettingIdNew.equals(vmSettingIdOld)) {
                 vmSettingIdNew.getHistoryList().add(history);
                 vmSettingIdNew = em.merge(vmSettingIdNew);
+            }
+            if (vmUserIdOld != null && !vmUserIdOld.equals(vmUserIdNew)) {
+                vmUserIdOld.getHistoryModificationList().remove(history);
+                vmUserIdOld = em.merge(vmUserIdOld);
+            }
+            if (vmUserIdNew != null && !vmUserIdNew.equals(vmUserIdOld)) {
+                vmUserIdNew.getHistoryModificationList().add(history);
+                vmUserIdNew = em.merge(vmUserIdNew);
             }
             for (HistoryField historyFieldListNewHistoryField : historyFieldListNew) {
                 if (!historyFieldListOld.contains(historyFieldListNewHistoryField)) {
@@ -373,6 +396,11 @@ public class HistoryJpaController implements Serializable {
             if (vmSettingId != null) {
                 vmSettingId.getHistoryList().remove(history);
                 vmSettingId = em.merge(vmSettingId);
+            }
+            VmUser vmUserId = history.getVmUserId();
+            if (vmUserId != null) {
+                vmUserId.getHistoryModificationList().remove(history);
+                vmUserId = em.merge(vmUserId);
             }
             List<Baseline> baselineList = history.getBaselineList();
             for (Baseline baselineListBaseline : baselineList) {

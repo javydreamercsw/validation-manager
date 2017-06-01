@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -161,6 +161,8 @@ public class VmUser extends Login implements Serializable {
     private List<Notification> notificationList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "author")
     private List<Notification> notificationList1;
+    @OneToMany(mappedBy = "vmUserId")
+    private List<History> historyList;
 
     public VmUser() {
         super();
@@ -422,5 +424,17 @@ public class VmUser extends Login implements Serializable {
 
     public void setNotificationList1(List<Notification> notificationList1) {
         this.notificationList1 = notificationList1;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    @Override
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    @Override
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
     }
 }

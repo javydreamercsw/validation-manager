@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,13 +67,6 @@ public class TestHelper {
                 getEntityManagerFactory()).findUserStatus(1));
         temp.write2DB();
         return temp.getEntity();
-    }
-
-    public static void deleteUser(VmUser user) throws NonexistentEntityException,
-            IllegalOrphanException {
-        if (user != null) {
-            VMUserServer.deleteUser(user);
-        }
     }
 
     public static Project createProject(String name, String notes) {

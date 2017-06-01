@@ -274,6 +274,7 @@ public abstract class Versionable implements Comparable<Versionable>,
                                     StandardCharsets.UTF_8)
                                     .equals(hf.getFieldValue()))) {
                         result = true;
+                        break;
                     }
                 }
                 catch (SecurityException | IllegalArgumentException | IllegalAccessException ex) {
@@ -362,11 +363,14 @@ public abstract class Versionable implements Comparable<Versionable>,
         if (v instanceof EntityServer) {
             EntityServer es = (EntityServer) v;
             Versionable temp = (Versionable) es.getEntity();
-            update(temp, v);
-            EntityTransaction t = DataBaseManager.getEntityManager().getTransaction();
-            t.begin();
-            DataBaseManager.getEntityManager().merge(temp);
-            t.commit();
+            if (temp.getHistoryList() == null
+                    || temp.getHistoryList().size() != v.getHistoryList().size()) {
+                update(temp, v);
+                EntityTransaction t = DataBaseManager.getEntityManager().getTransaction();
+                t.begin();
+                DataBaseManager.getEntityManager().merge(temp);
+                t.commit();
+            }
         }
     }
 

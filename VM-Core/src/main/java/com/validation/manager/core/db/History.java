@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -125,6 +125,9 @@ public class History implements Serializable {
     @JoinColumn(name = "vm_setting_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private VmSetting vmSettingId;
+    @JoinColumn(name = "vm_user_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private VmUser vmUserId;
 
     public History() {
     }
@@ -295,5 +298,13 @@ public class History implements Serializable {
 
     public void setVmSettingId(VmSetting vmSettingId) {
         this.vmSettingId = vmSettingId;
+    }
+
+    public VmUser getVmUserId() {
+        return vmUserId;
+    }
+
+    public void setVmUserId(VmUser vmUserId) {
+        this.vmUserId = vmUserId;
     }
 }

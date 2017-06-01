@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -320,10 +320,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
     @Test
     public void testVersioning() {
         try {
-            Requirement req = TestHelper.createRequirement("SRS-SW-0001",
+            RequirementServer rs = new RequirementServer("SRS-SW-0001",
                     "Description", rsn.getRequirementSpecNodePK(),
                     "Notes", 1, 1);
-            RequirementServer rs = new RequirementServer(req);
+            rs.write2DB();
             int historyCount = 1;
             assertEquals(historyCount++, rs.getHistoryList().size());
             History history = rs.getHistoryList().get(rs
@@ -337,7 +337,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertTrue(checkHistory(rs));
             rs.setDescription("desc 2");
             rs.write2DB();
-            assertEquals(historyCount++, rs.getHistoryList().size());
+            assertEquals(historyCount++, rs.getEntity().getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
             assertEquals(0, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
@@ -352,7 +352,10 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.setModifierId(test.getId());
             rs.setReason("Test");
             rs.write2DB();
-            assertEquals(historyCount++, rs.getHistoryList().size());
+            rs.getHistoryList().forEach(h -> {
+                System.out.println(h.toString());
+            });
+            assertEquals(historyCount++, rs.getEntity().getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
             assertEquals(0, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
@@ -362,7 +365,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.increaseMidVersion();
-            assertEquals(historyCount++, rs.getHistoryList().size());
+            assertEquals(historyCount++, rs.getEntity().getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
             assertEquals(0, history.getMajorVersion());
             assertEquals(1, history.getMidVersion());
@@ -373,7 +376,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertNotNull(history.getModificationTime());
             assertTrue(checkHistory(rs));
             rs.increaseMajorVersion();
-            assertEquals(historyCount, rs.getHistoryList().size());
+            assertEquals(historyCount, rs.getEntity().getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
             assertEquals(1, history.getMajorVersion());
             assertEquals(0, history.getMidVersion());
@@ -392,7 +395,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.update();
             assertEquals(total, new HistoryJpaController(DataBaseManager
                     .getEntityManagerFactory()).getHistoryCount());
-            assertEquals(historyCount, rs.getHistoryList().size());
+            assertEquals(historyCount, rs.getEntity().getHistoryList().size());
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);

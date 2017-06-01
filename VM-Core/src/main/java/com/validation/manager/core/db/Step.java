@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -188,14 +188,6 @@ public class Step extends Versionable implements Serializable {
         return "com.validation.manager.core.db.Step[ stepPK=" + stepPK + " ]";
     }
 
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
-    }
-
     @XmlTransient
     @JsonIgnore
     @Override
@@ -206,5 +198,13 @@ public class Step extends Versionable implements Serializable {
     @Override
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
+    }
+
+    public byte[] getText() {
+        return text;
+    }
+
+    public void setText(byte[] text) {
+        this.text = text;
     }
 }
