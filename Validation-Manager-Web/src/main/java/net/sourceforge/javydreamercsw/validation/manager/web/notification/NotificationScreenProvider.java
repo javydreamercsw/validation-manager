@@ -76,16 +76,7 @@ public class NotificationScreenProvider extends AbstractProvider {
 
     @Override
     public Component getContent() {
-        if (vs == null) {
-            update();
-        }
-        return vs;
-    }
-
-    @Override
-    public void update() {
         vs = new VerticalLayout();
-        super.update();
         //On top put a list of notifications
         BeanItemContainer<Notification> container
                 = new BeanItemContainer<>(Notification.class);
@@ -238,8 +229,6 @@ public class NotificationScreenProvider extends AbstractProvider {
                                 = new NotificationServer((Notification) n);
                         ns.setAcknowledgeDate(new Date());
                         ns.write2DB();
-                        ((VMUI) UI.getCurrent()).updateScreen();
-                        ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
@@ -250,6 +239,7 @@ public class NotificationScreenProvider extends AbstractProvider {
         vs.addComponent(text);
         vs.setSizeFull();
         vs.setId(getComponentCaption());
+        return vs;
     }
 }
 
