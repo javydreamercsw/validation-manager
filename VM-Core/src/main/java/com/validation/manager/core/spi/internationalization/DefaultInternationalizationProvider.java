@@ -18,6 +18,7 @@ package com.validation.manager.core.spi.internationalization;
 import com.vaadin.ui.UI;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.server.core.VMUserServer;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -36,8 +37,10 @@ public class DefaultInternationalizationProvider
 
     @Override
     public String translate(String mess) {
-        return translate(mess, new Locale(((VMUI) UI.getCurrent())
-                .getUser().getLocale()));
+        VMUI ui = (VMUI) UI.getCurrent();
+        VMUserServer user = ui == null ? null : ui.getUser();
+        return translate(mess, user == null ? Locale.getDefault()
+                : new Locale(user.getLocale()));
     }
 
     @Override
