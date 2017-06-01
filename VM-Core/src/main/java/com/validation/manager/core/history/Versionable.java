@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +15,15 @@
  */
 package com.validation.manager.core.history;
 
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.FieldType;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.HistoryField;
+import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.server.core.FieldTypeServer;
 import com.validation.manager.core.server.core.HistoryFieldServer;
 import com.validation.manager.core.server.core.HistoryServer;
-import com.validation.manager.core.server.core.VMUserServer;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,7 @@ import java.util.logging.Logger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
+import javax.persistence.EntityTransaction;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
@@ -300,16 +302,18 @@ public abstract class Versionable implements Comparable<Versionable>,
         if (auditable(v)) {
             //Add history of creation
             HistoryServer hs = new HistoryServer();
-            if (v.getModifierId() < 0) {
+            VmUserJpaController c
+                    = new VmUserJpaController(DataBaseManager.getEntityManagerFactory());
+            if (v.getModifierId() <= 0) {
                 try {
                     //By default blame system
-                    hs.setModifierId(new VMUserServer(1).getEntity());
+                    hs.setModifierId(c.findVmUser(1));
                 }
                 catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             } else {
-                hs.setModifierId(new VMUserServer(v.getModifierId()).getEntity());
+                hs.setModifierId(c.findVmUser(v.getModifierId()));
             }
 
             if (v.getHistoryList() != null && !v.getHistoryList().isEmpty()) {
@@ -349,6 +353,20 @@ public abstract class Versionable implements Comparable<Versionable>,
             v.setMajorVersion(current.getMajorVersion());
             v.setMidVersion(current.getMidVersion());
             v.setMinorVersion(current.getMinorVersion());
+        }
+        /**
+         * When running update() on the server class, it adds the initial
+         * history to the server but never persists to the database. So we
+         * update it when we are creating the record instead.
+         */
+        if (v instanceof EntityServer) {
+            EntityServer es = (EntityServer) v;
+            Versionable temp = (Versionable) es.getEntity();
+            update(temp, v);
+            EntityTransaction t = DataBaseManager.getEntityManager().getTransaction();
+            t.begin();
+            DataBaseManager.getEntityManager().merge(temp);
+            t.commit();
         }
     }
 
