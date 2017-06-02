@@ -179,6 +179,9 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>unit-test</id>
@@ -186,6 +189,13 @@
                         <goals>
                             <goal>test</goal>
                         </goals>
+                        <configuration>
+                            <skip>${maven.test.skip}</skip>
+                            <argLine>${argLine}</argLine>
+                            <excludes>
+                                <exclude>**/*IT.java</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>integration-test</id>
@@ -193,6 +203,13 @@
                         <goals>
                             <goal>test</goal>
                         </goals>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                            <argLine>${argLine}</argLine>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -201,6 +218,7 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.7.9</version>
                 <configuration>
+                    <skip>${skipTests}</skip>
                     <output>file</output>
                     <append>true</append>
                 </configuration>
