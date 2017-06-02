@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,15 @@ public class AttachmentTypeServer extends AttachmentType
     private final AttachmentTypeJpaController c
             = new AttachmentTypeJpaController(DataBaseManager
                     .getEntityManagerFactory());
+
+    public AttachmentTypeServer(String type) {
+        super(type);
+    }
+
+    public AttachmentTypeServer(int id) {
+        setId(id);
+        update();
+    }
 
     @Override
     public int write2DB() throws Exception {

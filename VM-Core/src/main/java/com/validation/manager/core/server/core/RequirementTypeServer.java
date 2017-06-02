@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -55,6 +56,7 @@ public final class RequirementTypeServer extends RequirementType
             new RequirementTypeJpaController(getEntityManagerFactory()).create(rt);
             setId(rt.getId());
         }
+        update();
         return getId();
     }
 
@@ -79,7 +81,7 @@ public final class RequirementTypeServer extends RequirementType
         update(this, getEntity());
     }
 
-    public static Iterable<RequirementType> getRequirementTypes() {
+    public static List<RequirementType> getRequirementTypes() {
         return new RequirementTypeJpaController(
                 getEntityManagerFactory())
                 .findRequirementTypeEntities();

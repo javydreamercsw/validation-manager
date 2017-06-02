@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,12 +70,7 @@ public class AttachmentType implements Serializable {
     public AttachmentType() {
     }
 
-    public AttachmentType(Integer id) {
-        this.id = id;
-    }
-
-    public AttachmentType(Integer id, String type) {
-        this.id = id;
+    public AttachmentType(String type) {
         this.type = type;
     }
 
@@ -122,7 +117,7 @@ public class AttachmentType implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof AttachmentType)) {
             return false;
         }

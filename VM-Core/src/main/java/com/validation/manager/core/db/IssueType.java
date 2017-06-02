@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -81,12 +81,7 @@ public class IssueType implements Serializable {
     public IssueType() {
     }
 
-    public IssueType(Integer id) {
-        this.id = id;
-    }
-
-    public IssueType(Integer id, String typeName) {
-        this.id = id;
+    public IssueType(String typeName) {
         this.typeName = typeName;
     }
 
@@ -133,7 +128,7 @@ public class IssueType implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof IssueType)) {
             return false;
         }

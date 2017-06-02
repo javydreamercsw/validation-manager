@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,8 @@ import java.io.File;
 import static java.lang.System.getProperty;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -77,6 +77,21 @@ public class TableExtractorTest {
                 + getProperty("file.separator")
                 + name
                 + getProperty("file.separator") + "Tables.xlsx");
+        assert file.exists();
+        te = new TableExtractor(file);
+        tables = te.extractTables();
+        assertEquals(1, tables.size());
+        for (DefaultTableModel model : tables) {
+            assertEquals(3, model.getRowCount());
+            assertEquals(3, model.getColumnCount());
+        }
+        file = new File(getProperty("user.dir")
+                + getProperty("file.separator") + "src"
+                + getProperty("file.separator") + "test"
+                + getProperty("file.separator") + "java"
+                + getProperty("file.separator")
+                + name
+                + getProperty("file.separator") + "Tables.xlsm");
         assert file.exists();
         te = new TableExtractor(file);
         tables = te.extractTables();

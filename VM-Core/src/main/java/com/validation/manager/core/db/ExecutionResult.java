@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,12 +75,7 @@ public class ExecutionResult implements Serializable {
     public ExecutionResult() {
     }
 
-    public ExecutionResult(Integer id) {
-        this.id = id;
-    }
-
-    public ExecutionResult(Integer id, String resultName) {
-        this.id = id;
+    public ExecutionResult(String resultName) {
         this.resultName = resultName;
     }
 
@@ -119,7 +114,7 @@ public class ExecutionResult implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof ExecutionResult)) {
             return false;
         }

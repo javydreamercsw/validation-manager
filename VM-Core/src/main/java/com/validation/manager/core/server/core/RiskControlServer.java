@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,7 @@ public final class RiskControlServer extends RiskControl
         setRiskControlType(new RiskControlTypeJpaController(
                 getEntityManagerFactory()).findRiskControlType(
                 riskControlPK.getRiskControlTypeId()));
+        update();
     }
 
     public RiskControlServer(RiskControl riskControl) {

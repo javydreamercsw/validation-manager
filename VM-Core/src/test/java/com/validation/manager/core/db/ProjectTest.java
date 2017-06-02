@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,16 @@
  */
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.ProjectJpaController;
+import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
 import static com.validation.manager.core.server.core.ProjectServer.deleteProject;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.tool.Tool;
 import com.validation.manager.test.AbstractVMTestCase;
 import static com.validation.manager.test.TestHelper.addRequirementToStep;
@@ -122,6 +125,9 @@ public class ProjectTest extends AbstractVMTestCase {
             addTestCaseToPlan(plan, tc);
             project.write2DB();
             assertEquals(1, Tool.extractRequirements(project.getEntity()).size());
+            TestPlanServer.deleteTestPlan(plan);
+            assertNull(new TestPlanJpaController(DataBaseManager
+                    .getEntityManagerFactory()).findTestPlan(plan.getTestPlanPK()));
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);

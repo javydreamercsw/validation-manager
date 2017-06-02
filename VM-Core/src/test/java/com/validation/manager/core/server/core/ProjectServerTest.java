@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -120,6 +120,7 @@ public class ProjectServerTest extends AbstractVMTestCase {
                     node.getRequirementSpecNodePK(), "Notes", 1, 1);
             assertEquals(2, Tool.extractRequirements(root).size());
             TestHelper.addChildToRequirement(req1, req2);
+            assertEquals(1, new ProjectServer(root).getChildren().size());
             try {
                 ProjectServer.deleteProject(sub);
             }

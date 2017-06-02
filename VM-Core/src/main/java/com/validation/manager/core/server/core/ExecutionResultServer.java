@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,15 @@ import java.util.List;
 public class ExecutionResultServer extends ExecutionResult
         implements EntityServer<ExecutionResult> {
 
+    public ExecutionResultServer(String resultName) {
+        super(resultName);
+    }
+
+    public ExecutionResultServer(int id) {
+        setId(id);
+        update();
+    }
+
     @Override
     public int write2DB() throws Exception {
         ExecutionResultJpaController c
@@ -42,7 +51,7 @@ public class ExecutionResultServer extends ExecutionResult
         } else {
             ExecutionResult r = getEntity();
             update(r, this);
-            c.create(r);
+            c.edit(r);
             setId(r.getId());
             update();
         }

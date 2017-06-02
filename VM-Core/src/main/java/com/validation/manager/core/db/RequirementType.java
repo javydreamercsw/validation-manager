@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,7 +64,7 @@ public class RequirementType implements Serializable {
     @Basic(optional = false)
     @GeneratedValue(strategy = GenerationType.TABLE,
             generator = "ReqTypeGen")
-    @TableGenerator(name = "ReqType", table = "vm_id",
+    @TableGenerator(name = "ReqTypeGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "requirement_type",

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,9 +31,12 @@ import static java.util.logging.Logger.getLogger;
 public final class UserTestProjectRoleServer extends UserTestProjectRole
         implements EntityServer<UserTestProjectRole> {
 
-    public UserTestProjectRoleServer(int testProjectId, int userId, int roleId) {
+    public UserTestProjectRoleServer(int testProjectId, int userId,
+            int roleId) throws Exception {
         super(testProjectId, userId, roleId);
-        update();
+        setTestProject(new TestProjectServer(testProjectId).getEntity());
+        setRole(new RoleServer(roleId).getEntity());
+        setVmUser(new VMUserServer(userId).getEntity());
     }
 
     /**
@@ -47,26 +50,20 @@ public final class UserTestProjectRoleServer extends UserTestProjectRole
     public int write2DB() throws PreexistingEntityException, Exception {
         UserTestProjectRoleJpaController controller
                 = new UserTestProjectRoleJpaController(getEntityManagerFactory());
-        if (getUserTestProjectRolePK().getRoleId() > 0
-                && getUserTestProjectRolePK().getTestProjectId() > 0
-                && getUserTestProjectRolePK().getUserId() > 0) {
-            UserTestProjectRole temp
-                    = controller.findUserTestProjectRole(getUserTestProjectRolePK());
+        UserTestProjectRole temp
+                = controller.findUserTestProjectRole(getUserTestProjectRolePK());
+        if (temp == null) {
+            temp = new UserTestProjectRole();
+            update(temp, this);
+            controller.create(temp);
+            setUserTestProjectRolePK(temp.getUserTestProjectRolePK());
+        } else {
             temp.setRole(getRole());
             temp.setTestProject(getTestProject());
             temp.setVmUser(getVmUser());
             controller.edit(temp);
-        } else {
-            UserTestProjectRole temp = new UserTestProjectRole(
-                    getUserTestProjectRolePK().getTestProjectId(),
-                    getUserTestProjectRolePK().getUserId(),
-                    getUserTestProjectRolePK().getRoleId());
-            temp.setRole(getRole());
-            temp.setTestProject(getTestProject());
-            temp.setVmUser(getVmUser());
-            controller.create(temp);
-            setUserTestProjectRolePK(temp.getUserTestProjectRolePK());
         }
+        update();
         return getUserTestProjectRolePK().getRoleId();
     }
 
@@ -102,6 +99,7 @@ public final class UserTestProjectRoleServer extends UserTestProjectRole
         target.setRole(source.getRole());
         target.setTestProject(source.getTestProject());
         target.setVmUser(source.getVmUser());
+        target.setUserTestProjectRolePK(source.getUserTestProjectRolePK());
     }
 
     @Override

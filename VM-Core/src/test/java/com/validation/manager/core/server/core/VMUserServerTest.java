@@ -138,4 +138,23 @@ public class VMUserServerTest extends AbstractVMTestCase {
         ns.write2DB();
         assertEquals(0, instance.getPendingNotifications().size());
     }
+
+    /**
+     * Test of getUser method, of class VMUserServer.
+     *
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetUser() throws Exception {
+        System.out.println("getUser");
+        String username = "test";
+        String password = "test";
+        String name = "Test";
+        String lastname = "User";
+        String email = "test.user@test.com";
+        VMUserServer instance = new VMUserServer(username, password, name,
+                lastname, email);
+        instance.write2DB();
+        assertNotNull(VMUserServer.getUser(username, password, true));
+    }
 }

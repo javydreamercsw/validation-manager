@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +36,11 @@ public final class TestProjectServer extends TestProject
 
     public TestProjectServer(String name, boolean active) {
         super(name, active);
+    }
+
+    public TestProjectServer(int id) {
+        super.setId(id);
+        update();
     }
 
     public TestProjectServer(TestProject tp) {

@@ -17,11 +17,11 @@ package com.validation.manager.test;
 
 import com.validation.manager.core.DBState;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.history.Auditable;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.HistoryField;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.VmUserJpaController;
+import com.validation.manager.core.history.Auditable;
 import com.validation.manager.core.history.Versionable;
 import com.validation.manager.core.server.core.VMUserServer;
 import static com.validation.manager.core.tool.MD5.encrypt;
@@ -199,6 +199,9 @@ public abstract class AbstractVMTestCase extends TestCase {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
+        v.getHistoryList().forEach(h -> {
+            LOG.info(h.toString());
+        });
         return true;
     }
 }

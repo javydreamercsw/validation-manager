@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +32,11 @@ public final class RoleServer extends Role implements EntityServer<Role> {
     private static final Map<String, Object> PARAMETERS = new HashMap<>();
     private final RoleJpaController c
             = new RoleJpaController(DataBaseManager.getEntityManagerFactory());
+
+    public RoleServer(int id) {
+        setId(id);
+        update();
+    }
 
     public RoleServer(String description) {
         super(description);
