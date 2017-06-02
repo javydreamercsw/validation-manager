@@ -47,11 +47,11 @@ public class RequirementServerTest extends AbstractVMTestCase {
             = getLogger(RequirementServerTest.class.getName());
     private Project p;
     private RequirementSpecNode rsn;
+    private RequirementSpec rss;
 
     @Override
     protected void postSetUp() {
         try {
-            RequirementSpec rss = null;
             p = TestHelper.createProject("New Project", "Notes");
             ProjectServer project = new ProjectServer(p);
             project.setNotes("Notes 2");
@@ -255,6 +255,18 @@ public class RequirementServerTest extends AbstractVMTestCase {
         }
     }
 
+    @Test
+    public void testGetRequirements() throws Exception {
+        assertEquals(0, RequirementSpecServer.getRequirements(rss).size());
+        TestHelper.createRequirement("SRS-SW-0001",
+                "Sample requirement", rsn.getRequirementSpecNodePK(),
+                "Notes", 1, 1);
+        TestHelper.createRequirement("SRS-SW-0002",
+                "Sample requirement", rsn.getRequirementSpecNodePK(),
+                "Notes", 1, 1);
+        assertEquals(2, RequirementSpecServer.getRequirements(rss).size());
+    }
+
     /**
      * Test of requirement coverage with versioning method, of class
      * RequirementServer.
@@ -352,9 +364,6 @@ public class RequirementServerTest extends AbstractVMTestCase {
             rs.setModifierId(test.getId());
             rs.setReason("Test");
             rs.write2DB();
-            rs.getHistoryList().forEach(h -> {
-                System.out.println(h.toString());
-            });
             assertEquals(historyCount++, rs.getEntity().getHistoryList().size());
             history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
             assertEquals(0, history.getMajorVersion());
