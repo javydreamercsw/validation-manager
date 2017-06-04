@@ -17,7 +17,7 @@ Validation Manager is a tool to handle all the cumbersome paperwork of regulated
 
 ### How do I get set up? ###
 
-This is a Netbeans Project using Maven as build mechanism. Installing Netbeans 8.0 (currently) should be more than enough to get started.
+This is a web project using Maven 3 build mechanism. Installing Netbeans 8.0 (currently) should be more than enough to get started.
 
 * Configuration: No configuration needed. Everything handed by Maven.
 * Dependencies: Everything handed by Maven.
