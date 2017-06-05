@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ public interface ImporterInterface<T> {
      * Import the file.
      *
      * @return List of imported entities
-     * @throws ImportException If something goes wrong in the importing process.
+     * @throws VMException If something goes wrong in the importing process.
      */
     List<T> importFile() throws VMException;
 
@@ -37,7 +37,7 @@ public interface ImporterInterface<T> {
      *
      * @param header File has header row.
      * @return List of imported entities
-     * @throws ImportException If something goes wrong in the importing process.
+     * @throws VMException If something goes wrong in the importing process.
      */
     List<T> importFile(boolean header) throws VMException;
 
