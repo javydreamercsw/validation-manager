@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,17 @@
 package com.validation.manager.core;
 
 import com.vaadin.ui.Component;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import org.openide.util.Lookup;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public interface ContentProvider {
+
+    static final InternationalizationProvider TRANSLATOR
+            = Lookup.getDefault().lookup(InternationalizationProvider.class);
 
     /**
      * Return the component caption. This will be attempted to be translated.

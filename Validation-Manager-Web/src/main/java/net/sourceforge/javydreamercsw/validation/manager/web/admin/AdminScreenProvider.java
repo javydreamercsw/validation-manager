@@ -18,6 +18,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.admin;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -31,19 +32,24 @@ import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.email.IEmailManager;
-import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.VmSetting;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMSettingServer;
+import com.validation.manager.core.server.core.VMUserServer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.UserComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
@@ -53,22 +59,21 @@ public class AdminScreenProvider extends AbstractProvider {
 
     private static final Logger LOG
             = Logger.getLogger(IMainContentProvider.class.getSimpleName());
-    private static final InternationalizationProvider TRANSLATOR
-            = Lookup.getDefault().lookup(InternationalizationProvider.class);
 
     @Override
     public Component getContent() {
         TabSheet adminSheet = new TabSheet();
         VerticalLayout layout = new VerticalLayout();
-        //Build setting tab
-        Component sl = getSettingTab();
-        //Build email setting tab
-        Component s2 = getEmailSettingTab();
         //Build left side
-        adminSheet.addTab(sl, TRANSLATOR
+        //Build setting tab
+        adminSheet.addTab(getSettingTab(), TRANSLATOR
                 .translate("general.settings"));
-        adminSheet.addTab(s2, TRANSLATOR
+        //Build email setting tab
+        adminSheet.addTab(getEmailSettingTab(), TRANSLATOR
                 .translate("general.email.settings"));
+        //Build user management tab
+        adminSheet.addTab(getUserManagementTab(), TRANSLATOR
+                .translate("menu.user"));
         layout.addComponent(adminSheet);
         layout.setId(getComponentCaption());
         return layout;
@@ -171,14 +176,10 @@ public class AdminScreenProvider extends AbstractProvider {
             }
         });
         split2.setFirstComponent(sTree2);
-        VMSettingServer.getSettings().stream().map((s) -> {
+        VMSettingServer.getSettings().forEach(s -> {
             if (s.getSetting().startsWith("mail")) {
                 sTree2.addItem(s);
                 sTree2.setChildrenAllowed(s, false);
-            }
-            return s;
-        }).forEachOrdered((s) -> {
-            if (s.getSetting().startsWith("mail")) {
                 sTree2.setItemCaption(s, TRANSLATOR
                         .translate(s.getSetting()));
             }
@@ -249,18 +250,49 @@ public class AdminScreenProvider extends AbstractProvider {
                         displaySetting((VmSetting) sTree.getValue()));
             }
         });
-        VMSettingServer.getSettings().stream().map((s) -> {
+        VMSettingServer.getSettings().forEach(s -> {
             if (!s.getSetting().startsWith("mail")) {
                 sTree.addItem(s);
                 sTree.setChildrenAllowed(s, false);
-            }
-            return s;
-        }).forEachOrdered((s) -> {
-            if (!s.getSetting().startsWith("mail")) {
                 sTree.setItemCaption(s, TRANSLATOR
                         .translate(s.getSetting()));
             }
         });
         return sl;
+    }
+
+    private Component getUserManagementTab() {
+        VerticalLayout vl = new VerticalLayout();
+        HorizontalSplitPanel split = new HorizontalSplitPanel();
+        vl.addComponent(split);
+        //Create left side
+        Tree users = new Tree();
+        //Menu
+        VerticalLayout main = new VerticalLayout();
+        main.addComponent(users);
+        HorizontalLayout hl = new HorizontalLayout();
+        Button addUser = new Button(TRANSLATOR.translate("add.user"));
+        addUser.addClickListener(listener -> {
+            VmUser user = new VmUser();
+
+            split.setSecondComponent(new UserComponent(user, true));
+        });
+        hl.addComponent(addUser);
+        main.addComponent(hl);
+        split.setFirstComponent(main);
+        VMUserServer.getVMUsers().forEach(user -> {
+            if (!Objects.equals(user.getId(),
+                    ((VMUI) UI.getCurrent()).getUser().getId())) {
+                users.addItem(user.getEntity());
+                users.setItemCaption(user.getEntity(), user.toString());
+                users.setItemIcon(user.getEntity(), VaadinIcons.USER);
+                users.setChildrenAllowed(user.getEntity(), false);
+            }
+        });
+        users.addValueChangeListener((Property.ValueChangeEvent event) -> {
+            VmUser user = (VmUser) users.getValue();
+            split.setSecondComponent(new UserComponent(user, true));
+        });
+        return vl;
     }
 }

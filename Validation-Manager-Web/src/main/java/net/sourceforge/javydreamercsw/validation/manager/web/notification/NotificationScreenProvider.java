@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,8 +60,6 @@ public class NotificationScreenProvider extends AbstractProvider {
     private static final Logger LOG
             = Logger.getLogger(NotificationScreenProvider.class.getSimpleName());
     private VerticalLayout vs = null;
-    private final InternationalizationProvider TRANSLATOR = Lookup.getDefault()
-            .lookup(InternationalizationProvider.class);
 
     @Override
     public boolean shouldDisplay() {
@@ -242,4 +240,3 @@ public class NotificationScreenProvider extends AbstractProvider {
         return vs;
     }
 }
-

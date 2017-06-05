@@ -57,7 +57,9 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
 
     public VMUserServer(VmUser vmu) {
         super.setId(vmu.getId());
-        update();
+        if (getId() != null) {
+            update();
+        }
         //previously hashing the already hashed password
         setHashPassword(false);
     }
@@ -180,6 +182,11 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     @Override
     public int write2DB() throws Exception {
         Date date;
+        if (getUserStatusId() == null) {
+            setUserStatusId(new UserStatusJpaController(
+                    getEntityManagerFactory())
+                    .findUserStatus(1));
+        }
         if (getUserStatusId().getId() == 4) {
             //Changed from aged out to password changed. Clear status
             setUserStatusId(new UserStatusJpaController(
@@ -203,7 +210,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         }
         VmUserJpaController controller
                 = new VmUserJpaController(getEntityManagerFactory());
-        if (getId() > 0) {
+        if (getId() == null || getId() > 0) {
             setModifierId(getEntity().getId());
             date = new Date();
             setLastModified(date);
