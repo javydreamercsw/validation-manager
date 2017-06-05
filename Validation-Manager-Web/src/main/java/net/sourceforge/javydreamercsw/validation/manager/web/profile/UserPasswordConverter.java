@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ public class UserPasswordConverter implements Converter<String, String> {
             Class<? extends String> targetType, Locale locale)
             throws ConversionException {
         try {
-            return MD5.encrypt(value);
+            return value == null ? "" : MD5.encrypt(value);
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
