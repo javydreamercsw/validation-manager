@@ -61,7 +61,7 @@ public class AssigmentType implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "assigment_type",
-            initialValue = 1000,
+            initialValue = 1_000,
             allocationSize = 1)
     @NotNull
     @Column(name = "id")
@@ -72,7 +72,7 @@ public class AssigmentType implements Serializable {
     @Column(name = "fk_table")
     private String fkTable;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "description")
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "assigmentType")

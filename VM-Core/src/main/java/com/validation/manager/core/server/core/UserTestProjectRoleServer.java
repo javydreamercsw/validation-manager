@@ -17,10 +17,10 @@ package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.controller.UserTestProjectRoleJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 
@@ -42,28 +42,31 @@ public final class UserTestProjectRoleServer extends UserTestProjectRole
     /**
      * Persist to database
      *
-     * @throws PreexistingEntityException If entity already exists and tried to
-     * be re-created.
-     * @throws Exception If something goes wrong writing to the database.
+     * @throws VMException If something goes wrong writing to the database.
      */
     @Override
-    public int write2DB() throws PreexistingEntityException, Exception {
-        UserTestProjectRoleJpaController controller
-                = new UserTestProjectRoleJpaController(getEntityManagerFactory());
-        UserTestProjectRole temp
-                = controller.findUserTestProjectRole(getUserTestProjectRolePK());
-        if (temp == null) {
-            temp = new UserTestProjectRole();
-            update(temp, this);
-            controller.create(temp);
-            setUserTestProjectRolePK(temp.getUserTestProjectRolePK());
-        } else {
-            temp.setRole(getRole());
-            temp.setTestProject(getTestProject());
-            temp.setVmUser(getVmUser());
-            controller.edit(temp);
+    public int write2DB() throws VMException {
+        try {
+            UserTestProjectRoleJpaController controller
+                    = new UserTestProjectRoleJpaController(getEntityManagerFactory());
+            UserTestProjectRole temp
+                    = controller.findUserTestProjectRole(getUserTestProjectRolePK());
+            if (temp == null) {
+                temp = new UserTestProjectRole();
+                update(temp, this);
+                controller.create(temp);
+                setUserTestProjectRolePK(temp.getUserTestProjectRolePK());
+            } else {
+                temp.setRole(getRole());
+                temp.setTestProject(getTestProject());
+                temp.setVmUser(getVmUser());
+                controller.edit(temp);
+            }
+            update();
         }
-        update();
+        catch (Exception ex) {
+            throw new VMException(ex);
+        }
         return getUserTestProjectRolePK().getRoleId();
     }
 

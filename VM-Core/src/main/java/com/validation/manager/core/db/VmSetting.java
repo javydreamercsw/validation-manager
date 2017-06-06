@@ -67,7 +67,7 @@ public class VmSetting extends Versionable implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "vm_setting",
-            initialValue = 1000,
+            initialValue = 1_000,
             allocationSize = 1)
     @NotNull
     @Column(name = "id")
@@ -85,12 +85,12 @@ public class VmSetting extends Versionable implements Serializable {
     @Column(name = "int_val")
     private Integer intVal;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Auditable
     @Column(name = "long_val")
     private String longVal;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Auditable
     @Column(name = "string_val")
     private String stringVal;

@@ -60,14 +60,14 @@ public class Investigation implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "investigation",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @NotNull
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(min = 1, max = 65_535)
     @Column(name = "description")
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "investigation")

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Notification;
 import com.validation.manager.core.db.NotificationPK;
 import com.validation.manager.core.db.controller.NotificationJpaController;
@@ -26,7 +27,7 @@ import java.util.Date;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class NotificationServer extends Notification
+public final class NotificationServer extends Notification
         implements EntityServer<Notification> {
 
     public NotificationServer() {
@@ -44,23 +45,28 @@ public class NotificationServer extends Notification
     }
 
     @Override
-    public int write2DB() throws Exception {
-        if (getNotificationPK() == null) {
-            Notification n = new Notification();
-            if (getCreationDate() == null) {
-                setCreationDate(new Date());
+    public int write2DB() throws VMException {
+        try {
+            if (getNotificationPK() == null) {
+                Notification n = new Notification();
+                if (getCreationDate() == null) {
+                    setCreationDate(new Date());
+                }
+                update(n, this);
+                new NotificationJpaController(DataBaseManager
+                        .getEntityManagerFactory()).create(n);
+                setNotificationPK(n.getNotificationPK());
+            } else {
+                Notification n = getEntity();
+                update(n, this);
+                new NotificationJpaController(DataBaseManager
+                        .getEntityManagerFactory()).edit(n);
             }
-            update(n, this);
-            new NotificationJpaController(DataBaseManager
-                    .getEntityManagerFactory()).create(n);
-            setNotificationPK(n.getNotificationPK());
-        } else {
-            Notification n = getEntity();
-            update(n, this);
-            new NotificationJpaController(DataBaseManager
-                    .getEntityManagerFactory()).edit(n);
+            update();
         }
-        update();
+        catch (Exception ex) {
+            throw new VMException(ex);
+        }
         return getNotificationPK().getId();
     }
 

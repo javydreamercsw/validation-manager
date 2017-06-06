@@ -51,16 +51,16 @@ public class RequirementJpaController implements Serializable {
 
     public void create(Requirement requirement) {
         if (requirement.getRequirementList() == null) {
-            requirement.setRequirementList(new ArrayList<Requirement>());
+            requirement.setRequirementList(new ArrayList<>());
         }
         if (requirement.getStepList() == null) {
-            requirement.setStepList(new ArrayList<Step>());
+            requirement.setStepList(new ArrayList<>());
         }
         if (requirement.getRiskControlHasRequirementList() == null) {
-            requirement.setRiskControlHasRequirementList(new ArrayList<RiskControlHasRequirement>());
+            requirement.setRiskControlHasRequirementList(new ArrayList<>());
         }
         if (requirement.getHistoryList() == null) {
-            requirement.setHistoryList(new ArrayList<History>());
+            requirement.setHistoryList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
@@ -86,25 +86,25 @@ public class RequirementJpaController implements Serializable {
                 requirementTypeId = em.getReference(requirementTypeId.getClass(), requirementTypeId.getId());
                 requirement.setRequirementTypeId(requirementTypeId);
             }
-            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
+            List<Requirement> attachedRequirementList = new ArrayList<>();
             for (Requirement requirementListRequirementToAttach : requirement.getRequirementList()) {
                 requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getId());
                 attachedRequirementList.add(requirementListRequirementToAttach);
             }
             requirement.setRequirementList(attachedRequirementList);
-            List<Step> attachedStepList = new ArrayList<Step>();
+            List<Step> attachedStepList = new ArrayList<>();
             for (Step stepListStepToAttach : requirement.getStepList()) {
                 stepListStepToAttach = em.getReference(stepListStepToAttach.getClass(), stepListStepToAttach.getStepPK());
                 attachedStepList.add(stepListStepToAttach);
             }
             requirement.setStepList(attachedStepList);
-            List<RiskControlHasRequirement> attachedRiskControlHasRequirementList = new ArrayList<RiskControlHasRequirement>();
+            List<RiskControlHasRequirement> attachedRiskControlHasRequirementList = new ArrayList<>();
             for (RiskControlHasRequirement riskControlHasRequirementListRiskControlHasRequirementToAttach : requirement.getRiskControlHasRequirementList()) {
                 riskControlHasRequirementListRiskControlHasRequirementToAttach = em.getReference(riskControlHasRequirementListRiskControlHasRequirementToAttach.getClass(), riskControlHasRequirementListRiskControlHasRequirementToAttach.getRiskControlHasRequirementPK());
                 attachedRiskControlHasRequirementList.add(riskControlHasRequirementListRiskControlHasRequirementToAttach);
             }
             requirement.setRiskControlHasRequirementList(attachedRiskControlHasRequirementList);
-            List<History> attachedHistoryList = new ArrayList<History>();
+            List<History> attachedHistoryList = new ArrayList<>();
             for (History historyListHistoryToAttach : requirement.getHistoryList()) {
                 historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
                 attachedHistoryList.add(historyListHistoryToAttach);
@@ -193,7 +193,7 @@ public class RequirementJpaController implements Serializable {
             for (RiskControlHasRequirement riskControlHasRequirementListOldRiskControlHasRequirement : riskControlHasRequirementListOld) {
                 if (!riskControlHasRequirementListNew.contains(riskControlHasRequirementListOldRiskControlHasRequirement)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain RiskControlHasRequirement " + riskControlHasRequirementListOldRiskControlHasRequirement + " since its requirement field is not nullable.");
                 }
@@ -217,28 +217,28 @@ public class RequirementJpaController implements Serializable {
                 requirementTypeIdNew = em.getReference(requirementTypeIdNew.getClass(), requirementTypeIdNew.getId());
                 requirement.setRequirementTypeId(requirementTypeIdNew);
             }
-            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
+            List<Requirement> attachedRequirementListNew = new ArrayList<>();
             for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
                 requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getId());
                 attachedRequirementListNew.add(requirementListNewRequirementToAttach);
             }
             requirementListNew = attachedRequirementListNew;
             requirement.setRequirementList(requirementListNew);
-            List<Step> attachedStepListNew = new ArrayList<Step>();
+            List<Step> attachedStepListNew = new ArrayList<>();
             for (Step stepListNewStepToAttach : stepListNew) {
                 stepListNewStepToAttach = em.getReference(stepListNewStepToAttach.getClass(), stepListNewStepToAttach.getStepPK());
                 attachedStepListNew.add(stepListNewStepToAttach);
             }
             stepListNew = attachedStepListNew;
             requirement.setStepList(stepListNew);
-            List<RiskControlHasRequirement> attachedRiskControlHasRequirementListNew = new ArrayList<RiskControlHasRequirement>();
+            List<RiskControlHasRequirement> attachedRiskControlHasRequirementListNew = new ArrayList<>();
             for (RiskControlHasRequirement riskControlHasRequirementListNewRiskControlHasRequirementToAttach : riskControlHasRequirementListNew) {
                 riskControlHasRequirementListNewRiskControlHasRequirementToAttach = em.getReference(riskControlHasRequirementListNewRiskControlHasRequirementToAttach.getClass(), riskControlHasRequirementListNewRiskControlHasRequirementToAttach.getRiskControlHasRequirementPK());
                 attachedRiskControlHasRequirementListNew.add(riskControlHasRequirementListNewRiskControlHasRequirementToAttach);
             }
             riskControlHasRequirementListNew = attachedRiskControlHasRequirementListNew;
             requirement.setRiskControlHasRequirementList(riskControlHasRequirementListNew);
-            List<History> attachedHistoryListNew = new ArrayList<History>();
+            List<History> attachedHistoryListNew = new ArrayList<>();
             for (History historyListNewHistoryToAttach : historyListNew) {
                 historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
                 attachedHistoryListNew.add(historyListNewHistoryToAttach);
@@ -371,7 +371,7 @@ public class RequirementJpaController implements Serializable {
             List<RiskControlHasRequirement> riskControlHasRequirementListOrphanCheck = requirement.getRiskControlHasRequirementList();
             for (RiskControlHasRequirement riskControlHasRequirementListOrphanCheckRiskControlHasRequirement : riskControlHasRequirementListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Requirement (" + requirement + ") cannot be destroyed since the RiskControlHasRequirement " + riskControlHasRequirementListOrphanCheckRiskControlHasRequirement + " in its riskControlHasRequirementList field has a non-nullable requirement field.");
             }

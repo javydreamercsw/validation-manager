@@ -61,7 +61,7 @@ public class SpecLevel implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "spec_level",
-            initialValue = 1000,
+            initialValue = 1_000,
             allocationSize = 1)
     @NotNull
     @Column(name = "id")
@@ -74,7 +74,7 @@ public class SpecLevel implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(min = 1, max = 65_535)
     @Column(name = "description")
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "specLevel")

@@ -10,3 +10,5 @@ INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `s
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (21, 'mail.auth.username', 1, 0, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (22, 'mail.auth.password', 1, 0, '0', NULL);
 INSERT INTO `vm_setting` (`id`, `setting`, `bool_val`, `int_val`, `long_val`, `string_val`) VALUES (23, 'mail.enable', 0, 0, '0', NULL);
+/*Fix typos*/
+UPDATE `role` set description = 'reserved.desc' where id in (1,2);

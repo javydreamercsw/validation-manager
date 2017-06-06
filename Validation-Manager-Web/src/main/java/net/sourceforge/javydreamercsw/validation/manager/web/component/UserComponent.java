@@ -16,6 +16,7 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.icons.VaadinIcons;
@@ -29,21 +30,31 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.RoleJpaController;
+import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.core.tool.MD5;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
-import net.sourceforge.javydreamercsw.validation.manager.web.profile.UserPasswordConverter;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
@@ -112,7 +123,69 @@ public class UserComponent extends Panel {
         if (user.getLocale() != null) {
             locale.setValue(user.getLocale());
         }
+        binder.bind(locale, "locale");
         layout.addComponent(locale);
+        //Status
+        ComboBox status = new ComboBox(TRANSLATOR.
+                translate("general.status"));
+        new UserStatusJpaController(DataBaseManager.getEntityManagerFactory())
+                .findUserStatusEntities().forEach(us -> {
+                    status.addItem(us);
+                    status.setItemCaption(us, 
+                            TRANSLATOR.translate(us.getStatus()));
+                });
+        binder.bind(status, "userStatusId");
+        status.setTextInputAllowed(false);
+        layout.addComponent(status);
+        //Roles
+        if (edit) {
+            List<Role> list = new RoleJpaController(DataBaseManager
+                    .getEntityManagerFactory())
+                    .findRoleEntities();
+            Collections.sort(list, (Role r1, Role r2)
+                    -> TRANSLATOR.translate(r1.getRoleName())
+                            .compareTo(TRANSLATOR
+                                    .translate(r2.getRoleName())));
+            BeanItemContainer<Role> roleContainer
+                    = new BeanItemContainer<>(Role.class, list);
+            TwinColSelect roles
+                    = new TwinColSelect(TRANSLATOR.translate("general.role"));
+            roles.setContainerDataSource(roleContainer);
+            roles.setRows(5);
+            roles.setLeftColumnCaption(TRANSLATOR.translate("available.roles"));
+            roles.setRightColumnCaption(TRANSLATOR.translate("current.roles"));
+            list.forEach(r -> {
+                roles.setItemCaption(r, TRANSLATOR.translate(r.getDescription()));
+            });
+            if (user.getRoleList() != null) {
+                user.getRoleList().forEach(r -> {
+                    roles.select(r);
+                });
+            }
+            roles.addValueChangeListener(event -> {
+                Set<Role> selected
+                        = (Set<Role>) event.getProperty().getValue();
+                if (user.getRoleList() == null) {
+                    user.setRoleList(new ArrayList<>());
+                }
+                user.getRoleList().clear();
+                selected.forEach(r -> {
+                    user.getRoleList().add(r);
+                });
+            });
+            layout.addComponent(roles);
+        } else {
+            if (!user.getRoleList().isEmpty()) {
+                Table roles = new Table(TRANSLATOR.translate("general.role"));
+                user.getRoleList().forEach(role -> {
+                    roles.addItem(role);
+                    roles.setItemCaption(role,
+                            TRANSLATOR.translate(role.getRoleName()));
+                    roles.setItemIcon(role, VaadinIcons.USER_STAR);
+                    layout.addComponent(roles);
+                });
+            }
+        }
         Button update = new Button(user.getId() == null
                 ? TRANSLATOR.
                         translate("general.create")
@@ -134,7 +207,6 @@ public class UserComponent extends Panel {
                     us.setLastName((String) ln.getValue());
                     us.setEmail((String) email.getValue());
                     us.setUsername((String) username.getValue());
-                    us.setPassword(password);
                 }
                 us.setLocale((String) locale.getValue());
                 if (listener.isChanged()
@@ -171,7 +243,7 @@ public class UserComponent extends Panel {
                                                 Notification.Type.WARNING_MESSAGE);
                                     }
                                     mb.close();
-                                } catch (Exception ex) {
+                                } catch (VMException ex) {
                                     Exceptions.printStackTrace(ex);
                                 }
                             }, ButtonOption.focus(),

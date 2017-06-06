@@ -46,13 +46,13 @@ public class RootCauseTypeJpaController implements Serializable {
 
     public void create(RootCauseType rootCauseType) {
         if (rootCauseType.getRootCauseList() == null) {
-            rootCauseType.setRootCauseList(new ArrayList<RootCause>());
+            rootCauseType.setRootCauseList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<RootCause> attachedRootCauseList = new ArrayList<RootCause>();
+            List<RootCause> attachedRootCauseList = new ArrayList<>();
             for (RootCause rootCauseListRootCauseToAttach : rootCauseType.getRootCauseList()) {
                 rootCauseListRootCauseToAttach = em.getReference(rootCauseListRootCauseToAttach.getClass(), rootCauseListRootCauseToAttach.getRootCausePK());
                 attachedRootCauseList.add(rootCauseListRootCauseToAttach);
@@ -89,7 +89,7 @@ public class RootCauseTypeJpaController implements Serializable {
             for (RootCause rootCauseListOldRootCause : rootCauseListOld) {
                 if (!rootCauseListNew.contains(rootCauseListOldRootCause)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain RootCause " + rootCauseListOldRootCause + " since its rootCauseType field is not nullable.");
                 }
@@ -97,7 +97,7 @@ public class RootCauseTypeJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<RootCause> attachedRootCauseListNew = new ArrayList<RootCause>();
+            List<RootCause> attachedRootCauseListNew = new ArrayList<>();
             for (RootCause rootCauseListNewRootCauseToAttach : rootCauseListNew) {
                 rootCauseListNewRootCauseToAttach = em.getReference(rootCauseListNewRootCauseToAttach.getClass(), rootCauseListNewRootCauseToAttach.getRootCausePK());
                 attachedRootCauseListNew.add(rootCauseListNewRootCauseToAttach);
@@ -152,7 +152,7 @@ public class RootCauseTypeJpaController implements Serializable {
             List<RootCause> rootCauseListOrphanCheck = rootCauseType.getRootCauseList();
             for (RootCause rootCauseListOrphanCheckRootCause : rootCauseListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This RootCauseType (" + rootCauseType + ") cannot be destroyed since the RootCause " + rootCauseListOrphanCheckRootCause + " in its rootCauseList field has a non-nullable rootCauseType field.");
             }

@@ -40,7 +40,7 @@ public class RootCausePK implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "root_cause",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     private int id;
     @Basic(optional = false)
     @NotNull

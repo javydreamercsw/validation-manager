@@ -72,7 +72,7 @@ public class IssueType implements Serializable {
     @Column(name = "type_name")
     private String typeName;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "description")
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "issueType")

@@ -56,7 +56,7 @@ public class AttachmentType implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 65_535)
     @Column(name = "description")
     private String description;
     @Basic(optional = false)

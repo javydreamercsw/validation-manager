@@ -47,22 +47,22 @@ public class CorrectiveActionJpaController implements Serializable {
 
     public void create(CorrectiveAction correctiveAction) {
         if (correctiveAction.getVmUserList() == null) {
-            correctiveAction.setVmUserList(new ArrayList<VmUser>());
+            correctiveAction.setVmUserList(new ArrayList<>());
         }
         if (correctiveAction.getExceptionHasCorrectiveActionList() == null) {
-            correctiveAction.setExceptionHasCorrectiveActionList(new ArrayList<ExceptionHasCorrectiveAction>());
+            correctiveAction.setExceptionHasCorrectiveActionList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserList = new ArrayList<>();
             for (VmUser vmUserListVmUserToAttach : correctiveAction.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
             }
             correctiveAction.setVmUserList(attachedVmUserList);
-            List<ExceptionHasCorrectiveAction> attachedExceptionHasCorrectiveActionList = new ArrayList<ExceptionHasCorrectiveAction>();
+            List<ExceptionHasCorrectiveAction> attachedExceptionHasCorrectiveActionList = new ArrayList<>();
             for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach : correctiveAction.getExceptionHasCorrectiveActionList()) {
                 exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach = em.getReference(exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach.getClass(), exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach.getExceptionHasCorrectiveActionPK());
                 attachedExceptionHasCorrectiveActionList.add(exceptionHasCorrectiveActionListExceptionHasCorrectiveActionToAttach);
@@ -105,7 +105,7 @@ public class CorrectiveActionJpaController implements Serializable {
             for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListOldExceptionHasCorrectiveAction : exceptionHasCorrectiveActionListOld) {
                 if (!exceptionHasCorrectiveActionListNew.contains(exceptionHasCorrectiveActionListOldExceptionHasCorrectiveAction)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExceptionHasCorrectiveAction " + exceptionHasCorrectiveActionListOldExceptionHasCorrectiveAction + " since its correctiveAction field is not nullable.");
                 }
@@ -113,14 +113,14 @@ public class CorrectiveActionJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserListNew = new ArrayList<>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
                 attachedVmUserListNew.add(vmUserListNewVmUserToAttach);
             }
             vmUserListNew = attachedVmUserListNew;
             correctiveAction.setVmUserList(vmUserListNew);
-            List<ExceptionHasCorrectiveAction> attachedExceptionHasCorrectiveActionListNew = new ArrayList<ExceptionHasCorrectiveAction>();
+            List<ExceptionHasCorrectiveAction> attachedExceptionHasCorrectiveActionListNew = new ArrayList<>();
             for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach : exceptionHasCorrectiveActionListNew) {
                 exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach = em.getReference(exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach.getClass(), exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach.getExceptionHasCorrectiveActionPK());
                 attachedExceptionHasCorrectiveActionListNew.add(exceptionHasCorrectiveActionListNewExceptionHasCorrectiveActionToAttach);
@@ -187,7 +187,7 @@ public class CorrectiveActionJpaController implements Serializable {
             List<ExceptionHasCorrectiveAction> exceptionHasCorrectiveActionListOrphanCheck = correctiveAction.getExceptionHasCorrectiveActionList();
             for (ExceptionHasCorrectiveAction exceptionHasCorrectiveActionListOrphanCheckExceptionHasCorrectiveAction : exceptionHasCorrectiveActionListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This CorrectiveAction (" + correctiveAction + ") cannot be destroyed since the ExceptionHasCorrectiveAction " + exceptionHasCorrectiveActionListOrphanCheckExceptionHasCorrectiveAction + " in its exceptionHasCorrectiveActionList field has a non-nullable correctiveAction field.");
             }

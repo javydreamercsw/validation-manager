@@ -15,10 +15,12 @@
  */
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.tool.MD5;
 import com.validation.manager.test.AbstractVMTestCase;
 import java.util.Date;
 import org.junit.Test;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -84,28 +86,85 @@ public class VMUserServerTest extends AbstractVMTestCase {
     /**
      * Test of validCredentials method, of class VMUserServer.
      *
-     * @throws java.lang.Exception
      */
     @Test
-    public void testValidCredentials() throws Exception {
+    public void testValidCredentials() {
         System.out.println("validCredentials");
         String user = "test";
         String pw = "test";
         String name = "Test";
         String lastname = "User";
         String email = "test.user@test.com";
-        VMUserServer instance = new VMUserServer(user, pw, name,
-                lastname, email);
-        instance.write2DB();
-        assertEquals(true, VMUserServer.validCredentials(user, pw, true));
-        assertEquals(false, VMUserServer.validCredentials(user, pw + 1, true));
-        assertEquals(false, VMUserServer.validCredentials(user + 1, pw + 1,
-                true));
-        assertEquals(false, VMUserServer.validCredentials(user + 1, pw, true));
-        assertEquals(true, VMUserServer.validCredentials(user, MD5.encrypt(pw),
-                false));
-        assertEquals(false, VMUserServer.validCredentials(user,
-                MD5.encrypt(pw) + 1, false));
+        VMUserServer instance;
+        try {
+            instance = new VMUserServer(user, pw, name,
+                    lastname, email);
+            instance.write2DB();
+            assertEquals(true, VMUserServer.validCredentials(user, pw, true));
+            assertEquals(false, VMUserServer.validCredentials(user, pw + 1, true));
+            assertEquals(false, VMUserServer.validCredentials(user + 1, pw + 1,
+                    true));
+            assertEquals(false, VMUserServer.validCredentials(user + 1, pw, true));
+            assertEquals(true, VMUserServer.validCredentials(user, MD5.encrypt(pw),
+                    false));
+            assertEquals(false, VMUserServer.validCredentials(user,
+                    MD5.encrypt(pw) + 1, false));
+            try {
+                assertNotNull(new VMUserServer(user, pw));
+            }
+            catch (VMException ex) {
+                Exceptions.printStackTrace(ex);
+                fail();
+            }
+            int attempts = 0;
+            try {
+                assertEquals(attempts, instance.getAttempts());
+                new VMUserServer(user, pw + 1);
+                instance.update();
+                assertEquals(++attempts, instance.getAttempts());
+            }
+            catch (VMException ex) {
+                Exceptions.printStackTrace(ex);
+                fail();
+            }
+            try {
+                new VMUserServer(user + 1, pw + 1);
+                //Wrong user name so can't be linked with account
+                instance.update();
+                assertEquals(attempts, instance.getAttempts());
+            }
+            catch (VMException ex) {
+                Exceptions.printStackTrace(ex);
+                fail();
+            }
+            try {
+                new VMUserServer(user + 1, pw);
+                //Wrong user name so can't be linked with account
+                instance.update();
+                assertEquals(attempts, instance.getAttempts());
+            }
+            catch (VMException ex) {
+                Exceptions.printStackTrace(ex);
+                fail();
+            }
+            //Lock the account
+            try {
+                for (int i = attempts; i < VMSettingServer
+                        .getSetting("password.attempts").getIntVal(); i++) {
+                    new VMUserServer(user, pw + 1);
+                    instance.update();
+                    assertEquals(++attempts, instance.getAttempts());
+                }
+            }
+            catch (VMException ex) {
+                Exceptions.printStackTrace(ex);
+                fail();
+            }
+        }
+        catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+            fail();
+        }
     }
 
     /**

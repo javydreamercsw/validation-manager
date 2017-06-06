@@ -67,11 +67,11 @@ public class RequirementSpecNode implements Serializable {
     @Column(name = "name")
     private String name;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "description")
     private String description;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "scope")
     private String scope;
     @JoinColumns({

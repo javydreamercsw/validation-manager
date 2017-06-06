@@ -46,13 +46,13 @@ public class NotificationTypeJpaController implements Serializable {
 
     public void create(NotificationType notificationType) {
         if (notificationType.getNotificationList() == null) {
-            notificationType.setNotificationList(new ArrayList<Notification>());
+            notificationType.setNotificationList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Notification> attachedNotificationList = new ArrayList<Notification>();
+            List<Notification> attachedNotificationList = new ArrayList<>();
             for (Notification notificationListNotificationToAttach : notificationType.getNotificationList()) {
                 notificationListNotificationToAttach = em.getReference(notificationListNotificationToAttach.getClass(), notificationListNotificationToAttach.getNotificationPK());
                 attachedNotificationList.add(notificationListNotificationToAttach);
@@ -89,7 +89,7 @@ public class NotificationTypeJpaController implements Serializable {
             for (Notification notificationListOldNotification : notificationListOld) {
                 if (!notificationListNew.contains(notificationListOldNotification)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain Notification " + notificationListOldNotification + " since its notificationType field is not nullable.");
                 }
@@ -97,7 +97,7 @@ public class NotificationTypeJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Notification> attachedNotificationListNew = new ArrayList<Notification>();
+            List<Notification> attachedNotificationListNew = new ArrayList<>();
             for (Notification notificationListNewNotificationToAttach : notificationListNew) {
                 notificationListNewNotificationToAttach = em.getReference(notificationListNewNotificationToAttach.getClass(), notificationListNewNotificationToAttach.getNotificationPK());
                 attachedNotificationListNew.add(notificationListNewNotificationToAttach);
@@ -152,7 +152,7 @@ public class NotificationTypeJpaController implements Serializable {
             List<Notification> notificationListOrphanCheck = notificationType.getNotificationList();
             for (Notification notificationListOrphanCheckNotification : notificationListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This NotificationType (" + notificationType + ") cannot be destroyed since the Notification " + notificationListOrphanCheckNotification + " in its notificationList field has a non-nullable notificationType field.");
             }

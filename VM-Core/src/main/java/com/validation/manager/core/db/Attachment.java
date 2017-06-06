@@ -63,7 +63,7 @@ public class Attachment implements Serializable {
     @Column(name = "file")
     private byte[] file;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "TEXT_VALUE")
     private String textValue;
     @Size(max = 255)

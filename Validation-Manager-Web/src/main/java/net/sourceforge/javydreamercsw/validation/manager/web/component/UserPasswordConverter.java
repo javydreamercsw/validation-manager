@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sourceforge.javydreamercsw.validation.manager.web.profile;
+package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.util.converter.Converter;
 import com.validation.manager.core.tool.MD5;

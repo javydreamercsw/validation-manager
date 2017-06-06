@@ -31,7 +31,7 @@ import com.validation.manager.core.server.core.TestCaseServer;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.vaadin.teemu.wizards.WizardStep;
 

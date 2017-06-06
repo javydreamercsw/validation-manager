@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 package com.validation.manager.core.db;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -52,13 +53,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         project = new ProjectServer("Test product", "Project Notes");
         try {
             project.write2DB();
-        } catch (IllegalOrphanException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        } catch (NonexistentEntityException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        } catch (Exception ex) {
+        }
+        catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -67,7 +63,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         try {
             rss = TestHelper.createRequirementSpec("Test", "Test",
                     project, 1);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -76,7 +73,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         try {
             rsns = createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -93,7 +91,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
                 requirements.add(new RequirementJpaController(
                         getEntityManagerFactory())
                         .findRequirement(reqs.getId()));
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -136,7 +135,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
             });
             n3.write2DB();
             assertEquals(1, swSpec.getRequirementSpecNodeList().size());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -148,7 +148,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
                 req.getRequirementList().add(requirements.get(requirementAmount - count - 1));
                 new RequirementServer(req).write2DB();
                 count++;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -160,13 +161,16 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         SpecLevelServer sl = new SpecLevelServer(name, name + " Level");
         try {
             assertTrue(sl.write2DB() > 0);
-        } catch (IllegalOrphanException ex) {
+        }
+        catch (IllegalOrphanException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        } catch (NonexistentEntityException ex) {
+        }
+        catch (NonexistentEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -178,7 +182,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
                 "description", project.getId(), sl.getId());
         try {
             rss.write2DB();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }

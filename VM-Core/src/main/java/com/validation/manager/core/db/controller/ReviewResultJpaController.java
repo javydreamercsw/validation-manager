@@ -45,13 +45,13 @@ public class ReviewResultJpaController implements Serializable {
 
     public void create(ReviewResult reviewResult) {
         if (reviewResult.getExecutionStepList() == null) {
-            reviewResult.setExecutionStepList(new ArrayList<ExecutionStep>());
+            reviewResult.setExecutionStepList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
+            List<ExecutionStep> attachedExecutionStepList = new ArrayList<>();
             for (ExecutionStep executionStepListExecutionStepToAttach : reviewResult.getExecutionStepList()) {
                 executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
@@ -84,7 +84,7 @@ public class ReviewResultJpaController implements Serializable {
             ReviewResult persistentReviewResult = em.find(ReviewResult.class, reviewResult.getId());
             List<ExecutionStep> executionStepListOld = persistentReviewResult.getExecutionStepList();
             List<ExecutionStep> executionStepListNew = reviewResult.getExecutionStepList();
-            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
+            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<>();
             for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
                 executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepListNew.add(executionStepListNewExecutionStepToAttach);

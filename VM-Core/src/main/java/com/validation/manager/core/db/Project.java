@@ -67,7 +67,7 @@ public class Project extends Versionable implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "project",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -77,7 +77,7 @@ public class Project extends Versionable implements Serializable {
     @Column(name = "name")
     private String name;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "notes")
     private String notes;
     @JoinTable(name = "project_has_test_project", joinColumns = {

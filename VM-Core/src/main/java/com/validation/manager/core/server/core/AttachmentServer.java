@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Attachment;
 import com.validation.manager.core.db.AttachmentPK;
 import com.validation.manager.core.db.controller.AttachmentJpaController;
@@ -45,21 +46,26 @@ public final class AttachmentServer extends Attachment
     }
 
     @Override
-    public int write2DB() throws Exception {
-        AttachmentJpaController c
-                = new AttachmentJpaController(DataBaseManager.getEntityManagerFactory());
-        if (getAttachmentPK() == null) {
-            Attachment a = new Attachment();
-            update(a, this);
-            c.create(a);
-            setAttachmentPK(a.getAttachmentPK());
-            update();
-        } else {
-            Attachment a = new Attachment();
-            update(a, this);
-            c.edit(a);
-            setAttachmentPK(a.getAttachmentPK());
-            update();
+    public int write2DB() throws VMException {
+        try {
+            AttachmentJpaController c
+                    = new AttachmentJpaController(DataBaseManager.getEntityManagerFactory());
+            if (getAttachmentPK() == null) {
+                Attachment a = new Attachment();
+                update(a, this);
+                c.create(a);
+                setAttachmentPK(a.getAttachmentPK());
+                update();
+            } else {
+                Attachment a = new Attachment();
+                update(a, this);
+                c.edit(a);
+                setAttachmentPK(a.getAttachmentPK());
+                update();
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getAttachmentPK().getId();
     }

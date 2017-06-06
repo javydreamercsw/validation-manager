@@ -47,22 +47,22 @@ public class InvestigationJpaController implements Serializable {
 
     public void create(Investigation investigation) {
         if (investigation.getUserHasInvestigationList() == null) {
-            investigation.setUserHasInvestigationList(new ArrayList<UserHasInvestigation>());
+            investigation.setUserHasInvestigationList(new ArrayList<>());
         }
         if (investigation.getExceptionHasInvestigationList() == null) {
-            investigation.setExceptionHasInvestigationList(new ArrayList<ExceptionHasInvestigation>());
+            investigation.setExceptionHasInvestigationList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<UserHasInvestigation> attachedUserHasInvestigationList = new ArrayList<UserHasInvestigation>();
+            List<UserHasInvestigation> attachedUserHasInvestigationList = new ArrayList<>();
             for (UserHasInvestigation userHasInvestigationListUserHasInvestigationToAttach : investigation.getUserHasInvestigationList()) {
                 userHasInvestigationListUserHasInvestigationToAttach = em.getReference(userHasInvestigationListUserHasInvestigationToAttach.getClass(), userHasInvestigationListUserHasInvestigationToAttach.getUserHasInvestigationPK());
                 attachedUserHasInvestigationList.add(userHasInvestigationListUserHasInvestigationToAttach);
             }
             investigation.setUserHasInvestigationList(attachedUserHasInvestigationList);
-            List<ExceptionHasInvestigation> attachedExceptionHasInvestigationList = new ArrayList<ExceptionHasInvestigation>();
+            List<ExceptionHasInvestigation> attachedExceptionHasInvestigationList = new ArrayList<>();
             for (ExceptionHasInvestigation exceptionHasInvestigationListExceptionHasInvestigationToAttach : investigation.getExceptionHasInvestigationList()) {
                 exceptionHasInvestigationListExceptionHasInvestigationToAttach = em.getReference(exceptionHasInvestigationListExceptionHasInvestigationToAttach.getClass(), exceptionHasInvestigationListExceptionHasInvestigationToAttach.getExceptionHasInvestigationPK());
                 attachedExceptionHasInvestigationList.add(exceptionHasInvestigationListExceptionHasInvestigationToAttach);
@@ -110,7 +110,7 @@ public class InvestigationJpaController implements Serializable {
             for (UserHasInvestigation userHasInvestigationListOldUserHasInvestigation : userHasInvestigationListOld) {
                 if (!userHasInvestigationListNew.contains(userHasInvestigationListOldUserHasInvestigation)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserHasInvestigation " + userHasInvestigationListOldUserHasInvestigation + " since its investigation field is not nullable.");
                 }
@@ -118,7 +118,7 @@ public class InvestigationJpaController implements Serializable {
             for (ExceptionHasInvestigation exceptionHasInvestigationListOldExceptionHasInvestigation : exceptionHasInvestigationListOld) {
                 if (!exceptionHasInvestigationListNew.contains(exceptionHasInvestigationListOldExceptionHasInvestigation)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExceptionHasInvestigation " + exceptionHasInvestigationListOldExceptionHasInvestigation + " since its investigation field is not nullable.");
                 }
@@ -126,14 +126,14 @@ public class InvestigationJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<UserHasInvestigation> attachedUserHasInvestigationListNew = new ArrayList<UserHasInvestigation>();
+            List<UserHasInvestigation> attachedUserHasInvestigationListNew = new ArrayList<>();
             for (UserHasInvestigation userHasInvestigationListNewUserHasInvestigationToAttach : userHasInvestigationListNew) {
                 userHasInvestigationListNewUserHasInvestigationToAttach = em.getReference(userHasInvestigationListNewUserHasInvestigationToAttach.getClass(), userHasInvestigationListNewUserHasInvestigationToAttach.getUserHasInvestigationPK());
                 attachedUserHasInvestigationListNew.add(userHasInvestigationListNewUserHasInvestigationToAttach);
             }
             userHasInvestigationListNew = attachedUserHasInvestigationListNew;
             investigation.setUserHasInvestigationList(userHasInvestigationListNew);
-            List<ExceptionHasInvestigation> attachedExceptionHasInvestigationListNew = new ArrayList<ExceptionHasInvestigation>();
+            List<ExceptionHasInvestigation> attachedExceptionHasInvestigationListNew = new ArrayList<>();
             for (ExceptionHasInvestigation exceptionHasInvestigationListNewExceptionHasInvestigationToAttach : exceptionHasInvestigationListNew) {
                 exceptionHasInvestigationListNewExceptionHasInvestigationToAttach = em.getReference(exceptionHasInvestigationListNewExceptionHasInvestigationToAttach.getClass(), exceptionHasInvestigationListNewExceptionHasInvestigationToAttach.getExceptionHasInvestigationPK());
                 attachedExceptionHasInvestigationListNew.add(exceptionHasInvestigationListNewExceptionHasInvestigationToAttach);
@@ -199,14 +199,14 @@ public class InvestigationJpaController implements Serializable {
             List<UserHasInvestigation> userHasInvestigationListOrphanCheck = investigation.getUserHasInvestigationList();
             for (UserHasInvestigation userHasInvestigationListOrphanCheckUserHasInvestigation : userHasInvestigationListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Investigation (" + investigation + ") cannot be destroyed since the UserHasInvestigation " + userHasInvestigationListOrphanCheckUserHasInvestigation + " in its userHasInvestigationList field has a non-nullable investigation field.");
             }
             List<ExceptionHasInvestigation> exceptionHasInvestigationListOrphanCheck = investigation.getExceptionHasInvestigationList();
             for (ExceptionHasInvestigation exceptionHasInvestigationListOrphanCheckExceptionHasInvestigation : exceptionHasInvestigationListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Investigation (" + investigation + ") cannot be destroyed since the ExceptionHasInvestigation " + exceptionHasInvestigationListOrphanCheckExceptionHasInvestigation + " in its exceptionHasInvestigationList field has a non-nullable investigation field.");
             }

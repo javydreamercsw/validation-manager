@@ -50,49 +50,49 @@ public class RoleJpaController implements Serializable {
 
     public void create(Role role) {
         if (role.getVmUserList() == null) {
-            role.setVmUserList(new ArrayList<VmUser>());
+            role.setVmUserList(new ArrayList<>());
         }
         if (role.getUserRightList() == null) {
-            role.setUserRightList(new ArrayList<UserRight>());
+            role.setUserRightList(new ArrayList<>());
         }
         if (role.getUserTestProjectRoleList() == null) {
-            role.setUserTestProjectRoleList(new ArrayList<UserTestProjectRole>());
+            role.setUserTestProjectRoleList(new ArrayList<>());
         }
         if (role.getUserTestPlanRoleList() == null) {
-            role.setUserTestPlanRoleList(new ArrayList<UserTestPlanRole>());
+            role.setUserTestPlanRoleList(new ArrayList<>());
         }
         if (role.getExecutionStepHasVmUserList() == null) {
-            role.setExecutionStepHasVmUserList(new ArrayList<ExecutionStepHasVmUser>());
+            role.setExecutionStepHasVmUserList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserList = new ArrayList<>();
             for (VmUser vmUserListVmUserToAttach : role.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
             }
             role.setVmUserList(attachedVmUserList);
-            List<UserRight> attachedUserRightList = new ArrayList<UserRight>();
+            List<UserRight> attachedUserRightList = new ArrayList<>();
             for (UserRight userRightListUserRightToAttach : role.getUserRightList()) {
                 userRightListUserRightToAttach = em.getReference(userRightListUserRightToAttach.getClass(), userRightListUserRightToAttach.getId());
                 attachedUserRightList.add(userRightListUserRightToAttach);
             }
             role.setUserRightList(attachedUserRightList);
-            List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<UserTestProjectRole>();
+            List<UserTestProjectRole> attachedUserTestProjectRoleList = new ArrayList<>();
             for (UserTestProjectRole userTestProjectRoleListUserTestProjectRoleToAttach : role.getUserTestProjectRoleList()) {
                 userTestProjectRoleListUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListUserTestProjectRoleToAttach.getUserTestProjectRolePK());
                 attachedUserTestProjectRoleList.add(userTestProjectRoleListUserTestProjectRoleToAttach);
             }
             role.setUserTestProjectRoleList(attachedUserTestProjectRoleList);
-            List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<UserTestPlanRole>();
+            List<UserTestPlanRole> attachedUserTestPlanRoleList = new ArrayList<>();
             for (UserTestPlanRole userTestPlanRoleListUserTestPlanRoleToAttach : role.getUserTestPlanRoleList()) {
                 userTestPlanRoleListUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListUserTestPlanRoleToAttach.getUserTestPlanRolePK());
                 attachedUserTestPlanRoleList.add(userTestPlanRoleListUserTestPlanRoleToAttach);
             }
             role.setUserTestPlanRoleList(attachedUserTestPlanRoleList);
-            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserList = new ArrayList<ExecutionStepHasVmUser>();
+            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserList = new ArrayList<>();
             for (ExecutionStepHasVmUser executionStepHasVmUserListExecutionStepHasVmUserToAttach : role.getExecutionStepHasVmUserList()) {
                 executionStepHasVmUserListExecutionStepHasVmUserToAttach = em.getReference(executionStepHasVmUserListExecutionStepHasVmUserToAttach.getClass(), executionStepHasVmUserListExecutionStepHasVmUserToAttach.getExecutionStepHasVmUserPK());
                 attachedExecutionStepHasVmUserList.add(executionStepHasVmUserListExecutionStepHasVmUserToAttach);
@@ -163,7 +163,7 @@ public class RoleJpaController implements Serializable {
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestProjectRole " + userTestProjectRoleListOldUserTestProjectRole + " since its role field is not nullable.");
                 }
@@ -171,7 +171,7 @@ public class RoleJpaController implements Serializable {
             for (UserTestPlanRole userTestPlanRoleListOldUserTestPlanRole : userTestPlanRoleListOld) {
                 if (!userTestPlanRoleListNew.contains(userTestPlanRoleListOldUserTestPlanRole)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserTestPlanRole " + userTestPlanRoleListOldUserTestPlanRole + " since its role field is not nullable.");
                 }
@@ -179,7 +179,7 @@ public class RoleJpaController implements Serializable {
             for (ExecutionStepHasVmUser executionStepHasVmUserListOldExecutionStepHasVmUser : executionStepHasVmUserListOld) {
                 if (!executionStepHasVmUserListNew.contains(executionStepHasVmUserListOldExecutionStepHasVmUser)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStepHasVmUser " + executionStepHasVmUserListOldExecutionStepHasVmUser + " since its role field is not nullable.");
                 }
@@ -187,35 +187,35 @@ public class RoleJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserListNew = new ArrayList<>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
                 attachedVmUserListNew.add(vmUserListNewVmUserToAttach);
             }
             vmUserListNew = attachedVmUserListNew;
             role.setVmUserList(vmUserListNew);
-            List<UserRight> attachedUserRightListNew = new ArrayList<UserRight>();
+            List<UserRight> attachedUserRightListNew = new ArrayList<>();
             for (UserRight userRightListNewUserRightToAttach : userRightListNew) {
                 userRightListNewUserRightToAttach = em.getReference(userRightListNewUserRightToAttach.getClass(), userRightListNewUserRightToAttach.getId());
                 attachedUserRightListNew.add(userRightListNewUserRightToAttach);
             }
             userRightListNew = attachedUserRightListNew;
             role.setUserRightList(userRightListNew);
-            List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<UserTestProjectRole>();
+            List<UserTestProjectRole> attachedUserTestProjectRoleListNew = new ArrayList<>();
             for (UserTestProjectRole userTestProjectRoleListNewUserTestProjectRoleToAttach : userTestProjectRoleListNew) {
                 userTestProjectRoleListNewUserTestProjectRoleToAttach = em.getReference(userTestProjectRoleListNewUserTestProjectRoleToAttach.getClass(), userTestProjectRoleListNewUserTestProjectRoleToAttach.getUserTestProjectRolePK());
                 attachedUserTestProjectRoleListNew.add(userTestProjectRoleListNewUserTestProjectRoleToAttach);
             }
             userTestProjectRoleListNew = attachedUserTestProjectRoleListNew;
             role.setUserTestProjectRoleList(userTestProjectRoleListNew);
-            List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<UserTestPlanRole>();
+            List<UserTestPlanRole> attachedUserTestPlanRoleListNew = new ArrayList<>();
             for (UserTestPlanRole userTestPlanRoleListNewUserTestPlanRoleToAttach : userTestPlanRoleListNew) {
                 userTestPlanRoleListNewUserTestPlanRoleToAttach = em.getReference(userTestPlanRoleListNewUserTestPlanRoleToAttach.getClass(), userTestPlanRoleListNewUserTestPlanRoleToAttach.getUserTestPlanRolePK());
                 attachedUserTestPlanRoleListNew.add(userTestPlanRoleListNewUserTestPlanRoleToAttach);
             }
             userTestPlanRoleListNew = attachedUserTestPlanRoleListNew;
             role.setUserTestPlanRoleList(userTestPlanRoleListNew);
-            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserListNew = new ArrayList<ExecutionStepHasVmUser>();
+            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserListNew = new ArrayList<>();
             for (ExecutionStepHasVmUser executionStepHasVmUserListNewExecutionStepHasVmUserToAttach : executionStepHasVmUserListNew) {
                 executionStepHasVmUserListNewExecutionStepHasVmUserToAttach = em.getReference(executionStepHasVmUserListNewExecutionStepHasVmUserToAttach.getClass(), executionStepHasVmUserListNewExecutionStepHasVmUserToAttach.getExecutionStepHasVmUserPK());
                 attachedExecutionStepHasVmUserListNew.add(executionStepHasVmUserListNewExecutionStepHasVmUserToAttach);
@@ -316,21 +316,21 @@ public class RoleJpaController implements Serializable {
             List<UserTestProjectRole> userTestProjectRoleListOrphanCheck = role.getUserTestProjectRoleList();
             for (UserTestProjectRole userTestProjectRoleListOrphanCheckUserTestProjectRole : userTestProjectRoleListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the UserTestProjectRole " + userTestProjectRoleListOrphanCheckUserTestProjectRole + " in its userTestProjectRoleList field has a non-nullable role field.");
             }
             List<UserTestPlanRole> userTestPlanRoleListOrphanCheck = role.getUserTestPlanRoleList();
             for (UserTestPlanRole userTestPlanRoleListOrphanCheckUserTestPlanRole : userTestPlanRoleListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the UserTestPlanRole " + userTestPlanRoleListOrphanCheckUserTestPlanRole + " in its userTestPlanRoleList field has a non-nullable role field.");
             }
             List<ExecutionStepHasVmUser> executionStepHasVmUserListOrphanCheck = role.getExecutionStepHasVmUserList();
             for (ExecutionStepHasVmUser executionStepHasVmUserListOrphanCheckExecutionStepHasVmUser : executionStepHasVmUserListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the ExecutionStepHasVmUser " + executionStepHasVmUserListOrphanCheckExecutionStepHasVmUser + " in its executionStepHasVmUserList field has a non-nullable role field.");
             }

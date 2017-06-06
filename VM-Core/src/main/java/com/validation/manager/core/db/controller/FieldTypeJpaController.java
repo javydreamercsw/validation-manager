@@ -46,13 +46,13 @@ public class FieldTypeJpaController implements Serializable {
 
     public void create(FieldType fieldType) {
         if (fieldType.getHistoryFieldList() == null) {
-            fieldType.setHistoryFieldList(new ArrayList<HistoryField>());
+            fieldType.setHistoryFieldList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<HistoryField> attachedHistoryFieldList = new ArrayList<HistoryField>();
+            List<HistoryField> attachedHistoryFieldList = new ArrayList<>();
             for (HistoryField historyFieldListHistoryFieldToAttach : fieldType.getHistoryFieldList()) {
                 historyFieldListHistoryFieldToAttach = em.getReference(historyFieldListHistoryFieldToAttach.getClass(), historyFieldListHistoryFieldToAttach.getHistoryFieldPK());
                 attachedHistoryFieldList.add(historyFieldListHistoryFieldToAttach);
@@ -89,7 +89,7 @@ public class FieldTypeJpaController implements Serializable {
             for (HistoryField historyFieldListOldHistoryField : historyFieldListOld) {
                 if (!historyFieldListNew.contains(historyFieldListOldHistoryField)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain HistoryField " + historyFieldListOldHistoryField + " since its fieldType field is not nullable.");
                 }
@@ -97,7 +97,7 @@ public class FieldTypeJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<HistoryField> attachedHistoryFieldListNew = new ArrayList<HistoryField>();
+            List<HistoryField> attachedHistoryFieldListNew = new ArrayList<>();
             for (HistoryField historyFieldListNewHistoryFieldToAttach : historyFieldListNew) {
                 historyFieldListNewHistoryFieldToAttach = em.getReference(historyFieldListNewHistoryFieldToAttach.getClass(), historyFieldListNewHistoryFieldToAttach.getHistoryFieldPK());
                 attachedHistoryFieldListNew.add(historyFieldListNewHistoryFieldToAttach);
@@ -152,7 +152,7 @@ public class FieldTypeJpaController implements Serializable {
             List<HistoryField> historyFieldListOrphanCheck = fieldType.getHistoryFieldList();
             for (HistoryField historyFieldListOrphanCheckHistoryField : historyFieldListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This FieldType (" + fieldType + ") cannot be destroyed since the HistoryField " + historyFieldListOrphanCheckHistoryField + " in its historyFieldList field has a non-nullable fieldType field.");
             }

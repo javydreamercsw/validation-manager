@@ -60,7 +60,7 @@ public class RootCause implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "details")
     private String details;
     @JoinTable(name = "root_cause_has_user", joinColumns = {

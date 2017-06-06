@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.FieldType;
 import com.validation.manager.core.db.controller.FieldTypeJpaController;
 import java.util.List;
@@ -36,19 +37,24 @@ public class FieldTypeServer extends FieldType
     }
 
     @Override
-    public int write2DB() throws Exception {
-        FieldTypeJpaController c = new FieldTypeJpaController(DataBaseManager
-                .getEntityManagerFactory());
-        if (getId() == null) {
-            FieldType ft = new FieldType();
-            update(ft, this);
-            c.create(ft);
-            update(this, ft);
-        } else {
-            FieldType ft = getEntity();
-            update(ft, this);
-            c.edit(ft);
-            update(this, ft);
+    public int write2DB() throws VMException {
+        try {
+            FieldTypeJpaController c = new FieldTypeJpaController(DataBaseManager
+                    .getEntityManagerFactory());
+            if (getId() == null) {
+                FieldType ft = new FieldType();
+                update(ft, this);
+                c.create(ft);
+                update(this, ft);
+            } else {
+                FieldType ft = getEntity();
+                update(ft, this);
+                c.edit(ft);
+                update(this, ft);
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getId();
     }

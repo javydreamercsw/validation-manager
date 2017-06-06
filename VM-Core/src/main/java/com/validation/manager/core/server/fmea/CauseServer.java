@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@ package com.validation.manager.core.server.fmea;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Cause;
 import com.validation.manager.core.db.controller.CauseJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -25,7 +26,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class CauseServer extends Cause implements EntityServer<Cause> {
+public final class CauseServer extends Cause implements EntityServer<Cause> {
 
     public CauseServer(String name, String description) {
         super(name, description);
@@ -33,20 +34,25 @@ public class CauseServer extends Cause implements EntityServer<Cause> {
     }
 
     @Override
-    public int write2DB() throws NonexistentEntityException, Exception {
-        if (getId() > 0) {
-            Cause c = new CauseJpaController(
-                    getEntityManagerFactory())
-                    .findCause(getId());
-            update(c, this);
-            new CauseJpaController(
-                    getEntityManagerFactory()).edit(c);
-        } else {
-            Cause c = new Cause();
-            update(c, this);
-            new CauseJpaController(
-                    getEntityManagerFactory()).create(c);
-            setId(c.getId());
+    public int write2DB() throws VMException {
+        try {
+            if (getId() > 0) {
+                Cause c = new CauseJpaController(
+                        getEntityManagerFactory())
+                        .findCause(getId());
+                update(c, this);
+                new CauseJpaController(
+                        getEntityManagerFactory()).edit(c);
+            } else {
+                Cause c = new Cause();
+                update(c, this);
+                new CauseJpaController(
+                        getEntityManagerFactory()).create(c);
+                setId(c.getId());
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getId();
     }
@@ -71,7 +77,7 @@ public class CauseServer extends Cause implements EntityServer<Cause> {
             target.setRiskItemList(source.getRiskItemList());
         }
     }
-    
+
     @Override
     public void update() {
         update(this, getEntity());

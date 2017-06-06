@@ -53,7 +53,7 @@ public class IssueJpaController implements Serializable {
             issue.setIssuePK(new IssuePK());
         }
         if (issue.getExecutionStepHasIssueList() == null) {
-            issue.setExecutionStepHasIssueList(new ArrayList<ExecutionStepHasIssue>());
+            issue.setExecutionStepHasIssueList(new ArrayList<>());
         }
         issue.getIssuePK().setIssueTypeId(issue.getIssueType().getId());
         EntityManager em = null;
@@ -70,7 +70,7 @@ public class IssueJpaController implements Serializable {
                 issueType = em.getReference(issueType.getClass(), issueType.getId());
                 issue.setIssueType(issueType);
             }
-            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueList = new ArrayList<ExecutionStepHasIssue>();
+            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueList = new ArrayList<>();
             for (ExecutionStepHasIssue executionStepHasIssueListExecutionStepHasIssueToAttach : issue.getExecutionStepHasIssueList()) {
                 executionStepHasIssueListExecutionStepHasIssueToAttach = em.getReference(executionStepHasIssueListExecutionStepHasIssueToAttach.getClass(), executionStepHasIssueListExecutionStepHasIssueToAttach.getExecutionStepHasIssuePK());
                 attachedExecutionStepHasIssueList.add(executionStepHasIssueListExecutionStepHasIssueToAttach);
@@ -126,7 +126,7 @@ public class IssueJpaController implements Serializable {
             for (ExecutionStepHasIssue executionStepHasIssueListOldExecutionStepHasIssue : executionStepHasIssueListOld) {
                 if (!executionStepHasIssueListNew.contains(executionStepHasIssueListOldExecutionStepHasIssue)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStepHasIssue " + executionStepHasIssueListOldExecutionStepHasIssue + " since its issue field is not nullable.");
                 }
@@ -142,7 +142,7 @@ public class IssueJpaController implements Serializable {
                 issueTypeNew = em.getReference(issueTypeNew.getClass(), issueTypeNew.getId());
                 issue.setIssueType(issueTypeNew);
             }
-            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueListNew = new ArrayList<ExecutionStepHasIssue>();
+            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueListNew = new ArrayList<>();
             for (ExecutionStepHasIssue executionStepHasIssueListNewExecutionStepHasIssueToAttach : executionStepHasIssueListNew) {
                 executionStepHasIssueListNewExecutionStepHasIssueToAttach = em.getReference(executionStepHasIssueListNewExecutionStepHasIssueToAttach.getClass(), executionStepHasIssueListNewExecutionStepHasIssueToAttach.getExecutionStepHasIssuePK());
                 attachedExecutionStepHasIssueListNew.add(executionStepHasIssueListNewExecutionStepHasIssueToAttach);
@@ -213,7 +213,7 @@ public class IssueJpaController implements Serializable {
             List<ExecutionStepHasIssue> executionStepHasIssueListOrphanCheck = issue.getExecutionStepHasIssueList();
             for (ExecutionStepHasIssue executionStepHasIssueListOrphanCheckExecutionStepHasIssue : executionStepHasIssueListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Issue (" + issue + ") cannot be destroyed since the ExecutionStepHasIssue " + executionStepHasIssueListOrphanCheckExecutionStepHasIssue + " in its executionStepHasIssueList field has a non-nullable issue field.");
             }

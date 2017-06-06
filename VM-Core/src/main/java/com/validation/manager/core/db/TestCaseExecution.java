@@ -60,14 +60,14 @@ public class TestCaseExecution implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "test_case_execution",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @NotNull
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "scope")
     private String scope;
     @Basic(optional = false)
@@ -76,7 +76,7 @@ public class TestCaseExecution implements Serializable {
     @Column(name = "name")
     private String name;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "conclusion")
     private String conclusion;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testCaseExecution")

@@ -61,7 +61,7 @@ public class RiskControlType implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "risk_control_type",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
@@ -73,7 +73,7 @@ public class RiskControlType implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "description")
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskControlType")

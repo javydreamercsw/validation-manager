@@ -46,13 +46,13 @@ public class VmSettingJpaController implements Serializable {
 
     public void create(VmSetting vmSetting) {
         if (vmSetting.getHistoryList() == null) {
-            vmSetting.setHistoryList(new ArrayList<History>());
+            vmSetting.setHistoryList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<History> attachedHistoryList = new ArrayList<History>();
+            List<History> attachedHistoryList = new ArrayList<>();
             for (History historyListHistoryToAttach : vmSetting.getHistoryList()) {
                 historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
                 attachedHistoryList.add(historyListHistoryToAttach);
@@ -89,7 +89,7 @@ public class VmSettingJpaController implements Serializable {
             for (History historyListOldHistory : historyListOld) {
                 if (!historyListNew.contains(historyListOldHistory)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain History " + historyListOldHistory + " since its vmSettingId field is not nullable.");
                 }
@@ -97,7 +97,7 @@ public class VmSettingJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<History> attachedHistoryListNew = new ArrayList<History>();
+            List<History> attachedHistoryListNew = new ArrayList<>();
             for (History historyListNewHistoryToAttach : historyListNew) {
                 historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
                 attachedHistoryListNew.add(historyListNewHistoryToAttach);
@@ -152,7 +152,7 @@ public class VmSettingJpaController implements Serializable {
             List<History> historyListOrphanCheck = vmSetting.getHistoryList();
             for (History historyListOrphanCheckHistory : historyListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This VmSetting (" + vmSetting + ") cannot be destroyed since the History " + historyListOrphanCheckHistory + " in its historyList field has a non-nullable vmSettingId field.");
             }

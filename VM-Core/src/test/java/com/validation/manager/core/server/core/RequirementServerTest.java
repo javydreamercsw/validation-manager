@@ -16,6 +16,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -28,14 +29,12 @@ import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.HistoryJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import org.junit.Test;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -79,11 +78,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
                 fail();
             }
         }
-        catch (NonexistentEntityException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+        catch (VMException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -324,7 +320,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(100, rs.getTestCoverage());
         }
         catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
     }
@@ -407,7 +403,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(historyCount, rs.getEntity().getHistoryList().size());
         }
         catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
     }

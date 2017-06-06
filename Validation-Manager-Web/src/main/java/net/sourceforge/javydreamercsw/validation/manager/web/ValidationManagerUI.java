@@ -15,6 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
+import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.addon.contextmenu.MenuItem;
 import com.vaadin.annotations.PreserveOnRefresh;
@@ -1983,6 +1984,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         gl.addComponent(new Label(TRANSLATOR.translate("general.version")
                 + ": " + getVersion()), 2, 2);
         if (getUser() != null) {
+            getUser().update();
             //Logout button
             Button logout = new Button(TRANSLATOR.translate("general.logout"));
             logout.addClickListener((Button.ClickEvent event) -> {

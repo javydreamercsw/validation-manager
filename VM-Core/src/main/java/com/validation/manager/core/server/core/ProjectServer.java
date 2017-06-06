@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ import static java.util.logging.Logger.getLogger;
 public final class ProjectServer extends Project
         implements EntityServer<Project>, VersionableServer<Project> {
 
-    private static final long serialVersionUID = 3434510483033583117L;
+    private static final long serialVersionUID = 3_434_510_483_033_583_117L;
 
     public ProjectServer(String name, String notes) {
         super(name);
@@ -58,18 +58,22 @@ public final class ProjectServer extends Project
     }
 
     @Override
-    public int write2DB() throws IllegalOrphanException,
-            NonexistentEntityException, Exception {
-        Project p;
-        if (getId() == null) {
-            p = new Project(getName());
-            update(p, this);
-            new ProjectJpaController(getEntityManagerFactory()).create(p);
-            setId(p.getId());
-        } else {
-            p = getEntity();
-            update(p, this);
-            new ProjectJpaController(getEntityManagerFactory()).edit(p);
+    public int write2DB() throws VMException {
+        try {
+            Project p;
+            if (getId() == null) {
+                p = new Project(getName());
+                update(p, this);
+                new ProjectJpaController(getEntityManagerFactory()).create(p);
+                setId(p.getId());
+            } else {
+                p = getEntity();
+                update(p, this);
+                new ProjectJpaController(getEntityManagerFactory()).edit(p);
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getId();
     }

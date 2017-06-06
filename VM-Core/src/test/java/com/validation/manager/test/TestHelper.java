@@ -74,15 +74,7 @@ public class TestHelper {
         try {
             ps.write2DB();
         }
-        catch (IllegalOrphanException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        catch (NonexistentEntityException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        catch (Exception ex) {
+        catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }

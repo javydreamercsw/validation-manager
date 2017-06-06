@@ -19,7 +19,6 @@ import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.createdQuery;
 import static com.validation.manager.core.DataBaseManager.getEntityManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.ExecutionStep;
@@ -31,6 +30,7 @@ import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import static com.validation.manager.core.server.core.VMSettingServer.getSetting;
 import static com.validation.manager.core.tool.MD5.encrypt;
 import static java.lang.System.currentTimeMillis;
@@ -41,7 +41,7 @@ import java.util.Date;
 import java.util.List;
 import static java.util.Locale.getDefault;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 import javax.persistence.EntityTransaction;
 import org.openide.util.Exceptions;
 
@@ -54,6 +54,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     private static final long serialVersionUID = 1L;
     private boolean hashPassword = true;
     private boolean increaseAttempts = false;
+    private static final Logger LOG
+            = Logger.getLogger(VMUserServer.class.getName());
 
     public VMUserServer(VmUser vmu) {
         super.setId(vmu.getId());
@@ -65,28 +67,20 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     }
 
     //create user object and login
-    public VMUserServer(String attrUN, String attrUPW) throws Exception {
+    public VMUserServer(String attrUN, String attrUPW) throws VMException {
         super();
         try {
+            PARAMETERS.clear();
+            PARAMETERS.put("username", attrUN);
+            PARAMETERS.put("password", encrypt(attrUPW));
             List<Object> result = createdQuery(
-                    "SELECT u FROM VmUser uu WHERE u.username='" // NOI18N
-                    + attrUN + "' AND u.password='" + encrypt(attrUPW)
-                    + "' AND u.userStatusId.id <> 2");
+                    "SELECT u FROM VmUser u WHERE u.username= :username"// NOI18N
+                    + " AND u.password= :password AND u.userStatusId.id <> 2",
+                    PARAMETERS);
             //throw exception if no result found
             if (result.isEmpty()) {
-                PARAMETERS.clear();
-                PARAMETERS.put("username", attrUN);
-                result
-                        = namedQuery("VmUser.findByUsername",
-                                PARAMETERS);
                 //The username is valid but wrong password. Increase the login attempts.
-                if (result.size() > 0) {
-                    increaseAttempts = true;
-                    VmUser xcu = (VmUser) result.get(0);
-                    setAttempts(xcu.getAttempts());
-                    write2DB();
-                }
-                throw new Exception();
+                throw new VMException("general.login.invalid.message");
             } else {
                 VmUser vmu = (VmUser) result.get(0);
                 update(VMUserServer.this, vmu);
@@ -96,10 +90,11 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                 if (status != 2) {
                     Calendar cal2 = getInstance(),
                             now = getInstance();
-                    cal2.setTime(vmu.getLastModified());
+                    History last = getHistoryList().get(getHistoryList().size() - 1);
+                    cal2.setTime(last.getModificationTime());
                     long diffMillis = now.getTimeInMillis()
                             - cal2.getTimeInMillis();
-                    long diffDays = diffMillis / (24 * 60 * 60 * 1000);
+                    long diffDays = diffMillis / (24 * 60 * 60 * 1_000);
                     long age = getSetting("password.aging")
                             .getIntVal();
                     if (diffDays >= age) {
@@ -116,7 +111,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                         .findUserStatus(status));
             }
         }
-        catch (Exception e) {
+        catch (VMException e) {
             EntityTransaction transaction
                     = getEntityManager().getTransaction();
             if (transaction.isActive()) {
@@ -129,9 +124,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                 VmUser vmu = (VmUser) result.get(0);
                 update(VMUserServer.this, vmu);
                 //Don't rehash the pasword!
-                setHashPassword(false); //Increase attempts after a unsuccessfull login.
-                setIncreaseAttempts(true);
-                setLastModified(vmu.getLastModified());
+                setHashPassword(false);
+                setIncreaseAttempts(true);//Increase attempts after a unsuccessfull login.
                 write2DB();
             }
         }
@@ -157,7 +151,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         setUserStatusId(new UserStatusJpaController(
                 getEntityManagerFactory()).findUserStatus(1));
         setAttempts(0);
-        setLastModified(new java.sql.Timestamp(currentTimeMillis()));
         setHashPassword(true);
     }
 
@@ -174,14 +167,12 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                 getEntityManagerFactory())
                 .findUserStatus(userStatusId));
         setAttempts(attempts);
-        setLastModified(lastModified);
         setHashPassword(true);
     }
 
     //write to db
     @Override
-    public int write2DB() throws Exception {
-        Date date;
+    public int write2DB() throws VMException {
         if (getUserStatusId() == null) {
             setUserStatusId(new UserStatusJpaController(
                     getEntityManagerFactory())
@@ -210,24 +201,31 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         }
         VmUserJpaController controller
                 = new VmUserJpaController(getEntityManagerFactory());
-        if (getId() == null || getId() > 0) {
-            setModifierId(getEntity().getId());
-            date = new Date();
-            setLastModified(date);
-            //Sometimes password got re-hashed
-            String password;
-            if (isHashPassword()) {
-                password = encrypt(getPassword().replaceAll("'", "\\\\'"));
-            } else {
-                password = getPassword().replaceAll("'", "\\\\'");
+        if (getId() != null && getId() > 0) {
+            try {
+                setModifierId(getEntity().getId());
+                //Sometimes password got re-hashed
+                String password;
+                if (isHashPassword()) {
+                    password = encrypt(getPassword().replaceAll("'", "\\\\'"));
+                } else {
+                    password = getPassword().replaceAll("'", "\\\\'");
+                }
+                VmUser vmu = controller.findVmUser(getId());
+                update(vmu, this);
+                vmu.setPassword(password);
+                vmu.setReason(getReason() == null
+                        ? "audit.general.modified" : getReason());
+                vmu.setModificationTime(new Date());
+                controller.edit(vmu);
+                update();
             }
-            VmUser vmu = controller.findVmUser(getId());
-            update(vmu, this);
-            vmu.setPassword(password);
-            vmu.setReason(getReason() == null
-                    ? "audit.general.modified" : getReason());
-            vmu.setModificationTime(new Date());
-            controller.edit(vmu);
+            catch (NonexistentEntityException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            catch (Exception ex) {
+                throw new VMException(ex);
+            }
         } else {
             String password;
             if (isHashPassword()) {
@@ -240,7 +238,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     getEmail().replaceAll("'", "\\\\'"),
                     getFirstName().replaceAll("'", "\\\\'"),
                     getLastName().replaceAll("'", "\\\\'"), getLocale(),
-                    getLastModified(), new UserStatusJpaController(
+                    new UserStatusJpaController(
                             getEntityManagerFactory())
                             .findUserStatus(1), getAttempts());
             controller.create(vmu);
@@ -305,7 +303,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     //Now check the aging
                     long diff = currentTimeMillis()
                             - u.getModificationTime().getTime();
-                    if (diff / (1000 * 60 * 60 * 24)
+                    if (diff / (1_000 * 60 * 60 * 24)
                             > getSetting("password.unusable_period")
                                     .getIntVal()) {
                         passwordIsUsable = false;
@@ -327,7 +325,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     /**
      * Check user credentials.
      *
-     * the password is already encrypted. Usually queries from within the server
+     * The password is already encrypted. Usually queries from within the server
      * itself
      *
      * @param username User name
@@ -335,7 +333,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
      * @param encrypt Password needs encrypting?
      * @return true if valid
      */
-    public static boolean validCredentials(String username,
+    protected static boolean validCredentials(String username,
             String password, boolean encrypt) {
         try {
             PARAMETERS.clear();
@@ -347,11 +345,11 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     PARAMETERS).isEmpty();
         }
         catch (VMException e) {
-            getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, e);
+            LOG.log(Level.SEVERE, null, e);
             return false;
         }
         catch (Exception ex) {
-            getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             return false;
         }
     }
@@ -371,8 +369,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                 return null;
             }
         }
-        catch (Exception ex) {
-            getLogger(VMUserServer.class.getName()).log(Level.SEVERE, null, ex);
+        catch (VMException ex) {
+            LOG.log(Level.SEVERE, null, ex);
             return null;
 
         }
@@ -392,7 +390,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         target.setLocale(source.getLocale());
         target.setEmail(source.getEmail());
         target.setAttempts(source.getAttempts());
-        target.setLastModified(source.getLastModified());
         target.setUserStatusId(source.getUserStatusId());
         target.setRoleList(source.getRoleList());
         target.setCorrectiveActionList(source.getCorrectiveActionList());
@@ -444,7 +441,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
             a.write2DB();
             write2DB();
         }
-        catch (Exception ex) {
+        catch (VMException ex) {
             Exceptions.printStackTrace(ex);
         }
     }

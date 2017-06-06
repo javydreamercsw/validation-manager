@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 import org.junit.Test;
-import org.openide.util.Exceptions;
 import static org.openide.util.Exceptions.printStackTrace;
 
 /**
@@ -75,11 +74,8 @@ public class ProjectServerTest extends AbstractVMTestCase {
                 fail();
             }
         }
-        catch (NonexistentEntityException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+        catch (VMException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -161,11 +157,11 @@ public class ProjectServerTest extends AbstractVMTestCase {
                     ps.getTestProjects(true).size());
         }
         catch (NonexistentEntityException ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
         catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
     }

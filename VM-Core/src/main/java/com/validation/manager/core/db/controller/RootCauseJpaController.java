@@ -53,10 +53,10 @@ public class RootCauseJpaController implements Serializable {
             rootCause.setRootCausePK(new RootCausePK());
         }
         if (rootCause.getVmUserList() == null) {
-            rootCause.setVmUserList(new ArrayList<VmUser>());
+            rootCause.setVmUserList(new ArrayList<>());
         }
         if (rootCause.getExceptionHasRootCauseList() == null) {
-            rootCause.setExceptionHasRootCauseList(new ArrayList<ExceptionHasRootCause>());
+            rootCause.setExceptionHasRootCauseList(new ArrayList<>());
         }
         rootCause.getRootCausePK().setRootCauseTypeId(rootCause.getRootCauseType().getId());
         EntityManager em = null;
@@ -68,13 +68,13 @@ public class RootCauseJpaController implements Serializable {
                 rootCauseType = em.getReference(rootCauseType.getClass(), rootCauseType.getId());
                 rootCause.setRootCauseType(rootCauseType);
             }
-            List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserList = new ArrayList<>();
             for (VmUser vmUserListVmUserToAttach : rootCause.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
             }
             rootCause.setVmUserList(attachedVmUserList);
-            List<ExceptionHasRootCause> attachedExceptionHasRootCauseList = new ArrayList<ExceptionHasRootCause>();
+            List<ExceptionHasRootCause> attachedExceptionHasRootCauseList = new ArrayList<>();
             for (ExceptionHasRootCause exceptionHasRootCauseListExceptionHasRootCauseToAttach : rootCause.getExceptionHasRootCauseList()) {
                 exceptionHasRootCauseListExceptionHasRootCauseToAttach = em.getReference(exceptionHasRootCauseListExceptionHasRootCauseToAttach.getClass(), exceptionHasRootCauseListExceptionHasRootCauseToAttach.getExceptionHasRootCausePK());
                 attachedExceptionHasRootCauseList.add(exceptionHasRootCauseListExceptionHasRootCauseToAttach);
@@ -130,7 +130,7 @@ public class RootCauseJpaController implements Serializable {
             for (ExceptionHasRootCause exceptionHasRootCauseListOldExceptionHasRootCause : exceptionHasRootCauseListOld) {
                 if (!exceptionHasRootCauseListNew.contains(exceptionHasRootCauseListOldExceptionHasRootCause)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExceptionHasRootCause " + exceptionHasRootCauseListOldExceptionHasRootCause + " since its rootCause field is not nullable.");
                 }
@@ -142,14 +142,14 @@ public class RootCauseJpaController implements Serializable {
                 rootCauseTypeNew = em.getReference(rootCauseTypeNew.getClass(), rootCauseTypeNew.getId());
                 rootCause.setRootCauseType(rootCauseTypeNew);
             }
-            List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserListNew = new ArrayList<>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
                 attachedVmUserListNew.add(vmUserListNewVmUserToAttach);
             }
             vmUserListNew = attachedVmUserListNew;
             rootCause.setVmUserList(vmUserListNew);
-            List<ExceptionHasRootCause> attachedExceptionHasRootCauseListNew = new ArrayList<ExceptionHasRootCause>();
+            List<ExceptionHasRootCause> attachedExceptionHasRootCauseListNew = new ArrayList<>();
             for (ExceptionHasRootCause exceptionHasRootCauseListNewExceptionHasRootCauseToAttach : exceptionHasRootCauseListNew) {
                 exceptionHasRootCauseListNewExceptionHasRootCauseToAttach = em.getReference(exceptionHasRootCauseListNewExceptionHasRootCauseToAttach.getClass(), exceptionHasRootCauseListNewExceptionHasRootCauseToAttach.getExceptionHasRootCausePK());
                 attachedExceptionHasRootCauseListNew.add(exceptionHasRootCauseListNewExceptionHasRootCauseToAttach);
@@ -224,7 +224,7 @@ public class RootCauseJpaController implements Serializable {
             List<ExceptionHasRootCause> exceptionHasRootCauseListOrphanCheck = rootCause.getExceptionHasRootCauseList();
             for (ExceptionHasRootCause exceptionHasRootCauseListOrphanCheckExceptionHasRootCause : exceptionHasRootCauseListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This RootCause (" + rootCause + ") cannot be destroyed since the ExceptionHasRootCause " + exceptionHasRootCauseListOrphanCheckExceptionHasRootCause + " in its exceptionHasRootCauseList field has a non-nullable rootCause field.");
             }

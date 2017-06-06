@@ -59,7 +59,7 @@ public class Notification implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 2147483647)
+    @Size(min = 1, max = 2_147_483_647)
     @Column(name = "content")
     private String content;
     @Basic(optional = false)

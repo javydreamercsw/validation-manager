@@ -69,7 +69,7 @@ public class RequirementType implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "requirement_type",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @NotNull
     @Column(name = "id")
     private Integer id;

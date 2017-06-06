@@ -59,16 +59,16 @@ public class ExecutionStepJpaController implements Serializable {
             executionStep.setExecutionStepPK(new ExecutionStepPK());
         }
         if (executionStep.getExecutionStepHasAttachmentList() == null) {
-            executionStep.setExecutionStepHasAttachmentList(new ArrayList<ExecutionStepHasAttachment>());
+            executionStep.setExecutionStepHasAttachmentList(new ArrayList<>());
         }
         if (executionStep.getExecutionStepHasIssueList() == null) {
-            executionStep.setExecutionStepHasIssueList(new ArrayList<ExecutionStepHasIssue>());
+            executionStep.setExecutionStepHasIssueList(new ArrayList<>());
         }
         if (executionStep.getExecutionStepHasVmUserList() == null) {
-            executionStep.setExecutionStepHasVmUserList(new ArrayList<ExecutionStepHasVmUser>());
+            executionStep.setExecutionStepHasVmUserList(new ArrayList<>());
         }
         if (executionStep.getHistoryList() == null) {
-            executionStep.setHistoryList(new ArrayList<History>());
+            executionStep.setHistoryList(new ArrayList<>());
         }
         executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
         executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
@@ -117,25 +117,25 @@ public class ExecutionStepJpaController implements Serializable {
                 stepHistory = em.getReference(stepHistory.getClass(), stepHistory.getId());
                 executionStep.setStepHistory(stepHistory);
             }
-            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentList = new ArrayList<ExecutionStepHasAttachment>();
+            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentList = new ArrayList<>();
             for (ExecutionStepHasAttachment executionStepHasAttachmentListExecutionStepHasAttachmentToAttach : executionStep.getExecutionStepHasAttachmentList()) {
                 executionStepHasAttachmentListExecutionStepHasAttachmentToAttach = em.getReference(executionStepHasAttachmentListExecutionStepHasAttachmentToAttach.getClass(), executionStepHasAttachmentListExecutionStepHasAttachmentToAttach.getExecutionStepHasAttachmentPK());
                 attachedExecutionStepHasAttachmentList.add(executionStepHasAttachmentListExecutionStepHasAttachmentToAttach);
             }
             executionStep.setExecutionStepHasAttachmentList(attachedExecutionStepHasAttachmentList);
-            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueList = new ArrayList<ExecutionStepHasIssue>();
+            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueList = new ArrayList<>();
             for (ExecutionStepHasIssue executionStepHasIssueListExecutionStepHasIssueToAttach : executionStep.getExecutionStepHasIssueList()) {
                 executionStepHasIssueListExecutionStepHasIssueToAttach = em.getReference(executionStepHasIssueListExecutionStepHasIssueToAttach.getClass(), executionStepHasIssueListExecutionStepHasIssueToAttach.getExecutionStepHasIssuePK());
                 attachedExecutionStepHasIssueList.add(executionStepHasIssueListExecutionStepHasIssueToAttach);
             }
             executionStep.setExecutionStepHasIssueList(attachedExecutionStepHasIssueList);
-            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserList = new ArrayList<ExecutionStepHasVmUser>();
+            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserList = new ArrayList<>();
             for (ExecutionStepHasVmUser executionStepHasVmUserListExecutionStepHasVmUserToAttach : executionStep.getExecutionStepHasVmUserList()) {
                 executionStepHasVmUserListExecutionStepHasVmUserToAttach = em.getReference(executionStepHasVmUserListExecutionStepHasVmUserToAttach.getClass(), executionStepHasVmUserListExecutionStepHasVmUserToAttach.getExecutionStepHasVmUserPK());
                 attachedExecutionStepHasVmUserList.add(executionStepHasVmUserListExecutionStepHasVmUserToAttach);
             }
             executionStep.setExecutionStepHasVmUserList(attachedExecutionStepHasVmUserList);
-            List<History> attachedHistoryList = new ArrayList<History>();
+            List<History> attachedHistoryList = new ArrayList<>();
             for (History historyListHistoryToAttach : executionStep.getHistoryList()) {
                 historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
                 attachedHistoryList.add(historyListHistoryToAttach);
@@ -257,7 +257,7 @@ public class ExecutionStepJpaController implements Serializable {
             for (ExecutionStepHasAttachment executionStepHasAttachmentListOldExecutionStepHasAttachment : executionStepHasAttachmentListOld) {
                 if (!executionStepHasAttachmentListNew.contains(executionStepHasAttachmentListOldExecutionStepHasAttachment)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStepHasAttachment " + executionStepHasAttachmentListOldExecutionStepHasAttachment + " since its executionStep field is not nullable.");
                 }
@@ -265,7 +265,7 @@ public class ExecutionStepJpaController implements Serializable {
             for (ExecutionStepHasIssue executionStepHasIssueListOldExecutionStepHasIssue : executionStepHasIssueListOld) {
                 if (!executionStepHasIssueListNew.contains(executionStepHasIssueListOldExecutionStepHasIssue)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStepHasIssue " + executionStepHasIssueListOldExecutionStepHasIssue + " since its executionStep field is not nullable.");
                 }
@@ -273,7 +273,7 @@ public class ExecutionStepJpaController implements Serializable {
             for (ExecutionStepHasVmUser executionStepHasVmUserListOldExecutionStepHasVmUser : executionStepHasVmUserListOld) {
                 if (!executionStepHasVmUserListNew.contains(executionStepHasVmUserListOldExecutionStepHasVmUser)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStepHasVmUser " + executionStepHasVmUserListOldExecutionStepHasVmUser + " since its executionStep field is not nullable.");
                 }
@@ -313,28 +313,28 @@ public class ExecutionStepJpaController implements Serializable {
                 stepHistoryNew = em.getReference(stepHistoryNew.getClass(), stepHistoryNew.getId());
                 executionStep.setStepHistory(stepHistoryNew);
             }
-            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentListNew = new ArrayList<ExecutionStepHasAttachment>();
+            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentListNew = new ArrayList<>();
             for (ExecutionStepHasAttachment executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach : executionStepHasAttachmentListNew) {
                 executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach = em.getReference(executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach.getClass(), executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach.getExecutionStepHasAttachmentPK());
                 attachedExecutionStepHasAttachmentListNew.add(executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach);
             }
             executionStepHasAttachmentListNew = attachedExecutionStepHasAttachmentListNew;
             executionStep.setExecutionStepHasAttachmentList(executionStepHasAttachmentListNew);
-            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueListNew = new ArrayList<ExecutionStepHasIssue>();
+            List<ExecutionStepHasIssue> attachedExecutionStepHasIssueListNew = new ArrayList<>();
             for (ExecutionStepHasIssue executionStepHasIssueListNewExecutionStepHasIssueToAttach : executionStepHasIssueListNew) {
                 executionStepHasIssueListNewExecutionStepHasIssueToAttach = em.getReference(executionStepHasIssueListNewExecutionStepHasIssueToAttach.getClass(), executionStepHasIssueListNewExecutionStepHasIssueToAttach.getExecutionStepHasIssuePK());
                 attachedExecutionStepHasIssueListNew.add(executionStepHasIssueListNewExecutionStepHasIssueToAttach);
             }
             executionStepHasIssueListNew = attachedExecutionStepHasIssueListNew;
             executionStep.setExecutionStepHasIssueList(executionStepHasIssueListNew);
-            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserListNew = new ArrayList<ExecutionStepHasVmUser>();
+            List<ExecutionStepHasVmUser> attachedExecutionStepHasVmUserListNew = new ArrayList<>();
             for (ExecutionStepHasVmUser executionStepHasVmUserListNewExecutionStepHasVmUserToAttach : executionStepHasVmUserListNew) {
                 executionStepHasVmUserListNewExecutionStepHasVmUserToAttach = em.getReference(executionStepHasVmUserListNewExecutionStepHasVmUserToAttach.getClass(), executionStepHasVmUserListNewExecutionStepHasVmUserToAttach.getExecutionStepHasVmUserPK());
                 attachedExecutionStepHasVmUserListNew.add(executionStepHasVmUserListNewExecutionStepHasVmUserToAttach);
             }
             executionStepHasVmUserListNew = attachedExecutionStepHasVmUserListNew;
             executionStep.setExecutionStepHasVmUserList(executionStepHasVmUserListNew);
-            List<History> attachedHistoryListNew = new ArrayList<History>();
+            List<History> attachedHistoryListNew = new ArrayList<>();
             for (History historyListNewHistoryToAttach : historyListNew) {
                 historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
                 attachedHistoryListNew.add(historyListNewHistoryToAttach);
@@ -487,21 +487,21 @@ public class ExecutionStepJpaController implements Serializable {
             List<ExecutionStepHasAttachment> executionStepHasAttachmentListOrphanCheck = executionStep.getExecutionStepHasAttachmentList();
             for (ExecutionStepHasAttachment executionStepHasAttachmentListOrphanCheckExecutionStepHasAttachment : executionStepHasAttachmentListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This ExecutionStep (" + executionStep + ") cannot be destroyed since the ExecutionStepHasAttachment " + executionStepHasAttachmentListOrphanCheckExecutionStepHasAttachment + " in its executionStepHasAttachmentList field has a non-nullable executionStep field.");
             }
             List<ExecutionStepHasIssue> executionStepHasIssueListOrphanCheck = executionStep.getExecutionStepHasIssueList();
             for (ExecutionStepHasIssue executionStepHasIssueListOrphanCheckExecutionStepHasIssue : executionStepHasIssueListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This ExecutionStep (" + executionStep + ") cannot be destroyed since the ExecutionStepHasIssue " + executionStepHasIssueListOrphanCheckExecutionStepHasIssue + " in its executionStepHasIssueList field has a non-nullable executionStep field.");
             }
             List<ExecutionStepHasVmUser> executionStepHasVmUserListOrphanCheck = executionStep.getExecutionStepHasVmUserList();
             for (ExecutionStepHasVmUser executionStepHasVmUserListOrphanCheckExecutionStepHasVmUser : executionStepHasVmUserListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This ExecutionStep (" + executionStep + ") cannot be destroyed since the ExecutionStepHasVmUser " + executionStepHasVmUserListOrphanCheckExecutionStepHasVmUser + " in its executionStepHasVmUserList field has a non-nullable executionStep field.");
             }

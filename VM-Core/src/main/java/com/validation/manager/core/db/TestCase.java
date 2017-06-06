@@ -79,7 +79,7 @@ public class TestCase implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "test_case",
-            initialValue = 1000,
+            initialValue = 1_000,
             allocationSize = 1)
     private Integer id;
     @Basic(optional = false)

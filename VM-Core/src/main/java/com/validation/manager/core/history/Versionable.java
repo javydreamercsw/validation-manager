@@ -191,13 +191,13 @@ public abstract class Versionable implements Comparable<Versionable>,
         target.setModifierId(source.getModifierId());
         target.setReason(source.getReason());
         target.setModificationTime(source.getModificationTime());
-        target.setHistoryList(source.getHistoryList());
         try {
             target.updateHistory();
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
         }
+        target.setHistoryList(source.getHistoryList());
     }
 
     @Override

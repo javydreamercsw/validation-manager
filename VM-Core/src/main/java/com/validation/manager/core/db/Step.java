@@ -74,7 +74,7 @@ public class Step extends Versionable implements Serializable {
     @Auditable
     private byte[] expectedResult;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "notes")
     @Auditable
     private String notes;

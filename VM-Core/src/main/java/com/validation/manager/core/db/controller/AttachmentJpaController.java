@@ -52,7 +52,7 @@ public class AttachmentJpaController implements Serializable {
             attachment.setAttachmentPK(new AttachmentPK());
         }
         if (attachment.getExecutionStepHasAttachmentList() == null) {
-            attachment.setExecutionStepHasAttachmentList(new ArrayList<ExecutionStepHasAttachment>());
+            attachment.setExecutionStepHasAttachmentList(new ArrayList<>());
         }
         attachment.getAttachmentPK().setAttachmentTypeId(attachment.getAttachmentType().getId());
         EntityManager em = null;
@@ -64,7 +64,7 @@ public class AttachmentJpaController implements Serializable {
                 attachmentType = em.getReference(attachmentType.getClass(), attachmentType.getId());
                 attachment.setAttachmentType(attachmentType);
             }
-            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentList = new ArrayList<ExecutionStepHasAttachment>();
+            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentList = new ArrayList<>();
             for (ExecutionStepHasAttachment executionStepHasAttachmentListExecutionStepHasAttachmentToAttach : attachment.getExecutionStepHasAttachmentList()) {
                 executionStepHasAttachmentListExecutionStepHasAttachmentToAttach = em.getReference(executionStepHasAttachmentListExecutionStepHasAttachmentToAttach.getClass(), executionStepHasAttachmentListExecutionStepHasAttachmentToAttach.getExecutionStepHasAttachmentPK());
                 attachedExecutionStepHasAttachmentList.add(executionStepHasAttachmentListExecutionStepHasAttachmentToAttach);
@@ -114,7 +114,7 @@ public class AttachmentJpaController implements Serializable {
             for (ExecutionStepHasAttachment executionStepHasAttachmentListOldExecutionStepHasAttachment : executionStepHasAttachmentListOld) {
                 if (!executionStepHasAttachmentListNew.contains(executionStepHasAttachmentListOldExecutionStepHasAttachment)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStepHasAttachment " + executionStepHasAttachmentListOldExecutionStepHasAttachment + " since its attachment field is not nullable.");
                 }
@@ -126,7 +126,7 @@ public class AttachmentJpaController implements Serializable {
                 attachmentTypeNew = em.getReference(attachmentTypeNew.getClass(), attachmentTypeNew.getId());
                 attachment.setAttachmentType(attachmentTypeNew);
             }
-            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentListNew = new ArrayList<ExecutionStepHasAttachment>();
+            List<ExecutionStepHasAttachment> attachedExecutionStepHasAttachmentListNew = new ArrayList<>();
             for (ExecutionStepHasAttachment executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach : executionStepHasAttachmentListNew) {
                 executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach = em.getReference(executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach.getClass(), executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach.getExecutionStepHasAttachmentPK());
                 attachedExecutionStepHasAttachmentListNew.add(executionStepHasAttachmentListNewExecutionStepHasAttachmentToAttach);
@@ -189,7 +189,7 @@ public class AttachmentJpaController implements Serializable {
             List<ExecutionStepHasAttachment> executionStepHasAttachmentListOrphanCheck = attachment.getExecutionStepHasAttachmentList();
             for (ExecutionStepHasAttachment executionStepHasAttachmentListOrphanCheckExecutionStepHasAttachment : executionStepHasAttachmentListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Attachment (" + attachment + ") cannot be destroyed since the ExecutionStepHasAttachment " + executionStepHasAttachmentListOrphanCheckExecutionStepHasAttachment + " in its executionStepHasAttachmentList field has a non-nullable attachment field.");
             }
