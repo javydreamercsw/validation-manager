@@ -100,6 +100,7 @@ public class VMUserServerTest extends AbstractVMTestCase {
             instance = new VMUserServer(user, pw, name,
                     lastname, email);
             instance.write2DB();
+            assertEquals(1, (int) instance.getEntity().getUserStatusId().getId());
             assertEquals(true, VMUserServer.validCredentials(user, pw, true));
             assertEquals(false, VMUserServer.validCredentials(user, pw + 1, true));
             assertEquals(false, VMUserServer.validCredentials(user + 1, pw + 1,
@@ -121,7 +122,7 @@ public class VMUserServerTest extends AbstractVMTestCase {
                 assertEquals(attempts, instance.getAttempts());
                 new VMUserServer(user, pw + 1);
                 instance.update();
-                assertEquals(++attempts, instance.getAttempts());
+                assertEquals(++attempts, instance.getEntity().getAttempts());
             }
             catch (VMException ex) {
                 Exceptions.printStackTrace(ex);
@@ -131,7 +132,7 @@ public class VMUserServerTest extends AbstractVMTestCase {
                 new VMUserServer(user + 1, pw + 1);
                 //Wrong user name so can't be linked with account
                 instance.update();
-                assertEquals(attempts, instance.getAttempts());
+                assertEquals(attempts, instance.getEntity().getAttempts());
             }
             catch (VMException ex) {
                 Exceptions.printStackTrace(ex);
@@ -141,7 +142,7 @@ public class VMUserServerTest extends AbstractVMTestCase {
                 new VMUserServer(user + 1, pw);
                 //Wrong user name so can't be linked with account
                 instance.update();
-                assertEquals(attempts, instance.getAttempts());
+                assertEquals(attempts, instance.getEntity().getAttempts());
             }
             catch (VMException ex) {
                 Exceptions.printStackTrace(ex);
@@ -151,10 +152,16 @@ public class VMUserServerTest extends AbstractVMTestCase {
             try {
                 for (int i = attempts; i < VMSettingServer
                         .getSetting("password.attempts").getIntVal(); i++) {
+                    System.out.println("Attempts: " + attempts);
                     new VMUserServer(user, pw + 1);
                     instance.update();
-                    assertEquals(++attempts, instance.getAttempts());
+                    assertEquals(++attempts, instance.getEntity().getAttempts());
+                    assertEquals(1, (int) instance.getEntity().getUserStatusId().getId());
                 }
+                new VMUserServer(user, pw + 1);
+                instance.update();
+                assertEquals(++attempts, instance.getEntity().getAttempts());
+                assertEquals(4, (int) instance.getEntity().getUserStatusId().getId());
             }
             catch (VMException ex) {
                 Exceptions.printStackTrace(ex);

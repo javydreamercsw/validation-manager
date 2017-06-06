@@ -121,12 +121,11 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     + attrUN + "' AND u.userStatusId.id <> 2");
             //increase number of attempts
             if (!result.isEmpty()) {
-                VmUser vmu = (VmUser) result.get(0);
-                update(VMUserServer.this, vmu);
+                VMUserServer vmu = new VMUserServer((VmUser) result.get(0));
                 //Don't rehash the pasword!
-                setHashPassword(false);
-                setIncreaseAttempts(true);//Increase attempts after a unsuccessfull login.
-                write2DB();
+                vmu.setHashPassword(false);
+                vmu.setIncreaseAttempts(true);//Increase attempts after a unsuccessfull login.
+                vmu.write2DB();
             }
         }
     }
@@ -197,7 +196,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                 && getId() > 1) {
             setUserStatusId(
                     new UserStatusJpaController(
-                            getEntityManagerFactory()).findUserStatus(2));
+                            getEntityManagerFactory()).findUserStatus(4));
         }
         VmUserJpaController controller
                 = new VmUserJpaController(getEntityManagerFactory());
@@ -211,7 +210,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                 } else {
                     password = getPassword().replaceAll("'", "\\\\'");
                 }
-                VmUser vmu = controller.findVmUser(getId());
+                VmUser vmu = getEntity();
                 update(vmu, this);
                 vmu.setPassword(password);
                 vmu.setReason(getReason() == null
