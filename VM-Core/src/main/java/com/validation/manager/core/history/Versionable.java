@@ -191,13 +191,13 @@ public abstract class Versionable implements Comparable<Versionable>,
         target.setModifierId(source.getModifierId());
         target.setReason(source.getReason());
         target.setModificationTime(source.getModificationTime());
+        target.setHistoryList(source.getHistoryList());
         try {
             target.updateHistory();
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
         }
-        target.setHistoryList(source.getHistoryList());
     }
 
     @Override
@@ -364,6 +364,7 @@ public abstract class Versionable implements Comparable<Versionable>,
             EntityServer es = (EntityServer) v;
             Versionable temp = (Versionable) es.getEntity();
             if (temp.getHistoryList() == null
+                    || v.getHistoryList() == null
                     || temp.getHistoryList().size() != v.getHistoryList().size()) {
                 update(temp, v);
                 EntityTransaction t = DataBaseManager.getEntityManager().getTransaction();
