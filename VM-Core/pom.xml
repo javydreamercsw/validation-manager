@@ -179,6 +179,9 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>${cobertura.test}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>unit-test</id>
@@ -192,20 +195,6 @@
                             <excludes>
                                 <exclude>**/*IT.java</exclude>
                             </excludes>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>integration-test</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skipITs}</skip>
-                            <argLine>${argLine}</argLine>
-                            <includes>
-                                <include>**/*IT.java</include>
-                            </includes>
                         </configuration>
                     </execution>
                 </executions>
