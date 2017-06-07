@@ -232,9 +232,11 @@ public class History implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Fields: ");
+        StringBuilder sb = new StringBuilder();
         getHistoryFieldList().forEach(hf -> {
-            if (!sb.toString().isEmpty()) {
+            if (sb.toString().isEmpty()) {
+                sb.append("Fields: ");
+            } else {
                 sb.append(", ");
             }
             sb.append(hf.getFieldName())
