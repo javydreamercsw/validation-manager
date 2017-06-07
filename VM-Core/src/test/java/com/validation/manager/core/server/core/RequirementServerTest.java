@@ -393,7 +393,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertTrue(checkHistory(rs));
             int total = new HistoryJpaController(DataBaseManager
                     .getEntityManagerFactory()).getHistoryCount();
-            //Test for issue #25
+            //Test for issue #25 https://github.com/javydreamercsw/validation-manager/issues/25
             //Disconnet to the database
             DataBaseManager.close();
             //Reconnect

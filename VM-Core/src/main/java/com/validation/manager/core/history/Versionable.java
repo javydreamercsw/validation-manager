@@ -256,6 +256,16 @@ public abstract class Versionable implements Comparable<Versionable>,
         getHistoryList().add(history);
     }
 
+    public static boolean fieldMatchHistory(HistoryField hf, Object value) {
+        return !(value == null && !hf.getFieldValue().equals("null"))
+                || (!(value instanceof byte[]) && value != null
+                && !value.toString().equals(hf.getFieldValue()))
+                || ((value instanceof byte[])
+                && !new String((byte[]) value,
+                        StandardCharsets.UTF_8)
+                        .equals(hf.getFieldValue()));
+    }
+
     public static synchronized boolean auditable(Versionable v) {
         History current;
         boolean result = false;
@@ -268,7 +278,7 @@ public abstract class Versionable implements Comparable<Versionable>,
                             hf.getFieldName(), true), v);
                     if ((o == null && !hf.getFieldValue().equals("null"))
                             || (!(o instanceof byte[]) && o != null
-                            && !o.equals(hf.getFieldValue()))
+                            && !o.toString().equals(hf.getFieldValue()))
                             || ((o instanceof byte[])
                             && !new String((byte[]) o,
                                     StandardCharsets.UTF_8)

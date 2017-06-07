@@ -191,7 +191,7 @@ public abstract class AbstractVMTestCase extends TestCase {
                 //Compare audit field vs. the record in history.
                 Object o = FieldUtils.readField(FieldUtils.getField(v.getClass(),
                         hf.getFieldName(), true), v);
-                if (!o.toString().equals(hf.getFieldValue())) {
+                if (!Versionable.fieldMatchHistory(hf, o)) {
                     return false;
                 }
             }
