@@ -18,13 +18,14 @@ package com.validation.manager.core.history;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
 import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.controller.HistoryJpaController;
 import com.validation.manager.test.AbstractVMTestCase;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
+import static junit.framework.TestCase.assertEquals;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Test;
 import org.openide.util.Exceptions;
@@ -131,7 +132,7 @@ public class VersionableTest extends AbstractVMTestCase {
     }
 
     @Test
-    public void testAuditables() {
+    public void testVersioning() {
         try {
             DemoBuilder.buildDemoProject();
             EntityManager em = DataBaseManager.getEntityManager();
@@ -150,60 +151,75 @@ public class VersionableTest extends AbstractVMTestCase {
                             + entity.getJavaType().getSimpleName()
                             + " a").get(0);
                     assertNotNull(v);
-                    //Now pick one of the Auditable fields
-                    Field f = fields.get(0);
                     v.updateHistory();
-                    assertEquals(1, v.getHistoryList().size());
-                    History history = v.getHistoryList().get(v
-                            .getHistoryList().size() - 1);
-                    assertEquals(0, history.getMajorVersion());
-                    assertEquals(0, history.getMidVersion());
-                    assertEquals(1, history.getMinorVersion());
-                    assertEquals(1, (int) history.getModifierId().getId());
-                    assertEquals("audit.general.creation", history.getReason());
-                    assertNotNull(history.getModificationTime());
-                    assertTrue(checkHistory(v));
-                    assertFalse(Versionable.auditable(v));
-                    System.out.println("Changing field: "
-                            + f.getName() + " Type: "
-                            + f.getType().getSimpleName());
-                    f.setAccessible(true);
-                    if (f.getType() == Integer.class) {
-                        int current = f.getInt(v);
-                        int newValue = current + 1;
-                        System.out.println("Changing int value from: "
-                                + current + " to: " + newValue);
-                        f.setInt(v, newValue);
-                    } else if (f.getType() == String.class) {
-                        String current = (String) f.get(v);
-                        String newValue = current + 1;
-                        System.out.println("Changing int value from: "
-                                + current + " to: " + newValue);
-                        f.set(v, newValue);
-                    } else if (f.getType() == byte[].class) {
-                        byte[] current = (byte[]) f.get(v);
-                        byte[] append = "1".getBytes();
-                        byte[] newValue = new byte[current.length + append.length];
-                        System.out.println("Changing int value from: "
-                                + Arrays.toString(current) + " to: "
-                                + Arrays.toString(newValue));
-                        f.set(v, newValue);
-                    } else {
-                        fail("Unexpected field type: "
+                    int count = v.getHistoryList().size();
+                    for (Field f : fields) {
+                        //Now pick one of the Auditable fields
+                        assertEquals(count, v.getHistoryList().size());
+                        History history = v.getHistoryList().get(v
+                                .getHistoryList().size() - 1);
+                        assertEquals(count == 1 ? "audit.general.creation"
+                                : "audit.general.modified", history.getReason());
+                        assertEquals(0, history.getMajorVersion());
+                        assertEquals(0, history.getMidVersion());
+                        assertEquals(count++, history.getMinorVersion());
+                        assertEquals(1, (int) history.getModifierId().getId());
+                        assertNotNull(history.getModificationTime());
+                        assertTrue(checkHistory(v));
+                        assertFalse(Versionable.auditable(v));
+                        System.out.println("Changing field: "
+                                + f.getName() + " Type: "
                                 + f.getType().getSimpleName());
+                        f.setAccessible(true);
+                        if (f.getType() == Integer.class) {
+                            Integer current = (Integer) f.get(v);
+                            Integer newValue = current + 1;
+                            showChange(current, newValue);
+                            f.set(v, newValue);
+                        } else if (f.getType() == String.class) {
+                            String current = (String) f.get(v);
+                            String newValue = current + 1;
+                            showChange(current, newValue);
+                            f.set(v, newValue);
+                        } else if (f.getType() == byte[].class) {
+                            byte[] current = (byte[]) f.get(v);
+                            byte[] append = "1".getBytes();
+                            byte[] newValue = new byte[current.length + append.length];
+                            showChange(current, newValue);
+                            f.set(v, newValue);
+                        } else if (f.getType() == Boolean.class) {
+                            Boolean current = (Boolean) f.get(v);
+                            Boolean newValue = !current;
+                            showChange(current, newValue);
+                            f.set(v, newValue);
+                        } else {
+                            fail("Unexpected field type: "
+                                    + f.getType().getSimpleName());
+                        }
+                        assertTrue(Versionable.auditable(v));
+                        v.updateHistory();
+                        assertEquals(count, v.getHistoryList().size());
+                        history = v.getHistoryList().get(v.getHistoryList().size() - 1);
+                        assertEquals(0, history.getMajorVersion());
+                        assertEquals(0, history.getMidVersion());
+                        assertEquals(count, history.getMinorVersion());
+                        assertEquals(1, (int) history.getModifierId().getId());
+                        assertEquals("audit.general.modified", history.getReason());
+                        assertNotNull(history.getModificationTime());
+                        assertTrue(checkHistory(v));
+                        assertFalse(Versionable.auditable(v));
+                        int total = new HistoryJpaController(DataBaseManager
+                                .getEntityManagerFactory()).getHistoryCount();
+                        //Test for issue #25 https://github.com/javydreamercsw/validation-manager/issues/25
+
+                        v = (Versionable) DataBaseManager.getEntityManager().find(entity.getJavaType(),
+                                DataBaseManager.getEntityManagerFactory()
+                                        .getPersistenceUnitUtil().getIdentifier(v));
+                        assertTrue(checkHistory(v));
+                        assertEquals(total, new HistoryJpaController(DataBaseManager
+                                .getEntityManagerFactory()).getHistoryCount());
+                        assertEquals(count, v.getHistoryList().size());
                     }
-                    assertTrue(Versionable.auditable(v));
-                    v.updateHistory();
-                    assertEquals(2, v.getHistoryList().size());
-                    history = v.getHistoryList().get(v.getHistoryList().size() - 1);
-                    assertEquals(0, history.getMajorVersion());
-                    assertEquals(0, history.getMidVersion());
-                    assertEquals(2, history.getMinorVersion());
-                    assertEquals(1, (int) history.getModifierId().getId());
-                    assertEquals("audit.general.modified", history.getReason());
-                    assertNotNull(history.getModificationTime());
-                    assertTrue(checkHistory(v));
-                    assertFalse(Versionable.auditable(v));
                 }
             }
         }
@@ -211,6 +227,12 @@ public class VersionableTest extends AbstractVMTestCase {
             Exceptions.printStackTrace(ex);
             fail();
         }
+    }
+
+    private void showChange(Object current, Object newValue) {
+        System.out.println("Changing int value from: "
+                + current + " to: "
+                + newValue);
     }
 
     public class VersionableImpl extends Versionable {
