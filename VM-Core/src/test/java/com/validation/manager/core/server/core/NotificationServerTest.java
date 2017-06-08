@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,5 +60,13 @@ public class NotificationServerTest extends AbstractVMTestCase {
         ns.setAcknowledgeDate(new Date());
         ns.write2DB();
         assertEquals(0, target.getPendingNotifications().size());
+        NotificationServer instance2 = new NotificationServer();
+        instance2.setAuthor(author.getEntity());
+        instance2.setContent("Hello there!");
+        instance2.setCreationDate(new Date());
+        instance2.setNotificationType(NotificationTypeServer
+                .getType("notification.test.pending"));
+        instance2.setTargetUser(target.getEntity());
+        instance2.write2DB();
     }
 }
