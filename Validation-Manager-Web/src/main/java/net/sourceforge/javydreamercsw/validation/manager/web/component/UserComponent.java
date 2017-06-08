@@ -131,14 +131,14 @@ public class UserComponent extends Panel {
         new UserStatusJpaController(DataBaseManager.getEntityManagerFactory())
                 .findUserStatusEntities().forEach(us -> {
                     status.addItem(us);
-                    status.setItemCaption(us, 
+                    status.setItemCaption(us,
                             TRANSLATOR.translate(us.getStatus()));
                 });
         binder.bind(status, "userStatusId");
         status.setTextInputAllowed(false);
         layout.addComponent(status);
         //Roles
-        if (edit) {
+        if (edit && ((VMUI) UI.getCurrent()).checkRight("system.configuration")) {
             List<Role> list = new RoleJpaController(DataBaseManager
                     .getEntityManagerFactory())
                     .findRoleEntities();
