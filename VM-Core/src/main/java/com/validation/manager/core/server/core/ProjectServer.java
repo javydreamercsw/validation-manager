@@ -20,13 +20,15 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestProject;
+import com.validation.manager.core.db.controller.HistoryFieldJpaController;
+import com.validation.manager.core.db.controller.HistoryJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 
 /**
  *
@@ -36,6 +38,8 @@ public final class ProjectServer extends Project
         implements EntityServer<Project>, VersionableServer<Project> {
 
     private static final long serialVersionUID = 3_434_510_483_033_583_117L;
+    private static final Logger LOG
+            = Logger.getLogger(ProjectServer.class.getName());
 
     public ProjectServer(String name, String notes) {
         super(name);
@@ -82,6 +86,24 @@ public final class ProjectServer extends Project
         if (p.getProjectList().isEmpty()) {
             try {
                 if (p.getRequirementSpecList().isEmpty()) {
+                    p.getHistoryList().forEach(h -> {
+                        try {
+                            h.getHistoryFieldList().forEach(hf -> {
+                                try {
+                                    new HistoryFieldJpaController(getEntityManagerFactory())
+                                            .destroy(hf.getHistoryFieldPK());
+                                }
+                                catch (NonexistentEntityException ex) {
+                                    LOG.log(Level.SEVERE, null, ex);
+                                }
+                            });
+                            new HistoryJpaController(getEntityManagerFactory())
+                                    .destroy(h.getId());
+                        }
+                        catch (IllegalOrphanException | NonexistentEntityException ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                        }
+                    });
                     new ProjectJpaController(getEntityManagerFactory())
                             .destroy(p.getId());
                 } else {
@@ -89,7 +111,7 @@ public final class ProjectServer extends Project
                 }
             }
             catch (IllegalOrphanException | NonexistentEntityException ex) {
-                getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
         } else {
             throw new VMException("Unable to delete project with children!");

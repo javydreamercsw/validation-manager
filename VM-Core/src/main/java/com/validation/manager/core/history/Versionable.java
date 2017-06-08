@@ -130,24 +130,29 @@ public abstract class Versionable implements Comparable<Versionable>,
         this.dirty = dirty;
     }
 
+    private void updateInternalHistory() throws Exception {
+        if (this instanceof EntityServer) {
+            EntityServer vs = (EntityServer) this;
+            //Copy the version changes
+            Versionable ao = (Versionable) vs.getEntity();
+            ao.update(ao, this);
+            updateHistory(ao);
+            vs.write2DB();
+        } else {
+            updateHistory();
+        }
+    }
+
     /**
      * Increase major version.
      */
     public void increaseMajorVersion() {
-        setMajorVersion(getMajorVersion() + 1);
-        setMidVersion(0);
-        setMinorVersion(0);
         try {
-            if (this instanceof EntityServer) {
-                EntityServer vs = (EntityServer) this;
-                //Copy the version changes
-                Versionable ao = (Versionable) vs.getEntity();
-                ao.update(ao, this);
-                updateHistory(ao);
-                vs.write2DB();
-            } else {
-                updateHistory(this);
-            }
+            updateInternalHistory();
+            setMajorVersion(getMajorVersion() + 1);
+            setMidVersion(0);
+            setMinorVersion(0);
+            updateInternalHistory();
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);
@@ -158,19 +163,11 @@ public abstract class Versionable implements Comparable<Versionable>,
      * Increase major version.
      */
     public void increaseMidVersion() {
-        setMidVersion(getMidVersion() + 1);
-        setMinorVersion(0);
         try {
-            if (this instanceof EntityServer) {
-                EntityServer vs = (EntityServer) this;
-                //Copy the version changes
-                Versionable v = (Versionable) vs.getEntity();
-                v.update(v, this);
-                updateHistory(v);
-                vs.write2DB();
-            } else {
-                updateHistory(this);
-            }
+            updateInternalHistory();
+            setMidVersion(getMidVersion() + 1);
+            setMinorVersion(0);
+            updateInternalHistory();
         }
         catch (Exception ex) {
             Exceptions.printStackTrace(ex);

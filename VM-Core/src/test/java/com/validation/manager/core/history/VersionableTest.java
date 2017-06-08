@@ -50,6 +50,8 @@ public class VersionableTest extends AbstractVMTestCase {
         assertEquals(1, (int) instance.getMajorVersion());
         assertEquals(0, (int) instance.getMidVersion());
         assertEquals(0, (int) instance.getMinorVersion());
+        assertEquals(2, instance.getHistoryList().size());
+        checkHistory(instance);
     }
 
     /**
@@ -66,6 +68,8 @@ public class VersionableTest extends AbstractVMTestCase {
         assertEquals(0, (int) instance.getMajorVersion());
         assertEquals(1, (int) instance.getMidVersion());
         assertEquals(0, (int) instance.getMinorVersion());
+        assertEquals(2, instance.getHistoryList().size());
+        checkHistory(instance);
     }
 
     /**

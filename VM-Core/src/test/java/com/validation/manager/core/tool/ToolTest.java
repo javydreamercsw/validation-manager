@@ -15,18 +15,21 @@
  */
 package com.validation.manager.core.tool;
 
+import com.validation.manager.core.server.core.TestCaseExecutionServer;
+import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.test.AbstractVMTestCase;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.swing.ImageIcon;
 import static junit.framework.TestCase.*;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class ToolTest {
+public class ToolTest extends AbstractVMTestCase {
 
     /**
      * Test of createImageIcon method, of class Tool.
@@ -71,16 +74,27 @@ public class ToolTest {
 
     /**
      * Test of extractTCE method, of class Tool.
+     *
+     * @throws java.lang.Exception
      */
     @Test
-    @Ignore
-    public void testExtractTCE() {
+    public void testExtractTCE() throws Exception {
         System.out.println("extractTCE");
-        Object key = null;
-        TCEExtraction expResult = null;
-        TCEExtraction result = Tool.extractTCE(key);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+        TestCaseExecutionServer tce = new TestCaseExecutionServer("Test Name",
+                "Test Scope");
+        TestCaseServer tc = new TestCaseServer("Test Case", new Date());
+        tc.write2DB();
+        tce.addTestCase(tc);
+        tce.write2DB();
+        String key = "tce-" + tce.getId() + "-" + tc.getId();
+        TCEExtraction r = Tool.extractTCE(key);
+        assertEquals(tce.getId(), r.getTestCaseExecution().getId());
+        try {
+            Tool.extractTCE(key + 1);
+            fail();
+        }
+        catch (Exception ex) {
+            //Expected
+        }
     }
 }
