@@ -15,7 +15,6 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
-import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.addon.contextmenu.MenuItem;
 import com.vaadin.annotations.PreserveOnRefresh;
@@ -165,6 +164,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DemoProvider;
@@ -258,7 +258,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 user.setLocale(l.getLanguage());
                 try {
                     user.write2DB();
-                } catch (Exception ex) {
+                } catch (VMException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             } else {
@@ -530,7 +530,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                                             ess.getHistoryList().add(history.get(r));
                                         });
                                         ess.write2DB();
-                                    } catch (Exception ex) {
+                                    } catch (VMException ex) {
                                         LOG.log(Level.SEVERE, null, ex);
                                     }
                                 });
