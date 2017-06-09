@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +21,11 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
-import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.tool.MD5;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = IMainContentProvider.class)
@@ -51,7 +50,8 @@ public class DemoProvider extends AbstractProvider {
         VmUserJpaController controller
                 = new VmUserJpaController(DataBaseManager
                         .getEntityManagerFactory());
-        layout.addComponent(new Label("<h1>demo.tab.title</h1>",
+        layout.addComponent(new Label("<h1>"
+                + TRANSLATOR.translate("demo.tab.title") + "</h1>",
                 ContentMode.HTML));
         Label l = new Label();
         l.setId("demo.tab.message");
@@ -65,22 +65,22 @@ public class DemoProvider extends AbstractProvider {
                         && u.getPassword().equals(MD5
                                 .encrypt(u.getUsername()))) {
                     sb.append("<li><b>")
-                            .append("general.username")
+                            .append(TRANSLATOR.translate("general.username"))
                             .append(":</b> ")
-                            .append(u.getUsername()).append(", <b>")
-                            .append("general.password")
+                            .append(u.getUsername())
+                            .append(", <b>")
+                            .append(TRANSLATOR.translate("general.password"))
                             .append(":</b> ")
                             .append(u.getUsername())
                             .append(" <b>")
-                            .append("general.role")
+                            .append(TRANSLATOR.translate("general.role"))
                             .append(":</b> ")
-                            .append(Lookup.getDefault()
-                                    .lookup(InternationalizationProvider.class)
+                            .append(TRANSLATOR
                                     .translate(u.getRoleList().get(0)
                                             .getDescription()))
                             .append("</li>");
                 }
-            } catch (Exception ex) {
+            } catch (VMException ex) {
                 LOG.log(Level.SEVERE, null, ex);
             }
         });
