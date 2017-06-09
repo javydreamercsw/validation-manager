@@ -169,9 +169,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         setHashPassword(true);
     }
 
-    //write to db
-    @Override
-    public int write2DB() throws VMException {
+    private void prepareToPersist() {
         if (getUserStatusId() == null) {
             setUserStatusId(new UserStatusJpaController(
                     getEntityManagerFactory())
@@ -198,9 +196,15 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     new UserStatusJpaController(
                             getEntityManagerFactory()).findUserStatus(4));
         }
+    }
+
+    //write to db
+    @Override
+    public int write2DB() throws VMException {
         VmUserJpaController controller
                 = new VmUserJpaController(getEntityManagerFactory());
         if (getId() != null && getId() > 0) {
+            prepareToPersist();
             try {
                 setModifierId(getEntity().getId());
                 //Sometimes password got re-hashed
@@ -211,6 +215,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                     password = getPassword().replaceAll("'", "\\\\'");
                 }
                 VmUser vmu = getEntity();
+                LOG.log(Level.INFO, "DB: {0}", vmu.getHistoryList().size());
+                LOG.log(Level.INFO, "UI: {0}", getHistoryList().size());
                 update(vmu, this);
                 vmu.setPassword(password);
                 vmu.setReason(getReason() == null
@@ -226,6 +232,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
                 throw new VMException(ex);
             }
         } else {
+            prepareToPersist();
             String password;
             if (isHashPassword()) {
                 password = encrypt(getPassword().replaceAll("'", "\\\\'"));
