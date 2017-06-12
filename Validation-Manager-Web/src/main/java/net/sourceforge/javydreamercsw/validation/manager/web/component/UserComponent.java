@@ -256,6 +256,7 @@ public class UserComponent extends Panel {
                 } else {
                     us.write2DB();
                 }
+                ((ValidationManagerUI) UI.getCurrent()).setUser(us);
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 Notification.show(TRANSLATOR.

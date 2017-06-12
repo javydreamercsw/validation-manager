@@ -20,6 +20,7 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.FieldType;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.HistoryField;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.server.core.FieldTypeServer;
 import com.validation.manager.core.server.core.HistoryFieldServer;
@@ -36,7 +37,6 @@ import java.util.logging.Logger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
-import javax.persistence.EntityTransaction;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
@@ -140,6 +140,20 @@ public abstract class Versionable implements Comparable<Versionable>,
             vs.write2DB();
         } else {
             updateHistory();
+            try {
+                DataBaseManager.getEntityManagerFactory().getMetamodel()
+                        .entity(this.getClass());
+                Object key = DataBaseManager.getEntityManagerFactory()
+                        .getPersistenceUnitUtil().getIdentifier(this);
+                if (key != null
+                        && DataBaseManager.getEntityManager()
+                                .find(this.getClass(), key) != null) {
+                    DataBaseManager.getEntityManager().merge(this);
+                }
+            }
+            catch (IllegalArgumentException ex) {
+                LOG.log(Level.SEVERE, "Ignore if this is an Unit test!", ex);
+            }
         }
     }
 
@@ -352,6 +366,24 @@ public abstract class Versionable implements Comparable<Versionable>,
             hs.setModificationTime(v.getModificationTime() == null
                     ? new Date() : v.getModificationTime());
             hs.write2DB();
+            if (v instanceof VmUser) {
+                VmUser temp = (VmUser) v;
+                if (Objects.equals(temp.getId(), hs.getModifierId().getId())) {
+                    if (temp.getHistoryModificationList() == null) {
+                        temp.setHistoryModificationList(new ArrayList<>());
+                    }
+                    temp.getHistoryModificationList().add(hs.getEntity());
+                }
+            } else {
+                if (hs.getModifierId() != null) {
+                    VmUser temp = hs.getModifierId();
+                    if (temp.getHistoryModificationList() == null) {
+                        temp.setHistoryModificationList(new ArrayList<>());
+                    }
+                    temp.getHistoryModificationList().add(hs.getEntity());
+                    c.edit(temp);
+                }
+            }
             //Check the fields to be placed in history
             updateFields(hs, v);
         }
@@ -361,24 +393,6 @@ public abstract class Versionable implements Comparable<Versionable>,
             v.setMajorVersion(current.getMajorVersion());
             v.setMidVersion(current.getMidVersion());
             v.setMinorVersion(current.getMinorVersion());
-        }
-        /**
-         * When running update() on the server class, it adds the initial
-         * history to the server but never persists to the database. So we
-         * update it when we are creating the record instead.
-         */
-        if (v instanceof EntityServer) {
-            EntityServer es = (EntityServer) v;
-            Versionable temp = (Versionable) es.getEntity();
-            if (temp.getHistoryList() == null
-                    || v.getHistoryList() == null
-                    || temp.getHistoryList().size() != v.getHistoryList().size()) {
-                update(temp, v);
-                EntityTransaction t = DataBaseManager.getEntityManager().getTransaction();
-                t.begin();
-                DataBaseManager.getEntityManager().merge(temp);
-                t.commit();
-            }
         }
     }
 

@@ -50,7 +50,45 @@ public class VMUserServerTest extends AbstractVMTestCase {
         assertEquals(name, instance.getEntity().getFirstName());
         assertEquals(lastname, instance.getEntity().getLastName());
         assertEquals(email, instance.getEntity().getEmail());
+        assertEquals(1, instance.getHistoryList().size());
         assertEquals(1, instance.getEntity().getHistoryList().size());
+        email = "test2@test.com";
+        instance.setEmail(email);
+        instance.write2DB();
+        int modifiedAmount = instance.getHistoryModificationList().size();
+        assertEquals(instance.getId(), instance.getEntity().getId());
+        assertEquals(user, instance.getEntity().getUsername());
+        assertEquals(MD5.encrypt(pw), instance.getEntity().getPassword());
+        assertEquals(name, instance.getEntity().getFirstName());
+        assertEquals(lastname, instance.getEntity().getLastName());
+        assertEquals(email, instance.getEntity().getEmail());
+        assertEquals(2, instance.getHistoryList().size());
+        assertEquals(2, instance.getEntity().getHistoryList().size());
+        VMUserServer instance2 = new VMUserServer(user + 2, pw + 2, name + 2,
+                lastname + 2, email + 2);
+        instance2.write2DB();
+        assertEquals(instance2.getId(), instance2.getEntity().getId());
+        assertEquals(user + 2, instance2.getEntity().getUsername());
+        assertEquals(MD5.encrypt(pw + 2), instance2.getEntity().getPassword());
+        assertEquals(name + 2, instance2.getEntity().getFirstName());
+        assertEquals(lastname + 2, instance2.getEntity().getLastName());
+        assertEquals(email + 2, instance2.getEntity().getEmail());
+        assertEquals(1, instance2.getHistoryList().size());
+        assertEquals(1, instance2.getEntity().getHistoryList().size());
+        instance2.setEmail(email + 3);
+        instance2.setModifierId(instance.getId());
+        instance2.write2DB();
+        assertEquals(instance2.getId(), instance2.getEntity().getId());
+        assertEquals(user + 2, instance2.getEntity().getUsername());
+        assertEquals(MD5.encrypt(pw + 2), instance2.getEntity().getPassword());
+        assertEquals(name + 2, instance2.getEntity().getFirstName());
+        assertEquals(lastname + 2, instance2.getEntity().getLastName());
+        assertEquals(email + 3, instance2.getEntity().getEmail());
+        assertEquals(2, instance2.getHistoryList().size());
+        assertEquals(2, instance2.getEntity().getHistoryList().size());
+        instance.update();
+        assertEquals(modifiedAmount + 1,
+                instance.getHistoryModificationList().size());
     }
 
     /**

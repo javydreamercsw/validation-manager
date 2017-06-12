@@ -206,49 +206,58 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         if (getId() != null && getId() > 0) {
             prepareToPersist();
             try {
-                setModifierId(getEntity().getId());
+                if (getModifierId() == 0) {
+                    setModifierId(getEntity().getId());
+                }
                 //Sometimes password got re-hashed
                 String password;
                 if (isHashPassword()) {
                     password = encrypt(getPassword().replaceAll("'", "\\\\'"));
+                    setHashPassword(false);
                 } else {
                     password = getPassword().replaceAll("'", "\\\\'");
                 }
                 VmUser vmu = getEntity();
-                LOG.log(Level.INFO, "DB: {0}", vmu.getHistoryList().size());
-                LOG.log(Level.INFO, "UI: {0}", getHistoryList().size());
                 update(vmu, this);
                 vmu.setPassword(password);
                 vmu.setReason(getReason() == null
                         ? "audit.general.modified" : getReason());
                 vmu.setModificationTime(new Date());
+                vmu.updateHistory();
                 controller.edit(vmu);
                 update();
             }
             catch (NonexistentEntityException ex) {
-                Exceptions.printStackTrace(ex);
+                throw new VMException(ex);
             }
             catch (Exception ex) {
                 throw new VMException(ex);
             }
         } else {
-            prepareToPersist();
-            String password;
-            if (isHashPassword()) {
-                password = encrypt(getPassword().replaceAll("'", "\\\\'"));
-            } else {
-                password = getPassword().replaceAll("'", "\\\\'");
+            try {
+                prepareToPersist();
+                String password;
+                if (isHashPassword()) {
+                    password = encrypt(getPassword().replaceAll("'", "\\\\'"));
+                    setHashPassword(false);
+                } else {
+                    password = getPassword().replaceAll("'", "\\\\'");
+                }
+                VmUser vmu = new VmUser(
+                        getUsername().replaceAll("'", "\\\\'"), password,
+                        getEmail().replaceAll("'", "\\\\'"),
+                        getFirstName().replaceAll("'", "\\\\'"),
+                        getLastName().replaceAll("'", "\\\\'"), getLocale(),
+                        new UserStatusJpaController(
+                                getEntityManagerFactory())
+                                .findUserStatus(1), getAttempts());
+                vmu.updateHistory();
+                controller.create(vmu);
+                setId(vmu.getId());
             }
-            VmUser vmu = new VmUser(
-                    getUsername().replaceAll("'", "\\\\'"), password,
-                    getEmail().replaceAll("'", "\\\\'"),
-                    getFirstName().replaceAll("'", "\\\\'"),
-                    getLastName().replaceAll("'", "\\\\'"), getLocale(),
-                    new UserStatusJpaController(
-                            getEntityManagerFactory())
-                            .findUserStatus(1), getAttempts());
-            controller.create(vmu);
-            setId(vmu.getId());
+            catch (Exception ex) {
+                throw new VMException(ex);
+            }
         }
         setReason("");
         update();

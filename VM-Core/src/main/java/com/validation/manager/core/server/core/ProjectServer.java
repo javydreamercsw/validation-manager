@@ -20,14 +20,9 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.controller.HistoryFieldJpaController;
-import com.validation.manager.core.db.controller.HistoryJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -80,42 +75,6 @@ public final class ProjectServer extends Project
             throw new VMException(ex);
         }
         return getId();
-    }
-
-    public static void deleteProject(Project p) throws VMException {
-        if (p.getProjectList().isEmpty()) {
-            try {
-                if (p.getRequirementSpecList().isEmpty()) {
-                    p.getHistoryList().forEach(h -> {
-                        try {
-                            h.getHistoryFieldList().forEach(hf -> {
-                                try {
-                                    new HistoryFieldJpaController(getEntityManagerFactory())
-                                            .destroy(hf.getHistoryFieldPK());
-                                }
-                                catch (NonexistentEntityException ex) {
-                                    LOG.log(Level.SEVERE, null, ex);
-                                }
-                            });
-                            new HistoryJpaController(getEntityManagerFactory())
-                                    .destroy(h.getId());
-                        }
-                        catch (IllegalOrphanException | NonexistentEntityException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
-                        }
-                    });
-                    new ProjectJpaController(getEntityManagerFactory())
-                            .destroy(p.getId());
-                } else {
-                    throw new VMException("Unable to delete project with Requirement Specifications!");
-                }
-            }
-            catch (IllegalOrphanException | NonexistentEntityException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-        } else {
-            throw new VMException("Unable to delete project with children!");
-        }
     }
 
     @Override

@@ -17,11 +17,9 @@ package com.validation.manager.core.db;
 
 import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
-import static com.validation.manager.core.server.core.ProjectServer.deleteProject;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
@@ -42,7 +40,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import static junit.framework.TestCase.assertEquals;
-import org.junit.After;
 import org.junit.Test;
 
 /**
@@ -54,18 +51,6 @@ public class ProjectTest extends AbstractVMTestCase {
     private Project p;
     private static final Logger LOG
             = getLogger(ProjectTest.class.getName());
-
-    @After
-    public void clear() {
-        if (p != null) {
-            try {
-                deleteProject(p);
-            }
-            catch (VMException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-        }
-    }
 
     /**
      * Test of toString method, of class Project.
