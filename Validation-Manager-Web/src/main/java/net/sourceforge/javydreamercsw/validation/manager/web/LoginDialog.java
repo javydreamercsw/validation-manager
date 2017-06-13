@@ -33,6 +33,8 @@ import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.server.core.VMUserServer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openide.util.Lookup;
 
 /**
@@ -42,6 +44,10 @@ import org.openide.util.Lookup;
 @SuppressWarnings("serial")
 public final class LoginDialog extends VMWindow {
 
+    private static final InternationalizationProvider TRANSLATOR
+            = Lookup.getDefault().lookup(InternationalizationProvider.class);
+    private static final Logger LOG
+            = Logger.getLogger(LoginDialog.class.getSimpleName());
     private final ShortcutAction enterKey
             = new ShortcutAction(Lookup.getDefault()
                     .lookup(InternationalizationProvider.class)
@@ -161,6 +167,15 @@ public final class LoginDialog extends VMWindow {
                         menu.setUser(user);
                         //Open the profile page
                         ((VMUI) UI.getCurrent()).showTab("message.admin.userProfile");
+                        break;
+                    default:
+                        LOG.log(Level.SEVERE, "Unexpected User Status: {0}",
+                                user.getUserStatusId().getId());
+                        Notification.show("Unexpected User Status",
+                                "Unexpected User Status: "
+                                + user.getUserStatusId().getId()
+                                + "\n" + TRANSLATOR.translate("message.db.error"),
+                                Notification.Type.ERROR_MESSAGE);
                         break;
                 }
             }

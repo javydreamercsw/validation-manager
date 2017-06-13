@@ -57,18 +57,17 @@ public class NotificationManager implements INotificationManager {
         ns.setNotificationType(NotificationTypeServer.getType(selected));
         ns.write2DB();
         //If email is configured, send the user an email as well.
-        if (VMSettingServer.getSetting("mail.enable").getBoolVal()) {
-            if (!target.getEmail().isEmpty()) {
-                Lookup.getDefault().lookup(IEmailManager.class)
-                        .sendEmail(target.getEmail(), null,
-                                author.getEmail().isEmpty()
-                                ? new VMUserServer(1).getEmail()
-                                : author.getEmail(),
-                                TRANSLATOR.translate(selected,
-                                        new Locale(target.getLocale())),
-                                TRANSLATOR.translate("notification.new",
-                                        new Locale(target.getLocale())));
-            }
+        if (VMSettingServer.getSetting("mail.enable").getBoolVal()
+                && !target.getEmail().isEmpty()) {
+            Lookup.getDefault().lookup(IEmailManager.class)
+                    .sendEmail(target.getEmail(), null,
+                            author.getEmail().isEmpty()
+                            ? new VMUserServer(1).getEmail()
+                            : author.getEmail(),
+                            TRANSLATOR.translate(selected,
+                                    new Locale(target.getLocale())),
+                            TRANSLATOR.translate("notification.new",
+                                    new Locale(target.getLocale())));
         }
     }
 }

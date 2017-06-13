@@ -56,6 +56,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
     private boolean increaseAttempts = false;
     private static final Logger LOG
             = Logger.getLogger(VMUserServer.class.getName());
+    private static final String USERNAME = "username";
+    private static final String PWD = "password";
 
     public VMUserServer(VmUser vmu) {
         super.setId(vmu.getId());
@@ -71,8 +73,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         super();
         try {
             PARAMETERS.clear();
-            PARAMETERS.put("username", attrUN);
-            PARAMETERS.put("password", encrypt(attrUPW));
+            PARAMETERS.put(USERNAME, attrUN);
+            PARAMETERS.put(PWD, encrypt(attrUPW));
             List<Object> result = createdQuery(
                     "SELECT u FROM VmUser u WHERE u.username= :username"// NOI18N
                     + " AND u.password= :password AND u.userStatusId.id <> 2",
@@ -150,22 +152,6 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         setUserStatusId(new UserStatusJpaController(
                 getEntityManagerFactory()).findUserStatus(1));
         setAttempts(0);
-        setHashPassword(true);
-    }
-
-//create user object
-    public VMUserServer(String name, String password, String firstName,
-            String lastName, String email, int userStatusId, int attempts,
-            java.sql.Timestamp lastModified) throws Exception {
-        setUsername(name);
-        setPassword(password);
-        setFirstName(firstName);
-        setLastName(lastName);
-        setEmail(email);
-        setUserStatusId(new UserStatusJpaController(
-                getEntityManagerFactory())
-                .findUserStatus(userStatusId));
-        setAttempts(attempts);
         setHashPassword(true);
     }
 
@@ -301,8 +287,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         try {
             //Now check if password is not the same as the current password
             PARAMETERS.clear();
-            PARAMETERS.put("username", getUsername());
-            PARAMETERS.put("password", hash
+            PARAMETERS.put(USERNAME, getUsername());
+            PARAMETERS.put(PWD, hash
                     ? encrypt(newPass.replaceAll("'", "\\\\'")) : newPass);
             List<Object> result = createdQuery("SELECT x FROM VmUser x "
                     + "WHERE x.username = :username and x.password = :password",
@@ -352,8 +338,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
             String password, boolean encrypt) {
         try {
             PARAMETERS.clear();
-            PARAMETERS.put("username", username);
-            PARAMETERS.put("password", encrypt
+            PARAMETERS.put(USERNAME, username);
+            PARAMETERS.put(PWD, encrypt
                     ? encrypt(password.replaceAll("'", "\\\\'")) : password);
             return !createdQuery("SELECT x FROM VmUser x "
                     + "WHERE x.username = :username and x.password = :password",
@@ -373,8 +359,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
             String password, boolean encrypt) {
         try {
             PARAMETERS.clear();
-            PARAMETERS.put("username", username);
-            PARAMETERS.put("password", encrypt
+            PARAMETERS.put(USERNAME, username);
+            PARAMETERS.put(PWD, encrypt
                     ? encrypt(password.replaceAll("'", "\\\\'")) : password);
             if (validCredentials(username, password, encrypt)) {
                 return (VmUser) createdQuery("SELECT x FROM VmUser x "

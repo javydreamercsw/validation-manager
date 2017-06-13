@@ -26,7 +26,7 @@ import org.openide.util.Lookup;
  */
 public class TranslationConverter implements Converter<String, String> {
 
-    static final InternationalizationProvider TRANSLATOR
+    private static final InternationalizationProvider TRANSLATOR
             = Lookup.getDefault().lookup(InternationalizationProvider.class);
 
     @Override

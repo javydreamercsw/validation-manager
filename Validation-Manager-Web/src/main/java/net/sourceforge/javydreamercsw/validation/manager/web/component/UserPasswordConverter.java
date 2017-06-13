@@ -16,6 +16,7 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.util.converter.Converter;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.tool.MD5;
 import java.util.Locale;
 import org.openide.util.Exceptions;
@@ -26,14 +27,11 @@ import org.openide.util.Exceptions;
  */
 public class UserPasswordConverter implements Converter<String, String> {
 
-    private String pw;
-
     @Override
     public String convertToModel(String value,
             Class<? extends String> targetType, Locale locale)
             throws ConversionException {
-        pw = value;
-        return pw;
+        return value;
     }
 
     @Override
@@ -42,7 +40,7 @@ public class UserPasswordConverter implements Converter<String, String> {
             throws ConversionException {
         try {
             return value == null ? "" : MD5.encrypt(value);
-        } catch (Exception ex) {
+        } catch (VMException ex) {
             Exceptions.printStackTrace(ex);
         }
         return "";

@@ -23,7 +23,6 @@ import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  *
@@ -33,8 +32,6 @@ public final class ProjectServer extends Project
         implements EntityServer<Project>, VersionableServer<Project> {
 
     private static final long serialVersionUID = 3_434_510_483_033_583_117L;
-    private static final Logger LOG
-            = Logger.getLogger(ProjectServer.class.getName());
 
     public ProjectServer(String name, String notes) {
         super(name);

@@ -79,6 +79,12 @@ public class AdminScreenProvider extends AbstractProvider {
     private static final Logger LOG
             = Logger.getLogger(IMainContentProvider.class.getSimpleName());
     private final TabSheet adminSheet = new TabSheet();
+    private final String ISSUE_TYPE = "issue.type",
+            ISSUE_RESOLUTION = "issue.resolution",
+            REQUIREMENT_TYPE = "requirement.type",
+            DESC = "description",
+            DELETE_ERROR = "delete.error",
+            NAME = "name";
 
     @Override
     public Component getContent() {
@@ -339,27 +345,27 @@ public class AdminScreenProvider extends AbstractProvider {
     private Component getConfigurableTab() {
         VerticalLayout vl = new VerticalLayout();
         ComboBox options = new ComboBox();
-        options.addItem("issue.type");
-        options.setItemCaption("issue.type",
-                TRANSLATOR.translate("issue.type"));
-        options.addItem("issue.resolution");
-        options.setItemCaption("issue.resolution",
-                TRANSLATOR.translate("issue.resolution"));
-        options.addItem("requirement.type");
-        options.setItemCaption("requirement.type",
-                TRANSLATOR.translate("requirement.type"));
+        options.addItem(ISSUE_TYPE);
+        options.setItemCaption(ISSUE_TYPE,
+                TRANSLATOR.translate(ISSUE_TYPE));
+        options.addItem(ISSUE_RESOLUTION);
+        options.setItemCaption(ISSUE_RESOLUTION,
+                TRANSLATOR.translate(ISSUE_RESOLUTION));
+        options.addItem(REQUIREMENT_TYPE);
+        options.setItemCaption(REQUIREMENT_TYPE,
+                TRANSLATOR.translate(REQUIREMENT_TYPE));
         options.setTextInputAllowed(false);
         options.addValueChangeListener((Property.ValueChangeEvent event) -> {
             Component nextComp = null;
             if (options.getValue() != null) {
                 switch ((String) options.getValue()) {
-                    case "issue.type":
+                    case ISSUE_TYPE:
                         nextComp = displayIssueTypes();
                         break;
-                    case "issue.resolution":
+                    case ISSUE_RESOLUTION:
                         nextComp = displayIssueResolutions();
                         break;
-                    case "requirement.type":
+                    case REQUIREMENT_TYPE:
                         nextComp = displayRequirementTypes();
                         break;
                     default:
@@ -379,7 +385,7 @@ public class AdminScreenProvider extends AbstractProvider {
 
     private Component displayIssueTypes() {
         VerticalLayout vl = new VerticalLayout();
-        Grid grid = new Grid(TRANSLATOR.translate("issue.type"));
+        Grid grid = new Grid(TRANSLATOR.translate(ISSUE_TYPE));
         BeanItemContainer<IssueType> types
                 = new BeanItemContainer<>(IssueType.class);
         types.addAll(new IssueTypeJpaController(DataBaseManager
@@ -387,11 +393,11 @@ public class AdminScreenProvider extends AbstractProvider {
                 .findIssueTypeEntities());
         grid.setContainerDataSource(types);
         grid.setSelectionMode(SelectionMode.SINGLE);
-        grid.setColumns("typeName", "description");
+        grid.setColumns("typeName", DESC);
         Grid.Column name = grid.getColumn("typeName");
         name.setHeaderCaption(TRANSLATOR.translate("general.name"));
         name.setConverter(new TranslationConverter());
-        Grid.Column desc = grid.getColumn("description");
+        Grid.Column desc = grid.getColumn(DESC);
         desc.setHeaderCaption(TRANSLATOR.translate("general.description"));
         desc.setConverter(new TranslationConverter());
         grid.setSizeFull();
@@ -424,8 +430,8 @@ public class AdminScreenProvider extends AbstractProvider {
                     ((VMUI) UI.getCurrent()).updateScreen();
                 } catch (IllegalOrphanException | NonexistentEntityException ex) {
                     LOG.log(Level.SEVERE, null, ex);
-                    Notification.show(TRANSLATOR.translate("delete.error"),
-                            TRANSLATOR.translate("delete.error"),
+                    Notification.show(TRANSLATOR.translate(DELETE_ERROR),
+                            TRANSLATOR.translate(DELETE_ERROR),
                             Notification.Type.ERROR_MESSAGE);
                 }
             }
@@ -444,7 +450,7 @@ public class AdminScreenProvider extends AbstractProvider {
 
     private Component displayIssueResolutions() {
         VerticalLayout vl = new VerticalLayout();
-        Grid grid = new Grid(TRANSLATOR.translate("issue.resolution"));
+        Grid grid = new Grid(TRANSLATOR.translate(ISSUE_RESOLUTION));
         BeanItemContainer<IssueResolution> types
                 = new BeanItemContainer<>(IssueResolution.class);
         types.addAll(new IssueResolutionJpaController(DataBaseManager
@@ -452,8 +458,8 @@ public class AdminScreenProvider extends AbstractProvider {
                 .findIssueResolutionEntities());
         grid.setContainerDataSource(types);
         grid.setSelectionMode(SelectionMode.SINGLE);
-        grid.setColumns("name");
-        Grid.Column name = grid.getColumn("name");
+        grid.setColumns(NAME);
+        Grid.Column name = grid.getColumn(NAME);
         name.setHeaderCaption(TRANSLATOR.translate("general.name"));
         name.setConverter(new TranslationConverter());
         grid.setSizeFull();
@@ -486,8 +492,8 @@ public class AdminScreenProvider extends AbstractProvider {
                     ((VMUI) UI.getCurrent()).updateScreen();
                 } catch (IllegalOrphanException | NonexistentEntityException ex) {
                     LOG.log(Level.SEVERE, null, ex);
-                    Notification.show(TRANSLATOR.translate("delete.error"),
-                            TRANSLATOR.translate("delete.error"),
+                    Notification.show(TRANSLATOR.translate(DELETE_ERROR),
+                            TRANSLATOR.translate(DELETE_ERROR),
                             Notification.Type.ERROR_MESSAGE);
                 }
             }
@@ -506,7 +512,7 @@ public class AdminScreenProvider extends AbstractProvider {
 
     private Component displayRequirementTypes() {
         VerticalLayout vl = new VerticalLayout();
-        Grid grid = new Grid(TRANSLATOR.translate("requirement.type"));
+        Grid grid = new Grid(TRANSLATOR.translate(REQUIREMENT_TYPE));
         BeanItemContainer<RequirementType> types
                 = new BeanItemContainer<>(RequirementType.class);
         types.addAll(new RequirementTypeJpaController(DataBaseManager
@@ -514,11 +520,11 @@ public class AdminScreenProvider extends AbstractProvider {
                 .findRequirementTypeEntities());
         grid.setContainerDataSource(types);
         grid.setSelectionMode(SelectionMode.SINGLE);
-        grid.setColumns("name", "description");
-        Grid.Column name = grid.getColumn("name");
+        grid.setColumns(NAME, DESC);
+        Grid.Column name = grid.getColumn(NAME);
         name.setHeaderCaption(TRANSLATOR.translate("general.name"));
         name.setConverter(new TranslationConverter());
-        Grid.Column desc = grid.getColumn("description");
+        Grid.Column desc = grid.getColumn(DESC);
         desc.setHeaderCaption(TRANSLATOR.translate("general.description"));
         desc.setConverter(new TranslationConverter());
         grid.setSizeFull();
@@ -551,8 +557,8 @@ public class AdminScreenProvider extends AbstractProvider {
                     ((VMUI) UI.getCurrent()).updateScreen();
                 } catch (IllegalOrphanException | NonexistentEntityException ex) {
                     LOG.log(Level.SEVERE, null, ex);
-                    Notification.show(TRANSLATOR.translate("delete.error"),
-                            TRANSLATOR.translate("delete.error"),
+                    Notification.show(TRANSLATOR.translate(DELETE_ERROR),
+                            TRANSLATOR.translate(DELETE_ERROR),
                             Notification.Type.ERROR_MESSAGE);
                 }
             }
