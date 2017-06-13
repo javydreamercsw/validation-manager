@@ -63,7 +63,7 @@ public class TestProject implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "test_project",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @Basic(optional = false)
     @NotNull
     @Column(name = "id")
@@ -78,7 +78,7 @@ public class TestProject implements Serializable {
     @Column(name = "active")
     private boolean active;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "notes")
     private String notes;
     @ManyToMany(mappedBy = "testProjectList")

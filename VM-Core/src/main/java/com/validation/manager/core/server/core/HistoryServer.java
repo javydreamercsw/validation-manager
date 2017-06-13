@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.controller.HistoryJpaController;
 
@@ -37,19 +38,24 @@ public final class HistoryServer extends History
     }
 
     @Override
-    public int write2DB() throws Exception {
-        HistoryJpaController c = new HistoryJpaController(DataBaseManager
-                .getEntityManagerFactory());
-        if (getId() == null) {
-            History h = new History();
-            update(h, this);
-            c.create(h);
-            update(this, h);
-        } else {
-            History h = getEntity();
-            update(h, this);
-            c.edit(h);
-            update(this, h);
+    public int write2DB() throws VMException {
+        try {
+            HistoryJpaController c = new HistoryJpaController(DataBaseManager
+                    .getEntityManagerFactory());
+            if (getId() == null) {
+                History h = new History();
+                update(h, this);
+                c.create(h);
+                update(this, h);
+            } else {
+                History h = getEntity();
+                update(h, this);
+                c.edit(h);
+                update(this, h);
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getId();
     }
@@ -76,6 +82,7 @@ public final class HistoryServer extends History
         target.setStep(source.getStep());
         target.setRequirementId(source.getRequirementId());
         target.setVmSettingId(source.getVmSettingId());
+        target.setVmUserId(source.getVmUserId());
     }
 
     @Override

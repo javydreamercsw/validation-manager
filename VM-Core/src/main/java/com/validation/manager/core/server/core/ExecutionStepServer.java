@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Attachment;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepHasAttachment;
@@ -54,18 +55,23 @@ public final class ExecutionStepServer extends ExecutionStep
     }
 
     @Override
-    public int write2DB() throws Exception {
-        if (getExecutionStepPK() == null) {
-            ExecutionStep es = new ExecutionStep();
-            update(es, this);
-            c.create(es);
-            setExecutionStepPK(es.getExecutionStepPK());
-            update();
-        } else {
-            ExecutionStep es = getEntity();
-            update(es, this);
-            c.edit(es);
-            update();
+    public int write2DB() throws VMException {
+        try {
+            if (getExecutionStepPK() == null) {
+                ExecutionStep es = new ExecutionStep();
+                update(es, this);
+                c.create(es);
+                setExecutionStepPK(es.getExecutionStepPK());
+                update();
+            } else {
+                ExecutionStep es = getEntity();
+                update(es, this);
+                c.edit(es);
+                update();
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getExecutionStepPK().getTestCaseExecutionId();
     }
@@ -112,7 +118,7 @@ public final class ExecutionStepServer extends ExecutionStep
             setAssignedTime(new Date());
             write2DB();
         }
-        catch (Exception ex) {
+        catch (VMException ex) {
             Exceptions.printStackTrace(ex);
         }
     }

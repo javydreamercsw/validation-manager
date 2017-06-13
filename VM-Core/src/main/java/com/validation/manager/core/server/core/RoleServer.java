@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +17,10 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.controller.RoleJpaController;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -29,9 +28,13 @@ import java.util.Map;
  */
 public final class RoleServer extends Role implements EntityServer<Role> {
 
-    private static final Map<String, Object> PARAMETERS = new HashMap<>();
     private final RoleJpaController c
             = new RoleJpaController(DataBaseManager.getEntityManagerFactory());
+
+    public RoleServer(int id) {
+        setId(id);
+        update();
+    }
 
     public RoleServer(String description) {
         super(description);
@@ -51,17 +54,22 @@ public final class RoleServer extends Role implements EntityServer<Role> {
     }
 
     @Override
-    public int write2DB() throws Exception {
-        if (getId() == null) {
-            Role r = new Role();
-            update(r, this);
-            c.create(r);
-            update(this, r);
-        } else {
-            Role r = getEntity();
-            update(r, this);
-            c.edit(r);
-            update(this, r);
+    public int write2DB() throws VMException {
+        try {
+            if (getId() == null) {
+                Role r = new Role();
+                update(r, this);
+                c.create(r);
+                update(this, r);
+            } else {
+                Role r = getEntity();
+                update(r, this);
+                c.edit(r);
+                update(this, r);
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getId();
     }

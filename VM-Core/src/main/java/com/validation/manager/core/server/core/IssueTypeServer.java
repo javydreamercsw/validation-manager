@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,15 @@ import com.validation.manager.core.db.controller.IssueTypeJpaController;
  */
 public class IssueTypeServer extends IssueType
         implements EntityServer<IssueType> {
+
+    public IssueTypeServer(int id) {
+        setId(id);
+        update();
+    }
+
+    public IssueTypeServer(String typeName) {
+        super(typeName);
+    }
 
     @Override
     public int write2DB() throws Exception {

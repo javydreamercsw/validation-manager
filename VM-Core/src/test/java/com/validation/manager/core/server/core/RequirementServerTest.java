@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -25,17 +26,13 @@ import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.controller.HistoryJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.test.AbstractVMTestCase;
 import com.validation.manager.test.TestHelper;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import org.junit.Test;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -47,11 +44,11 @@ public class RequirementServerTest extends AbstractVMTestCase {
             = getLogger(RequirementServerTest.class.getName());
     private Project p;
     private RequirementSpecNode rsn;
+    private RequirementSpec rss;
 
     @Override
     protected void postSetUp() {
         try {
-            RequirementSpec rss = null;
             p = TestHelper.createProject("New Project", "Notes");
             ProjectServer project = new ProjectServer(p);
             project.setNotes("Notes 2");
@@ -79,11 +76,8 @@ public class RequirementServerTest extends AbstractVMTestCase {
                 fail();
             }
         }
-        catch (NonexistentEntityException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+        catch (VMException ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -255,6 +249,18 @@ public class RequirementServerTest extends AbstractVMTestCase {
         }
     }
 
+    @Test
+    public void testGetRequirements() throws Exception {
+        assertEquals(0, RequirementSpecServer.getRequirements(rss).size());
+        TestHelper.createRequirement("SRS-SW-0001",
+                "Sample requirement", rsn.getRequirementSpecNodePK(),
+                "Notes", 1, 1);
+        TestHelper.createRequirement("SRS-SW-0002",
+                "Sample requirement", rsn.getRequirementSpecNodePK(),
+                "Notes", 1, 1);
+        assertEquals(2, RequirementSpecServer.getRequirements(rss).size());
+    }
+
     /**
      * Test of requirement coverage with versioning method, of class
      * RequirementServer.
@@ -312,90 +318,7 @@ public class RequirementServerTest extends AbstractVMTestCase {
             assertEquals(100, rs.getTestCoverage());
         }
         catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-            fail();
-        }
-    }
-
-    @Test
-    public void testVersioning() {
-        try {
-            Requirement req = TestHelper.createRequirement("SRS-SW-0001",
-                    "Description", rsn.getRequirementSpecNodePK(),
-                    "Notes", 1, 1);
-            RequirementServer rs = new RequirementServer(req);
-            int historyCount = 1;
-            assertEquals(historyCount++, rs.getHistoryList().size());
-            History history = rs.getHistoryList().get(rs
-                    .getHistoryList().size() - 1);
-            assertEquals(0, history.getMajorVersion());
-            assertEquals(0, history.getMidVersion());
-            assertEquals(1, history.getMinorVersion());
-            assertEquals(1, (int) history.getModifierId().getId());
-            assertEquals("audit.general.creation", history.getReason());
-            assertNotNull(history.getModificationTime());
-            assertTrue(checkHistory(rs));
-            rs.setDescription("desc 2");
-            rs.write2DB();
-            assertEquals(historyCount++, rs.getHistoryList().size());
-            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
-            assertEquals(0, history.getMajorVersion());
-            assertEquals(0, history.getMidVersion());
-            assertEquals(2, history.getMinorVersion());
-            assertEquals(1, (int) history.getModifierId().getId());
-            assertEquals("audit.general.modified", history.getReason());
-            assertNotNull(history.getModificationTime());
-            assertTrue(checkHistory(rs));
-            rs.setDescription("desc 3");
-            VmUser test = TestHelper.createUser("Test", "pass", "email",
-                    "first", "last");
-            rs.setModifierId(test.getId());
-            rs.setReason("Test");
-            rs.write2DB();
-            assertEquals(historyCount++, rs.getHistoryList().size());
-            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
-            assertEquals(0, history.getMajorVersion());
-            assertEquals(0, history.getMidVersion());
-            assertEquals(3, history.getMinorVersion());
-            assertEquals((int) test.getId(), (int) history.getModifierId().getId());
-            assertEquals("Test", history.getReason());
-            assertNotNull(history.getModificationTime());
-            assertTrue(checkHistory(rs));
-            rs.increaseMidVersion();
-            assertEquals(historyCount++, rs.getHistoryList().size());
-            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
-            assertEquals(0, history.getMajorVersion());
-            assertEquals(1, history.getMidVersion());
-            assertEquals(0, history.getMinorVersion());
-            //TODO: Handle mid and major changes on system
-            //assertEquals(1, (int) history.getModifierId().getId());
-            //assertEquals("tbd", history.getReason());
-            assertNotNull(history.getModificationTime());
-            assertTrue(checkHistory(rs));
-            rs.increaseMajorVersion();
-            assertEquals(historyCount, rs.getHistoryList().size());
-            history = rs.getHistoryList().get(rs.getHistoryList().size() - 1);
-            assertEquals(1, history.getMajorVersion());
-            assertEquals(0, history.getMidVersion());
-            assertEquals(0, history.getMinorVersion());
-            //TODO: Handle mid and major changes on system
-            //assertEquals(1, (int) history.getModifierId().getId());
-            //assertEquals("tbd", history.getReason());
-            assertNotNull(history.getModificationTime());
-            assertTrue(checkHistory(rs));
-            int total = new HistoryJpaController(DataBaseManager
-                    .getEntityManagerFactory()).getHistoryCount();
-            //Test for issue #25
-            //Disconnet to the database
-            DataBaseManager.close();
-            //Reconnect
-            rs.update();
-            assertEquals(total, new HistoryJpaController(DataBaseManager
-                    .getEntityManagerFactory()).getHistoryCount());
-            assertEquals(historyCount, rs.getHistoryList().size());
-        }
-        catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.SEVERE, null, ex);
             fail();
         }
     }

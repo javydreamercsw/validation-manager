@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,25 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.notification;
 
+import com.validation.manager.core.api.email.IEmailManager;
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.api.notification.INotificationManager;
 import com.validation.manager.core.api.notification.NotificationTypes;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.NotificationServer;
 import com.validation.manager.core.server.core.NotificationTypeServer;
+import com.validation.manager.core.server.core.VMSettingServer;
+import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Date;
+import java.util.Locale;
+import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = INotificationManager.class)
 public class NotificationManager implements INotificationManager {
+
+    private static final InternationalizationProvider TRANSLATOR
+            = Lookup.getDefault().lookup(InternationalizationProvider.class);
 
     @Override
     public void addNotification(String message, NotificationTypes type,
@@ -47,5 +56,18 @@ public class NotificationManager implements INotificationManager {
         }
         ns.setNotificationType(NotificationTypeServer.getType(selected));
         ns.write2DB();
+        //If email is configured, send the user an email as well.
+        if (VMSettingServer.getSetting("mail.enable").getBoolVal()
+                && !target.getEmail().isEmpty()) {
+            Lookup.getDefault().lookup(IEmailManager.class)
+                    .sendEmail(target.getEmail(), null,
+                            author.getEmail().isEmpty()
+                            ? new VMUserServer(1).getEmail()
+                            : author.getEmail(),
+                            TRANSLATOR.translate(selected,
+                                    new Locale(target.getLocale())),
+                            TRANSLATOR.translate("notification.new",
+                                    new Locale(target.getLocale())));
+        }
     }
 }

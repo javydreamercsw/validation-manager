@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,8 @@
 package com.validation.manager.core.db;
 
 import com.validation.manager.core.history.Auditable;
-import com.validation.manager.core.history.Login;
+import com.validation.manager.core.history.Versionable;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -35,6 +34,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -66,11 +66,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT v FROM VmUser v WHERE v.lastName = :lastName")
     , @NamedQuery(name = "VmUser.findByLocale",
             query = "SELECT v FROM VmUser v WHERE v.locale = :locale")
-    , @NamedQuery(name = "VmUser.findByLastModified",
-            query = "SELECT v FROM VmUser v WHERE v.lastModified = :lastModified")
     , @NamedQuery(name = "VmUser.findByAttempts",
             query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts")})
-public class VmUser extends Login implements Serializable {
+public class VmUser extends Versionable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -81,7 +79,7 @@ public class VmUser extends Login implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "vm_user",
-            initialValue = 1000,
+            initialValue = 1_000,
             allocationSize = 1)
     @NotNull
     @Column(name = "id")
@@ -161,14 +159,20 @@ public class VmUser extends Login implements Serializable {
     private List<Notification> notificationList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "author")
     private List<Notification> notificationList1;
+    @OneToMany(mappedBy = "vmUserId")
+    private List<History> historyList;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "attempts")
+    @Min(value = 0)
+    private int attempts;
 
     public VmUser() {
         super();
     }
 
     public VmUser(String username, String password, String email, String first,
-            String last, String locale, Date lastModified,
-            UserStatus userStatus, int attempts) {
+            String last, String locale, UserStatus userStatus, int attempts) {
         this.username = username;
         this.password = password;
         this.email = email;
@@ -422,5 +426,25 @@ public class VmUser extends Login implements Serializable {
 
     public void setNotificationList1(List<Notification> notificationList1) {
         this.notificationList1 = notificationList1;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    @Override
+    public List<History> getHistoryList() {
+        return historyList;
+    }
+
+    @Override
+    public void setHistoryList(List<History> historyList) {
+        this.historyList = historyList;
+    }
+
+    public int getAttempts() {
+        return attempts;
+    }
+
+    public void setAttempts(int attempts) {
+        this.attempts = attempts;
     }
 }

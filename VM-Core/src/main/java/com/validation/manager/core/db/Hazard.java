@@ -62,7 +62,7 @@ public class Hazard implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "hazard",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
@@ -74,7 +74,7 @@ public class Hazard implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(min = 1, max = 65_535)
     @Column(name = "description")
     private String description;
     @JoinTable(name = "risk_item_has_hazard", joinColumns = {

@@ -52,7 +52,7 @@ public class ExecutionStepHasIssueJpaController implements Serializable {
             executionStepHasIssue.setExecutionStepHasIssuePK(new ExecutionStepHasIssuePK());
         }
         if (executionStepHasIssue.getVmUserList() == null) {
-            executionStepHasIssue.setVmUserList(new ArrayList<VmUser>());
+            executionStepHasIssue.setVmUserList(new ArrayList<>());
         }
         executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepTestCaseId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setIssueId(executionStepHasIssue.getIssue().getIssuePK().getId());
@@ -73,7 +73,7 @@ public class ExecutionStepHasIssueJpaController implements Serializable {
                 issue = em.getReference(issue.getClass(), issue.getIssuePK());
                 executionStepHasIssue.setIssue(issue);
             }
-            List<VmUser> attachedVmUserList = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserList = new ArrayList<>();
             for (VmUser vmUserListVmUserToAttach : executionStepHasIssue.getVmUserList()) {
                 vmUserListVmUserToAttach = em.getReference(vmUserListVmUserToAttach.getClass(), vmUserListVmUserToAttach.getId());
                 attachedVmUserList.add(vmUserListVmUserToAttach);
@@ -132,7 +132,7 @@ public class ExecutionStepHasIssueJpaController implements Serializable {
                 issueNew = em.getReference(issueNew.getClass(), issueNew.getIssuePK());
                 executionStepHasIssue.setIssue(issueNew);
             }
-            List<VmUser> attachedVmUserListNew = new ArrayList<VmUser>();
+            List<VmUser> attachedVmUserListNew = new ArrayList<>();
             for (VmUser vmUserListNewVmUserToAttach : vmUserListNew) {
                 vmUserListNewVmUserToAttach = em.getReference(vmUserListNewVmUserToAttach.getClass(), vmUserListNewVmUserToAttach.getId());
                 attachedVmUserListNew.add(vmUserListNewVmUserToAttach);

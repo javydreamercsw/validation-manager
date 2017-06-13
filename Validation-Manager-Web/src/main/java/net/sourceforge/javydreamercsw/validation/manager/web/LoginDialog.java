@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,9 +28,13 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+import com.validation.manager.core.VMException;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
-import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMUserServer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openide.util.Lookup;
 
 /**
@@ -40,6 +44,10 @@ import org.openide.util.Lookup;
 @SuppressWarnings("serial")
 public final class LoginDialog extends VMWindow {
 
+    private static final InternationalizationProvider TRANSLATOR
+            = Lookup.getDefault().lookup(InternationalizationProvider.class);
+    private static final Logger LOG
+            = Logger.getLogger(LoginDialog.class.getSimpleName());
     private final ShortcutAction enterKey
             = new ShortcutAction(Lookup.getDefault()
                     .lookup(InternationalizationProvider.class)
@@ -121,16 +129,58 @@ public final class LoginDialog extends VMWindow {
     }
 
     private void tryToLogIn() {
-        if (VMUserServer.validCredentials(name.getValue(),
-                password.getValue(), true)) {
-            VmUser user
-                    = VMUserServer.getUser(name.getValue(),
-                            password.getValue(), true);
+        try {
+            //Throws exception if credentials are wrong.
+            VMUserServer user = new VMUserServer(name.getValue(),
+                    password.getValue());
             if (menu != null) {
-                menu.setUser(new VMUserServer(user));
+                switch (user.getUserStatusId().getId()) {
+                    case 1:
+                        //Everything OK
+                        menu.setUser(user);
+                        break;
+                    case 2:
+                        //TODO: Inactive. Right now no special behavior
+                        menu.setUser(user);
+                        break;
+                    case 3:
+                        //Locked
+                        new Notification(Lookup.getDefault()
+                                .lookup(InternationalizationProvider.class).
+                                translate("audit.user.account.lock"),
+                                Lookup.getDefault()
+                                        .lookup(InternationalizationProvider.class).
+                                        translate("menu.connection.error.user"),
+                                Notification.Type.ERROR_MESSAGE, true)
+                                .show(Page.getCurrent());
+                        break;
+                    case 4:
+                        //Password Aged
+                        new Notification(Lookup.getDefault()
+                                .lookup(InternationalizationProvider.class).
+                                translate("user.status.aged"),
+                                Lookup.getDefault()
+                                        .lookup(InternationalizationProvider.class).
+                                        translate("user.status.aged"),
+                                Notification.Type.WARNING_MESSAGE, true)
+                                .show(Page.getCurrent());
+                        menu.setUser(user);
+                        //Open the profile page
+                        ((VMUI) UI.getCurrent()).showTab("message.admin.userProfile");
+                        break;
+                    default:
+                        LOG.log(Level.SEVERE, "Unexpected User Status: {0}",
+                                user.getUserStatusId().getId());
+                        Notification.show("Unexpected User Status",
+                                "Unexpected User Status: "
+                                + user.getUserStatusId().getId()
+                                + "\n" + TRANSLATOR.translate("message.db.error"),
+                                Notification.Type.ERROR_MESSAGE);
+                        break;
+                }
             }
             close();
-        } else {
+        } catch (VMException ex) {
             if (menu != null) {
                 menu.setUser(null);
             }

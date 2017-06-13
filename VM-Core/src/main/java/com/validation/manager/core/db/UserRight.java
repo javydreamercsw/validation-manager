@@ -61,7 +61,7 @@ public class UserRight implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "user_right",
-            initialValue = 1000,
+            initialValue = 1_000,
             allocationSize = 1)
     @NotNull
     @Column(name = "id")

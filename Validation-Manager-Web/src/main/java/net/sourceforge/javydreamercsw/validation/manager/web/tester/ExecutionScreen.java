@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,6 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.TestCase;
@@ -45,7 +44,6 @@ import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI
 import net.sourceforge.javydreamercsw.validation.manager.web.execution.ExecutionWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.quality.QualityScreenProvider;
-import org.openide.util.Lookup;
 
 /**
  *
@@ -63,7 +61,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
                 String.class, "");
         testCaseTree.addGeneratedColumn("general.status",
                 (Table source, Object itemId, Object columnId) -> {
-                    if (Lookup.getDefault().lookup(InternationalizationProvider.class)
+                    if (TRANSLATOR
                             .translate("general.status").equals(columnId)
                     && itemId instanceof String) {
                         String id = (String) itemId;
@@ -96,8 +94,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
                         }
                         if (locked) {
                             label2.setIcon(VaadinIcons.LOCK);
-                            label2.setDescription(Lookup.getDefault()
-                                    .lookup(InternationalizationProvider.class).translate("message.locked"));
+                            label2.setDescription(TRANSLATOR.translate("message.locked"));
                         }
                         if (!summary.isEmpty()) {
                             if (summary.containsKey("result.fail")) {
@@ -118,11 +115,9 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                 //All is pass
                                 message = "result.pass";
                             }
-                            label.setCaption(Lookup.getDefault()
-                                    .lookup(InternationalizationProvider.class)
+                            label.setCaption(TRANSLATOR
                                     .translate(message));
-                            label.setDescription(Lookup.getDefault()
-                                    .lookup(InternationalizationProvider.class)
+                            label.setDescription(TRANSLATOR
                                     .translate(message));
                             //Completed. Now check result
                             switch (message) {
@@ -179,11 +174,11 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     }
                     if (!isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof TesterScreenProvider) {
-                        actions.add(new Action(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                        actions.add(new Action(TRANSLATOR
                                 .translate("general.execute")));
                     } else if (isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof QualityScreenProvider) {
-                        actions.add(new Action(Lookup.getDefault().lookup(InternationalizationProvider.class)
+                        actions.add(new Action(TRANSLATOR
                                 .translate("general.review")));
                     }
                 }
@@ -264,7 +259,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
         if (executionWindow == null) {
             executionWindow = new ExecutionWindow(executions, tcID,
                     this instanceof QualityScreenProvider);
-            executionWindow.setCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
+            executionWindow.setCaption(TRANSLATOR
                     .translate("test.execution"));
             executionWindow.setVisible(true);
             executionWindow.setClosable(false);
@@ -289,10 +284,10 @@ public abstract class ExecutionScreen extends AbstractProvider {
     @Override
     public void update() {
         if (executionWindow != null) {
-            executionWindow.setCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
+            executionWindow.setCaption(TRANSLATOR
                     .translate("test.execution"));
         }
-        testCaseTree.setCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
+        testCaseTree.setCaption(TRANSLATOR
                 .translate("available.tests"));
         testCaseTree.removeAllItems();
         if (ValidationManagerUI.getInstance().getUser() != null) {
@@ -372,8 +367,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
         }
         //Update column titles
         for (String h : testCaseTree.getColumnHeaders()) {
-            testCaseTree.setColumnHeader(h, Lookup.getDefault()
-                    .lookup(InternationalizationProvider.class).translate(h));
+            testCaseTree.setColumnHeader(h, TRANSLATOR.translate(h));
         }
     }
 }

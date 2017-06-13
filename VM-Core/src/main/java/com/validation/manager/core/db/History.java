@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -93,7 +93,7 @@ public class History implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 2147483647)
+    @Size(min = 1, max = 2_147_483_647)
     @Column(name = "reason")
     private String reason;
     @Basic(optional = false)
@@ -125,6 +125,9 @@ public class History implements Serializable {
     @JoinColumn(name = "vm_setting_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private VmSetting vmSettingId;
+    @JoinColumn(name = "vm_user_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private VmUser vmUserId;
 
     public History() {
     }
@@ -229,9 +232,11 @@ public class History implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Fields: ");
+        StringBuilder sb = new StringBuilder();
         getHistoryFieldList().forEach(hf -> {
-            if (!sb.toString().isEmpty()) {
+            if (sb.toString().isEmpty()) {
+                sb.append("Fields: ");
+            } else {
                 sb.append(", ");
             }
             sb.append(hf.getFieldName())
@@ -295,5 +300,13 @@ public class History implements Serializable {
 
     public void setVmSettingId(VmSetting vmSettingId) {
         this.vmSettingId = vmSettingId;
+    }
+
+    public VmUser getVmUserId() {
+        return vmUserId;
+    }
+
+    public void setVmUserId(VmUser vmUserId) {
+        this.vmUserId = vmUserId;
     }
 }

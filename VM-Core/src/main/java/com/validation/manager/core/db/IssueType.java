@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,7 +63,7 @@ public class IssueType implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "issue_type",
-            initialValue = 1,
+            initialValue = 1_000,
             allocationSize = 1)
     private Integer id;
     @Basic(optional = false)
@@ -72,7 +72,7 @@ public class IssueType implements Serializable {
     @Column(name = "type_name")
     private String typeName;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "description")
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "issueType")
@@ -81,12 +81,7 @@ public class IssueType implements Serializable {
     public IssueType() {
     }
 
-    public IssueType(Integer id) {
-        this.id = id;
-    }
-
-    public IssueType(Integer id, String typeName) {
-        this.id = id;
+    public IssueType(String typeName) {
         this.typeName = typeName;
     }
 
@@ -133,7 +128,7 @@ public class IssueType implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof IssueType)) {
             return false;
         }

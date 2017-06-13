@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,6 @@ import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import static com.validation.manager.core.tool.MD5.encrypt;
 import com.validation.manager.test.AbstractVMTestCase;
-import java.util.Date;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import org.junit.Test;
@@ -44,7 +43,7 @@ public class UserTest extends AbstractVMTestCase {
                     "Create an user");
             VmUser u = new VmUser("test",
                     encrypt("password"), "test@test.com",
-                    "first", "last", "en", new Date(),
+                    "first", "last", "en",
                     new UserStatusJpaController(getEntityManagerFactory())
                             .findUserStatus(1), 0);
             u.setUserStatusId(new UserStatusJpaController(

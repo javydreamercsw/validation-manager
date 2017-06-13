@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Notification;
@@ -43,8 +44,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.UserToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.UserToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
@@ -59,9 +60,6 @@ public class NotificationScreenProvider extends AbstractProvider {
 
     private static final Logger LOG
             = Logger.getLogger(NotificationScreenProvider.class.getSimpleName());
-    private VerticalLayout vs = null;
-    private final InternationalizationProvider TRANSLATOR = Lookup.getDefault()
-            .lookup(InternationalizationProvider.class);
 
     @Override
     public boolean shouldDisplay() {
@@ -76,16 +74,7 @@ public class NotificationScreenProvider extends AbstractProvider {
 
     @Override
     public Component getContent() {
-        if (vs == null) {
-            update();
-        }
-        return vs;
-    }
-
-    @Override
-    public void update() {
-        vs = new VerticalLayout();
-        super.update();
+        VerticalLayout vs = new VerticalLayout();
         //On top put a list of notifications
         BeanItemContainer<Notification> container
                 = new BeanItemContainer<>(Notification.class);
@@ -201,7 +190,7 @@ public class NotificationScreenProvider extends AbstractProvider {
                             ns.write2DB();
                             ((VMUI) UI.getCurrent()).updateScreen();
                             ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
-                        } catch (Exception ex) {
+                        } catch (VMException ex) {
                             LOG.log(Level.SEVERE, null, ex);
                         }
                     }
@@ -217,7 +206,7 @@ public class NotificationScreenProvider extends AbstractProvider {
                             ns.write2DB();
                             ((VMUI) UI.getCurrent()).updateScreen();
                             ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
-                        } catch (Exception ex) {
+                        } catch (VMException ex) {
                             LOG.log(Level.SEVERE, null, ex);
                         }
                     }
@@ -238,9 +227,7 @@ public class NotificationScreenProvider extends AbstractProvider {
                                 = new NotificationServer((Notification) n);
                         ns.setAcknowledgeDate(new Date());
                         ns.write2DB();
-                        ((VMUI) UI.getCurrent()).updateScreen();
-                        ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
-                    } catch (Exception ex) {
+                    } catch (VMException ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }
@@ -250,6 +237,6 @@ public class NotificationScreenProvider extends AbstractProvider {
         vs.addComponent(text);
         vs.setSizeFull();
         vs.setId(getComponentCaption());
+        return vs;
     }
 }
-

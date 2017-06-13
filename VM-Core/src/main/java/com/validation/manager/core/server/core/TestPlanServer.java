@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
@@ -26,7 +27,6 @@ import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -57,20 +57,24 @@ public final class TestPlanServer extends TestPlan
     }
 
     @Override
-    public int write2DB() throws IllegalOrphanException,
-            NonexistentEntityException, Exception {
-        TestPlanJpaController controller
-                = new TestPlanJpaController(getEntityManagerFactory());
-        if (getTestPlanPK().getId() > 0) {
-            TestPlan temp = controller.findTestPlan(getTestPlanPK());
-            update(temp, this);
-            controller.edit(temp);
-        } else {
-            TestPlan temp = new TestPlan(getTestProject(), getActive(),
-                    getIsOpen());
-            update(temp, this);
-            controller.create(temp);
-            setTestPlanPK(temp.getTestPlanPK());
+    public int write2DB() throws VMException {
+        try {
+            TestPlanJpaController controller
+                    = new TestPlanJpaController(getEntityManagerFactory());
+            if (getTestPlanPK().getId() > 0) {
+                TestPlan temp = controller.findTestPlan(getTestPlanPK());
+                update(temp, this);
+                controller.edit(temp);
+            } else {
+                TestPlan temp = new TestPlan(getTestProject(), getActive(),
+                        getIsOpen());
+                update(temp, this);
+                controller.create(temp);
+                setTestPlanPK(temp.getTestPlanPK());
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getTestPlanPK().getId();
     }
@@ -93,10 +97,7 @@ public final class TestPlanServer extends TestPlan
             write2DB();
             return true;
         }
-        catch (PreexistingEntityException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
-        catch (Exception ex) {
+        catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
         return false;

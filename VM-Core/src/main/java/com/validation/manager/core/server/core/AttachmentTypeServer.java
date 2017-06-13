@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,12 +24,21 @@ import com.validation.manager.core.db.controller.AttachmentTypeJpaController;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class AttachmentTypeServer extends AttachmentType
+public final class AttachmentTypeServer extends AttachmentType
         implements EntityServer<AttachmentType> {
 
     private final AttachmentTypeJpaController c
             = new AttachmentTypeJpaController(DataBaseManager
                     .getEntityManagerFactory());
+
+    public AttachmentTypeServer(String type) {
+        super(type);
+    }
+
+    public AttachmentTypeServer(int id) {
+        setId(id);
+        update();
+    }
 
     @Override
     public int write2DB() throws Exception {

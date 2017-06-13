@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,13 @@ package com.validation.manager.core.server.core;
 import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.UserTestProjectRoleJpaController;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 
 /**
  *
@@ -38,26 +37,35 @@ public final class TestProjectServer extends TestProject
         super(name, active);
     }
 
+    public TestProjectServer(int id) {
+        super.setId(id);
+        update();
+    }
+
     public TestProjectServer(TestProject tp) {
         super.setId(tp.getId());
         update();
     }
 
     @Override
-    public int write2DB() throws IllegalOrphanException,
-            NonexistentEntityException, Exception {
-        TestProject tp;
-        if (getId() == null) {
-            tp = new TestProject();
-            update(tp, this);
-            new TestProjectJpaController(getEntityManagerFactory()).create(tp);
-            setId(tp.getId());
-        } else {
-            tp = getEntity();
-            update(tp, this);
-            new TestProjectJpaController(getEntityManagerFactory()).edit(tp);
+    public int write2DB() throws VMException {
+        try {
+            TestProject tp;
+            if (getId() == null) {
+                tp = new TestProject();
+                update(tp, this);
+                new TestProjectJpaController(getEntityManagerFactory()).create(tp);
+                setId(tp.getId());
+            } else {
+                tp = getEntity();
+                update(tp, this);
+                new TestProjectJpaController(getEntityManagerFactory()).edit(tp);
+            }
+            update();
         }
-        update();
+        catch (Exception ex) {
+            throw new VMException(ex);
+        }
         return getId();
     }
 

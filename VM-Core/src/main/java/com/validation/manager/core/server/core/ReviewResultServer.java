@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,15 @@ import java.util.List;
  */
 public class ReviewResultServer extends ReviewResult
         implements EntityServer<ReviewResult> {
+
+    public ReviewResultServer(int id) {
+        setId(id);
+        update();
+    }
+
+    public ReviewResultServer(String reviewName) {
+        super(reviewName);
+    }
 
     public static ReviewResult getReview(String review) {
         PARAMETERS.clear();

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,6 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -69,39 +68,17 @@ public class TestHelper {
         return temp.getEntity();
     }
 
-    public static void deleteUser(VmUser user) throws NonexistentEntityException,
-            IllegalOrphanException {
-        if (user != null) {
-            VMUserServer.deleteUser(user);
-        }
-    }
-
     public static Project createProject(String name, String notes) {
         ProjectServer ps = new ProjectServer(name, notes);
         try {
             ps.write2DB();
         }
-        catch (IllegalOrphanException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        catch (NonexistentEntityException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        catch (Exception ex) {
+        catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
         assertTrue(ps.getEntity() != null);
         return ps.getEntity();
-    }
-
-    public static void destroyProject(Project p) throws IllegalOrphanException,
-            NonexistentEntityException, VMException {
-        ProjectServer.deleteProject(p);
-        assertTrue(new ProjectJpaController(
-                getEntityManagerFactory()).findProject(p.getId()) == null);
     }
 
     public static TestCase createTestCase(String name, String summary)

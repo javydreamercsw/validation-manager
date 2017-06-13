@@ -65,7 +65,7 @@ public class Role implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "role",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -75,7 +75,7 @@ public class Role implements Serializable {
     @Column(name = "role_name")
     private String roleName;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 65_535)
     @Column(name = "description")
     private String description;
     @JoinTable(name = "user_has_role", joinColumns = {

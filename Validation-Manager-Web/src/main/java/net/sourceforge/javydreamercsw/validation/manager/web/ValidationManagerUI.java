@@ -164,9 +164,10 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
+import net.sourceforge.javydreamercsw.validation.manager.web.demo.DemoProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
-import net.sourceforge.javydreamercsw.validation.manager.web.provider.DemoProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceMatrix;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
@@ -257,7 +258,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 user.setLocale(l.getLanguage());
                 try {
                     user.write2DB();
-                } catch (Exception ex) {
+                } catch (VMException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             } else {
@@ -529,7 +530,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                                             ess.getHistoryList().add(history.get(r));
                                         });
                                         ess.write2DB();
-                                    } catch (Exception ex) {
+                                    } catch (VMException ex) {
                                         LOG.log(Level.SEVERE, null, ex);
                                     }
                                 });
@@ -1983,16 +1984,18 @@ public class ValidationManagerUI extends UI implements VMUI {
         gl.addComponent(new Label(TRANSLATOR.translate("general.version")
                 + ": " + getVersion()), 2, 2);
         if (getUser() != null) {
+            getUser().update();
             //Logout button
             Button logout = new Button(TRANSLATOR.translate("general.logout"));
             logout.addClickListener((Button.ClickEvent event) -> {
                 try {
+                    user.update();
                     user.write2DB();
                     user = null;
                     main = null;
                     setLocale(Locale.ENGLISH);
                     updateScreen();
-                } catch (Exception ex) {
+                } catch (VMException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             });
@@ -2818,8 +2821,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             String... fields) {
         Grid grid = new Grid(title);
         BeanItemContainer<History> histories
-                = new BeanItemContainer<>(History.class
-                );
+                = new BeanItemContainer<>(History.class);
         GeneratedPropertyContainer wrapperCont
                 = new GeneratedPropertyContainer(histories);
         histories.addAll(historyItems);

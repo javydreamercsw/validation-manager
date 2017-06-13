@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,10 @@ package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.controller.UserTestProjectRoleJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 
@@ -31,41 +31,41 @@ import static java.util.logging.Logger.getLogger;
 public final class UserTestProjectRoleServer extends UserTestProjectRole
         implements EntityServer<UserTestProjectRole> {
 
-    public UserTestProjectRoleServer(int testProjectId, int userId, int roleId) {
+    public UserTestProjectRoleServer(int testProjectId, int userId,
+            int roleId) throws Exception {
         super(testProjectId, userId, roleId);
-        update();
+        setTestProject(new TestProjectServer(testProjectId).getEntity());
+        setRole(new RoleServer(roleId).getEntity());
+        setVmUser(new VMUserServer(userId).getEntity());
     }
 
     /**
      * Persist to database
      *
-     * @throws PreexistingEntityException If entity already exists and tried to
-     * be re-created.
-     * @throws Exception If something goes wrong writing to the database.
+     * @throws VMException If something goes wrong writing to the database.
      */
     @Override
-    public int write2DB() throws PreexistingEntityException, Exception {
-        UserTestProjectRoleJpaController controller
-                = new UserTestProjectRoleJpaController(getEntityManagerFactory());
-        if (getUserTestProjectRolePK().getRoleId() > 0
-                && getUserTestProjectRolePK().getTestProjectId() > 0
-                && getUserTestProjectRolePK().getUserId() > 0) {
+    public int write2DB() throws VMException {
+        try {
+            UserTestProjectRoleJpaController controller
+                    = new UserTestProjectRoleJpaController(getEntityManagerFactory());
             UserTestProjectRole temp
                     = controller.findUserTestProjectRole(getUserTestProjectRolePK());
-            temp.setRole(getRole());
-            temp.setTestProject(getTestProject());
-            temp.setVmUser(getVmUser());
-            controller.edit(temp);
-        } else {
-            UserTestProjectRole temp = new UserTestProjectRole(
-                    getUserTestProjectRolePK().getTestProjectId(),
-                    getUserTestProjectRolePK().getUserId(),
-                    getUserTestProjectRolePK().getRoleId());
-            temp.setRole(getRole());
-            temp.setTestProject(getTestProject());
-            temp.setVmUser(getVmUser());
-            controller.create(temp);
-            setUserTestProjectRolePK(temp.getUserTestProjectRolePK());
+            if (temp == null) {
+                temp = new UserTestProjectRole();
+                update(temp, this);
+                controller.create(temp);
+                setUserTestProjectRolePK(temp.getUserTestProjectRolePK());
+            } else {
+                temp.setRole(getRole());
+                temp.setTestProject(getTestProject());
+                temp.setVmUser(getVmUser());
+                controller.edit(temp);
+            }
+            update();
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getUserTestProjectRolePK().getRoleId();
     }
@@ -102,6 +102,7 @@ public final class UserTestProjectRoleServer extends UserTestProjectRole
         target.setRole(source.getRole());
         target.setTestProject(source.getTestProject());
         target.setVmUser(source.getVmUser());
+        target.setUserTestProjectRolePK(source.getUserTestProjectRolePK());
     }
 
     @Override

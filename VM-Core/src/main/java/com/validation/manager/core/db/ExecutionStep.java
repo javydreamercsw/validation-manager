@@ -78,7 +78,7 @@ public class ExecutionStep implements Serializable {
     @Column(name = "execution_time")
     private Double executionTime;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "comment")
     private String comment;
     @Column(name = "execution_start")

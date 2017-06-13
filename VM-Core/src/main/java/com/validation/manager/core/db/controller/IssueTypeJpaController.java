@@ -46,13 +46,13 @@ public class IssueTypeJpaController implements Serializable {
 
     public void create(IssueType issueType) {
         if (issueType.getIssueList() == null) {
-            issueType.setIssueList(new ArrayList<Issue>());
+            issueType.setIssueList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Issue> attachedIssueList = new ArrayList<Issue>();
+            List<Issue> attachedIssueList = new ArrayList<>();
             for (Issue issueListIssueToAttach : issueType.getIssueList()) {
                 issueListIssueToAttach = em.getReference(issueListIssueToAttach.getClass(), issueListIssueToAttach.getIssuePK());
                 attachedIssueList.add(issueListIssueToAttach);
@@ -89,7 +89,7 @@ public class IssueTypeJpaController implements Serializable {
             for (Issue issueListOldIssue : issueListOld) {
                 if (!issueListNew.contains(issueListOldIssue)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain Issue " + issueListOldIssue + " since its issueType field is not nullable.");
                 }
@@ -97,7 +97,7 @@ public class IssueTypeJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Issue> attachedIssueListNew = new ArrayList<Issue>();
+            List<Issue> attachedIssueListNew = new ArrayList<>();
             for (Issue issueListNewIssueToAttach : issueListNew) {
                 issueListNewIssueToAttach = em.getReference(issueListNewIssueToAttach.getClass(), issueListNewIssueToAttach.getIssuePK());
                 attachedIssueListNew.add(issueListNewIssueToAttach);
@@ -152,7 +152,7 @@ public class IssueTypeJpaController implements Serializable {
             List<Issue> issueListOrphanCheck = issueType.getIssueList();
             for (Issue issueListOrphanCheckIssue : issueListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This IssueType (" + issueType + ") cannot be destroyed since the Issue " + issueListOrphanCheckIssue + " in its issueList field has a non-nullable issueType field.");
             }

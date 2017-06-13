@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,21 +37,25 @@ public final class RequirementStatusServer extends RequirementStatus
         }
     }
 
+    public RequirementStatusServer(String status) {
+        super(status);
+    }
+
     @Override
     public int write2DB() throws Exception {
         RequirementStatus p;
         RequirementStatusJpaController controller
                 = new RequirementStatusJpaController(
                         getEntityManagerFactory());
-        if (getId() > 0) {
-            p = controller.findRequirementStatus(getId());
-            update(p, this);
-            controller.edit(p);
-        } else {
+        if (getId() == null) {
             p = new RequirementStatus(getStatus());
             update(p, this);
             controller.create(p);
             setId(p.getId());
+        } else {
+            p = controller.findRequirementStatus(getId());
+            update(p, this);
+            controller.edit(p);
         }
         return getId();
     }

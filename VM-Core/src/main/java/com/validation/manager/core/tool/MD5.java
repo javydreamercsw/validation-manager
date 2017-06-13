@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@
  */
 package com.validation.manager.core.tool;
 
+import com.validation.manager.core.VMException;
 import static java.lang.Integer.toHexString;
 import java.security.MessageDigest;
 import static java.security.MessageDigest.getInstance;
@@ -32,11 +33,12 @@ public class MD5 {
     private MD5() {
     }
 
-    public static String encrypt(String text) throws Exception {
+    public static String encrypt(String text) throws VMException {
         try {
             algorithm = getInstance("MD5");
-        } catch (NoSuchAlgorithmException nsae) {
-            throw new Exception("Cannot find digest algorithm");
+        }
+        catch (NoSuchAlgorithmException nsae) {
+            throw new VMException("Cannot find digest algorithm");
         }
         byte[] defaultBytes = text.getBytes();
         algorithm.reset();

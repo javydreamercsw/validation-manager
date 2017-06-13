@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,14 @@
  */
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
-import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.ProjectJpaController;
+import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
-import static com.validation.manager.core.server.core.ProjectServer.deleteProject;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.tool.Tool;
 import com.validation.manager.test.AbstractVMTestCase;
 import static com.validation.manager.test.TestHelper.addRequirementToStep;
@@ -39,7 +40,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import static junit.framework.TestCase.assertEquals;
-import org.junit.After;
 import org.junit.Test;
 
 /**
@@ -51,18 +51,6 @@ public class ProjectTest extends AbstractVMTestCase {
     private Project p;
     private static final Logger LOG
             = getLogger(ProjectTest.class.getName());
-
-    @After
-    public void clear() {
-        if (p != null) {
-            try {
-                deleteProject(p);
-            }
-            catch (VMException ex) {
-                LOG.log(Level.SEVERE, null, ex);
-            }
-        }
-    }
 
     /**
      * Test of toString method, of class Project.
@@ -91,37 +79,40 @@ public class ProjectTest extends AbstractVMTestCase {
                 fail();
             }
             LOG.info("Create Requirement Spec Node");
-            RequirementSpecNode rsns = null;
+            RequirementSpecNode rsns;
             try {
                 rsns = createRequirementSpecNode(
                         rss, "Test", "Test", "Test");
+                Requirement r = createRequirement("SRS-SW-0001",
+                        "Sample requirement", rsns.getRequirementSpecNodePK(),
+                        "Notes", 1, 1);
+                //Create Test Case
+                TestCase tc = createTestCase("Dummy", "Summary");
+                //Add steps
+                for (int i = 1; i < 6; i++) {
+                    LOG.info(MessageFormat.format("Adding step: {0}", i));
+                    tc = addStep(tc, i, "Step " + i, "Note " + i, "Result " + i);
+                    Step step = tc.getStepList().get(i - 1);
+                    addRequirementToStep(step, r);
+                    new TestCaseServer(tc).write2DB();
+                    assertEquals(1, new StepServer(step).getRequirementList().size());
+                }
+                //Create test Project
+                TestProject tp = createTestProject("Test Project");
+                //Create test plan
+                TestPlan plan = createTestPlan(tp, "Notes", true, true);
+                //Add test to plan
+                addTestCaseToPlan(plan, tc);
+                project.write2DB();
+                assertEquals(1, Tool.extractRequirements(project.getEntity()).size());
+                TestPlanServer.deleteTestPlan(plan);
+                assertNull(new TestPlanJpaController(DataBaseManager
+                        .getEntityManagerFactory()).findTestPlan(plan.getTestPlanPK()));
             }
             catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
-            Requirement r = createRequirement("SRS-SW-0001",
-                    "Sample requirement", rsns.getRequirementSpecNodePK(),
-                    "Notes", 1, 1);
-            //Create Test Case
-            TestCase tc = createTestCase("Dummy", "Summary");
-            //Add steps
-            for (int i = 1; i < 6; i++) {
-                LOG.info(MessageFormat.format("Adding step: {0}", i));
-                tc = addStep(tc, i, "Step " + i, "Note " + i, "Result " + i);
-                Step step = tc.getStepList().get(i - 1);
-                addRequirementToStep(step, r);
-                new TestCaseServer(tc).write2DB();
-                assertEquals(1, new StepServer(step).getRequirementList().size());
-            }
-            //Create test Project
-            TestProject tp = createTestProject("Test Project");
-            //Create test plan
-            TestPlan plan = createTestPlan(tp, "Notes", true, true);
-            //Add test to plan
-            addTestCaseToPlan(plan, tc);
-            project.write2DB();
-            assertEquals(1, Tool.extractRequirements(project.getEntity()).size());
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);

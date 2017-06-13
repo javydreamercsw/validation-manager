@@ -74,7 +74,7 @@ public class DemoBuilder {
                 = new RequirementJpaController(DataBaseManager
                         .getEntityManagerFactory())
                         .findRequirementEntities();
-        LOG.log(Level.INFO, "Total: {0}", requirements.size());
+        LOG.log(Level.FINE, "Total Requirements: {0}", requirements.size());
         List<TestCase> tcs = new TestCaseJpaController(DataBaseManager
                 .getEntityManagerFactory()).findTestCaseEntities();
         int amount = tcs.size();

@@ -85,7 +85,7 @@ public class Baseline implements Serializable {
     @Column(name = "baseline_name")
     private String baselineName;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "description")
     private String description;
     @JoinTable(name = "baseline_has_history", joinColumns = {

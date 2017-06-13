@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,7 +70,7 @@ public class Requirement extends Versionable implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "requirement",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -83,12 +83,12 @@ public class Requirement extends Versionable implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "description")
     @Auditable
     private String description;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "notes")
     @Auditable
     private String notes;

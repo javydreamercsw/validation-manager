@@ -46,7 +46,7 @@ public class BaselineJpaController implements Serializable {
 
     public void create(Baseline baseline) {
         if (baseline.getHistoryList() == null) {
-            baseline.setHistoryList(new ArrayList<History>());
+            baseline.setHistoryList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
@@ -57,7 +57,7 @@ public class BaselineJpaController implements Serializable {
                 requirementSpec = em.getReference(requirementSpec.getClass(), requirementSpec.getRequirementSpecPK());
                 baseline.setRequirementSpec(requirementSpec);
             }
-            List<History> attachedHistoryList = new ArrayList<History>();
+            List<History> attachedHistoryList = new ArrayList<>();
             for (History historyListHistoryToAttach : baseline.getHistoryList()) {
                 historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
                 attachedHistoryList.add(historyListHistoryToAttach);
@@ -95,7 +95,7 @@ public class BaselineJpaController implements Serializable {
                 requirementSpecNew = em.getReference(requirementSpecNew.getClass(), requirementSpecNew.getRequirementSpecPK());
                 baseline.setRequirementSpec(requirementSpecNew);
             }
-            List<History> attachedHistoryListNew = new ArrayList<History>();
+            List<History> attachedHistoryListNew = new ArrayList<>();
             for (History historyListNewHistoryToAttach : historyListNew) {
                 historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
                 attachedHistoryListNew.add(historyListNewHistoryToAttach);

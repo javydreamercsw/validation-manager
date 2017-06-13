@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.validation.manager.core.tool.step.importer;
+package com.validation.manager.core.api.email;
 
-import static java.util.Locale.getDefault;
-import java.util.ResourceBundle;
-import static java.util.ResourceBundle.getBundle;
+import javax.mail.MessagingException;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class StepImportException extends Exception {
+public interface IEmailManager {
 
-    private static final ResourceBundle RB
-            = getBundle("com.validation.manager.resources.VMMessages",
-                    getDefault());
-
-    public StepImportException(String message) {
-        super(RB.containsKey(message) ? RB.getString(message) : message);
-    }
+    /**
+     * Create an email message.
+     *
+     * @param to Recipient email
+     * @param cc Email to copy to
+     * @param from Sender email
+     * @param subject Subject
+     * @param bodyText Message
+     * @throws MessagingException If there's an error sending the message
+     */
+    void sendEmail(String to, String cc, String from,
+            String subject, String bodyText) throws MessagingException;
 }

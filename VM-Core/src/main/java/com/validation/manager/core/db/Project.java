@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@
  */
 package com.validation.manager.core.db;
 
+import com.validation.manager.core.history.Auditable;
 import com.validation.manager.core.history.Versionable;
 import java.io.Serializable;
 import java.util.List;
@@ -67,7 +68,7 @@ public class Project extends Versionable implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "project",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @NotNull
     @Column(name = "id")
     private Integer id;
@@ -75,10 +76,12 @@ public class Project extends Versionable implements Serializable {
     @NotNull
     @Size(min = 1, max = 255)
     @Column(name = "name")
+    @Auditable
     private String name;
     @Lob
-    @Size(max = 2147483647)
+    @Size(max = 2_147_483_647)
     @Column(name = "notes")
+    @Auditable
     private String notes;
     @JoinTable(name = "project_has_test_project", joinColumns = {
         @JoinColumn(name = "project_id", referencedColumnName = "id")},

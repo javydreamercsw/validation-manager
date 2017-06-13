@@ -68,7 +68,7 @@ public class TestPlan implements Serializable {
     @Column(name = "name")
     private String name;
     @Lob
-    @Size(max = 65535)
+    @Size(max = 65_535)
     @Column(name = "notes")
     private String notes;
     @Basic(optional = false)

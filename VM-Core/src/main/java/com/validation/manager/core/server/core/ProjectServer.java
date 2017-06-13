@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +21,8 @@ import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -35,7 +31,7 @@ import static java.util.logging.Logger.getLogger;
 public final class ProjectServer extends Project
         implements EntityServer<Project>, VersionableServer<Project> {
 
-    private static final long serialVersionUID = 3434510483033583117L;
+    private static final long serialVersionUID = 3_434_510_483_033_583_117L;
 
     public ProjectServer(String name, String notes) {
         super(name);
@@ -58,38 +54,24 @@ public final class ProjectServer extends Project
     }
 
     @Override
-    public int write2DB() throws IllegalOrphanException,
-            NonexistentEntityException, Exception {
-        Project p;
-        if (getId() == null) {
-            p = new Project(getName());
-            update(p, this);
-            new ProjectJpaController(getEntityManagerFactory()).create(p);
-            setId(p.getId());
-        } else {
-            p = getEntity();
-            update(p, this);
-            new ProjectJpaController(getEntityManagerFactory()).edit(p);
+    public int write2DB() throws VMException {
+        try {
+            Project p;
+            if (getId() == null) {
+                p = new Project(getName());
+                update(p, this);
+                new ProjectJpaController(getEntityManagerFactory()).create(p);
+                setId(p.getId());
+            } else {
+                p = getEntity();
+                update(p, this);
+                new ProjectJpaController(getEntityManagerFactory()).edit(p);
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getId();
-    }
-
-    public static void deleteProject(Project p) throws VMException {
-        if (p.getProjectList().isEmpty()) {
-            try {
-                if (p.getRequirementSpecList().isEmpty()) {
-                    new ProjectJpaController(getEntityManagerFactory())
-                            .destroy(p.getId());
-                } else {
-                    throw new VMException("Unable to delete project with Requirement Specifications!");
-                }
-            }
-            catch (IllegalOrphanException | NonexistentEntityException ex) {
-                getLogger(ProjectServer.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-            throw new VMException("Unable to delete project with children!");
-        }
     }
 
     @Override

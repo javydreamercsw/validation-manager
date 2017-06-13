@@ -46,13 +46,13 @@ public class AssigmentTypeJpaController implements Serializable {
 
     public void create(AssigmentType assigmentType) {
         if (assigmentType.getUserAssigmentList() == null) {
-            assigmentType.setUserAssigmentList(new ArrayList<UserAssigment>());
+            assigmentType.setUserAssigmentList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<UserAssigment> attachedUserAssigmentList = new ArrayList<UserAssigment>();
+            List<UserAssigment> attachedUserAssigmentList = new ArrayList<>();
             for (UserAssigment userAssigmentListUserAssigmentToAttach : assigmentType.getUserAssigmentList()) {
                 userAssigmentListUserAssigmentToAttach = em.getReference(userAssigmentListUserAssigmentToAttach.getClass(), userAssigmentListUserAssigmentToAttach.getUserAssigmentPK());
                 attachedUserAssigmentList.add(userAssigmentListUserAssigmentToAttach);
@@ -89,7 +89,7 @@ public class AssigmentTypeJpaController implements Serializable {
             for (UserAssigment userAssigmentListOldUserAssigment : userAssigmentListOld) {
                 if (!userAssigmentListNew.contains(userAssigmentListOldUserAssigment)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserAssigment " + userAssigmentListOldUserAssigment + " since its assigmentType field is not nullable.");
                 }
@@ -97,7 +97,7 @@ public class AssigmentTypeJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<UserAssigment> attachedUserAssigmentListNew = new ArrayList<UserAssigment>();
+            List<UserAssigment> attachedUserAssigmentListNew = new ArrayList<>();
             for (UserAssigment userAssigmentListNewUserAssigmentToAttach : userAssigmentListNew) {
                 userAssigmentListNewUserAssigmentToAttach = em.getReference(userAssigmentListNewUserAssigmentToAttach.getClass(), userAssigmentListNewUserAssigmentToAttach.getUserAssigmentPK());
                 attachedUserAssigmentListNew.add(userAssigmentListNewUserAssigmentToAttach);
@@ -152,7 +152,7 @@ public class AssigmentTypeJpaController implements Serializable {
             List<UserAssigment> userAssigmentListOrphanCheck = assigmentType.getUserAssigmentList();
             for (UserAssigment userAssigmentListOrphanCheckUserAssigment : userAssigmentListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This AssigmentType (" + assigmentType + ") cannot be destroyed since the UserAssigment " + userAssigmentListOrphanCheckUserAssigment + " in its userAssigmentList field has a non-nullable assigmentType field.");
             }

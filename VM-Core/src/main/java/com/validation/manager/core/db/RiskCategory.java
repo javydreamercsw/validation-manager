@@ -64,7 +64,7 @@ public class RiskCategory implements Serializable {
             valueColumnName = "last_id",
             pkColumnValue = "risk_category",
             allocationSize = 1,
-            initialValue = 1000)
+            initialValue = 1_000)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;

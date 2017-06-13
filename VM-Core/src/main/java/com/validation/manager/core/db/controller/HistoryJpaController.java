@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,13 +53,13 @@ public class HistoryJpaController implements Serializable {
 
     public void create(History history) {
         if (history.getHistoryFieldList() == null) {
-            history.setHistoryFieldList(new ArrayList<HistoryField>());
+            history.setHistoryFieldList(new ArrayList<>());
         }
         if (history.getBaselineList() == null) {
-            history.setBaselineList(new ArrayList<Baseline>());
+            history.setBaselineList(new ArrayList<>());
         }
         if (history.getExecutionStepList() == null) {
-            history.setExecutionStepList(new ArrayList<ExecutionStep>());
+            history.setExecutionStepList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
@@ -90,19 +90,24 @@ public class HistoryJpaController implements Serializable {
                 vmSettingId = em.getReference(vmSettingId.getClass(), vmSettingId.getId());
                 history.setVmSettingId(vmSettingId);
             }
-            List<HistoryField> attachedHistoryFieldList = new ArrayList<HistoryField>();
+            VmUser vmUserId = history.getVmUserId();
+            if (vmUserId != null) {
+                vmUserId = em.getReference(vmUserId.getClass(), vmUserId.getId());
+                history.setVmUserId(vmUserId);
+            }
+            List<HistoryField> attachedHistoryFieldList = new ArrayList<>();
             for (HistoryField historyFieldListHistoryFieldToAttach : history.getHistoryFieldList()) {
                 historyFieldListHistoryFieldToAttach = em.getReference(historyFieldListHistoryFieldToAttach.getClass(), historyFieldListHistoryFieldToAttach.getHistoryFieldPK());
                 attachedHistoryFieldList.add(historyFieldListHistoryFieldToAttach);
             }
             history.setHistoryFieldList(attachedHistoryFieldList);
-            List<Baseline> attachedBaselineList = new ArrayList<Baseline>();
+            List<Baseline> attachedBaselineList = new ArrayList<>();
             for (Baseline baselineListBaselineToAttach : history.getBaselineList()) {
                 baselineListBaselineToAttach = em.getReference(baselineListBaselineToAttach.getClass(), baselineListBaselineToAttach.getId());
                 attachedBaselineList.add(baselineListBaselineToAttach);
             }
             history.setBaselineList(attachedBaselineList);
-            List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
+            List<ExecutionStep> attachedExecutionStepList = new ArrayList<>();
             for (ExecutionStep executionStepListExecutionStepToAttach : history.getExecutionStepList()) {
                 executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
@@ -128,6 +133,10 @@ public class HistoryJpaController implements Serializable {
             if (vmSettingId != null) {
                 vmSettingId.getHistoryList().add(history);
                 vmSettingId = em.merge(vmSettingId);
+            }
+            if (vmUserId != null) {
+                vmUserId.getHistoryModificationList().add(history);
+                vmUserId = em.merge(vmUserId);
             }
             for (HistoryField historyFieldListHistoryField : history.getHistoryFieldList()) {
                 History oldHistoryOfHistoryFieldListHistoryField = historyFieldListHistoryField.getHistory();
@@ -171,6 +180,8 @@ public class HistoryJpaController implements Serializable {
             Step stepNew = history.getStep();
             VmSetting vmSettingIdOld = persistentHistory.getVmSettingId();
             VmSetting vmSettingIdNew = history.getVmSettingId();
+            VmUser vmUserIdOld = persistentHistory.getVmUserId();
+            VmUser vmUserIdNew = history.getVmUserId();
             List<HistoryField> historyFieldListOld = persistentHistory.getHistoryFieldList();
             List<HistoryField> historyFieldListNew = history.getHistoryFieldList();
             List<Baseline> baselineListOld = persistentHistory.getBaselineList();
@@ -181,7 +192,7 @@ public class HistoryJpaController implements Serializable {
             for (HistoryField historyFieldListOldHistoryField : historyFieldListOld) {
                 if (!historyFieldListNew.contains(historyFieldListOldHistoryField)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain HistoryField " + historyFieldListOldHistoryField + " since its history field is not nullable.");
                 }
@@ -209,21 +220,25 @@ public class HistoryJpaController implements Serializable {
                 vmSettingIdNew = em.getReference(vmSettingIdNew.getClass(), vmSettingIdNew.getId());
                 history.setVmSettingId(vmSettingIdNew);
             }
-            List<HistoryField> attachedHistoryFieldListNew = new ArrayList<HistoryField>();
+            if (vmUserIdNew != null) {
+                vmUserIdNew = em.getReference(vmUserIdNew.getClass(), vmUserIdNew.getId());
+                history.setVmUserId(vmUserIdNew);
+            }
+            List<HistoryField> attachedHistoryFieldListNew = new ArrayList<>();
             for (HistoryField historyFieldListNewHistoryFieldToAttach : historyFieldListNew) {
                 historyFieldListNewHistoryFieldToAttach = em.getReference(historyFieldListNewHistoryFieldToAttach.getClass(), historyFieldListNewHistoryFieldToAttach.getHistoryFieldPK());
                 attachedHistoryFieldListNew.add(historyFieldListNewHistoryFieldToAttach);
             }
             historyFieldListNew = attachedHistoryFieldListNew;
             history.setHistoryFieldList(historyFieldListNew);
-            List<Baseline> attachedBaselineListNew = new ArrayList<Baseline>();
+            List<Baseline> attachedBaselineListNew = new ArrayList<>();
             for (Baseline baselineListNewBaselineToAttach : baselineListNew) {
                 baselineListNewBaselineToAttach = em.getReference(baselineListNewBaselineToAttach.getClass(), baselineListNewBaselineToAttach.getId());
                 attachedBaselineListNew.add(baselineListNewBaselineToAttach);
             }
             baselineListNew = attachedBaselineListNew;
             history.setBaselineList(baselineListNew);
-            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
+            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<>();
             for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
                 executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepListNew.add(executionStepListNewExecutionStepToAttach);
@@ -270,6 +285,14 @@ public class HistoryJpaController implements Serializable {
             if (vmSettingIdNew != null && !vmSettingIdNew.equals(vmSettingIdOld)) {
                 vmSettingIdNew.getHistoryList().add(history);
                 vmSettingIdNew = em.merge(vmSettingIdNew);
+            }
+            if (vmUserIdOld != null && !vmUserIdOld.equals(vmUserIdNew)) {
+                vmUserIdOld.getHistoryModificationList().remove(history);
+                vmUserIdOld = em.merge(vmUserIdOld);
+            }
+            if (vmUserIdNew != null && !vmUserIdNew.equals(vmUserIdOld)) {
+                vmUserIdNew.getHistoryModificationList().add(history);
+                vmUserIdNew = em.merge(vmUserIdNew);
             }
             for (HistoryField historyFieldListNewHistoryField : historyFieldListNew) {
                 if (!historyFieldListOld.contains(historyFieldListNewHistoryField)) {
@@ -342,7 +365,7 @@ public class HistoryJpaController implements Serializable {
             List<HistoryField> historyFieldListOrphanCheck = history.getHistoryFieldList();
             for (HistoryField historyFieldListOrphanCheckHistoryField : historyFieldListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This History (" + history + ") cannot be destroyed since the HistoryField " + historyFieldListOrphanCheckHistoryField + " in its historyFieldList field has a non-nullable history field.");
             }
@@ -373,6 +396,11 @@ public class HistoryJpaController implements Serializable {
             if (vmSettingId != null) {
                 vmSettingId.getHistoryList().remove(history);
                 vmSettingId = em.merge(vmSettingId);
+            }
+            VmUser vmUserId = history.getVmUserId();
+            if (vmUserId != null) {
+                vmUserId.getHistoryModificationList().remove(history);
+                vmUserId = em.merge(vmUserId);
             }
             List<Baseline> baselineList = history.getBaselineList();
             for (Baseline baselineListBaseline : baselineList) {

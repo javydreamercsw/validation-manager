@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Role;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.UserTestPlanRole;
@@ -44,15 +45,20 @@ public final class UserTestPlanRoleServer extends UserTestPlanRole
     }
 
     @Override
-    public int write2DB() throws NonexistentEntityException, Exception {
-        UserTestPlanRoleJpaController controller
-                = new UserTestPlanRoleJpaController(getEntityManagerFactory());
-        if (controller.findUserTestPlanRole(getUserTestPlanRolePK()) == null) {
-            UserTestPlanRole temp = new UserTestPlanRole(getTestPlan(), getVmUser(),
-                    getRole());
-            update(temp, this);
-            controller.create(temp);
-            update(this, temp);
+    public int write2DB() throws VMException {
+        try {
+            UserTestPlanRoleJpaController controller
+                    = new UserTestPlanRoleJpaController(getEntityManagerFactory());
+            if (controller.findUserTestPlanRole(getUserTestPlanRolePK()) == null) {
+                UserTestPlanRole temp = new UserTestPlanRole(getTestPlan(), getVmUser(),
+                        getRole());
+                update(temp, this);
+                controller.create(temp);
+                update(this, temp);
+            }
+        }
+        catch (Exception ex) {
+            throw new VMException(ex);
         }
         return getUserTestPlanRolePK().getTestPlanTestProjectId();
     }

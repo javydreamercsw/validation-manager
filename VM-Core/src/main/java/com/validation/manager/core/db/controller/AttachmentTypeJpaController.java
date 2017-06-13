@@ -47,13 +47,13 @@ public class AttachmentTypeJpaController implements Serializable {
 
     public void create(AttachmentType attachmentType) throws PreexistingEntityException, Exception {
         if (attachmentType.getAttachmentList() == null) {
-            attachmentType.setAttachmentList(new ArrayList<Attachment>());
+            attachmentType.setAttachmentList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Attachment> attachedAttachmentList = new ArrayList<Attachment>();
+            List<Attachment> attachedAttachmentList = new ArrayList<>();
             for (Attachment attachmentListAttachmentToAttach : attachmentType.getAttachmentList()) {
                 attachmentListAttachmentToAttach = em.getReference(attachmentListAttachmentToAttach.getClass(), attachmentListAttachmentToAttach.getAttachmentPK());
                 attachedAttachmentList.add(attachmentListAttachmentToAttach);
@@ -96,7 +96,7 @@ public class AttachmentTypeJpaController implements Serializable {
             for (Attachment attachmentListOldAttachment : attachmentListOld) {
                 if (!attachmentListNew.contains(attachmentListOldAttachment)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain Attachment " + attachmentListOldAttachment + " since its attachmentType field is not nullable.");
                 }
@@ -104,7 +104,7 @@ public class AttachmentTypeJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Attachment> attachedAttachmentListNew = new ArrayList<Attachment>();
+            List<Attachment> attachedAttachmentListNew = new ArrayList<>();
             for (Attachment attachmentListNewAttachmentToAttach : attachmentListNew) {
                 attachmentListNewAttachmentToAttach = em.getReference(attachmentListNewAttachmentToAttach.getClass(), attachmentListNewAttachmentToAttach.getAttachmentPK());
                 attachedAttachmentListNew.add(attachmentListNewAttachmentToAttach);
@@ -159,7 +159,7 @@ public class AttachmentTypeJpaController implements Serializable {
             List<Attachment> attachmentListOrphanCheck = attachmentType.getAttachmentList();
             for (Attachment attachmentListOrphanCheckAttachment : attachmentListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This AttachmentType (" + attachmentType + ") cannot be destroyed since the Attachment " + attachmentListOrphanCheckAttachment + " in its attachmentList field has a non-nullable attachmentType field.");
             }

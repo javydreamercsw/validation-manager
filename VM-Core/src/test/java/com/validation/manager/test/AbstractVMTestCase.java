@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,17 +17,14 @@ package com.validation.manager.test;
 
 import com.validation.manager.core.DBState;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.history.Auditable;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.HistoryField;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.VmUserJpaController;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.history.Auditable;
 import com.validation.manager.core.history.Versionable;
 import com.validation.manager.core.server.core.VMUserServer;
 import static com.validation.manager.core.tool.MD5.encrypt;
-import static com.validation.manager.test.TestHelper.deleteUser;
 import static java.lang.Class.forName;
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -168,17 +165,9 @@ public abstract class AbstractVMTestCase extends TestCase {
     }
 
     protected void deleteTestUsers() {
-        try {
-            deleteUser(designer);
-            deleteUser(tester);
-            deleteUser(leader);
-            designer = null;
-            tester = null;
-            leader = null;
-        }
-        catch (IllegalOrphanException | NonexistentEntityException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-        }
+        designer = null;
+        tester = null;
+        leader = null;
     }
 
     public List<Field> getAuditableFields(Versionable v) {
@@ -202,7 +191,7 @@ public abstract class AbstractVMTestCase extends TestCase {
                 //Compare audit field vs. the record in history.
                 Object o = FieldUtils.readField(FieldUtils.getField(v.getClass(),
                         hf.getFieldName(), true), v);
-                if (!o.toString().equals(hf.getFieldValue())) {
+                if (!Versionable.fieldMatchHistory(hf, o)) {
                     return false;
                 }
             }
@@ -210,6 +199,9 @@ public abstract class AbstractVMTestCase extends TestCase {
                 LOG.log(Level.SEVERE, null, ex);
             }
         }
+        v.getHistoryList().forEach(h -> {
+            LOG.info(h.toString());
+        });
         return true;
     }
 }
