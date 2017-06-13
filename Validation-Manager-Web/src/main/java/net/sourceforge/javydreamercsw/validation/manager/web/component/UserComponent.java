@@ -183,8 +183,8 @@ public class UserComponent extends Panel {
                     roles.setItemCaption(role,
                             TRANSLATOR.translate(role.getRoleName()));
                     roles.setItemIcon(role, VaadinIcons.USER_STAR);
-                    layout.addComponent(roles);
                 });
+                layout.addComponent(roles);
             }
         }
         Button update = new Button(user.getId() == null
@@ -273,9 +273,10 @@ public class UserComponent extends Panel {
                 translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
-            ValidationManagerUI.getInstance().updateScreen();
+            ((VMUI) UI.getCurrent()).updateScreen();
         });
         binder.setReadOnly(!edit);
+        binder.setBuffered(true);
         HorizontalLayout hl = new HorizontalLayout();
         hl.addComponent(update);
         hl.addComponent(cancel);

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -149,7 +149,7 @@ public final class VaadinUtils {
                 }
             }
         });
-        LOG.log(Level.INFO, "Locale updated: {0} -> {1} in {2} ms.",
+        LOG.log(Level.FINE, "Locale updated: {0} -> {1} in {2} ms.",
                 new Object[]{ui.getLocale(), locale,
                     System.currentTimeMillis() - time});
     }

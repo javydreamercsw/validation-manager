@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,7 +62,7 @@ public class IssueResolution implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "issue_resolution",
-            initialValue = 1,
+            initialValue = 1_000,
             allocationSize = 1)
     private Integer id;
     @Basic(optional = false)
@@ -120,7 +120,7 @@ public class IssueResolution implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof IssueResolution)) {
             return false;
         }

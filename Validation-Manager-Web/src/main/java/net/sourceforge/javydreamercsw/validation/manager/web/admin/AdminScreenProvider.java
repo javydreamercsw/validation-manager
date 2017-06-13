@@ -18,12 +18,18 @@ package net.sourceforge.javydreamercsw.validation.manager.web.admin;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.Grid.SingleSelectionModel;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Notification;
@@ -35,11 +41,16 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.email.IEmailManager;
+import com.validation.manager.core.db.IssueType;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.IssueTypeJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.VMSettingServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.io.PrintWriter;
@@ -49,6 +60,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.IssueTypeComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.TranslationConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.UserComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.Lookup;
@@ -59,11 +72,12 @@ public class AdminScreenProvider extends AbstractProvider {
 
     private static final Logger LOG
             = Logger.getLogger(IMainContentProvider.class.getSimpleName());
+    private final TabSheet adminSheet = new TabSheet();
 
     @Override
     public Component getContent() {
-        TabSheet adminSheet = new TabSheet();
         VerticalLayout layout = new VerticalLayout();
+        adminSheet.removeAllComponents();
         //Build left side
         //Build setting tab
         adminSheet.addTab(getSettingTab(), TRANSLATOR
@@ -74,9 +88,29 @@ public class AdminScreenProvider extends AbstractProvider {
         //Build user management tab
         adminSheet.addTab(getUserManagementTab(), TRANSLATOR
                 .translate("menu.user"));
+        //Build configurable items management tab
+        adminSheet.addTab(getConfigurableTab(), TRANSLATOR
+                .translate("general.configuration"));
         layout.addComponent(adminSheet);
         layout.setId(getComponentCaption());
         return layout;
+    }
+
+    @Override
+    public void update() {
+        adminSheet.removeAllComponents();
+        adminSheet.addTab(getSettingTab(), TRANSLATOR
+                .translate("general.settings"));
+        //Build email setting tab
+        adminSheet.addTab(getEmailSettingTab(), TRANSLATOR
+                .translate("general.email.settings"));
+        //Build user management tab
+        adminSheet.addTab(getUserManagementTab(), TRANSLATOR
+                .translate("menu.user"));
+        //Build configurable items management tab
+        adminSheet.addTab(getConfigurableTab(), TRANSLATOR
+                .translate("general.configuration"));
+        super.update();
     }
 
     @Override
@@ -274,7 +308,6 @@ public class AdminScreenProvider extends AbstractProvider {
         Button addUser = new Button(TRANSLATOR.translate("add.user"));
         addUser.addClickListener(listener -> {
             VmUser user = new VmUser();
-
             split.setSecondComponent(new UserComponent(user, true));
         });
         hl.addComponent(addUser);
@@ -292,6 +325,110 @@ public class AdminScreenProvider extends AbstractProvider {
         users.addValueChangeListener((Property.ValueChangeEvent event) -> {
             VmUser user = (VmUser) users.getValue();
             split.setSecondComponent(new UserComponent(user, true));
+        });
+        vl.setSizeFull();
+        return vl;
+    }
+
+    private Component getConfigurableTab() {
+        VerticalLayout vl = new VerticalLayout();
+        ComboBox options = new ComboBox();
+        options.addItem("issue.type");
+        options.setItemCaption("issue.type",
+                TRANSLATOR.translate("issue.type"));
+        options.addItem("issue.resolution");
+        options.setItemCaption("issue.resolution",
+                TRANSLATOR.translate("issue.resolution"));
+        options.addItem("requirement.type");
+        options.setItemCaption("requirement.type",
+                TRANSLATOR.translate("requirement.type"));
+        options.setTextInputAllowed(false);
+        options.addValueChangeListener((Property.ValueChangeEvent event) -> {
+            Component nextComp = null;
+            if (options.getValue() != null) {
+                switch ((String) options.getValue()) {
+                    case "issue.type":
+                        nextComp = displayIssueTypes();
+                        break;
+                    case "issue.resolution":
+                        break;
+                    case "requirement.type":
+                        break;
+                    default:
+                    //Do nothing
+                    }
+            }
+            if (nextComp != null) {
+                vl.removeAllComponents();
+                vl.addComponent(options);
+                vl.addComponent(nextComp);
+            }
+        });
+        vl.addComponent(options);
+        vl.setSizeFull();
+        return vl;
+    }
+
+    private Component displayIssueTypes() {
+        VerticalLayout vl = new VerticalLayout();
+        Grid grid = new Grid(TRANSLATOR.translate("issue.type"));
+        BeanItemContainer<IssueType> types
+                = new BeanItemContainer<>(IssueType.class);
+        types.addAll(new IssueTypeJpaController(DataBaseManager.getEntityManagerFactory())
+                .findIssueTypeEntities());
+        grid.setContainerDataSource(types);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        grid.setColumns("typeName", "description");
+        Grid.Column name = grid.getColumn("typeName");
+        name.setHeaderCaption(TRANSLATOR.translate("general.name"));
+        name.setConverter(new TranslationConverter());
+        Grid.Column desc = grid.getColumn("description");
+        desc.setHeaderCaption(TRANSLATOR.translate("general.description"));
+        desc.setConverter(new TranslationConverter());
+        grid.setSizeFull();
+        vl.addComponent(grid);
+        grid.setHeightMode(HeightMode.ROW);
+        grid.setHeightByRows(types.size() > 5 ? 5 : types.size());
+        //Menu
+        HorizontalLayout hl = new HorizontalLayout();
+        Button add = new Button(TRANSLATOR.translate("general.create"));
+        add.addClickListener(listener -> {
+            VMWindow w = new VMWindow();
+            w.setContent(new IssueTypeComponent(new IssueType(), true));
+            w.setModal(true);
+            ((VMUI) UI.getCurrent()).addWindow(w);
+            w.addCloseListener(l -> {
+                update();
+            });
+        });
+        hl.addComponent(add);
+        Button delete = new Button(TRANSLATOR.translate("general.delete"));
+        delete.setEnabled(false);
+        delete.addClickListener(listener -> {
+            IssueType selected = (IssueType) ((SingleSelectionModel) grid.
+                    getSelectionModel()).getSelectedRow();
+            if (selected != null && selected.getId() >= 1000) {
+                try {
+                    new IssueTypeJpaController(DataBaseManager
+                            .getEntityManagerFactory())
+                            .destroy(selected.getId());
+                    update();
+                } catch (IllegalOrphanException | NonexistentEntityException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                    Notification.show(TRANSLATOR.translate("delete.error"),
+                            TRANSLATOR.translate("delete.error"),
+                            Notification.Type.ERROR_MESSAGE);
+                }
+            }
+        });
+        hl.addComponent(delete);
+        vl.addComponent(hl);
+        grid.addSelectionListener(event -> { // Java 8
+            // Get selection from the selection model
+            IssueType selected = (IssueType) ((SingleSelectionModel) grid.
+                    getSelectionModel()).getSelectedRow();
+            //Only delete custom ones.
+            delete.setEnabled(selected != null && selected.getId() >= 1000);
         });
         return vl;
     }

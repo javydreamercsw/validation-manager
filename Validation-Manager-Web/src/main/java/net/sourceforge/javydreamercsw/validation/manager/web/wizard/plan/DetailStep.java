@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,8 +31,8 @@ import com.validation.manager.core.server.core.TestCaseServer;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
@@ -72,7 +72,7 @@ public class DetailStep implements WizardStep {
         binder.bind(scope, "scope");
         layout.addComponent(scope);
         if (tce.getId() != null) {
-            TextArea conclusion = new TextArea("general.comclusion");
+            TextArea conclusion = new TextArea("general.conclusion");
             conclusion.setConverter(new ByteToStringConverter());
             binder.bind(conclusion, "conclusion");
             layout.addComponent(conclusion);
