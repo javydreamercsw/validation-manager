@@ -1989,6 +1989,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             Button logout = new Button(TRANSLATOR.translate("general.logout"));
             logout.addClickListener((Button.ClickEvent event) -> {
                 try {
+                    user.update();
                     user.write2DB();
                     user = null;
                     main = null;
