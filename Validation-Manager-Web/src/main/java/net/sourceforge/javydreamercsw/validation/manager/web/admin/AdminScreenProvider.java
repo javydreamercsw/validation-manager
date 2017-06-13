@@ -45,10 +45,14 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.email.IEmailManager;
+import com.validation.manager.core.db.IssueResolution;
 import com.validation.manager.core.db.IssueType;
+import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.IssueResolutionJpaController;
 import com.validation.manager.core.db.controller.IssueTypeJpaController;
+import com.validation.manager.core.db.controller.RequirementTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.VMSettingServer;
@@ -60,7 +64,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.IssueResolutionComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.IssueTypeComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementTypeComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TranslationConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.UserComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
@@ -351,8 +357,10 @@ public class AdminScreenProvider extends AbstractProvider {
                         nextComp = displayIssueTypes();
                         break;
                     case "issue.resolution":
+                        nextComp = displayIssueResolutions();
                         break;
                     case "requirement.type":
+                        nextComp = displayRequirementTypes();
                         break;
                     default:
                     //Do nothing
@@ -374,7 +382,8 @@ public class AdminScreenProvider extends AbstractProvider {
         Grid grid = new Grid(TRANSLATOR.translate("issue.type"));
         BeanItemContainer<IssueType> types
                 = new BeanItemContainer<>(IssueType.class);
-        types.addAll(new IssueTypeJpaController(DataBaseManager.getEntityManagerFactory())
+        types.addAll(new IssueTypeJpaController(DataBaseManager
+                .getEntityManagerFactory())
                 .findIssueTypeEntities());
         grid.setContainerDataSource(types);
         grid.setSelectionMode(SelectionMode.SINGLE);
@@ -398,7 +407,7 @@ public class AdminScreenProvider extends AbstractProvider {
             w.setModal(true);
             ((VMUI) UI.getCurrent()).addWindow(w);
             w.addCloseListener(l -> {
-                update();
+                ((VMUI) UI.getCurrent()).updateScreen();
             });
         });
         hl.addComponent(add);
@@ -412,7 +421,7 @@ public class AdminScreenProvider extends AbstractProvider {
                     new IssueTypeJpaController(DataBaseManager
                             .getEntityManagerFactory())
                             .destroy(selected.getId());
-                    update();
+                    ((VMUI) UI.getCurrent()).updateScreen();
                 } catch (IllegalOrphanException | NonexistentEntityException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                     Notification.show(TRANSLATOR.translate("delete.error"),
@@ -426,6 +435,133 @@ public class AdminScreenProvider extends AbstractProvider {
         grid.addSelectionListener(event -> { // Java 8
             // Get selection from the selection model
             IssueType selected = (IssueType) ((SingleSelectionModel) grid.
+                    getSelectionModel()).getSelectedRow();
+            //Only delete custom ones.
+            delete.setEnabled(selected != null && selected.getId() >= 1000);
+        });
+        return vl;
+    }
+
+    private Component displayIssueResolutions() {
+        VerticalLayout vl = new VerticalLayout();
+        Grid grid = new Grid(TRANSLATOR.translate("issue.resolution"));
+        BeanItemContainer<IssueResolution> types
+                = new BeanItemContainer<>(IssueResolution.class);
+        types.addAll(new IssueResolutionJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findIssueResolutionEntities());
+        grid.setContainerDataSource(types);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        grid.setColumns("name");
+        Grid.Column name = grid.getColumn("name");
+        name.setHeaderCaption(TRANSLATOR.translate("general.name"));
+        name.setConverter(new TranslationConverter());
+        grid.setSizeFull();
+        vl.addComponent(grid);
+        grid.setHeightMode(HeightMode.ROW);
+        grid.setHeightByRows(types.size() > 5 ? 5 : types.size());
+        //Menu
+        HorizontalLayout hl = new HorizontalLayout();
+        Button add = new Button(TRANSLATOR.translate("general.create"));
+        add.addClickListener(listener -> {
+            VMWindow w = new VMWindow();
+            w.setContent(new IssueResolutionComponent(new IssueResolution(), true));
+            w.setModal(true);
+            ((VMUI) UI.getCurrent()).addWindow(w);
+            w.addCloseListener(l -> {
+                ((VMUI) UI.getCurrent()).updateScreen();
+            });
+        });
+        hl.addComponent(add);
+        Button delete = new Button(TRANSLATOR.translate("general.delete"));
+        delete.setEnabled(false);
+        delete.addClickListener(listener -> {
+            IssueResolution selected = (IssueResolution) ((SingleSelectionModel) grid.
+                    getSelectionModel()).getSelectedRow();
+            if (selected != null && selected.getId() >= 1000) {
+                try {
+                    new IssueResolutionJpaController(DataBaseManager
+                            .getEntityManagerFactory())
+                            .destroy(selected.getId());
+                    ((VMUI) UI.getCurrent()).updateScreen();
+                } catch (IllegalOrphanException | NonexistentEntityException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                    Notification.show(TRANSLATOR.translate("delete.error"),
+                            TRANSLATOR.translate("delete.error"),
+                            Notification.Type.ERROR_MESSAGE);
+                }
+            }
+        });
+        hl.addComponent(delete);
+        vl.addComponent(hl);
+        grid.addSelectionListener(event -> { // Java 8
+            // Get selection from the selection model
+            IssueResolution selected = (IssueResolution) ((SingleSelectionModel) grid.
+                    getSelectionModel()).getSelectedRow();
+            //Only delete custom ones.
+            delete.setEnabled(selected != null && selected.getId() >= 1000);
+        });
+        return vl;
+    }
+
+    private Component displayRequirementTypes() {
+        VerticalLayout vl = new VerticalLayout();
+        Grid grid = new Grid(TRANSLATOR.translate("requirement.type"));
+        BeanItemContainer<RequirementType> types
+                = new BeanItemContainer<>(RequirementType.class);
+        types.addAll(new RequirementTypeJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findRequirementTypeEntities());
+        grid.setContainerDataSource(types);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        grid.setColumns("name", "description");
+        Grid.Column name = grid.getColumn("name");
+        name.setHeaderCaption(TRANSLATOR.translate("general.name"));
+        name.setConverter(new TranslationConverter());
+        Grid.Column desc = grid.getColumn("description");
+        desc.setHeaderCaption(TRANSLATOR.translate("general.description"));
+        desc.setConverter(new TranslationConverter());
+        grid.setSizeFull();
+        vl.addComponent(grid);
+        grid.setHeightMode(HeightMode.ROW);
+        grid.setHeightByRows(types.size() > 5 ? 5 : types.size());
+        //Menu
+        HorizontalLayout hl = new HorizontalLayout();
+        Button add = new Button(TRANSLATOR.translate("general.create"));
+        add.addClickListener(listener -> {
+            VMWindow w = new VMWindow();
+            w.setContent(new RequirementTypeComponent(new RequirementType(), true));
+            w.setModal(true);
+            ((VMUI) UI.getCurrent()).addWindow(w);
+            w.addCloseListener(l -> {
+                ((VMUI) UI.getCurrent()).updateScreen();
+            });
+        });
+        hl.addComponent(add);
+        Button delete = new Button(TRANSLATOR.translate("general.delete"));
+        delete.setEnabled(false);
+        delete.addClickListener(listener -> {
+            RequirementType selected = (RequirementType) ((SingleSelectionModel) grid.
+                    getSelectionModel()).getSelectedRow();
+            if (selected != null && selected.getId() >= 1000) {
+                try {
+                    new RequirementTypeJpaController(DataBaseManager
+                            .getEntityManagerFactory())
+                            .destroy(selected.getId());
+                    ((VMUI) UI.getCurrent()).updateScreen();
+                } catch (IllegalOrphanException | NonexistentEntityException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                    Notification.show(TRANSLATOR.translate("delete.error"),
+                            TRANSLATOR.translate("delete.error"),
+                            Notification.Type.ERROR_MESSAGE);
+                }
+            }
+        });
+        hl.addComponent(delete);
+        vl.addComponent(hl);
+        grid.addSelectionListener(event -> { // Java 8
+            // Get selection from the selection model
+            RequirementType selected = (RequirementType) ((SingleSelectionModel) grid.
                     getSelectionModel()).getSelectedRow();
             //Only delete custom ones.
             delete.setEnabled(selected != null && selected.getId() >= 1000);
