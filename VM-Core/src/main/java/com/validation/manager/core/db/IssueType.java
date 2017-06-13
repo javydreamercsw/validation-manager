@@ -63,7 +63,7 @@ public class IssueType implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "issue_type",
-            initialValue = 1,
+            initialValue = 1000,
             allocationSize = 1)
     private Integer id;
     @Basic(optional = false)
