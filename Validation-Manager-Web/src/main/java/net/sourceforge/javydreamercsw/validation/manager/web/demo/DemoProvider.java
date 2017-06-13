@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sourceforge.javydreamercsw.validation.manager.web.provider;
+package net.sourceforge.javydreamercsw.validation.manager.web.demo;
 
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Component;
@@ -26,6 +26,7 @@ import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.tool.MD5;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = IMainContentProvider.class)

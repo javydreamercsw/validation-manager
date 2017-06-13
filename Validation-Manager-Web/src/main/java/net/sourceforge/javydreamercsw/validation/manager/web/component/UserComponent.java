@@ -51,6 +51,7 @@ import de.steinwedel.messagebox.MessageBox;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -256,7 +257,9 @@ public class UserComponent extends Panel {
                 } else {
                     us.write2DB();
                 }
-                ((ValidationManagerUI) UI.getCurrent()).setUser(us);
+                ((VMUI) UI.getCurrent()).getUser().update();
+                ((VMUI) UI.getCurrent()).setLocale(new Locale(us.getLocale()));
+                ((VMUI) UI.getCurrent()).updateScreen();
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 Notification.show(TRANSLATOR.

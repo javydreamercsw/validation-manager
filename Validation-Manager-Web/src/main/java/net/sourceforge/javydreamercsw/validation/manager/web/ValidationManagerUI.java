@@ -167,7 +167,7 @@ import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
-import net.sourceforge.javydreamercsw.validation.manager.web.provider.DemoProvider;
+import net.sourceforge.javydreamercsw.validation.manager.web.demo.DemoProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceMatrix;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
