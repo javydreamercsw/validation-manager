@@ -166,8 +166,8 @@ import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
-import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
 import net.sourceforge.javydreamercsw.validation.manager.web.demo.DemoProvider;
+import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceMatrix;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
@@ -1994,7 +1994,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     main = null;
                     setLocale(Locale.ENGLISH);
                     updateScreen();
-                } catch (Exception ex) {
+                } catch (VMException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             });
@@ -2820,8 +2820,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             String... fields) {
         Grid grid = new Grid(title);
         BeanItemContainer<History> histories
-                = new BeanItemContainer<>(History.class
-                );
+                = new BeanItemContainer<>(History.class);
         GeneratedPropertyContainer wrapperCont
                 = new GeneratedPropertyContainer(histories);
         histories.addAll(historyItems);
