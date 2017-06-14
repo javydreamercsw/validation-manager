@@ -3,16 +3,16 @@ pipeline {
     agent any
 
     stages {
-        checkout([$class: 'GitSCM', branches: [[name: '**']], 
-        browser: [$class: 'GithubWeb', 
-        repoUrl: 'https://github.com/javydreamercsw/validation-manager'], 
-        doGenerateSubmoduleConfigurations: false, extensions: [], 
-        submoduleCfg: [], 
-        userRemoteConfigs: [[credentialsId: 'bd07203f-cbb4-452d-a297-5b984a446f9a', 
-        url: 'https://github.com/javydreamercsw/validation-manager.git']]])
         stage('Build') {
             steps {
                 echo 'Building..'
+                checkout([$class: 'GitSCM', branches: [[name: '**']], 
+                browser: [$class: 'GithubWeb', 
+                repoUrl: 'https://github.com/javydreamercsw/validation-manager'], 
+                doGenerateSubmoduleConfigurations: false, extensions: [], 
+                submoduleCfg: [], 
+                userRemoteConfigs: [[credentialsId: 'bd07203f-cbb4-452d-a297-5b984a446f9a', 
+                url: 'https://github.com/javydreamercsw/validation-manager.git']]])
                 mvn install
                 archiveArtifacts artifacts: '**/target/*.war', fingerprint: true
                 echo 'Done!'
