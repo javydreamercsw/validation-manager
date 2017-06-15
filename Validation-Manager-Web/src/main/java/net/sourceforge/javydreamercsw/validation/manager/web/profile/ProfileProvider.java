@@ -16,7 +16,9 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.profile;
 
 import com.vaadin.ui.Component;
+import com.vaadin.ui.UI;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.VMUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.UserComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
@@ -43,7 +45,7 @@ public class ProfileProvider extends AbstractProvider {
 
     @Override
     public Component getContent() {
-        return new UserComponent(ValidationManagerUI.getInstance().getUser(),
+        return new UserComponent(((VMUI) UI.getCurrent()).getUser().getEntity(),
                 true);
     }
 }
