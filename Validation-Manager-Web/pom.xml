@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
         <openoffice.version>4.1.2</openoffice.version>
-        <vaadin.version>7.7.9</vaadin.version>
+        <vaadin.version>7.7.10</vaadin.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
