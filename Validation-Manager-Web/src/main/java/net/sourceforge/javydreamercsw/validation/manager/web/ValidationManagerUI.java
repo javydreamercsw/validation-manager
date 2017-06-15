@@ -144,7 +144,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -165,6 +164,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectTreeComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.demo.DemoProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
@@ -195,7 +195,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     private Component left;
     private final TabSheet tabSheet = new TabSheet();
     private final List<Project> projects = new ArrayList<>();
-    private Tree tree;
+    private ProjectTreeComponent tree;
     private Tab main;
     private final List<String> roles = new ArrayList<>();
     private final String REQUIREMENT_REVIEW = "requirement.view";
@@ -1461,14 +1461,11 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     @Override
     public void buildProjectTree(Object item) {
-        tree.removeAllItems();
-        tree.addItem(projTreeRoot);
-        projects.forEach((p) -> {
-            if (p.getParentProjectId() == null) {
-                //TODO: Check if you have permissions on project to see it.
-                addProject(p, tree);
-            }
-        });
+        if (tree == null) {
+            tree = new ProjectTreeComponent();
+        } else {
+            tree.update();
+        }
         showItemInTree(item);
     }
 
@@ -2153,194 +2150,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                 "project.viewer");
     }
 
-    private void addRequirementSpec(RequirementSpec rs, Tree tree) {
-        // Add the item as a regular item.
-        tree.addItem(rs);
-        tree.setItemCaption(rs, rs.getName());
-        tree.setItemIcon(rs, SPEC_ICON);
-        // Set it to be a child.
-        tree.setParent(rs, rs.getProject());
-        if (rs.getRequirementSpecNodeList().isEmpty()
-                && rs.getBaselineList().isEmpty()) {
-            //No children
-            tree.setChildrenAllowed(rs, false);
-        } else {
-            rs.getRequirementSpecNodeList().forEach((rsn) -> {
-                addRequirementSpecsNode(rsn, tree);
-            });
-            //Add the baseline to the spec
-            rs.getBaselineList().forEach(bl -> {
-                addBaseline(bl, tree);
-            });
-        }
-    }
-
-    private void addRequirementSpecsNode(RequirementSpecNode rsn, Tree tree) {
-        // Add the item as a regular item.
-        tree.addItem(rsn);
-        tree.setItemCaption(rsn, rsn.getName());
-        tree.setItemIcon(rsn, SPEC_ICON);
-        // Set it to be a child.
-        tree.setParent(rsn, rsn.getRequirementSpec());
-        if (rsn.getRequirementList().isEmpty()) {
-            //No children
-            tree.setChildrenAllowed(rsn, false);
-        } else {
-            ArrayList<Requirement> list
-                    = new ArrayList<>(rsn.getRequirementList());
-            Collections.sort(list,
-                    (Requirement o1, Requirement o2)
-                    -> o1.getUniqueId().compareTo(o2.getUniqueId()));
-            list.forEach((req) -> {
-                addRequirement(req, tree);
-            });
-        }
-    }
-
-    private void addTestProject(TestProject tp, Tree tree) {
-        tree.addItem(tp);
-        tree.setItemCaption(tp, tp.getName());
-        tree.setItemIcon(tp, TEST_SUITE_ICON);
-        tree.setParent(tp, tp.getProjectList().get(0));
-        boolean children = false;
-        if (!tp.getTestPlanList().isEmpty()) {
-            tp.getTestPlanList().forEach((plan) -> {
-                addTestPlan(plan, tree);
-            });
-            children = true;
-        }
-        tree.setChildrenAllowed(tp, children);
-    }
-
-    private void addTestPlan(TestPlan tp, Tree tree) {
-        tree.addItem(tp);
-        tree.setItemCaption(tp, tp.getName());
-        tree.setItemIcon(tp, TEST_PLAN_ICON);
-        tree.setParent(tp, tp.getTestProject());
-        if (!tp.getTestCaseList().isEmpty()) {
-            tp.getTestCaseList().forEach((tc) -> {
-                addTestCase(tc, tp, tree);
-            });
-        }
-    }
-
-    private void addTestCase(TestCase t, TestPlan plan, Tree tree) {
-        tree.addItem(t);
-        tree.setItemCaption(t, t.getName());
-        tree.setItemIcon(t, TEST_ICON);
-        tree.setParent(t, plan);
-        List<Step> stepList = t.getStepList();
-        Collections.sort(stepList, (Step o1, Step o2)
-                -> o1.getStepSequence() - o2.getStepSequence());
-        stepList.forEach((s) -> {
-            addStep(s, tree);
-        });
-    }
-
-    private void addStep(Step s, Tree tree) {
-        addStep(s, tree, null);
-    }
-
-    private void addStep(Step s, Tree tree, String parent) {
-        tree.addItem(s);
-        tree.setItemCaption(s, "Step # " + s.getStepSequence());
-        tree.setItemIcon(s, STEP_ICON);
-        Object parentId = s.getTestCase();
-        if (parent != null) {
-            parentId = parent;
-        }
-        tree.setParent(s, parentId);
-        tree.setChildrenAllowed(s, false);
-    }
-
-    private void addRequirement(Requirement req, Tree tree) {
-        // Add the item as a regular item.
-        tree.addItem(req);
-        tree.setItemCaption(req, req.getUniqueId());
-        tree.setItemIcon(req, REQUIREMENT_ICON);
-        tree.setParent(req, req.getRequirementSpecNode());
-        //No children
-        tree.setChildrenAllowed(req, false);
-    }
-
-    private void addTestCaseExecutions(String parent, TestCaseExecution tce,
-            Tree tree) {
-        tree.addItem(tce);
-        tree.setItemCaption(tce, tce.getName());
-        tree.setItemIcon(tce, EXECUTION_ICON);
-        tree.setParent(tce, parent);
-        for (ExecutionStep es : tce.getExecutionStepList()) {
-            //Group under the Test Case
-            TestCase tc = es.getStep().getTestCase();
-            Collection<?> children = tree.getChildren(tce);
-            String node = "tce-" + tce.getId() + "-" + tc.getId();
-            boolean add = true;
-            if (children != null) {
-                //Check if already added as children
-                for (Object o : children) {
-                    if (o.equals(node)) {
-                        add = false;
-                        break;
-                    }
-                }
-            }
-            if (add) {
-                //Add Test Case if not there
-                tree.addItem(node);
-                tree.setItemCaption(node, tc.getName());
-                tree.setItemIcon(node, TEST_ICON);
-                tree.setParent(node, tce);
-            }
-            tree.addItem(es);
-            tree.setItemCaption(es, "Step #" + es.getStep().getStepSequence());
-            //Use icon based on result of step
-            tree.setItemIcon(es, STEP_ICON);
-            tree.setParent(es, node);
-            tree.setChildrenAllowed(es, false);
-        }
-    }
-
-    public void addProject(Project p, Tree tree) {
-        tree.addItem(p);
-        tree.setItemCaption(p, p.getName());
-        tree.setParent(p, p.getParentProjectId() == null
-                ? projTreeRoot : p.getParentProjectId());
-        tree.setItemIcon(p, PROJECT_ICON);
-        boolean children = false;
-        if (!p.getProjectList().isEmpty()) {
-            p.getProjectList().forEach((sp) -> {
-                addProject(sp, tree);
-            });
-            children = true;
-        }
-        if (!p.getRequirementSpecList().isEmpty()) {
-            p.getRequirementSpecList().forEach((rs) -> {
-                addRequirementSpec(rs, tree);
-            });
-            children = true;
-        }
-        if (!p.getTestProjectList().isEmpty()) {
-            p.getTestProjectList().forEach((tp) -> {
-                addTestProject(tp, tree);
-            });
-            children = true;
-        }
-        List<TestCaseExecution> executions = TestCaseExecutionServer
-                .getExecutions(p);
-        String id = "executions" + p.getId();
-        tree.addItem(id);
-        tree.setItemCaption(id, TRANSLATOR.translate("general.execution"));
-        tree.setItemIcon(id, EXECUTIONS_ICON);
-        tree.setParent(id, p);
-        executions.forEach((tce) -> {
-            addTestCaseExecutions(id, tce, tree);
-        });
-        if (!children) {
-            // No subprojects
-            tree.setChildrenAllowed(p, false);
-        }
-    }
-
     @Override
     protected void init(VaadinRequest request) {
         ProjectJpaController controller
@@ -2351,7 +2160,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 && controller.findProjectEntities().isEmpty()) {
             buildDemoTree();
         }
-        tree = new Tree();
+        tree = new ProjectTreeComponent();
         // Set the tree in drag source mode
         tree.setDragMode(TreeDragMode.NODE);
         // Allow the tree to receive drag drops and handle them
