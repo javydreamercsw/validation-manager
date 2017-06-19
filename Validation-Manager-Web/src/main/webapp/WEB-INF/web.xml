@@ -14,6 +14,11 @@
         <param-name>db.password</param-name>
         <param-value/>
     </context-param>
+    <context-param>
+        <description>Vaadin production mode</description>
+        <param-name>productionMode</param-name>
+        <param-value>true</param-value>
+    </context-param>
     <listener>
         <listener-class>org.h2.server.web.DbStarter</listener-class>
     </listener>
