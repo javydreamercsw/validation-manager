@@ -410,6 +410,7 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         target.setNotificationList(source.getNotificationList());
         target.setNotificationList1(source.getNotificationList1());
         target.setHistoryModificationList(source.getHistoryModificationList());
+        target.setUserHasRoleList(source.getUserHasRoleList());
         super.update(target, source);
     }
 

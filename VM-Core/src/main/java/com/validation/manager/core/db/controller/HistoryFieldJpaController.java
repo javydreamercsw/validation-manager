@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,8 +49,8 @@ public class HistoryFieldJpaController implements Serializable {
         if (historyField.getHistoryFieldPK() == null) {
             historyField.setHistoryFieldPK(new HistoryFieldPK());
         }
-        historyField.getHistoryFieldPK().setFieldTypeId(historyField.getFieldType().getId());
         historyField.getHistoryFieldPK().setHistoryId(historyField.getHistory().getId());
+        historyField.getHistoryFieldPK().setFieldTypeId(historyField.getFieldType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -90,8 +90,8 @@ public class HistoryFieldJpaController implements Serializable {
     }
 
     public void edit(HistoryField historyField) throws NonexistentEntityException, Exception {
-        historyField.getHistoryFieldPK().setFieldTypeId(historyField.getFieldType().getId());
         historyField.getHistoryFieldPK().setHistoryId(historyField.getHistory().getId());
+        historyField.getHistoryFieldPK().setFieldTypeId(historyField.getFieldType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

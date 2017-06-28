@@ -92,5 +92,6 @@ public final class RoleServer extends Role implements EntityServer<Role> {
         target.setUserRightList(source.getUserRightList());
         target.setUserTestPlanRoleList(source.getUserTestPlanRoleList());
         target.setVmUserList(source.getVmUserList());
+        target.setUserHasRoleList(source.getUserHasRoleList());
     }
 }

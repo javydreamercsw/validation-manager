@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,7 @@ import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.ExecutionStepHasVmUser;
 import com.validation.manager.core.db.Role;
+import com.validation.manager.core.db.UserHasRole;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
@@ -64,6 +65,9 @@ public class RoleJpaController implements Serializable {
         if (role.getExecutionStepHasVmUserList() == null) {
             role.setExecutionStepHasVmUserList(new ArrayList<>());
         }
+        if (role.getUserHasRoleList() == null) {
+            role.setUserHasRoleList(new ArrayList<>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -98,6 +102,12 @@ public class RoleJpaController implements Serializable {
                 attachedExecutionStepHasVmUserList.add(executionStepHasVmUserListExecutionStepHasVmUserToAttach);
             }
             role.setExecutionStepHasVmUserList(attachedExecutionStepHasVmUserList);
+            List<UserHasRole> attachedUserHasRoleList = new ArrayList<>();
+            for (UserHasRole userHasRoleListUserHasRoleToAttach : role.getUserHasRoleList()) {
+                userHasRoleListUserHasRoleToAttach = em.getReference(userHasRoleListUserHasRoleToAttach.getClass(), userHasRoleListUserHasRoleToAttach.getUserHasRolePK());
+                attachedUserHasRoleList.add(userHasRoleListUserHasRoleToAttach);
+            }
+            role.setUserHasRoleList(attachedUserHasRoleList);
             em.persist(role);
             for (VmUser vmUserListVmUser : role.getVmUserList()) {
                 vmUserListVmUser.getRoleList().add(role);
@@ -134,6 +144,15 @@ public class RoleJpaController implements Serializable {
                     oldRoleOfExecutionStepHasVmUserListExecutionStepHasVmUser = em.merge(oldRoleOfExecutionStepHasVmUserListExecutionStepHasVmUser);
                 }
             }
+            for (UserHasRole userHasRoleListUserHasRole : role.getUserHasRoleList()) {
+                Role oldRoleOfUserHasRoleListUserHasRole = userHasRoleListUserHasRole.getRole();
+                userHasRoleListUserHasRole.setRole(role);
+                userHasRoleListUserHasRole = em.merge(userHasRoleListUserHasRole);
+                if (oldRoleOfUserHasRoleListUserHasRole != null) {
+                    oldRoleOfUserHasRoleListUserHasRole.getUserHasRoleList().remove(userHasRoleListUserHasRole);
+                    oldRoleOfUserHasRoleListUserHasRole = em.merge(oldRoleOfUserHasRoleListUserHasRole);
+                }
+            }
             em.getTransaction().commit();
         }
         finally {
@@ -159,6 +178,8 @@ public class RoleJpaController implements Serializable {
             List<UserTestPlanRole> userTestPlanRoleListNew = role.getUserTestPlanRoleList();
             List<ExecutionStepHasVmUser> executionStepHasVmUserListOld = persistentRole.getExecutionStepHasVmUserList();
             List<ExecutionStepHasVmUser> executionStepHasVmUserListNew = role.getExecutionStepHasVmUserList();
+            List<UserHasRole> userHasRoleListOld = persistentRole.getUserHasRoleList();
+            List<UserHasRole> userHasRoleListNew = role.getUserHasRoleList();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
@@ -182,6 +203,14 @@ public class RoleJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStepHasVmUser " + executionStepHasVmUserListOldExecutionStepHasVmUser + " since its role field is not nullable.");
+                }
+            }
+            for (UserHasRole userHasRoleListOldUserHasRole : userHasRoleListOld) {
+                if (!userHasRoleListNew.contains(userHasRoleListOldUserHasRole)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain UserHasRole " + userHasRoleListOldUserHasRole + " since its role field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -222,6 +251,13 @@ public class RoleJpaController implements Serializable {
             }
             executionStepHasVmUserListNew = attachedExecutionStepHasVmUserListNew;
             role.setExecutionStepHasVmUserList(executionStepHasVmUserListNew);
+            List<UserHasRole> attachedUserHasRoleListNew = new ArrayList<>();
+            for (UserHasRole userHasRoleListNewUserHasRoleToAttach : userHasRoleListNew) {
+                userHasRoleListNewUserHasRoleToAttach = em.getReference(userHasRoleListNewUserHasRoleToAttach.getClass(), userHasRoleListNewUserHasRoleToAttach.getUserHasRolePK());
+                attachedUserHasRoleListNew.add(userHasRoleListNewUserHasRoleToAttach);
+            }
+            userHasRoleListNew = attachedUserHasRoleListNew;
+            role.setUserHasRoleList(userHasRoleListNew);
             role = em.merge(role);
             for (VmUser vmUserListOldVmUser : vmUserListOld) {
                 if (!vmUserListNew.contains(vmUserListOldVmUser)) {
@@ -280,6 +316,17 @@ public class RoleJpaController implements Serializable {
                     }
                 }
             }
+            for (UserHasRole userHasRoleListNewUserHasRole : userHasRoleListNew) {
+                if (!userHasRoleListOld.contains(userHasRoleListNewUserHasRole)) {
+                    Role oldRoleOfUserHasRoleListNewUserHasRole = userHasRoleListNewUserHasRole.getRole();
+                    userHasRoleListNewUserHasRole.setRole(role);
+                    userHasRoleListNewUserHasRole = em.merge(userHasRoleListNewUserHasRole);
+                    if (oldRoleOfUserHasRoleListNewUserHasRole != null && !oldRoleOfUserHasRoleListNewUserHasRole.equals(role)) {
+                        oldRoleOfUserHasRoleListNewUserHasRole.getUserHasRoleList().remove(userHasRoleListNewUserHasRole);
+                        oldRoleOfUserHasRoleListNewUserHasRole = em.merge(oldRoleOfUserHasRoleListNewUserHasRole);
+                    }
+                }
+            }
             em.getTransaction().commit();
         }
         catch (Exception ex) {
@@ -333,6 +380,13 @@ public class RoleJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the ExecutionStepHasVmUser " + executionStepHasVmUserListOrphanCheckExecutionStepHasVmUser + " in its executionStepHasVmUserList field has a non-nullable role field.");
+            }
+            List<UserHasRole> userHasRoleListOrphanCheck = role.getUserHasRoleList();
+            for (UserHasRole userHasRoleListOrphanCheckUserHasRole : userHasRoleListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This Role (" + role + ") cannot be destroyed since the UserHasRole " + userHasRoleListOrphanCheckUserHasRole + " in its userHasRoleList field has a non-nullable role field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

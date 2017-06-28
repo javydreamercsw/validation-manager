@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -118,6 +118,7 @@ public final class VMSettingServer extends VmSetting
         target.setStringVal(source.getStringVal());
         target.setId(source.getId());
         target.setHistoryList(source.getHistoryList());
+        target.setProjectId(source.getProjectId());
         super.update(target, source);
     }
 

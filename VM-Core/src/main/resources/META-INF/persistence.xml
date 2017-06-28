@@ -54,6 +54,7 @@
     <class>com.validation.manager.core.db.TestProject</class>
     <class>com.validation.manager.core.db.UserAssigment</class>
     <class>com.validation.manager.core.db.UserHasInvestigation</class>
+    <class>com.validation.manager.core.db.UserHasRole</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
     <class>com.validation.manager.core.db.UserRight</class>
     <class>com.validation.manager.core.db.UserStatus</class>
@@ -128,6 +129,7 @@
     <class>com.validation.manager.core.db.TestProject</class>
     <class>com.validation.manager.core.db.UserAssigment</class>
     <class>com.validation.manager.core.db.UserHasInvestigation</class>
+    <class>com.validation.manager.core.db.UserHasRole</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
     <class>com.validation.manager.core.db.UserRight</class>
     <class>com.validation.manager.core.db.UserStatus</class>
@@ -204,6 +206,7 @@
     <class>com.validation.manager.core.db.TestProject</class>
     <class>com.validation.manager.core.db.UserAssigment</class>
     <class>com.validation.manager.core.db.UserHasInvestigation</class>
+    <class>com.validation.manager.core.db.UserHasRole</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
     <class>com.validation.manager.core.db.UserRight</class>
     <class>com.validation.manager.core.db.UserStatus</class>

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,9 +49,9 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
         if (riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK() == null) {
             riskItemHasRiskCategory.setRiskItemHasRiskCategoryPK(new RiskItemHasRiskCategoryPK());
         }
-        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
+        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -91,9 +91,9 @@ public class RiskItemHasRiskCategoryJpaController implements Serializable {
     }
 
     public void edit(RiskItemHasRiskCategory riskItemHasRiskCategory) throws NonexistentEntityException, Exception {
-        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskitemFMEAid(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getFMEAid());
         riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskCategoryId(riskItemHasRiskCategory.getRiskCategory().getId());
+        riskItemHasRiskCategory.getRiskItemHasRiskCategoryPK().setRiskItemId(riskItemHasRiskCategory.getRiskItem().getRiskItemPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

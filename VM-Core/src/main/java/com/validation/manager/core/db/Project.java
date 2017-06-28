@@ -99,6 +99,8 @@ public class Project extends Versionable implements Serializable {
     private List<RequirementSpec> requirementSpecList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "projectId")
     private List<History> historyList;
+    @OneToMany(mappedBy = "projectId")
+    private List<UserHasRole> userHasRoleList;
 
     public Project(String name) {
         this.name = name;
@@ -201,5 +203,15 @@ public class Project extends Versionable implements Serializable {
     @Override
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<UserHasRole> getUserHasRoleList() {
+        return userHasRoleList;
+    }
+
+    public void setUserHasRoleList(List<UserHasRole> userHasRoleList) {
+        this.userHasRoleList = userHasRoleList;
     }
 }

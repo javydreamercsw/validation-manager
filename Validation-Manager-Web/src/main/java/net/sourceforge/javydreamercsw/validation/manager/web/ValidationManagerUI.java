@@ -2152,6 +2152,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     @Override
     protected void init(VaadinRequest request) {
+        Page.getCurrent().setTitle("Validation Manager");
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
                         .getEntityManagerFactory());
@@ -2389,7 +2390,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         tree.setSizeFull();
         updateProjectList();
         updateScreen();
-        Page.getCurrent().setTitle("Validation Manager");
     }
 
     private static <V> void swapValues(SortedMap m, int i0, int i1) {
@@ -2448,6 +2448,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         return result;
     }
 
+    @Override
     public boolean checkAnyRights(List<String> rights) {
         boolean result = false;
         if (rights.stream().anyMatch((r) -> (checkRight(r)))) {
@@ -2479,6 +2480,36 @@ public class ValidationManagerUI extends UI implements VMUI {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean checkProjectRole(Project p, String role) {
+        if (user != null) {
+            user.update();
+            if (user.getUserHasRoleList().stream().anyMatch((uhr)
+                    -> (Objects.equals(uhr.getProjectId().getId(), p.getId())
+                    && uhr.getRole().getRoleName().equals(role)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkAnyProjectRole(Project p, List<String> roles) {
+        return roles.stream().anyMatch((r) -> (checkProjectRole(p, r)));
+    }
+
+    @Override
+    public boolean checkAllProjectRoles(Project p, List<String> roles) {
+        boolean result = true;
+        for (String r : roles) {
+            if (!checkProjectRole(p, r)) {
+                result = false;
+                break;
+            }
+        }
+        return result;
     }
 
     private void displayTestPlanning(Project p) {

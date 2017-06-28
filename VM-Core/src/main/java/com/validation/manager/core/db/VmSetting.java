@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -96,6 +98,9 @@ public class VmSetting extends Versionable implements Serializable {
     private String stringVal;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmSettingId")
     private List<History> historyList;
+    @JoinColumn(name = "project_id", referencedColumnName = "id")
+    @ManyToOne
+    private Project projectId;
 
     public VmSetting() {
     }
@@ -187,5 +192,13 @@ public class VmSetting extends Versionable implements Serializable {
     @Override
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
+    }
+
+    public Project getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Project projectId) {
+        this.projectId = projectId;
     }
 }

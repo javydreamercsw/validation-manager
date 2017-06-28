@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.test.AbstractVMTestCase;
+import java.util.UUID;
 import org.junit.Test;
 
 /**
@@ -32,7 +33,7 @@ public class NotificationTypeServerTest extends AbstractVMTestCase {
     @Test
     public void testWrite2DB() throws Exception {
         System.out.println("write2DB");
-        String type = "type";
+        String type = UUID.randomUUID().toString();
         NotificationTypeServer instance = new NotificationTypeServer();
         assertNull(NotificationTypeServer.getType(type));
         instance.setTypeName(type);

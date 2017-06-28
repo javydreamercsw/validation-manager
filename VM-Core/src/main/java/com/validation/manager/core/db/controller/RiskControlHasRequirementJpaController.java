@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,8 +49,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
         if (riskControlHasRequirement.getRiskControlHasRequirementPK() == null) {
             riskControlHasRequirement.setRiskControlHasRequirementPK(new RiskControlHasRequirementPK());
         }
-        riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
+        riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlRiskControlTypeId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getRiskControlTypeId());
         EntityManager em = null;
         try {
@@ -91,8 +91,8 @@ public class RiskControlHasRequirementJpaController implements Serializable {
     }
 
     public void edit(RiskControlHasRequirement riskControlHasRequirement) throws NonexistentEntityException, Exception {
-        riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRequirementId(riskControlHasRequirement.getRequirement().getId());
+        riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getId());
         riskControlHasRequirement.getRiskControlHasRequirementPK().setRiskControlRiskControlTypeId(riskControlHasRequirement.getRiskControl().getRiskControlPK().getRiskControlTypeId());
         EntityManager em = null;
         try {

@@ -28,4 +28,11 @@
             <goal>release:perform</goal>
         </goals>
     </action>
+    <action>
+            <actionName>CUSTOM-Display Available Plugin Updates</actionName>
+            <displayName>Display Available Plugin Updates</displayName>
+            <goals>
+                <goal>versions:display-plugin-updates</goal>
+            </goals>
+        </action>
 </actions>

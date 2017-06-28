@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,9 +50,9 @@ public class UserTestProjectRoleJpaController implements Serializable {
         if (userTestProjectRole.getUserTestProjectRolePK() == null) {
             userTestProjectRole.setUserTestProjectRolePK(new UserTestProjectRolePK());
         }
+        userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
-        userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -101,9 +101,9 @@ public class UserTestProjectRoleJpaController implements Serializable {
     }
 
     public void edit(UserTestProjectRole userTestProjectRole) throws NonexistentEntityException, Exception {
+        userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         userTestProjectRole.getUserTestProjectRolePK().setTestProjectId(userTestProjectRole.getTestProject().getId());
         userTestProjectRole.getUserTestProjectRolePK().setUserId(userTestProjectRole.getVmUser().getId());
-        userTestProjectRole.getUserTestProjectRolePK().setRoleId(userTestProjectRole.getRole().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

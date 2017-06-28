@@ -45,7 +45,6 @@ public class ProfileProvider extends AbstractProvider {
 
     @Override
     public Component getContent() {
-        return new UserComponent(((VMUI) UI.getCurrent()).getUser().getEntity(),
-                true);
+        return new UserComponent(((VMUI) UI.getCurrent()).getUser(), true);
     }
 }

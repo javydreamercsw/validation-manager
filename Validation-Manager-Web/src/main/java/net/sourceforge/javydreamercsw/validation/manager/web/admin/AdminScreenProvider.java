@@ -319,7 +319,7 @@ public class AdminScreenProvider extends AbstractProvider {
         HorizontalLayout hl = new HorizontalLayout();
         Button addUser = new Button(TRANSLATOR.translate("add.user"));
         addUser.addClickListener(listener -> {
-            VmUser user = new VmUser();
+            VMUserServer user = new VMUserServer(new VmUser());
             split.setSecondComponent(new UserComponent(user, true));
         });
         hl.addComponent(addUser);
@@ -336,7 +336,7 @@ public class AdminScreenProvider extends AbstractProvider {
         });
         users.addValueChangeListener((Property.ValueChangeEvent event) -> {
             VmUser user = (VmUser) users.getValue();
-            split.setSecondComponent(new UserComponent(user, true));
+            split.setSecondComponent(new UserComponent(new VMUserServer(user), true));
         });
         vl.setSizeFull();
         return vl;
