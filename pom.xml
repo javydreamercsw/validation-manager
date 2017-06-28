@@ -63,7 +63,7 @@
         <netbeans.version>RELEASE82</netbeans.version>
         <junit.version>4.12</junit.version>
         <mysql.version>6.0.6</mysql.version>
-        <h2.version>1.4.195</h2.version>
+        <h2.version>1.4.196</h2.version>
         <poi.version>3.16</poi.version>
         <vaadin.icons.version>3.0.1</vaadin.icons.version>
     </properties>
@@ -159,6 +159,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.20</version>
                     <configuration>
+                        <trimStackTrace>false</trimStackTrace>
                         <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
                     </configuration>
                 </plugin>

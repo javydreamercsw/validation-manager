@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
@@ -96,7 +97,15 @@ public final class TestCaseServer extends TestCase
     }
 
     public Step addStep(int sequence, String text, String note, String criteria,
-            List<Requirement> requirements)
+            List<Requirement> requirements) throws PreexistingEntityException,
+            Exception {
+        //Use default plain String Field
+        return addStep(sequence, text, note, criteria, requirements,
+                DataEntryServer.getStringField("general.result"));
+    }
+
+    public Step addStep(int sequence, String text, String note, String criteria,
+            List<Requirement> requirements, DataEntry de)
             throws PreexistingEntityException, Exception {
         StepServer ss = new StepServer(getEntity(), sequence, text);
         int amount = getStepList().size();

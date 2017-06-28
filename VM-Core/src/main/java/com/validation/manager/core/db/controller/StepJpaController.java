@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.StepPK;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -54,13 +55,16 @@ public class StepJpaController implements Serializable {
             step.setStepPK(new StepPK());
         }
         if (step.getRequirementList() == null) {
-            step.setRequirementList(new ArrayList<>());
+            step.setRequirementList(new ArrayList<Requirement>());
         }
         if (step.getExecutionStepList() == null) {
-            step.setExecutionStepList(new ArrayList<>());
+            step.setExecutionStepList(new ArrayList<ExecutionStep>());
         }
         if (step.getHistoryList() == null) {
-            step.setHistoryList(new ArrayList<>());
+            step.setHistoryList(new ArrayList<History>());
+        }
+        if (step.getDataEntryList() == null) {
+            step.setDataEntryList(new ArrayList<DataEntry>());
         }
         step.getStepPK().setTestCaseId(step.getTestCase().getId());
         EntityManager em = null;
@@ -72,24 +76,30 @@ public class StepJpaController implements Serializable {
                 testCase = em.getReference(testCase.getClass(), testCase.getId());
                 step.setTestCase(testCase);
             }
-            List<Requirement> attachedRequirementList = new ArrayList<>();
+            List<Requirement> attachedRequirementList = new ArrayList<Requirement>();
             for (Requirement requirementListRequirementToAttach : step.getRequirementList()) {
                 requirementListRequirementToAttach = em.getReference(requirementListRequirementToAttach.getClass(), requirementListRequirementToAttach.getId());
                 attachedRequirementList.add(requirementListRequirementToAttach);
             }
             step.setRequirementList(attachedRequirementList);
-            List<ExecutionStep> attachedExecutionStepList = new ArrayList<>();
+            List<ExecutionStep> attachedExecutionStepList = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListExecutionStepToAttach : step.getExecutionStepList()) {
                 executionStepListExecutionStepToAttach = em.getReference(executionStepListExecutionStepToAttach.getClass(), executionStepListExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepList.add(executionStepListExecutionStepToAttach);
             }
             step.setExecutionStepList(attachedExecutionStepList);
-            List<History> attachedHistoryList = new ArrayList<>();
+            List<History> attachedHistoryList = new ArrayList<History>();
             for (History historyListHistoryToAttach : step.getHistoryList()) {
                 historyListHistoryToAttach = em.getReference(historyListHistoryToAttach.getClass(), historyListHistoryToAttach.getId());
                 attachedHistoryList.add(historyListHistoryToAttach);
             }
             step.setHistoryList(attachedHistoryList);
+            List<DataEntry> attachedDataEntryList = new ArrayList<DataEntry>();
+            for (DataEntry dataEntryListDataEntryToAttach : step.getDataEntryList()) {
+                dataEntryListDataEntryToAttach = em.getReference(dataEntryListDataEntryToAttach.getClass(), dataEntryListDataEntryToAttach.getDataEntryPK());
+                attachedDataEntryList.add(dataEntryListDataEntryToAttach);
+            }
+            step.setDataEntryList(attachedDataEntryList);
             em.persist(step);
             if (testCase != null) {
                 testCase.getStepList().add(step);
@@ -115,6 +125,15 @@ public class StepJpaController implements Serializable {
                 if (oldStepOfHistoryListHistory != null) {
                     oldStepOfHistoryListHistory.getHistoryList().remove(historyListHistory);
                     oldStepOfHistoryListHistory = em.merge(oldStepOfHistoryListHistory);
+                }
+            }
+            for (DataEntry dataEntryListDataEntry : step.getDataEntryList()) {
+                Step oldStepOfDataEntryListDataEntry = dataEntryListDataEntry.getStep();
+                dataEntryListDataEntry.setStep(step);
+                dataEntryListDataEntry = em.merge(dataEntryListDataEntry);
+                if (oldStepOfDataEntryListDataEntry != null) {
+                    oldStepOfDataEntryListDataEntry.getDataEntryList().remove(dataEntryListDataEntry);
+                    oldStepOfDataEntryListDataEntry = em.merge(oldStepOfDataEntryListDataEntry);
                 }
             }
             em.getTransaction().commit();
@@ -147,11 +166,13 @@ public class StepJpaController implements Serializable {
             List<ExecutionStep> executionStepListNew = step.getExecutionStepList();
             List<History> historyListOld = persistentStep.getHistoryList();
             List<History> historyListNew = step.getHistoryList();
+            List<DataEntry> dataEntryListOld = persistentStep.getDataEntryList();
+            List<DataEntry> dataEntryListNew = step.getDataEntryList();
             List<String> illegalOrphanMessages = null;
             for (ExecutionStep executionStepListOldExecutionStep : executionStepListOld) {
                 if (!executionStepListNew.contains(executionStepListOldExecutionStep)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain ExecutionStep " + executionStepListOldExecutionStep + " since its step field is not nullable.");
                 }
@@ -159,9 +180,17 @@ public class StepJpaController implements Serializable {
             for (History historyListOldHistory : historyListOld) {
                 if (!historyListNew.contains(historyListOldHistory)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
+                        illegalOrphanMessages = new ArrayList<String>();
                     }
                     illegalOrphanMessages.add("You must retain History " + historyListOldHistory + " since its step field is not nullable.");
+                }
+            }
+            for (DataEntry dataEntryListOldDataEntry : dataEntryListOld) {
+                if (!dataEntryListNew.contains(dataEntryListOldDataEntry)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain DataEntry " + dataEntryListOldDataEntry + " since its step field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -171,27 +200,34 @@ public class StepJpaController implements Serializable {
                 testCaseNew = em.getReference(testCaseNew.getClass(), testCaseNew.getId());
                 step.setTestCase(testCaseNew);
             }
-            List<Requirement> attachedRequirementListNew = new ArrayList<>();
+            List<Requirement> attachedRequirementListNew = new ArrayList<Requirement>();
             for (Requirement requirementListNewRequirementToAttach : requirementListNew) {
                 requirementListNewRequirementToAttach = em.getReference(requirementListNewRequirementToAttach.getClass(), requirementListNewRequirementToAttach.getId());
                 attachedRequirementListNew.add(requirementListNewRequirementToAttach);
             }
             requirementListNew = attachedRequirementListNew;
             step.setRequirementList(requirementListNew);
-            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<>();
+            List<ExecutionStep> attachedExecutionStepListNew = new ArrayList<ExecutionStep>();
             for (ExecutionStep executionStepListNewExecutionStepToAttach : executionStepListNew) {
                 executionStepListNewExecutionStepToAttach = em.getReference(executionStepListNewExecutionStepToAttach.getClass(), executionStepListNewExecutionStepToAttach.getExecutionStepPK());
                 attachedExecutionStepListNew.add(executionStepListNewExecutionStepToAttach);
             }
             executionStepListNew = attachedExecutionStepListNew;
             step.setExecutionStepList(executionStepListNew);
-            List<History> attachedHistoryListNew = new ArrayList<>();
+            List<History> attachedHistoryListNew = new ArrayList<History>();
             for (History historyListNewHistoryToAttach : historyListNew) {
                 historyListNewHistoryToAttach = em.getReference(historyListNewHistoryToAttach.getClass(), historyListNewHistoryToAttach.getId());
                 attachedHistoryListNew.add(historyListNewHistoryToAttach);
             }
             historyListNew = attachedHistoryListNew;
             step.setHistoryList(historyListNew);
+            List<DataEntry> attachedDataEntryListNew = new ArrayList<DataEntry>();
+            for (DataEntry dataEntryListNewDataEntryToAttach : dataEntryListNew) {
+                dataEntryListNewDataEntryToAttach = em.getReference(dataEntryListNewDataEntryToAttach.getClass(), dataEntryListNewDataEntryToAttach.getDataEntryPK());
+                attachedDataEntryListNew.add(dataEntryListNewDataEntryToAttach);
+            }
+            dataEntryListNew = attachedDataEntryListNew;
+            step.setDataEntryList(dataEntryListNew);
             step = em.merge(step);
             if (testCaseOld != null && !testCaseOld.equals(testCaseNew)) {
                 testCaseOld.getStepList().remove(step);
@@ -235,6 +271,17 @@ public class StepJpaController implements Serializable {
                     }
                 }
             }
+            for (DataEntry dataEntryListNewDataEntry : dataEntryListNew) {
+                if (!dataEntryListOld.contains(dataEntryListNewDataEntry)) {
+                    Step oldStepOfDataEntryListNewDataEntry = dataEntryListNewDataEntry.getStep();
+                    dataEntryListNewDataEntry.setStep(step);
+                    dataEntryListNewDataEntry = em.merge(dataEntryListNewDataEntry);
+                    if (oldStepOfDataEntryListNewDataEntry != null && !oldStepOfDataEntryListNewDataEntry.equals(step)) {
+                        oldStepOfDataEntryListNewDataEntry.getDataEntryList().remove(dataEntryListNewDataEntry);
+                        oldStepOfDataEntryListNewDataEntry = em.merge(oldStepOfDataEntryListNewDataEntry);
+                    }
+                }
+            }
             em.getTransaction().commit();
         }
         catch (Exception ex) {
@@ -271,16 +318,23 @@ public class StepJpaController implements Serializable {
             List<ExecutionStep> executionStepListOrphanCheck = step.getExecutionStepList();
             for (ExecutionStep executionStepListOrphanCheckExecutionStep : executionStepListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Step (" + step + ") cannot be destroyed since the ExecutionStep " + executionStepListOrphanCheckExecutionStep + " in its executionStepList field has a non-nullable step field.");
             }
             List<History> historyListOrphanCheck = step.getHistoryList();
             for (History historyListOrphanCheckHistory : historyListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
+                    illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Step (" + step + ") cannot be destroyed since the History " + historyListOrphanCheckHistory + " in its historyList field has a non-nullable step field.");
+            }
+            List<DataEntry> dataEntryListOrphanCheck = step.getDataEntryList();
+            for (DataEntry dataEntryListOrphanCheckDataEntry : dataEntryListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Step (" + step + ") cannot be destroyed since the DataEntry " + dataEntryListOrphanCheckDataEntry + " in its dataEntryList field has a non-nullable step field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

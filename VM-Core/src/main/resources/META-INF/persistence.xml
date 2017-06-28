@@ -9,6 +9,9 @@
     <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.DataEntry</class>
+    <class>com.validation.manager.core.db.DataEntryProperty</class>
+    <class>com.validation.manager.core.db.DataEntryType</class>
     <class>com.validation.manager.core.db.ExceptionHasCorrectiveAction</class>
     <class>com.validation.manager.core.db.ExceptionHasInvestigation</class>
     <class>com.validation.manager.core.db.ExceptionHasRootCause</class>
@@ -84,6 +87,9 @@
     <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.DataEntry</class>
+    <class>com.validation.manager.core.db.DataEntryProperty</class>
+    <class>com.validation.manager.core.db.DataEntryType</class>
     <class>com.validation.manager.core.db.ExceptionHasCorrectiveAction</class>
     <class>com.validation.manager.core.db.ExceptionHasInvestigation</class>
     <class>com.validation.manager.core.db.ExceptionHasRootCause</class>
@@ -161,6 +167,9 @@
     <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.DataEntry</class>
+    <class>com.validation.manager.core.db.DataEntryProperty</class>
+    <class>com.validation.manager.core.db.DataEntryType</class>
     <class>com.validation.manager.core.db.ExceptionHasCorrectiveAction</class>
     <class>com.validation.manager.core.db.ExceptionHasInvestigation</class>
     <class>com.validation.manager.core.db.ExceptionHasRootCause</class>
