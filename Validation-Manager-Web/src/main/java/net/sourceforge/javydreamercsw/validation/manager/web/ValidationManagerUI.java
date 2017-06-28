@@ -691,13 +691,14 @@ public class ValidationManagerUI extends UI implements VMUI {
         result.setConverter(new ByteToStringConverter());
         binder.bind(result, "expectedResult");
         layout.addComponent(result);
-        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"), "notes",
-                TextArea.class);
+        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"),
+                "notes", TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
         tree.select(s);
         if (!s.getRequirementList().isEmpty() && !edit) {
-            layout.addComponent(getDisplayRequirementList("related.requirements",
+            layout.addComponent(getDisplayRequirementList(
+                    TRANSLATOR.translate("related.requirements"),
                     s.getRequirementList()));
         } else {
             AbstractSelect requirements = getRequirementSelectionComponent();
@@ -716,6 +717,34 @@ public class ValidationManagerUI extends UI implements VMUI {
                 });
             });
             layout.addComponent(requirements);
+        }
+        Tree fields = new Tree(TRANSLATOR.translate("general.fields"));
+        s.getDataEntryList().forEach(de -> {
+            fields.addItem(de);
+            fields.setItemCaption(de, TRANSLATOR.translate(de.getEntryName()));
+            switch (de.getDataEntryType().getTypeName()) {
+                case "string.type.name":
+                    fields.setItemIcon(de, VaadinIcons.TEXT_INPUT);
+                    break;
+                case "numeric.type.name":
+                    fields.setItemIcon(de, VaadinIcons.COINS);
+                    break;
+                case "boolean.type.name":
+                    fields.setItemIcon(de, VaadinIcons.ADJUST);
+                    break;
+                case "attachment.type.name":
+                    fields.setItemIcon(de, VaadinIcons.PAPERCLIP);
+                    break;
+            }
+            fields.setChildrenAllowed(de, !de.getDataEntryPropertyList().isEmpty());
+            de.getDataEntryPropertyList().forEach(prop -> {
+                fields.addItem(prop);
+                fields.setItemCaption(prop, TRANSLATOR.translate(prop.getPropertyName()));
+                fields.setParent(prop, de);
+            });
+        });
+        if (!fields.getItemIds().isEmpty()) {
+            layout.addComponent(fields);
         }
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
@@ -2048,6 +2077,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     .forEach(p -> {
                         p.processNotification();
                     });
+            createTree();
         }
         //Add the content
         vs.setSecondComponent(getContentComponent());
@@ -2150,17 +2180,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 "project.viewer");
     }
 
-    @Override
-    protected void init(VaadinRequest request) {
-        Page.getCurrent().setTitle("Validation Manager");
-        ProjectJpaController controller
-                = new ProjectJpaController(DataBaseManager
-                        .getEntityManagerFactory());
-
-        if (DataBaseManager.isDemo()
-                && controller.findProjectEntities().isEmpty()) {
-            buildDemoTree();
-        }
+    private void createTree() {
         tree = new ProjectTreeComponent();
         // Set the tree in drag source mode
         tree.setDragMode(TreeDragMode.NODE);
@@ -2389,6 +2409,19 @@ public class ValidationManagerUI extends UI implements VMUI {
         tree.expandItem(projTreeRoot);
         tree.setSizeFull();
         updateProjectList();
+    }
+
+    @Override
+    protected void init(VaadinRequest request) {
+        Page.getCurrent().setTitle("Validation Manager");
+        ProjectJpaController controller
+                = new ProjectJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+
+        if (DataBaseManager.isDemo()
+                && controller.findProjectEntities().isEmpty()) {
+            buildDemoTree();
+        }
         updateScreen();
     }
 

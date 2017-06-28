@@ -17,7 +17,6 @@ package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.Container;
 import com.vaadin.ui.Tree;
-import com.vaadin.ui.UI;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMUI;
 import static com.validation.manager.core.VMUI.PROJECT_ICON;
@@ -88,11 +87,12 @@ public final class ProjectTreeComponent extends Tree {
                 .findProjectEntities().forEach((p) -> {
                     if (p.getParentProjectId() == null) {
                         //Check for permissions to show the project
-                        if (((VMUI) UI.getCurrent()).checkAnyProjectRole(p, null)
-                                || !((VMUI) UI.getCurrent()).getUser()
-                                        .getRoleList().isEmpty()) {
-                            addProject(p);
-                        }
+//                        if (((VMUI) UI.getCurrent()).getUser() != null
+//                                && ((VMUI) UI.getCurrent()).checkAnyProjectRole(p, null)
+//                                || !((VMUI) UI.getCurrent()).getUser()
+//                                        .getRoleList().isEmpty()) {
+                        addProject(p);
+//                        }
                     }
                 });
     }

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import de.steinwedel.messagebox.ButtonOption;
@@ -130,7 +131,7 @@ public final class ExecutionWindow extends VMWindow {
                                                 ess.write2DB();
                                                 ValidationManagerUI.getInstance()
                                                         .updateScreen();
-                                            } catch (Exception ex) {
+                                            } catch (VMException ex) {
                                                 Exceptions.printStackTrace(ex);
                                             }
                                         });
@@ -156,7 +157,7 @@ public final class ExecutionWindow extends VMWindow {
                                                 ess.write2DB();
                                                 ValidationManagerUI.getInstance()
                                                         .updateScreen();
-                                            } catch (Exception ex) {
+                                            } catch (VMException ex) {
                                                 Exceptions.printStackTrace(ex);
                                             }
                                         });
