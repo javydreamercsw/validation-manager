@@ -15,7 +15,10 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
+import com.vaadin.addon.contextmenu.ContextMenu;
+import com.vaadin.addon.contextmenu.MenuItem;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.event.ItemClickEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
@@ -29,6 +32,7 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
+import static com.validation.manager.core.VMUI.PROJECT_ICON;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
@@ -142,6 +146,18 @@ public final class StepComponent extends Panel {
         });
         if (!fields.getItemIds().isEmpty()) {
             layout.addComponent(fields);
+            if (edit) {
+                //Add edit menus to the tree
+                ContextMenu menu = new ContextMenu(fields, true);
+                fields.addItemClickListener((ItemClickEvent event) -> {
+                    MenuItem create
+                            = menu.addItem(TRANSLATOR.translate("create.sub.project"),
+                                    PROJECT_ICON,
+                                    (MenuItem selectedItem) -> {
+
+                                    });
+                });
+            }
         }
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
