@@ -19,6 +19,9 @@ import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -29,6 +32,14 @@ import javax.validation.constraints.NotNull;
 public class DataEntryPK implements Serializable {
 
     @Basic(optional = false)
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "Data_Entry_IDGEN")
+    @TableGenerator(name = "Data_Entry_IDGEN", table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "data_entry",
+            initialValue = 0,
+            allocationSize = 1)
     @Column(name = "id")
     private int id;
     @Basic(optional = false)
