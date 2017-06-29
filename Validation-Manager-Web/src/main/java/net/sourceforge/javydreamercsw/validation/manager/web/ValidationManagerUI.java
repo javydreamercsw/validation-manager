@@ -69,7 +69,6 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.TreeDragMode;
 import com.vaadin.ui.Tree.TreeDropCriterion;
 import com.vaadin.ui.Tree.TreeTargetDetails;
-import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
@@ -165,6 +164,7 @@ import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectTreeComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementSelectionComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.StepComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.demo.DemoProvider;
@@ -2707,21 +2707,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 //        //TODO:
 //    }
     public AbstractSelect getRequirementSelectionComponent() {
-        Project p = getParentProject();
-        List<Requirement> reqs = Tool.extractRequirements(p);
-        Collections.sort(reqs, (Requirement o1, Requirement o2)
-                -> o1.getUniqueId().compareTo(o2.getUniqueId()));
-        BeanItemContainer<Requirement> requirementContainer
-                = new BeanItemContainer<>(Requirement.class,
-                        reqs);
-        TwinColSelect requirements
-                = new TwinColSelect(TRANSLATOR.translate("linked.requirement"));
-        requirements.setItemCaptionPropertyId("uniqueId");
-        requirements.setContainerDataSource(requirementContainer);
-        requirements.setRows(5);
-        requirements.setLeftColumnCaption(TRANSLATOR.translate("available.requirement"));
-        requirements.setRightColumnCaption(TRANSLATOR.translate("linked.requirement"));
-        return requirements;
+        return new RequirementSelectionComponent(getParentProject());
     }
 
     public Component getDisplayRequirementList(String title,
