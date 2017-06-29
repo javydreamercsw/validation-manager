@@ -165,6 +165,7 @@ import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectTreeComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.StepComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.demo.DemoProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
@@ -339,7 +340,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     rsn.setName(name.getValue().toString());
                     rsn.setDescription(desc.getValue().toString());
                     rsn.setScope(scope.getValue().toString());
-                    handleVerioning(rsn, () -> {
+                    handleVersioning(rsn, () -> {
                         try {
                             new RequirementSpecNodeJpaController(DataBaseManager
                                     .getEntityManagerFactory()).edit(rsn);
@@ -558,7 +559,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     tces.setScope(scope.getValue().toString());
                     tces.setName(name.getValue().toString());
                     try {
-                        handleVerioning(tces, () -> {
+                        handleVersioning(tces, () -> {
                             try {
                                 tces.write2DB();
                                 tces.update(tce, tces.getEntity());
@@ -673,172 +674,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, "testcase.view");
     }
 
-    private void displayStep(Step s, boolean edit) {
-        Panel form = new Panel(TRANSLATOR.translate("step.detail"));
-        FormLayout layout = new FormLayout();
-        form.setContent(layout);
-        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
-        binder.setItemDataSource(s);
-        Field<?> sequence = binder.buildAndBind(TRANSLATOR.translate("general.sequence"),
-                "stepSequence");
-        layout.addComponent(sequence);
-        TextArea text = new TextArea(TRANSLATOR.translate("general.text"));
-        text.setConverter(new ByteToStringConverter());
-        binder.bind(text, "text");
-        layout.addComponent(text);
-        TextArea result = new TextArea(TRANSLATOR.translate("expected.result"));
-        result.setConverter(new ByteToStringConverter());
-        binder.bind(result, "expectedResult");
-        layout.addComponent(result);
-        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"),
-                "notes", TextArea.class);
-        notes.setSizeFull();
-        layout.addComponent(notes);
-        tree.select(s);
-        if (!s.getRequirementList().isEmpty() && !edit) {
-            layout.addComponent(getDisplayRequirementList(
-                    TRANSLATOR.translate("related.requirements"),
-                    s.getRequirementList()));
-        } else {
-            AbstractSelect requirements = getRequirementSelectionComponent();
-            //Select the exisitng ones.
-            if (s.getRequirementList() != null) {
-                s.getRequirementList().forEach((r) -> {
-                    requirements.select(r);
-                });
-            }
-            requirements.addValueChangeListener(event -> {
-                Set<Requirement> selected
-                        = (Set<Requirement>) event.getProperty().getValue();
-                s.getRequirementList().clear();
-                selected.forEach(r -> {
-                    s.getRequirementList().add(r);
-                });
-            });
-            layout.addComponent(requirements);
-        }
-        Tree fields = new Tree(TRANSLATOR.translate("general.fields"));
-        s.getDataEntryList().forEach(de -> {
-            fields.addItem(de);
-            fields.setItemCaption(de, TRANSLATOR.translate(de.getEntryName()));
-            switch (de.getDataEntryType().getTypeName()) {
-                case "string.type.name":
-                    fields.setItemIcon(de, VaadinIcons.TEXT_INPUT);
-                    break;
-                case "numeric.type.name":
-                    fields.setItemIcon(de, VaadinIcons.COINS);
-                    break;
-                case "boolean.type.name":
-                    fields.setItemIcon(de, VaadinIcons.ADJUST);
-                    break;
-                case "attachment.type.name":
-                    fields.setItemIcon(de, VaadinIcons.PAPERCLIP);
-                    break;
-            }
-            fields.setChildrenAllowed(de, !de.getDataEntryPropertyList().isEmpty());
-            de.getDataEntryPropertyList().forEach(prop -> {
-                fields.addItem(prop);
-                fields.setItemCaption(prop, TRANSLATOR.translate(prop.getPropertyName()));
-                fields.setParent(prop, de);
-            });
-        });
-        if (!fields.getItemIds().isEmpty()) {
-            layout.addComponent(fields);
-        }
-        Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
-        cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
-            if (s.getStepPK() == null) {
-                displayObject(tree.getValue());
-            } else {
-                displayObject(s, false);
-            }
-        });
-        if (edit) {
-            if (s.getStepPK() == null) {
-                //Creating a new one
-                Button save = new Button(TRANSLATOR.translate("general.save"));
-                save.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        s.setExpectedResult(((TextArea) result).getValue()
-                                .getBytes("UTF-8"));
-                        s.setNotes(notes.getValue() == null ? ""
-                                : notes.getValue().toString());
-                        s.setStepSequence(Integer.parseInt(sequence
-                                .getValue().toString()));
-                        s.setTestCase((TestCase) tree.getValue());
-                        s.setText(text.getValue().getBytes("UTF-8"));
-                        if (s.getRequirementList() == null) {
-                            s.setRequirementList(new ArrayList<>());
-                        }
-                        new StepJpaController(DataBaseManager
-                                .getEntityManagerFactory()).create(s);
-                        form.setVisible(false);
-                        //Recreate the tree to show the addition
-                        updateProjectList();
-                        displayObject(s);
-                        buildProjectTree(s);
-                        updateScreen();
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.creation"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    }
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            } else {
-                //Editing existing one
-                Button update = new Button(TRANSLATOR.translate("general.update"));
-                update.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        s.setExpectedResult(((TextArea) result).getValue()
-                                .getBytes("UTF-8"));
-                        s.setNotes(notes.getValue().toString());
-                        s.setStepSequence(Integer.parseInt(sequence.getValue().toString()));
-                        s.setText(text.getValue().getBytes("UTF-8"));
-                        if (s.getRequirementList() == null) {
-                            s.setRequirementList(new ArrayList<>());
-                        }
-                        handleVerioning(s, () -> {
-                            try {
-                                new StepJpaController(DataBaseManager
-                                        .getEntityManagerFactory()).edit(s);
-                                displayStep(s, true);
-                            } catch (NonexistentEntityException ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            } catch (Exception ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            }
-                        });
-                    } catch (UnsupportedEncodingException | NumberFormatException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.creation"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    }
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            }
-        }
-        binder.setReadOnly(!edit);
-        binder.bindMemberFields(form);
-        layout.setSizeFull();
-        form.setSizeFull();
-        setTabContent(main, form, "testcase.view");
+    public void displayStep(Step s, boolean edit) {
+        setTabContent(main, new StepComponent(s, edit), "testcase.view");
     }
 
     private void displayTestCase(TestCase t, boolean edit) {
@@ -917,7 +754,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         t.setCreationDate((Date) creation.getValue());
                         t.setActive((Boolean) active.getValue());
                         t.setIsOpen((Boolean) open.getValue());
-                        handleVerioning(t, () -> {
+                        handleVersioning(t, () -> {
                             try {
                                 new TestCaseJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(t);
@@ -1023,7 +860,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         tp.setNotes(notes.getValue().toString());
                         tp.setActive((Boolean) open.getValue());
                         tp.setIsOpen((Boolean) open.getValue());
-                        handleVerioning(tp, () -> {
+                        handleVersioning(tp, () -> {
                             try {
                                 new TestPlanJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(tp);
@@ -1123,7 +960,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         tp.setName(name.getValue().toString());
                         tp.setNotes(notes.getValue().toString());
                         tp.setActive((Boolean) active.getValue());
-                        handleVerioning(tp, () -> {
+                        handleVersioning(tp, () -> {
                             try {
                                 new TestProjectJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(tp);
@@ -1239,7 +1076,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         rs.setName(name.getValue().toString());
                         rs.setModificationDate(new Date());
                         rs.setSpecLevel((SpecLevel) level.getValue());
-                        handleVerioning(rs, () -> {
+                        handleVersioning(rs, () -> {
                             try {
                                 new RequirementSpecJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(rs);
@@ -1276,7 +1113,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
-    private void displayObject(Object item) {
+    public void displayObject(Object item) {
         displayObject(item, false);
     }
 
@@ -1418,7 +1255,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         rs.setDescription(((TextArea) desc).getValue());
                         rs.setNotes(((TextArea) notes).getValue());
                         rs.setUniqueId(((TextField) id).getValue());
-                        handleVerioning(rs, () -> {
+                        handleVersioning(rs, () -> {
                             try {
                                 rs.write2DB();
                                 //Recreate the tree to show the addition
@@ -2140,7 +1977,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Editing existing one
                 Button update = new Button(TRANSLATOR.translate("generl.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
-                    handleVerioning(p, () -> {
+                    handleVersioning(p, () -> {
                         try {
                             p.setName(name.getValue().toString());
                             if (notes.getValue() != null) {
@@ -2649,7 +2486,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 Button update = new Button(TRANSLATOR.translate("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
-                        handleVerioning(baseline, () -> {
+                        handleVersioning(baseline, () -> {
                             try {
                                 new BaselineJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(baseline);
@@ -2869,7 +2706,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 //    private void createBaselineMenu(ContextMenu menu) {
 //        //TODO:
 //    }
-    private AbstractSelect getRequirementSelectionComponent() {
+    public AbstractSelect getRequirementSelectionComponent() {
         Project p = getParentProject();
         List<Requirement> reqs = Tool.extractRequirements(p);
         Collections.sort(reqs, (Requirement o1, Requirement o2)
@@ -2887,7 +2724,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         return requirements;
     }
 
-    private Component getDisplayRequirementList(String title,
+    public Component getDisplayRequirementList(String title,
             List<Requirement> requirementList) {
         Grid grid = new Grid(title);
         BeanItemContainer<Requirement> children
@@ -3123,7 +2960,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         }
     }
 
-    private void handleVerioning(Object o, Runnable r) {
+    public void handleVersioning(Object o, Runnable r) {
         if (o instanceof Versionable) {
             Versionable ao = (Versionable) o;
             if (Versionable.auditable(ao)) {
