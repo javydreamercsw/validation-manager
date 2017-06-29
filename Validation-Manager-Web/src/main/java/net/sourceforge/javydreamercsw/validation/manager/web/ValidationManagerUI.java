@@ -164,6 +164,7 @@ import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectTreeComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementListComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementSelectionComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.StepComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
@@ -2712,19 +2713,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     public Component getDisplayRequirementList(String title,
             List<Requirement> requirementList) {
-        Grid grid = new Grid(title);
-        BeanItemContainer<Requirement> children
-                = new BeanItemContainer<>(Requirement.class);
-        children.addAll(requirementList);
-        grid.setContainerDataSource(children);
-        grid.setColumns("uniqueId");
-        Grid.Column uniqueId = grid.getColumn("uniqueId");
-        uniqueId.setHeaderCaption(TRANSLATOR.translate("unique.id"));
-        grid.setHeightMode(HeightMode.ROW);
-        grid.setHeightByRows(children.size() > 5 ? 5 : children.size());
-        grid.setSizeFull();
-        children.sort(new Object[]{"uniqueId"}, new boolean[]{true});
-        return grid;
+        return new RequirementListComponent(title, requirementList);
     }
 
     private void addDeleteExecution(ContextMenu menu) {
