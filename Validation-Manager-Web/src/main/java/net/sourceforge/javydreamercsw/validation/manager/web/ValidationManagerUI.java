@@ -26,9 +26,7 @@ import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroupFieldFactory;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.Transferable;
@@ -42,7 +40,6 @@ import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
-import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -88,7 +85,6 @@ import com.validation.manager.core.api.notification.NotificationTypes;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.History;
-import com.validation.manager.core.db.HistoryField;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -163,6 +159,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.HistoryTable;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectTreeComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementListComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementSelectionComponent;
@@ -2526,135 +2523,9 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
-    private Grid getHistoryTable(String title,
-            List<History> historyItems, String sortByField,
-            boolean showVersionFields,
-            String... fields) {
-        Grid grid = new Grid(title);
-        BeanItemContainer<History> histories
-                = new BeanItemContainer<>(History.class);
-        GeneratedPropertyContainer wrapperCont
-                = new GeneratedPropertyContainer(histories);
-        histories.addAll(historyItems);
-        grid.setContainerDataSource(wrapperCont);
-        if (wrapperCont.size() > 0) {
-            grid.setHeightMode(HeightMode.ROW);
-            grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
-        }
-        for (String field : fields) {
-            wrapperCont.addGeneratedProperty(field,
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    String result = "";
-                    for (HistoryField hf : v.getHistoryFieldList()) {
-                        if (hf.getFieldName().equals(field)) {
-                            result = hf.getFieldValue();
-                            break;
-                        }
-                    }
-                    return result;
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-        }
-        if (showVersionFields) {
-            wrapperCont.addGeneratedProperty("version",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getMajorVersion() + "." + v.getMidVersion()
-                            + "." + v.getMinorVersion();
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-            wrapperCont.addGeneratedProperty("modifier",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getModifierId().getFirstName() + " "
-                            + v.getModifierId().getLastName();
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-            wrapperCont.addGeneratedProperty("modificationDate",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getModificationTime().toString();
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-            wrapperCont.addGeneratedProperty("modificationReason",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getReason() == null ? "" : TRANSLATOR.translate(v.getReason());
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-        }
-        List<String> fieldList = new ArrayList<>();
-        //Add specified fields
-        fieldList.addAll(Arrays.asList(fields));
-        if (showVersionFields) {
-            //Add default fields
-            fieldList.add("version");
-            fieldList.add("modifier");
-            fieldList.add("modificationDate");
-            fieldList.add("modificationReason");
-        }
-        grid.setColumns(fieldList.toArray());
-        if (showVersionFields) {
-            Grid.Column version = grid.getColumn("version");
-            version.setHeaderCaption(TRANSLATOR.translate("general.version"));
-            Grid.Column mod = grid.getColumn("modifier");
-            mod.setHeaderCaption(TRANSLATOR.translate("general.modifier"));
-            Grid.Column modDate = grid.getColumn("modificationDate");
-            modDate.setHeaderCaption(TRANSLATOR.translate("modification.date"));
-            Grid.Column modReason = grid.getColumn("modificationReason");
-            modReason.setHeaderCaption(TRANSLATOR.translate("general.reason"));
-        }
-        if (sortByField != null && !sortByField.trim().isEmpty()) {
-            wrapperCont.sort(new Object[]{sortByField}, new boolean[]{true});
-        }
-        grid.setSizeFull();
-        return grid;
-    }
-
     private Component createStepHistoryTable(String title,
             List<History> historyItems, boolean showVersionFields) {
-        Grid grid = getHistoryTable(title, historyItems, null,
+        Grid grid = new HistoryTable(title, historyItems, null,
                 showVersionFields,
                 "text", "expectedResult", "notes");
         Grid.Column text = grid.getColumn("text");
@@ -2668,7 +2539,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private Component createRequirementHistoryTable(String title,
             List<History> historyItems) {
-        Grid grid = getHistoryTable(title, historyItems, "uniqueId", true,
+        Grid grid = new HistoryTable(title, historyItems, "uniqueId", true,
                 "uniqueId", "description", "notes");
         Grid.Column uniqueId = grid.getColumn("uniqueId");
         uniqueId.setHeaderCaption(TRANSLATOR.translate("unique.id"));
@@ -2677,17 +2548,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         Grid.Column notes = grid.getColumn("notes");
         notes.setHeaderCaption(TRANSLATOR.translate("general.notes"));
         return grid;
-    }
-
-    private void addBaseline(Baseline bl, Tree tree) {
-        if (!tree.containsId(bl)) {
-            tree.addItem(bl);
-            tree.setItemCaption(bl, bl.getBaselineName());
-            tree.setItemIcon(bl, BASELINE_ICON);
-            tree.setParent(bl, bl.getRequirementSpec());
-            //No children
-            tree.setChildrenAllowed(bl, false);
-        }
     }
 
     private void displayTraceMatrix(Project project) {
