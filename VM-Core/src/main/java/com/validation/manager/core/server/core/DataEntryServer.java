@@ -19,6 +19,7 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.DataEntryProperty;
+import com.validation.manager.core.db.DataEntryType;
 import com.validation.manager.core.db.controller.DataEntryJpaController;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +99,7 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
         DataEntry de = new DataEntry();
         de.setEntryName(name);
         de.setDataEntryPropertyList(new ArrayList<>());
-        de.setDataEntryType(DataEntryTypeServer.getType("string.type.name"));
+        de.setDataEntryType(DataEntryTypeServer.getType("type.string.name"));
         return de;
     }
 
@@ -112,7 +113,7 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
         DataEntry de = new DataEntry();
         de.setEntryName(name);
         de.setDataEntryPropertyList(new ArrayList<>());
-        de.setDataEntryType(DataEntryTypeServer.getType("boolean.type.name"));
+        de.setDataEntryType(DataEntryTypeServer.getType("type.boolean.name"));
         return de;
     }
 
@@ -126,7 +127,7 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
         DataEntry de = new DataEntry();
         de.setEntryName(name);
         de.setDataEntryPropertyList(new ArrayList<>());
-        de.setDataEntryType(DataEntryTypeServer.getType("attachment.type.name"));
+        de.setDataEntryType(DataEntryTypeServer.getType("type.attachment.name"));
         de.getDataEntryPropertyList().add(DataEntryPropertyServer
                 .createProperty("property.required", true));
         return de;
@@ -144,7 +145,7 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
         DataEntry de = new DataEntry();
         de.setEntryName(name);
         de.setDataEntryPropertyList(new ArrayList<>());
-        de.setDataEntryType(DataEntryTypeServer.getType("numeric.type.name"));
+        de.setDataEntryType(DataEntryTypeServer.getType("type.numeric.name"));
         if (min != null) {
             //Set minimum
             de.getDataEntryPropertyList().add(DataEntryPropertyServer
@@ -156,5 +157,20 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
                     .createProperty("property.max", max));
         }
         return de;
+    }
+
+    public static List<DataEntryProperty> getDefaultProperties(DataEntryType det) {
+        List<DataEntryProperty> props = new ArrayList<>();
+        props.add(DataEntryPropertyServer
+                .createProperty("property.required", true));
+        switch (det.getId()) {
+            case 2:
+                props.add(DataEntryPropertyServer
+                        .createProperty("property.min", "X"));
+                props.add(DataEntryPropertyServer
+                        .createProperty("property.max", "X"));
+                break;
+        }
+        return props;
     }
 }

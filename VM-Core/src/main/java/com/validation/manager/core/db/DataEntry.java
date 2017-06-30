@@ -51,9 +51,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     , @NamedQuery(name = "DataEntry.findByEntryName", query = "SELECT d FROM DataEntry d WHERE d.entryName = :entryName")})
 public class DataEntry implements Serializable {
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataEntry")
-    private List<DataEntryProperty> dataEntryPropertyList;
-
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected DataEntryPK dataEntryPK;
@@ -62,14 +59,20 @@ public class DataEntry implements Serializable {
     @Size(min = 1, max = 45)
     @Column(name = "entry_name")
     private String entryName;
-    @JoinColumn(name = "data_entry_type_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "data_entry_type_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private DataEntryType dataEntryType;
     @JoinColumns({
-        @JoinColumn(name = "step_id", referencedColumnName = "id", insertable = false, updatable = false)
-        , @JoinColumn(name = "step_test_case_id", referencedColumnName = "test_case_id", insertable = false, updatable = false)})
+        @JoinColumn(name = "step_id", referencedColumnName = "id",
+                insertable = false, updatable = false)
+        , @JoinColumn(name = "step_test_case_id",
+                referencedColumnName = "test_case_id", insertable = false,
+                updatable = false)})
     @ManyToOne(optional = false)
     private Step step;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataEntry")
+    private List<DataEntryProperty> dataEntryPropertyList;
 
     public DataEntry() {
     }
@@ -133,15 +136,15 @@ public class DataEntry implements Serializable {
             return false;
         }
         DataEntry other = (DataEntry) object;
-        if ((this.dataEntryPK == null && other.dataEntryPK != null) || (this.dataEntryPK != null && !this.dataEntryPK.equals(other.dataEntryPK))) {
-            return false;
-        }
-        return true;
+        return !((this.dataEntryPK == null && other.dataEntryPK != null)
+                || (this.dataEntryPK != null
+                && !this.dataEntryPK.equals(other.dataEntryPK)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.DataEntry[ dataEntryPK=" + dataEntryPK + " ]";
+        return "com.validation.manager.core.db.DataEntry[ dataEntryPK="
+                + dataEntryPK + " ]";
     }
 
     @XmlTransient
@@ -153,5 +156,4 @@ public class DataEntry implements Serializable {
     public void setDataEntryPropertyList(List<DataEntryProperty> dataEntryPropertyList) {
         this.dataEntryPropertyList = dataEntryPropertyList;
     }
-
 }

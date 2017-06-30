@@ -111,14 +111,14 @@ public class DataEntryServerTest extends AbstractVMTestCase {
         DataEntry de = DataEntryServer.getStringField(name);
         assertNull(de.getDataEntryPK());
         assertEquals(name, de.getEntryName());
-        assertEquals("string.type.name", de.getDataEntryType().getTypeName());
+        assertEquals("type.string.name", de.getDataEntryType().getTypeName());
         assertEquals(0, de.getDataEntryPropertyList().size());
         DataEntryServer des = new DataEntryServer(de);
         des.setStep(tcs.getStepList().get(0));
         des.write2DB();
         assertNotNull(des.getEntity().getDataEntryPK());
         assertEquals(name, des.getEntity().getEntryName());
-        assertEquals("string.type.name", des.getEntity().getDataEntryType().getTypeName());
+        assertEquals("type.string.name", des.getEntity().getDataEntryType().getTypeName());
         assertEquals(0, des.getEntity().getDataEntryPropertyList().size());
     }
 
@@ -134,14 +134,14 @@ public class DataEntryServerTest extends AbstractVMTestCase {
         DataEntry de = DataEntryServer.getBooleanField(name);
         assertNull(de.getDataEntryPK());
         assertEquals(name, de.getEntryName());
-        assertEquals("boolean.type.name", de.getDataEntryType().getTypeName());
+        assertEquals("type.boolean.name", de.getDataEntryType().getTypeName());
         assertEquals(0, de.getDataEntryPropertyList().size());
         DataEntryServer des = new DataEntryServer(de);
         des.setStep(tcs.getStepList().get(0));
         des.write2DB();
         assertNotNull(des.getEntity().getDataEntryPK());
         assertEquals(name, des.getEntity().getEntryName());
-        assertEquals("boolean.type.name", des.getEntity().getDataEntryType().getTypeName());
+        assertEquals("type.boolean.name", des.getEntity().getDataEntryType().getTypeName());
         assertEquals(0, des.getEntity().getDataEntryPropertyList().size());
     }
 
@@ -157,14 +157,14 @@ public class DataEntryServerTest extends AbstractVMTestCase {
         DataEntry de = DataEntryServer.getAttachmentField(name);
         assertNull(de.getDataEntryPK());
         assertEquals(name, de.getEntryName());
-        assertEquals("attachment.type.name", de.getDataEntryType().getTypeName());
+        assertEquals("type.attachment.name", de.getDataEntryType().getTypeName());
         assertEquals(1, de.getDataEntryPropertyList().size());
         DataEntryServer des = new DataEntryServer(de);
         des.setStep(tcs.getStepList().get(0));
         des.write2DB();
         assertNotNull(des.getEntity().getDataEntryPK());
         assertEquals(name, des.getEntity().getEntryName());
-        assertEquals("attachment.type.name", des.getEntity().getDataEntryType().getTypeName());
+        assertEquals("type.attachment.name", des.getEntity().getDataEntryType().getTypeName());
         assertEquals(1, des.getEntity().getDataEntryPropertyList().size());
     }
 
@@ -182,26 +182,26 @@ public class DataEntryServerTest extends AbstractVMTestCase {
         DataEntry de = DataEntryServer.getNumericField(name, min, max);
         assertNull(de.getDataEntryPK());
         assertEquals(name, de.getEntryName());
-        assertEquals("numeric.type.name", de.getDataEntryType().getTypeName());
+        assertEquals("type.numeric.name", de.getDataEntryType().getTypeName());
         assertEquals(0, de.getDataEntryPropertyList().size());
         min = 1.0f;
         de = DataEntryServer.getNumericField(name, min, max);
         assertNull(de.getDataEntryPK());
         assertEquals(name, de.getEntryName());
-        assertEquals("numeric.type.name", de.getDataEntryType().getTypeName());
+        assertEquals("type.numeric.name", de.getDataEntryType().getTypeName());
         assertEquals(1, de.getDataEntryPropertyList().size());
         max = 10.0f;
         de = DataEntryServer.getNumericField(name, min, max);
         assertNull(de.getDataEntryPK());
         assertEquals(name, de.getEntryName());
-        assertEquals("numeric.type.name", de.getDataEntryType().getTypeName());
+        assertEquals("type.numeric.name", de.getDataEntryType().getTypeName());
         assertEquals(2, de.getDataEntryPropertyList().size());
         de.setStep(tcs.getStepList().get(0));
         DataEntryServer des = new DataEntryServer(de);
         des.write2DB();
         assertNotNull(des.getEntity().getDataEntryPK());
         assertEquals(name, des.getEntity().getEntryName());
-        assertEquals("numeric.type.name", des.getEntity().getDataEntryType().getTypeName());
+        assertEquals("type.numeric.name", des.getEntity().getDataEntryType().getTypeName());
         assertEquals(2, des.getEntity().getDataEntryPropertyList().size());
     }
 }

@@ -27,6 +27,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -34,6 +36,9 @@ import java.util.Optional;
  */
 public final class DataEntryPropertyServer extends DataEntryProperty
         implements EntityServer<DataEntryProperty> {
+
+    private static final Logger LOG
+            = Logger.getLogger(DataEntryPropertyServer.class.getSimpleName());
 
     public static DataEntryProperty createProperty(String name, Serializable val) {
         DataEntryProperty dep = new DataEntryProperty();
@@ -48,8 +53,8 @@ public final class DataEntryPropertyServer extends DataEntryProperty
             oos.writeObject(object);
             return Optional.of(Base64.getEncoder().encodeToString(baos.toByteArray()));
         }
-        catch (final IOException e) {
-            e.printStackTrace();
+        catch (final IOException ex) {
+            LOG.log(Level.SEVERE, null, ex);
             return Optional.empty();
         }
     }
@@ -59,8 +64,8 @@ public final class DataEntryPropertyServer extends DataEntryProperty
         try (final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
             return Optional.of((T) ois.readObject());
         }
-        catch (final IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+        catch (final IOException | ClassNotFoundException ex) {
+            LOG.log(Level.SEVERE, null, ex);
             return Optional.empty();
         }
     }

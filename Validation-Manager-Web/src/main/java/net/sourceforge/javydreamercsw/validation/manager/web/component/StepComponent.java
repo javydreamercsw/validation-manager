@@ -15,11 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.addon.contextmenu.MenuItem;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Field;
@@ -28,11 +24,9 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
-import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
-import static com.validation.manager.core.VMUI.PROJECT_ICON;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
@@ -119,46 +113,10 @@ public final class StepComponent extends Panel {
             });
             layout.addComponent(requirements);
         }
-        Tree fields = new Tree(TRANSLATOR.translate("general.fields"));
-        s.getDataEntryList().forEach(de -> {
-            fields.addItem(de);
-            fields.setItemCaption(de, TRANSLATOR.translate(de.getEntryName()));
-            switch (de.getDataEntryType().getTypeName()) {
-                case "string.type.name":
-                    fields.setItemIcon(de, VaadinIcons.TEXT_INPUT);
-                    break;
-                case "numeric.type.name":
-                    fields.setItemIcon(de, VaadinIcons.COINS);
-                    break;
-                case "boolean.type.name":
-                    fields.setItemIcon(de, VaadinIcons.ADJUST);
-                    break;
-                case "attachment.type.name":
-                    fields.setItemIcon(de, VaadinIcons.PAPERCLIP);
-                    break;
-            }
-            fields.setChildrenAllowed(de, !de.getDataEntryPropertyList().isEmpty());
-            de.getDataEntryPropertyList().forEach(prop -> {
-                fields.addItem(prop);
-                fields.setItemCaption(prop, TRANSLATOR.translate(prop.getPropertyName()));
-                fields.setParent(prop, de);
-            });
-        });
-        if (!fields.getItemIds().isEmpty()) {
-            layout.addComponent(fields);
-            if (edit) {
-                //Add edit menus to the tree
-                ContextMenu menu = new ContextMenu(fields, true);
-                fields.addItemClickListener((ItemClickEvent event) -> {
-                    MenuItem create
-                            = menu.addItem(TRANSLATOR.translate("create.sub.project"),
-                                    PROJECT_ICON,
-                                    (MenuItem selectedItem) -> {
-
-                                    });
-                });
-            }
-        }
+        DataEntryComponent fields = new DataEntryComponent(edit);
+        binder.bind(fields, "dataEntryList");
+        layout.addComponent(fields);
+        binder.setReadOnly(edit);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -236,7 +194,6 @@ public final class StepComponent extends Panel {
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
-                        ((ValidationManagerUI) UI.getCurrent()).updateScreen();
                         ((ValidationManagerUI) UI.getCurrent()).displayObject(s);
                     } catch (UnsupportedEncodingException | NumberFormatException ex) {
                         LOG.log(Level.SEVERE, null, ex);
