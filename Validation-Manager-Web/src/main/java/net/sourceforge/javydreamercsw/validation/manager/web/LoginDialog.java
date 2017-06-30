@@ -134,52 +134,69 @@ public final class LoginDialog extends VMWindow {
             VMUserServer user = new VMUserServer(name.getValue(),
                     password.getValue());
             if (menu != null) {
-                switch (user.getUserStatusId().getId()) {
-                    case 1:
-                        //Everything OK
-                        menu.setUser(user);
-                        break;
-                    case 2:
-                        //TODO: Inactive. Right now no special behavior
-                        menu.setUser(user);
-                        break;
-                    case 3:
-                        //Locked
-                        new Notification(Lookup.getDefault()
-                                .lookup(InternationalizationProvider.class).
-                                translate("audit.user.account.lock"),
-                                Lookup.getDefault()
-                                        .lookup(InternationalizationProvider.class).
-                                        translate("menu.connection.error.user"),
-                                Notification.Type.ERROR_MESSAGE, true)
-                                .show(Page.getCurrent());
-                        break;
-                    case 4:
-                        //Password Aged
-                        new Notification(Lookup.getDefault()
-                                .lookup(InternationalizationProvider.class).
-                                translate("user.status.aged"),
-                                Lookup.getDefault()
-                                        .lookup(InternationalizationProvider.class).
-                                        translate("user.status.aged"),
-                                Notification.Type.WARNING_MESSAGE, true)
-                                .show(Page.getCurrent());
-                        menu.setUser(user);
-                        //Open the profile page
-                        ((VMUI) UI.getCurrent()).showTab("message.admin.userProfile");
-                        break;
-                    default:
-                        LOG.log(Level.SEVERE, "Unexpected User Status: {0}",
-                                user.getUserStatusId().getId());
-                        Notification.show("Unexpected User Status",
-                                "Unexpected User Status: "
-                                + user.getUserStatusId().getId()
-                                + "\n" + TRANSLATOR.translate("message.db.error"),
-                                Notification.Type.ERROR_MESSAGE);
-                        break;
+                if (user.getUserStatusId() != null) {
+                    switch (user.getUserStatusId().getId()) {
+                        case 1:
+                            //Everything OK
+                            menu.setUser(user);
+                            close();
+                            break;
+                        case 2:
+                            //TODO: Inactive. Right now no special behavior
+                            menu.setUser(user);
+                            close();
+                            break;
+                        case 3:
+                            //Locked
+                            new Notification(Lookup.getDefault()
+                                    .lookup(InternationalizationProvider.class).
+                                    translate("audit.user.account.lock"),
+                                    Lookup.getDefault()
+                                            .lookup(InternationalizationProvider.class).
+                                            translate("menu.connection.error.user"),
+                                    Notification.Type.ERROR_MESSAGE, true)
+                                    .show(Page.getCurrent());
+                            clear();
+                            break;
+                        case 4:
+                            //Password Aged
+                            new Notification(Lookup.getDefault()
+                                    .lookup(InternationalizationProvider.class).
+                                    translate("user.status.aged"),
+                                    Lookup.getDefault()
+                                            .lookup(InternationalizationProvider.class).
+                                            translate("user.status.aged"),
+                                    Notification.Type.WARNING_MESSAGE, true)
+                                    .show(Page.getCurrent());
+                            menu.setUser(user);
+                            //Open the profile page
+                            ((VMUI) UI.getCurrent()).showTab("message.admin.userProfile");
+                            close();
+                            break;
+                        default:
+                            LOG.log(Level.SEVERE, "Unexpected User Status: {0}",
+                                    user.getUserStatusId().getId());
+                            Notification.show("Unexpected User Status",
+                                    "Unexpected User Status: "
+                                    + user.getUserStatusId().getId()
+                                    + "\n" + TRANSLATOR.translate("message.db.error"),
+                                    Notification.Type.ERROR_MESSAGE);
+                            menu.setUser(null);
+                            close();
+                            break;
+                    }
+                } else {
+                    new Notification(Lookup.getDefault()
+                            .lookup(InternationalizationProvider.class).
+                            translate("general.login.invalid.title"),
+                            Lookup.getDefault()
+                                    .lookup(InternationalizationProvider.class).
+                                    translate("general.login.invalid.message"),
+                            Notification.Type.ERROR_MESSAGE, true)
+                            .show(Page.getCurrent());
+                    clear();
                 }
             }
-            close();
         } catch (VMException ex) {
             if (menu != null) {
                 menu.setUser(null);
@@ -199,5 +216,6 @@ public final class LoginDialog extends VMWindow {
     public void clear() {
         name.clear();
         password.clear();
+        name.focus();
     }
 }
