@@ -298,11 +298,8 @@
         </profile>
         <profile>
             <id>installer</id>
-            <properties>
-                <original.finalName>${project.build.finalName}</original.finalName>
-            </properties>
             <build>
-                <finalName>ROOT</finalName>
+                <finalName>${project.name}</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.tomcat.maven</groupId>
@@ -316,6 +313,8 @@
                                 </goals>
                                 <phase>package</phase>
                                 <configuration>
+                                    <charset>utf-8</charset>
+                                    <httpPort>9078</httpPort>
                                     <warRunDependency>
                                         <dependency>
                                             <groupId>${project.groupId}</groupId>
@@ -323,7 +322,6 @@
                                             <version>${project.version}</version>
                                             <type>war</type>
                                         </dependency>
-                                        <contextPath>/</contextPath>
                                     </warRunDependency>
                                 </configuration>
                             </execution>

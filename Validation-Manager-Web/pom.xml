@@ -345,37 +345,4 @@
             </plugins>
         </pluginManagement>
     </build>
-    <profiles>
-        <profile>
-            <id>installer</id>
-            <properties>
-                <original.finalName>${project.build.finalName}</original.finalName>
-            </properties>
-            <build>
-                <finalName>ROOT</finalName>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.tomcat.maven</groupId>
-                        <artifactId>tomcat7-maven-plugin</artifactId>
-                        <version>2.2</version>
-                        <executions>
-                            <execution>
-                                <id>tomcat-run</id>
-                                <goals>
-                                    <goal>exec-war-only</goal>
-                                </goals>
-                                <phase>package</phase>
-                                <configuration>
-                                    <path>/</path>
-                                    <charset>utf-8</charset>
-                                    <httpPort>9078</httpPort>
-                                    <contextFile>${project.basedir}\src\main\java\webapp\META-INF\context.xml</contextFile>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

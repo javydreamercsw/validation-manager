@@ -35,4 +35,11 @@
                 <goal>versions:display-plugin-updates</goal>
             </goals>
         </action>
+    <action>
+            <actionName>CUSTOM-Create Embedded Tomcat Distro</actionName>
+            <displayName>Create Embedded Tomcat Distro</displayName>
+            <goals>
+                <goal>package</goal>
+            </goals>
+        </action>
 </actions>
