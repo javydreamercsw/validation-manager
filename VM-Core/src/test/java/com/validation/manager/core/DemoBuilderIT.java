@@ -61,6 +61,10 @@ public class DemoBuilderIT extends AbstractVMTestCase {
                                 assertTrue(s.getRequirementList().size() > 0);
                                 //Check all steps have related fields.
                                 assertTrue(s.getDataEntryList().size() > 0);
+                                //Check all fields have properties.
+                                s.getDataEntryList().forEach(de -> {
+                                    assertTrue(de.getDataEntryPropertyList().size() > 0);
+                                });
                             });
                         });
                     });

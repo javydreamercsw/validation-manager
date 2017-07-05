@@ -97,9 +97,10 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
      */
     public static DataEntry getStringField(String name) {
         DataEntry de = new DataEntry();
+        DataEntryType det = DataEntryTypeServer.getType("type.string.name");
         de.setEntryName(name);
-        de.setDataEntryPropertyList(new ArrayList<>());
-        de.setDataEntryType(DataEntryTypeServer.getType("type.string.name"));
+        de.setDataEntryPropertyList(getDefaultProperties(det));
+        de.setDataEntryType(det);
         return de;
     }
 
@@ -112,8 +113,9 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
     public static DataEntry getBooleanField(String name) {
         DataEntry de = new DataEntry();
         de.setEntryName(name);
-        de.setDataEntryPropertyList(new ArrayList<>());
-        de.setDataEntryType(DataEntryTypeServer.getType("type.boolean.name"));
+        DataEntryType det = DataEntryTypeServer.getType("type.boolean.name");
+        de.setDataEntryPropertyList(getDefaultProperties(det));
+        de.setDataEntryType(det);
         return de;
     }
 
@@ -126,8 +128,9 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
     public static DataEntry getAttachmentField(String name) {
         DataEntry de = new DataEntry();
         de.setEntryName(name);
-        de.setDataEntryPropertyList(new ArrayList<>());
-        de.setDataEntryType(DataEntryTypeServer.getType("type.attachment.name"));
+        DataEntryType det = DataEntryTypeServer.getType("type.attachment.name");
+        de.setDataEntryPropertyList(getDefaultProperties(det));
+        de.setDataEntryType(det);
         de.getDataEntryPropertyList().add(DataEntryPropertyServer
                 .createProperty("property.required", true));
         return de;
@@ -144,17 +147,18 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
     public static DataEntry getNumericField(String name, Float min, Float max) {
         DataEntry de = new DataEntry();
         de.setEntryName(name);
-        de.setDataEntryPropertyList(new ArrayList<>());
-        de.setDataEntryType(DataEntryTypeServer.getType("type.numeric.name"));
-        if (min != null) {
-            //Set minimum
-            de.getDataEntryPropertyList().add(DataEntryPropertyServer
-                    .createProperty("property.min", min));
-        }
-        if (max != null) {
-            //Set maximum
-            de.getDataEntryPropertyList().add(DataEntryPropertyServer
-                    .createProperty("property.max", max));
+        DataEntryType det = DataEntryTypeServer.getType("type.numeric.name");
+        de.setDataEntryPropertyList(getDefaultProperties(det));
+        de.setDataEntryType(det);
+        for (DataEntryProperty dep : de.getDataEntryPropertyList()) {
+            if (dep.getPropertyName().equals("property.min") && min != null) {
+                //Set minimum
+                dep.setPropertyValue(min.toString());
+            }
+            if (dep.getPropertyName().equals("property.max") && max != null) {
+                //Set minimum
+                dep.setPropertyValue(max.toString());
+            }
         }
         return de;
     }
