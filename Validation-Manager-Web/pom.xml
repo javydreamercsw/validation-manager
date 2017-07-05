@@ -365,6 +365,12 @@
                                     <goal>exec-war-only</goal>
                                 </goals>
                                 <phase>package</phase>
+                                <configuration>
+                                    <path>/</path>
+                                    <charset>utf-8</charset>
+                                    <httpPort>9078</httpPort>
+                                    <contextFile>${project.basedir}\src\main\java\webapp\META-INF\context.xml</contextFile>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
