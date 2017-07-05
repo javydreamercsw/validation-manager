@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -166,7 +166,7 @@ public class DemoBuilder {
                                 "Description " + (i + 1), "Scope " + (i + 1));
                 if (reqAmount > 0) {
                     for (int y = 0; y < reqAmount; y++) {
-                        String header = "";
+                        String header;
                         switch (level) {
                             case 1:
                                 header = "PS";
