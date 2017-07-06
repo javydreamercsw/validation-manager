@@ -37,6 +37,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
+import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.AttachmentType;
@@ -88,9 +89,9 @@ public class ExecutionWizardStep implements WizardStep {
 
     private final Wizard w;
     private final ExecutionStepServer step;
-    private final ComboBox result = new ComboBox("general.result");
-    private final ComboBox review = new ComboBox("quality.review");
-    private final ComboBox issueType = new ComboBox("issue.type");
+    private final ComboBox result = new ComboBox(TRANSLATOR.translate("general.result"));
+    private final ComboBox review = new ComboBox(TRANSLATOR.translate("quality.review"));
+    private final ComboBox issueType = new ComboBox(TRANSLATOR.translate("issue.type"));
     private Button attach;
     private Button bug;
     private Button comment;
@@ -109,7 +110,7 @@ public class ExecutionWizardStep implements WizardStep {
         issueType.setSizeFull();
         issueType.setReadOnly(false);
         issueType.setRequired(true);
-        issueType.setRequiredError("missing.type");
+        issueType.setRequiredError(TRANSLATOR.translate("missing.type"));
         IssueTypeJpaController it
                 = new IssueTypeJpaController(DataBaseManager
                         .getEntityManagerFactory());
@@ -132,11 +133,11 @@ public class ExecutionWizardStep implements WizardStep {
         });
         result.setReadOnly(false);
         result.setRequired(true);
-        result.setRequiredError("missing.result");
+        result.setRequiredError(TRANSLATOR.translate("missing.result"));
         result.setTextInputAllowed(false);
         review.setReadOnly(false);
         review.setRequired(true);
-        review.setRequiredError("missing.reviiew.result");
+        review.setRequiredError(TRANSLATOR.translate("missing.reviiew.result"));
         review.setTextInputAllowed(false);
         ReviewResultJpaController c2
                 = new ReviewResultJpaController(DataBaseManager
@@ -189,14 +190,15 @@ public class ExecutionWizardStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return getStep().getStep().getTestCase().getName() + " Step:"
+        return getStep().getStep().getTestCase().getName() + " "
+                + TRANSLATOR.translate("general.step") + ":"
                 + getStep().getStep().getStepSequence();
     }
 
     @Override
     public Component getContent() {
         getStep().update();
-        Panel form = new Panel("step.detail");
+        Panel form = new Panel(TRANSLATOR.translate("step.detail"));
         if (getStep().getExecutionStart() == null) {
             //Set the start date.
             getStep().setExecutionStart(new Date());
@@ -206,17 +208,17 @@ public class ExecutionWizardStep implements WizardStep {
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(getStep().getStep().getClass());
         binder.setItemDataSource(getStep().getStep());
-        TextArea text = new TextArea("general.text");
+        TextArea text = new TextArea(TRANSLATOR.translate("general.text"));
         text.setConverter(new ByteToStringConverter());
         binder.bind(text, "text");
         text.setSizeFull();
         layout.addComponent(text);
-        Field notes = binder.buildAndBind("general.notes", "notes",
+        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"), "notes",
                 TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
         if (getStep().getExecutionStart() != null) {
-            start = new DateField("start.date");
+            start = new DateField(TRANSLATOR.translate("start.date"));
             start.setResolution(Resolution.SECOND);
             start.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
@@ -225,8 +227,7 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(start);
         }
         if (getStep().getExecutionEnd() != null) {
-            end = new DateField(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                    .translate("end.date"));
+            end = new DateField(TRANSLATOR.translate("end.date"));
             end.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
             end.setResolution(Resolution.SECOND);
@@ -248,8 +249,7 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add Reviewer name
         if (getStep().getReviewer() != null) {
-            TextField reviewerField = new TextField(Lookup.getDefault()
-                    .lookup(InternationalizationProvider.class)
+            TextField reviewerField = new TextField(TRANSLATOR
                     .translate("general.reviewer"));
             reviewerField.setValue(getStep().getReviewer().getFirstName() + " "
                     + getStep().getReviewer().getLastName());
@@ -257,8 +257,7 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(reviewerField);
         }
         if (getStep().getReviewDate() != null) {
-            reviewDate = new DateField(Lookup.getDefault()
-                    .lookup(InternationalizationProvider.class)
+            reviewDate = new DateField(TRANSLATOR
                     .translate("review.date"));
             reviewDate.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
@@ -268,7 +267,7 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(reviewDate);
         }
         if (VMSettingServer.getSetting("show.expected.result").getBoolVal()) {
-            TextArea expectedResult = new TextArea("expected.result");
+            TextArea expectedResult = new TextArea(TRANSLATOR.translate("expected.result"));
             expectedResult.setConverter(new ByteToStringConverter());
             binder.bind(expectedResult, "expectedResult");
             expectedResult.setSizeFull();
@@ -276,11 +275,11 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add the Attachments
         HorizontalLayout attachments = new HorizontalLayout();
-        attachments.setCaption("general.attachment");
+        attachments.setCaption(TRANSLATOR.translate("general.attachment"));
         HorizontalLayout comments = new HorizontalLayout();
-        comments.setCaption("general.comments");
+        comments.setCaption(TRANSLATOR.translate("general.comments"));
         HorizontalLayout issues = new HorizontalLayout();
-        issues.setCaption("general.issue");
+        issues.setCaption(TRANSLATOR.translate("general.issue"));
         int commentCounter = 0;
         int issueCounter = 0;
         for (ExecutionStepHasIssue ei : getStep().getExecutionStepHasIssueList()) {
@@ -346,11 +345,11 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add the menu
         HorizontalLayout hl = new HorizontalLayout();
-        attach = new Button("add.attachment");
+        attach = new Button(TRANSLATOR.translate("add.attachment"));
         attach.setIcon(VaadinIcons.PAPERCLIP);
         attach.addClickListener((Button.ClickEvent event) -> {
             //Show dialog to upload file.
-            Window dialog = new VMWindow("attach.file");
+            Window dialog = new VMWindow(TRANSLATOR.translate("attach.file"));
             VerticalLayout vl = new VerticalLayout();
             MultiFileUpload multiFileUpload = new MultiFileUpload() {
                 @Override
@@ -378,7 +377,7 @@ public class ExecutionWizardStep implements WizardStep {
                     }
                 }
             };
-            multiFileUpload.setCaption("select.files.attach");
+            multiFileUpload.setCaption(TRANSLATOR.translate("select.files.attach"));
             vl.addComponent(multiFileUpload);
             dialog.setContent(vl);
             dialog.setHeight(25, Sizeable.Unit.PERCENTAGE);
@@ -386,13 +385,13 @@ public class ExecutionWizardStep implements WizardStep {
             ValidationManagerUI.getInstance().addWindow(dialog);
         });
         hl.addComponent(attach);
-        bug = new Button("create.issue");
+        bug = new Button(TRANSLATOR.translate("create.issue"));
         bug.setIcon(VaadinIcons.BUG);
         bug.addClickListener((Button.ClickEvent event) -> {
             displayIssue(new IssueServer());
         });
         hl.addComponent(bug);
-        comment = new Button("add.comment");
+        comment = new Button(TRANSLATOR.translate("add.comment"));
         comment.setIcon(VaadinIcons.CLIPBOARD_TEXT);
         comment.addClickListener((Button.ClickEvent event) -> {
             AttachmentServer as = new AttachmentServer();
@@ -413,7 +412,7 @@ public class ExecutionWizardStep implements WizardStep {
     }
 
     private void displayIssue(IssueServer is) {
-        Panel form = new Panel("general.issue");
+        Panel form = new Panel(TRANSLATOR.translate("general.issue"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         if (is.getIssuePK() == null) {
@@ -422,17 +421,20 @@ public class ExecutionWizardStep implements WizardStep {
         }
         BeanFieldGroup binder = new BeanFieldGroup(is.getClass());
         binder.setItemDataSource(is);
-        Field title = binder.buildAndBind("general.summary", "title",
+        Field title = binder.buildAndBind(TRANSLATOR.translate("general.summary"),
+                "title",
                 TextField.class);
         title.setSizeFull();
         layout.addComponent(title);
-        Field desc = binder.buildAndBind("general.description", "description",
+        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.description"),
+                "description",
                 TextArea.class);
         desc.setSizeFull();
         layout.addComponent(desc);
-        DateField creation = (DateField) binder.buildAndBind("creation.time",
-                "creationTime",
-                DateField.class);
+        DateField creation = (DateField) binder
+                .buildAndBind(TRANSLATOR.translate("creation.time"),
+                        "creationTime",
+                        DateField.class);
         creation.setReadOnly(true);
         creation.setDateFormat(VMSettingServer.getSetting("date.format")
                 .getStringVal());
@@ -444,7 +446,7 @@ public class ExecutionWizardStep implements WizardStep {
             issueType.setValue(is.getIssueType().getTypeName());
         } else {
             //Set it as observation
-            issueType.setValue("observation.name");
+            issueType.setValue(TRANSLATOR.translate("observation.name"));
         }
         //Lock if being created
         issueType.setReadOnly(is.getIssueType() == null);
@@ -480,7 +482,7 @@ public class ExecutionWizardStep implements WizardStep {
                         ButtonOption.icon(VaadinIcons.CHECK),
                         ButtonOption.disable())
                 .withCancelButton(ButtonOption.icon(VaadinIcons.CLOSE));
-        mb.getWindow().setCaption("issue.detail");
+        mb.getWindow().setCaption(TRANSLATOR.translate("issue.detail"));
         mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
         ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) -> {
             //Enable if there is a description change.
@@ -498,12 +500,12 @@ public class ExecutionWizardStep implements WizardStep {
     }
 
     private void displayComment(AttachmentServer as) {
-        Panel form = new Panel("general.comment");
+        Panel form = new Panel(TRANSLATOR.translate("general.comment"));
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         BeanFieldGroup binder = new BeanFieldGroup(as.getClass());
         binder.setItemDataSource(as);
-        Field desc = binder.buildAndBind("general.text", "textValue",
+        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.text"), "textValue",
                 TextArea.class);
         desc.setSizeFull();
         layout.addComponent(desc);
@@ -535,7 +537,7 @@ public class ExecutionWizardStep implements WizardStep {
                         ButtonOption.icon(VaadinIcons.CHECK),
                         ButtonOption.disable())
                 .withCancelButton(ButtonOption.icon(VaadinIcons.CLOSE));
-        mb.getWindow().setCaption("enter.comment");
+        mb.getWindow().setCaption(TRANSLATOR.translate("enter.comment"));
         mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
         ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) -> {
             //Enable only when there is a comment.
@@ -552,11 +554,11 @@ public class ExecutionWizardStep implements WizardStep {
         String answer = ((String) result.getValue());
         String answer2 = ((String) review.getValue());
         if (answer == null) {
-            Notification.show("unable.to.proceed",
+            Notification.show(TRANSLATOR.translate("unable.to.proceed"),
                     result.getRequiredError(),
                     Notification.Type.WARNING_MESSAGE);
         } else if (reviewer && answer2 == null) {
-            Notification.show("unable.to.proceed",
+            Notification.show(TRANSLATOR.translate("unable.to.proceed"),
                     review.getRequiredError(),
                     Notification.Type.WARNING_MESSAGE);
         } else {
@@ -621,8 +623,8 @@ public class ExecutionWizardStep implements WizardStep {
                 LOG.log(Level.WARNING,
                         "Unable to find OpenOffice and/or LibreOffice "
                         + "installation at: {0}", home);
-                Notification.show("unable.to.render.pdf.title",
-                        "unable.to.render.pdf.message",
+                Notification.show(TRANSLATOR.translate("unable.to.render.pdf.title"),
+                        TRANSLATOR.translate("unable.to.render.pdf.message"),
                         Notification.Type.ERROR_MESSAGE);
                 return false;
             }
@@ -630,8 +632,8 @@ public class ExecutionWizardStep implements WizardStep {
                 LOG.log(Level.WARNING,
                         "Unable to find OpenOffice and/or LibreOffice "
                         + "installation at port: {0}", port);
-                Notification.show("unable.to.render.pdf.title",
-                        "unable.to.render.pdf.port",
+                Notification.show(TRANSLATOR.translate("unable.to.render.pdf.title"),
+                        TRANSLATOR.translate("unable.to.render.pdf.port"),
                         Notification.Type.ERROR_MESSAGE);
                 return false;
             }
@@ -703,8 +705,8 @@ public class ExecutionWizardStep implements WizardStep {
                     + name, ex);
         }
         if (!ableToDisplay) {
-            Notification.show("unable.to.render.pdf.title",
-                    "unable.to.render.pdf.message",
+            Notification.show(TRANSLATOR.translate("unable.to.render.pdf.title"),
+                    TRANSLATOR.translate("unable.to.render.pdf.message"),
                     Notification.Type.ERROR_MESSAGE);
         }
     }
@@ -713,7 +715,7 @@ public class ExecutionWizardStep implements WizardStep {
         MessageBox mb = MessageBox.createQuestion();
         mb.setData(data);
         mb.asModal(true)
-                .withMessage(new Label("remove.item.title"))
+                .withMessage(new Label(TRANSLATOR.translate("remove.item.title")))
                 .withButtonAlignment(Alignment.MIDDLE_CENTER)
                 .withYesButton(() -> {
                     try {
@@ -752,7 +754,7 @@ public class ExecutionWizardStep implements WizardStep {
                     }
                 },
                         ButtonOption.icon(VaadinIcons.CLOSE));
-        mb.getWindow().setCaption("issue.details");
+        mb.getWindow().setCaption(TRANSLATOR.translate("issue.details"));
         mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
         return mb;
     }
