@@ -74,4 +74,9 @@ public class DataEntryTypeServer extends DataEntryType
                 .namedQuery("DataEntryType.findByTypeName", PARAMETERS);
         return result.isEmpty() ? null : (DataEntryType) result.get(0);
     }
+
+    public static Iterable<DataEntryType> getTypes() {
+        return new DataEntryTypeJpaController(DataBaseManager
+                .getEntityManagerFactory()).findDataEntryTypeEntities();
+    }
 }

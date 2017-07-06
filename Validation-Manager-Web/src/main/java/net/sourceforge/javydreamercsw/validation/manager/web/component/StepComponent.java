@@ -17,6 +17,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.validator.NullValidator;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
@@ -26,11 +27,12 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.DataEntryType;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
@@ -38,6 +40,7 @@ import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.DataEntryTypeJpaController;
 import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.DataEntryServer;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Set;
@@ -138,11 +141,16 @@ public final class StepComponent extends Panel {
             Button add = new Button(TRANSLATOR.translate("add.field"));
             add.addClickListener(listener -> {
                 VMWindow w = new VMWindow();
-                VerticalLayout vl = new VerticalLayout();
-                ComboBox newType = new ComboBox(TRANSLATOR.translate("general.type"));
+                FormLayout fl = new FormLayout();
+                ComboBox newType = new ComboBox(TRANSLATOR
+                        .translate("general.type"));
                 newType.setNewItemsAllowed(false);
                 newType.setTextInputAllowed(false);
-                newType.setNewItemsAllowed(false);
+                newType.addValidator(new NullValidator(TRANSLATOR
+                        .translate("message.required.field.missing")
+                        .replaceAll("%f",
+                                TRANSLATOR.translate("general.type")),
+                        false));
                 BeanItemContainer<DataEntryType> container
                         = new BeanItemContainer<>(DataEntryType.class,
                                 new DataEntryTypeJpaController(DataBaseManager
@@ -154,7 +162,44 @@ public final class StepComponent extends Panel {
                     newType.setItemCaption(id,
                             TRANSLATOR.translate(temp.getTypeName()));
                 });
-                w.setContent(vl);
+                fl.addComponent(newType);
+                TextField tf = new TextField(TRANSLATOR.translate("general.name"));
+                fl.addComponent(tf);
+                HorizontalLayout hl = new HorizontalLayout();
+                Button a = new Button(TRANSLATOR.translate("general.add"));
+                a.addClickListener(l -> {
+                    DataEntryType det = (DataEntryType) newType.getValue();
+                    DataEntry de = null;
+                    switch (det.getId()) {
+                        case 1:
+                            de = DataEntryServer.getStringField(tf.getValue());
+                            break;
+                        case 2:
+                            de = DataEntryServer.getNumericField(tf.getValue(),
+                                    null, null);
+                            break;
+                        case 3:
+                            de = DataEntryServer.getBooleanField(tf.getValue());
+                            break;
+                        case 4:
+                            de = DataEntryServer.getAttachmentField(tf.getValue());
+                            break;
+                    }
+                    if (de != null) {
+                        s.getDataEntryList().add(de);
+                        ((ValidationManagerUI) UI.getCurrent()).displayObject(s);
+                    }
+                    UI.getCurrent().removeWindow(w);
+                });
+                hl.addComponent(a);
+                Button c = new Button(TRANSLATOR.translate("general.cancel"));
+                c.addClickListener(l -> {
+                    UI.getCurrent().removeWindow(w);
+                });
+                hl.addComponent(c);
+                fl.addComponent(hl);
+                w.setContent(fl);
+                UI.getCurrent().addWindow(w);
             });
             if (s.getStepPK() == null) {
                 //Creating a new one
@@ -190,6 +235,7 @@ public final class StepComponent extends Panel {
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(save);
+                hl.addComponent(add);
                 hl.addComponent(cancel);
                 layout.addComponent(hl);
             } else {
@@ -231,6 +277,7 @@ public final class StepComponent extends Panel {
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(update);
+                hl.addComponent(add);
                 hl.addComponent(cancel);
                 layout.addComponent(hl);
             }

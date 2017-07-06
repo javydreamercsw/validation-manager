@@ -17,20 +17,19 @@ package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.Validator;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.data.util.converter.Converter;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
-import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.DataEntryType;
-import com.validation.manager.core.db.controller.DataEntryTypeJpaController;
 import com.validation.manager.core.server.core.DataEntryServer;
+import com.validation.manager.core.server.core.DataEntryTypeServer;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -57,38 +56,46 @@ public final class DataEntryComponent extends CustomField<List<DataEntry>> {
             binder.bind(name, "entryName");
             name.setConverter(new TranslationConverter());
             layout.addComponent(name);
-            ComboBox type = new ComboBox(TRANSLATOR.translate("general.type"));
-            type.setNewItemsAllowed(false);
-            type.setTextInputAllowed(false);
-            type.setNewItemsAllowed(false);
-            BeanItemContainer<DataEntryType> container
-                    = new BeanItemContainer<>(DataEntryType.class,
-                            new DataEntryTypeJpaController(DataBaseManager
-                                    .getEntityManagerFactory())
-                                    .findDataEntryTypeEntities());
-            type.setContainerDataSource(container);
-            type.getItemIds().forEach(id -> {
-                DataEntryType temp = ((DataEntryType) id);
-                type.setItemCaption(id,
-                        TRANSLATOR.translate(temp.getTypeName()));
+            TextField type = new TextField(TRANSLATOR.translate("general.type"));
+            type.setConverter(new Converter<String, DataEntryType>() {
+
+                @Override
+                public DataEntryType convertToModel(String value,
+                        Class<? extends DataEntryType> targetType,
+                        Locale locale) throws Converter.ConversionException {
+                    for (DataEntryType det : DataEntryTypeServer.getTypes()) {
+                        if (TRANSLATOR.translate(det.getTypeName()).equals(value)) {
+                            return det;
+                        }
+                    }
+                    return null;
+                }
+
+                @Override
+                public String convertToPresentation(DataEntryType value,
+                        Class<? extends String> targetType, Locale locale)
+                        throws Converter.ConversionException {
+                    return TRANSLATOR.translate(value.getTypeName());
+                }
+
+                @Override
+                public Class<DataEntryType> getModelType() {
+                    return DataEntryType.class;
+                }
+
+                @Override
+                public Class<String> getPresentationType() {
+                    return String.class;
+                }
             });
             DataEntryPropertyComponent properties
                     = new DataEntryPropertyComponent(edit);
-            if (edit) {
-                type.addValueChangeListener(listener -> {
-                    de.setDataEntryType((DataEntryType) type.getValue());
-                    de.getDataEntryPropertyList().clear();
-                    de.getDataEntryPropertyList()
-                            .addAll(DataEntryServer
-                                    .getDefaultProperties(de
-                                            .getDataEntryType()));
-                });
-            }
             binder.bind(type, "dataEntryType");
             layout.addComponent(type);
             binder.bind(properties, "dataEntryPropertyList");
             layout.addComponent(properties);
             binder.setReadOnly(!edit);
+            type.setReadOnly(true);
         });
         return p;
     }

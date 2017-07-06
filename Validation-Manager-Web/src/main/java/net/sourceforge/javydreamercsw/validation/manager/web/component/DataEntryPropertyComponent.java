@@ -15,13 +15,17 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.FormLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.DataEntryProperty;
+import com.validation.manager.core.server.core.DataEntryPropertyServer;
 import java.util.List;
 
 /**
@@ -43,9 +47,23 @@ public final class DataEntryPropertyComponent extends
         Panel p = new Panel();
         FormLayout l = new FormLayout();
         getInternalValue().forEach(prop -> {
-            TextField tf = new TextField(prop.getPropertyName(),
-                    prop.getPropertyValue());
-            l.addComponent(tf);
+            HorizontalLayout hl = new HorizontalLayout();
+            TextField tf = new TextField(
+                    TRANSLATOR.translate(prop.getPropertyName()),
+                    DataEntryPropertyServer.convertFrom(prop.getPropertyValue())
+                            .toString());
+            hl.addComponent(tf);
+            if (edit) {
+                //Add button for deleting this property.
+                Button delete = new Button();
+                delete.setIcon(VaadinIcons.MINUS);
+                delete.addClickListener(listener -> {
+                    getInternalValue().remove(prop);
+                    l.removeComponent(hl);
+                });
+                hl.addComponent(delete);
+            }
+            l.addComponent(hl);
         });
         p.setContent(l);
         return p;
