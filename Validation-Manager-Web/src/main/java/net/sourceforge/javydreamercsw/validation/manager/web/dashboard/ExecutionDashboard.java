@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,7 +54,6 @@ public final class ExecutionDashboard extends VMWindow {
 
     private void init() {
         setCaption("execution.dash");
-        center();
         setHeight(100, Unit.PERCENTAGE);
         setWidth(100, Unit.PERCENTAGE);
         //Gather stats

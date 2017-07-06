@@ -176,7 +176,6 @@ public class UserComponent extends Panel {
             Button projectRole = new Button(TRANSLATOR.translate("manage.project.role"));
             projectRole.addClickListener(l -> {
                 VMWindow w = new VMWindow(TRANSLATOR.translate("manage.project.role"));
-                w.setModal(true);
                 w.setContent(getProjectRoleManager());
                 ((VMUI) UI.getCurrent()).addWindow(w);
             });

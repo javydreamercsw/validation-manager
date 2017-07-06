@@ -458,7 +458,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     .withOkButton(() -> {
                                         //Start the wizard
                                         Wizard w = new Wizard();
-                                        Window sw = new VMWindow();
+                                        VMWindow sw = new VMWindow();
                                         w.setDisplayedMaxTitles(3);
                                         toApprove.forEach(r -> {
                                             w.addStep(new SelectRequirementVersionStep(r));
@@ -492,8 +492,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                                             }
                                         });
                                         sw.setContent(w);
-                                        sw.center();
-                                        sw.setModal(true);
                                         sw.setSizeFull();
                                         addWindow(sw);
                                     }, ButtonOption.focus(),
@@ -1374,8 +1372,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 }
                             });
                             sw.setContent(w);
-                            sw.center();
-                            sw.setModal(true);
                             sw.setSizeFull();
                             addWindow(sw);
                         });
@@ -1605,10 +1601,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                             });
                             subContent.addComponent(cb);
                             subContent.addComponent(upload);
-
-                            // Center it in the browser window
-                            subWindow.center();
-
                             // Open it in the UI
                             addWindow(subWindow);
                         });
@@ -1694,10 +1686,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                             });
                             subContent.addComponent(cb);
                             subContent.addComponent(upload);
-
-                            // Center it in the browser window
-                            subWindow.center();
-
                             // Open it in the UI
                             addWindow(subWindow);
                         });
@@ -2440,7 +2428,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         vs.setSecondComponent(tm);
         vs.setSizeFull();
         w.setContent(vs);
-        w.center();
         w.setSizeFull();
         addWindow(w);
     }

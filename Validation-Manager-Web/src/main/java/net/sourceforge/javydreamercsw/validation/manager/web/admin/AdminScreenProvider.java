@@ -236,7 +236,6 @@ public class AdminScreenProvider extends AbstractProvider {
                     //Show a window to test email settings
                     VMWindow w = new VMWindow(TRANSLATOR
                             .translate("general.email.settings.test"));
-                    w.setModal(true);
                     VerticalLayout vl = new VerticalLayout();
                     TextField to = new TextField(TRANSLATOR.translate("general.email.to"));
                     TextField from = new TextField(TRANSLATOR.translate("general.email.from"));
@@ -410,7 +409,6 @@ public class AdminScreenProvider extends AbstractProvider {
         add.addClickListener(listener -> {
             VMWindow w = new VMWindow();
             w.setContent(new IssueTypeComponent(new IssueType(), true));
-            w.setModal(true);
             ((VMUI) UI.getCurrent()).addWindow(w);
             w.addCloseListener(l -> {
                 ((VMUI) UI.getCurrent()).updateScreen();
@@ -472,7 +470,6 @@ public class AdminScreenProvider extends AbstractProvider {
         add.addClickListener(listener -> {
             VMWindow w = new VMWindow();
             w.setContent(new IssueResolutionComponent(new IssueResolution(), true));
-            w.setModal(true);
             ((VMUI) UI.getCurrent()).addWindow(w);
             w.addCloseListener(l -> {
                 ((VMUI) UI.getCurrent()).updateScreen();
@@ -537,7 +534,6 @@ public class AdminScreenProvider extends AbstractProvider {
         add.addClickListener(listener -> {
             VMWindow w = new VMWindow();
             w.setContent(new RequirementTypeComponent(new RequirementType(), true));
-            w.setModal(true);
             ((VMUI) UI.getCurrent()).addWindow(w);
             w.addCloseListener(l -> {
                 ((VMUI) UI.getCurrent()).updateScreen();

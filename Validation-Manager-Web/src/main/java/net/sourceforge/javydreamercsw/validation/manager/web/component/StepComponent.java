@@ -16,8 +16,10 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -25,12 +27,15 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.db.DataEntryType;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.controller.DataEntryTypeJpaController;
 import com.validation.manager.core.db.controller.StepJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.io.UnsupportedEncodingException;
@@ -38,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.Lookup;
 
@@ -129,10 +135,31 @@ public final class StepComponent extends Panel {
             }
         });
         if (edit) {
+            Button add = new Button(TRANSLATOR.translate("add.field"));
+            add.addClickListener(listener -> {
+                VMWindow w = new VMWindow();
+                VerticalLayout vl = new VerticalLayout();
+                ComboBox newType = new ComboBox(TRANSLATOR.translate("general.type"));
+                newType.setNewItemsAllowed(false);
+                newType.setTextInputAllowed(false);
+                newType.setNewItemsAllowed(false);
+                BeanItemContainer<DataEntryType> container
+                        = new BeanItemContainer<>(DataEntryType.class,
+                                new DataEntryTypeJpaController(DataBaseManager
+                                        .getEntityManagerFactory())
+                                        .findDataEntryTypeEntities());
+                newType.setContainerDataSource(container);
+                newType.getItemIds().forEach(id -> {
+                    DataEntryType temp = ((DataEntryType) id);
+                    newType.setItemCaption(id,
+                            TRANSLATOR.translate(temp.getTypeName()));
+                });
+                w.setContent(vl);
+            });
             if (s.getStepPK() == null) {
                 //Creating a new one
                 Button save = new Button(TRANSLATOR.translate("general.save"));
-                save.addClickListener((Button.ClickEvent event) -> {
+                save.addClickListener(listener -> {
                     try {
                         s.setExpectedResult(((TextArea) result).getValue()
                                 .getBytes("UTF-8"));
