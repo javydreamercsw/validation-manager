@@ -131,8 +131,6 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
         DataEntryType det = DataEntryTypeServer.getType("type.attachment.name");
         de.setDataEntryPropertyList(getDefaultProperties(det));
         de.setDataEntryType(det);
-        de.getDataEntryPropertyList().add(DataEntryPropertyServer
-                .createProperty("property.required", true));
         return de;
     }
 
