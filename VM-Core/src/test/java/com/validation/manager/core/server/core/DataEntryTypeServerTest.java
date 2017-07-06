@@ -56,7 +56,7 @@ public class DataEntryTypeServerTest extends AbstractVMTestCase {
     @Test
     public void testGetType() {
         System.out.println("getType");
-        String type = "string.type.name";
+        String type = "type.string.name";
         assertNotNull(DataEntryTypeServer.getType(type));
         assertNull(DataEntryTypeServer.getType(type + 1));
     }
