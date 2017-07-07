@@ -229,8 +229,8 @@ public class ExecutionWizardStep implements WizardStep {
         binder.bind(text, "text");
         text.setSizeFull();
         layout.addComponent(text);
-        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"), "notes",
-                TextArea.class);
+        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"),
+                "notes", TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
         if (getStep().getExecutionStart() != null) {
@@ -723,14 +723,14 @@ public class ExecutionWizardStep implements WizardStep {
                     ReviewResult newReview = ReviewResultServer.getReview(answer2);
                     getStep().setExecutionStart(start.getValue());
                     if (getStep().getResultId() == null
-                            || !Objects.equals(step.getResultId().getId(),
+                            || !Objects.equals(getStep().getResultId().getId(),
                                     newResult.getId())) {
                         getStep().setResultId(newResult);
                         //Set end date to null to reflect update
                         getStep().setExecutionEnd(null);
                     }
-                    if (getStep().getReviewResultId() == null
-                            || !Objects.equals(step.getReviewResultId().getId(),
+                    if (reviewer && getStep().getReviewResultId() == null
+                            || !Objects.equals(getStep().getReviewResultId().getId(),
                                     newReview.getId())) {
                         getStep().setReviewResultId(newReview);
                         getStep().setReviewer(ValidationManagerUI.getInstance()
@@ -771,9 +771,9 @@ public class ExecutionWizardStep implements WizardStep {
                             stepAnswer.setFieldName(fieldName);
                             stepAnswer.setFieldAnswer(field.getValue().toString());
                             c.create(stepAnswer);
+                            getStep().getExecutionStepAnswerList().add(stepAnswer);
                         }
                     }
-                    getStep().update();
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }

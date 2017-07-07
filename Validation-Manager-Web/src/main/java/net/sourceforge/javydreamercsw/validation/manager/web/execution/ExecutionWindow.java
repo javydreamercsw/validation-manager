@@ -19,6 +19,7 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
@@ -29,6 +30,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.vaadin.teemu.wizards.Wizard;
+import org.vaadin.teemu.wizards.WizardStep;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
 import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
 import org.vaadin.teemu.wizards.event.WizardProgressListener;
@@ -44,7 +46,8 @@ public final class ExecutionWindow extends VMWindow {
     private final boolean reviewer;
 
     /**
-     * Display all the executions one after another.
+     * Display all the executions one after another. This view is used as well
+     * for reviewing the execution
      *
      * @param executions Executions to display.
      * @param reviewer true if this is for a reviewer
@@ -147,20 +150,21 @@ public final class ExecutionWindow extends VMWindow {
                             .withMessage(Lookup.getDefault().lookup(InternationalizationProvider.class)
                                     .translate("lock.test.case.message"))
                             .withYesButton(() -> {
-                                execution.getSteps().stream().map((step)
-                                        -> (ExecutionWizardStep) step).map((s)
-                                        -> s.getStep()).filter((ess) -> (!ess.getLocked()
-                                        && ess.getResultId() != null))
-                                        .forEachOrdered((ess) -> {
-                                            try {
-                                                ess.setLocked(true);
-                                                ess.write2DB();
-                                                ValidationManagerUI.getInstance()
-                                                        .updateScreen();
-                                            } catch (VMException ex) {
-                                                Exceptions.printStackTrace(ex);
-                                            }
-                                        });
+                                for (WizardStep step : execution.getSteps()) {
+                                    ExecutionWizardStep s = (ExecutionWizardStep) step;
+                                    ExecutionStepServer ess = s.getStep();
+                                    if (!ess.getLocked()
+                                            && ess.getResultId() != null) {
+                                        try {
+                                            ess.setLocked(true);
+                                            ess.write2DB();
+                                            ValidationManagerUI.getInstance()
+                                                    .updateScreen();
+                                        } catch (VMException ex) {
+                                            Exceptions.printStackTrace(ex);
+                                        }
+                                    }
+                                }
                             }, ButtonOption.focus(),
                                     ButtonOption.icon(VaadinIcons.CHECK))
                             .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
