@@ -46,13 +46,13 @@ public class DataEntryTypeJpaController implements Serializable {
 
     public void create(DataEntryType dataEntryType) {
         if (dataEntryType.getDataEntryList() == null) {
-            dataEntryType.setDataEntryList(new ArrayList<DataEntry>());
+            dataEntryType.setDataEntryList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<DataEntry> attachedDataEntryList = new ArrayList<DataEntry>();
+            List<DataEntry> attachedDataEntryList = new ArrayList<>();
             for (DataEntry dataEntryListDataEntryToAttach : dataEntryType.getDataEntryList()) {
                 dataEntryListDataEntryToAttach = em.getReference(dataEntryListDataEntryToAttach.getClass(), dataEntryListDataEntryToAttach.getDataEntryPK());
                 attachedDataEntryList.add(dataEntryListDataEntryToAttach);
@@ -89,7 +89,7 @@ public class DataEntryTypeJpaController implements Serializable {
             for (DataEntry dataEntryListOldDataEntry : dataEntryListOld) {
                 if (!dataEntryListNew.contains(dataEntryListOldDataEntry)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain DataEntry " + dataEntryListOldDataEntry + " since its dataEntryType field is not nullable.");
                 }
@@ -97,7 +97,7 @@ public class DataEntryTypeJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<DataEntry> attachedDataEntryListNew = new ArrayList<DataEntry>();
+            List<DataEntry> attachedDataEntryListNew = new ArrayList<>();
             for (DataEntry dataEntryListNewDataEntryToAttach : dataEntryListNew) {
                 dataEntryListNewDataEntryToAttach = em.getReference(dataEntryListNewDataEntryToAttach.getClass(), dataEntryListNewDataEntryToAttach.getDataEntryPK());
                 attachedDataEntryListNew.add(dataEntryListNewDataEntryToAttach);
@@ -152,7 +152,7 @@ public class DataEntryTypeJpaController implements Serializable {
             List<DataEntry> dataEntryListOrphanCheck = dataEntryType.getDataEntryList();
             for (DataEntry dataEntryListOrphanCheckDataEntry : dataEntryListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This DataEntryType (" + dataEntryType + ") cannot be destroyed since the DataEntry " + dataEntryListOrphanCheckDataEntry + " in its dataEntryList field has a non-nullable dataEntryType field.");
             }

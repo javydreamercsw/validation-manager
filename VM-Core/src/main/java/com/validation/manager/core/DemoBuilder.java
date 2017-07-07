@@ -23,6 +23,7 @@ import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.DataEntryServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
@@ -34,7 +35,9 @@ import com.validation.manager.core.server.core.TestCaseServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
 import com.validation.manager.core.server.core.VMUserServer;
+import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -219,10 +222,24 @@ public class DemoBuilder {
                             + (tcCounter++),
                             new Date());
             tcs.write2DB();
+            List<Requirement> reqs = Tool.extractRequirements(p);
+            Random r = new Random();
             for (int j = 0; j < amount; j++) {
+                int min = r.nextInt(reqs.size());
+                int max = min == reqs.size() - 1 ? min
+                        : min + r.nextInt(reqs.size() - min);
                 tcs.addStep((j + 1), "Step #" + (j + 1), "Note",
                         "Criteria",
-                        new ArrayList<>());
+                        reqs.subList(min, max),
+                        Arrays.asList(DataEntryServer
+                                .getStringField("Text",
+                                        r.nextBoolean() ? "Hello" : null,
+                                        r.nextBoolean()),
+                                DataEntryServer.getBooleanField("Boolean",
+                                        r.nextBoolean()),
+                                DataEntryServer.getNumericField("Numeric",
+                                        10f, 20f),
+                                DataEntryServer.getAttachmentField("Attachment")));
             }
             tcs.write2DB();
             tps.addTestCase(tcs.getEntity());

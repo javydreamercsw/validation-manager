@@ -15,14 +15,20 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
+import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.util.converter.StringToDoubleConverter;
+import com.vaadin.data.validator.DoubleRangeValidator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.shared.ui.datefield.Resolution;
+import com.vaadin.ui.AbstractField;
+import com.vaadin.ui.AbstractTextField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
@@ -41,16 +47,20 @@ import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.AttachmentType;
+import com.validation.manager.core.db.DataEntryProperty;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.ExecutionStepAnswer;
 import com.validation.manager.core.db.ExecutionStepHasAttachment;
 import com.validation.manager.core.db.ExecutionStepHasIssue;
 import com.validation.manager.core.db.ReviewResult;
 import com.validation.manager.core.db.controller.ExecutionResultJpaController;
+import com.validation.manager.core.db.controller.ExecutionStepAnswerJpaController;
 import com.validation.manager.core.db.controller.IssueTypeJpaController;
 import com.validation.manager.core.db.controller.ReviewResultJpaController;
 import com.validation.manager.core.server.core.AttachmentServer;
 import com.validation.manager.core.server.core.AttachmentTypeServer;
+import com.validation.manager.core.server.core.DataEntryServer;
 import com.validation.manager.core.server.core.ExecutionResultServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.IssueServer;
@@ -64,6 +74,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,6 +91,7 @@ import org.openide.util.Lookup;
 import org.vaadin.easyuploads.MultiFileUpload;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.WizardStep;
+import tm.kod.widgets.numberfield.NumberField;
 
 /**
  *
@@ -89,9 +101,12 @@ public class ExecutionWizardStep implements WizardStep {
 
     private final Wizard w;
     private final ExecutionStepServer step;
-    private final ComboBox result = new ComboBox(TRANSLATOR.translate("general.result"));
-    private final ComboBox review = new ComboBox(TRANSLATOR.translate("quality.review"));
-    private final ComboBox issueType = new ComboBox(TRANSLATOR.translate("issue.type"));
+    private final ComboBox result
+            = new ComboBox(TRANSLATOR.translate("general.result"));
+    private final ComboBox review
+            = new ComboBox(TRANSLATOR.translate("quality.review"));
+    private final ComboBox issueType
+            = new ComboBox(TRANSLATOR.translate("issue.type"));
     private Button attach;
     private Button bug;
     private Button comment;
@@ -101,6 +116,7 @@ public class ExecutionWizardStep implements WizardStep {
     private static final Logger LOG
             = Logger.getLogger(ExecutionWizardStep.class.getSimpleName());
     private boolean reviewer = false;
+    private final List<AbstractField> fields = new ArrayList<>();
 
     public ExecutionWizardStep(Wizard w, ExecutionStep step,
             boolean reviewer) {
@@ -267,12 +283,136 @@ public class ExecutionWizardStep implements WizardStep {
             layout.addComponent(reviewDate);
         }
         if (VMSettingServer.getSetting("show.expected.result").getBoolVal()) {
-            TextArea expectedResult = new TextArea(TRANSLATOR.translate("expected.result"));
+            TextArea expectedResult
+                    = new TextArea(TRANSLATOR.translate("expected.result"));
             expectedResult.setConverter(new ByteToStringConverter());
             binder.bind(expectedResult, "expectedResult");
             expectedResult.setSizeFull();
             layout.addComponent(expectedResult);
         }
+        //Add the fields
+        fields.clear();
+        getStep().getStep().getDataEntryList().forEach(de -> {
+            switch (de.getDataEntryType().getId()) {
+                case 1://String
+                    TextField tf = new TextField(TRANSLATOR
+                            .translate(de.getEntryName()));
+                    tf.setRequired(true);
+                    tf.setData(de.getEntryName());
+                    if (VMSettingServer.getSetting("show.expected.result")
+                            .getBoolVal()) {
+                        //Add expected result
+                        DataEntryProperty stringCase = DataEntryServer
+                                .getProperty(de, "property.match.case");
+                        DataEntryProperty r = DataEntryServer
+                                .getProperty(de, "property.expected.result");
+                        if (r != null
+                                && !r.getPropertyValue().equals("null")) {
+                            String error = TRANSLATOR.translate("expected.result") + ": "
+                                    + r.getPropertyValue();
+                            tf.setRequiredError(error);
+                            tf.addValidator((Object val) -> {
+                                //We have an expected result and a match case requirement
+                                if (stringCase != null
+                                        && stringCase.getPropertyValue().equals("true")
+                                        ? !((String) val).equals(r.getPropertyValue())
+                                        : !((String) val).equalsIgnoreCase(r.getPropertyValue())) {
+                                    throw new InvalidValueException(error);
+                                }
+                            });
+                        }
+                    }
+                    fields.add(tf);
+                    //Set value if already recorded
+                    updateValue(tf);
+                    layout.addComponent(tf);
+                    break;
+                case 2://Numeric
+                    NumberField field = new NumberField(TRANSLATOR
+                            .translate(de.getEntryName()));
+                    field.setSigned(true);
+                    field.setUseGrouping(true);
+                    field.setGroupingSeparator(',');
+                    field.setDecimal(true);
+                    field.setDecimalSeparator('.');
+                    field.setConverter(new StringToDoubleConverter());
+                    field.setRequired(true);
+                    field.setData(de.getEntryName());
+                    Double min = null,
+                     max = null;
+                    for (DataEntryProperty prop : de.getDataEntryPropertyList()) {
+                        String value = prop.getPropertyValue();
+                        if (prop.getPropertyName().equals("property.max")) {
+                            try {
+                                max = Double.parseDouble(value);
+                            } catch (NumberFormatException ex) {
+                                //Leave as null
+                            }
+                        } else if (prop.getPropertyName().equals("property.min")) {
+                            try {
+                                min = Double.parseDouble(value);
+                            } catch (NumberFormatException ex) {
+                                //Leave as null
+                            }
+                        }
+                    }
+                    if (VMSettingServer.getSetting("show.expected.result")
+                            .getBoolVal()) {
+                        //Add expected result
+                        if (min != null || max != null) {
+                            String error = TRANSLATOR
+                                    .translate("error.out.of.range")
+                                    + " "
+                                    + (min == null ? " "
+                                            : (TRANSLATOR.translate("property.min")
+                                            + ": " + min))
+                                    + " "
+                                    + (max == null ? ""
+                                            : (TRANSLATOR
+                                                    .translate("property.max")
+                                            + ": " + max));
+                            field.setRequiredError(error);
+                            field.addValidator(new DoubleRangeValidator(error,
+                                    min, max));
+                        }
+                    }
+                    fields.add(field);
+                    //Set value if already recorded
+                    updateValue(field);
+                    layout.addComponent(field);
+                    break;
+                case 3://Boolean
+                    CheckBox cb = new CheckBox(TRANSLATOR
+                            .translate(de.getEntryName()));
+                    cb.setData(de.getEntryName());
+                    cb.setRequired(true);
+                    if (VMSettingServer.getSetting("show.expected.result")
+                            .getBoolVal()) {
+                        DataEntryProperty r = DataEntryServer.getProperty(de,
+                                "property.expected.result");
+                        if (r != null) {
+                            //Add expected result
+                            String error = TRANSLATOR.translate("expected.result") + ": "
+                                    + r.getPropertyValue();
+                            cb.addValidator((Object val) -> {
+                                if (!val.toString().equals(r.getPropertyValue())) {
+                                    throw new InvalidValueException(error);
+                                }
+                            });
+                        }
+                    }
+                    fields.add(cb);
+                    //Set value if already recorded
+                    updateValue(cb);
+                    layout.addComponent(cb);
+                    break;
+                case 4://Attachment
+                    Label l = new Label(TRANSLATOR
+                            .translate(de.getEntryName()));
+                    layout.addComponent(l);
+                    break;
+            }
+        });
         //Add the Attachments
         HorizontalLayout attachments = new HorizontalLayout();
         attachments.setCaption(TRANSLATOR.translate("general.attachment"));
@@ -553,6 +693,7 @@ public class ExecutionWizardStep implements WizardStep {
         //Can only proceed after the current step is executed and documented.
         String answer = ((String) result.getValue());
         String answer2 = ((String) review.getValue());
+        boolean pass = true;
         if (answer == null) {
             Notification.show(TRANSLATOR.translate("unable.to.proceed"),
                     result.getRequiredError(),
@@ -562,41 +703,87 @@ public class ExecutionWizardStep implements WizardStep {
                     review.getRequiredError(),
                     Notification.Type.WARNING_MESSAGE);
         } else {
-            try {
-                //Save the result
-                ExecutionResult newResult = ExecutionResultServer
-                        .getResult(answer);
-                ReviewResult newReview = ReviewResultServer.getReview(answer2);
-                getStep().setExecutionStart(start.getValue());
-                if (getStep().getResultId() == null
-                        || !Objects.equals(step.getResultId().getId(),
-                                newResult.getId())) {
-                    getStep().setResultId(newResult);
-                    //Set end date to null to reflect update
-                    getStep().setExecutionEnd(null);
+            //Check all fields for answers
+            for (AbstractField field : fields) {
+                if (field.isRequired()) {
+                    if (!(field instanceof CheckBox)
+                            && field.isEmpty()) {
+                        Notification.show(TRANSLATOR.translate("unable.to.proceed"),
+                                field.getRequiredError(),
+                                Notification.Type.WARNING_MESSAGE);
+                        pass = false;
+                    }
                 }
-                if (getStep().getReviewResultId() == null
-                        || !Objects.equals(step.getReviewResultId().getId(),
-                                newReview.getId())) {
-                    getStep().setReviewResultId(newReview);
-                    //Set end date to null to reflect update
-                    getStep().setReviewer(ValidationManagerUI.getInstance().getUser());
+            }
+            if (pass) {
+                try {
+                    //Save the result
+                    ExecutionResult newResult = ExecutionResultServer
+                            .getResult(answer);
+                    ReviewResult newReview = ReviewResultServer.getReview(answer2);
+                    getStep().setExecutionStart(start.getValue());
+                    if (getStep().getResultId() == null
+                            || !Objects.equals(step.getResultId().getId(),
+                                    newResult.getId())) {
+                        getStep().setResultId(newResult);
+                        //Set end date to null to reflect update
+                        getStep().setExecutionEnd(null);
+                    }
+                    if (getStep().getReviewResultId() == null
+                            || !Objects.equals(step.getReviewResultId().getId(),
+                                    newReview.getId())) {
+                        getStep().setReviewResultId(newReview);
+                        getStep().setReviewer(ValidationManagerUI.getInstance()
+                                .getUser());
+                    }
+                    if (getStep().getExecutionEnd() == null) {
+                        getStep().setExecutionEnd(new Date());
+                    }
+                    if (reviewer && getStep().getReviewDate() == null) {
+                        getStep().setReviewDate(new Date());
+                    }
+                    //Save the field answers
+                    if (getStep().getExecutionStepAnswerList() == null) {
+                        getStep().setExecutionStepAnswerList(new ArrayList<>());
+                    }
+                    getStep().getExecutionStepAnswerList().clear();
+                    ExecutionStepAnswerJpaController c
+                            = new ExecutionStepAnswerJpaController(DataBaseManager
+                                    .getEntityManagerFactory());
+                    for (AbstractField field : fields) {
+                        //The field has the field name as data
+                        if (field.getData() == null) {
+                            pass = false;
+                            LOG.log(Level.SEVERE, "Field missing data! {0}",
+                                    field);
+                        } else {
+                            String fieldName = (String) field.getData();
+                            ExecutionStepAnswer stepAnswer
+                                    = new ExecutionStepAnswer(getStep()
+                                            .getExecutionStepPK()
+                                            .getTestCaseExecutionId(),
+                                            getStep().getExecutionStepPK()
+                                                    .getStepId(),
+                                            getStep().getExecutionStepPK()
+                                                    .getStepTestCaseId()
+                                    );
+                            stepAnswer.setExecutionStep(getStep().getEntity());
+                            stepAnswer.setFieldName(fieldName);
+                            stepAnswer.setFieldAnswer(field.getValue().toString());
+                            c.create(stepAnswer);
+                        }
+                    }
+                    getStep().update();
+                } catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
                 }
-                if (getStep().getExecutionEnd() == null) {
-                    getStep().setExecutionEnd(new Date());
-                }
-                if (reviewer && getStep().getReviewDate() == null) {
-                    getStep().setReviewDate(new Date());
-                }
-            } catch (Exception ex) {
-                LOG.log(Level.SEVERE, null, ex);
             }
         }
         boolean validAnswer = result.getValue() != null
                 && !((String) result.getValue()).trim().isEmpty();
         boolean validReview = review.getValue() != null
                 && !((String) review.getValue()).trim().isEmpty();
-        return reviewer ? validReview && validAnswer : validAnswer;
+        return reviewer ? validReview && validAnswer : validAnswer && pass;
     }
 
     @Override
@@ -757,5 +944,22 @@ public class ExecutionWizardStep implements WizardStep {
         mb.getWindow().setCaption(TRANSLATOR.translate("issue.details"));
         mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
         return mb;
+    }
+
+    private void updateValue(AbstractField field) {
+        if (field.getData() != null) {
+            //Look for the answer in the database
+            getStep().getExecutionStepAnswerList().forEach(answer -> {
+                if (answer.getFieldName().equals(field.getData())) {
+                    if (field instanceof AbstractTextField) {//This includes NumberField
+                        field.setValue(answer.getFieldAnswer());
+                    } else if (field instanceof CheckBox) {
+                        field.setValue(answer.getFieldAnswer().equals("true"));
+                    }
+                }
+            });
+        } else {
+            LOG.log(Level.SEVERE, "Field missing data! {0}", field);
+        }
     }
 }

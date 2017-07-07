@@ -25,7 +25,6 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.DataEntryProperty;
-import com.validation.manager.core.server.core.DataEntryPropertyServer;
 import java.util.List;
 
 /**
@@ -47,23 +46,24 @@ public final class DataEntryPropertyComponent extends
         Panel p = new Panel();
         FormLayout l = new FormLayout();
         getInternalValue().forEach(prop -> {
-            HorizontalLayout hl = new HorizontalLayout();
-            TextField tf = new TextField(
-                    TRANSLATOR.translate(prop.getPropertyName()),
-                    DataEntryPropertyServer.convertFrom(prop.getPropertyValue())
-                            .toString());
-            hl.addComponent(tf);
-            if (edit) {
-                //Add button for deleting this property.
-                Button delete = new Button();
-                delete.setIcon(VaadinIcons.MINUS);
-                delete.addClickListener(listener -> {
-                    getInternalValue().remove(prop);
-                    l.removeComponent(hl);
-                });
-                hl.addComponent(delete);
+            if (!prop.getPropertyName().equals("property.expected.result")) {
+                HorizontalLayout hl = new HorizontalLayout();
+                TextField tf = new TextField(
+                        TRANSLATOR.translate(prop.getPropertyName()),
+                        prop.getPropertyValue());
+                hl.addComponent(tf);
+                if (edit) {
+                    //Add button for deleting this property.
+                    Button delete = new Button();
+                    delete.setIcon(VaadinIcons.MINUS);
+                    delete.addClickListener(listener -> {
+                        getInternalValue().remove(prop);
+                        l.removeComponent(hl);
+                    });
+                    hl.addComponent(delete);
+                }
+                l.addComponent(hl);
             }
-            l.addComponent(hl);
         });
         p.setContent(l);
         return p;

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -135,15 +135,21 @@ public class ExecutionStep implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
     private List<ExecutionStepHasVmUser> executionStepHasVmUserList;
     @JoinTable(name = "execution_step_has_history", joinColumns = {
-        @JoinColumn(name = "execution_step_test_case_execution_id", referencedColumnName = "test_case_execution_id")
-        , @JoinColumn(name = "execution_step_step_id", referencedColumnName = "step_id")
-        , @JoinColumn(name = "execution_step_step_test_case_id", referencedColumnName = "step_test_case_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "history_id", referencedColumnName = "id")})
+        @JoinColumn(name = "execution_step_test_case_execution_id",
+                referencedColumnName = "test_case_execution_id")
+        , @JoinColumn(name = "execution_step_step_id",
+                referencedColumnName = "step_id")
+        , @JoinColumn(name = "execution_step_step_test_case_id",
+                referencedColumnName = "step_test_case_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "history_id", referencedColumnName = "id")})
     @ManyToMany
     private List<History> historyList;
     @JoinColumn(name = "step_history", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private History stepHistory;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "executionStep")
+    private List<ExecutionStepAnswer> executionStepAnswerList;
 
     public ExecutionStep() {
     }
@@ -152,13 +158,15 @@ public class ExecutionStep implements Serializable {
         this.executionStepPK = executionStepPK;
     }
 
-    public ExecutionStep(ExecutionStepPK executionStepPK, boolean locked, boolean reviewed) {
+    public ExecutionStep(ExecutionStepPK executionStepPK, boolean locked,
+            boolean reviewed) {
         this.executionStepPK = executionStepPK;
         this.locked = locked;
         this.reviewed = reviewed;
     }
 
-    public ExecutionStep(int testCaseExecutionId, int stepId, int stepTestCaseId) {
+    public ExecutionStep(int testCaseExecutionId, int stepId,
+            int stepTestCaseId) {
         this.executionStepPK = new ExecutionStepPK(testCaseExecutionId,
                 stepId, stepTestCaseId);
     }
@@ -281,8 +289,8 @@ public class ExecutionStep implements Serializable {
         return executionStepHasAttachmentList;
     }
 
-    public void setExecutionStepHasAttachmentList(List<ExecutionStepHasAttachment> executionStepHasAttachmentList) {
-        this.executionStepHasAttachmentList = executionStepHasAttachmentList;
+    public void setExecutionStepHasAttachmentList(List<ExecutionStepHasAttachment> esha) {
+        this.executionStepHasAttachmentList = esha;
     }
 
     @Override
@@ -306,7 +314,8 @@ public class ExecutionStep implements Serializable {
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.ExecutionStep[ executionStepPK=" + executionStepPK + " ]";
+        return "com.validation.manager.core.db.ExecutionStep[ executionStepPK="
+                + executionStepPK + " ]";
     }
 
     @XmlTransient
@@ -315,8 +324,8 @@ public class ExecutionStep implements Serializable {
         return executionStepHasIssueList;
     }
 
-    public void setExecutionStepHasIssueList(List<ExecutionStepHasIssue> executionStepHasIssueList) {
-        this.executionStepHasIssueList = executionStepHasIssueList;
+    public void setExecutionStepHasIssueList(List<ExecutionStepHasIssue> eshi) {
+        this.executionStepHasIssueList = eshi;
     }
 
     /**
@@ -353,8 +362,8 @@ public class ExecutionStep implements Serializable {
         return executionStepHasVmUserList;
     }
 
-    public void setExecutionStepHasVmUserList(List<ExecutionStepHasVmUser> executionStepHasVmUserList) {
-        this.executionStepHasVmUserList = executionStepHasVmUserList;
+    public void setExecutionStepHasVmUserList(List<ExecutionStepHasVmUser> eshu) {
+        this.executionStepHasVmUserList = eshu;
     }
 
     @XmlTransient
@@ -373,5 +382,15 @@ public class ExecutionStep implements Serializable {
 
     public void setStepHistory(History stepHistory) {
         this.stepHistory = stepHistory;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<ExecutionStepAnswer> getExecutionStepAnswerList() {
+        return executionStepAnswerList;
+    }
+
+    public void setExecutionStepAnswerList(List<ExecutionStepAnswer> esa) {
+        this.executionStepAnswerList = esa;
     }
 }

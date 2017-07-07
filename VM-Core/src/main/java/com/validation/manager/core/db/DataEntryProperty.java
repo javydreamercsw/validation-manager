@@ -163,5 +163,4 @@ public class DataEntryProperty implements Serializable {
         return "com.validation.manager.core.db.DataEntryProperty[ dataEntryPropertyPK="
                 + dataEntryPropertyPK + " ]";
     }
-
 }

@@ -96,11 +96,31 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
      * @return DataEntry. The entry is not persisted into the database yet.
      */
     public static DataEntry getStringField(String name) {
+        return getStringField(name, null, false);
+    }
+
+    /**
+     * Create a default string field
+     *
+     * @param name Field name
+     * @param expected Expected result.
+     * @param matchCase True if answer must match the case of the expected
+     * result. False otherwise.
+     * @return DataEntry. The entry is not persisted into the database yet.
+     */
+    public static DataEntry getStringField(String name, String expected,
+            boolean matchCase) {
         DataEntry de = new DataEntry();
         DataEntryType det = DataEntryTypeServer.getType("type.string.name");
         de.setEntryName(name);
         de.setDataEntryPropertyList(getDefaultProperties(det));
         de.setDataEntryType(det);
+        if (expected != null) {
+            getProperty(de, "property.expected.result")
+                    .setPropertyValue(expected);
+            getProperty(de, "property.match.case")
+                    .setPropertyValue(matchCase ? "true" : "false");
+        }
         return de;
     }
 
@@ -116,6 +136,24 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
         DataEntryType det = DataEntryTypeServer.getType("type.boolean.name");
         de.setDataEntryPropertyList(getDefaultProperties(det));
         de.setDataEntryType(det);
+        return de;
+    }
+
+    /**
+     * Create a boolean field
+     *
+     * @param name Field name
+     * @param expected Expected result
+     * @return DataEntry. The entry is not persisted into the database yet.
+     */
+    public static DataEntry getBooleanField(String name, boolean expected) {
+        DataEntry de = new DataEntry();
+        de.setEntryName(name);
+        DataEntryType det = DataEntryTypeServer.getType("type.boolean.name");
+        de.setDataEntryPropertyList(getDefaultProperties(det));
+        de.setDataEntryType(det);
+        getProperty(de, "property.expected.result")
+                .setPropertyValue(expected ? "true" : "false");
         return de;
     }
 
@@ -163,16 +201,36 @@ public final class DataEntryServer extends DataEntry implements EntityServer<Dat
 
     public static List<DataEntryProperty> getDefaultProperties(DataEntryType det) {
         List<DataEntryProperty> props = new ArrayList<>();
+        //Required by default
         props.add(DataEntryPropertyServer
                 .createProperty("property.required", true));
         switch (det.getId()) {
-            case 2:
+            case 2://Numeric: add value range
                 props.add(DataEntryPropertyServer
-                        .createProperty("property.min", "X"));
+                        .createProperty("property.min", null));
                 props.add(DataEntryPropertyServer
-                        .createProperty("property.max", "X"));
+                        .createProperty("property.max", null));
                 break;
+            case 1://Additional properties for text fields
+                props.add(DataEntryPropertyServer
+                        .createProperty("property.match.case", false));
+            //Fall thru
+            default:
+                //Property for expected result.
+                props.add(DataEntryPropertyServer
+                        .createProperty("property.expected.result", null));
         }
         return props;
+    }
+
+    public static DataEntryProperty getProperty(DataEntry de, String name) {
+        DataEntryProperty prop = null;
+        for (DataEntryProperty p : de.getDataEntryPropertyList()) {
+            if (p.getPropertyName().equals(name)) {
+                prop = p;
+                break;
+            }
+        }
+        return prop;
     }
 }

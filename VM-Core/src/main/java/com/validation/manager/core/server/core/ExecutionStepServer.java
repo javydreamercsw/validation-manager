@@ -104,6 +104,7 @@ public final class ExecutionStepServer extends ExecutionStep
         target.setReviewDate(source.getReviewDate());
         target.setHistoryList(source.getHistoryList());
         target.setStepHistory(source.getStepHistory());
+        target.setExecutionStepAnswerList(source.getExecutionStepAnswerList());
     }
 
     @Override

@@ -66,4 +66,6 @@ limitations under the License.
     <inherits name="org.vaadin.gridutil.WidgetSet" />
 
     <inherits name="pl.pdfviewer.PdfViewerWidgetSet" />
+
+    <inherits name="tm.kod.widgets.numberfield.WidgetSet" />
 </module>

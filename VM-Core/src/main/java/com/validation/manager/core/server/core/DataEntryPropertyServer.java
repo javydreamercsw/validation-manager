@@ -19,16 +19,7 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.DataEntryProperty;
 import com.validation.manager.core.db.controller.DataEntryPropertyJpaController;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Base64;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -37,39 +28,12 @@ import java.util.logging.Logger;
 public final class DataEntryPropertyServer extends DataEntryProperty
         implements EntityServer<DataEntryProperty> {
 
-    private static final Logger LOG
-            = Logger.getLogger(DataEntryPropertyServer.class.getSimpleName());
-
-    public static DataEntryProperty createProperty(String name, Serializable val) {
+    public static DataEntryProperty createProperty(String name,
+            Serializable val) {
         DataEntryProperty dep = new DataEntryProperty();
         dep.setPropertyName(name);
-        dep.setPropertyValue(convertToString(val).get());
+        dep.setPropertyValue(val == null ? "null" : val.toString());
         return dep;
-    }
-
-    public static Optional<String> convertToString(final Serializable object) {
-        try (final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-            oos.writeObject(object);
-            return Optional.of(Base64.getEncoder().encodeToString(baos.toByteArray()));
-        }
-        catch (final IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            return Optional.empty();
-        }
-    }
-
-    public static <T extends Serializable> Object
-            convertFrom(final String objectAsString) {
-        final byte[] data = Base64.getDecoder().decode(objectAsString);
-        try (final ObjectInputStream ois
-                = new ObjectInputStream(new ByteArrayInputStream(data))) {
-            return ois.readObject();
-        }
-        catch (final IOException | ClassNotFoundException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            return Optional.empty();
-        }
     }
 
     DataEntryPropertyServer(DataEntryProperty dep) {

@@ -16,6 +16,7 @@
 package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.db.DataEntry;
+import com.validation.manager.core.db.DataEntryProperty;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -200,6 +201,14 @@ public class DataEntryServerTest extends AbstractVMTestCase {
         assertEquals("type.numeric.name", de.getDataEntryType().getTypeName());
         assertEquals(DataEntryServer.getDefaultProperties(de
                 .getDataEntryType()).size(), de.getDataEntryPropertyList().size());
+        for (DataEntryProperty dep : de.getDataEntryPropertyList()) {
+            if (dep.getPropertyName().equals("property.min")) {
+                assertEquals("null", dep.getPropertyValue());
+            }
+            if (dep.getPropertyName().equals("property.max")) {
+                assertEquals("null", dep.getPropertyValue());
+            }
+        }
         min = 1.0f;
         de = DataEntryServer.getNumericField(name, min, max);
         assertNull(de.getDataEntryPK());
@@ -207,6 +216,14 @@ public class DataEntryServerTest extends AbstractVMTestCase {
         assertEquals("type.numeric.name", de.getDataEntryType().getTypeName());
         assertEquals(DataEntryServer.getDefaultProperties(de
                 .getDataEntryType()).size(), de.getDataEntryPropertyList().size());
+        for (DataEntryProperty dep : de.getDataEntryPropertyList()) {
+            if (dep.getPropertyName().equals("property.min")) {
+                assertEquals(min, Float.valueOf(dep.getPropertyValue()));
+            }
+            if (dep.getPropertyName().equals("property.max")) {
+                assertEquals("null", dep.getPropertyValue());
+            }
+        }
         max = 10.0f;
         de = DataEntryServer.getNumericField(name, min, max);
         assertNull(de.getDataEntryPK());
@@ -214,6 +231,14 @@ public class DataEntryServerTest extends AbstractVMTestCase {
         assertEquals("type.numeric.name", de.getDataEntryType().getTypeName());
         assertEquals(DataEntryServer.getDefaultProperties(de
                 .getDataEntryType()).size(), de.getDataEntryPropertyList().size());
+        for (DataEntryProperty dep : de.getDataEntryPropertyList()) {
+            if (dep.getPropertyName().equals("property.min")) {
+                assertEquals(min, Float.valueOf(dep.getPropertyValue()));
+            }
+            if (dep.getPropertyName().equals("property.max")) {
+                assertEquals(max, Float.valueOf(dep.getPropertyValue()));
+            }
+        }
         de.setStep(tcs.getStepList().get(0));
         DataEntryServer des = new DataEntryServer(de);
         des.write2DB();
@@ -224,5 +249,13 @@ public class DataEntryServerTest extends AbstractVMTestCase {
         assertEquals(DataEntryServer.getDefaultProperties(de
                 .getDataEntryType()).size(), des.getEntity()
                         .getDataEntryPropertyList().size());
+        for (DataEntryProperty dep : des.getDataEntryPropertyList()) {
+            if (dep.getPropertyName().equals("property.min")) {
+                assertEquals(min, Float.valueOf(dep.getPropertyValue()));
+            }
+            if (dep.getPropertyName().equals("property.max")) {
+                assertEquals(max, Float.valueOf(dep.getPropertyValue()));
+            }
+        }
     }
 }
