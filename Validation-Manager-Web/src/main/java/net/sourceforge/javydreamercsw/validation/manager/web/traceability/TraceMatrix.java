@@ -55,13 +55,13 @@ public class TraceMatrix extends TreeTable {
     }
 
     private void init() {
-        addContainerProperty("general.requirement",
+        addContainerProperty(TRANSLATOR.translate("general.requirement"),
                 String.class, "");
-        addContainerProperty("general.test.case",
+        addContainerProperty(TRANSLATOR.translate("general.test.case"),
                 Label.class, "");
-        addContainerProperty("general.result",
+        addContainerProperty(TRANSLATOR.translate("general.result"),
                 Label.class, "");
-        addContainerProperty("general.issue",
+        addContainerProperty(TRANSLATOR.translate("general.issue"),
                 Label.class, "");
         Tool.extractRequirements(p).forEach((r) -> {
             if (r.getParentRequirementId() == null) {
