@@ -23,23 +23,31 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepPK;
+import com.validation.manager.core.db.HistoryField;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
+import com.validation.manager.core.server.core.VMSettingServer;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.execution.ExecutionWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
@@ -175,19 +183,22 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     if (!isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof TesterScreenProvider) {
                         actions.add(new Action(TRANSLATOR
-                                .translate("general.execute")));
+                                .translate("general.execute"),
+                                VMUI.EXECUTION_ICON));
                     } else if (isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof QualityScreenProvider) {
                         actions.add(new Action(TRANSLATOR
-                                .translate("general.review")));
+                                .translate("general.review"),
+                                VaadinIcons.EYE));
                     }
+                    actions.add(new Action(TRANSLATOR
+                            .translate("general.export"), VaadinIcons.DOWNLOAD));
                 }
                 return actions.toArray(new Action[actions.size()]);
             }
 
             @Override
             public void handleAction(Action action, Object sender, Object target) {
-                //Parse the information to get the exact Execution Step
                 List<TestCaseExecutionServer> executions = new ArrayList<>();
                 int tcID = -1;
                 if (((String) target).startsWith("tce")) {
@@ -200,9 +211,95 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     tcID = Integer.parseInt(((String) target)
                             .substring(((String) target).lastIndexOf("-") + 1));
                 }
-                showExecutionScreen(executions, tcID);
+                //Parse the information to get the exact Execution Step
+                if (action.getCaption().equals(TRANSLATOR
+                        .translate("general.export"))) {
+                    viewExecutionScreen(executions, tcID);
+                } else {
+                    showExecutionScreen(executions, tcID);
+                }
             }
         });
+    }
+
+    private void viewExecutionScreen(List<TestCaseExecutionServer> executions,
+            int tcID) {
+        TreeTable summary = new TreeTable();
+        summary.addContainerProperty(TRANSLATOR.translate("general.test.case"),
+                String.class, "");
+        summary.addContainerProperty(TRANSLATOR.translate("general.sequence"),
+                String.class, "");
+        summary.addContainerProperty(TRANSLATOR.translate("general.text"),
+                String.class, "");
+        summary.addContainerProperty(TRANSLATOR.translate("general.notes"),
+                String.class, "");
+        summary.addContainerProperty(TRANSLATOR.translate("expected.result"),
+                String.class, "");
+        summary.addContainerProperty(TRANSLATOR.translate("general.result"),
+                String.class, "");
+        summary.addContainerProperty(TRANSLATOR.translate("start.date"),
+                String.class, "");
+        summary.addContainerProperty(TRANSLATOR.translate("end.date"),
+                String.class, "");
+        VMWindow w = new VMWindow();
+        for (TestCaseExecutionServer execution : executions) {
+            for (ExecutionStep es : execution.getExecutionStepList()) {
+                if (tcID < 0
+                        || es.getExecutionStepPK().getStepTestCaseId() == tcID) {
+                    //Add test case if not there already
+                    if (!summary.containsId(es.getStep().getTestCase().getId())) {
+                        summary.addItem(new Object[]{es.getStep().getTestCase().getName(),
+                            "", "", "", "", "", "", ""},
+                                es.getStep().getTestCase().getId());
+                    }
+                    //Add the step
+                    //First calculate the sequence number
+                    Collection c = summary.getChildren(es.getStep()
+                            .getTestCase().getId());
+                    int i = c == null ? 1 : c.size() + 1;
+                    String stepId = es.getStep().getTestCase().getId() + "."
+                            + i;
+                    //Calculate the fields from History
+                    SimpleDateFormat format = new SimpleDateFormat(
+                            VMSettingServer.getSetting("date.format")
+                                    .getStringVal());
+                    String text = "", notes = "", expected = "", result = "";
+                    for (HistoryField f : es.getStepHistory().getHistoryFieldList()) {
+                        switch (f.getFieldName()) {
+                            case "text":
+                                text = f.getFieldValue();
+                                break;
+                            case "expectedResult":
+                                expected = f.getFieldValue();
+                                break;
+                            case "notes":
+                                notes = f.getFieldValue();
+                                break;
+                        }
+                    }
+                    summary.addItem(new Object[]{"", "" + i,//Sequence
+                        text, //Text
+                        notes, //Notes
+                        expected, //Expected Result
+                        es.getResultId() == null
+                        ? TRANSLATOR.translate("result.pending")
+                        : TRANSLATOR.translate(es.getResultId()
+                        .getResultName()), //Result
+                        es.getExecutionStart() == null ? ""
+                        : format.format(es.getExecutionStart()), //Start Date
+                        es.getExecutionEnd() == null ? ""
+                        : format.format(es.getExecutionEnd())},//End Date
+                            stepId);
+                    //Put step under the test case
+                    summary.setParent(stepId,
+                            es.getStep().getTestCase().getId());
+                    //Mark test case as a leaf
+                    summary.setChildrenAllowed(stepId, false);
+                }
+            }
+        }
+        w.setContent(summary);
+        UI.getCurrent().addWindow(w);
     }
 
     protected Map<String, Integer> getSummary(TestCaseExecution tce, int tcId) {
