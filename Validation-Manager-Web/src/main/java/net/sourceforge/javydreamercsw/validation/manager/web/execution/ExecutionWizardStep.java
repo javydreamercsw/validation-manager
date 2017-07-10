@@ -206,24 +206,23 @@ public class ExecutionWizardStep implements WizardStep {
 
     @Override
     public String getCaption() {
-        return getStep().getStep().getTestCase().getName() + " "
+        return getExecutionStep().getStep().getTestCase().getName() + " "
                 + TRANSLATOR.translate("general.step") + ":"
-                + getStep().getStep().getStepSequence();
+                + getExecutionStep().getStep().getStepSequence();
     }
 
     @Override
     public Component getContent() {
-        getStep().update();
         Panel form = new Panel(TRANSLATOR.translate("step.detail"));
-        if (getStep().getExecutionStart() == null) {
+        if (getExecutionStep().getExecutionStart() == null) {
             //Set the start date.
-            getStep().setExecutionStart(new Date());
+            getExecutionStep().setExecutionStart(new Date());
         }
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(getStep().getStep().getClass());
-        binder.setItemDataSource(getStep().getStep());
+        BeanFieldGroup binder = new BeanFieldGroup(getExecutionStep().getStep().getClass());
+        binder.setItemDataSource(getExecutionStep().getStep());
         TextArea text = new TextArea(TRANSLATOR.translate("general.text"));
         text.setConverter(new ByteToStringConverter());
         binder.bind(text, "text");
@@ -233,52 +232,52 @@ public class ExecutionWizardStep implements WizardStep {
                 "notes", TextArea.class);
         notes.setSizeFull();
         layout.addComponent(notes);
-        if (getStep().getExecutionStart() != null) {
+        if (getExecutionStep().getExecutionStart() != null) {
             start = new DateField(TRANSLATOR.translate("start.date"));
             start.setResolution(Resolution.SECOND);
             start.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
-            start.setValue(getStep().getExecutionStart());
+            start.setValue(getExecutionStep().getExecutionStart());
             start.setReadOnly(true);
             layout.addComponent(start);
         }
-        if (getStep().getExecutionEnd() != null) {
+        if (getExecutionStep().getExecutionEnd() != null) {
             end = new DateField(TRANSLATOR.translate("end.date"));
             end.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
             end.setResolution(Resolution.SECOND);
-            end.setValue(getStep().getExecutionEnd());
+            end.setValue(getExecutionStep().getExecutionEnd());
             end.setReadOnly(true);
             layout.addComponent(end);
         }
         binder.setReadOnly(true);
         //Space to record result
-        if (getStep().getResultId() != null) {
-            result.setValue(getStep().getResultId().getResultName());
+        if (getExecutionStep().getResultId() != null) {
+            result.setValue(getExecutionStep().getResultId().getResultName());
         }
         layout.addComponent(result);
         if (reviewer) {//Space to record review
-            if (getStep().getReviewResultId() != null) {
-                review.setValue(getStep().getReviewResultId().getReviewName());
+            if (getExecutionStep().getReviewResultId() != null) {
+                review.setValue(getExecutionStep().getReviewResultId().getReviewName());
             }
             layout.addComponent(review);
         }
         //Add Reviewer name
-        if (getStep().getReviewer() != null) {
+        if (getExecutionStep().getReviewer() != null) {
             TextField reviewerField = new TextField(TRANSLATOR
                     .translate("general.reviewer"));
-            reviewerField.setValue(getStep().getReviewer().getFirstName() + " "
-                    + getStep().getReviewer().getLastName());
+            reviewerField.setValue(getExecutionStep().getReviewer().getFirstName() + " "
+                    + getExecutionStep().getReviewer().getLastName());
             reviewerField.setReadOnly(true);
             layout.addComponent(reviewerField);
         }
-        if (getStep().getReviewDate() != null) {
+        if (getExecutionStep().getReviewDate() != null) {
             reviewDate = new DateField(TRANSLATOR
                     .translate("review.date"));
             reviewDate.setDateFormat(VMSettingServer.getSetting("date.format")
                     .getStringVal());
             reviewDate.setResolution(Resolution.SECOND);
-            reviewDate.setValue(getStep().getReviewDate());
+            reviewDate.setValue(getExecutionStep().getReviewDate());
             reviewDate.setReadOnly(true);
             layout.addComponent(reviewDate);
         }
@@ -292,7 +291,7 @@ public class ExecutionWizardStep implements WizardStep {
         }
         //Add the fields
         fields.clear();
-        getStep().getStep().getDataEntryList().forEach(de -> {
+        getExecutionStep().getStep().getDataEntryList().forEach(de -> {
             switch (de.getDataEntryType().getId()) {
                 case 1://String
                     TextField tf = new TextField(TRANSLATOR
@@ -422,7 +421,7 @@ public class ExecutionWizardStep implements WizardStep {
         issues.setCaption(TRANSLATOR.translate("general.issue"));
         int commentCounter = 0;
         int issueCounter = 0;
-        for (ExecutionStepHasIssue ei : getStep().getExecutionStepHasIssueList()) {
+        for (ExecutionStepHasIssue ei : getExecutionStep().getExecutionStepHasIssueList()) {
             issueCounter++;
             Button a = new Button("Issue #" + issueCounter);
             a.setIcon(VaadinIcons.BUG);
@@ -433,7 +432,7 @@ public class ExecutionWizardStep implements WizardStep {
             issues.addComponent(a);
         }
         for (ExecutionStepHasAttachment attachment
-                : getStep().getExecutionStepHasAttachmentList()) {
+                : getExecutionStep().getExecutionStepHasAttachmentList()) {
             switch (attachment.getAttachment().getAttachmentType().getType()) {
                 case "comment": {
                     //Comments go in a different section
@@ -506,11 +505,11 @@ public class ExecutionWizardStep implements WizardStep {
                         a.setFileName(fileName);
                         a.write2DB();
                         //Now add it to this Execution Step
-                        if (getStep().getExecutionStepHasAttachmentList() == null) {
-                            getStep().setExecutionStepHasAttachmentList(new ArrayList<>());
+                        if (getExecutionStep().getExecutionStepHasAttachmentList() == null) {
+                            getExecutionStep().setExecutionStepHasAttachmentList(new ArrayList<>());
                         }
-                        getStep().addAttachment(a);
-                        getStep().write2DB();
+                        getExecutionStep().addAttachment(a);
+                        getExecutionStep().write2DB();
                         w.updateCurrentStep();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, "Error creating attachment!", ex);
@@ -607,12 +606,12 @@ public class ExecutionWizardStep implements WizardStep {
                         issue.write2DB();
                         if (toAdd) {
                             //Now add it to this Execution Step
-                            if (getStep().getExecutionStepHasIssueList() == null) {
-                                getStep().setExecutionStepHasIssueList(new ArrayList<>());
+                            if (getExecutionStep().getExecutionStepHasIssueList() == null) {
+                                getExecutionStep().setExecutionStepHasIssueList(new ArrayList<>());
                             }
-                            getStep().addIssue(issue, ValidationManagerUI
+                            getExecutionStep().addIssue(issue, ValidationManagerUI
                                     .getInstance().getUser());
-                            getStep().write2DB();
+                            getExecutionStep().write2DB();
                         }
                         w.updateCurrentStep();
                     } catch (Exception ex) {
@@ -663,11 +662,11 @@ public class ExecutionWizardStep implements WizardStep {
                         a.write2DB();
                         if (toAdd) {
                             //Now add it to this Execution Step
-                            if (getStep().getExecutionStepHasAttachmentList() == null) {
-                                getStep().setExecutionStepHasAttachmentList(new ArrayList<>());
+                            if (getExecutionStep().getExecutionStepHasAttachmentList() == null) {
+                                getExecutionStep().setExecutionStepHasAttachmentList(new ArrayList<>());
                             }
-                            getStep().addAttachment(a);
-                            getStep().write2DB();
+                            getExecutionStep().addAttachment(a);
+                            getExecutionStep().write2DB();
                         }
                         w.updateCurrentStep();
                     } catch (Exception ex) {
@@ -721,32 +720,33 @@ public class ExecutionWizardStep implements WizardStep {
                     ExecutionResult newResult = ExecutionResultServer
                             .getResult(answer);
                     ReviewResult newReview = ReviewResultServer.getReview(answer2);
-                    getStep().setExecutionStart(start.getValue());
-                    if (getStep().getResultId() == null
-                            || !Objects.equals(getStep().getResultId().getId(),
+                    getExecutionStep().setExecutionStart(start.getValue());
+                    if (getExecutionStep().getResultId() == null
+                            || !Objects.equals(getExecutionStep().getResultId().getId(),
                                     newResult.getId())) {
-                        getStep().setResultId(newResult);
+                        getExecutionStep().setResultId(newResult);
                         //Set end date to null to reflect update
-                        getStep().setExecutionEnd(null);
+                        getExecutionStep().setExecutionEnd(null);
                     }
-                    if (reviewer && getStep().getReviewResultId() == null
-                            || !Objects.equals(getStep().getReviewResultId().getId(),
-                                    newReview.getId())) {
-                        getStep().setReviewResultId(newReview);
-                        getStep().setReviewer(ValidationManagerUI.getInstance()
-                                .getUser());
+                    if (reviewer && (getExecutionStep().getReviewResultId() == null
+                            || !Objects.equals(getExecutionStep()
+                                    .getReviewResultId().getId(),
+                                    newReview.getId()))) {
+                        getExecutionStep().setReviewResultId(newReview);
+                        getExecutionStep().setReviewer(ValidationManagerUI
+                                .getInstance().getUser());
                     }
-                    if (getStep().getExecutionEnd() == null) {
-                        getStep().setExecutionEnd(new Date());
+                    if (getExecutionStep().getExecutionEnd() == null) {
+                        getExecutionStep().setExecutionEnd(new Date());
                     }
-                    if (reviewer && getStep().getReviewDate() == null) {
-                        getStep().setReviewDate(new Date());
+                    if (reviewer && getExecutionStep().getReviewDate() == null) {
+                        getExecutionStep().setReviewDate(new Date());
                     }
                     //Save the field answers
-                    if (getStep().getExecutionStepAnswerList() == null) {
-                        getStep().setExecutionStepAnswerList(new ArrayList<>());
+                    if (getExecutionStep().getExecutionStepAnswerList() == null) {
+                        getExecutionStep().setExecutionStepAnswerList(new ArrayList<>());
                     }
-                    getStep().getExecutionStepAnswerList().clear();
+                    getExecutionStep().getExecutionStepAnswerList().clear();
                     ExecutionStepAnswerJpaController c
                             = new ExecutionStepAnswerJpaController(DataBaseManager
                                     .getEntityManagerFactory());
@@ -759,19 +759,20 @@ public class ExecutionWizardStep implements WizardStep {
                         } else {
                             String fieldName = (String) field.getData();
                             ExecutionStepAnswer stepAnswer
-                                    = new ExecutionStepAnswer(getStep()
+                                    = new ExecutionStepAnswer(getExecutionStep()
                                             .getExecutionStepPK()
                                             .getTestCaseExecutionId(),
-                                            getStep().getExecutionStepPK()
+                                            getExecutionStep().getExecutionStepPK()
                                                     .getStepId(),
-                                            getStep().getExecutionStepPK()
+                                            getExecutionStep().getExecutionStepPK()
                                                     .getStepTestCaseId()
                                     );
-                            stepAnswer.setExecutionStep(getStep().getEntity());
+                            stepAnswer.setExecutionStep(getExecutionStep().getEntity());
                             stepAnswer.setFieldName(fieldName);
                             stepAnswer.setFieldAnswer(field.getValue().toString());
                             c.create(stepAnswer);
-                            getStep().getExecutionStepAnswerList().add(stepAnswer);
+                            getExecutionStep().getExecutionStepAnswerList()
+                                    .add(stepAnswer);
                         }
                     }
                 } catch (Exception ex) {
@@ -788,13 +789,13 @@ public class ExecutionWizardStep implements WizardStep {
 
     @Override
     public boolean onBack() {
-        return getStep().getStep().getStepSequence() > 1;
+        return getExecutionStep().getStep().getStepSequence() > 1;
     }
 
     /**
      * @return the step
      */
-    public ExecutionStepServer getStep() {
+    public ExecutionStepServer getExecutionStep() {
         return step;
     }
 
@@ -907,17 +908,17 @@ public class ExecutionWizardStep implements WizardStep {
                 .withYesButton(() -> {
                     try {
                         if (mb.getData() instanceof ExecutionStepHasAttachment) {
-                            getStep().removeAttachment(new AttachmentServer(
+                            getExecutionStep().removeAttachment(new AttachmentServer(
                                     ((ExecutionStepHasAttachment) mb.getData())
                                             .getAttachment().getAttachmentPK()));
                         }
                         if (mb.getData() instanceof ExecutionStepHasIssue) {
-                            getStep().removeIssue(new IssueServer(
+                            getExecutionStep().removeIssue(new IssueServer(
                                     ((ExecutionStepHasIssue) mb.getData())
                                             .getIssue()));
                         }
-                        getStep().write2DB();
-                        getStep().update();
+                        getExecutionStep().write2DB();
+                        getExecutionStep().update();
                         w.updateCurrentStep();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
@@ -949,7 +950,7 @@ public class ExecutionWizardStep implements WizardStep {
     private void updateValue(AbstractField field) {
         if (field.getData() != null) {
             //Look for the answer in the database
-            getStep().getExecutionStepAnswerList().forEach(answer -> {
+            getExecutionStep().getExecutionStepAnswerList().forEach(answer -> {
                 if (answer.getFieldName().equals(field.getData())) {
                     if (field instanceof AbstractTextField) {//This includes NumberField
                         field.setValue(answer.getFieldAnswer());

@@ -122,7 +122,7 @@ public final class ExecutionWindow extends VMWindow {
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)
-                                        -> s.getStep()).filter((ess) -> (!ess.getLocked()
+                                        -> s.getExecutionStep()).filter((ess) -> (!ess.getLocked()
                                         && ess.getResultId() != null))
                                         .forEachOrdered((ess) -> {
                                             try {
@@ -152,7 +152,7 @@ public final class ExecutionWindow extends VMWindow {
                             .withYesButton(() -> {
                                 for (WizardStep step : execution.getSteps()) {
                                     ExecutionWizardStep s = (ExecutionWizardStep) step;
-                                    ExecutionStepServer ess = s.getStep();
+                                    ExecutionStepServer ess = s.getExecutionStep();
                                     if (!ess.getLocked()
                                             && ess.getResultId() != null) {
                                         try {

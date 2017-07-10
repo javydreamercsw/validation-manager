@@ -237,6 +237,10 @@ public abstract class ExecutionScreen extends AbstractProvider {
                 String.class, "");
         summary.addContainerProperty(TRANSLATOR.translate("general.result"),
                 String.class, "");
+        summary.addContainerProperty(TRANSLATOR.translate("general.attachment"),
+                HorizontalLayout.class, new HorizontalLayout());
+        summary.addContainerProperty(TRANSLATOR.translate("tester.desc"),
+                String.class, "");
         summary.addContainerProperty(TRANSLATOR.translate("start.date"),
                 String.class, "");
         summary.addContainerProperty(TRANSLATOR.translate("end.date"),
@@ -248,8 +252,10 @@ public abstract class ExecutionScreen extends AbstractProvider {
                         || es.getExecutionStepPK().getStepTestCaseId() == tcID) {
                     //Add test case if not there already
                     if (!summary.containsId(es.getStep().getTestCase().getId())) {
-                        summary.addItem(new Object[]{es.getStep().getTestCase().getName(),
-                            "", "", "", "", "", "", ""},
+                        summary.addItem(new Object[]{es.getStep()
+                            .getTestCase().getName(),
+                            "", "", "", "", "", new HorizontalLayout(), "",
+                            "", ""},
                                 es.getStep().getTestCase().getId());
                     }
                     //Add the step
@@ -263,8 +269,12 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     SimpleDateFormat format = new SimpleDateFormat(
                             VMSettingServer.getSetting("date.format")
                                     .getStringVal());
-                    String text = "", notes = "", expected = "", result = "";
-                    for (HistoryField f : es.getStepHistory().getHistoryFieldList()) {
+                    String text = "", notes = "", expected = "",
+                            tester = es.getAssignee() == null ? ""
+                            : es.getAssignee().getFirstName() + " "
+                            + es.getAssignee().getLastName();
+                    for (HistoryField f : es.getStepHistory()
+                            .getHistoryFieldList()) {
                         switch (f.getFieldName()) {
                             case "text":
                                 text = f.getFieldValue();
@@ -277,6 +287,27 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                 break;
                         }
                     }
+                    HorizontalLayout attachments = new HorizontalLayout();
+                    if (!es.getExecutionStepHasAttachmentList().isEmpty()) {
+                        es.getExecutionStepHasAttachmentList().forEach(esha -> {
+                            Label temp = new Label();
+                            switch (esha.getAttachment().getAttachmentType().getType()) {
+                                case "comment":
+                                    temp.setIcon(VaadinIcons.PAPERCLIP);
+                                    attachments.addComponent(temp);
+                                    break;
+                                default:
+                                    temp.setIcon(VaadinIcons.PAPERCLIP);
+                                    attachments.addComponent(temp);
+                                    break;
+                            }
+                        });
+                    }
+                    if (!es.getExecutionStepHasIssueList().isEmpty()) {
+                        Label temp = new Label();
+                        temp.setIcon(VaadinIcons.BUG);
+                        attachments.addComponent(temp);
+                    }
                     summary.addItem(new Object[]{"", "" + i,//Sequence
                         text, //Text
                         notes, //Notes
@@ -285,6 +316,8 @@ public abstract class ExecutionScreen extends AbstractProvider {
                         ? TRANSLATOR.translate("result.pending")
                         : TRANSLATOR.translate(es.getResultId()
                         .getResultName()), //Result
+                        attachments,//Attachments, issues and comments
+                        tester,
                         es.getExecutionStart() == null ? ""
                         : format.format(es.getExecutionStart()), //Start Date
                         es.getExecutionEnd() == null ? ""

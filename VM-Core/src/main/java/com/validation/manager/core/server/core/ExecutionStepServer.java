@@ -62,13 +62,12 @@ public final class ExecutionStepServer extends ExecutionStep
                 update(es, this);
                 c.create(es);
                 setExecutionStepPK(es.getExecutionStepPK());
-                update();
             } else {
                 ExecutionStep es = getEntity();
                 update(es, this);
                 c.edit(es);
-                update();
             }
+            update();
         }
         catch (Exception ex) {
             throw new VMException(ex);
@@ -83,9 +82,6 @@ public final class ExecutionStepServer extends ExecutionStep
 
     @Override
     public void update(ExecutionStep target, ExecutionStep source) {
-        if (target.getExecutionStepHasAttachmentList() == null) {
-            target.setExecutionStepHasAttachmentList(new ArrayList<>());
-        }
         target.setAssignedTime(source.getAssignedTime());
         target.setComment(source.getComment());
         target.setExecutionEnd(source.getExecutionEnd());
