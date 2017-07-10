@@ -71,8 +71,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
                 String.class, "");
         testCaseTree.addGeneratedColumn("general.status",
                 (Table source, Object itemId, Object columnId) -> {
-                    if (TRANSLATOR
-                            .translate("general.status").equals(columnId)
+                    if ("general.status".equals(columnId)
                     && itemId instanceof String) {
                         String id = (String) itemId;
                         String message;
