@@ -55,7 +55,6 @@ import com.validation.manager.core.db.ExecutionStepHasAttachment;
 import com.validation.manager.core.db.ExecutionStepHasIssue;
 import com.validation.manager.core.db.ReviewResult;
 import com.validation.manager.core.db.controller.ExecutionResultJpaController;
-import com.validation.manager.core.db.controller.ExecutionStepAnswerJpaController;
 import com.validation.manager.core.db.controller.IssueTypeJpaController;
 import com.validation.manager.core.db.controller.ReviewResultJpaController;
 import com.validation.manager.core.server.core.AttachmentServer;
@@ -644,7 +643,8 @@ public class ExecutionWizardStep implements WizardStep {
         form.setContent(layout);
         BeanFieldGroup binder = new BeanFieldGroup(as.getClass());
         binder.setItemDataSource(as);
-        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.text"), "textValue",
+        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.text"),
+                "textValue",
                 TextArea.class);
         desc.setSizeFull();
         layout.addComponent(desc);
@@ -742,14 +742,13 @@ public class ExecutionWizardStep implements WizardStep {
                     if (reviewer && getExecutionStep().getReviewDate() == null) {
                         getExecutionStep().setReviewDate(new Date());
                     }
-                    //Save the field answers
                     if (getExecutionStep().getExecutionStepAnswerList() == null) {
                         getExecutionStep().setExecutionStepAnswerList(new ArrayList<>());
                     }
+                    if (getExecutionStep().getExecutionStepHasVmUserList() == null) {
+                        getExecutionStep().setExecutionStepHasVmUserList(new ArrayList<>());
+                    }
                     getExecutionStep().getExecutionStepAnswerList().clear();
-                    ExecutionStepAnswerJpaController c
-                            = new ExecutionStepAnswerJpaController(DataBaseManager
-                                    .getEntityManagerFactory());
                     for (AbstractField field : fields) {
                         //The field has the field name as data
                         if (field.getData() == null) {
@@ -770,7 +769,6 @@ public class ExecutionWizardStep implements WizardStep {
                             stepAnswer.setExecutionStep(getExecutionStep().getEntity());
                             stepAnswer.setFieldName(fieldName);
                             stepAnswer.setFieldAnswer(field.getValue().toString());
-                            c.create(stepAnswer);
                             getExecutionStep().getExecutionStepAnswerList()
                                     .add(stepAnswer);
                         }

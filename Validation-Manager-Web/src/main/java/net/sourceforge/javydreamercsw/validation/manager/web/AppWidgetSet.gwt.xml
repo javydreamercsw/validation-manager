@@ -68,4 +68,8 @@ limitations under the License.
     <inherits name="pl.pdfviewer.PdfViewerWidgetSet" />
 
     <inherits name="tm.kod.widgets.numberfield.WidgetSet" />
+
+    <inherits name="org.vaadin.hene.popupbutton.widgetset.PopupbuttonWidgetset" />
+
+    <inherits name="org.tepi.filtertable.gwt.FilterTableWidgetset" />
 </module>

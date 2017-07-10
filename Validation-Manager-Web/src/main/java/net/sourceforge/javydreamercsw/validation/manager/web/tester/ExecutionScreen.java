@@ -15,6 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.tester;
 
+import com.vaadin.addon.tableexport.ExcelExport;
 import com.vaadin.event.Action;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
@@ -29,6 +30,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.ExecutionStepHasVmUser;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.HistoryField;
 import com.validation.manager.core.db.TestCase;
@@ -245,7 +247,11 @@ public abstract class ExecutionScreen extends AbstractProvider {
                 String.class, "");
         summary.addContainerProperty(TRANSLATOR.translate("end.date"),
                 String.class, "");
-        VMWindow w = new VMWindow();
+        summary.addContainerProperty(TRANSLATOR.translate("general.reviewer"),
+                String.class, "");
+        summary.addContainerProperty(TRANSLATOR.translate("review.date"),
+                String.class, "");
+        VMWindow w = new VMWindow(TRANSLATOR.translate("general.export"));
         for (TestCaseExecutionServer execution : executions) {
             for (ExecutionStep es : execution.getExecutionStepList()) {
                 if (tcID < 0
@@ -254,8 +260,8 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     if (!summary.containsId(es.getStep().getTestCase().getId())) {
                         summary.addItem(new Object[]{es.getStep()
                             .getTestCase().getName(),
-                            "", "", "", "", "", new HorizontalLayout(), "",
-                            "", ""},
+                            "", "", "", "", "", new HorizontalLayout(), "", "",
+                            "", "", ""},
                                 es.getStep().getTestCase().getId());
                     }
                     //Add the step
@@ -270,9 +276,18 @@ public abstract class ExecutionScreen extends AbstractProvider {
                             VMSettingServer.getSetting("date.format")
                                     .getStringVal());
                     String text = "", notes = "", expected = "",
-                            tester = es.getAssignee() == null ? ""
-                            : es.getAssignee().getFirstName() + " "
-                            + es.getAssignee().getLastName();
+                            tester = "", reviewer = "";
+                    //Search roles for tester and reviewer
+                    for (ExecutionStepHasVmUser eshu : es.getExecutionStepHasVmUserList()) {
+                        if (eshu.getRole().getRoleName().equals("tester")) {
+                            tester = eshu.getVmUser().getFirstName()
+                                    + " " + eshu.getVmUser().getLastName();
+                        }
+                        if (eshu.getRole().getRoleName().equals("quality")) {
+                            reviewer = eshu.getVmUser().getFirstName()
+                                    + " " + eshu.getVmUser().getLastName();
+                        }
+                    }
                     for (HistoryField f : es.getStepHistory()
                             .getHistoryFieldList()) {
                         switch (f.getFieldName()) {
@@ -317,11 +332,14 @@ public abstract class ExecutionScreen extends AbstractProvider {
                         : TRANSLATOR.translate(es.getResultId()
                         .getResultName()), //Result
                         attachments,//Attachments, issues and comments
-                        tester,
+                        tester,//Tester
                         es.getExecutionStart() == null ? ""
                         : format.format(es.getExecutionStart()), //Start Date
                         es.getExecutionEnd() == null ? ""
-                        : format.format(es.getExecutionEnd())},//End Date
+                        : format.format(es.getExecutionEnd()),//End Date
+                        reviewer,//Reviewer
+                        es.getReviewDate() == null ? ""
+                        : format.format(es.getReviewDate())},//Review Date
                             stepId);
                     //Put step under the test case
                     summary.setParent(stepId,
@@ -331,7 +349,27 @@ public abstract class ExecutionScreen extends AbstractProvider {
                 }
             }
         }
-        w.setContent(summary);
+        VerticalLayout vl = new VerticalLayout();
+        summary.setSizeFull();
+        vl.addComponent(summary);
+        Button export = new Button(TRANSLATOR.translate("general.export"));
+        export.addClickListener(listener -> {
+            //Hide the attachment column as it doesn't work well on the export.
+            summary.setColumnCollapsingAllowed(true);
+            summary.setColumnCollapsed(TRANSLATOR.translate("general.attachment"), true);
+            //Create the Excel file
+            ExcelExport excelExport = new ExcelExport(summary);
+            excelExport.excludeCollapsedColumns();
+            excelExport.setReportTitle(TRANSLATOR.translate("general.export"));
+            excelExport.setDisplayTotals(false);
+            excelExport.export();
+            //TODO: Also send the attachments
+
+            //
+            UI.getCurrent().removeWindow(w);
+        });
+        vl.addComponent(export);
+        w.setContent(vl);
         UI.getCurrent().addWindow(w);
     }
 

@@ -17,14 +17,24 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.UI;
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.db.ExecutionStepHasVmUser;
+import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.controller.ExecutionStepAnswerJpaController;
+import com.validation.manager.core.db.controller.ExecutionStepHasVmUserJpaController;
 import com.validation.manager.core.server.core.ExecutionStepServer;
+import com.validation.manager.core.server.core.RoleServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.Exceptions;
@@ -44,6 +54,8 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 public final class ExecutionWindow extends VMWindow {
 
     private final boolean reviewer;
+    private static final Logger LOG
+            = Logger.getLogger(ExecutionWindow.class.getSimpleName());
 
     /**
      * Display all the executions one after another. This view is used as well
@@ -131,7 +143,7 @@ public final class ExecutionWindow extends VMWindow {
                                                     ess.setLocked(false);
                                                 }
                                                 ess.setReviewed(true);
-                                                ess.write2DB();
+                                                save(ess);
                                                 ValidationManagerUI.getInstance()
                                                         .updateScreen();
                                             } catch (VMException ex) {
@@ -157,7 +169,7 @@ public final class ExecutionWindow extends VMWindow {
                                             && ess.getResultId() != null) {
                                         try {
                                             ess.setLocked(true);
-                                            ess.write2DB();
+                                            save(ess);
                                             ValidationManagerUI.getInstance()
                                                     .updateScreen();
                                         } catch (VMException ex) {
@@ -182,5 +194,57 @@ public final class ExecutionWindow extends VMWindow {
         layout.addComponent(execution);
         layout.setSizeFull();
         setContent(layout);
+    }
+
+    private void save(ExecutionStepServer ess) throws VMException {
+        //Handle temporary values
+        ExecutionStepAnswerJpaController c
+                = new ExecutionStepAnswerJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        ess.getExecutionStepAnswerList().forEach(answer -> {
+            try {
+                c.create(answer);
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        });
+        //Set tester/reviewer
+        ess.write2DB();
+        boolean tester = false, review = false;
+        for (ExecutionStepHasVmUser temp : ess.getExecutionStepHasVmUserList()) {
+            if (temp.getRole().getRoleName().equals("tester")) {
+                tester = true;
+            }
+            if (temp.getRole().getRoleName().equals("quality")) {
+                review = true;
+            }
+        }
+        VmUser vmUser = ((VMUI) UI.getCurrent()).getUser().getEntity();
+        ExecutionStepHasVmUserJpaController c2
+                = new ExecutionStepHasVmUserJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+        if (!tester) {
+            try {
+                ExecutionStepHasVmUser t = new ExecutionStepHasVmUser();
+                t.setExecutionStep(ess.getEntity());
+                t.setRole(RoleServer.getRole("tester"));
+                t.setVmUser(vmUser);
+                c2.create(t);
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
+        }
+        if (reviewer && !review) {
+            try {
+                ExecutionStepHasVmUser r = new ExecutionStepHasVmUser();
+                r.setExecutionStep(ess.getEntity());
+                r.setRole(RoleServer.getRole("quality"));
+                r.setVmUser(vmUser);
+                c2.create(r);
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
+        }
+        ess.update();
     }
 }
