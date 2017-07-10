@@ -135,7 +135,6 @@ public final class HistoryTable extends Grid {
         }
         List<String> fieldList = new ArrayList<>();
         //Add specified fields
-        fieldList.add("number");
         fieldList.addAll(Arrays.asList(fields));
         if (showVersionFields) {
             //Add default fields
@@ -155,8 +154,6 @@ public final class HistoryTable extends Grid {
             Grid.Column modReason = getColumn("modificationReason");
             modReason.setHeaderCaption(TRANSLATOR.translate("general.reason"));
         }
-        Grid.Column modReason = getColumn("number");
-        modReason.setHeaderCaption(TRANSLATOR.translate("general.sequence"));
         if (sortByField != null && !sortByField.trim().isEmpty()) {
             wrapperCont.sort(new Object[]{sortByField}, new boolean[]{true});
         }
