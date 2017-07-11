@@ -1444,6 +1444,15 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     true);
                         });
         edit.setEnabled(checkRight("testplan.planning"));
+        MenuItem export
+                = menu.addItem(TRANSLATOR.translate("general.export"),
+                        VaadinIcons.DOWNLOAD,
+                        (MenuItem selectedItem) -> {
+                            TestPlan tp = (TestPlan) tree.getValue();
+                            UI.getCurrent().addWindow(TestCaseExporter
+                                    .getTestCaseExporter(tp.getTestCaseList()));
+                        });
+        export.setEnabled(checkRight("testcase.view"));
     }
 
     private void createProjectMenu(ContextMenu menu) {
