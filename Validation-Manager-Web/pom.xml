@@ -25,15 +25,6 @@
             <url>http://maven.vaadin.com/vaadin-addons</url>
         </repository>
     </repositories>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.vaadin.addons</groupId>
-                <artifactId>filteringtable</artifactId>
-                <version>0.9.15.v7</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -189,7 +180,7 @@
         <dependency>
             <groupId>com.vaadin.addon</groupId>
             <artifactId>tableexport-for-vaadin</artifactId>
-            <version>1.6.2</version>
+            <version>1.6.3-SNAPSHOT</version>
         </dependency>
     </dependencies>
     

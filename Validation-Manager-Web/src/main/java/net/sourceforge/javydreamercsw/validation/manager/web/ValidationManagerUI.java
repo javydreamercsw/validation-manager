@@ -162,6 +162,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectTr
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementListComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementSelectionComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.StepComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.TestCaseExporter;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.demo.DemoProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
@@ -1690,6 +1691,15 @@ public class ValidationManagerUI extends UI implements VMUI {
                             addWindow(subWindow);
                         });
         importSteps.setEnabled(checkRight("requirement.modify"));
+        MenuItem export
+                = menu.addItem(TRANSLATOR.translate("general.export"),
+                        VaadinIcons.DOWNLOAD,
+                        (MenuItem selectedItem) -> {
+                            TestCase tc = (TestCase) tree.getValue();
+                            UI.getCurrent().addWindow(TestCaseExporter
+                                    .getTestCaseExporter(Arrays.asList(tc)));
+                        });
+        export.setEnabled(checkRight("testcase.view"));
         addExecutionDashboard(menu);
     }
 
