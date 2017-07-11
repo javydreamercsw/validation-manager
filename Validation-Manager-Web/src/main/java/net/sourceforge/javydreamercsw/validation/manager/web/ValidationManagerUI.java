@@ -2442,9 +2442,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         addWindow(w);
     }
 
-//    private void createBaselineMenu(ContextMenu menu) {
-//        //TODO:
-//    }
     public AbstractSelect getRequirementSelectionComponent() {
         return new RequirementSelectionComponent(getParentProject());
     }

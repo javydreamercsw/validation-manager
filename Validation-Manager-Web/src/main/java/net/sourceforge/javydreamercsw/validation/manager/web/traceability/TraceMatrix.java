@@ -15,12 +15,13 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.traceability;
 
+import com.vaadin.addon.tableexport.ExcelExport;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TreeTable;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.VMUI;
@@ -58,11 +59,11 @@ public class TraceMatrix extends TreeTable {
         addContainerProperty(TRANSLATOR.translate("general.requirement"),
                 String.class, "");
         addContainerProperty(TRANSLATOR.translate("general.test.case"),
-                Label.class, "");
+                String.class, "");
         addContainerProperty(TRANSLATOR.translate("general.result"),
-                Label.class, "");
+                String.class, "");
         addContainerProperty(TRANSLATOR.translate("general.issue"),
-                Label.class, "");
+                String.class, "");
         Tool.extractRequirements(p).forEach((r) -> {
             if (r.getParentRequirementId() == null) {
                 addRequirement(r);
@@ -87,7 +88,7 @@ public class TraceMatrix extends TreeTable {
 
     private void addRequirement(Requirement r) {
         addItem(new Object[]{r.getUniqueId(),
-            new Label(), new Label(), new Label()}, r.getUniqueId());
+            "", "", ""}, r.getUniqueId());
         addTestCases(r);
         //Add children
         r.getRequirementList().forEach(child -> {
@@ -144,25 +145,21 @@ public class TraceMatrix extends TreeTable {
         r.getHistoryList().forEach(h -> {
             h.getExecutionStepList().forEach(es -> {
                 TestCase tc = es.getStep().getTestCase();
-                Label label = new Label(tc.getName());
-                label.setIcon(VMUI.TEST_ICON);
                 Object rId = buildId(r);
                 Object tcID = buildId(tc, rId);
                 Object esId = buildId(es, rId);
                 if (!containsId(tcID)) {
                     addItem(new Object[]{"",
-                        label, new Label(), new Label()}, tcID);
+                        tc.getName(), "", ""}, tcID);
                     setParent(tcID, rId);
+                    setItemIcon(tcID, VMUI.TEST_ICON);
                 }
                 if (es.getResultId() != null) {
                     String result = es.getResultId().getResultName();
-                    Label resultLabel
-                            = new Label(TRANSLATOR.translate(result));
                     addItem(new Object[]{"",
-                        new Label(
                         TRANSLATOR.translate("general.step")
-                        + " #" + es.getStep().getStepSequence()),
-                        resultLabel, new Label()}, esId);
+                        + " #" + es.getStep().getStepSequence(),
+                        TRANSLATOR.translate(result), ""}, esId);
                     setParent(esId, tcID);
                     //Completed. Now check result
                     Resource icon;
@@ -183,7 +180,7 @@ public class TraceMatrix extends TreeTable {
                             icon = VaadinIcons.CLOCK;
                             break;
                     }
-                    resultLabel.setIcon(icon);
+                    setItemIcon(esId, icon);
                 }
                 addIssues(es);
             });
@@ -200,13 +197,13 @@ public class TraceMatrix extends TreeTable {
     private void addIssues(ExecutionStep es) {
         for (ExecutionStepHasIssue eshi : es.getExecutionStepHasIssueList()) {
             int issueNumber = eshi.getIssue().getIssuePK().getId();
-            Label label = new Label("general.issue" + "#" + issueNumber);
-            label.setIcon(VaadinIcons.BUG);
             Object esId = buildId(eshi.getExecutionStep());
             Object issueId = buildId(eshi.getIssue(), esId);
             addItem(new Object[]{"",
-                new Label(), new Label(), label}, issueId);
+                "", "", TRANSLATOR.translate("general.issue") + "#"
+                + issueNumber}, issueId);
             setParent(issueId, esId);
+            setItemIcon(issueId, VaadinIcons.BUG);
             setChildrenAllowed(issueId, false);
         }
     }
@@ -243,6 +240,16 @@ public class TraceMatrix extends TreeTable {
             }
         });
         hl.addComponent(baseline);
+        Button export = new Button(TRANSLATOR.translate("general.export"));
+        export.addClickListener(listener -> {
+            //Create the Excel file
+            ExcelExport excelExport = new ExcelExport(this);
+            excelExport.excludeCollapsedColumns();
+            excelExport.setReportTitle(TRANSLATOR.translate("trace.matrix"));
+            excelExport.setDisplayTotals(false);
+            excelExport.export();
+        });
+        hl.addComponent(export);
         return hl;
     }
 }
