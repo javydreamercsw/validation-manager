@@ -28,4 +28,18 @@
             <goal>release:perform</goal>
         </goals>
     </action>
+    <action>
+            <actionName>CUSTOM-Display Available Plugin Updates</actionName>
+            <displayName>Display Available Plugin Updates</displayName>
+            <goals>
+                <goal>versions:display-plugin-updates</goal>
+            </goals>
+        </action>
+    <action>
+            <actionName>CUSTOM-Create Embedded Tomcat Distro</actionName>
+            <displayName>Create Embedded Tomcat Distro</displayName>
+            <goals>
+                <goal>package</goal>
+            </goals>
+        </action>
 </actions>

@@ -166,6 +166,8 @@ public class VmUser extends Versionable implements Serializable {
     @Column(name = "attempts")
     @Min(value = 0)
     private int attempts;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
+    private List<UserHasRole> userHasRoleList;
 
     public VmUser() {
         super();
@@ -179,6 +181,7 @@ public class VmUser extends Versionable implements Serializable {
         this.firstName = first;
         this.lastName = last;
         this.locale = locale;
+        this.attempts = attempts;
         this.userStatusId = userStatus;
     }
 
@@ -446,5 +449,15 @@ public class VmUser extends Versionable implements Serializable {
 
     public void setAttempts(int attempts) {
         this.attempts = attempts;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<UserHasRole> getUserHasRoleList() {
+        return userHasRoleList;
+    }
+
+    public void setUserHasRoleList(List<UserHasRole> userHasRoleList) {
+        this.userHasRoleList = userHasRoleList;
     }
 }

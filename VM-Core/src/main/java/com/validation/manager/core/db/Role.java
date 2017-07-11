@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -90,6 +90,8 @@ public class Role implements Serializable {
     private List<UserTestProjectRole> userTestProjectRoleList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
     private List<UserTestPlanRole> userTestPlanRoleList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
+    private List<UserHasRole> userHasRoleList;
 
     public Role() {
     }
@@ -171,13 +173,12 @@ public class Role implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof Role)) {
             return false;
         }
         Role other = (Role) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return this.id.equals(other.id);
     }
 
     @Override
@@ -193,5 +194,15 @@ public class Role implements Serializable {
 
     public void setExecutionStepHasVmUserList(List<ExecutionStepHasVmUser> executionStepHasVmUserList) {
         this.executionStepHasVmUserList = executionStepHasVmUserList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<UserHasRole> getUserHasRoleList() {
+        return userHasRoleList;
+    }
+
+    public void setUserHasRoleList(List<UserHasRole> userHasRoleList) {
+        this.userHasRoleList = userHasRoleList;
     }
 }

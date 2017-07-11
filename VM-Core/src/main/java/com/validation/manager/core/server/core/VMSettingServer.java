@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ package com.validation.manager.core.server.core;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.VmSettingJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -33,13 +34,13 @@ public final class VMSettingServer extends VmSetting
 
     private static List<Object> result;
 
-    public VMSettingServer(String setting) {
+    public VMSettingServer(String setting) throws VMException {
         VmSetting s = getSetting(setting);
         if (s != null) {
             super.setId(s.getId());
             update();
         } else {
-            throw new RuntimeException("Setting: " + setting
+            throw new VMException("Setting: " + setting
                     + " doesn't exist!");
         }
     }
@@ -118,6 +119,7 @@ public final class VMSettingServer extends VmSetting
         target.setStringVal(source.getStringVal());
         target.setId(source.getId());
         target.setHistoryList(source.getHistoryList());
+        target.setProjectId(source.getProjectId());
         super.update(target, source);
     }
 

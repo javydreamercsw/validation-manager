@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,8 +79,6 @@ public class ImageDisplay extends AbstractFileDisplay
             images.add(new FileResource(f));
         }
         imageViewer.setImages(images);
-        w.center();
-        w.setModal(true);
         w.setContent(imageViewer);
         w.setHeight(80, Sizeable.Unit.PERCENTAGE);
         w.setWidth(80, Sizeable.Unit.PERCENTAGE);

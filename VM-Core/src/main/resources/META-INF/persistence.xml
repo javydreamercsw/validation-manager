@@ -9,6 +9,9 @@
     <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.DataEntry</class>
+    <class>com.validation.manager.core.db.DataEntryProperty</class>
+    <class>com.validation.manager.core.db.DataEntryType</class>
     <class>com.validation.manager.core.db.ExceptionHasCorrectiveAction</class>
     <class>com.validation.manager.core.db.ExceptionHasInvestigation</class>
     <class>com.validation.manager.core.db.ExceptionHasRootCause</class>
@@ -54,6 +57,7 @@
     <class>com.validation.manager.core.db.TestProject</class>
     <class>com.validation.manager.core.db.UserAssigment</class>
     <class>com.validation.manager.core.db.UserHasInvestigation</class>
+    <class>com.validation.manager.core.db.UserHasRole</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
     <class>com.validation.manager.core.db.UserRight</class>
     <class>com.validation.manager.core.db.UserStatus</class>
@@ -62,6 +66,7 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
+    <class>com.validation.manager.core.db.ExecutionStepAnswer</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/validation_manager?serverTimezone=UTC"/>
@@ -83,6 +88,9 @@
     <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.DataEntry</class>
+    <class>com.validation.manager.core.db.DataEntryProperty</class>
+    <class>com.validation.manager.core.db.DataEntryType</class>
     <class>com.validation.manager.core.db.ExceptionHasCorrectiveAction</class>
     <class>com.validation.manager.core.db.ExceptionHasInvestigation</class>
     <class>com.validation.manager.core.db.ExceptionHasRootCause</class>
@@ -128,6 +136,7 @@
     <class>com.validation.manager.core.db.TestProject</class>
     <class>com.validation.manager.core.db.UserAssigment</class>
     <class>com.validation.manager.core.db.UserHasInvestigation</class>
+    <class>com.validation.manager.core.db.UserHasRole</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
     <class>com.validation.manager.core.db.UserRight</class>
     <class>com.validation.manager.core.db.UserStatus</class>
@@ -136,6 +145,7 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
+    <class>com.validation.manager.core.db.ExecutionStepAnswer</class>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:h2:file:./target/data/test/validation-manager-test;AUTO_SERVER=TRUE"/>
@@ -159,6 +169,9 @@
     <class>com.validation.manager.core.db.Baseline</class>
     <class>com.validation.manager.core.db.Cause</class>
     <class>com.validation.manager.core.db.CorrectiveAction</class>
+    <class>com.validation.manager.core.db.DataEntry</class>
+    <class>com.validation.manager.core.db.DataEntryProperty</class>
+    <class>com.validation.manager.core.db.DataEntryType</class>
     <class>com.validation.manager.core.db.ExceptionHasCorrectiveAction</class>
     <class>com.validation.manager.core.db.ExceptionHasInvestigation</class>
     <class>com.validation.manager.core.db.ExceptionHasRootCause</class>
@@ -204,6 +217,7 @@
     <class>com.validation.manager.core.db.TestProject</class>
     <class>com.validation.manager.core.db.UserAssigment</class>
     <class>com.validation.manager.core.db.UserHasInvestigation</class>
+    <class>com.validation.manager.core.db.UserHasRole</class>
     <class>com.validation.manager.core.db.UserModifiedRecord</class>
     <class>com.validation.manager.core.db.UserRight</class>
     <class>com.validation.manager.core.db.UserStatus</class>
@@ -212,6 +226,7 @@
     <class>com.validation.manager.core.db.VmId</class>
     <class>com.validation.manager.core.db.VmSetting</class>
     <class>com.validation.manager.core.db.VmUser</class>
+    <class>com.validation.manager.core.db.ExecutionStepAnswer</class>
     <properties>
       <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
       <property name="eclipselink.logging.logger" value="org.eclipse.persistence.logging.DefaultSessionLog"/>

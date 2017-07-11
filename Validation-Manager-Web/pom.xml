@@ -4,7 +4,7 @@
     <parent>
         <artifactId>Validation-Manager</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.3.3</version>
+        <version>0.3.4</version>
     </parent>
     
     <artifactId>Validation-Manager-Web</artifactId>
@@ -16,7 +16,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
         <openoffice.version>4.1.2</openoffice.version>
-        <vaadin.version>7.7.9</vaadin.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
@@ -141,7 +140,7 @@
         <dependency>
             <groupId>pl.pdfviewer</groupId>
             <artifactId>pdfviewer</artifactId>
-            <version>1.3.2</version>
+            <version>1.3.5</version>
         </dependency>
         <dependency>
             <groupId>org.vaadin.addons</groupId>
@@ -173,13 +172,16 @@
             <artifactId>vaadin-grid-util</artifactId>
             <version>1.1.0</version>
         </dependency>
-        <!--
         <dependency>
-            <groupId>org.vaadin.addons</groupId>
-            <artifactId>vaadin-excel-exporter</artifactId>
-            <version>1.0.6</version>
+            <groupId>tm.kod</groupId>
+            <artifactId>numberfield7</artifactId>
+            <version>0.0.4</version>
         </dependency>
-        -->
+        <dependency>
+            <groupId>com.vaadin.addon</groupId>
+            <artifactId>tableexport-for-vaadin</artifactId>
+            <version>1.6.3-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     
     <build>
@@ -237,6 +239,7 @@
                         </manifest>
                     </archive>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <!--Include service files-->
                     <webResources>
                         <resource>
                             <directory>target/classes/META-INF/services</directory>

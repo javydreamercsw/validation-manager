@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,11 +54,11 @@ public class ExecutionStepHasIssueJpaController implements Serializable {
         if (executionStepHasIssue.getVmUserList() == null) {
             executionStepHasIssue.setVmUserList(new ArrayList<>());
         }
+        executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepTestCaseExecutionId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepTestCaseId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setIssueId(executionStepHasIssue.getIssue().getIssuePK().getId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setIssueIssueTypeId(executionStepHasIssue.getIssue().getIssuePK().getIssueTypeId());
-        executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepTestCaseExecutionId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
-        executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -108,11 +108,11 @@ public class ExecutionStepHasIssueJpaController implements Serializable {
     }
 
     public void edit(ExecutionStepHasIssue executionStepHasIssue) throws NonexistentEntityException, Exception {
+        executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepTestCaseExecutionId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepTestCaseId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setIssueId(executionStepHasIssue.getIssue().getIssuePK().getId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setIssueIssueTypeId(executionStepHasIssue.getIssue().getIssuePK().getIssueTypeId());
-        executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepTestCaseExecutionId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
-        executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepId());
         EntityManager em = null;
         try {
             em = getEntityManager();

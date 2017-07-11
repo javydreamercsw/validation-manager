@@ -15,6 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
+import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.event.FieldEvents;
@@ -23,6 +24,7 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -32,6 +34,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Tree;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -40,21 +43,27 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Role;
-import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.UserHasRole;
 import com.validation.manager.core.db.controller.RoleJpaController;
+import com.validation.manager.core.db.controller.UserHasRoleJpaController;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
+import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.core.tool.MD5;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -65,20 +74,20 @@ import org.openide.util.Lookup;
  */
 public class UserComponent extends Panel {
 
-    private final VmUser user;
+    private final VMUserServer user;
     private static final Logger LOG
             = Logger.getLogger(UserComponent.class.getSimpleName());
     private static final InternationalizationProvider TRANSLATOR
             = Lookup.getDefault().lookup(InternationalizationProvider.class);
     private boolean edit = false;
 
-    public UserComponent(VmUser user, boolean edit) {
+    public UserComponent(VMUserServer user, boolean edit) {
         this.user = user;
         this.edit = edit;
         init();
     }
 
-    public UserComponent(VmUser user, String caption, boolean edit) {
+    public UserComponent(VMUserServer user, String caption, boolean edit) {
         super(caption);
         this.user = user;
         this.edit = edit;
@@ -138,8 +147,39 @@ public class UserComponent extends Panel {
         binder.bind(status, "userStatusId");
         status.setTextInputAllowed(false);
         layout.addComponent(status);
+        List<UserHasRole> userRoles = new ArrayList<>();
+        //Project specific roles
+        if (!user.getUserHasRoleList().isEmpty()) {
+            Tree roles = new Tree(TRANSLATOR.translate("project.specific.role"));
+            user.getUserHasRoleList().forEach(uhr -> {
+                if (uhr.getProjectId() != null) {
+                    Project p = uhr.getProjectId();
+                    if (!roles.containsId(p)) {
+                        roles.addItem(p);
+                        roles.setItemCaption(p, p.getName());
+                        roles.setItemIcon(p, VMUI.PROJECT_ICON);
+                    }
+                    roles.addItem(uhr);
+                    roles.setItemCaption(uhr,
+                            TRANSLATOR.translate(uhr.getRole().getRoleName()));
+                    roles.setChildrenAllowed(uhr, false);
+                    roles.setItemIcon(uhr, VaadinIcons.USER_CARD);
+                    roles.setParent(uhr, p);
+                }
+            });
+            if (!roles.getItemIds().isEmpty()) {
+                layout.addComponent(roles);
+            }
+        }
         //Roles
         if (edit && ((VMUI) UI.getCurrent()).checkRight("system.configuration")) {
+            Button projectRole = new Button(TRANSLATOR.translate("manage.project.role"));
+            projectRole.addClickListener(l -> {
+                VMWindow w = new VMWindow(TRANSLATOR.translate("manage.project.role"));
+                w.setContent(getProjectRoleManager());
+                ((VMUI) UI.getCurrent()).addWindow(w);
+            });
+            layout.addComponent(projectRole);
             List<Role> list = new RoleJpaController(DataBaseManager
                     .getEntityManagerFactory())
                     .findRoleEntities();
@@ -155,34 +195,38 @@ public class UserComponent extends Panel {
             roles.setRows(5);
             roles.setLeftColumnCaption(TRANSLATOR.translate("available.roles"));
             roles.setRightColumnCaption(TRANSLATOR.translate("current.roles"));
+            roles.setImmediate(true);
             list.forEach(r -> {
                 roles.setItemCaption(r, TRANSLATOR.translate(r.getDescription()));
             });
-            if (user.getRoleList() != null) {
-                user.getRoleList().forEach(r -> {
-                    roles.select(r);
+            if (user.getUserHasRoleList() != null) {
+                Set<Role> rs = new HashSet<>();
+                user.getUserHasRoleList().forEach(uhr -> {
+                    if (uhr.getProjectId() == null) {
+                        rs.add(uhr.getRole());
+                    }
                 });
+                roles.setValue(rs);
             }
             roles.addValueChangeListener(event -> {
                 Set<Role> selected
                         = (Set<Role>) event.getProperty().getValue();
-                if (user.getRoleList() == null) {
-                    user.setRoleList(new ArrayList<>());
-                }
-                user.getRoleList().clear();
                 selected.forEach(r -> {
-                    user.getRoleList().add(r);
+                    UserHasRole temp = new UserHasRole();
+                    temp.setRole(r);
+                    temp.setVmUser(user);
+                    userRoles.add(temp);
                 });
             });
             layout.addComponent(roles);
         } else {
-            if (!user.getRoleList().isEmpty()) {
+            if (!user.getUserHasRoleList().isEmpty()) {
                 Table roles = new Table(TRANSLATOR.translate("general.role"));
-                user.getRoleList().forEach(role -> {
-                    roles.addItem(role);
-                    roles.setItemCaption(role,
-                            TRANSLATOR.translate(role.getRoleName()));
-                    roles.setItemIcon(role, VaadinIcons.USER_STAR);
+                user.getUserHasRoleList().forEach(role -> {
+                    roles.addItem(role.getRole());
+                    roles.setItemCaption(role.getRole(),
+                            TRANSLATOR.translate(role.getRole().getRoleName()));
+                    roles.setItemIcon(role.getRole(), VaadinIcons.USER_STAR);
                 });
                 layout.addComponent(roles);
             }
@@ -210,6 +254,21 @@ public class UserComponent extends Panel {
                     us.setUsername((String) username.getValue());
                 }
                 us.setLocale((String) locale.getValue());
+                if (user.getUserHasRoleList() == null) {
+                    user.setUserHasRoleList(new ArrayList<>());
+                }
+                user.getUserHasRoleList().clear();
+                userRoles.forEach(uhr -> {
+                    UserHasRoleJpaController c
+                            = new UserHasRoleJpaController(DataBaseManager
+                                    .getEntityManagerFactory());
+                    try {
+                        c.create(uhr);
+                        user.getUserHasRoleList().add(uhr);
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                });
                 if (listener.isChanged()
                         && !password.equals(user.getPassword())) {
                     //Different password. Prompt for confirmation
@@ -281,6 +340,88 @@ public class UserComponent extends Panel {
         hl.addComponent(update);
         hl.addComponent(cancel);
         layout.addComponent(hl);
+    }
+
+    private Component getProjectRoleManager() {
+        VerticalLayout vl = new VerticalLayout();
+        ProjectTreeComponent tree = new ProjectTreeComponentBuilder()
+                .setShowRequirement(false)
+                .setShowTestCase(false)
+                .setShowExecution(false)
+                .createProjectTreeComponent();
+        vl.addComponent(tree);
+        TwinColSelect roles
+                = new TwinColSelect(TRANSLATOR.translate("general.role"));
+        tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
+            Project selected = (Project) tree.getValue();
+            if (user.getUserHasRoleList() == null) {
+                user.setUserHasRoleList(new ArrayList<>());
+            }
+            if (selected != null) {
+                HashSet<Role> values = new HashSet<>();
+                user.getUserHasRoleList().forEach(uhr -> {
+                    if (uhr.getProjectId() != null
+                            && Objects.equals(uhr.getProjectId().getId(),
+                                    selected.getId())) {
+                        values.add(uhr.getRole());
+                    }
+                });
+                roles.setValue(values);
+            }
+        });
+        List<Role> list = new RoleJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findRoleEntities();
+        Collections.sort(list, (Role r1, Role r2)
+                -> TRANSLATOR.translate(r1.getRoleName())
+                        .compareTo(TRANSLATOR
+                                .translate(r2.getRoleName())));
+        BeanItemContainer<Role> roleContainer
+                = new BeanItemContainer<>(Role.class, list);
+        roles.setContainerDataSource(roleContainer);
+        roles.setRows(5);
+        roles.setLeftColumnCaption(TRANSLATOR.translate("available.roles"));
+        roles.setRightColumnCaption(TRANSLATOR.translate("current.roles"));
+        list.forEach(r -> {
+            roles.setItemCaption(r, TRANSLATOR.translate(r.getDescription()));
+        });
+        roles.addValueChangeListener(event -> {
+            Set<Role> selected
+                    = (Set<Role>) event.getProperty().getValue();
+            UserHasRoleJpaController c
+                    = new UserHasRoleJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+            ProjectServer ps = new ProjectServer((Project) tree.getValue());
+            if (ps.getUserHasRoleList().isEmpty()) {
+                ps.setUserHasRoleList(new ArrayList<>());
+            }
+            selected.forEach(r -> {
+                //Look for the existing ones
+                boolean found = false;
+                for (UserHasRole uhr : ps.getUserHasRoleList()) {
+                    if (Objects.equals(uhr.getVmUser().getId(), user.getId())
+                            && Objects.equals(uhr.getRole().getId(), r.getId())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    try {
+                        //Create a new one
+                        UserHasRole uhr = new UserHasRole();
+                        uhr.setProjectId(ps.getEntity());
+                        uhr.setRole(r);
+                        uhr.setVmUser(user.getEntity());
+                        c.create(uhr);
+                        user.update();
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
+        });
+        vl.addComponent(roles);
+        return vl;
     }
 
     private class PasswordChangeListener implements TextChangeListener {

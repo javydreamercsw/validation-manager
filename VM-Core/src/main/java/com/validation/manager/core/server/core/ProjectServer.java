@@ -89,6 +89,7 @@ public final class ProjectServer extends Project
         target.setRequirementSpecList(source.getRequirementSpecList());
         target.setTestProjectList(source.getTestProjectList());
         target.setId(source.getId());
+        target.setUserHasRoleList(source.getUserHasRoleList());
         super.update(target, source);
     }
 

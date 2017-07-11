@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,7 +153,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                     ResourceBundle.getBundle(
                                             "com.validation.manager.resources.VMMessages",
                                             Locale.getDefault()).getString(
-                                            "message.requirement.import.missing.column").replaceAll("%c", "" + cells));
+                                            "message.requirement.import.missing.column")
+                                            .replaceAll("%c", "" + cells));
                             errors.add(r);
                         } else {
                             Requirement requirement = new Requirement();
@@ -162,18 +163,19 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                 Cell cell = row.getCell(c);
                                 String value = "";
                                 if (cell != null) {
-                                    switch (cell.getCellType()) {
-                                        case Cell.CELL_TYPE_FORMULA:
+                                    switch (cell.getCellTypeEnum()) {
+                                        case FORMULA:
                                             value = cell.getCellFormula();
                                             break;
-                                        case Cell.CELL_TYPE_NUMERIC:
+                                        case NUMERIC:
                                             value = "" + cell.getNumericCellValue();
                                             break;
-                                        case Cell.CELL_TYPE_STRING:
+                                        case STRING:
                                             value = cell.getStringCellValue();
                                             break;
                                         default:
                                             value = "";
+                                            break;
                                     }
                                 }
                                 //Remove any extra spaces.
@@ -214,7 +216,8 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                         requirement.setNotes(value);
                                         break;
                                     default:
-                                        throw new RequirementImportException("Invalid column detected: " + c);
+                                        throw new RequirementImportException(
+                                                "Invalid column detected: " + c);
                                 }
                                 LOG.fine(value);
                             }
@@ -327,7 +330,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
             }
             StringBuilder sb = new StringBuilder("Rows with erros:\n");
             errors.stream().forEach((line) -> {
-                sb.append(line).append("\n");
+                sb.append(line).append('\n');
             });
             if (!errors.isEmpty()) {
                 getDefault().lookup(MessageHandler.class).info(sb.toString());
@@ -414,7 +417,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
         cs.setDataFormat(getBuiltinFormat("text"));
         Font f = wb.createFont();
         f.setFontHeightInPoints((short) 12);
-        f.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        f.setBold(true);
         f.setColor((short) Font.COLOR_NORMAL);
         cs.setFont(f);
         Row newRow = sheet.createRow(0);

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,11 +50,11 @@ public class ExecutionStepHasVmUserJpaController implements Serializable {
         if (executionStepHasVmUser.getExecutionStepHasVmUserPK() == null) {
             executionStepHasVmUser.setExecutionStepHasVmUserPK(new ExecutionStepHasVmUserPK());
         }
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setRoleId(executionStepHasVmUser.getRole().getId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setVmUserId(executionStepHasVmUser.getVmUser().getId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setRoleId(executionStepHasVmUser.getRole().getId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -103,11 +103,11 @@ public class ExecutionStepHasVmUserJpaController implements Serializable {
     }
 
     public void edit(ExecutionStepHasVmUser executionStepHasVmUser) throws NonexistentEntityException, Exception {
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setRoleId(executionStepHasVmUser.getRole().getId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setVmUserId(executionStepHasVmUser.getVmUser().getId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setRoleId(executionStepHasVmUser.getRole().getId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
         EntityManager em = null;
         try {
             em = getEntityManager();

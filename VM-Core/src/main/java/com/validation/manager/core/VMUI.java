@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ package com.validation.manager.core;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Window;
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Collection;
 import java.util.List;
@@ -101,12 +102,20 @@ public interface VMUI {
     boolean checkRight(String right);
 
     /**
-     * Check the provided rights against the current user.
+     * Check all the provided rights against the current user.
      *
      * @param rights Rights to check
-     * @return true if it has all the right, false otherwise.
+     * @return true if it has all the rights, false otherwise.
      */
     boolean checkAllRights(List<String> rights);
+
+    /**
+     * Check any of the provided rights against the current user.
+     *
+     * @param rights Rights to check
+     * @return true if it has at least one of the rights, false otherwise.
+     */
+    boolean checkAnyRights(List<String> rights);
 
     /**
      * Add a window to the UI
@@ -150,4 +159,31 @@ public interface VMUI {
      * @param id Id to search for.
      */
     public void showTab(String id);
+
+    /**
+     * Check the user has a role in a project.
+     *
+     * @param p Project to check.
+     * @param role Role to check.
+     * @return true if it has the role in the project, false otherwise.
+     */
+    public boolean checkProjectRole(Project p, String role);
+
+    /**
+     * Check the user has any of the roles in a project.
+     *
+     * @param p Project to check.
+     * @param roles Roles to check.
+     * @return true if it has any of the roles in the project, false otherwise.
+     */
+    public boolean checkAnyProjectRole(Project p, List<String> roles);
+
+    /**
+     * Check the user has all of the roles in a project.
+     *
+     * @param p Project to check.
+     * @param roles Roles to check.
+     * @return true if it has all of the roles in the project, false otherwise.
+     */
+    public boolean checkAllProjectRoles(Project p, List<String> roles);
 }

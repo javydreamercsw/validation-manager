@@ -88,6 +88,8 @@ public class Step extends Versionable implements Serializable {
     private TestCase testCase;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
     private List<History> historyList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
+    private List<DataEntry> dataEntryList;
 
     public Step() {
     }
@@ -120,14 +122,6 @@ public class Step extends Versionable implements Serializable {
 
     public void setStepSequence(int stepSequence) {
         this.stepSequence = stepSequence;
-    }
-
-    public byte[] getExpectedResult() {
-        return expectedResult;
-    }
-
-    public void setExpectedResult(byte[] expectedResult) {
-        this.expectedResult = expectedResult;
     }
 
     public String getNotes() {
@@ -198,6 +192,24 @@ public class Step extends Versionable implements Serializable {
     @Override
     public void setHistoryList(List<History> historyList) {
         this.historyList = historyList;
+    }
+
+    public byte[] getExpectedResult() {
+        return expectedResult;
+    }
+
+    public void setExpectedResult(byte[] expectedResult) {
+        this.expectedResult = expectedResult;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<DataEntry> getDataEntryList() {
+        return dataEntryList;
+    }
+
+    public void setDataEntryList(List<DataEntry> dataEntryList) {
+        this.dataEntryList = dataEntryList;
     }
 
     public byte[] getText() {

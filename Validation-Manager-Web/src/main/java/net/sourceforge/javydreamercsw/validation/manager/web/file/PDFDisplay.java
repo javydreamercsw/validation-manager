@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,9 +42,7 @@ public class PDFDisplay extends AbstractFileDisplay {
 
     @Override
     public Window getViewer(File f) {
-        Window w = new VMWindow(f.getName());
-        w.center();
-        w.setModal(true);
+        VMWindow w = new VMWindow(f.getName());
         PdfViewer pdfViewer = new PdfViewer(f);
         pdfViewer.setSizeFull();
         w.setContent(pdfViewer);

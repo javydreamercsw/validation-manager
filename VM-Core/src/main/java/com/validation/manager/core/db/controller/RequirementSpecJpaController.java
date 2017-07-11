@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,8 +59,8 @@ public class RequirementSpecJpaController implements Serializable {
         if (requirementSpec.getBaselineList() == null) {
             requirementSpec.setBaselineList(new ArrayList<>());
         }
-        requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
         requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
+        requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -130,8 +130,8 @@ public class RequirementSpecJpaController implements Serializable {
     }
 
     public void edit(RequirementSpec requirementSpec) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
         requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
+        requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
@@ -25,8 +26,10 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -96,7 +99,16 @@ public final class TestCaseServer extends TestCase
     }
 
     public Step addStep(int sequence, String text, String note, String criteria,
-            List<Requirement> requirements)
+            List<Requirement> requirements) throws PreexistingEntityException,
+            Exception {
+        //Use default plain String Field
+        return addStep(sequence, text, note, criteria, requirements,
+                new ArrayList<>(Arrays.asList(DataEntryServer
+                        .getStringField("general.result"))));
+    }
+
+    public Step addStep(int sequence, String text, String note, String criteria,
+            List<Requirement> requirements, List<DataEntry> fields)
             throws PreexistingEntityException, Exception {
         StepServer ss = new StepServer(getEntity(), sequence, text);
         int amount = getStepList().size();
@@ -105,7 +117,23 @@ public final class TestCaseServer extends TestCase
         if (ss.getRequirementList() == null) {
             ss.setRequirementList(new ArrayList<>());
         }
+        if (ss.getDataEntryList() == null) {
+            ss.setDataEntryList(new ArrayList<>());
+        }
         ss.write2DB();
+        fields.forEach(de -> {
+            try {
+                //Need to add them to the database first
+                DataEntryServer des = new DataEntryServer(de);
+                des.setStep(ss.getEntity());
+                des.write2DB();
+                des.update(de, des);
+            }
+            catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        });
+        ss.getDataEntryList().addAll(fields);
         if (requirements != null) {
             requirements.forEach((req) -> {
                 ss.getRequirementList().add(req);

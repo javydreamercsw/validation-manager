@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,24 +28,30 @@ public class VMWindow extends Window {
     public VMWindow() {
         super();
         menu = null;
-        setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        init();
     }
 
     public VMWindow(String caption) {
         super(caption);
         menu = null;
-        setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        init();
     }
 
     public VMWindow(ValidationManagerUI menu, String caption) {
         super(caption);
         this.menu = menu;
-        setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        init();
     }
 
     public VMWindow(ValidationManagerUI menu) {
         super();
         this.menu = menu;
+        init();
+    }
+
+    private void init() {
         setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        setModal(true);
+        center();
     }
 }

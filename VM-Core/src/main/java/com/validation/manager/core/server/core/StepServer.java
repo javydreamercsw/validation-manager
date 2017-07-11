@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,6 +82,7 @@ public final class StepServer extends Step implements EntityServer<Step> {
 
     @Override
     public void update(Step target, Step source) {
+        target.setDataEntryList(source.getDataEntryList());
         target.setExpectedResult(source.getExpectedResult());
         target.setNotes(source.getNotes());
         target.setRequirementList(source.getRequirementList());

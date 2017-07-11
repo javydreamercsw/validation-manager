@@ -8,3 +8,4 @@ VM-Core/data/*
 \.rej$
 \.conflict\~$
 /VM-Core/log/
+/target/

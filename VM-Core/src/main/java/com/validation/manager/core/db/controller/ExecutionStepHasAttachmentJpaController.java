@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,11 +49,11 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
         if (executionStepHasAttachment.getExecutionStepHasAttachmentPK() == null) {
             executionStepHasAttachment.setExecutionStepHasAttachmentPK(new ExecutionStepHasAttachmentPK());
         }
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentId(executionStepHasAttachment.getAttachment().getAttachmentPK().getId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepTestCaseExecutionId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentId(executionStepHasAttachment.getAttachment().getAttachmentPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -93,11 +93,11 @@ public class ExecutionStepHasAttachmentJpaController implements Serializable {
     }
 
     public void edit(ExecutionStepHasAttachment executionStepHasAttachment) throws NonexistentEntityException, Exception {
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentId(executionStepHasAttachment.getAttachment().getAttachmentPK().getId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
-        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
         executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepTestCaseExecutionId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentAttachmentTypeId(executionStepHasAttachment.getAttachment().getAttachmentPK().getAttachmentTypeId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setExecutionStepStepTestCaseId(executionStepHasAttachment.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasAttachment.getExecutionStepHasAttachmentPK().setAttachmentId(executionStepHasAttachment.getAttachment().getAttachmentPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

@@ -23,12 +23,9 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroupFieldFactory;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.Transferable;
@@ -42,7 +39,6 @@ import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
-import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -69,7 +65,6 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.TreeDragMode;
 import com.vaadin.ui.Tree.TreeDropCriterion;
 import com.vaadin.ui.Tree.TreeTargetDetails;
-import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
@@ -89,7 +84,6 @@ import com.validation.manager.core.api.notification.NotificationTypes;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.History;
-import com.validation.manager.core.db.HistoryField;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
@@ -103,7 +97,6 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.controller.BaselineJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
@@ -119,7 +112,6 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.history.Versionable;
 import com.validation.manager.core.history.Versionable.CHANGE_LEVEL;
-import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
@@ -144,7 +136,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -164,7 +155,14 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.annotation.WebServlet;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.BaselineComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.HistoryTable;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectTreeComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementListComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementSelectionComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.StepComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.TestCaseExporter;
 import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.demo.DemoProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
@@ -195,7 +193,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     private Component left;
     private final TabSheet tabSheet = new TabSheet();
     private final List<Project> projects = new ArrayList<>();
-    private Tree tree;
+    private ProjectTreeComponent tree;
     private Tab main;
     private final List<String> roles = new ArrayList<>();
     private final String REQUIREMENT_REVIEW = "requirement.view";
@@ -339,7 +337,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     rsn.setName(name.getValue().toString());
                     rsn.setDescription(desc.getValue().toString());
                     rsn.setScope(scope.getValue().toString());
-                    handleVerioning(rsn, () -> {
+                    handleVersioning(rsn, () -> {
                         try {
                             new RequirementSpecNodeJpaController(DataBaseManager
                                     .getEntityManagerFactory()).edit(rsn);
@@ -461,7 +459,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     .withOkButton(() -> {
                                         //Start the wizard
                                         Wizard w = new Wizard();
-                                        Window sw = new VMWindow();
+                                        VMWindow sw = new VMWindow();
                                         w.setDisplayedMaxTitles(3);
                                         toApprove.forEach(r -> {
                                             w.addStep(new SelectRequirementVersionStep(r));
@@ -495,8 +493,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                                             }
                                         });
                                         sw.setContent(w);
-                                        sw.center();
-                                        sw.setModal(true);
                                         sw.setSizeFull();
                                         addWindow(sw);
                                     }, ButtonOption.focus(),
@@ -558,7 +554,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     tces.setScope(scope.getValue().toString());
                     tces.setName(name.getValue().toString());
                     try {
-                        handleVerioning(tces, () -> {
+                        handleVersioning(tces, () -> {
                             try {
                                 tces.write2DB();
                                 tces.update(tce, tces.getEntity());
@@ -673,143 +669,8 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, "testcase.view");
     }
 
-    private void displayStep(Step s, boolean edit) {
-        Panel form = new Panel(TRANSLATOR.translate("step.detail"));
-        FormLayout layout = new FormLayout();
-        form.setContent(layout);
-        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
-        binder.setItemDataSource(s);
-        Field<?> sequence = binder.buildAndBind(TRANSLATOR.translate("general.sequence"),
-                "stepSequence");
-        layout.addComponent(sequence);
-        TextArea text = new TextArea(TRANSLATOR.translate("general.text"));
-        text.setConverter(new ByteToStringConverter());
-        binder.bind(text, "text");
-        layout.addComponent(text);
-        TextArea result = new TextArea(TRANSLATOR.translate("expected.result"));
-        result.setConverter(new ByteToStringConverter());
-        binder.bind(result, "expectedResult");
-        layout.addComponent(result);
-        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"), "notes",
-                TextArea.class);
-        notes.setSizeFull();
-        layout.addComponent(notes);
-        tree.select(s);
-        if (!s.getRequirementList().isEmpty() && !edit) {
-            layout.addComponent(getDisplayRequirementList("related.requirements",
-                    s.getRequirementList()));
-        } else {
-            AbstractSelect requirements = getRequirementSelectionComponent();
-            //Select the exisitng ones.
-            if (s.getRequirementList() != null) {
-                s.getRequirementList().forEach((r) -> {
-                    requirements.select(r);
-                });
-            }
-            requirements.addValueChangeListener(event -> {
-                Set<Requirement> selected
-                        = (Set<Requirement>) event.getProperty().getValue();
-                s.getRequirementList().clear();
-                selected.forEach(r -> {
-                    s.getRequirementList().add(r);
-                });
-            });
-            layout.addComponent(requirements);
-        }
-        Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
-        cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
-            if (s.getStepPK() == null) {
-                displayObject(tree.getValue());
-            } else {
-                displayObject(s, false);
-            }
-        });
-        if (edit) {
-            if (s.getStepPK() == null) {
-                //Creating a new one
-                Button save = new Button(TRANSLATOR.translate("general.save"));
-                save.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        s.setExpectedResult(((TextArea) result).getValue()
-                                .getBytes("UTF-8"));
-                        s.setNotes(notes.getValue() == null ? ""
-                                : notes.getValue().toString());
-                        s.setStepSequence(Integer.parseInt(sequence
-                                .getValue().toString()));
-                        s.setTestCase((TestCase) tree.getValue());
-                        s.setText(text.getValue().getBytes("UTF-8"));
-                        if (s.getRequirementList() == null) {
-                            s.setRequirementList(new ArrayList<>());
-                        }
-                        new StepJpaController(DataBaseManager
-                                .getEntityManagerFactory()).create(s);
-                        form.setVisible(false);
-                        //Recreate the tree to show the addition
-                        updateProjectList();
-                        displayObject(s);
-                        buildProjectTree(s);
-                        updateScreen();
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.creation"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    }
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            } else {
-                //Editing existing one
-                Button update = new Button(TRANSLATOR.translate("general.update"));
-                update.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        s.setExpectedResult(((TextArea) result).getValue()
-                                .getBytes("UTF-8"));
-                        s.setNotes(notes.getValue().toString());
-                        s.setStepSequence(Integer.parseInt(sequence.getValue().toString()));
-                        s.setText(text.getValue().getBytes("UTF-8"));
-                        if (s.getRequirementList() == null) {
-                            s.setRequirementList(new ArrayList<>());
-                        }
-                        handleVerioning(s, () -> {
-                            try {
-                                new StepJpaController(DataBaseManager
-                                        .getEntityManagerFactory()).edit(s);
-                                displayStep(s, true);
-                            } catch (NonexistentEntityException ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            } catch (Exception ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            }
-                        });
-                    } catch (UnsupportedEncodingException | NumberFormatException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.creation"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    }
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            }
-        }
-        binder.setReadOnly(!edit);
-        binder.bindMemberFields(form);
-        layout.setSizeFull();
-        form.setSizeFull();
-        setTabContent(main, form, "testcase.view");
+    public void displayStep(Step s, boolean edit) {
+        setTabContent(main, new StepComponent(s, edit), "testcase.view");
     }
 
     private void displayTestCase(TestCase t, boolean edit) {
@@ -888,7 +749,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         t.setCreationDate((Date) creation.getValue());
                         t.setActive((Boolean) active.getValue());
                         t.setIsOpen((Boolean) open.getValue());
-                        handleVerioning(t, () -> {
+                        handleVersioning(t, () -> {
                             try {
                                 new TestCaseJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(t);
@@ -994,7 +855,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         tp.setNotes(notes.getValue().toString());
                         tp.setActive((Boolean) open.getValue());
                         tp.setIsOpen((Boolean) open.getValue());
-                        handleVerioning(tp, () -> {
+                        handleVersioning(tp, () -> {
                             try {
                                 new TestPlanJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(tp);
@@ -1094,7 +955,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         tp.setName(name.getValue().toString());
                         tp.setNotes(notes.getValue().toString());
                         tp.setActive((Boolean) active.getValue());
-                        handleVerioning(tp, () -> {
+                        handleVersioning(tp, () -> {
                             try {
                                 new TestProjectJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(tp);
@@ -1210,7 +1071,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         rs.setName(name.getValue().toString());
                         rs.setModificationDate(new Date());
                         rs.setSpecLevel((SpecLevel) level.getValue());
-                        handleVerioning(rs, () -> {
+                        handleVersioning(rs, () -> {
                             try {
                                 new RequirementSpecJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(rs);
@@ -1247,7 +1108,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, form, REQUIREMENT_REVIEW);
     }
 
-    private void displayObject(Object item) {
+    public void displayObject(Object item) {
         displayObject(item, false);
     }
 
@@ -1389,7 +1250,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         rs.setDescription(((TextArea) desc).getValue());
                         rs.setNotes(((TextArea) notes).getValue());
                         rs.setUniqueId(((TextField) id).getValue());
-                        handleVerioning(rs, () -> {
+                        handleVersioning(rs, () -> {
                             try {
                                 rs.write2DB();
                                 //Recreate the tree to show the addition
@@ -1461,14 +1322,11 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     @Override
     public void buildProjectTree(Object item) {
-        tree.removeAllItems();
-        tree.addItem(projTreeRoot);
-        projects.forEach((p) -> {
-            if (p.getParentProjectId() == null) {
-                //TODO: Check if you have permissions on project to see it.
-                addProject(p, tree);
-            }
-        });
+        if (tree == null) {
+            tree = new ProjectTreeComponent();
+        } else {
+            tree.update();
+        }
         showItemInTree(item);
     }
 
@@ -1515,8 +1373,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 }
                             });
                             sw.setContent(w);
-                            sw.center();
-                            sw.setModal(true);
                             sw.setSizeFull();
                             addWindow(sw);
                         });
@@ -1746,10 +1602,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                             });
                             subContent.addComponent(cb);
                             subContent.addComponent(upload);
-
-                            // Center it in the browser window
-                            subWindow.center();
-
                             // Open it in the UI
                             addWindow(subWindow);
                         });
@@ -1835,14 +1687,19 @@ public class ValidationManagerUI extends UI implements VMUI {
                             });
                             subContent.addComponent(cb);
                             subContent.addComponent(upload);
-
-                            // Center it in the browser window
-                            subWindow.center();
-
                             // Open it in the UI
                             addWindow(subWindow);
                         });
         importSteps.setEnabled(checkRight("requirement.modify"));
+        MenuItem export
+                = menu.addItem(TRANSLATOR.translate("general.export"),
+                        VaadinIcons.DOWNLOAD,
+                        (MenuItem selectedItem) -> {
+                            TestCase tc = (TestCase) tree.getValue();
+                            UI.getCurrent().addWindow(TestCaseExporter
+                                    .getTestCaseExporter(Arrays.asList(tc)));
+                        });
+        export.setEnabled(checkRight("testcase.view"));
         addExecutionDashboard(menu);
     }
 
@@ -2051,6 +1908,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     .forEach(p -> {
                         p.processNotification();
                     });
+            createTree();
         }
         //Add the content
         vs.setSecondComponent(getContentComponent());
@@ -2113,7 +1971,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 //Editing existing one
                 Button update = new Button(TRANSLATOR.translate("generl.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
-                    handleVerioning(p, () -> {
+                    handleVersioning(p, () -> {
                         try {
                             p.setName(name.getValue().toString());
                             if (notes.getValue() != null) {
@@ -2153,205 +2011,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                 "project.viewer");
     }
 
-    private void addRequirementSpec(RequirementSpec rs, Tree tree) {
-        // Add the item as a regular item.
-        tree.addItem(rs);
-        tree.setItemCaption(rs, rs.getName());
-        tree.setItemIcon(rs, SPEC_ICON);
-        // Set it to be a child.
-        tree.setParent(rs, rs.getProject());
-        if (rs.getRequirementSpecNodeList().isEmpty()
-                && rs.getBaselineList().isEmpty()) {
-            //No children
-            tree.setChildrenAllowed(rs, false);
-        } else {
-            rs.getRequirementSpecNodeList().forEach((rsn) -> {
-                addRequirementSpecsNode(rsn, tree);
-            });
-            //Add the baseline to the spec
-            rs.getBaselineList().forEach(bl -> {
-                addBaseline(bl, tree);
-            });
-        }
-    }
-
-    private void addRequirementSpecsNode(RequirementSpecNode rsn, Tree tree) {
-        // Add the item as a regular item.
-        tree.addItem(rsn);
-        tree.setItemCaption(rsn, rsn.getName());
-        tree.setItemIcon(rsn, SPEC_ICON);
-        // Set it to be a child.
-        tree.setParent(rsn, rsn.getRequirementSpec());
-        if (rsn.getRequirementList().isEmpty()) {
-            //No children
-            tree.setChildrenAllowed(rsn, false);
-        } else {
-            ArrayList<Requirement> list
-                    = new ArrayList<>(rsn.getRequirementList());
-            Collections.sort(list,
-                    (Requirement o1, Requirement o2)
-                    -> o1.getUniqueId().compareTo(o2.getUniqueId()));
-            list.forEach((req) -> {
-                addRequirement(req, tree);
-            });
-        }
-    }
-
-    private void addTestProject(TestProject tp, Tree tree) {
-        tree.addItem(tp);
-        tree.setItemCaption(tp, tp.getName());
-        tree.setItemIcon(tp, TEST_SUITE_ICON);
-        tree.setParent(tp, tp.getProjectList().get(0));
-        boolean children = false;
-        if (!tp.getTestPlanList().isEmpty()) {
-            tp.getTestPlanList().forEach((plan) -> {
-                addTestPlan(plan, tree);
-            });
-            children = true;
-        }
-        tree.setChildrenAllowed(tp, children);
-    }
-
-    private void addTestPlan(TestPlan tp, Tree tree) {
-        tree.addItem(tp);
-        tree.setItemCaption(tp, tp.getName());
-        tree.setItemIcon(tp, TEST_PLAN_ICON);
-        tree.setParent(tp, tp.getTestProject());
-        if (!tp.getTestCaseList().isEmpty()) {
-            tp.getTestCaseList().forEach((tc) -> {
-                addTestCase(tc, tp, tree);
-            });
-        }
-    }
-
-    private void addTestCase(TestCase t, TestPlan plan, Tree tree) {
-        tree.addItem(t);
-        tree.setItemCaption(t, t.getName());
-        tree.setItemIcon(t, TEST_ICON);
-        tree.setParent(t, plan);
-        List<Step> stepList = t.getStepList();
-        Collections.sort(stepList, (Step o1, Step o2)
-                -> o1.getStepSequence() - o2.getStepSequence());
-        stepList.forEach((s) -> {
-            addStep(s, tree);
-        });
-    }
-
-    private void addStep(Step s, Tree tree) {
-        addStep(s, tree, null);
-    }
-
-    private void addStep(Step s, Tree tree, String parent) {
-        tree.addItem(s);
-        tree.setItemCaption(s, "Step # " + s.getStepSequence());
-        tree.setItemIcon(s, STEP_ICON);
-        Object parentId = s.getTestCase();
-        if (parent != null) {
-            parentId = parent;
-        }
-        tree.setParent(s, parentId);
-        tree.setChildrenAllowed(s, false);
-    }
-
-    private void addRequirement(Requirement req, Tree tree) {
-        // Add the item as a regular item.
-        tree.addItem(req);
-        tree.setItemCaption(req, req.getUniqueId());
-        tree.setItemIcon(req, REQUIREMENT_ICON);
-        tree.setParent(req, req.getRequirementSpecNode());
-        //No children
-        tree.setChildrenAllowed(req, false);
-    }
-
-    private void addTestCaseExecutions(String parent, TestCaseExecution tce,
-            Tree tree) {
-        tree.addItem(tce);
-        tree.setItemCaption(tce, tce.getName());
-        tree.setItemIcon(tce, EXECUTION_ICON);
-        tree.setParent(tce, parent);
-        for (ExecutionStep es : tce.getExecutionStepList()) {
-            //Group under the Test Case
-            TestCase tc = es.getStep().getTestCase();
-            Collection<?> children = tree.getChildren(tce);
-            String node = "tce-" + tce.getId() + "-" + tc.getId();
-            boolean add = true;
-            if (children != null) {
-                //Check if already added as children
-                for (Object o : children) {
-                    if (o.equals(node)) {
-                        add = false;
-                        break;
-                    }
-                }
-            }
-            if (add) {
-                //Add Test Case if not there
-                tree.addItem(node);
-                tree.setItemCaption(node, tc.getName());
-                tree.setItemIcon(node, TEST_ICON);
-                tree.setParent(node, tce);
-            }
-            tree.addItem(es);
-            tree.setItemCaption(es, "Step #" + es.getStep().getStepSequence());
-            //Use icon based on result of step
-            tree.setItemIcon(es, STEP_ICON);
-            tree.setParent(es, node);
-            tree.setChildrenAllowed(es, false);
-        }
-    }
-
-    public void addProject(Project p, Tree tree) {
-        tree.addItem(p);
-        tree.setItemCaption(p, p.getName());
-        tree.setParent(p, p.getParentProjectId() == null
-                ? projTreeRoot : p.getParentProjectId());
-        tree.setItemIcon(p, PROJECT_ICON);
-        boolean children = false;
-        if (!p.getProjectList().isEmpty()) {
-            p.getProjectList().forEach((sp) -> {
-                addProject(sp, tree);
-            });
-            children = true;
-        }
-        if (!p.getRequirementSpecList().isEmpty()) {
-            p.getRequirementSpecList().forEach((rs) -> {
-                addRequirementSpec(rs, tree);
-            });
-            children = true;
-        }
-        if (!p.getTestProjectList().isEmpty()) {
-            p.getTestProjectList().forEach((tp) -> {
-                addTestProject(tp, tree);
-            });
-            children = true;
-        }
-        List<TestCaseExecution> executions = TestCaseExecutionServer
-                .getExecutions(p);
-        String id = "executions" + p.getId();
-        tree.addItem(id);
-        tree.setItemCaption(id, TRANSLATOR.translate("general.execution"));
-        tree.setItemIcon(id, EXECUTIONS_ICON);
-        tree.setParent(id, p);
-        executions.forEach((tce) -> {
-            addTestCaseExecutions(id, tce, tree);
-        });
-        if (!children) {
-            // No subprojects
-            tree.setChildrenAllowed(p, false);
-        }
-    }
-
-    @Override
-    protected void init(VaadinRequest request) {
-        ProjectJpaController controller
-                = new ProjectJpaController(DataBaseManager
-                        .getEntityManagerFactory());
-
-        if (DataBaseManager.isDemo()
-                && controller.findProjectEntities().isEmpty()) {
-            buildDemoTree();
-        }
-        tree = new Tree();
+    private void createTree() {
+        tree = new ProjectTreeComponent();
         // Set the tree in drag source mode
         tree.setDragMode(TreeDragMode.NODE);
         // Allow the tree to receive drag drops and handle them
@@ -2579,8 +2240,20 @@ public class ValidationManagerUI extends UI implements VMUI {
         tree.expandItem(projTreeRoot);
         tree.setSizeFull();
         updateProjectList();
-        updateScreen();
+    }
+
+    @Override
+    protected void init(VaadinRequest request) {
         Page.getCurrent().setTitle("Validation Manager");
+        ProjectJpaController controller
+                = new ProjectJpaController(DataBaseManager
+                        .getEntityManagerFactory());
+
+        if (DataBaseManager.isDemo()
+                && controller.findProjectEntities().isEmpty()) {
+            buildDemoTree();
+        }
+        updateScreen();
     }
 
     private static <V> void swapValues(SortedMap m, int i0, int i1) {
@@ -2639,6 +2312,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         return result;
     }
 
+    @Override
     public boolean checkAnyRights(List<String> rights) {
         boolean result = false;
         if (rights.stream().anyMatch((r) -> (checkRight(r)))) {
@@ -2672,6 +2346,36 @@ public class ValidationManagerUI extends UI implements VMUI {
         return false;
     }
 
+    @Override
+    public boolean checkProjectRole(Project p, String role) {
+        if (user != null) {
+            user.update();
+            if (user.getUserHasRoleList().stream().anyMatch((uhr)
+                    -> (Objects.equals(uhr.getProjectId().getId(), p.getId())
+                    && uhr.getRole().getRoleName().equals(role)))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkAnyProjectRole(Project p, List<String> roles) {
+        return roles.stream().anyMatch((r) -> (checkProjectRole(p, r)));
+    }
+
+    @Override
+    public boolean checkAllProjectRoles(Project p, List<String> roles) {
+        boolean result = true;
+        for (String r : roles) {
+            if (!checkProjectRole(p, r)) {
+                result = false;
+                break;
+            }
+        }
+        return result;
+    }
+
     private void displayTestPlanning(Project p) {
         DesignerScreenProvider provider = Lookup.getDefault()
                 .lookup(DesignerScreenProvider.class);
@@ -2688,262 +2392,19 @@ public class ValidationManagerUI extends UI implements VMUI {
         return tree.getValue();
     }
 
-    private void displayBaseline(Baseline baseline, boolean edit) {
+    public void displayBaseline(Baseline baseline, boolean edit) {
         displayBaseline(baseline, edit, null);
     }
 
-    private void displayBaseline(Baseline baseline,
+    public void displayBaseline(Baseline baseline,
             boolean edit, RequirementSpec rs) {
-        Panel form = new Panel(TRANSLATOR.translate("baseline.detail"));
-        FormLayout layout = new FormLayout();
-        form.setContent(layout);
-        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(baseline.getClass());
-        binder.setItemDataSource(baseline);
-        Field<?> id = binder.buildAndBind(TRANSLATOR.translate("general.name"), "baselineName");
-        layout.addComponent(id);
-        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.description"), "description",
-                TextArea.class
-        );
-        desc.setSizeFull();
-        layout.addComponent(desc);
-        Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
-        if (rs != null) {
-            List<History> potential = new ArrayList<>();
-            Tool.extractRequirements(rs).forEach((r) -> {
-                potential.add(r.getHistoryList().get(r.getHistoryList().size() - 1));
-            });
-            layout.addComponent(createRequirementHistoryTable(TRANSLATOR.translate("included.requirements"),
-                    potential));
-        } else {
-            layout.addComponent(createRequirementHistoryTable(TRANSLATOR.translate("included.requirements"),
-                    baseline.getHistoryList()));
-        }
-        cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
-            displayObject(tree.getValue());
-        });
-        if (edit) {
-            if (baseline.getId() == null) {
-                //Creating a new one
-                Button save = new Button(TRANSLATOR.translate("general.save"));
-                save.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        binder.commit();
-                        if (rs != null) {
-                            MessageBox prompt = MessageBox.createQuestion()
-                                    .withCaption(TRANSLATOR.translate("save.baseline.title"))
-                                    .withMessage(TRANSLATOR.translate("save.baseine.message")
-                                            + "requirements will be released to a new major version")
-                                    .withYesButton(() -> {
-                                        Baseline entity = BaselineServer
-                                                .createBaseline(
-                                                        baseline.getBaselineName(),
-                                                        baseline.getDescription(),
-                                                        rs)
-                                                .getEntity();
-                                        updateProjectList();
-                                        buildProjectTree(entity);
-                                        displayObject(entity, false);
-                                        updateScreen();
-                                    },
-                                            ButtonOption.focus(),
-                                            ButtonOption
-                                                    .icon(VaadinIcons.CHECK))
-                                    .withNoButton(() -> {
-                                        displayObject(tree.getValue());
-                                    },
-                                            ButtonOption
-                                                    .icon(VaadinIcons.CLOSE));
-                            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-                            prompt.open();
-                        } else {
-                            //Recreate the tree to show the addition
-                            displayObject(baseline, true);
-                        }
-                        updateProjectList();
-                        updateScreen();
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                    }
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            } else {
-                //Editing existing one
-                Button update = new Button(TRANSLATOR.translate("general.update"));
-                update.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        handleVerioning(baseline, () -> {
-                            try {
-                                new BaselineJpaController(DataBaseManager
-                                        .getEntityManagerFactory()).edit(baseline);
-                                //Recreate the tree to show the addition
-                                buildProjectTree(baseline);
-                                displayBaseline(baseline, false);
-                            } catch (NonexistentEntityException ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            } catch (Exception ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            }
-                        });
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
-                    }
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            }
-        }
-        binder.setBuffered(true);
-        binder.setReadOnly(!edit);
-        binder.bindMemberFields(form);
-        form.setSizeFull();
-        setTabContent(main, form, REQUIREMENT_REVIEW);
-    }
-
-    private Grid getHistoryTable(String title,
-            List<History> historyItems, String sortByField,
-            boolean showVersionFields,
-            String... fields) {
-        Grid grid = new Grid(title);
-        BeanItemContainer<History> histories
-                = new BeanItemContainer<>(History.class);
-        GeneratedPropertyContainer wrapperCont
-                = new GeneratedPropertyContainer(histories);
-        histories.addAll(historyItems);
-        grid.setContainerDataSource(wrapperCont);
-        if (wrapperCont.size() > 0) {
-            grid.setHeightMode(HeightMode.ROW);
-            grid.setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
-        }
-        for (String field : fields) {
-            wrapperCont.addGeneratedProperty(field,
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    String result = "";
-                    for (HistoryField hf : v.getHistoryFieldList()) {
-                        if (hf.getFieldName().equals(field)) {
-                            result = hf.getFieldValue();
-                            break;
-                        }
-                    }
-                    return result;
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-        }
-        if (showVersionFields) {
-            wrapperCont.addGeneratedProperty("version",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getMajorVersion() + "." + v.getMidVersion()
-                            + "." + v.getMinorVersion();
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-            wrapperCont.addGeneratedProperty("modifier",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getModifierId().getFirstName() + " "
-                            + v.getModifierId().getLastName();
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-            wrapperCont.addGeneratedProperty("modificationDate",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getModificationTime().toString();
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-            wrapperCont.addGeneratedProperty("modificationReason",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getReason() == null ? "" : TRANSLATOR.translate(v.getReason());
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-        }
-        List<String> fieldList = new ArrayList<>();
-        //Add specified fields
-        fieldList.addAll(Arrays.asList(fields));
-        if (showVersionFields) {
-            //Add default fields
-            fieldList.add("version");
-            fieldList.add("modifier");
-            fieldList.add("modificationDate");
-            fieldList.add("modificationReason");
-        }
-        grid.setColumns(fieldList.toArray());
-        if (showVersionFields) {
-            Grid.Column version = grid.getColumn("version");
-            version.setHeaderCaption(TRANSLATOR.translate("general.version"));
-            Grid.Column mod = grid.getColumn("modifier");
-            mod.setHeaderCaption(TRANSLATOR.translate("general.modifier"));
-            Grid.Column modDate = grid.getColumn("modificationDate");
-            modDate.setHeaderCaption(TRANSLATOR.translate("modification.date"));
-            Grid.Column modReason = grid.getColumn("modificationReason");
-            modReason.setHeaderCaption(TRANSLATOR.translate("general.reason"));
-        }
-        if (sortByField != null && !sortByField.trim().isEmpty()) {
-            wrapperCont.sort(new Object[]{sortByField}, new boolean[]{true});
-        }
-        grid.setSizeFull();
-        return grid;
+        setTabContent(main, new BaselineComponent(baseline, edit, rs),
+                REQUIREMENT_REVIEW);
     }
 
     private Component createStepHistoryTable(String title,
             List<History> historyItems, boolean showVersionFields) {
-        Grid grid = getHistoryTable(title, historyItems, null,
+        Grid grid = new HistoryTable(title, historyItems, null,
                 showVersionFields,
                 "text", "expectedResult", "notes");
         Grid.Column text = grid.getColumn("text");
@@ -2955,9 +2416,9 @@ public class ValidationManagerUI extends UI implements VMUI {
         return grid;
     }
 
-    private Component createRequirementHistoryTable(String title,
+    public Component createRequirementHistoryTable(String title,
             List<History> historyItems) {
-        Grid grid = getHistoryTable(title, historyItems, "uniqueId", true,
+        Grid grid = new HistoryTable(title, historyItems, "uniqueId", true,
                 "uniqueId", "description", "notes");
         Grid.Column uniqueId = grid.getColumn("uniqueId");
         uniqueId.setHeaderCaption(TRANSLATOR.translate("unique.id"));
@@ -2966,17 +2427,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         Grid.Column notes = grid.getColumn("notes");
         notes.setHeaderCaption(TRANSLATOR.translate("general.notes"));
         return grid;
-    }
-
-    private void addBaseline(Baseline bl, Tree tree) {
-        if (!tree.containsId(bl)) {
-            tree.addItem(bl);
-            tree.setItemCaption(bl, bl.getBaselineName());
-            tree.setItemIcon(bl, BASELINE_ICON);
-            tree.setParent(bl, bl.getRequirementSpec());
-            //No children
-            tree.setChildrenAllowed(bl, false);
-        }
     }
 
     private void displayTraceMatrix(Project project) {
@@ -2988,7 +2438,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         vs.setSecondComponent(tm);
         vs.setSizeFull();
         w.setContent(vs);
-        w.center();
         w.setSizeFull();
         addWindow(w);
     }
@@ -2996,39 +2445,13 @@ public class ValidationManagerUI extends UI implements VMUI {
 //    private void createBaselineMenu(ContextMenu menu) {
 //        //TODO:
 //    }
-    private AbstractSelect getRequirementSelectionComponent() {
-        Project p = getParentProject();
-        List<Requirement> reqs = Tool.extractRequirements(p);
-        Collections.sort(reqs, (Requirement o1, Requirement o2)
-                -> o1.getUniqueId().compareTo(o2.getUniqueId()));
-        BeanItemContainer<Requirement> requirementContainer
-                = new BeanItemContainer<>(Requirement.class,
-                        reqs);
-        TwinColSelect requirements
-                = new TwinColSelect(TRANSLATOR.translate("linked.requirement"));
-        requirements.setItemCaptionPropertyId("uniqueId");
-        requirements.setContainerDataSource(requirementContainer);
-        requirements.setRows(5);
-        requirements.setLeftColumnCaption(TRANSLATOR.translate("available.requirement"));
-        requirements.setRightColumnCaption(TRANSLATOR.translate("linked.requirement"));
-        return requirements;
+    public AbstractSelect getRequirementSelectionComponent() {
+        return new RequirementSelectionComponent(getParentProject());
     }
 
-    private Component getDisplayRequirementList(String title,
+    public Component getDisplayRequirementList(String title,
             List<Requirement> requirementList) {
-        Grid grid = new Grid(title);
-        BeanItemContainer<Requirement> children
-                = new BeanItemContainer<>(Requirement.class);
-        children.addAll(requirementList);
-        grid.setContainerDataSource(children);
-        grid.setColumns("uniqueId");
-        Grid.Column uniqueId = grid.getColumn("uniqueId");
-        uniqueId.setHeaderCaption(TRANSLATOR.translate("unique.id"));
-        grid.setHeightMode(HeightMode.ROW);
-        grid.setHeightByRows(children.size() > 5 ? 5 : children.size());
-        grid.setSizeFull();
-        children.sort(new Object[]{"uniqueId"}, new boolean[]{true});
-        return grid;
+        return new RequirementListComponent(title, requirementList);
     }
 
     private void addDeleteExecution(ContextMenu menu) {
@@ -3250,7 +2673,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         }
     }
 
-    private void handleVerioning(Object o, Runnable r) {
+    public void handleVersioning(Object o, Runnable r) {
         if (o instanceof Versionable) {
             Versionable ao = (Versionable) o;
             if (Versionable.auditable(ao)) {

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.UserHasRole;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
@@ -58,6 +59,9 @@ public class ProjectJpaController implements Serializable {
         }
         if (project.getHistoryList() == null) {
             project.setHistoryList(new ArrayList<>());
+        }
+        if (project.getUserHasRoleList() == null) {
+            project.setUserHasRoleList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
@@ -92,6 +96,12 @@ public class ProjectJpaController implements Serializable {
                 attachedHistoryList.add(historyListHistoryToAttach);
             }
             project.setHistoryList(attachedHistoryList);
+            List<UserHasRole> attachedUserHasRoleList = new ArrayList<>();
+            for (UserHasRole userHasRoleListUserHasRoleToAttach : project.getUserHasRoleList()) {
+                userHasRoleListUserHasRoleToAttach = em.getReference(userHasRoleListUserHasRoleToAttach.getClass(), userHasRoleListUserHasRoleToAttach.getUserHasRolePK());
+                attachedUserHasRoleList.add(userHasRoleListUserHasRoleToAttach);
+            }
+            project.setUserHasRoleList(attachedUserHasRoleList);
             em.persist(project);
             if (parentProjectId != null) {
                 parentProjectId.getProjectList().add(project);
@@ -128,6 +138,15 @@ public class ProjectJpaController implements Serializable {
                     oldProjectIdOfHistoryListHistory = em.merge(oldProjectIdOfHistoryListHistory);
                 }
             }
+            for (UserHasRole userHasRoleListUserHasRole : project.getUserHasRoleList()) {
+                Project oldProjectIdOfUserHasRoleListUserHasRole = userHasRoleListUserHasRole.getProjectId();
+                userHasRoleListUserHasRole.setProjectId(project);
+                userHasRoleListUserHasRole = em.merge(userHasRoleListUserHasRole);
+                if (oldProjectIdOfUserHasRoleListUserHasRole != null) {
+                    oldProjectIdOfUserHasRoleListUserHasRole.getUserHasRoleList().remove(userHasRoleListUserHasRole);
+                    oldProjectIdOfUserHasRoleListUserHasRole = em.merge(oldProjectIdOfUserHasRoleListUserHasRole);
+                }
+            }
             em.getTransaction().commit();
         }
         finally {
@@ -153,6 +172,8 @@ public class ProjectJpaController implements Serializable {
             List<RequirementSpec> requirementSpecListNew = project.getRequirementSpecList();
             List<History> historyListOld = persistentProject.getHistoryList();
             List<History> historyListNew = project.getHistoryList();
+            List<UserHasRole> userHasRoleListOld = persistentProject.getUserHasRoleList();
+            List<UserHasRole> userHasRoleListNew = project.getUserHasRoleList();
             List<String> illegalOrphanMessages = null;
             for (RequirementSpec requirementSpecListOldRequirementSpec : requirementSpecListOld) {
                 if (!requirementSpecListNew.contains(requirementSpecListOldRequirementSpec)) {
@@ -205,6 +226,13 @@ public class ProjectJpaController implements Serializable {
             }
             historyListNew = attachedHistoryListNew;
             project.setHistoryList(historyListNew);
+            List<UserHasRole> attachedUserHasRoleListNew = new ArrayList<>();
+            for (UserHasRole userHasRoleListNewUserHasRoleToAttach : userHasRoleListNew) {
+                userHasRoleListNewUserHasRoleToAttach = em.getReference(userHasRoleListNewUserHasRoleToAttach.getClass(), userHasRoleListNewUserHasRoleToAttach.getUserHasRolePK());
+                attachedUserHasRoleListNew.add(userHasRoleListNewUserHasRoleToAttach);
+            }
+            userHasRoleListNew = attachedUserHasRoleListNew;
+            project.setUserHasRoleList(userHasRoleListNew);
             project = em.merge(project);
             if (parentProjectIdOld != null && !parentProjectIdOld.equals(parentProjectIdNew)) {
                 parentProjectIdOld.getProjectList().remove(project);
@@ -262,6 +290,23 @@ public class ProjectJpaController implements Serializable {
                     if (oldProjectIdOfHistoryListNewHistory != null && !oldProjectIdOfHistoryListNewHistory.equals(project)) {
                         oldProjectIdOfHistoryListNewHistory.getHistoryList().remove(historyListNewHistory);
                         oldProjectIdOfHistoryListNewHistory = em.merge(oldProjectIdOfHistoryListNewHistory);
+                    }
+                }
+            }
+            for (UserHasRole userHasRoleListOldUserHasRole : userHasRoleListOld) {
+                if (!userHasRoleListNew.contains(userHasRoleListOldUserHasRole)) {
+                    userHasRoleListOldUserHasRole.setProjectId(null);
+                    userHasRoleListOldUserHasRole = em.merge(userHasRoleListOldUserHasRole);
+                }
+            }
+            for (UserHasRole userHasRoleListNewUserHasRole : userHasRoleListNew) {
+                if (!userHasRoleListOld.contains(userHasRoleListNewUserHasRole)) {
+                    Project oldProjectIdOfUserHasRoleListNewUserHasRole = userHasRoleListNewUserHasRole.getProjectId();
+                    userHasRoleListNewUserHasRole.setProjectId(project);
+                    userHasRoleListNewUserHasRole = em.merge(userHasRoleListNewUserHasRole);
+                    if (oldProjectIdOfUserHasRoleListNewUserHasRole != null && !oldProjectIdOfUserHasRoleListNewUserHasRole.equals(project)) {
+                        oldProjectIdOfUserHasRoleListNewUserHasRole.getUserHasRoleList().remove(userHasRoleListNewUserHasRole);
+                        oldProjectIdOfUserHasRoleListNewUserHasRole = em.merge(oldProjectIdOfUserHasRoleListNewUserHasRole);
                     }
                 }
             }
@@ -329,6 +374,11 @@ public class ProjectJpaController implements Serializable {
             for (Project projectListProject : projectList) {
                 projectListProject.setParentProjectId(null);
                 projectListProject = em.merge(projectListProject);
+            }
+            List<UserHasRole> userHasRoleList = project.getUserHasRoleList();
+            for (UserHasRole userHasRoleListUserHasRole : userHasRoleList) {
+                userHasRoleListUserHasRole.setProjectId(null);
+                userHasRoleListUserHasRole = em.merge(userHasRoleListUserHasRole);
             }
             em.remove(project);
             em.getTransaction().commit();

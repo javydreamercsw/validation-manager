@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -108,7 +108,8 @@ public class TableExtractor {
             output = new ObjectOutputStream(fileOut);
             output.writeObject(tables);
             output.flush();
-        } finally {
+        }
+        finally {
             if (output != null) {
                 output.close();
             }
@@ -120,7 +121,8 @@ public class TableExtractor {
     }
 
     public List<DefaultTableModel> extractTables()
-            throws IOException, FileNotFoundException, ClassNotFoundException, VMException {
+            throws IOException, FileNotFoundException, ClassNotFoundException,
+            VMException {
         List<DefaultTableModel> tables = new ArrayList<>();
         if (source.getName().endsWith(".doc")
                 || source.getName().endsWith(".docx")
@@ -160,7 +162,8 @@ public class TableExtractor {
             for (int i = 0; i < columns; i++) {
                 title[i] = format("Column {0}", i + 1);
             }
-            int row = 0, col = 0;
+            int row = 0;
+            int col = 0;
             for (int i = 0; i < rowNum; i++) {
                 for (Object obj : data.get(row)) {
                     LOG.log(Level.FINE, "r: {0} c: {1} v: {2}",

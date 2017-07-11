@@ -23,8 +23,11 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.TestCase;
@@ -41,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.TestCaseExporter;
 import net.sourceforge.javydreamercsw.validation.manager.web.execution.ExecutionWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.quality.QualityScreenProvider;
@@ -61,8 +65,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
                 String.class, "");
         testCaseTree.addGeneratedColumn("general.status",
                 (Table source, Object itemId, Object columnId) -> {
-                    if (TRANSLATOR
-                            .translate("general.status").equals(columnId)
+                    if ("general.status".equals(columnId)
                     && itemId instanceof String) {
                         String id = (String) itemId;
                         String message;
@@ -175,19 +178,22 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     if (!isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof TesterScreenProvider) {
                         actions.add(new Action(TRANSLATOR
-                                .translate("general.execute")));
+                                .translate("general.execute"),
+                                VMUI.EXECUTION_ICON));
                     } else if (isLocked(tce, tcID)
                             && ExecutionScreen.this instanceof QualityScreenProvider) {
                         actions.add(new Action(TRANSLATOR
-                                .translate("general.review")));
+                                .translate("general.review"),
+                                VaadinIcons.EYE));
                     }
+                    actions.add(new Action(TRANSLATOR
+                            .translate("general.export"), VaadinIcons.DOWNLOAD));
                 }
                 return actions.toArray(new Action[actions.size()]);
             }
 
             @Override
             public void handleAction(Action action, Object sender, Object target) {
-                //Parse the information to get the exact Execution Step
                 List<TestCaseExecutionServer> executions = new ArrayList<>();
                 int tcID = -1;
                 if (((String) target).startsWith("tce")) {
@@ -200,9 +206,21 @@ public abstract class ExecutionScreen extends AbstractProvider {
                     tcID = Integer.parseInt(((String) target)
                             .substring(((String) target).lastIndexOf("-") + 1));
                 }
-                showExecutionScreen(executions, tcID);
+                //Parse the information to get the exact Execution Step
+                if (action.getCaption().equals(TRANSLATOR
+                        .translate("general.export"))) {
+                    viewExecutionScreen(executions, tcID);
+                } else {
+                    showExecutionScreen(executions, tcID);
+                }
             }
         });
+    }
+
+    private void viewExecutionScreen(List<TestCaseExecutionServer> executions,
+            int tcID) {
+        UI.getCurrent().addWindow(TestCaseExporter
+                .getExecutionExporter(executions, tcID));
     }
 
     protected Map<String, Integer> getSummary(TestCaseExecution tce, int tcId) {
