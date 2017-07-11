@@ -18,6 +18,7 @@ package com.validation.manager.core.server.core;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.VmSettingJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -33,13 +34,13 @@ public final class VMSettingServer extends VmSetting
 
     private static List<Object> result;
 
-    public VMSettingServer(String setting) {
+    public VMSettingServer(String setting) throws VMException {
         VmSetting s = getSetting(setting);
         if (s != null) {
             super.setId(s.getId());
             update();
         } else {
-            throw new RuntimeException("Setting: " + setting
+            throw new VMException("Setting: " + setting
                     + " doesn't exist!");
         }
     }

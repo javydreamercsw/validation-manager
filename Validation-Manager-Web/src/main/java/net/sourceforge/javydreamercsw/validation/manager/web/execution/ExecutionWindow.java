@@ -210,7 +210,8 @@ public final class ExecutionWindow extends VMWindow {
         });
         //Set tester/reviewer
         ess.write2DB();
-        boolean tester = false, review = false;
+        boolean tester = false;
+        boolean review = false;
         for (ExecutionStepHasVmUser temp : ess.getExecutionStepHasVmUserList()) {
             if (temp.getRole().getRoleName().equals("tester")) {
                 tester = true;

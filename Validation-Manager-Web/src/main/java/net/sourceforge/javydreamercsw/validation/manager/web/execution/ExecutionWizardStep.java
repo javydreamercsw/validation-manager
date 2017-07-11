@@ -354,25 +354,23 @@ public class ExecutionWizardStep implements WizardStep {
                             }
                         }
                     }
+                    //Add expected result
                     if (VMSettingServer.getSetting("show.expected.result")
-                            .getBoolVal()) {
-                        //Add expected result
-                        if (min != null || max != null) {
-                            String error = TRANSLATOR
-                                    .translate("error.out.of.range")
-                                    + " "
-                                    + (min == null ? " "
-                                            : (TRANSLATOR.translate("property.min")
-                                            + ": " + min))
-                                    + " "
-                                    + (max == null ? ""
-                                            : (TRANSLATOR
-                                                    .translate("property.max")
-                                            + ": " + max));
-                            field.setRequiredError(error);
-                            field.addValidator(new DoubleRangeValidator(error,
-                                    min, max));
-                        }
+                            .getBoolVal() && (min != null || max != null)) {
+                        String error = TRANSLATOR
+                                .translate("error.out.of.range")
+                                + " "
+                                + (min == null ? " "
+                                        : (TRANSLATOR.translate("property.min")
+                                        + ": " + min))
+                                + " "
+                                + (max == null ? ""
+                                        : (TRANSLATOR
+                                                .translate("property.max")
+                                        + ": " + max));
+                        field.setRequiredError(error);
+                        field.addValidator(new DoubleRangeValidator(error,
+                                min, max));
                     }
                     fields.add(field);
                     //Set value if already recorded
@@ -409,6 +407,9 @@ public class ExecutionWizardStep implements WizardStep {
                             .translate(de.getEntryName()));
                     layout.addComponent(l);
                     break;
+                default:
+                    LOG.log(Level.SEVERE, "Unexpected field type: {0}",
+                            de.getDataEntryType().getId());
             }
         });
         //Add the Attachments
@@ -704,14 +705,12 @@ public class ExecutionWizardStep implements WizardStep {
         } else {
             //Check all fields for answers
             for (AbstractField field : fields) {
-                if (field.isRequired()) {
-                    if (!(field instanceof CheckBox)
-                            && field.isEmpty()) {
-                        Notification.show(TRANSLATOR.translate("unable.to.proceed"),
-                                field.getRequiredError(),
-                                Notification.Type.WARNING_MESSAGE);
-                        pass = false;
-                    }
+                if (field.isRequired() && !(field instanceof CheckBox)
+                        && field.isEmpty()) {
+                    Notification.show(TRANSLATOR.translate("unable.to.proceed"),
+                            field.getRequiredError(),
+                            Notification.Type.WARNING_MESSAGE);
+                    pass = false;
                 }
             }
             if (pass) {

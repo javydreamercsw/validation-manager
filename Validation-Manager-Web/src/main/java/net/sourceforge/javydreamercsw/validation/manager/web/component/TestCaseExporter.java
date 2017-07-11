@@ -37,6 +37,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -45,6 +47,9 @@ import org.apache.commons.lang3.ArrayUtils;
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class TestCaseExporter {
+
+    private static final Logger LOG
+            = Logger.getLogger(TestCaseExporter.class.getSimpleName());
 
     public static Window getTestCaseExporter(List<TestCase> testCases) {
         TreeTable summary = new TreeTable();
@@ -160,8 +165,11 @@ public class TestCaseExporter {
                     SimpleDateFormat format = new SimpleDateFormat(
                             VMSettingServer.getSetting("date.format")
                                     .getStringVal());
-                    String text = "", notes = "", expected = "",
-                            tester = "", reviewer = "";
+                    String text = "";
+                    String notes = "";
+                    String expected = "";
+                    String tester = "";
+                    String reviewer = "";
                     //Search roles for tester and reviewer
                     for (ExecutionStepHasVmUser eshu : es.getExecutionStepHasVmUserList()) {
                         if (eshu.getRole().getRoleName().equals("tester")) {
@@ -185,6 +193,10 @@ public class TestCaseExporter {
                             case "notes":
                                 notes = f.getFieldValue();
                                 break;
+                            default:
+                                LOG.log(Level.SEVERE,
+                                        "Unexpected field name: {0}",
+                                        f.getFieldName());
                         }
                     }
                     HorizontalLayout attachments = new HorizontalLayout();

@@ -62,6 +62,7 @@ public final class StepComponent extends Panel {
     private final boolean edit;
     private static final Logger LOG
             = Logger.getLogger(StepComponent.class.getSimpleName());
+    private final String encoding = "UTF-8";
 
     public StepComponent(Step s, boolean edit) {
         setCaption(TRANSLATOR.translate("step.detail"));
@@ -207,14 +208,14 @@ public final class StepComponent extends Panel {
                 save.addClickListener(listener -> {
                     try {
                         s.setExpectedResult(((TextArea) result).getValue()
-                                .getBytes("UTF-8"));
+                                .getBytes(encoding));
                         s.setNotes(notes.getValue() == null ? ""
                                 : notes.getValue().toString());
                         s.setStepSequence(Integer.parseInt(sequence
                                 .getValue().toString()));
                         s.setTestCase((TestCase) ((ValidationManagerUI) UI
                                 .getCurrent()).getTree().getValue());
-                        s.setText(text.getValue().getBytes("UTF-8"));
+                        s.setText(text.getValue().getBytes(encoding));
                         if (s.getRequirementList() == null) {
                             s.setRequirementList(new ArrayList<>());
                         }
@@ -244,10 +245,10 @@ public final class StepComponent extends Panel {
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
                         s.setExpectedResult(((TextArea) result).getValue()
-                                .getBytes("UTF-8"));
+                                .getBytes(encoding));
                         s.setNotes(notes.getValue().toString());
                         s.setStepSequence(Integer.parseInt(sequence.getValue().toString()));
-                        s.setText(text.getValue().getBytes("UTF-8"));
+                        s.setText(text.getValue().getBytes(encoding));
                         if (s.getRequirementList() == null) {
                             s.setRequirementList(new ArrayList<>());
                         }
