@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,8 @@
  */
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.VMException;
+import com.validation.manager.core.tool.Tool;
 import com.validation.manager.test.AbstractVMTestCase;
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,7 +33,7 @@ import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.pdfbox.tools.TextToPDF;
+import org.h2.store.fs.FileUtils;
 import org.junit.Test;
 import org.openide.util.Exceptions;
 
@@ -56,10 +58,12 @@ public class AttachmentServerTest extends AbstractVMTestCase {
             AttachmentServer instance = new AttachmentServer();
             instance.addFile(f, f.getName());
             instance.write2DB();
+            //Delete the file
+            FileUtils.delete(f.getAbsolutePath());
             assertEquals(1, (int) instance.getAttachmentType().getId());//Text file
             System.out.println("retrieveFile");
             AttachmentServer temp = new AttachmentServer(instance.getAttachmentPK());
-            File loadedFile = temp.getAttachedFile();
+            File loadedFile = temp.getAttachedFile("target/loaded/");
             BufferedReader br = new BufferedReader(new FileReader(loadedFile));
             String line;
             int count = 0;
@@ -71,21 +75,20 @@ public class AttachmentServerTest extends AbstractVMTestCase {
             assertEquals(lines.size(), count);
             //Create pdf file
             System.out.println("add pdf File");
-            TextToPDF ttp = new TextToPDF();
-            PDDocument pdfd = ttp.createPDFFromText(new FileReader(loadedFile));
-            File pdf = new File("target/Text.pdf");
+            File pdf = Tool.convertToPDF(loadedFile, "target/Text.pdf");
             pdf.deleteOnExit();
-            pdfd.save(pdf);
             instance = new AttachmentServer();
             instance.addFile(pdf, pdf.getName());
             instance.write2DB();
+            //Delete the file
+            FileUtils.delete(pdf.getAbsolutePath());
             assertEquals(2, (int) instance.getAttachmentType().getId());//PDF file
             System.out.println("retrieveFile");
             temp = new AttachmentServer(instance.getAttachmentPK());
-            loadedFile = temp.getAttachedFile();
+            loadedFile = temp.getAttachedFile("target/loaded/");
             PDFTextStripper pdfStripper;
-            PDDocument pdDoc;
-            COSDocument cosDoc;
+            PDDocument pdDoc = null;
+            COSDocument cosDoc = null;
             try {
                 PDFParser parser
                         = new PDFParser(new RandomAccessBufferedFileInputStream(loadedFile));
@@ -102,12 +105,16 @@ public class AttachmentServerTest extends AbstractVMTestCase {
                 Exceptions.printStackTrace(ex);
                 fail();
             }
+            finally {
+                if (cosDoc != null) {
+                    cosDoc.close();
+                }
+                if (pdDoc != null) {
+                    pdDoc.close();
+                }
+            }
         }
-        catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-            fail();
-        }
-        catch (Exception ex) {
+        catch (IOException | VMException ex) {
             Exceptions.printStackTrace(ex);
             fail();
         }

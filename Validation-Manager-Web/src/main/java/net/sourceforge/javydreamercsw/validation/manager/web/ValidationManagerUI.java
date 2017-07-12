@@ -17,6 +17,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 
 import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.addon.contextmenu.MenuItem;
+import com.vaadin.addon.tableexport.TemporaryFileDownloadResource;
 import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
@@ -130,6 +131,7 @@ import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -2772,5 +2774,25 @@ public class ValidationManagerUI extends UI implements VMUI {
      */
     public static List<Locale> getAvailableLocales() {
         return Collections.unmodifiableList(LOCALES);
+    }
+
+    @Override
+    public boolean sendConvertedFileToUser(final UI app, final File fileToExport,
+            final String exportFileName, String mimeType) {
+        TemporaryFileDownloadResource resource;
+        try {
+            resource = new TemporaryFileDownloadResource(app, exportFileName,
+                    mimeType, fileToExport);
+            if (null == app) {
+                UI.getCurrent().getPage().open(resource, exportFileName, false);
+            } else {
+                app.getPage().open(resource, exportFileName, false);
+            }
+        } catch (final FileNotFoundException e) {
+            LOG.log(Level.WARNING,
+                    "Sending file to user failed with FileNotFoundException {0}", e);
+            return false;
+        }
+        return true;
     }
 }

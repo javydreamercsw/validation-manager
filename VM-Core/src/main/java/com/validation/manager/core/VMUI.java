@@ -17,9 +17,11 @@ package com.validation.manager.core;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.server.core.VMUserServer;
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -186,4 +188,16 @@ public interface VMUI {
      * @return true if it has all of the roles in the project, false otherwise.
      */
     public boolean checkAllProjectRoles(Project p, List<String> roles);
+
+    /**
+     * Send a file to the client
+     *
+     * @param app UI to send the file.
+     * @param attachment File to send.
+     * @param exportedFileName Exported file name.
+     * @param mimeType File's mime type.
+     * @return True if sent successfully. False otherwise.
+     */
+    public boolean sendConvertedFileToUser(final UI app, File attachment,
+            String exportedFileName, String mimeType);
 }

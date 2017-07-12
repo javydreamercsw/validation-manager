@@ -17,6 +17,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.addon.tableexport.ExcelExport;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -25,22 +26,29 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepHasVmUser;
 import com.validation.manager.core.db.HistoryField;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.server.core.AttachmentServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.VMSettingServer;
+import com.validation.manager.core.tool.Tool;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import org.apache.commons.lang3.ArrayUtils;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -112,7 +120,7 @@ public class TestCaseExporter {
             }
         });
         summary.setSizeFull();
-        return getExportWindow(summary);
+        return getExportWindow(summary, null);
     }
 
     public static Window getExecutionExporter(List<TestCaseExecutionServer> executions,
@@ -246,15 +254,17 @@ public class TestCaseExporter {
                 }
             }
         }
-        return getExportWindow(summary);
+        return getExportWindow(summary, executions);
     }
 
-    private static Window getExportWindow(TreeTable summary) {
+    private static Window getExportWindow(TreeTable summary,
+            List<TestCaseExecutionServer> executions) {
         VMWindow w = new VMWindow(TRANSLATOR.translate("general.export"));
         VerticalLayout vl = new VerticalLayout();
         summary.setSizeFull();
         vl.addComponent(summary);
         Button export = new Button(TRANSLATOR.translate("general.export"));
+        List<File> attachments = new ArrayList<>();
         export.addClickListener(listener -> {
             if (ArrayUtils.contains(summary.getColumnHeaders(),
                     TRANSLATOR.translate("general.attachment"))) {
@@ -269,9 +279,62 @@ public class TestCaseExporter {
             excelExport.setReportTitle(TRANSLATOR.translate("general.export"));
             excelExport.setDisplayTotals(false);
             excelExport.export();
-            //TODO: Also send the attachments
-
-            //
+            String basePath = VaadinService.getCurrent()
+                    .getBaseDirectory().getAbsolutePath()
+                    + File.separator
+                    + "VAADIN"
+                    + File.separator
+                    + "temp"
+                    + File.separator;
+            if (executions != null) {
+                //Also send the attachments
+                executions.forEach(execution -> {
+                    execution.getExecutionStepList().forEach(es -> {
+                        es.getExecutionStepHasAttachmentList().forEach(esha -> {
+                            AttachmentServer as
+                                    = new AttachmentServer(esha
+                                            .getAttachment()
+                                            .getAttachmentPK());
+                            File f = null;
+                            switch (esha.getAttachment().getAttachmentType().getType()) {
+                                case "comment": //Create a pdf version of the comment
+                                    try {
+                                        String fileName = basePath
+                                                + TRANSLATOR.translate("general.comment")
+                                                + "-"
+                                                + TRANSLATOR.translate("general.step")
+                                                + "-"
+                                                + es.getStep().getStepSequence()
+                                                + ".pdf";
+                                        f = Tool.convertToPDF(as
+                                                .getTextValue(), fileName);
+                                    } catch (IOException ex) {
+                                        Exceptions.printStackTrace(ex);
+                                    }
+                                    break;
+                                default:
+                                    f = as.getAttachedFile(basePath);
+                            }
+                            if (f != null) {
+                                attachments.add(f);
+                            }
+                        });
+                    });
+                });
+            }
+            if (!attachments.isEmpty()) {
+                try {
+                    File attachment = Tool.createZipFile(attachments,
+                            basePath + "Attachments.zip");
+                    LOG.log(Level.FINE, "Downloading: {0}",
+                            attachment.getAbsolutePath());
+                    ((VMUI) UI.getCurrent()).sendConvertedFileToUser(UI.getCurrent(),
+                            attachment, attachment.getName(),
+                            Tool.getMimeType(attachment));
+                } catch (IOException ex) {
+                    LOG.log(Level.SEVERE, "Error downloading attachments!", ex);
+                }
+            }
             UI.getCurrent().removeWindow(w);
         });
         vl.addComponent(export);

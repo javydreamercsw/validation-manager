@@ -29,6 +29,12 @@
     </dependencyManagement>
     
     <dependencies>
+        <!--Mime Type determination-->
+        <dependency>
+            <groupId>com.j256.simplemagic</groupId>
+            <artifactId>simplemagic</artifactId>
+            <version>1.12</version>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-server</artifactId>
@@ -128,13 +134,11 @@
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>${pdfbox.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox-tools</artifactId>
             <version>${pdfbox.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jacoco</groupId>
