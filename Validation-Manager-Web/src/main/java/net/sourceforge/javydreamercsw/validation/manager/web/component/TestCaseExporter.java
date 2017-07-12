@@ -31,6 +31,7 @@ import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepHasVmUser;
 import com.validation.manager.core.db.HistoryField;
+import com.validation.manager.core.db.Issue;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.server.core.AttachmentServer;
@@ -120,7 +121,7 @@ public class TestCaseExporter {
             }
         });
         summary.setSizeFull();
-        return getExportWindow(summary, null);
+        return getExportWindow(summary, null, -1);
     }
 
     public static Window getExecutionExporter(List<TestCaseExecutionServer> executions,
@@ -254,11 +255,11 @@ public class TestCaseExporter {
                 }
             }
         }
-        return getExportWindow(summary, executions);
+        return getExportWindow(summary, executions, tcID);
     }
 
     private static Window getExportWindow(TreeTable summary,
-            List<TestCaseExecutionServer> executions) {
+            List<TestCaseExecutionServer> executions, int tcID) {
         VMWindow w = new VMWindow(TRANSLATOR.translate("general.export"));
         VerticalLayout vl = new VerticalLayout();
         summary.setSizeFull();
@@ -273,12 +274,6 @@ public class TestCaseExporter {
                 summary.setColumnCollapsed(TRANSLATOR
                         .translate("general.attachment"), true);
             }
-            //Create the Excel file
-            ExcelExport excelExport = new ExcelExport(summary);
-            excelExport.excludeCollapsedColumns();
-            excelExport.setReportTitle(TRANSLATOR.translate("general.export"));
-            excelExport.setDisplayTotals(false);
-            excelExport.export();
             String basePath = VaadinService.getCurrent()
                     .getBaseDirectory().getAbsolutePath()
                     + File.separator
@@ -290,35 +285,98 @@ public class TestCaseExporter {
                 //Also send the attachments
                 executions.forEach(execution -> {
                     execution.getExecutionStepList().forEach(es -> {
-                        es.getExecutionStepHasAttachmentList().forEach(esha -> {
-                            AttachmentServer as
-                                    = new AttachmentServer(esha
-                                            .getAttachment()
-                                            .getAttachmentPK());
-                            File f = null;
-                            switch (esha.getAttachment().getAttachmentType().getType()) {
-                                case "comment": //Create a pdf version of the comment
-                                    try {
-                                        String fileName = basePath
-                                                + TRANSLATOR.translate("general.comment")
+                        if (tcID < 0
+                                || es.getExecutionStepPK().getStepTestCaseId() == tcID) {
+                            es.getExecutionStepHasAttachmentList().forEach(esha -> {
+                                AttachmentServer as
+                                        = new AttachmentServer(esha
+                                                .getAttachment()
+                                                .getAttachmentPK());
+                                File f = null;
+                                switch (esha.getAttachment().getAttachmentType().getType()) {
+                                    case "comment": //Create a pdf version of the comment
+                                        try {
+                                            String fileName = basePath
+                                                    + TRANSLATOR.translate("general.test.case")
+                                                    + "-"
+                                                    + es.getStep().getTestCase().getName()
+                                                    + "-"
+                                                    + TRANSLATOR.translate("general.comment")
+                                                    + "-"
+                                                    + TRANSLATOR.translate("general.step")
+                                                    + "-"
+                                                    + es.getStep().getStepSequence()
+                                                    + ".pdf";
+                                            f = Tool.convertToPDF(as
+                                                    .getTextValue(), fileName);
+                                        } catch (IOException ex) {
+                                            Exceptions.printStackTrace(ex);
+                                        }
+                                        break;
+                                    default:
+                                        File temp = as.getAttachedFile(basePath);
+                                        f = new File(basePath
+                                                + TRANSLATOR.translate("general.test.case")
                                                 + "-"
-                                                + TRANSLATOR.translate("general.step")
+                                                + es.getStep().getTestCase().getName()
                                                 + "-"
-                                                + es.getStep().getStepSequence()
-                                                + ".pdf";
-                                        f = Tool.convertToPDF(as
-                                                .getTextValue(), fileName);
-                                    } catch (IOException ex) {
-                                        Exceptions.printStackTrace(ex);
+                                                + TRANSLATOR.translate("general.attachment")
+                                                + "-"
+                                                + temp.getName());
+                                        temp.renameTo(temp);
+                                }
+                                if (f != null) {
+                                    attachments.add(f);
+                                }
+                            });
+                        }
+                        if (es.getExecutionStepHasIssueList() != null) {
+                            es.getExecutionStepHasIssueList().forEach(eshi -> {
+                                try {
+                                    Issue i = eshi.getIssue();
+                                    String fileName = basePath
+                                            + TRANSLATOR.translate("general.test.case")
+                                            + "-"
+                                            + es.getStep().getTestCase().getName()
+                                            + "-"
+                                            + TRANSLATOR.translate("general.issue")
+                                            + "-"
+                                            + TRANSLATOR.translate("general.step")
+                                            + "-"
+                                            + es.getStep().getStepSequence()
+                                            + ".pdf";
+                                    //Create a string version of the issue
+                                    StringBuilder sb = new StringBuilder();
+                                    sb.append(TRANSLATOR.translate("general.summary"))
+                                            .append(i.getTitle())
+                                            .append('\n')
+                                            .append(TRANSLATOR.translate("issue.type"))
+                                            .append(':')
+                                            .append(TRANSLATOR.translate(i
+                                                    .getIssueType().getTypeName()))
+                                            .append('\n')
+                                            .append(TRANSLATOR.translate("creation.time"))
+                                            .append(':')
+                                            .append(i.getCreationTime())
+                                            .append('\n')
+                                            .append(TRANSLATOR.translate("issue.detail"))
+                                            .append(':')
+                                            .append(i.getDescription())
+                                            .append('\n');
+                                    if (i.getIssueResolutionId() != null) {
+                                        sb.append(TRANSLATOR.translate("issue.resolution"))
+                                                .append(':')
+                                                .append(TRANSLATOR.translate(i
+                                                        .getIssueResolutionId().getName()))
+                                                .append('\n');
                                     }
-                                    break;
-                                default:
-                                    f = as.getAttachedFile(basePath);
-                            }
-                            if (f != null) {
-                                attachments.add(f);
-                            }
-                        });
+                                    attachments.add(Tool.convertToPDF(sb.toString(),
+                                            fileName));
+                                } catch (IOException ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
+                            });
+                        }
                     });
                 });
             }
@@ -335,6 +393,12 @@ public class TestCaseExporter {
                     LOG.log(Level.SEVERE, "Error downloading attachments!", ex);
                 }
             }
+            //Create the Excel file
+            ExcelExport excelExport = new ExcelExport(summary);
+            excelExport.excludeCollapsedColumns();
+            excelExport.setReportTitle(TRANSLATOR.translate("general.export"));
+            excelExport.setDisplayTotals(false);
+            excelExport.export();
             UI.getCurrent().removeWindow(w);
         });
         vl.addComponent(export);
