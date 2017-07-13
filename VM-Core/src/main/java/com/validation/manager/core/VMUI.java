@@ -17,9 +17,13 @@ package com.validation.manager.core;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.io.File;
 import java.util.Collection;
@@ -72,6 +76,14 @@ public interface VMUI {
      * @param edit True if it should be displayed in edit mode.
      */
     void displayObject(Object item, boolean edit);
+
+    /**
+     * Display the specified object.
+     *
+     * @since 0.3.5
+     * @param item Item to display.
+     */
+    void displayObject(Object item);
 
     /**
      * Get the selected object from the tree.
@@ -200,4 +212,57 @@ public interface VMUI {
      */
     public boolean sendConvertedFileToUser(final UI app, File attachment,
             String exportedFileName, String mimeType);
+
+    /**
+     * Handle versioning of an item.
+     *
+     * @since 0.3.5
+     * @param o Object to check if versioning information needs to be provided.
+     * @param r Runnable to be executed if information is provided.
+     */
+    public void handleVersioning(Object o, Runnable r);
+
+    /**
+     * Create History Table for Requirements.
+     *
+     * @since 0.3.5
+     * @param title Caption
+     * @param historyItems History items to show in table
+     * @param showVersionFields True to show version fields.
+     * @return Grid with the specified history.
+     */
+    public Component createRequirementHistoryTable(String title,
+            List<History> historyItems, boolean showVersionFields);
+
+    /**
+     * Create History Table for Step.
+     *
+     * @since 0.3.5
+     *
+     * @param title Caption
+     * @param historyItems History items to show in table
+     * @return Grid with the specified history.
+     * @param showVersionFields True to show version fields.
+     */
+    public Component createStepHistoryTable(String title,
+            List<History> historyItems, boolean showVersionFields);
+
+    /**
+     * Display a list of requirements.
+     *
+     * @since 0.3.5
+     *
+     * @param title Caption
+     * @param requirementList List to display
+     * @return Component for visualizing the list.
+     */
+    public Component getDisplayRequirementList(String title,
+            List<Requirement> requirementList);
+
+    /**
+     * Get the requirement selection component.
+     *
+     * @return Requirement selection component.
+     */
+    public AbstractSelect getRequirementSelectionComponent();
 }

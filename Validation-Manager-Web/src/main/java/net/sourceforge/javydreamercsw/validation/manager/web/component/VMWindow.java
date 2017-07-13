@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sourceforge.javydreamercsw.validation.manager.web;
+package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.ui.Window;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 
 /**
  *

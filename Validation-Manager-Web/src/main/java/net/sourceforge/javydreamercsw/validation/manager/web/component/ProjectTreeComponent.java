@@ -34,6 +34,7 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
+import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -194,7 +195,8 @@ public final class ProjectTreeComponent extends Tree {
                 //Group under the Test Case
                 TestCase tc = es.getStep().getTestCase();
                 Collection<?> children = getChildren(tce);
-                String node = "tce-" + tce.getId() + "-" + tc.getId();
+                String node = Tool.buildId(tce,
+                        Tool.buildId(tc, null, false)).toString();
                 boolean add = true;
                 if (children != null) {
                     //Check if already added as children

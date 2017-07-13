@@ -47,7 +47,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import org.apache.commons.lang3.ArrayUtils;
 import org.openide.util.Exceptions;
 
@@ -79,14 +78,14 @@ public class TestCaseExporter {
         testCases.forEach(tc -> {
             for (Step step : tc.getStepList()) {
                 //Add test case if not there already
-                if (!summary.containsId(step.getTestCase().getId())) {
+                if (!summary.containsId(step.getTestCase().getTestCasePK())) {
                     summary.addItem(new Object[]{step
                         .getTestCase().getName(),
                         "", "", "", "", ""},
-                            step.getTestCase().getId());
+                            step.getTestCase().getTestCasePK());
                 }
                 //Add the step
-                String stepId = step.getTestCase().getId() + "."
+                String stepId = step.getTestCase().getTestCasePK().getId() + "."
                         + step.getStepSequence();
                 String text = new String(step.getText(), StandardCharsets.UTF_8),
                         notes = step.getNotes(),
@@ -101,10 +100,10 @@ public class TestCaseExporter {
                         stepId);
                 //Put step under the test case
                 summary.setParent(stepId,
-                        step.getTestCase().getId());
+                        step.getTestCase().getTestCasePK());
                 //Add the fields of the test case
                 for (DataEntry de : step.getDataEntryList()) {
-                    String fieldId = step.getTestCase().getId() + "."
+                    String fieldId = step.getTestCase().getTestCasePK() + "."
                             + step.getStepSequence()
                             + "" + (summary.getChildren(stepId) == null ? 0
                             : summary.getChildren(stepId).size());
@@ -156,19 +155,19 @@ public class TestCaseExporter {
                 if (tcID < 0
                         || es.getExecutionStepPK().getStepTestCaseId() == tcID) {
                     //Add test case if not there already
-                    if (!summary.containsId(es.getStep().getTestCase().getId())) {
+                    if (!summary.containsId(es.getStep().getTestCase().getTestCasePK())) {
                         summary.addItem(new Object[]{es.getStep()
                             .getTestCase().getName(),
                             "", "", "", "", "", new HorizontalLayout(), "", "",
                             "", "", ""},
-                                es.getStep().getTestCase().getId());
+                                es.getStep().getTestCase().getTestCasePK());
                     }
                     //Add the step
                     //First calculate the sequence number
                     Collection c = summary.getChildren(es.getStep()
-                            .getTestCase().getId());
+                            .getTestCase().getTestCasePK());
                     int i = c == null ? 1 : c.size() + 1;
-                    String stepId = es.getStep().getTestCase().getId() + "."
+                    String stepId = es.getStep().getTestCase().getTestCasePK() + "."
                             + i;
                     //Calculate the fields from History
                     SimpleDateFormat format = new SimpleDateFormat(
@@ -249,7 +248,7 @@ public class TestCaseExporter {
                             stepId);
                     //Put step under the test case
                     summary.setParent(stepId,
-                            es.getStep().getTestCase().getId());
+                            es.getStep().getTestCase().getTestCasePK());
                     //Mark test case as a leaf
                     summary.setChildrenAllowed(stepId, false);
                 }

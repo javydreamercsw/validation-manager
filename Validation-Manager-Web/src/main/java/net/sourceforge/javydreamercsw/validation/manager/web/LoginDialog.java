@@ -15,6 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
