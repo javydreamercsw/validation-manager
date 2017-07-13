@@ -15,7 +15,6 @@
  */
 package com.validation.manager.test;
 
-import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -26,9 +25,6 @@ import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
-import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.controller.RequirementJpaController;
-import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
@@ -38,9 +34,9 @@ import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.server.core.TestCaseTypeServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
-import com.validation.manager.core.server.core.VMUserServer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
@@ -58,16 +54,6 @@ public class TestHelper {
     private static final Logger LOG
             = Logger.getLogger(TestHelper.class.getName());
 
-    public static VmUser createUser(String name, String pass, String email,
-            String first, String last) throws Exception {
-        VMUserServer temp = new VMUserServer(name,
-                pass, first, last, email);
-        temp.setUserStatusId(new UserStatusJpaController(
-                getEntityManagerFactory()).findUserStatus(1));
-        temp.write2DB();
-        return temp.getEntity();
-    }
-
     public static Project createProject(String name, String notes) {
         ProjectServer ps = new ProjectServer(name, notes);
         try {
@@ -83,11 +69,13 @@ public class TestHelper {
 
     public static TestCase createTestCase(String name, String summary)
             throws PreexistingEntityException, Exception {
-        TestCaseServer tc = new TestCaseServer(name, new Date());
+        TestCaseServer tc = new TestCaseServer(name, new Date(),
+                new TestCaseTypeServer(5).getEntity());
         tc.setRiskControlHasTestCaseList(new ArrayList<>());
         tc.setActive(true);
         tc.setIsOpen(true);
         tc.setSummary(summary.getBytes());
+        tc.setTestCaseType(new TestCaseTypeServer(5).getEntity());
         tc.write2DB();
         return tc.getEntity();
     }
@@ -102,24 +90,10 @@ public class TestHelper {
         return req.getEntity();
     }
 
-    public static void destroyRequirement(Requirement r)
-            throws NonexistentEntityException {
-        try {
-            RequirementServer.deleteRequirement(r);
-            assertTrue(new RequirementJpaController(
-                    getEntityManagerFactory())
-                    .findRequirement(r.getId()) == null);
-        }
-        catch (IllegalOrphanException ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-    }
-
     public static TestCase addStep(TestCase tc, int sequence,
             String text, String note, String result) throws PreexistingEntityException,
             Exception {
-        TestCaseServer tcs = new TestCaseServer(tc.getId());
+        TestCaseServer tcs = new TestCaseServer(tc.getTestCasePK());
         int amount = tcs.getStepList().size();
         tcs.addStep(sequence, text, note, note, null);
         assertEquals(amount + 1, tcs.getStepList().size());
@@ -201,12 +175,5 @@ public class TestHelper {
         ps.getProjectList().add(sub);
         ps.write2DB();
         return new ProjectServer(sub).getEntity();
-    }
-
-    public static Requirement addChildToRequirement(Requirement parent,
-            Requirement child) throws Exception {
-        RequirementServer rs = new RequirementServer(parent);
-        rs.addChildRequirement(child);
-        return rs.getEntity();
     }
 }
