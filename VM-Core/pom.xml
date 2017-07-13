@@ -211,6 +211,10 @@
                     <skip>${skipTests}</skip>
                     <output>file</output>
                     <append>true</append>
+                    <excludes>
+                        <exclude>**/*JpaController.*</exclude>
+                        <exclude>com/validation/manager/core/db/**/*</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
