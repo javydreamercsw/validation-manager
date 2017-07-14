@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,32 +70,31 @@ public class TestCaseServerTest extends AbstractVMTestCase {
             fail();
         }
         LOG.info("Create Requirement Spec Node");
-        RequirementSpecNode rsns = null;
         try {
-            rsns = createRequirementSpecNode(
+            RequirementSpecNode rsns = createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
+            Requirement r = createRequirement("SRS-SW-0001",
+                    "Sample requirement", rsns.getRequirementSpecNodePK(),
+                    "Notes", 1, 1);
+            //Create Test Case
+            TestCase tc = createTestCase("Dummy", "Summary");
+            TestCaseServer tcs = new TestCaseServer(tc);
+            //Add steps
+            List<Requirement> reqs = new ArrayList<>();
+            reqs.add(r);
+            for (int i = 1; i < 6; i++) {
+                LOG.info(MessageFormat.format("Adding step: {0}", i));
+                Step step = tcs.addStep(i, "Step " + i, "Note " + i,
+                        "Criteria " + i, reqs);
+                assertEquals(1, new StepServer(step).getRequirementList().size());
+                tcs.update();
+                assertEquals(i, tcs.getStepList().size());
+                assertEquals(i, new RequirementServer(r).getStepList().size());
+            }
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        }
-        Requirement r = createRequirement("SRS-SW-0001",
-                "Sample requirement", rsns.getRequirementSpecNodePK(),
-                "Notes", 1, 1);
-        //Create Test Case
-        TestCase tc = createTestCase("Dummy", "Summary");
-        TestCaseServer tcs = new TestCaseServer(tc);
-        //Add steps
-        List<Requirement> reqs = new ArrayList<>();
-        reqs.add(r);
-        for (int i = 1; i < 6; i++) {
-            LOG.info(MessageFormat.format("Adding step: {0}", i));
-            Step step = tcs.addStep(i, "Step " + i, "Note " + i,
-                    "Criteria " + i, reqs);
-            assertEquals(1, new StepServer(step).getRequirementList().size());
-            tcs.update();
-            assertEquals(i, tcs.getStepList().size());
-            assertEquals(i, new RequirementServer(r).getStepList().size());
         }
     }
 }
