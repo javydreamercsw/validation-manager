@@ -69,90 +69,90 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
             fail();
         }
         System.out.println("Create Requirement Spec Node");
-        RequirementSpecNode rsns = null;
         try {
-            rsns = createRequirementSpecNode(
+            RequirementSpecNode rsns = createRequirementSpecNode(
                     rss, "Test", "Test", "Test");
-        }
-        catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
-            fail();
-        }
-        System.out.println("Create Requirements");
-        List<Requirement> requirements = new ArrayList<>();
-        int requirementAmount = 15;
-        for (int i = 0; i < requirementAmount; i++) {
+            System.out.println("Create Requirements");
+            List<Requirement> requirements = new ArrayList<>();
+            int requirementAmount = 15;
+            for (int i = 0; i < requirementAmount; i++) {
+                try {
+                    Requirement reqs
+                            = createRequirement("SRS-SW-00" + i,
+                                    "Description " + i,
+                                    rsns.getRequirementSpecNodePK(),
+                                    "Notes " + i, 2, 1);
+                    requirements.add(new RequirementJpaController(
+                            getEntityManagerFactory())
+                            .findRequirement(reqs.getId()));
+                }
+                catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                    fail();
+                }
+            }
+            System.out.println("Done!");
+            System.out.println("Create Requirement Spec Levels");
+            SpecLevelServer userSpecLevel = createSpecLevel("User Requirement");
+            SpecLevelServer functionalSpecLevel
+                    = createSpecLevel("Functional Requirement");
+            SpecLevelServer unitSpecLevel = createSpecLevel("Unit Requirement");
+            System.out.println("Done!");
+            System.out.println("Create Requirement Specs");
+            RequirementSpecServer productSpec = createRequirementSpec(
+                    "Project Spec", userSpecLevel);
+            RequirementSpecServer archSpec = createRequirementSpec(
+                    "Architectural Spec", functionalSpecLevel);
+            RequirementSpecServer swSpec = createRequirementSpec(
+                    "Software Spec", unitSpecLevel);
+            System.out.println("Done!");
+            System.out.println("Adding requirements to spec nodes");
             try {
-                Requirement reqs
-                        = createRequirement("SRS-SW-00" + i,
-                                "Description " + i,
-                                rsns.getRequirementSpecNodePK(),
-                                "Notes " + i, 2, 1);
-                requirements.add(new RequirementJpaController(
-                        getEntityManagerFactory())
-                        .findRequirement(reqs.getId()));
+                RequirementSpecNodeServer n1
+                        = productSpec.addSpecNode("Node 1", "description", "scope");
+                requirements.subList(0, 5).forEach((r) -> {
+                    n1.getRequirementList().add(r);
+                });
+                n1.write2DB();
+                assertEquals(1, productSpec.getRequirementSpecNodeList().size());
+                RequirementSpecNodeServer n2
+                        = archSpec.addSpecNode("Node 2", "description", "scope");
+                requirements.subList(5, 10).forEach((r) -> {
+                    n2.getRequirementList().add(r);
+                });
+                n2.write2DB();
+                assertEquals(1, archSpec.getRequirementSpecNodeList().size());
+                RequirementSpecNodeServer n3
+                        = swSpec.addSpecNode("Node 3", "description", "scope");
+                requirements.subList(10, 15).forEach((r) -> {
+                    n3.getRequirementList().add(r);
+                });
+                n3.write2DB();
+                assertEquals(1, swSpec.getRequirementSpecNodeList().size());
             }
             catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
-        }
-        System.out.println("Done!");
-        System.out.println("Create Requirement Spec Levels");
-        SpecLevelServer userSpecLevel = createSpecLevel("User Requirement");
-        SpecLevelServer functionalSpecLevel
-                = createSpecLevel("Functional Requirement");
-        SpecLevelServer unitSpecLevel = createSpecLevel("Unit Requirement");
-        System.out.println("Done!");
-        System.out.println("Create Requirement Specs");
-        RequirementSpecServer productSpec = createRequirementSpec(
-                "Project Spec", userSpecLevel);
-        RequirementSpecServer archSpec = createRequirementSpec(
-                "Architectural Spec", functionalSpecLevel);
-        RequirementSpecServer swSpec = createRequirementSpec(
-                "Software Spec", unitSpecLevel);
-        System.out.println("Done!");
-        System.out.println("Adding requirements to spec nodes");
-        try {
-            RequirementSpecNodeServer n1
-                    = productSpec.addSpecNode("Node 1", "description", "scope");
-            requirements.subList(0, 5).forEach((r) -> {
-                n1.getRequirementList().add(r);
-            });
-            n1.write2DB();
-            assertEquals(1, productSpec.getRequirementSpecNodeList().size());
-            RequirementSpecNodeServer n2
-                    = archSpec.addSpecNode("Node 2", "description", "scope");
-            requirements.subList(5, 10).forEach((r) -> {
-                n2.getRequirementList().add(r);
-            });
-            n2.write2DB();
-            assertEquals(1, archSpec.getRequirementSpecNodeList().size());
-            RequirementSpecNodeServer n3
-                    = swSpec.addSpecNode("Node 3", "description", "scope");
-            requirements.subList(10, 15).forEach((r) -> {
-                n3.getRequirementList().add(r);
-            });
-            n3.write2DB();
-            assertEquals(1, swSpec.getRequirementSpecNodeList().size());
+            System.out.println("Done!");
+            System.out.println("Adding requirements to requirements");
+            int count = 0;
+            for (Requirement req : requirements) {
+                try {
+                    req.getRequirementList().add(requirements
+                            .get(requirementAmount - count - 1));
+                    new RequirementServer(req).write2DB();
+                    count++;
+                }
+                catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                    fail();
+                }
+            }
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        }
-        System.out.println("Done!");
-        System.out.println("Adding requirements to requirements");
-        int count = 0;
-        for (Requirement req : requirements) {
-            try {
-                req.getRequirementList().add(requirements.get(requirementAmount - count - 1));
-                new RequirementServer(req).write2DB();
-                count++;
-            }
-            catch (Exception ex) {
-                LOG.log(Level.SEVERE, null, ex);
-                fail();
-            }
         }
         System.out.println("Done!");
     }
@@ -177,7 +177,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
         return sl;
     }
 
-    private RequirementSpecServer createRequirementSpec(String name, SpecLevelServer sl) {
+    private RequirementSpecServer createRequirementSpec(String name,
+            SpecLevelServer sl) {
         RequirementSpecServer rss = new RequirementSpecServer(name,
                 "description", project.getId(), sl.getId());
         try {

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,19 +21,17 @@ import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
@@ -53,7 +51,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "TestCase.findAll",
             query = "SELECT t FROM TestCase t")
     , @NamedQuery(name = "TestCase.findById",
-            query = "SELECT t FROM TestCase t WHERE t.id = :id")
+            query = "SELECT t FROM TestCase t WHERE t.testCasePK.id = :id")
+    , @NamedQuery(name = "TestCase.findByTestCaseTypeId",
+            query = "SELECT t FROM TestCase t WHERE t.testCasePK.testCaseTypeId = :testCaseTypeId")
     , @NamedQuery(name = "TestCase.findByName",
             query = "SELECT t FROM TestCase t WHERE t.name = :name")
     , @NamedQuery(name = "TestCase.findByCreationDate",
@@ -64,26 +64,14 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT t FROM TestCase t WHERE t.isOpen = :isOpen")})
 public class TestCase implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    @EmbeddedId
+    protected TestCasePK testCasePK;
+    @Basic(optional = false)
+    @NotNull
     @Lob
     @Column(name = "summary")
     private byte[] summary;
-
-    private static final long serialVersionUID = 1L;
-    @Id
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.TABLE,
-            generator = "TestCase_IDGEN")
-    @TableGenerator(name = "TestCase_IDGEN", table = "vm_id",
-            pkColumnName = "table_name",
-            valueColumnName = "last_id",
-            pkColumnValue = "test_case",
-            initialValue = 1_000,
-            allocationSize = 1)
-    private Integer id;
-    @Basic(optional = false)
-    @NotNull
     @Size(min = 1, max = 255)
     @Column(name = "name")
     private String name;
@@ -97,7 +85,9 @@ public class TestCase implements Serializable {
     @Column(name = "is_open")
     private Boolean isOpen;
     @JoinTable(name = "test_plan_has_test_case", joinColumns = {
-        @JoinColumn(name = "test_case_id", referencedColumnName = "id")},
+        @JoinColumn(name = "test_case_id", referencedColumnName = "id")
+        ,@JoinColumn(name = "test_case_type_id", referencedColumnName = "test_case_type_id",
+                insertable = false, updatable = false)},
             inverseJoinColumns = {
                 @JoinColumn(name = "test_plan_id", referencedColumnName = "id")
                 , @JoinColumn(name = "test_plan_test_project_id",
@@ -108,12 +98,16 @@ public class TestCase implements Serializable {
     private List<RiskControlHasTestCase> riskControlHasTestCaseList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "testCase")
     private List<Step> stepList;
+    @JoinColumn(name = "test_case_type_id", referencedColumnName = "id",
+            insertable = false, updatable = false)
+    @ManyToOne(optional = false)
+    private TestCaseType testCaseType;
 
     public TestCase() {
     }
 
-    public TestCase(int id) {
-        this.id = id;
+    public TestCase(TestCasePK testCasePK) {
+        this.testCasePK = testCasePK;
     }
 
     public TestCase(String name, Date creationDate) {
@@ -121,12 +115,16 @@ public class TestCase implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public Integer getId() {
-        return id;
+    public TestCase(int testCaseId, int testCaseTypeId) {
+        this.testCasePK = new TestCasePK(testCaseId, testCaseTypeId);
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public TestCasePK getTestCasePK() {
+        return testCasePK;
+    }
+
+    public void setTestCasePK(TestCasePK testCasePK) {
+        this.testCasePK = testCasePK;
     }
 
     public String getName() {
@@ -136,7 +134,6 @@ public class TestCase implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
 
     public Date getCreationDate() {
         return creationDate;
@@ -172,6 +169,14 @@ public class TestCase implements Serializable {
         this.testPlanList = testPlanList;
     }
 
+    public TestCaseType getTestCaseType() {
+        return testCaseType;
+    }
+
+    public void setTestCaseType(TestCaseType testCaseType) {
+        this.testCaseType = testCaseType;
+    }
+
     @XmlTransient
     @JsonIgnore
     public List<RiskControlHasTestCase> getRiskControlHasTestCaseList() {
@@ -195,24 +200,24 @@ public class TestCase implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (testCasePK != null ? testCasePK.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
-        
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof TestCase)) {
             return false;
         }
         TestCase other = (TestCase) object;
-        return !((this.id == null && other.id != null)
-                || (this.id != null && !this.id.equals(other.id)));
+        return !((this.testCasePK == null && other.testCasePK != null)
+                || (this.testCasePK != null && !this.testCasePK.equals(other.testCasePK)));
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.TestCase[ id=" + id + " ]";
+        return "com.validation.manager.core.db.TestCase[ testCasePK=" + testCasePK + " ]";
     }
 
     public byte[] getSummary() {

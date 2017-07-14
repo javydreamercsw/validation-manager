@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;

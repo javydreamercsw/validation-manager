@@ -17,6 +17,7 @@ package com.validation.manager.core.tool;
 
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.server.core.TestCaseTypeServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import java.io.File;
 import java.io.IOException;
@@ -89,11 +90,13 @@ public class ToolTest extends AbstractVMTestCase {
         System.out.println("extractTCE");
         TestCaseExecutionServer tce = new TestCaseExecutionServer("Test Name",
                 "Test Scope");
-        TestCaseServer tc = new TestCaseServer("Test Case", new Date());
+        TestCaseServer tc = new TestCaseServer("Test Case", new Date(),
+                new TestCaseTypeServer(5).getEntity());
         tc.write2DB();
         tce.addTestCase(tc);
         tce.write2DB();
-        String key = "tce-" + tce.getId() + "-" + tc.getId();
+        String key = Tool.buildId(tce,
+                Tool.buildId(tc, null, false)).toString();
         TCEExtraction r = Tool.extractTCE(key);
         assertEquals(tce.getId(), r.getTestCaseExecution().getId());
         try {

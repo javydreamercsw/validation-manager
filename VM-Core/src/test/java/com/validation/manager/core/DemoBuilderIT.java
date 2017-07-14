@@ -15,7 +15,13 @@
  */
 package com.validation.manager.core;
 
+import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestCaseExecution;
+import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
@@ -48,12 +54,16 @@ public class DemoBuilderIT extends AbstractVMTestCase {
         try {
             DemoBuilder.buildDemoProject();
             List<Project> projects = ProjectServer.getProjects();
-            projects.forEach(p -> {
-                p.getTestProjectList().forEach(tp -> {
+            assertTrue(projects.size() > 0);
+            int testProjects = 0, plans = 0;
+            for (Project p : projects) {
+                for (TestProject tp : p.getTestProjectList()) {
+                    testProjects++;
                     //Check all Test Projects have related projects..
                     assertTrue(tp.getProjectList().size() > 0);
-                    tp.getTestPlanList().forEach(plan -> {
-                        plan.getTestCaseList().forEach(tc -> {
+                    for (TestPlan plan : tp.getTestPlanList()) {
+                        plans++;
+                        for (TestCase tc : plan.getTestCaseList()) {
                             //Check all test cases have steps.
                             assertTrue(tc.getStepList().size() > 0);
                             tc.getStepList().forEach(s -> {
@@ -66,19 +76,27 @@ public class DemoBuilderIT extends AbstractVMTestCase {
                                     assertTrue(de.getDataEntryPropertyList().size() > 0);
                                 });
                             });
-                        });
-                    });
-                });
-                TestCaseExecutionServer.getExecutions(p).forEach(ex -> {
+                        }
+                    }
+                }
+                List<TestCaseExecution> executions
+                        = TestCaseExecutionServer.getExecutions(p);
+                if (p.getParentProjectId() != null) {
+                    assertTrue(executions.size() > 0);
+                }
+                executions.forEach(ex -> {
                     //Check all execution has steps.
-                    assertTrue(ex.getExecutionStepList().size() > 0);
-                    ex.getExecutionStepList().forEach(es -> {
+                    List<ExecutionStep> steps = ex.getExecutionStepList();
+                    assertTrue(steps.size() > 0);
+                    steps.forEach(es -> {
                         //Check all execution steps have history.
                         assertTrue(es.getHistoryList().size() > 0);
                     });
                 });
                 //Check all requirements have either children or a parent
-                Tool.extractRequirements(p).forEach(r -> {
+                List<Requirement> reqs = Tool.extractRequirements(p);
+                assertTrue(reqs.size() > 0);
+                reqs.forEach(r -> {
                     try {
                         RequirementServer rs = new RequirementServer(r);
                         assertTrue(rs.getParentRequirementId() != null
@@ -95,7 +113,9 @@ public class DemoBuilderIT extends AbstractVMTestCase {
                         fail();
                     }
                 });
-            });
+            }
+            assertTrue(testProjects > 0);
+            assertTrue(plans > 0);
         }
         catch (Exception e) {
             LOG.log(Level.SEVERE, null, e);

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,20 +87,24 @@ public class StepImporterTest extends AbstractVMTestCase {
             TestProject tp = null;
             try {
                 tp = createTestProject("Test Project");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
             System.out.println("Add Test Project to Project");
             try {
                 addTestProjectToProject(tp, project);
-            } catch (IllegalOrphanException ex) {
+            }
+            catch (IllegalOrphanException ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
-            } catch (NonexistentEntityException ex) {
+            }
+            catch (NonexistentEntityException ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -108,7 +112,8 @@ public class StepImporterTest extends AbstractVMTestCase {
             TestPlan plan = null;
             try {
                 plan = createTestPlan(tp, "Test Plan", true, true);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -116,14 +121,16 @@ public class StepImporterTest extends AbstractVMTestCase {
             TestCase test = null;
             try {
                 test = createTestCase("Test", "");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
             System.out.println("Add Test to Plan");
             try {
                 addTestCaseToPlan(plan, test);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -131,7 +138,8 @@ public class StepImporterTest extends AbstractVMTestCase {
             com.validation.manager.core.db.TestCase tc = null;
             try {
                 tc = createTestCase("Dummy", "Test Summary");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -147,7 +155,8 @@ public class StepImporterTest extends AbstractVMTestCase {
                 r = createRequirement("SRS-SW-0001",
                         "Sample requirement", rsn.getRequirementSpecNodePK(),
                         "Notes", 1, 1);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -159,11 +168,12 @@ public class StepImporterTest extends AbstractVMTestCase {
                     StepImporter instance = new StepImporter(file,
                             new TestCaseJpaController(
                                     getEntityManagerFactory())
-                                    .findTestCase(tc.getId()));
+                                    .findTestCase(tc.getTestCasePK()));
                     instance.importFile(true);
                     instance.processImport();
                 }
-            } catch (VMException ex) {
+            }
+            catch (VMException ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
@@ -181,7 +191,8 @@ public class StepImporterTest extends AbstractVMTestCase {
                         rs.getStepList().size());
             }
             return rs.getStepList().size();
-        } catch (VMException ex) {
+        }
+        catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -225,10 +236,12 @@ public class StepImporterTest extends AbstractVMTestCase {
             File template = exportTemplate();
             assertTrue(template.exists());
             template.deleteOnExit();
-        } catch (FileNotFoundException ex) {
+        }
+        catch (FileNotFoundException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        } catch (IOException | InvalidFormatException ex) {
+        }
+        catch (IOException | InvalidFormatException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }

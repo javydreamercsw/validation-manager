@@ -62,7 +62,7 @@ public final class TestPlanServer extends TestPlan
             TestPlanJpaController controller
                     = new TestPlanJpaController(getEntityManagerFactory());
             if (getTestPlanPK().getId() > 0) {
-                TestPlan temp = controller.findTestPlan(getTestPlanPK());
+                TestPlan temp = getEntity();
                 update(temp, this);
                 controller.edit(temp);
             } else {
@@ -76,6 +76,7 @@ public final class TestPlanServer extends TestPlan
         catch (Exception ex) {
             throw new VMException(ex);
         }
+        update();
         return getTestPlanPK().getId();
     }
 

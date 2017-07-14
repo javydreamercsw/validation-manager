@@ -15,23 +15,23 @@
  */
 package com.validation.manager.core.db.controller;
 
-import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.TestPlan;
-import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestPlanPK;
-import java.util.ArrayList;
-import java.util.List;
+import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.UserTestPlanRole;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -78,7 +78,7 @@ public class TestPlanJpaController implements Serializable {
             }
             List<TestCase> attachedTestCaseList = new ArrayList<>();
             for (TestCase testCaseListTestCaseToAttach : testPlan.getTestCaseList()) {
-                testCaseListTestCaseToAttach = em.getReference(testCaseListTestCaseToAttach.getClass(), testCaseListTestCaseToAttach.getId());
+                testCaseListTestCaseToAttach = em.getReference(testCaseListTestCaseToAttach.getClass(), testCaseListTestCaseToAttach.getTestCasePK());
                 attachedTestCaseList.add(testCaseListTestCaseToAttach);
             }
             testPlan.setTestCaseList(attachedTestCaseList);
@@ -179,7 +179,7 @@ public class TestPlanJpaController implements Serializable {
             }
             List<TestCase> attachedTestCaseListNew = new ArrayList<>();
             for (TestCase testCaseListNewTestCaseToAttach : testCaseListNew) {
-                testCaseListNewTestCaseToAttach = em.getReference(testCaseListNewTestCaseToAttach.getClass(), testCaseListNewTestCaseToAttach.getId());
+                testCaseListNewTestCaseToAttach = em.getReference(testCaseListNewTestCaseToAttach.getClass(), testCaseListNewTestCaseToAttach.getTestCasePK());
                 attachedTestCaseListNew.add(testCaseListNewTestCaseToAttach);
             }
             testCaseListNew = attachedTestCaseListNew;

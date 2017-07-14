@@ -17,11 +17,15 @@ package com.validation.manager.core.tool;
 
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
+import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.Issue;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
+import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
@@ -39,6 +43,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -120,8 +125,9 @@ public class Tool {
         TestCaseServer tcs = null;
         if (key instanceof String) {
             String item = (String) key;
-            String tceIdS = item.substring(item.indexOf("-") + 1,
-                    item.lastIndexOf("-"));
+            StringTokenizer st = new StringTokenizer(item, "-");
+            st.nextToken();//Ignore the tce part
+            String tceIdS = st.nextToken();
             try {
                 int tceId = Integer.parseInt(tceIdS);
                 LOG.log(Level.FINE, "{0}", tceId);
@@ -131,10 +137,10 @@ public class Tool {
                 LOG.log(Level.WARNING, "Unable to find TCE: " + tceIdS, nfe);
             }
             try {
-                int tcId = Integer.parseInt(item.substring(item
-                        .lastIndexOf("-") + 1));
+                int tcId = Integer.parseInt(st.nextToken());
+                int tcTypeId = Integer.parseInt(st.nextToken());
                 LOG.log(Level.FINE, "{0}", tcId);
-                tcs = new TestCaseServer(tcId);
+                tcs = new TestCaseServer(new TestCasePK(tcId, tcTypeId));
             }
             catch (NumberFormatException nfe) {
                 LOG.log(Level.WARNING, "Unable to find TCE: " + tceIdS, nfe);
@@ -208,5 +214,71 @@ public class Tool {
             });
         }
         return f;
+    }
+
+    /**
+     * Builder of unique id's for items.
+     *
+     * @param item Item to get the id from
+     * @param postfix postfix to add to the key
+     * @param usePrefix Use the prefix?
+     * @return key for the object
+     */
+    public static Object buildId(Object item, Object postfix, boolean usePrefix) {
+        Object pf;
+        Object key = null;
+        String prefix;
+        if (postfix == null) {
+            pf = "";
+        } else {
+            pf = "-" + postfix;
+        }
+        if (item instanceof TestCase) {
+            TestCase tc = (TestCase) item;
+            prefix = "tc";
+            key = (usePrefix ? prefix + "-" : "") + tc.getTestCasePK().getId()
+                    + "-" + tc.getTestCasePK().getTestCaseTypeId()
+                    + pf;
+        } else if (item instanceof Requirement) {
+            Requirement r = (Requirement) item;
+            key = r.getUniqueId() + pf;
+        } else if (item instanceof ExecutionStep) {
+            ExecutionStep es = (ExecutionStep) item;
+            prefix = "es";
+            key = (usePrefix ? prefix + "-" : "")
+                    + es.getExecutionStepPK().getStepId() + "-"
+                    + es.getExecutionStepPK().getStepTestCaseId() + "-"
+                    + es.getExecutionStepPK().getTestCaseExecutionId() + pf;
+        } else if (item instanceof Issue) {
+            Issue issue = (Issue) item;
+            prefix = "issue";
+            key = (usePrefix ? prefix + "-" : "") + issue.getIssuePK().getId() + pf;
+        } else if (item instanceof TestCaseExecution) {
+            TestCaseExecution tce = (TestCaseExecution) item;
+            prefix = "tce";
+            key = (usePrefix ? prefix + "-" : "") + tce.getId() + pf;
+        }
+        return key;
+    }
+
+    /**
+     * Builder of unique id's for items.
+     *
+     * @param item Item to get the id from
+     * @return key for the object
+     */
+    public static Object buildId(Object item) {
+        return buildId(item, null, true);
+    }
+
+    /**
+     * Builder of unique id's for items.
+     *
+     * @param item Item to get the id from
+     * @param postfix postfix to add to the key
+     * @return key for the object
+     */
+    public static Object buildId(Object item, Object postfix) {
+        return buildId(item, postfix, true);
     }
 }

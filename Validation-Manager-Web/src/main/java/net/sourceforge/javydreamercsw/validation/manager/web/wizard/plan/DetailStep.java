@@ -24,6 +24,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.TestCaseExecution;
+import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
@@ -41,7 +42,7 @@ import org.vaadin.teemu.wizards.WizardStep;
  */
 public class DetailStep implements WizardStep {
 
-    private List<Integer> testCases;
+    private List<TestCasePK> testCases;
     private final TestCaseExecution tce;
     private static final Logger LOG
             = Logger.getLogger(DetailStep.class.getSimpleName());
@@ -94,7 +95,7 @@ public class DetailStep implements WizardStep {
             TestCaseExecutionServer tces = new TestCaseExecutionServer(tce);
             //Now create the execution records
             TestCaseServer tc;
-            for (Integer id : testCases) {
+            for (TestCasePK id : testCases) {
                 //Retrieve the TestCase to get the steps
                 tc = new TestCaseServer(id);
                 tces.addTestCase(tc.getEntity());
@@ -126,14 +127,14 @@ public class DetailStep implements WizardStep {
     /**
      * @return the testCases
      */
-    public List<Integer> getTestCases() {
+    public List<TestCasePK> getTestCases() {
         return testCases;
     }
 
     /**
      * @param testCases the testCases to set
      */
-    public void setTestCases(List<Integer> testCases) {
+    public void setTestCases(List<TestCasePK> testCases) {
         this.testCases = testCases;
     }
 }

@@ -32,6 +32,7 @@ import com.validation.manager.core.server.core.RequirementSpecServer;
 import com.validation.manager.core.server.core.StepServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.server.core.TestCaseTypeServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
 import com.validation.manager.core.server.core.VMUserServer;
@@ -218,9 +219,9 @@ public class DemoBuilder {
         for (int i = 0; i < 5; i++) {
             //Add steps
             TestCaseServer tcs
-                    = new TestCaseServer("Test Case #"
-                            + (tcCounter++),
-                            new Date());
+                    = new TestCaseServer("Test Case #" + (tcCounter++),
+                            new Date(),
+                            new TestCaseTypeServer(5).getEntity());
             tcs.write2DB();
             List<Requirement> reqs = Tool.extractRequirements(p);
             Random r = new Random();

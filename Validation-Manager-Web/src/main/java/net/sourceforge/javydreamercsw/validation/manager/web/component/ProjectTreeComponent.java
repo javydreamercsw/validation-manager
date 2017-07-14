@@ -269,6 +269,8 @@ public final class ProjectTreeComponent extends Tree {
                 tp.getTestCaseList().forEach((tc) -> {
                     addTestCase(tc, tp);
                 });
+            } else {
+                setChildrenAllowed(tp, false);
             }
         }
     }

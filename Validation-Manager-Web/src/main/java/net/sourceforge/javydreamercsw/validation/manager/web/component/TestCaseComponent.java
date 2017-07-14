@@ -16,8 +16,11 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.validator.NullValidator;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -31,9 +34,12 @@ import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestCaseType;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
+import com.validation.manager.core.db.controller.TestCaseTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.server.core.TestCaseTypeServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
@@ -78,7 +84,8 @@ public final class TestCaseComponent extends Panel {
         summary.setConverter(new ByteToStringConverter());
         binder.bind(summary, "summary");
         layout.addComponent(summary);
-        PopupDateField creation = new PopupDateField(TRANSLATOR.translate("general.creation.date"));
+        PopupDateField creation = new PopupDateField(TRANSLATOR
+                .translate("general.creation.date"));
         creation.setResolution(Resolution.SECOND);
         creation.setDateFormat(VMSettingServer.getSetting("date.format")
                 .getStringVal());
@@ -90,6 +97,31 @@ public final class TestCaseComponent extends Panel {
         Field<?> open = binder.buildAndBind(TRANSLATOR.translate("general.open"),
                 "isOpen");
         layout.addComponent(open);
+        ComboBox type = new ComboBox(TRANSLATOR.translate("general.test.case.type"));
+        type.setNewItemsAllowed(false);
+        type.setTextInputAllowed(false);
+        type.addValidator(new NullValidator(TRANSLATOR
+                .translate("message.required.field.missing")
+                .replaceAll("%f",
+                        TRANSLATOR.translate("general.test.case.type")),
+                false));
+        BeanItemContainer<TestCaseType> container
+                = new BeanItemContainer<>(TestCaseType.class,
+                        new TestCaseTypeJpaController(DataBaseManager
+                                .getEntityManagerFactory())
+                                .findTestCaseTypeEntities());
+        type.setContainerDataSource(container);
+        type.getItemIds().forEach(id -> {
+            TestCaseType temp = ((TestCaseType) id);
+            type.setItemCaption(id,
+                    TRANSLATOR.translate(temp.getTypeName()));
+        });
+        if (t.getTestCaseType() == null) {
+            //Pre-select Requirement
+            type.setValue(new TestCaseTypeServer(5).getEntity());
+        }
+        binder.bind(type, "testCaseType");
+        layout.addComponent(type);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -113,6 +145,7 @@ public final class TestCaseComponent extends Panel {
                         t.setIsOpen((Boolean) open.getValue());
                         t.getTestPlanList().add((TestPlan) ((VMUI) UI.getCurrent())
                                 .getSelectdValue());
+                        t.setTestCaseType((TestCaseType) type.getValue());
                         new TestCaseJpaController(DataBaseManager
                                 .getEntityManagerFactory()).create(t);
                         setVisible(false);

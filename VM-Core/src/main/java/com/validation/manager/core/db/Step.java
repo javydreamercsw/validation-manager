@@ -25,6 +25,7 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -82,8 +83,12 @@ public class Step extends Versionable implements Serializable {
     private List<Requirement> requirementList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
     private List<ExecutionStep> executionStepList;
-    @JoinColumn(name = "test_case_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
+    @JoinColumns({
+        @JoinColumn(name = "test_case_id", referencedColumnName = "id",
+                insertable = false, updatable = false)
+        ,@JoinColumn(name = "test_case_type_id", referencedColumnName = "test_case_type_id",
+                insertable = false, updatable = false)
+    })
     @ManyToOne(optional = false)
     private TestCase testCase;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "step")
@@ -124,12 +129,16 @@ public class Step extends Versionable implements Serializable {
         this.stepSequence = stepSequence;
     }
 
-    public String getNotes() {
-        return notes;
+    public byte[] getText() {
+        return text;
     }
 
-    public void setNotes(String notes) {
-        this.notes = notes;
+    public void setText(byte[] text) {
+        this.text = text;
+    }
+
+    public byte[] getExpectedResult() {
+        return expectedResult;
     }
 
     @XmlTransient
@@ -150,6 +159,18 @@ public class Step extends Versionable implements Serializable {
 
     public void setExecutionStepList(List<ExecutionStep> executionStepList) {
         this.executionStepList = executionStepList;
+    }
+
+    public void setExpectedResult(byte[] expectedResult) {
+        this.expectedResult = expectedResult;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public TestCase getTestCase() {
@@ -194,14 +215,6 @@ public class Step extends Versionable implements Serializable {
         this.historyList = historyList;
     }
 
-    public byte[] getExpectedResult() {
-        return expectedResult;
-    }
-
-    public void setExpectedResult(byte[] expectedResult) {
-        this.expectedResult = expectedResult;
-    }
-
     @XmlTransient
     @JsonIgnore
     public List<DataEntry> getDataEntryList() {
@@ -210,13 +223,5 @@ public class Step extends Versionable implements Serializable {
 
     public void setDataEntryList(List<DataEntry> dataEntryList) {
         this.dataEntryList = dataEntryList;
-    }
-
-    public byte[] getText() {
-        return text;
-    }
-
-    public void setText(byte[] text) {
-        this.text = text;
     }
 }

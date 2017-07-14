@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,10 +62,12 @@ public class TestPlanTest extends AbstractVMTestCase {
                     new RoleJpaController(getEntityManagerFactory())
                             .findRole(7));
             assertEquals(3, tps.getUserTestPlanRoleList().size());
-        } catch (PreexistingEntityException ex) {
+        }
+        catch (PreexistingEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }

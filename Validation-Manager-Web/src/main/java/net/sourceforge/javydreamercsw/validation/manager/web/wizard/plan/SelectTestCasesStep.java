@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,12 +22,15 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.TestCasePK;
+import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.TreeTableCheckBox;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.TreeTableCheckBox;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.WizardStep;
 
@@ -77,7 +80,7 @@ public class SelectTestCasesStep implements WizardStep {
     @Override
     public boolean onAdvance() {
         //Get a list of selected test cases
-        List<Integer> testCases
+        List<TestCasePK> testCases
                 = processChildren("project" + p.getId());
         testCases.forEach((i) -> {
             LOG.log(Level.FINE, "Test Case: {0}", i);
@@ -135,19 +138,19 @@ public class SelectTestCasesStep implements WizardStep {
             }).forEachOrdered((plan) -> {
                 plan.getTestCaseList().stream().map((tc) -> {
                     TreeTableCheckBox tccb = new TreeTableCheckBox(testTree,
-                            tc.getName(), "tc" + tc.getId());
+                            tc.getName(), Tool.buildId(tc));
                     tccb.setIcon(ValidationManagerUI.TEST_ICON);
                     testTree.addItem(new Object[]{tccb,
                         tc.getSummary() != null
                         ? new String(tc.getSummary()) : ""},
-                            "tc" + tc.getId());
+                            Tool.buildId(tc));
                     return tc;
                 }).map((tc) -> {
-                    testTree.setParent("tc" + tc.getId(),
+                    testTree.setParent(Tool.buildId(tc),
                             plan.getTestPlanPK());
                     return tc;
                 }).forEachOrdered((tc) -> {
-                    testTree.setChildrenAllowed("tc" + tc.getId(), false);
+                    testTree.setChildrenAllowed(Tool.buildId(tc), false);
                 });
             });
             return tp;
@@ -160,8 +163,8 @@ public class SelectTestCasesStep implements WizardStep {
         testTree.setCollapsed("project" + p.getId(), false);
     }
 
-    private List<Integer> processChildren(Object parent) {
-        List<Integer> testCases = new ArrayList<>();
+    private List<TestCasePK> processChildren(Object parent) {
+        List<TestCasePK> testCases = new ArrayList<>();
         //Get a list of selected test cases
         testTree.getChildren(parent).stream().map((o) -> {
             if (o instanceof String) {
@@ -176,7 +179,11 @@ public class SelectTestCasesStep implements WizardStep {
                             //Selected
                             LOG.log(Level.FINE, "Included TC: {0}",
                                     ttcb.getObjectId());
-                            testCases.add(Integer.parseInt(id.substring(2)));
+                            StringTokenizer st = new StringTokenizer(id, "-");
+                            st.nextToken();//Ignore tc
+                            testCases.add(new TestCasePK(Integer
+                                    .parseInt(st.nextToken()),
+                                    Integer.parseInt(st.nextToken())));
                             Object pid = id;
                             //Add the related project to the list.
                             while (pid != null) {

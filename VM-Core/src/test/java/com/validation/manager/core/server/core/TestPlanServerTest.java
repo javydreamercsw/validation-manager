@@ -15,6 +15,7 @@
  */
 package com.validation.manager.core.server.core;
 
+import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.test.AbstractVMTestCase;
@@ -89,6 +90,10 @@ public class TestPlanServerTest extends AbstractVMTestCase {
         tc.write2DB();
         assertEquals(0, instance.getEntity().getTestCaseList().size());
         instance.addTestCase(tc.getEntity());
+        assertEquals(1, instance.getEntity().getTestCaseList().size());
+        //Reproduce issue where test Cases dissapear ater disconnecting to the data base.
+        DataBaseManager.close();
+        DataBaseManager.getEntityManager();
         assertEquals(1, instance.getEntity().getTestCaseList().size());
     }
 

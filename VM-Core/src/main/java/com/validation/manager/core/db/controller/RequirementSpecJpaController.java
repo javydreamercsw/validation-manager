@@ -59,8 +59,8 @@ public class RequirementSpecJpaController implements Serializable {
         if (requirementSpec.getBaselineList() == null) {
             requirementSpec.setBaselineList(new ArrayList<>());
         }
-        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
+        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -130,8 +130,8 @@ public class RequirementSpecJpaController implements Serializable {
     }
 
     public void edit(RequirementSpec requirementSpec) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         requirementSpec.getRequirementSpecPK().setSpecLevelId(requirementSpec.getSpecLevel().getId());
+        requirementSpec.getRequirementSpecPK().setProjectId(requirementSpec.getProject().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
