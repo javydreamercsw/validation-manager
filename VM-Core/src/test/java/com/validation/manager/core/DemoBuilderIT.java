@@ -88,7 +88,7 @@ public class DemoBuilderIT extends AbstractVMTestCase {
                             LOG.log(Level.INFO, "{0} has no steps!",
                                     rs.getUniqueId());
                         }
-//                        assertTrue(rs.getStepList().size() > 0);
+                        assertTrue(rs.getStepList().size() > 0);
                     }
                     catch (VMException ex) {
                         Exceptions.printStackTrace(ex);
