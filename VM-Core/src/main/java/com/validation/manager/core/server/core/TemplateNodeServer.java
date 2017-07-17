@@ -22,6 +22,8 @@ import com.validation.manager.core.db.TemplateNode;
 import com.validation.manager.core.db.TemplateNodePK;
 import com.validation.manager.core.db.TemplateNodeType;
 import com.validation.manager.core.db.controller.TemplateNodeJpaController;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -35,6 +37,9 @@ public final class TemplateNodeServer extends TemplateNode
 
     public TemplateNodeServer(TemplateNodePK templateNodePK) {
         super(templateNodePK);
+        if (templateNodePK != null) {
+            update();
+        }
     }
 
     public TemplateNodeServer(TemplateNodePK templateNodePK, String nodeName) {
@@ -91,5 +96,24 @@ public final class TemplateNodeServer extends TemplateNode
     @Override
     public void update() {
         update(this, getEntity());
+    }
+
+    public static void delete(TemplateNode n) throws NonexistentEntityException {
+        assert n != null : "Null parameter!";
+        assert n instanceof TemplateNode :
+                "Sent a non Entity class as parameter: " + n.getClass();
+        if (n.getTemplateNodeList() != null) {
+            n.getTemplateNodeList().forEach(sn -> {
+                try {
+                    delete(sn);
+                }
+                catch (NonexistentEntityException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            });
+            n.getTemplateNodeList().clear();
+        }
+        new TemplateNodeJpaController(DataBaseManager
+                .getEntityManagerFactory()).destroy(n.getTemplateNodePK());
     }
 }
