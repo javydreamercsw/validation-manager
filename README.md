@@ -7,6 +7,7 @@
        src="https://scan.coverity.com/projects/12634/badge.svg"/>
 </a>
 [![Stories in Ready](https://badge.waffle.io/javydreamercsw/validation-manager.png?label=ready&title=Ready)](http://waffle.io/javydreamercsw/validation-manager)
+[![Dependency Status](https://www.versioneye.com/user/projects/596d2b19368b0800116ee85a/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/596d2b19368b0800116ee85a)
 
 
 Welcome to Validation Manager Repository!
