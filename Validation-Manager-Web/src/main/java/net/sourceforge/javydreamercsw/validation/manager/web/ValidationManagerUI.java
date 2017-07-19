@@ -1009,8 +1009,25 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (p.getId() == null && new TemplateJpaController(DataBaseManager
                 .getEntityManagerFactory()).getTemplateCount() > 0) {//Make sure there are templates defined.
             //Prompt the user to see if he wants to use a template or not.
-            //Show creation wizard
-            showProjectWizard(p);
+            MessageBox prompt = MessageBox.createQuestion()
+                    .withCaption(TRANSLATOR.translate("use.project.wizard.title"))
+                    .withMessage(TRANSLATOR.translate("use.project.wizard.message"))
+                    .withYesButton(() -> {
+                        //Show creation wizard
+                        showProjectWizard(p);
+                    },
+                            ButtonOption.focus(),
+                            ButtonOption
+                                    .icon(VaadinIcons.CHECK))
+                    .withNoButton(() -> {
+                        // Just display it.
+                        setTabContent(main, new ProjectComponent(p, edit),
+                                "project.viewer");
+                    },
+                            ButtonOption
+                                    .icon(VaadinIcons.CLOSE));
+            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+            prompt.open();
         } else {
             // Just display it.
             setTabContent(main, new ProjectComponent(p, edit),
@@ -1251,6 +1268,8 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     @Override
     protected void init(VaadinRequest request) {
+        LOG.log(Level.INFO, "Current working directory: {0}",
+                System.getProperty("user.home"));
         Page.getCurrent().setTitle("Validation Manager");
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
