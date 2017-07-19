@@ -48,9 +48,13 @@ public final class ProjectServer extends Project
     }
 
     public ProjectServer(Project p) {
-        Project product = new ProjectJpaController(
-                getEntityManagerFactory()).findProject(p.getId());
-        update((ProjectServer) this, product);
+        if (p.getId() != null) {
+            Project product = new ProjectJpaController(
+                    getEntityManagerFactory()).findProject(p.getId());
+            update((ProjectServer) this, product);
+        } else {
+            update((ProjectServer) this, p);
+        }
     }
 
     @Override

@@ -23,7 +23,6 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.ItemClickEvent;
@@ -41,8 +40,6 @@ import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
@@ -64,7 +61,6 @@ import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
 import com.validation.manager.core.IMainContentProvider;
@@ -91,6 +87,7 @@ import com.validation.manager.core.db.VmSetting;
 import com.validation.manager.core.db.controller.ExecutionStepJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.StepJpaController;
+import com.validation.manager.core.db.controller.TemplateJpaController;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -138,6 +135,7 @@ import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.BaselineComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ExecutionStepComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.HistoryTable;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectTreeComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementListComponent;
@@ -157,6 +155,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUpload
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceMatrix;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.wizard.project.ProjectCreationWizard;
 import org.openide.util.Lookup;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
@@ -382,7 +381,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         setTabContent(main, new RequirementComponent(req, edit), REQUIREMENT_REVIEW);
     }
 
-    // @return the current application instance
     public static ValidationManagerUI getInstance() {
         return (ValidationManagerUI) ValidationManagerUI
                 .getCurrent();
@@ -1008,99 +1006,16 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayProject(Project p, boolean edit) {
-        // Bind it to a component
-        Panel form = new Panel(TRANSLATOR.translate("project.detail"));
-        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        FormLayout layout = new FormLayout();
-        form.setContent(layout);
-        BeanFieldGroup binder = new BeanFieldGroup(p.getClass());
-        binder.setItemDataSource(p);
-        Field<?> name = binder.buildAndBind(TRANSLATOR.translate("general.name"), "name");
-        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"), "notes",
-                TextArea.class);
-        notes.setSizeFull();
-        name.setRequired(true);
-        name.setRequiredError(TRANSLATOR.translate("missing.name.message"));
-        layout.addComponent(name);
-        layout.addComponent(notes);
-        Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
-        cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
-            if (p.getId() == null) {
-                displayObject(tree.getValue());
-            } else {
-                displayObject(p, false);
-            }
-        });
-        if (edit) {
-            if (p.getId() == null) {
-                //Creating a new one
-                Button save = new Button(TRANSLATOR.translate("general.save"));
-                save.addClickListener((Button.ClickEvent event) -> {
-                    if (name.getValue() == null) {
-                        Notification.show(name.getRequiredError(),
-                                Notification.Type.ERROR_MESSAGE);
-                        return;
-                    }
-                    p.setName(name.getValue().toString());
-                    if (notes.getValue() != null) {
-                        p.setNotes(notes.getValue().toString());
-                    }
-                    new ProjectJpaController(DataBaseManager
-                            .getEntityManagerFactory()).create(p);
-                    form.setVisible(false);
-                    //Recreate the tree to show the addition
-                    updateProjectList();
-                    buildProjectTree(p);
-                    displayProject(p, false);
-                    updateScreen();
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            } else {
-                //Editing existing one
-                Button update = new Button(TRANSLATOR.translate("generl.update"));
-                update.addClickListener((Button.ClickEvent event) -> {
-                    handleVersioning(p, () -> {
-                        try {
-                            p.setName(name.getValue().toString());
-                            if (notes.getValue() != null) {
-                                p.setNotes(notes.getValue().toString());
-                            }
-                            new ProjectJpaController(DataBaseManager
-                                    .getEntityManagerFactory()).edit(p);
-                        } catch (NonexistentEntityException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                    ex.getLocalizedMessage(),
-                                    Notification.Type.ERROR_MESSAGE);
-                        } catch (Exception ex) {
-                            LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                    ex.getLocalizedMessage(),
-                                    Notification.Type.ERROR_MESSAGE);
-                        }
-                    });
-                });
-                HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
-            }
+        if (p.getId() == null && new TemplateJpaController(DataBaseManager
+                .getEntityManagerFactory()).getTemplateCount() > 0) {//Make sure there are templates defined.
+            //Prompt the user to see if he wants to use a template or not.
+            //Show creation wizard
+            showProjectWizard(p);
+        } else {
+            // Just display it.
+            setTabContent(main, new ProjectComponent(p, edit),
+                    "project.viewer");
         }
-
-        binder.setBuffered(
-                true);
-        binder.setReadOnly(
-                !edit);
-        binder.bindMemberFields(form);
-
-        form.setSizeFull();
-
-        setTabContent(main, form,
-                "project.viewer");
     }
 
     private void createTree() {
@@ -1537,6 +1452,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         addWindow(w);
     }
 
+    @Override
     public AbstractSelect getRequirementSelectionComponent() {
         return new RequirementSelectionComponent(getParentProject());
     }
@@ -1775,12 +1691,14 @@ public class ValidationManagerUI extends UI implements VMUI {
                 ao.setModifierId(getUser().getId());
                 //Now check the level of the change
                 CHANGE_LEVEL level = CHANGE_LEVEL.MINOR;
-                History latest = ao.getHistoryList().get(ao.getHistoryList()
-                        .size() - 1);
-                if (ao.getMajorVersion() > latest.getMajorVersion()) {
-                    level = CHANGE_LEVEL.MAJOR;
-                } else if (ao.getMidVersion() > latest.getMidVersion()) {
-                    level = CHANGE_LEVEL.MODERATE;
+                if (!ao.getHistoryList().isEmpty()) {
+                    History latest = ao.getHistoryList().get(ao.getHistoryList()
+                            .size() - 1);
+                    if (ao.getMajorVersion() > latest.getMajorVersion()) {
+                        level = CHANGE_LEVEL.MAJOR;
+                    } else if (ao.getMidVersion() > latest.getMidVersion()) {
+                        level = CHANGE_LEVEL.MODERATE;
+                    }
                 }
                 switch (level) {
                     case MAJOR:
@@ -1880,5 +1798,9 @@ public class ValidationManagerUI extends UI implements VMUI {
             return false;
         }
         return true;
+    }
+
+    private void showProjectWizard(Project p) {
+        addWindow(new ProjectCreationWizard(new ProjectServer(p)));
     }
 }
