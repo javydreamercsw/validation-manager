@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ public class VMDemoResetThread extends Thread {
                     //Check again this is a demo environment, just in case
                     if (DataBaseManager.isDemo()) {
                         LOG.warning("Dropping tables...");
-                        DataBaseManager.nativeQuery("DROP ALL OBJECTS");
+                        DataBaseManager.clean();
                         LOG.warning("Done!");
                     }
                     //Reload the database
@@ -53,7 +53,7 @@ public class VMDemoResetThread extends Thread {
                     DataBaseManager.reload(true);
                     LOG.warning("Done!");
                 } catch (VMException ex) {
-                   LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
         }

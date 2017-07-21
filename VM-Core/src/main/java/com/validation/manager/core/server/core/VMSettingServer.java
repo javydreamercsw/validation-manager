@@ -86,7 +86,7 @@ public final class VMSettingServer extends VmSetting
 
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
-        if (getId() > 0) {
+        if (getId() != null) {
             VmSetting s = new VmSettingJpaController(
                     getEntityManagerFactory())
                     .findVmSetting(getId());

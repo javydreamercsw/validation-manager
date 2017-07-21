@@ -1271,14 +1271,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         LOG.log(Level.INFO, "Current working directory: {0}",
                 System.getProperty("user.home"));
         Page.getCurrent().setTitle("Validation Manager");
-        ProjectJpaController controller
-                = new ProjectJpaController(DataBaseManager
-                        .getEntityManagerFactory());
-
-        if (DataBaseManager.isDemo()
-                && controller.findProjectEntities().isEmpty()) {
-            buildDemoTree();
-        }
         updateScreen();
     }
 
@@ -1697,6 +1689,14 @@ public class ValidationManagerUI extends UI implements VMUI {
                 }
             } else {
                 LOG.warning("Missing configuration for Open Office!");
+            }
+            //Build demo tree if needed
+            ProjectJpaController controller
+                    = new ProjectJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+            if (DataBaseManager.isDemo()
+                    && controller.findProjectEntities().isEmpty()) {
+                buildDemoTree();
             }
         }
     }

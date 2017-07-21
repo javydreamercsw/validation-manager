@@ -1,41 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context antiJARLocking="true" docBase="validation-manager" path="/validation-manager">
-  <!-- #################### PLEASE CONFIGURE #############################-->
-  <!-- ### Params: username, password, url, driverClassName            ###-->
-  <!-- ###################################################################-->
-  <!-- H2 Embedded Database, not for production.
+    <!-- #################### PLEASE CONFIGURE #############################-->
+    <!-- ### Params: username, password, url, driverClassName            ###-->
+    <!-- ###################################################################-->
+    <!-- H2 Embedded Database, not for production.
     Note: For H2, make sure this values match the contents of
     web.xml for proper shutdown of H2 database!-->
-  <Resource auth="Container" driverClassName="org.h2.Driver" maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/VMDB" password="" type="javax.sql.DataSource" url="jdbc:h2:file:~/VM/data/validation-manager;CREATE=TRUE;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE" username="root"/>
-  <!-- MySQL Database
+    <Resource auth="Container" driverClassName="org.h2.Driver" maxActive="100" 
+              maxIdle="30" maxWait="10000" name="jdbc/VMDB" password="" 
+              type="javax.sql.DataSource" 
+              url="jdbc:h2:file:~/VM/data/validation-manager;CREATE=TRUE;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE" username="root"/>
+    <!-- MySQL Database
 <Resource auth="Container" driverClassName="com.mysql.cj.jdbc.Driver"
     maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/VMDB"
     password="" type="javax.sql.DataSource"
     url="jdbc:mysql://localhost:3306/validation-manager?serverTimezone=UTC"
     username="root"/>-->
-  <!-- Oracle Database 
+    <!-- Oracle Database 
 <Resource auth="Container" driverClassName="oracle.jdbc.driver.OracleDriver"
     maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/VMDB"
     password="" type="javax.sql.DataSource"
     url="jdbc:oracle:thin:@//server.local:1521/<service name>"
     username="root"/> -->
-  <!-- PostgreSQL Database
+    <!-- PostgreSQL Database
 <Resource auth="Container" driverClassName="org.postgresql.Driver"
     maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/VMDB"
     password="" type="javax.sql.DataSource"
     url="jdbc:postgresql://localhost:5432/validation-manager"
     username="root"/> -->
-  <!-- Turn off session serialization -->
-  <Manager pathname=""/>
-  <!-- ################# Optional Configuration #################-->
-  <!-- Database JNDI Name -->
-  <Environment name="validation-manager/JNDIDB" override="false" type="java.lang.String" value="VMPUJNDI"/>
-  <!-- ################# ###################### #################-->
-  <!-- Demo settings -->
-  <!-- Warning! This will reset your database on 'demo-period' intervals so use with care
+    <!-- Turn off session serialization -->
+    <Manager pathname=""/>
+    <!-- ################# Optional Configuration #################-->
+    <!-- Database JNDI Name -->
+    <Environment name="validation-manager/JNDIDB" override="false" type="java.lang.String" value="VMPUJNDI"/>
+    <!-- ################# ###################### #################-->
+    <!-- Demo settings -->
+    <!-- Warning! This will reset your database on 'demo-period' intervals so use with care
     Precautions have been put in place to check the database is an H2 embedded database before proceeding
     Please set value to false for use in production.-->
-  <Environment name="validation-manager/demo" override="false" type="java.lang.Boolean" value="true"/>
-  <Environment name="validation-manager/demo-period" override="false" type="java.lang.Long" value="86400000"/>
-  <!-- ################# ###################### #################-->
+    <Environment name="validation-manager/demo" override="false" type="java.lang.Boolean" value="true"/>
+    <Environment name="validation-manager/demo-period" override="false" type="java.lang.Long" value="86400000"/>
+    <!-- ################# ###################### #################-->
 </Context>
