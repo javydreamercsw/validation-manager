@@ -25,9 +25,12 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Tree;
@@ -47,6 +50,11 @@ import com.validation.manager.core.db.controller.TemplateNodeJpaController;
 import com.validation.manager.core.db.controller.TemplateNodeTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.TemplateNodeServer;
+import com.validation.manager.core.server.core.TemplateServer;
+import de.steinwedel.messagebox.ButtonOption;
+import de.steinwedel.messagebox.MessageBox;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.admin.AdminProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import org.openide.util.Exceptions;
@@ -69,7 +77,11 @@ public class TemplateScreenProvider extends AdminProvider {
     private final Tree tree;
     private final ListSelect type
             = new ListSelect(TRANSLATOR.translate("general.type"));
+    private final ListSelect templates
+            = new ListSelect(TRANSLATOR.translate("template.tab.list.name"));
     private TextField name;
+    private static final Logger LOG
+            = Logger.getLogger(TemplateScreenProvider.class.getSimpleName());
 
     @Override
     public String getComponentCaption() {
@@ -93,17 +105,25 @@ public class TemplateScreenProvider extends AdminProvider {
         tree.addItemClickListener((ItemClickEvent event) -> {
             if (event.getButton() == MouseButton.RIGHT) {
                 menu.removeItems();
-                if (tree.getValue() != null && !tree.isRoot(tree.getValue())) {
+                if (tree.getValue() != null) {
+                    if (tree.getValue() instanceof Template) {
+                        Template template = (Template) tree.getValue();
+                        if (template.getId() < 1_000) {
+                            return;
+                        }
+                    }
                     MenuItem create
                             = menu.addItem(TRANSLATOR.translate("general.add.child"),
                                     PROJECT_ICON, (MenuItem selectedItem) -> {
-                                        displayCreationWizard();
+                                        displayChildCreationWizard();
                                     });
                     MenuItem delete
                             = menu.addItem(TRANSLATOR.translate("general.delete"),
                                     PROJECT_ICON, (MenuItem selectedItem) -> {
-                                        displayDeletionWizard();
+                                        displayChildDeletionWizard();
                                     });
+                    //Don't allow to delete the root node.
+                    delete.setEnabled(!tree.isRoot(tree.getValue()));
                 }
             }
         });
@@ -113,19 +133,18 @@ public class TemplateScreenProvider extends AdminProvider {
     public Component getContent() {
         Panel p = new Panel();
         HorizontalSplitPanel hs = new HorizontalSplitPanel();
-        hs.setSplitPosition(25, Sizeable.Unit.PERCENTAGE);
+        hs.setSplitPosition(30, Sizeable.Unit.PERCENTAGE);
         hs.addComponent(getLeftComponent());
         hs.addComponent(getRightComponent());
         hs.setSizeFull();
         p.setContent(hs);
+        p.setId(getComponentCaption());
         return p;
     }
 
     private Component getLeftComponent() {
         Panel p = new Panel();
         VerticalLayout layout = new VerticalLayout();
-        ListSelect templates
-                = new ListSelect(TRANSLATOR.translate("template.tab.list.name"));
         templates.setNullSelectionAllowed(true);
         BeanItemContainer<Template> container
                 = new BeanItemContainer<>(Template.class,
@@ -142,7 +161,32 @@ public class TemplateScreenProvider extends AdminProvider {
             displayTemplate((Template) event.getProperty().getValue());
         });
         templates.setNullSelectionAllowed(false);
+        templates.setWidth(100, Sizeable.Unit.PERCENTAGE);
         layout.addComponent(templates);
+        HorizontalLayout hl = new HorizontalLayout();
+        Button create = new Button(TRANSLATOR.translate("general.add"));
+        create.addClickListener(listener -> {
+            displayTemplateCreateWizard();
+        });
+        hl.addComponent(create);
+        Button copy = new Button(TRANSLATOR.translate("general.copy"));
+        copy.addClickListener(listener -> {
+            displayTemplateCopyWizard();
+        });
+        hl.addComponent(copy);
+        Button delete = new Button(TRANSLATOR.translate("general.delete"));
+        delete.addClickListener(listener -> {
+            displayTemplateDeleteWizard();
+        });
+        hl.addComponent(delete);
+        templates.addValueChangeListener(listener -> {
+            if (templates.getValue() != null) {
+                Template t = (Template) templates.getValue();
+                delete.setEnabled(t.getId() >= 1_000);
+                copy.setEnabled(t.getTemplateNodeList().size() > 0);
+            }
+        });
+        layout.addComponent(hl);
         layout.setSizeFull();
         p.setContent(layout);
         p.setSizeFull();
@@ -153,8 +197,9 @@ public class TemplateScreenProvider extends AdminProvider {
         //Clear the tree to create a new one.
         tree.removeAllItems();
         if (t != null) {
-            tree.addItem(t.getTemplateName());
-            tree.setItemIcon(t.getTemplateName(), VaadinIcons.FILE_TREE);
+            tree.addItem(t);
+            tree.setItemIcon(t, VaadinIcons.FILE_TREE);
+            tree.setItemCaption(t, t.getTemplateName());
             t.getTemplateNodeList().forEach(node -> {
                 if (node.getTemplateNode() == null) {
                     //Only root folders
@@ -176,7 +221,7 @@ public class TemplateScreenProvider extends AdminProvider {
                     node.getTemplateNode().getTemplateNodePK());
         } else {
             tree.setParent(key,
-                    node.getTemplate().getTemplateName());
+                    node.getTemplate());
         }
         Resource icon;
         switch (node.getTemplateNodeType().getId()) {
@@ -210,21 +255,33 @@ public class TemplateScreenProvider extends AdminProvider {
         return p;
     }
 
-    private void displayDeletionWizard() {
-        try {
-            TemplateNodeServer node
-                    = new TemplateNodeServer((TemplateNodePK) tree.getValue());
-            TemplateNodeServer.delete(node.getEntity());
-            tree.getChildren(tree.getValue()).forEach(child -> {
-                tree.removeItem(child);
-            });
-            tree.removeItem(node.getTemplateNodePK());
-        } catch (NonexistentEntityException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+    private void displayChildDeletionWizard() {
+        MessageBox prompt = MessageBox.createQuestion()
+                .withCaption(TRANSLATOR.translate("general.delete.child"))
+                .withMessage(TRANSLATOR.translate("template.delete.message"))
+                .withYesButton(() -> {
+                    try {
+                        TemplateNodeServer node
+                                = new TemplateNodeServer((TemplateNodePK) tree.getValue());
+                        TemplateNodeServer.delete(node.getEntity());
+                        tree.getChildren(tree.getValue()).forEach(child -> {
+                            tree.removeItem(child);
+                        });
+                        tree.removeItem(node.getTemplateNodePK());
+                    } catch (NonexistentEntityException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                },
+                        ButtonOption.focus(),
+                        ButtonOption
+                                .icon(VaadinIcons.CHECK))
+                .withNoButton(ButtonOption
+                        .icon(VaadinIcons.CLOSE));
+        prompt.getWindow().setIcon(VMUI.SMALL_APP_ICON);
+        prompt.open();
     }
 
-    private void displayCreationWizard() {
+    private void displayChildCreationWizard() {
         Wizard w = new Wizard();
         Window cw = new VMWindow();
         w.addStep(new WizardStep() {
@@ -256,6 +313,7 @@ public class TemplateScreenProvider extends AdminProvider {
                 name = (TextField) binder.buildAndBind(TRANSLATOR
                         .translate("general.name"),
                         "nodeName", TextField.class);
+                name.setNullRepresentation("");
                 vl.addComponent(name);
                 vl.addComponent(type);
                 return vl;
@@ -288,17 +346,28 @@ public class TemplateScreenProvider extends AdminProvider {
             public void wizardCompleted(WizardCompletedEvent event) {
                 try {
                     //Add the item
-                    TemplateNode tn = new TemplateNode();
-                    TemplateNodeServer node
-                            = new TemplateNodeServer((TemplateNodePK) tree.getValue());
-                    tn.setTemplate(node.getTemplate());
-                    tn.setTemplateNode(node.getEntity());
+                    TemplateNode tn = new TemplateNode(), parent = null;
+                    Template template = null;
+                    if (tree.getValue() instanceof TemplateNodePK) {
+                        TemplateNodeServer node
+                                = new TemplateNodeServer((TemplateNodePK) tree.getValue());
+                        template = node.getTemplate();
+                        parent = node.getEntity();
+                    } else if (tree.getValue() instanceof Template) {
+                        template = (Template) tree.getValue();
+                    }
+                    tn.setTemplate(template);
+                    if (parent != null) {
+                        tn.setTemplateNode(parent);
+                    }
                     tn.setTemplateNodeType((TemplateNodeType) type.getValue());
                     tn.setNodeName(name.getValue());
                     new TemplateNodeJpaController(DataBaseManager
                             .getEntityManagerFactory()).create(tn);
                     addTemplateNode(tn);
                     UI.getCurrent().removeWindow(cw);
+                    ((VMUI) UI.getCurrent()).updateScreen();
+                    ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
                 }
@@ -312,5 +381,170 @@ public class TemplateScreenProvider extends AdminProvider {
         cw.setContent(w);
         cw.setSizeFull();
         UI.getCurrent().addWindow(cw);
+    }
+
+    private void displayTemplateCopyWizard() {
+        Wizard w = new Wizard();
+        Window cw = new VMWindow();
+        w.addStep(new WizardStep() {
+            private final TextField nameField
+                    = new TextField(TRANSLATOR.translate("general.name"));
+
+            @Override
+            public String getCaption() {
+                return TRANSLATOR.translate("template.copy");
+            }
+
+            @Override
+            public Component getContent() {
+                VerticalLayout vl = new VerticalLayout();
+                Template t = new Template();
+                BeanFieldGroup binder = new BeanFieldGroup(t.getClass());
+                binder.setItemDataSource(t);
+                binder.bind(tree, "templateName");
+                vl.addComponent(nameField);
+                return vl;
+            }
+
+            @Override
+            public boolean onAdvance() {
+                try {
+                    TemplateServer t = new TemplateServer(nameField.getValue());
+                    t.write2DB();
+                    return t.getId() > 0;
+                } catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                    Notification.show(TRANSLATOR
+                            .translate("general.error.record.creation"),
+                            ex.getLocalizedMessage(),
+                            Notification.Type.ERROR_MESSAGE);
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onBack() {
+                return false;
+            }
+        });
+        w.addListener(new WizardProgressListener() {
+            @Override
+            public void activeStepChanged(WizardStepActivationEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void stepSetChanged(WizardStepSetChangedEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(WizardCompletedEvent event) {
+                ((VMUI) UI.getCurrent()).updateScreen();
+                ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
+                UI.getCurrent().removeWindow(cw);
+            }
+
+            @Override
+            public void wizardCancelled(WizardCancelledEvent event) {
+                UI.getCurrent().removeWindow(cw);
+            }
+        });
+        cw.setContent(w);
+        cw.setSizeFull();
+        UI.getCurrent().addWindow(cw);
+    }
+
+    private void displayTemplateCreateWizard() {
+        Wizard w = new Wizard();
+        Window cw = new VMWindow();
+        w.addStep(new WizardStep() {
+            private final TextField nameField
+                    = new TextField(TRANSLATOR.translate("general.name"));
+
+            @Override
+            public String getCaption() {
+                return TRANSLATOR.translate("add.template");
+            }
+
+            @Override
+            public Component getContent() {
+                VerticalLayout vl = new VerticalLayout();
+                Template t = new Template();
+                BeanFieldGroup binder = new BeanFieldGroup(t.getClass());
+                binder.setItemDataSource(t);
+                binder.bind(tree, "templateName");
+                vl.addComponent(nameField);
+                return vl;
+            }
+
+            @Override
+            public boolean onAdvance() {
+                try {
+                    TemplateServer t = new TemplateServer(nameField.getValue());
+                    t.write2DB();
+                    return t.getId() > 0;
+                } catch (Exception ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                    Notification.show(TRANSLATOR
+                            .translate("general.error.record.creation"),
+                            ex.getLocalizedMessage(),
+                            Notification.Type.ERROR_MESSAGE);
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onBack() {
+                return false;
+            }
+        });
+        w.addListener(new WizardProgressListener() {
+            @Override
+            public void activeStepChanged(WizardStepActivationEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void stepSetChanged(WizardStepSetChangedEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(WizardCompletedEvent event) {
+                ((VMUI) UI.getCurrent()).updateScreen();
+                ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
+                UI.getCurrent().removeWindow(cw);
+            }
+
+            @Override
+            public void wizardCancelled(WizardCancelledEvent event) {
+                UI.getCurrent().removeWindow(cw);
+            }
+        });
+        cw.setContent(w);
+        cw.setSizeFull();
+        UI.getCurrent().addWindow(cw);
+    }
+
+    private void displayTemplateDeleteWizard() {
+        MessageBox prompt = MessageBox.createQuestion()
+                .withCaption(TRANSLATOR.translate("template.delete.title"))
+                .withMessage(TRANSLATOR.translate("template.delete.message"))
+                .withYesButton(() -> {
+                    if (templates.getValue() != null) {
+                        //Delete nodes
+                        TemplateServer t
+                                = new TemplateServer(((Template) templates.getValue()));
+                        t.delete();
+                    }
+                },
+                        ButtonOption.focus(),
+                        ButtonOption
+                                .icon(VaadinIcons.CHECK))
+                .withNoButton(ButtonOption
+                        .icon(VaadinIcons.CLOSE));
+        prompt.getWindow().setIcon(VMUI.SMALL_APP_ICON);
+        prompt.open();
     }
 }

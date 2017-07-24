@@ -41,6 +41,7 @@ public class DemoProvider extends AbstractProvider {
         if (layout == null) {
             layout = new VerticalLayout();
             update();
+            layout.setId(getComponentCaption());
         }
         return layout;
     }

@@ -296,6 +296,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
         VerticalLayout vl = new VerticalLayout();
         update();
         vl.addComponent(testCaseTree);
+        vl.setId(getComponentCaption());
         return vl;
     }
 

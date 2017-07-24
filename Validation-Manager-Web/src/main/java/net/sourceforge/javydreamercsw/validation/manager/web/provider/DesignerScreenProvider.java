@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,6 +62,7 @@ public class DesignerScreenProvider extends AbstractProvider {
                 ValidationManagerUI.getInstance().updateScreen();
             }
         });
+        w.setId(getComponentCaption());
         return w;
     }
 

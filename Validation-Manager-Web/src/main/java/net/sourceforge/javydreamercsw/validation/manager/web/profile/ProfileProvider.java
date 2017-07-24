@@ -45,6 +45,9 @@ public class ProfileProvider extends AbstractProvider {
 
     @Override
     public Component getContent() {
-        return new UserComponent(((VMUI) UI.getCurrent()).getUser(), true);
+        UserComponent uc
+                = new UserComponent(((VMUI) UI.getCurrent()).getUser(), true);
+        uc.setId(getComponentCaption());
+        return uc;
     }
 }
