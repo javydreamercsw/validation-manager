@@ -15,7 +15,6 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
-import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
@@ -36,6 +35,7 @@ import com.validation.manager.core.api.internationalization.Internationalization
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import org.openide.util.Lookup;
 
 /**
@@ -93,6 +93,7 @@ public final class LoginDialog extends VMWindow {
         layout.addComponent(name);
         layout.addComponent(password);
         name.focus();
+        name.setWidth(100, Unit.PERCENTAGE);
         StringLengthValidator nameVal = new StringLengthValidator(
                 Lookup.getDefault()
                         .lookup(InternationalizationProvider.class).
@@ -107,6 +108,7 @@ public final class LoginDialog extends VMWindow {
         passVal.setMinLength(3);
         password.addValidator(passVal);
         password.setImmediate(true);
+        password.setWidth(100, Unit.PERCENTAGE);
         layout.addComponent(hlayout);
         layout.setComponentAlignment(name, Alignment.TOP_LEFT);
         layout.setComponentAlignment(password, Alignment.MIDDLE_LEFT);
