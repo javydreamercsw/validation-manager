@@ -924,7 +924,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             version = "";
         }
         if (build != null) {
-            version += (version.isEmpty() ? "" : " ") + build + ")";
+            version += (version.isEmpty() ? "" : " ") + "(" + build + ")";
         }
         return version;
     }

@@ -17,12 +17,17 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Template;
 import com.validation.manager.core.db.TemplateNode;
 import com.validation.manager.core.db.TemplateNodeType;
 import com.validation.manager.core.db.controller.TemplateJpaController;
 import com.validation.manager.core.db.controller.TemplateNodeJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -30,6 +35,9 @@ import java.util.ArrayList;
  */
 public final class TemplateServer extends Template
         implements EntityServer<Template> {
+
+    private static final Logger LOG
+            = Logger.getLogger(TemplateServer.class.getSimpleName());
 
     public TemplateServer() {
         setTemplateNodeList(new ArrayList<>());
@@ -42,6 +50,11 @@ public final class TemplateServer extends Template
 
     public TemplateServer(int id) {
         setId(id);
+        update();
+    }
+
+    public TemplateServer(Template t) {
+        setId(t.getId());
         update();
     }
 
@@ -108,6 +121,28 @@ public final class TemplateServer extends Template
             c.edit(child);
         } else {
             child.setTemplateNode(parent);
+        }
+    }
+
+    public void delete() throws VMException {
+        try {
+            TemplateNodeJpaController c
+                    = new TemplateNodeJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+            getTemplateNodeList().forEach(node -> {
+                try {
+                    c.destroy(node.getTemplateNodePK());
+                }
+                catch (NonexistentEntityException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            });
+            new TemplateJpaController(DataBaseManager
+                    .getEntityManagerFactory()).destroy(getId());
+        }
+        catch (IllegalOrphanException | NonexistentEntityException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+            throw new VMException(ex);
         }
     }
 }

@@ -39,6 +39,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
 import static com.validation.manager.core.VMUI.PROJECT_ICON;
 import com.validation.manager.core.db.Template;
@@ -146,6 +147,7 @@ public class TemplateScreenProvider extends AdminProvider {
         Panel p = new Panel();
         VerticalLayout layout = new VerticalLayout();
         templates.setNullSelectionAllowed(true);
+        templates.setWidth(100, Sizeable.Unit.PERCENTAGE);
         BeanItemContainer<Template> container
                 = new BeanItemContainer<>(Template.class,
                         new TemplateJpaController(DataBaseManager
@@ -383,6 +385,12 @@ public class TemplateScreenProvider extends AdminProvider {
         UI.getCurrent().addWindow(cw);
     }
 
+    @Override
+    public void update() {
+        super.update();
+        tree.removeAllItems();
+    }
+
     private void displayTemplateCopyWizard() {
         Wizard w = new Wizard();
         Window cw = new VMWindow();
@@ -533,10 +541,17 @@ public class TemplateScreenProvider extends AdminProvider {
                 .withMessage(TRANSLATOR.translate("template.delete.message"))
                 .withYesButton(() -> {
                     if (templates.getValue() != null) {
-                        //Delete nodes
-                        TemplateServer t
-                                = new TemplateServer(((Template) templates.getValue()));
-                        t.delete();
+                        try {
+                            //Delete nodes
+                            TemplateServer t
+                                    = new TemplateServer(((Template) templates
+                                            .getValue()));
+                            t.delete();
+                            ((VMUI) UI.getCurrent()).updateScreen();
+                            ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
+                        } catch (VMException ex) {
+                            LOG.log(Level.SEVERE, null, ex);
+                        }
                     }
                 },
                         ButtonOption.focus(),
