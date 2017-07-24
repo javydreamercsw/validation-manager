@@ -15,7 +15,7 @@
     maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/VMDB"
     password="" type="javax.sql.DataSource"
     url="jdbc:mysql://localhost:3306/validation-manager?serverTimezone=UTC"
-    username="root"/>-->
+    username="vm"/>-->
     <!-- Oracle Database 
 <Resource auth="Container" driverClassName="oracle.jdbc.driver.OracleDriver"
     maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/VMDB"
@@ -27,7 +27,7 @@
     maxActive="100" maxIdle="30" maxWait="10000" name="jdbc/VMDB"
     password="" type="javax.sql.DataSource"
     url="jdbc:postgresql://localhost:5432/validation-manager"
-    username="root"/> -->
+    username="vm"/> -->
     <!-- Turn off session serialization -->
     <Manager pathname=""/>
     <!-- ################# Optional Configuration #################-->
