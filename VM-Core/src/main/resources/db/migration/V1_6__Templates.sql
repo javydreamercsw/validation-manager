@@ -7,17 +7,6 @@ INSERT INTO `template_node_type` (`id`, `type_name`) VALUES (2, 'general.test.pl
 INSERT INTO `template_node_type` (`id`, `type_name`) VALUES (3, 'general.folder');
 INSERT INTO `template_node_type` (`id`, `type_name`) VALUES (4, 'general.risk.management');
 
-/*Template Nodes*/
-/*GAMP 5*/
-INSERT INTO `template_node` (`id`, `template_id`, `template_node_type_id`, `parent_template_node_id`, `template_node_template_id`, `parent_template_node_template_node_type_id`, `node_name`) VALUES (1, 1, 1, NULL, NULL, NULL, 'Good Manufacturing Practice (GMP)');
-INSERT INTO `template_node` (`id`, `template_id`, `template_node_type_id`, `parent_template_node_id`, `template_node_template_id`, `parent_template_node_template_node_type_id`, `node_name`) VALUES (2, 1, 1, NULL, NULL, NULL, 'Good Clinical Practice (GCP)');
-INSERT INTO `template_node` (`id`, `template_id`, `template_node_type_id`, `parent_template_node_id`, `template_node_template_id`, `parent_template_node_template_node_type_id`, `node_name`) VALUES (3, 1, 1, NULL, NULL, NULL, 'Good Laboratory Practice (GLP)');
-INSERT INTO `template_node` (`id`, `template_id`, `template_node_type_id`, `parent_template_node_id`, `template_node_template_id`, `parent_template_node_template_node_type_id`, `node_name`) VALUES (4, 1, 1, NULL, NULL, NULL, 'Good Distribution Practice (GDP)');
-INSERT INTO `template_node` (`id`, `template_id`, `template_node_type_id`, `parent_template_node_id`, `template_node_template_id`, `parent_template_node_template_node_type_id`, `node_name`) VALUES (5, 1, 1, NULL, NULL, NULL, 'Good Quality Practice (GQP)');
-INSERT INTO `template_node` (`id`, `template_id`, `template_node_type_id`, `parent_template_node_id`, `template_node_template_id`, `parent_template_node_template_node_type_id`, `node_name`) VALUES (6, 1, 1, NULL, NULL, NULL, 'Good Pharmacovigilance Practice');
-INSERT INTO `template_node` (`id`, `template_id`, `template_node_type_id`, `parent_template_node_id`, `template_node_template_id`, `parent_template_node_template_node_type_id`, `node_name`) VALUES (7, 1, 1, NULL, NULL, NULL, 'Medical Device Regulations');
-INSERT INTO `template_node` (`id`, `template_id`, `template_node_type_id`, `parent_template_node_id`, `template_node_template_id`, `parent_template_node_template_node_type_id`, `node_name`) VALUES (8, 1, 1, NULL, NULL, NULL, 'Prescription Drug Marketing Act (PDMA)');
-
 INSERT INTO `test_case_type` (`id`, `type_name`, `type_description`) VALUES (1, 'module.test', 'module.test.desc');
 INSERT INTO `test_case_type` (`id`, `type_name`, `type_description`) VALUES (2, 'integration.test', 'integration.test.desc');
 INSERT INTO `test_case_type` (`id`, `type_name`, `type_description`) VALUES (3, 'configuration.test', 'configuration.test.desc');
