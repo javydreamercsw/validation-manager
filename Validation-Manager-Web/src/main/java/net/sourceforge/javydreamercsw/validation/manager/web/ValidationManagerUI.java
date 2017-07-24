@@ -894,14 +894,15 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     public synchronized String getVersion() {
         String version = null;
-
-        // try to load from maven properties first
+        String build = null;// try to load from maven properties first
         try {
             Properties p = new Properties();
-            InputStream is = getClass().getResourceAsStream("/version.properties");
+            InputStream is = getClass()
+                    .getResourceAsStream("/version.properties");
             if (is != null) {
                 p.load(is);
                 version = p.getProperty("version", "");
+                build = p.getProperty("build.number", "");
             }
         } catch (IOException e) {
             // ignore
@@ -922,14 +923,18 @@ public class ValidationManagerUI extends UI implements VMUI {
             // we could not compute the version so use a blank
             version = "";
         }
+        if (build != null) {
+            version += (version.isEmpty() ? "" : " ") + build + ")";
+        }
         return version;
     }
 
     private Component getMenu() {
         GridLayout gl = new GridLayout(3, 3);
         gl.addComponent(new Image("", LOGO), 0, 0);
-        gl.addComponent(new Label(TRANSLATOR.translate("general.version")
-                + ": " + getVersion()), 2, 2);
+        String label = TRANSLATOR.translate("general.version")
+                + ": " + getVersion();
+        gl.addComponent(new Label(label), 2, 2);
         if (getUser() != null) {
             getUser().update();
             //Logout button

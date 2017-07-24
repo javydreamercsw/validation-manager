@@ -199,6 +199,15 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <configuration>
+                    <items>
+                        <item>buildNumber2</item>
+                    </items>
+                </configuration>
+            </plugin>
             <!-- Run annotation processors on src/main/java sources -->
             <plugin>
                 <groupId>org.bsc.maven</groupId>
@@ -244,6 +253,9 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
+                        <manifestEntries>
+                            <Implementation-Build>${buildNumber}</Implementation-Build>
+                        </manifestEntries>
                     </archive>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <!--Include service files-->
