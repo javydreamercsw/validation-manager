@@ -140,10 +140,7 @@ public final class LoginDialog extends VMWindow {
                 if (user.getUserStatusId() != null) {
                     switch (user.getUserStatusId().getId()) {
                         case 1:
-                            //Everything OK
-                            menu.setUser(user);
-                            close();
-                            break;
+                        //Everything OK, fall thru
                         case 2:
                             //TODO: Inactive. Right now no special behavior
                             menu.setUser(user);
