@@ -167,13 +167,19 @@
     </dependencies>
     
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
                 <configuration>
                     <items>
-                        <item>buildNumber1</item>
+                        <item>timestamp</item>
                     </items>
                 </configuration>
             </plugin>

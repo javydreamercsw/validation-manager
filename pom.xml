@@ -195,7 +195,7 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <format>Build {0,number}</format>
+                        <format>{0,date,yyyy-MM-dd_HH-mm}</format>
                         <doCheck>false</doCheck>
                         <doUpdate>false</doUpdate>
                         <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
