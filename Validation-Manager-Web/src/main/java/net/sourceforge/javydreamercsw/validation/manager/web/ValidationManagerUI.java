@@ -129,8 +129,14 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.BaselineComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ExecutionStepComponent;
@@ -174,7 +180,6 @@ public class ValidationManagerUI extends UI implements VMUI {
     private VMUserServer user = null;
     private static final Logger LOG
             = Logger.getLogger(ValidationManagerUI.class.getSimpleName());
-    private static VMDemoResetThread reset = null;
     private LoginDialog loginWindow = null;
     private String projTreeRoot;
     private Component left;
@@ -378,7 +383,8 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayRequirement(Requirement req, boolean edit) {
-        setTabContent(main, new RequirementComponent(req, edit), REQUIREMENT_REVIEW);
+        setTabContent(main, new RequirementComponent(req, edit),
+                REQUIREMENT_REVIEW);
     }
 
     public static ValidationManagerUI getInstance() {
@@ -892,9 +898,26 @@ public class ValidationManagerUI extends UI implements VMUI {
         return hsplit;
     }
 
+    public synchronized String getBuild() {
+        String build = null;
+        try {
+            Properties p = new Properties();
+            InputStream is = getClass()
+                    .getResourceAsStream("/version.properties");
+            if (is != null) {
+                p.load(is);
+                build = p.getProperty("build.number", "");
+                LOG.log(Level.INFO, "Loaded build: {0}",
+                        new Object[]{build});
+            }
+        } catch (IOException e) {
+            // ignore
+        }
+        return build;
+    }
+
     public synchronized String getVersion() {
         String version = null;
-        String build = null;// try to load from maven properties first
         try {
             Properties p = new Properties();
             InputStream is = getClass()
@@ -902,29 +925,11 @@ public class ValidationManagerUI extends UI implements VMUI {
             if (is != null) {
                 p.load(is);
                 version = p.getProperty("version", "");
-                build = p.getProperty("build.number", "");
+                LOG.log(Level.INFO, "Loaded version: {0}",
+                        new Object[]{version});
             }
         } catch (IOException e) {
             // ignore
-        }
-
-        // fallback to using Java API
-        if (version == null) {
-            Package aPackage = getClass().getPackage();
-            if (aPackage != null) {
-                version = aPackage.getImplementationVersion();
-                if (version == null) {
-                    version = aPackage.getSpecificationVersion();
-                }
-            }
-        }
-
-        if (version == null) {
-            // we could not compute the version so use a blank
-            version = "";
-        }
-        if (build != null) {
-            version += (version.isEmpty() ? "" : " ") + "(" + build + ")";
         }
         return version;
     }
@@ -932,9 +937,9 @@ public class ValidationManagerUI extends UI implements VMUI {
     private Component getMenu() {
         GridLayout gl = new GridLayout(3, 3);
         gl.addComponent(new Image("", LOGO), 0, 0);
-        String label = TRANSLATOR.translate("general.version")
-                + ": " + getVersion();
-        gl.addComponent(new Label(label), 2, 2);
+        Label version = new Label(TRANSLATOR.translate("general.version")
+                + ": " + getVersion() + "(" + getBuild() + ")");
+        gl.addComponent(version, 2, 2);
         if (getUser() != null) {
             getUser().update();
             //Logout button
@@ -1623,22 +1628,33 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
+    @WebListener
     @VaadinServletConfiguration(productionMode = false,
             ui = ValidationManagerUI.class,
             widgetset = "net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet")
-    public static class Servlet extends VaadinServlet {
+    public static class Servlet extends VaadinServlet
+            implements ServletContextListener {
+
+        private ScheduledExecutorService scheduler;
 
         public Servlet() {
+            //Build demo tree if needed
+            ProjectJpaController controller
+                    = new ProjectJpaController(DataBaseManager
+                            .getEntityManagerFactory());
+            if (DataBaseManager.isDemo()
+                    && controller.findProjectEntities().isEmpty()) {
+                buildDemoTree();
+            }
+        }
+
+        @Override
+        public void contextInitialized(ServletContextEvent sce) {
             //Connect to the database defined in context.xml
             try {
                 DataBaseManager.setPersistenceUnitName("VMPUJNDI");
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
-            }
-            if (reset == null && DataBaseManager.isDemo()) {
-                LOG.info("Running on demo mode!");
-                reset = new VMDemoResetThread();
-                reset.start();
             }
             //Check for existance of OpenOffice installation
             VmSetting home = VMSettingServer.getSetting("openoffice.home");
@@ -1695,13 +1711,23 @@ public class ValidationManagerUI extends UI implements VMUI {
             } else {
                 LOG.warning("Missing configuration for Open Office!");
             }
-            //Build demo tree if needed
-            ProjectJpaController controller
-                    = new ProjectJpaController(DataBaseManager
-                            .getEntityManagerFactory());
-            if (DataBaseManager.isDemo()
-                    && controller.findProjectEntities().isEmpty()) {
-                buildDemoTree();
+            if (DataBaseManager.isDemo()) {
+                long reset_period = DataBaseManager.getDemoResetPeriod();
+                if (reset_period > 0) {
+                    LOG.info("Scheduling demo reset...");
+                    scheduler = Executors.newSingleThreadScheduledExecutor();
+                    scheduler.scheduleAtFixedRate(new VMDemoResetThread(), 0,
+                            reset_period, TimeUnit.MILLISECONDS);
+                    LOG.info("Done!");
+                }
+            }
+        }
+
+        @Override
+        public void contextDestroyed(ServletContextEvent sce) {
+            LOG.info("Context destroyed!");
+            if (scheduler != null) {
+                scheduler.shutdownNow();
             }
         }
     }
