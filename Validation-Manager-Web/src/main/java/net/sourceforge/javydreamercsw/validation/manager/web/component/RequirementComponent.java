@@ -18,7 +18,6 @@ package net.sourceforge.javydreamercsw.validation.manager.web.component;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -37,6 +36,7 @@ import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.RequirementServer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -73,17 +73,20 @@ public final class RequirementComponent extends Panel {
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
         BeanFieldGroup binder = new BeanFieldGroup(req.getClass());
         binder.setItemDataSource(req);
-        Field<?> id = binder.buildAndBind(TRANSLATOR.translate("requirement.id"),
-                "uniqueId");
+        TextField id = (TextField) binder.buildAndBind(TRANSLATOR.translate("requirement.id"),
+                "uniqueId", TextField.class);
+        id.setNullRepresentation("");
         layout.addComponent(id);
-        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.description"),
+        TextArea desc = (TextArea) binder.buildAndBind(TRANSLATOR.translate("general.description"),
                 "description",
                 TextArea.class);
+        desc.setNullRepresentation("");
         desc.setSizeFull();
         layout.addComponent(desc);
-        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"),
+        TextArea notes = (TextArea) binder.buildAndBind(TRANSLATOR.translate("general.notes"),
                 "notes",
                 TextArea.class);
+        notes.setNullRepresentation("");
         notes.setSizeFull();
         layout.addComponent(notes);
         if (req.getParentRequirementId() != null) {
@@ -91,6 +94,9 @@ public final class RequirementComponent extends Panel {
             tf.setValue(req.getParentRequirementId().getUniqueId());
             tf.setReadOnly(true);
             layout.addComponent(tf);
+        }
+        if (req.getRequirementList() == null) {
+            req.setRequirementList(new ArrayList<>());
         }
         if (!req.getRequirementList().isEmpty() && !edit) {
             layout.addComponent(((VMUI) UI.getCurrent()).getDisplayRequirementList(
@@ -185,10 +191,15 @@ public final class RequirementComponent extends Panel {
         }
         try {
             //Add a history section
-            List<History> versions = new RequirementServer(req).getHistoryList();
-            if (!versions.isEmpty()) {
-                layout.addComponent(((VMUI) UI.getCurrent()).createRequirementHistoryTable(
-                        TRANSLATOR.translate("general.history"), versions, true));
+            if (req.getId() != null) {
+                List<History> versions
+                        = new RequirementServer(req).getHistoryList();
+                if (!versions.isEmpty()) {
+                    layout.addComponent(((VMUI) UI.getCurrent())
+                            .createRequirementHistoryTable(
+                                    TRANSLATOR.translate("general.history"),
+                                    versions, true));
+                }
             }
         } catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
