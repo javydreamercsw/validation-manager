@@ -871,7 +871,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             .getComponentCaption());
                     if (me == null) {
                         if (provider.shouldDisplay()) {
-                            LOG.log(Level.INFO, "Loading: {0}",
+                            LOG.log(Level.FINE, "Loading: {0}",
                                     TRANSLATOR.translate(provider
                                             .getComponentCaption()));
                             tabSheet.addTab(provider.getContent(),
