@@ -16,7 +16,6 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
 import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
@@ -44,8 +43,6 @@ import org.vaadin.teemu.wizards.WizardStep;
 public final class GAMPStep implements WizardStep {
 
     private final ProjectCreationWizard wizard;
-    private final ComboBox type
-            = new ComboBox(TRANSLATOR.translate("general.type"));
     private final ComboBox category
             = new ComboBox(TRANSLATOR.translate("general.category"));
     private final boolean version = true;
@@ -61,10 +58,6 @@ public final class GAMPStep implements WizardStep {
 
     public GAMPStep(ProjectCreationWizard wizard) {
         this.wizard = wizard;
-        getType().addItem("general.software");
-        getType().addItem("general.hardware");
-        getType().setTextInputAllowed(false);
-        getType().setWidth(100, Unit.PERCENTAGE);
         getCategory().setWidth(100, Unit.PERCENTAGE);
         getCategory().setTextInputAllowed(false);
         getCategory().addValueChangeListener(event -> {
@@ -76,10 +69,10 @@ public final class GAMPStep implements WizardStep {
                 supplierAssessment = false;
                 cs = false;
                 LOG.log(Level.INFO, "Type: {0}\nCategory: {1}\nTemplate: {2}",
-                        new Object[]{getType().getValue(), getCategory().getValue(), "GAMP5"});
+                        new Object[]{wizard.getType(), getCategory().getValue(), "GAMP5"});
                 String c = ((String) getCategory().getValue());
                 int cat = Integer.parseInt(c.substring(c.length() - 1));
-                if (getType().getValue().equals("general.software")) {
+                if (wizard.getType().equals("general.software")) {
                     switch (cat) {
                         case 5:
                             urs = true;
@@ -117,24 +110,6 @@ public final class GAMPStep implements WizardStep {
                 }
             }
         });
-        translateSelect(getType());
-        getType().addValueChangeListener(event -> {
-            getCategory().removeAllItems();
-            if (getType().getCaption() != null) {
-                if (getType().getValue().equals("general.software")) {
-                    //Load SW options
-                    getCategory().addItem("template.gamp5.sw.cat1");
-                    getCategory().addItem("template.gamp5.sw.cat3");
-                    getCategory().addItem("template.gamp5.sw.cat4");
-                    getCategory().addItem("template.gamp5.sw.cat5");
-                } else {
-                    //Load HW options
-                    getCategory().addItem("template.gamp5.hw.cat1");
-                    getCategory().addItem("template.gamp5.hw.cat2");
-                }
-            }
-            translateSelect(getCategory());
-        });
     }
 
     @Override
@@ -149,20 +124,25 @@ public final class GAMPStep implements WizardStep {
         text.setSizeFull();
         text.setEnabled(false);
         text.setValue(TRANSLATOR.translate("template.gamp5.disclaimer"));
-        vl.addComponent(getType());
+        getCategory().removeAllItems();
+        switch (wizard.getType()) {
+            case "general.software":
+                //Load SW options
+                getCategory().addItem("template.gamp5.sw.cat1");
+                getCategory().addItem("template.gamp5.sw.cat3");
+                getCategory().addItem("template.gamp5.sw.cat4");
+                getCategory().addItem("template.gamp5.sw.cat5");
+                break;
+            default:
+                //Load HW options
+                getCategory().addItem("template.gamp5.hw.cat1");
+                getCategory().addItem("template.gamp5.hw.cat2");
+        }
+        wizard.translateSelect(getCategory());
         vl.addComponent(getCategory());
         vl.addComponent(text);
         vl.setSizeFull();
         return vl;
-    }
-
-    private void translateSelect(AbstractSelect s) {
-        for (Object o : s.getItemIds()) {
-            String id = ((String) o);
-            s.setItemCaption(id, (id.startsWith("template")
-                    ? (id.substring(id.length() - 1) + "-") : "")
-                    + TRANSLATOR.translate((String) id));
-        }
     }
 
     @Override
@@ -170,10 +150,7 @@ public final class GAMPStep implements WizardStep {
         if (getCategory().getValue() != null) {
             wizard.setCategory((String) getCategory().getValue());
         }
-        if (getType().getValue() != null) {
-            wizard.setType((String) getType().getValue());
-        }
-        if (getCategory().getValue() != null && getType().getValue() != null) {
+        if (getCategory().getValue() != null) {
             wizard.setProcess(new ProjectTemplateManager() {
                 @Override
                 public void run() {
@@ -308,20 +285,13 @@ public final class GAMPStep implements WizardStep {
                 }
             });
         }
-        return getType().getValue() != null && getCategory().getValue() != null;
+        return getCategory().getValue() != null;
     }
 
     @Override
     public boolean onBack() {
         //Disabling going back since Wizards is not user friendly for dynamic content
         return false;
-    }
-
-    /**
-     * @return the type
-     */
-    public ComboBox getType() {
-        return type;
     }
 
     /**

@@ -71,106 +71,111 @@ public class ProjectCreationWizardTest extends AbstractVMTestCase {
                 System.out.println("Wizard cancelled");
             }
         });
-        assertEquals(1, w.getSteps().size());
-        ProjectTemplateStep step1 = (ProjectTemplateStep) w.getSteps().get(0);
-        //Try to advance without selecting a template
+        assertEquals(2, w.getSteps().size());
+        ProjectTypeStep step1 = (ProjectTypeStep) w.getSteps().get(0);
         assertFalse(step1.onAdvance());
-        //Select GAMP template
-        step1.getTemplates().setValue(new TemplateJpaController(DataBaseManager
-                .getEntityManagerFactory()).findTemplate(1));
-        assertEquals(3, w.getSteps().size());//Added GAMP and detail steps
-        assertNull(instance.getTemplate());
+        //Select HW
+        step1.getType().setValue("general.hardware");
         assertTrue(step1.onAdvance());
+        w.next();
+        ProjectTemplateStep step2 = (ProjectTemplateStep) w.getSteps().get(1);
+        //Try to advance without selecting a template
+        assertFalse(step2.onAdvance());
+        //Select GAMP template
+        step2.getTemplates().setValue(new TemplateJpaController(DataBaseManager
+                .getEntityManagerFactory()).findTemplate(1));
+        assertEquals(4, w.getSteps().size());//Added GAMP and detail steps
+        assertNull(instance.getTemplate());
+        assertTrue(step2.onAdvance());
         assertNotNull(instance.getTemplate());
         w.next();
-        //Step 2
-        GAMPStep step2 = (GAMPStep) w.getSteps().get(1);
-        assertFalse(step2.onAdvance());
-        assertEquals(0, step2.getCategory().getItemIds().size());
-        //Select HW
-        step2.getType().setValue("general.hardware");
-        assertEquals(2, step2.getCategory().getItemIds().size());
+        //Step 3
+        GAMPStep step3 = (GAMPStep) w.getSteps().get(2);
+        assertFalse(step3.onAdvance());
+        assertEquals(2, step3.getCategory().getItemIds().size());
         //Select category 1
-        step2.getCategory().setValue("template.gamp5.hw.cat1");
-        assertEquals(true, step2.isIq());
-        assertEquals(true, step2.isVersion());
-        assertEquals(false, step2.isCs());
-        assertEquals(false, step2.isDs());
-        assertEquals(false, step2.isMs());
-        assertEquals(false, step2.isFs());
-        assertEquals(false, step2.isSupplierAssessment());
-        assertEquals(false, step2.isUrs());
+        step3.getCategory().setValue("template.gamp5.hw.cat1");
+        assertEquals(true, step3.isIq());
+        assertEquals(true, step3.isVersion());
+        assertEquals(false, step3.isCs());
+        assertEquals(false, step3.isDs());
+        assertEquals(false, step3.isMs());
+        assertEquals(false, step3.isFs());
+        assertEquals(false, step3.isSupplierAssessment());
+        assertEquals(false, step3.isUrs());
         assertNull(instance.getProcess());
         //Select category 2
-        step2.getCategory().setValue("template.gamp5.hw.cat2");
-        assertEquals(true, step2.isIq());
-        assertEquals(true, step2.isVersion());
-        assertEquals(false, step2.isCs());
-        assertEquals(true, step2.isDs());
-        assertEquals(false, step2.isMs());
-        assertEquals(false, step2.isFs());
-        assertEquals(true, step2.isSupplierAssessment());
-        assertEquals(false, step2.isUrs());
+        step3.getCategory().setValue("template.gamp5.hw.cat2");
+        assertEquals(true, step3.isIq());
+        assertEquals(true, step3.isVersion());
+        assertEquals(false, step3.isCs());
+        assertEquals(true, step3.isDs());
+        assertEquals(false, step3.isMs());
+        assertEquals(false, step3.isFs());
+        assertEquals(true, step3.isSupplierAssessment());
+        assertEquals(false, step3.isUrs());
         assertNull(instance.getProcess());
         //Select SW
-        step2.getType().setValue("general.software");
-        assertEquals(4, step2.getCategory().getItemIds().size());
+        step1.getType().setValue("general.software");
+        step1.onAdvance();//Set the new type
+        step3.getContent();//Refresh the categories
+        assertEquals(4, step3.getCategory().getItemIds().size());
         assertNull(instance.getProcess());
         //Select category 1
-        step2.getCategory().setValue("template.gamp5.sw.cat1");
-        assertEquals(true, step2.isIq());
-        assertEquals(true, step2.isVersion());
-        assertEquals(false, step2.isCs());
-        assertEquals(false, step2.isDs());
-        assertEquals(false, step2.isMs());
-        assertEquals(false, step2.isFs());
-        assertEquals(false, step2.isSupplierAssessment());
-        assertEquals(false, step2.isUrs());
+        step3.getCategory().setValue("template.gamp5.sw.cat1");
+        assertEquals(true, step3.isIq());
+        assertEquals(true, step3.isVersion());
+        assertEquals(false, step3.isCs());
+        assertEquals(false, step3.isDs());
+        assertEquals(false, step3.isMs());
+        assertEquals(false, step3.isFs());
+        assertEquals(false, step3.isSupplierAssessment());
+        assertEquals(false, step3.isUrs());
         assertNull(instance.getProcess());
         //Select category 3
-        step2.getCategory().setValue("template.gamp5.sw.cat3");
-        assertEquals(true, step2.isIq());
-        assertEquals(true, step2.isVersion());
-        assertEquals(false, step2.isCs());
-        assertEquals(false, step2.isDs());
-        assertEquals(false, step2.isMs());
-        assertEquals(false, step2.isFs());
-        assertEquals(true, step2.isSupplierAssessment());
-        assertEquals(true, step2.isUrs());
+        step3.getCategory().setValue("template.gamp5.sw.cat3");
+        assertEquals(true, step3.isIq());
+        assertEquals(true, step3.isVersion());
+        assertEquals(false, step3.isCs());
+        assertEquals(false, step3.isDs());
+        assertEquals(false, step3.isMs());
+        assertEquals(false, step3.isFs());
+        assertEquals(true, step3.isSupplierAssessment());
+        assertEquals(true, step3.isUrs());
         assertNull(instance.getProcess());
         //Select category 4
-        step2.getCategory().setValue("template.gamp5.sw.cat4");
-        assertEquals(true, step2.isIq());
-        assertEquals(true, step2.isVersion());
-        assertEquals(true, step2.isCs());
-        assertEquals(false, step2.isDs());
-        assertEquals(false, step2.isMs());
-        assertEquals(true, step2.isFs());
-        assertEquals(true, step2.isSupplierAssessment());
-        assertEquals(true, step2.isUrs());
+        step3.getCategory().setValue("template.gamp5.sw.cat4");
+        assertEquals(true, step3.isIq());
+        assertEquals(true, step3.isVersion());
+        assertEquals(true, step3.isCs());
+        assertEquals(false, step3.isDs());
+        assertEquals(false, step3.isMs());
+        assertEquals(true, step3.isFs());
+        assertEquals(true, step3.isSupplierAssessment());
+        assertEquals(true, step3.isUrs());
         assertNull(instance.getProcess());
         //Select category 5
-        step2.getCategory().setValue("template.gamp5.sw.cat5");
-        assertEquals(true, step2.isIq());
-        assertEquals(true, step2.isVersion());
-        assertEquals(false, step2.isCs());
-        assertEquals(true, step2.isDs());
-        assertEquals(true, step2.isMs());
-        assertEquals(true, step2.isFs());
-        assertEquals(true, step2.isSupplierAssessment());
-        assertEquals(true, step2.isUrs());
+        step3.getCategory().setValue("template.gamp5.sw.cat5");
+        assertEquals(true, step3.isIq());
+        assertEquals(true, step3.isVersion());
+        assertEquals(false, step3.isCs());
+        assertEquals(true, step3.isDs());
+        assertEquals(true, step3.isMs());
+        assertEquals(true, step3.isFs());
+        assertEquals(true, step3.isSupplierAssessment());
+        assertEquals(true, step3.isUrs());
         assertNull(instance.getProcess());
-        assertTrue(step2.onAdvance());
+        assertTrue(step3.onAdvance());
         assertNotNull(instance.getProcess());
         w.next();
         //Step 3
-        ProjectDetailsStep step3 = (ProjectDetailsStep) w.getSteps().get(2);
-        assertFalse(step3.onAdvance());
+        ProjectDetailsStep step4 = (ProjectDetailsStep) w.getSteps().get(3);
+        assertFalse(step4.onAdvance());
         //Set the project name
-        step3.getName().setValue("Test");
-        step3.getNotes().setValue("Test Notes");
+        step4.getName().setValue("Test");
+        step4.getNotes().setValue("Test Notes");
         //Finish the wizard
-        assertTrue(step3.onAdvance());
+        assertTrue(step4.onAdvance());
         assertEquals("Test", instance.getProject().getName());
         assertEquals("Test Notes", instance.getProject().getNotes());
         w.next();

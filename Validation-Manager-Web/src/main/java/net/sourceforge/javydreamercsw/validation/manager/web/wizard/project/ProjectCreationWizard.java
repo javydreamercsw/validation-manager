@@ -15,7 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.UI;
+import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.Template;
 import com.validation.manager.core.server.core.ProjectServer;
 import java.util.logging.Logger;
@@ -44,6 +46,7 @@ public final class ProjectCreationWizard extends VMWindow {
 
     public ProjectCreationWizard(ProjectServer p) {
         this.ps = p;
+        wizard.addStep(new ProjectTypeStep(this));
         wizard.addStep(new ProjectTemplateStep(this));
         wizard.addListener(new WizardProgressListener() {
             @Override
@@ -152,5 +155,14 @@ public final class ProjectCreationWizard extends VMWindow {
      */
     public void setProject(ProjectServer ps) {
         this.ps = ps;
+    }
+
+    public void translateSelect(AbstractSelect s) {
+        for (Object o : s.getItemIds()) {
+            String id = ((String) o);
+            s.setItemCaption(id, (id.startsWith("template")
+                    ? (id.substring(id.length() - 1) + "-") : "")
+                    + TRANSLATOR.translate((String) id));
+        }
     }
 }
