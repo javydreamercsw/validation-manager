@@ -56,10 +56,10 @@ import net.sourceforge.javydreamercsw.validation.manager.web.quality.QualityScre
 public abstract class ExecutionScreen extends AbstractProvider {
 
     private ExecutionWindow executionWindow = null;
-    private final TreeTable testCaseTree
-            = new TreeTable("available.tests");
+    private final TreeTable testCaseTree;
 
     public ExecutionScreen() {
+        testCaseTree = new TreeTable("available.tests");
         testCaseTree.setAnimationsEnabled(true);
         testCaseTree.addContainerProperty("general.name",
                 String.class, "");
