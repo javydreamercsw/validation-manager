@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.SelectRequirementVersionStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.event.WizardCancelledEvent;

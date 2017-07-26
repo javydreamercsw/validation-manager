@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sourceforge.javydreamercsw.validation.manager.web;
+package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.event.Action;
@@ -35,7 +35,7 @@ import com.validation.manager.core.api.internationalization.Internationalization
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import org.openide.util.Lookup;
 
 /**

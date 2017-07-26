@@ -15,6 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
+import net.sourceforge.javydreamercsw.validation.manager.web.component.LoginDialog;
 import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.addon.contextmenu.MenuItem;
 import com.vaadin.addon.tableexport.TemporaryFileDownloadResource;
