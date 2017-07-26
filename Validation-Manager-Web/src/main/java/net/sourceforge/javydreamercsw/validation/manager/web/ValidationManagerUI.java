@@ -907,7 +907,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             if (is != null) {
                 p.load(is);
                 build = p.getProperty("build.number", "");
-                LOG.log(Level.INFO, "Loaded build: {0}",
+                LOG.log(Level.FINE, "Loaded build: {0}",
                         new Object[]{build});
             }
         } catch (IOException e) {
@@ -925,7 +925,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             if (is != null) {
                 p.load(is);
                 version = p.getProperty("version", "");
-                LOG.log(Level.INFO, "Loaded version: {0}",
+                LOG.log(Level.FINE, "Loaded version: {0}",
                         new Object[]{version});
             }
         } catch (IOException e) {
@@ -938,7 +938,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         GridLayout gl = new GridLayout(3, 3);
         gl.addComponent(new Image("", LOGO), 0, 0);
         Label version = new Label(TRANSLATOR.translate("general.version")
-                + ": " + getVersion() + "(" + getBuild() + ")");
+                + ": " + getVersion() + " (" + getBuild() + ")");
         gl.addComponent(version, 2, 2);
         if (getUser() != null) {
             getUser().update();
