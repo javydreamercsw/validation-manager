@@ -1766,10 +1766,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void showVersioningPrompt(Versionable ao, Runnable r) {
         VerticalLayout layout = new VerticalLayout();
         TextArea message = new TextArea();
-        message.setValue(TRANSLATOR.translate("missing.reason.message")
-                + "change to this item. This will be kep in "
-                + "the history of the record along with user "
-                + "and date the change is done.");
+        message.setValue(TRANSLATOR.translate("missing.reason.message"));
         message.setReadOnly(true);
         message.setSizeFull();
         TextArea desc = new TextArea(TRANSLATOR.translate("general.reason"));
