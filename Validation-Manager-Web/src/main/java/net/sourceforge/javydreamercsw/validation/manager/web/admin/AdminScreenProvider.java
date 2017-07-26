@@ -62,13 +62,13 @@ import java.io.StringWriter;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.IssueResolutionComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.IssueTypeComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementTypeComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TranslationConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.UserComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -77,13 +77,17 @@ public class AdminScreenProvider extends AdminProvider {
 
     private static final Logger LOG
             = Logger.getLogger(IMainContentProvider.class.getSimpleName());
-    private final TabSheet adminSheet = new TabSheet();
+    private final TabSheet adminSheet;
     private final String ISSUE_TYPE = "issue.type",
             ISSUE_RESOLUTION = "issue.resolution",
             REQUIREMENT_TYPE = "requirement.type",
             DESC = "description",
             DELETE_ERROR = "delete.error",
             NAME = "name";
+
+    public AdminScreenProvider() {
+        adminSheet = new TabSheet();
+    }
 
     @Override
     public Component getContent() {

@@ -15,11 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
-import net.sourceforge.javydreamercsw.validation.manager.web.component.LoginDialog;
 import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.addon.contextmenu.MenuItem;
 import com.vaadin.addon.tableexport.TemporaryFileDownloadResource;
-import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
@@ -142,6 +140,7 @@ import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.BaselineComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ExecutionStepComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.HistoryTable;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.LoginDialog;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ProjectTreeComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementComponent;
@@ -173,7 +172,7 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 @Theme("vmtheme")
 @SuppressWarnings("serial")
-@PreserveOnRefresh
+//@PreserveOnRefresh
 public class ValidationManagerUI extends UI implements VMUI {
 
     private static final InternationalizationProvider TRANSLATOR
@@ -872,8 +871,12 @@ public class ValidationManagerUI extends UI implements VMUI {
                             .getComponentCaption());
                     if (me == null) {
                         if (provider.shouldDisplay()) {
+                            LOG.log(Level.INFO, "Loading: {0}",
+                                    TRANSLATOR.translate(provider
+                                            .getComponentCaption()));
                             tabSheet.addTab(provider.getContent(),
-                                    TRANSLATOR.translate(provider.getComponentCaption()));
+                                    TRANSLATOR.translate(provider
+                                            .getComponentCaption()));
                         }
                     } else {
                         provider.update();
@@ -1630,7 +1633,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     @WebServlet(value = "/*", asyncSupported = true)
     @WebListener
-    @VaadinServletConfiguration(productionMode = false,
+    @VaadinServletConfiguration(productionMode = true,
             ui = ValidationManagerUI.class,
             widgetset = "net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet")
     public static class Servlet extends VaadinServlet

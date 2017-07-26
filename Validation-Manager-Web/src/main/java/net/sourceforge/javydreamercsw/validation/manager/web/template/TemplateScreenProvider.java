@@ -76,10 +76,8 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 public class TemplateScreenProvider extends AdminProvider {
 
     private final Tree tree;
-    private final ListSelect type
-            = new ListSelect(TRANSLATOR.translate("general.type"));
-    private final ListSelect templates
-            = new ListSelect(TRANSLATOR.translate("template.tab.list.name"));
+    private final ListSelect type;
+    private final ListSelect templates;
     private TextField name;
     private static final Logger LOG
             = Logger.getLogger(TemplateScreenProvider.class.getSimpleName());
@@ -90,6 +88,8 @@ public class TemplateScreenProvider extends AdminProvider {
     }
 
     public TemplateScreenProvider() {
+        type = new ListSelect(TRANSLATOR.translate("general.type"));
+        templates = new ListSelect(TRANSLATOR.translate("template.tab.list.name"));
         tree = new Tree();
         //Select item on right click as well
         tree.addItemClickListener((ItemClickEvent event) -> {

@@ -38,11 +38,9 @@ public class DemoProvider extends AbstractProvider {
 
     @Override
     public Component getContent() {
-        if (layout == null) {
-            layout = new VerticalLayout();
-            update();
-            layout.setId(getComponentCaption());
-        }
+        layout = new VerticalLayout();
+        update();
+        layout.setId(getComponentCaption());
         return layout;
     }
 
@@ -60,7 +58,7 @@ public class DemoProvider extends AbstractProvider {
         layout.addComponent(l);
         StringBuilder sb = new StringBuilder("<ul>");
         controller.findVmUserEntities().stream().filter((u)
-                -> (u.getId() < 1000)).forEachOrdered((u) -> {
+                -> (u.getId() < 1_000)).forEachOrdered((u) -> {
             try {
                 //Default accounts
                 if (u.getPassword() != null
@@ -90,7 +88,6 @@ public class DemoProvider extends AbstractProvider {
         layout.addComponent(new Label(sb.toString(),
                 ContentMode.HTML));
         layout.setId(getComponentCaption());
-        super.update();
     }
 
     @Override
