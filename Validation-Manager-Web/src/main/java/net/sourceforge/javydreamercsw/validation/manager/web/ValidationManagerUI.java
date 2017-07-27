@@ -1783,7 +1783,9 @@ public class ValidationManagerUI extends UI implements VMUI {
                 .withMessage(layout)
                 .withYesButton(() -> {
                     ao.setReason(desc.getValue());
-                    r.run();
+                    if (r != null) {
+                        r.run();
+                    }
                 },
                         ButtonOption.focus(),
                         ButtonOption

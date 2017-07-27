@@ -19,6 +19,7 @@ import static com.validation.manager.core.DataBaseManager.getEntityManagerFactor
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.ProjectType;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import java.util.ArrayList;
@@ -33,9 +34,10 @@ public final class ProjectServer extends Project
 
     private static final long serialVersionUID = 3_434_510_483_033_583_117L;
 
-    public ProjectServer(String name, String notes) {
+    public ProjectServer(String name, String notes, ProjectType type) {
         super(name);
         setNotes(notes);
+        setProjectTypeId(type);
         setProjectList(new ArrayList<>());
         setRequirementSpecList(new ArrayList<>());
         setTestProjectList(new ArrayList<>());
@@ -94,6 +96,7 @@ public final class ProjectServer extends Project
         target.setTestProjectList(source.getTestProjectList());
         target.setId(source.getId());
         target.setUserHasRoleList(source.getUserHasRoleList());
+        target.setProjectTypeId(source.getProjectTypeId());
         super.update(target, source);
     }
 

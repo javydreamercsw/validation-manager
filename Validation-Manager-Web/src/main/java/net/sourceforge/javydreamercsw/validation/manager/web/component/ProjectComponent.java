@@ -16,7 +16,10 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.validator.NullValidator;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -29,7 +32,9 @@ import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.Project;
+import com.validation.manager.core.db.ProjectType;
 import com.validation.manager.core.db.controller.ProjectJpaController;
+import com.validation.manager.core.db.controller.ProjectTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,6 +51,7 @@ public final class ProjectComponent extends Panel {
             = Logger.getLogger(ProjectComponent.class.getSimpleName());
     private TextField name;
     private TextArea notes;
+    private ComboBox type;
     private final Button save = new Button(TRANSLATOR.translate("general.save"));
     private final Button update = new Button(TRANSLATOR.translate("general.update"));
 
@@ -65,6 +71,7 @@ public final class ProjectComponent extends Panel {
 
     private void init() {
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        type = new ComboBox(TRANSLATOR.translate("general.type"));
         FormLayout layout = new FormLayout();
         setContent(layout);
         BeanFieldGroup binder = new BeanFieldGroup(getProject().getClass());
@@ -80,6 +87,26 @@ public final class ProjectComponent extends Panel {
         getName().setRequiredError(TRANSLATOR.translate("missing.name.message"));
         layout.addComponent(getName());
         layout.addComponent(getNotes());
+        type.setNewItemsAllowed(false);
+        type.setTextInputAllowed(false);
+        type.addValidator(new NullValidator(TRANSLATOR
+                .translate("message.required.field.missing")
+                .replaceAll("%f",
+                        TRANSLATOR.translate("general.type")),
+                false));
+        BeanItemContainer<ProjectType> container
+                = new BeanItemContainer<>(ProjectType.class,
+                        new ProjectTypeJpaController(DataBaseManager
+                                .getEntityManagerFactory())
+                                .findProjectTypeEntities());
+        type.setContainerDataSource(container);
+        type.getItemIds().forEach(id -> {
+            ProjectType temp = ((ProjectType) id);
+            type.setItemCaption(id,
+                    TRANSLATOR.translate(temp.getTypeName()));
+        });
+        layout.addComponent(type);
+        binder.bind(type, "projectTypeId");
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();
@@ -103,9 +130,14 @@ public final class ProjectComponent extends Panel {
                     if (getNotes().getValue() != null) {
                         getProject().setNotes(getNotes().getValue());
                     }
+                    if (type.getValue() == null) {
+                        Notification.show(type.getRequiredError(),
+                                Notification.Type.ERROR_MESSAGE);
+                        return;
+                    }
+                    getProject().setProjectTypeId((ProjectType) type.getValue());
                     new ProjectJpaController(DataBaseManager
                             .getEntityManagerFactory()).create(getProject());
-                    setVisible(false);
                     //Recreate the tree to show the addition
                     ((VMUI) UI.getCurrent()).updateProjectList();
                     ((VMUI) UI.getCurrent()).buildProjectTree(getProject());
@@ -119,28 +151,36 @@ public final class ProjectComponent extends Panel {
             } else {
                 //Editing existing one
                 getUpdate().addClickListener((Button.ClickEvent event) -> {
-                    ((VMUI) UI.getCurrent()).handleVersioning(getProject(), () -> {
-                        try {
-                            getProject().setName(getName().getValue());
-                            if (getNotes().getValue() != null) {
-                                getProject().setNotes(getNotes().getValue());
-                            }
-                            new ProjectJpaController(DataBaseManager
-                                    .getEntityManagerFactory()).edit(getProject());
-                        } catch (NonexistentEntityException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                    ex.getLocalizedMessage(),
-                                    Notification.Type.ERROR_MESSAGE);
-                        } catch (Exception ex) {
-                            LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                    ex.getLocalizedMessage(),
-                                    Notification.Type.ERROR_MESSAGE);
+                    ((VMUI) UI.getCurrent()).handleVersioning(getProject(), null);
+                    try {
+                        getProject().setName(getName().getValue());
+                        if (getNotes().getValue() != null) {
+                            getProject().setNotes(getNotes().getValue());
                         }
-                    });
+                        if (type.getValue() == null) {
+                            Notification.show(type.getRequiredError(),
+                                    Notification.Type.ERROR_MESSAGE);
+                            return;
+                        }
+                        getProject().setProjectTypeId((ProjectType) type.getValue());
+                        new ProjectJpaController(DataBaseManager
+                                .getEntityManagerFactory()).edit(getProject());
+                    } catch (NonexistentEntityException ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                        Notification.show(TRANSLATOR.translate("general.error.record.update"),
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                        Notification.show(TRANSLATOR.translate("general.error.record.update"),
+                                ex.getLocalizedMessage(),
+                                Notification.Type.ERROR_MESSAGE);
+                    }
+                    //Recreate the tree to show the addition
                     ((VMUI) UI.getCurrent()).updateProjectList();
-                    ((VMUI) UI.getCurrent()).displayObject(getProject(), true);
+                    ((VMUI) UI.getCurrent()).buildProjectTree(getProject());
+                    ((VMUI) UI.getCurrent()).displayObject(getProject(), false);
+                    ((VMUI) UI.getCurrent()).updateScreen();
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(getUpdate());

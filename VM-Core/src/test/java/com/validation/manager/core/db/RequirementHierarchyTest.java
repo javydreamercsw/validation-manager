@@ -21,6 +21,7 @@ import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.ProjectTypeServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
@@ -50,7 +51,8 @@ public class RequirementHierarchyTest extends AbstractVMTestCase {
     public void testHierarchy() {
         System.out.println("Test Requirement Hierarchy");
         System.out.println("Create Project");
-        project = new ProjectServer("Test product", "Project Notes");
+        project = new ProjectServer("Test product", "Project Notes",
+                new ProjectTypeServer(1).getEntity());
         try {
             project.write2DB();
         }

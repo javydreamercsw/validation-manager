@@ -22,6 +22,7 @@ import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.TemplateJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.ProjectTypeServer;
 import com.validation.manager.test.AbstractVMTestCase;
 import org.junit.Test;
 import org.vaadin.teemu.wizards.Wizard;
@@ -46,7 +47,8 @@ public class ProjectCreationWizardTest extends AbstractVMTestCase {
     public void testGAMPWizard() throws VMException {
         System.out.println("GAMP Wizard");
         assertEquals(0, ProjectServer.getProjects().size());
-        ProjectServer ps = new ProjectServer("", "");
+        ProjectServer ps = new ProjectServer("", "",
+                new ProjectTypeServer(1).getEntity());
         ProjectCreationWizard instance = new ProjectCreationWizard(ps);
         Wizard w = instance.getWizard();
         w.addListener(new WizardProgressListener() {

@@ -38,10 +38,10 @@ import org.openide.util.Exceptions;
  *
  * @author Javier Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class DemoBuilderIT extends AbstractVMTestCase {
+public class DemoBuilderTest extends AbstractVMTestCase {
 
     private static final Logger LOG
-            = Logger.getLogger(DemoBuilderIT.class.getSimpleName());
+            = Logger.getLogger(DemoBuilderTest.class.getSimpleName());
 
     /**
      * Test of buildDemoProject method, of class DemoBuilder.

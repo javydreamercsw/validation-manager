@@ -26,6 +26,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.server.core.DataEntryServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.ProjectTypeServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
@@ -57,22 +58,19 @@ public class DemoBuilder {
 
     public static void buildDemoProject() throws Exception {
         LOG.info("Creating demo projects...");
-        ProjectJpaController controller
-                = new ProjectJpaController(DataBaseManager
-                        .getEntityManagerFactory());
-        Project rootProject = new Project("Demo");
-        controller.create(rootProject);
+        ProjectServer rootProject = new ProjectServer("Demo", "Demo project",
+                new ProjectTypeServer(1).getEntity());
+        rootProject.write2DB();
         for (int i = 0; i < 2; i++) {
-            Project temp = new Project("Sub " + (i + 1));
-            temp.setParentProjectId(rootProject);
-            controller.create(temp);
-            ProjectServer ps = new ProjectServer(temp);
+            ProjectServer ps = new ProjectServer("Sub " + (i + 1),
+                    "Demo project",
+                    new ProjectTypeServer(1).getEntity());
+            ps.setParentProjectId(rootProject.getEntity());
+            ps.write2DB();
             addDemoProjectRequirements(ps.getEntity());
             addDemoProjectTestProject(ps.getEntity());
-            rootProject.getProjectList().add(ps.getEntity());
         }
-        addDemoProjectRequirements(rootProject);
-        controller.edit(rootProject);
+        rootProject.update();
         //Link requirements with steps
         List<Requirement> requirements
                 = new RequirementJpaController(DataBaseManager
@@ -98,8 +96,10 @@ public class DemoBuilder {
             }
             i++;
         }
-        for (Project p : controller.findProjectEntities()) {
-            addDemoExecution(p);
+        for (Project p : ProjectServer.getProjects()) {
+            if (p.getParentProjectId() != null) {
+                addDemoExecution(p);
+            }
         }
         LOG.info("Done!");
     }

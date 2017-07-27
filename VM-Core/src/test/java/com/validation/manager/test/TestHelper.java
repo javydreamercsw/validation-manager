@@ -29,6 +29,7 @@ import com.validation.manager.core.db.controller.exceptions.IllegalOrphanExcepti
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
+import com.validation.manager.core.server.core.ProjectTypeServer;
 import com.validation.manager.core.server.core.RequirementServer;
 import com.validation.manager.core.server.core.RequirementSpecNodeServer;
 import com.validation.manager.core.server.core.RequirementSpecServer;
@@ -55,7 +56,8 @@ public class TestHelper {
             = Logger.getLogger(TestHelper.class.getName());
 
     public static Project createProject(String name, String notes) {
-        ProjectServer ps = new ProjectServer(name, notes);
+        ProjectServer ps = new ProjectServer(name, notes,
+                new ProjectTypeServer(1).getEntity());
         try {
             ps.write2DB();
         }
