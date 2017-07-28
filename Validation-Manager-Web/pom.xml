@@ -4,7 +4,7 @@
     <parent>
         <artifactId>Validation-Manager</artifactId>
         <groupId>net.sourceforge.javydreamercsw</groupId>
-        <version>0.3.5</version>
+        <version>0.4.0-SNAPSHOT</version>
     </parent>
     
     <artifactId>Validation-Manager-Web</artifactId>
