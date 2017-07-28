@@ -1,5 +1,10 @@
+/*Project Types*/
+INSERT INTO `project_type` (`id`, `type_name`) VALUES (1, 'general.software');
+INSERT INTO `project_type` (`id`, `type_name`) VALUES (2, 'general.hardware');
+INSERT INTO `project_type` (`id`, `type_name`) VALUES (3, 'general.mixed');
+
 /*Templates*/
-INSERT INTO `template` (`id`, `template_name`) VALUES (1, 'GAMP 5');
+INSERT INTO `template` (`id`, `template_name`, `project_type_id`) VALUES (1, 'GAMP 5', 3);
 
 /*Template node types*/
 INSERT INTO `template_node_type` (`id`, `type_name`) VALUES (1, 'general.requirement');

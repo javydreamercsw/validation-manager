@@ -71,6 +71,8 @@ public class ProjectType implements Serializable {
     private String typeName;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "projectTypeId")
     private List<Project> projectList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "projectTypeId")
+    private List<Template> templateList;
 
     public ProjectType() {
     }
@@ -131,5 +133,15 @@ public class ProjectType implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.ProjectType[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Template> getTemplateList() {
+        return templateList;
+    }
+
+    public void setTemplateList(List<Template> templateList) {
+        this.templateList = templateList;
     }
 }

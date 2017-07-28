@@ -23,6 +23,7 @@ import com.validation.manager.core.ContentProvider;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Template;
 import com.validation.manager.core.db.controller.TemplateJpaController;
+import java.util.ArrayList;
 import java.util.List;
 import org.vaadin.teemu.wizards.WizardStep;
 
@@ -52,11 +53,17 @@ class ProjectTemplateStep implements WizardStep {
     public Component getContent() {
         VerticalLayout vl = new VerticalLayout();
         getTemplates().removeAllItems();
+        List<Template> templateList = new ArrayList<>();
+        new TemplateJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findTemplateEntities().forEach(t -> {
+                    if (t.getProjectTypeId().getTypeName().equals(wizard.getType())
+                            || t.getProjectTypeId().getTypeName().equals("general.mixed")) {
+                        templateList.add(t);
+                    }
+                });
         BeanItemContainer<Template> container
-                = new BeanItemContainer<>(Template.class,
-                        new TemplateJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findTemplateEntities());
+                = new BeanItemContainer<>(Template.class, templateList);
         getTemplates().setContainerDataSource(container);
         getTemplates().getItemIds().forEach(id -> {
             Template temp = (Template) id;
@@ -98,7 +105,7 @@ class ProjectTemplateStep implements WizardStep {
 
     @Override
     public boolean onBack() {
-        return false;
+        return true;
     }
 
     /**

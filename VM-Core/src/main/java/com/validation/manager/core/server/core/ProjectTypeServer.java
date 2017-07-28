@@ -64,6 +64,7 @@ public final class ProjectTypeServer extends ProjectType
         target.setId(source.getId());
         target.setProjectList(source.getProjectList());
         target.setTypeName(source.getTypeName());
+        target.setTemplateList(source.getTemplateList());
     }
 
     @Override

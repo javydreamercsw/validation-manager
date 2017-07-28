@@ -55,7 +55,11 @@ public final class TemplateServer extends Template
 
     public TemplateServer(Template t) {
         setId(t.getId());
-        update();
+        if (getId() != null) {
+            update();
+        } else {
+            update(TemplateServer.this, t);
+        }
     }
 
     @Override
@@ -88,6 +92,7 @@ public final class TemplateServer extends Template
         target.setId(source.getId());
         target.setTemplateName(source.getTemplateName());
         target.setTemplateNodeList(source.getTemplateNodeList());
+        target.setProjectTypeId(source.getProjectTypeId());
     }
 
     @Override
@@ -132,15 +137,13 @@ public final class TemplateServer extends Template
             getTemplateNodeList().forEach(node -> {
                 try {
                     c.destroy(node.getTemplateNodePK());
-                }
-                catch (NonexistentEntityException ex) {
+                } catch (NonexistentEntityException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             });
             new TemplateJpaController(DataBaseManager
                     .getEntityManagerFactory()).destroy(getId());
-        }
-        catch (IllegalOrphanException | NonexistentEntityException ex) {
+        } catch (IllegalOrphanException | NonexistentEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
             throw new VMException(ex);
         }
