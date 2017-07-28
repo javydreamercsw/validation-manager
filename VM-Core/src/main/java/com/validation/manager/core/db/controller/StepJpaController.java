@@ -66,14 +66,14 @@ public class StepJpaController implements Serializable {
         if (step.getDataEntryList() == null) {
             step.setDataEntryList(new ArrayList<>());
         }
-        step.getStepPK().setTestCaseId(step.getTestCase().getId());
+        step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             TestCase testCase = step.getTestCase();
             if (testCase != null) {
-                testCase = em.getReference(testCase.getClass(), testCase.getId());
+                testCase = em.getReference(testCase.getClass(), testCase.getTestCasePK());
                 step.setTestCase(testCase);
             }
             List<Requirement> attachedRequirementList = new ArrayList<>();
@@ -152,7 +152,7 @@ public class StepJpaController implements Serializable {
     }
 
     public void edit(Step step) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        step.getStepPK().setTestCaseId(step.getTestCase().getId());
+        step.getStepPK().setTestCaseId(step.getTestCase().getTestCasePK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -197,7 +197,7 @@ public class StepJpaController implements Serializable {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
             if (testCaseNew != null) {
-                testCaseNew = em.getReference(testCaseNew.getClass(), testCaseNew.getId());
+                testCaseNew = em.getReference(testCaseNew.getClass(), testCaseNew.getTestCasePK());
                 step.setTestCase(testCaseNew);
             }
             List<Requirement> attachedRequirementListNew = new ArrayList<>();

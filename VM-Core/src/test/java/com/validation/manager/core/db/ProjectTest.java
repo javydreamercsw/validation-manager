@@ -17,6 +17,7 @@ package com.validation.manager.core.db;
 
 import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.TestPlanJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
@@ -114,7 +115,7 @@ public class ProjectTest extends AbstractVMTestCase {
                 fail();
             }
         }
-        catch (Exception ex) {
+        catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }

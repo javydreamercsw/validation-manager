@@ -21,6 +21,8 @@ import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestCasePK;
+import com.validation.manager.core.db.TestCaseType;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -38,18 +40,20 @@ import org.openide.util.Exceptions;
 public final class TestCaseServer extends TestCase
         implements EntityServer<TestCase> {
 
-    public TestCaseServer(int id) {
+    public TestCaseServer(TestCasePK id) {
         super(id);
         update();
     }
 
     public TestCaseServer(TestCase tc) {
-        super.setId(tc.getId());
+        super.setTestCasePK(tc.getTestCasePK());
         update();
     }
 
-    public TestCaseServer(String name, Date creationDate) {
+    public TestCaseServer(String name, Date creationDate, TestCaseType type) {
         super(name, creationDate);
+        setTestCasePK(new TestCasePK());
+        setTestCaseType(type);
     }
 
     @Override
@@ -57,24 +61,24 @@ public final class TestCaseServer extends TestCase
             NonexistentEntityException, Exception {
         TestCaseJpaController controller
                 = new TestCaseJpaController(getEntityManagerFactory());
-        if (getId() != null && getId() > 0) {
-            TestCase temp = controller.findTestCase(getId());
+        if (getTestCasePK() != null && getTestCasePK().getId() > 0) {
+            TestCase temp = controller.findTestCase(getTestCasePK());
             update(temp, this);
             controller.edit(temp);
         } else {
-            TestCase temp = new TestCase(getName(), getCreationDate());
-            temp.setCreationDate(new Date());
+            TestCase temp = new TestCase();
+            update(temp, this);
             controller.create(temp);
-            setId(temp.getId());
+            setTestCasePK(temp.getTestCasePK());
         }
         update();
-        return getId();
+        return getTestCasePK().getId();
     }
 
     @Override
     public TestCase getEntity() {
         return new TestCaseJpaController(getEntityManagerFactory())
-                .findTestCase(getId());
+                .findTestCase(getTestCasePK());
     }
 
     @Override
@@ -83,14 +87,15 @@ public final class TestCaseServer extends TestCase
         target.setCreationDate(source.getCreationDate());
         target.setRiskControlHasTestCaseList(source
                 .getRiskControlHasTestCaseList());
-        target.setStepList(source.getStepList() == null
-                ? new ArrayList<>() : source.getStepList());
+        target.setStepList(source.getStepList());
         target.setIsOpen(source.getIsOpen());
         target.setSummary(source.getSummary());
-        target.setTestPlanList(new ArrayList<>());
-        target.setId(source.getId());
+        target.setTestPlanList(source.getTestPlanList());
+        target.setTestCasePK(source.getTestCasePK());
         target.setName(source.getName());
         target.setIsOpen(source.getIsOpen());
+        target.setTestCaseType(source.getTestCaseType());
+        target.setTestCasePK(source.getTestCasePK());
     }
 
     @Override

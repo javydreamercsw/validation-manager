@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,7 +91,8 @@ public class ExecutionStepServerTest extends AbstractVMTestCase {
                 TestCaseServer tcs
                         = new TestCaseServer("Test Case #"
                                 + (tcCounter++),
-                                new Date());
+                                new Date(),
+                                new TestCaseTypeServer(5).getEntity());
                 tcs.write2DB();
                 for (int j = 0; j < 5; j++) {
                     List<Requirement> requirements

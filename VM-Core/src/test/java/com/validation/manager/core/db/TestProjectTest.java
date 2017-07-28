@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,7 +47,8 @@ public class TestProjectTest extends AbstractVMTestCase {
             tp.write2DB();
             assertTrue(tp.getId() >= 0);
             assignRolesForTestProject(tp);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }
@@ -69,10 +70,12 @@ public class TestProjectTest extends AbstractVMTestCase {
                     new RoleJpaController(getEntityManagerFactory())
                             .findRole(9));
             assertEquals(3, tp.getUserTestProjectRoleList().size());
-        } catch (PreexistingEntityException ex) {
+        }
+        catch (PreexistingEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
             fail();
         }

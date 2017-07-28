@@ -17,8 +17,11 @@ package com.validation.manager.core.db;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import static com.validation.manager.core.DataBaseManager.namedQuery;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.db.controller.VmUserJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import static com.validation.manager.core.tool.MD5.encrypt;
 import com.validation.manager.test.AbstractVMTestCase;
 import java.util.logging.Level;
@@ -61,7 +64,7 @@ public class UserTest extends AbstractVMTestCase {
             result = namedQuery("VmUser.findByUsername", parameters);
             assertTrue(result.isEmpty());
         }
-        catch (Exception e) {
+        catch (VMException | IllegalOrphanException | NonexistentEntityException e) {
             fail(e.getMessage());
         }
     }

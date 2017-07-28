@@ -25,6 +25,7 @@ import com.validation.manager.core.db.UserTestProjectRole;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.UserTestProjectRoleJpaController;
+import java.util.ArrayList;
 
 /**
  *
@@ -35,6 +36,9 @@ public final class TestProjectServer extends TestProject
 
     public TestProjectServer(String name, boolean active) {
         super(name, active);
+        setProjectList(new ArrayList<>());
+        setTestPlanList(new ArrayList<>());
+        setUserTestProjectRoleList(new ArrayList<>());
     }
 
     public TestProjectServer(int id) {

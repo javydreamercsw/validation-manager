@@ -23,7 +23,6 @@ import com.validation.manager.core.db.controller.VmIdJpaController;
 import com.validation.manager.core.server.core.VMIdServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import static java.lang.Class.forName;
-import static java.lang.Integer.parseInt;
 import static java.lang.Long.valueOf;
 import static java.lang.Thread.sleep;
 import java.lang.reflect.Field;
@@ -36,7 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.StringTokenizer;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,6 +49,7 @@ import static javax.persistence.Persistence.createEntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.TableGenerator;
 import javax.sql.DataSource;
+import org.eclipse.persistence.jpa.JpaHelper;
 import org.h2.jdbcx.JdbcDataSource;
 
 /**
@@ -69,10 +69,11 @@ public class DataBaseManager {
     private static DBState state = DBState.START_UP;
     private static boolean locked = false;
     private static boolean usingContext;
-    private static boolean demo;
+    protected static boolean demo;
     private static Long demoResetPeriod;
-    private static DataBaseManager instance;
     private static boolean versioning_enabled = true;
+    private static DataSource dataSource = null;
+    private static Connection connection = null;
 
     /**
      * @return the versioning enabled
@@ -95,14 +96,25 @@ public class DataBaseManager {
         return demoResetPeriod;
     }
 
-    private DataBaseManager() {
+    public static void clean() {
+        Flyway flyway = new Flyway();
+        flyway.setDataSource(dataSource);
+        if (isDemo()) {
+            LOG.warning("Resetting database since it is on demo mode.");
+            //Clean the database on demo
+            flyway.clean();
+            Properties p = new Properties();
+            p.put("eclipselink.ddl-generation", "drop-and-create-tables");
+            p.put("eclipselink.ddl-generation.output-mode", "database");
+            p.put("eclipselink.deploy-on-startup", "true");
+            JpaHelper.getEntityManagerFactory(getEntityManager()).refreshMetadata(p);
+            //Update the data
+            flyway.init();
+            flyway.migrate();
+        }
     }
 
-    public static DataBaseManager get() throws Exception {
-        if (instance == null) {
-            instance = new DataBaseManager();
-        }
-        return instance;
+    private DataBaseManager() {
     }
 
     @SuppressWarnings("unchecked")
@@ -373,10 +385,6 @@ public class DataBaseManager {
         em = null;
     }
 
-    public static EntityTransaction getTransaction() {
-        return getEntityManager().getTransaction();
-    }
-
     public static void reload() throws VMException {
         reload(false);
     }
@@ -391,27 +399,25 @@ public class DataBaseManager {
     }
 
     public static void updateDBState() {
-        DataSource ds = null;
-        Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            ds = (javax.sql.DataSource) new InitialContext().lookup("java:comp/env/jdbc/VMDB");
-            conn = ds.getConnection();
+            dataSource = (javax.sql.DataSource) new InitialContext().lookup("java:comp/env/jdbc/VMDB");
+            connection = dataSource.getConnection();
         }
         catch (NamingException ne) {
             LOG.log(Level.FINE, null, ne);
             if (emf == null) {
                 try {
                     //It might be the tests, use an H2 Database
-                    ds = new JdbcDataSource();
-                    ((JdbcDataSource) ds).setPassword("");
-                    ((JdbcDataSource) ds).setUser("vm_user");
-                    ((JdbcDataSource) ds).setURL(
+                    dataSource = new JdbcDataSource();
+                    ((JdbcDataSource) dataSource).setPassword("");
+                    ((JdbcDataSource) dataSource).setUser("vm_user");
+                    ((JdbcDataSource) dataSource).setURL(
                             "jdbc:h2:file:./target/data/test/validation-manager-test;AUTO_SERVER=TRUE");
                     //Load the H2 driver
                     forName("org.h2.Driver");
-                    conn = ds.getConnection();
+                    connection = dataSource.getConnection();
                 }
                 catch (ClassNotFoundException | SQLException ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -419,16 +425,16 @@ public class DataBaseManager {
             } else {
                 EntityTransaction transaction = getEntityManager().getTransaction();
                 transaction.begin();
-                conn = getEntityManager().unwrap(java.sql.Connection.class);
+                connection = getEntityManager().unwrap(java.sql.Connection.class);
                 transaction.commit();
             }
         }
         catch (SQLException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
-        if (conn != null) {
+        if (getConnection() != null) {
             try {
-                stmt = conn.prepareStatement("select * from vm_setting");
+                stmt = getConnection().prepareStatement("select * from vm_setting");
                 rs = stmt.executeQuery();
                 if (!rs.next()) {
                     //Tables there but empty? Not safe to proceed
@@ -444,7 +450,7 @@ public class DataBaseManager {
             }
             finally {
                 try {
-                    conn.close();
+                    getConnection().close();
                 }
                 catch (SQLException ex) {
                     LOG.log(Level.SEVERE, null, ex);
@@ -467,10 +473,11 @@ public class DataBaseManager {
                 }
             }
         }
-        if (ds != null) {
+        if (dataSource != null) {
+            getEntityManagerFactory();
             //Initialize flyway
-            initializeFlyway(ds);
-            updateDatabase(ds);
+            initializeFlyway(dataSource);
+            updateDatabase(dataSource);
         } else {
             state = DBState.ERROR;
         }
@@ -563,55 +570,6 @@ public class DataBaseManager {
     }
 
     /**
-     * Compare two number strings. For example: 2.1.0 == 2.01.00
-     *
-     * @param first first string to compare
-     * @param second second string to compare
-     * @return true if same, false otherwise
-     */
-    public static boolean compareNumberStrings(String first, String second) {
-        return compareNumberStrings(first, second, ".");
-    }
-
-    /**
-     * Compare two number strings. For example: 2.1.0 == 2.01.00
-     *
-     * @param first first string to compare
-     * @param second second string to compare
-     * @param separator separator of fields (i.e. for 2.1.0 is '.')
-     * @return true if same, false otherwise
-     */
-    public static boolean compareNumberStrings(String first, String second,
-            String separator) {
-        boolean result = true;
-        StringTokenizer firstST = new StringTokenizer(first, separator);
-        StringTokenizer secondST = new StringTokenizer(second, separator);
-        if (firstST.countTokens() != secondST.countTokens()) {
-            //Different amount of fields, not equal. (i.e. 2.1 and 2.1.1
-            result = false;
-        } else {
-            try {
-                while (firstST.hasMoreTokens()) {
-                    int firstInt = parseInt(firstST.nextToken());
-                    int secondInt = parseInt(secondST.nextToken());
-                    //Both numbers let's continue
-                    if (firstInt != secondInt) {
-                        result = false;
-                        break;
-                    }
-                }
-                //Everything the same
-            }
-            catch (java.lang.NumberFormatException e) {
-                LOG.log(Level.WARNING, null, e);
-                //Is not a number
-                result = false;
-            }
-        }
-        return result;
-    }
-
-    /**
      * @return the locked
      */
     public static boolean isLocked() {
@@ -623,6 +581,12 @@ public class DataBaseManager {
         setState(DBState.START_UP);
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);
+        if (isDemo()) {
+            //Clean the database on demo
+            clean();
+            close();
+            getEntityManagerFactory();
+        }
         MigrationInfo status = flyway.info().current();
         if (status == null) {
             setState(DBState.NEED_INIT);
@@ -644,5 +608,12 @@ public class DataBaseManager {
     private static void displayDBStatus(MigrationInfo status) {
         LOG.log(Level.FINE, "Description: {0}\nState: {1}\nVersion: {2}",
                 new Object[]{status.getDescription(), status.getState(), status.getVersion()});
+    }
+
+    /**
+     * @return the connection
+     */
+    private static Connection getConnection() {
+        return connection;
     }
 }

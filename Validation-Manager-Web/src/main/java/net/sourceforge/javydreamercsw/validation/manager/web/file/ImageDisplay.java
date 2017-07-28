@@ -21,7 +21,7 @@ import com.vaadin.ui.Window;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.lookup.ServiceProvider;
 import org.tepi.imageviewer.ImageViewer;

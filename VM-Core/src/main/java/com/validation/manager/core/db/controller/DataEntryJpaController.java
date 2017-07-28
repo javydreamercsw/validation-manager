@@ -24,8 +24,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.DataEntryType;
 import com.validation.manager.core.db.Step;
+import com.validation.manager.core.db.DataEntryProperty;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -49,9 +52,12 @@ public class DataEntryJpaController implements Serializable {
         if (dataEntry.getDataEntryPK() == null) {
             dataEntry.setDataEntryPK(new DataEntryPK());
         }
-        dataEntry.getDataEntryPK().setDataEntryTypeId(dataEntry.getDataEntryType().getId());
+        if (dataEntry.getDataEntryPropertyList() == null) {
+            dataEntry.setDataEntryPropertyList(new ArrayList<>());
+        }
         dataEntry.getDataEntryPK().setStepId(dataEntry.getStep().getStepPK().getId());
         dataEntry.getDataEntryPK().setStepTestCaseId(dataEntry.getStep().getStepPK().getTestCaseId());
+        dataEntry.getDataEntryPK().setDataEntryTypeId(dataEntry.getDataEntryType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -66,6 +72,12 @@ public class DataEntryJpaController implements Serializable {
                 step = em.getReference(step.getClass(), step.getStepPK());
                 dataEntry.setStep(step);
             }
+            List<DataEntryProperty> attachedDataEntryPropertyList = new ArrayList<>();
+            for (DataEntryProperty dataEntryPropertyListDataEntryPropertyToAttach : dataEntry.getDataEntryPropertyList()) {
+                dataEntryPropertyListDataEntryPropertyToAttach = em.getReference(dataEntryPropertyListDataEntryPropertyToAttach.getClass(), dataEntryPropertyListDataEntryPropertyToAttach.getDataEntryPropertyPK());
+                attachedDataEntryPropertyList.add(dataEntryPropertyListDataEntryPropertyToAttach);
+            }
+            dataEntry.setDataEntryPropertyList(attachedDataEntryPropertyList);
             em.persist(dataEntry);
             if (dataEntryType != null) {
                 dataEntryType.getDataEntryList().add(dataEntry);
@@ -74,6 +86,15 @@ public class DataEntryJpaController implements Serializable {
             if (step != null) {
                 step.getDataEntryList().add(dataEntry);
                 step = em.merge(step);
+            }
+            for (DataEntryProperty dataEntryPropertyListDataEntryProperty : dataEntry.getDataEntryPropertyList()) {
+                DataEntry oldDataEntryOfDataEntryPropertyListDataEntryProperty = dataEntryPropertyListDataEntryProperty.getDataEntry();
+                dataEntryPropertyListDataEntryProperty.setDataEntry(dataEntry);
+                dataEntryPropertyListDataEntryProperty = em.merge(dataEntryPropertyListDataEntryProperty);
+                if (oldDataEntryOfDataEntryPropertyListDataEntryProperty != null) {
+                    oldDataEntryOfDataEntryPropertyListDataEntryProperty.getDataEntryPropertyList().remove(dataEntryPropertyListDataEntryProperty);
+                    oldDataEntryOfDataEntryPropertyListDataEntryProperty = em.merge(oldDataEntryOfDataEntryPropertyListDataEntryProperty);
+                }
             }
             em.getTransaction().commit();
         }
@@ -90,10 +111,10 @@ public class DataEntryJpaController implements Serializable {
         }
     }
 
-    public void edit(DataEntry dataEntry) throws NonexistentEntityException, Exception {
-        dataEntry.getDataEntryPK().setDataEntryTypeId(dataEntry.getDataEntryType().getId());
+    public void edit(DataEntry dataEntry) throws IllegalOrphanException, NonexistentEntityException, Exception {
         dataEntry.getDataEntryPK().setStepId(dataEntry.getStep().getStepPK().getId());
         dataEntry.getDataEntryPK().setStepTestCaseId(dataEntry.getStep().getStepPK().getTestCaseId());
+        dataEntry.getDataEntryPK().setDataEntryTypeId(dataEntry.getDataEntryType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -103,6 +124,20 @@ public class DataEntryJpaController implements Serializable {
             DataEntryType dataEntryTypeNew = dataEntry.getDataEntryType();
             Step stepOld = persistentDataEntry.getStep();
             Step stepNew = dataEntry.getStep();
+            List<DataEntryProperty> dataEntryPropertyListOld = persistentDataEntry.getDataEntryPropertyList();
+            List<DataEntryProperty> dataEntryPropertyListNew = dataEntry.getDataEntryPropertyList();
+            List<String> illegalOrphanMessages = null;
+            for (DataEntryProperty dataEntryPropertyListOldDataEntryProperty : dataEntryPropertyListOld) {
+                if (!dataEntryPropertyListNew.contains(dataEntryPropertyListOldDataEntryProperty)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain DataEntryProperty " + dataEntryPropertyListOldDataEntryProperty + " since its dataEntry field is not nullable.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
             if (dataEntryTypeNew != null) {
                 dataEntryTypeNew = em.getReference(dataEntryTypeNew.getClass(), dataEntryTypeNew.getId());
                 dataEntry.setDataEntryType(dataEntryTypeNew);
@@ -111,6 +146,13 @@ public class DataEntryJpaController implements Serializable {
                 stepNew = em.getReference(stepNew.getClass(), stepNew.getStepPK());
                 dataEntry.setStep(stepNew);
             }
+            List<DataEntryProperty> attachedDataEntryPropertyListNew = new ArrayList<>();
+            for (DataEntryProperty dataEntryPropertyListNewDataEntryPropertyToAttach : dataEntryPropertyListNew) {
+                dataEntryPropertyListNewDataEntryPropertyToAttach = em.getReference(dataEntryPropertyListNewDataEntryPropertyToAttach.getClass(), dataEntryPropertyListNewDataEntryPropertyToAttach.getDataEntryPropertyPK());
+                attachedDataEntryPropertyListNew.add(dataEntryPropertyListNewDataEntryPropertyToAttach);
+            }
+            dataEntryPropertyListNew = attachedDataEntryPropertyListNew;
+            dataEntry.setDataEntryPropertyList(dataEntryPropertyListNew);
             dataEntry = em.merge(dataEntry);
             if (dataEntryTypeOld != null && !dataEntryTypeOld.equals(dataEntryTypeNew)) {
                 dataEntryTypeOld.getDataEntryList().remove(dataEntry);
@@ -127,6 +169,17 @@ public class DataEntryJpaController implements Serializable {
             if (stepNew != null && !stepNew.equals(stepOld)) {
                 stepNew.getDataEntryList().add(dataEntry);
                 stepNew = em.merge(stepNew);
+            }
+            for (DataEntryProperty dataEntryPropertyListNewDataEntryProperty : dataEntryPropertyListNew) {
+                if (!dataEntryPropertyListOld.contains(dataEntryPropertyListNewDataEntryProperty)) {
+                    DataEntry oldDataEntryOfDataEntryPropertyListNewDataEntryProperty = dataEntryPropertyListNewDataEntryProperty.getDataEntry();
+                    dataEntryPropertyListNewDataEntryProperty.setDataEntry(dataEntry);
+                    dataEntryPropertyListNewDataEntryProperty = em.merge(dataEntryPropertyListNewDataEntryProperty);
+                    if (oldDataEntryOfDataEntryPropertyListNewDataEntryProperty != null && !oldDataEntryOfDataEntryPropertyListNewDataEntryProperty.equals(dataEntry)) {
+                        oldDataEntryOfDataEntryPropertyListNewDataEntryProperty.getDataEntryPropertyList().remove(dataEntryPropertyListNewDataEntryProperty);
+                        oldDataEntryOfDataEntryPropertyListNewDataEntryProperty = em.merge(oldDataEntryOfDataEntryPropertyListNewDataEntryProperty);
+                    }
+                }
             }
             em.getTransaction().commit();
         }
@@ -147,7 +200,7 @@ public class DataEntryJpaController implements Serializable {
         }
     }
 
-    public void destroy(DataEntryPK id) throws NonexistentEntityException {
+    public void destroy(DataEntryPK id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -159,6 +212,17 @@ public class DataEntryJpaController implements Serializable {
             }
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The dataEntry with id " + id + " no longer exists.", enfe);
+            }
+            List<String> illegalOrphanMessages = null;
+            List<DataEntryProperty> dataEntryPropertyListOrphanCheck = dataEntry.getDataEntryPropertyList();
+            for (DataEntryProperty dataEntryPropertyListOrphanCheckDataEntryProperty : dataEntryPropertyListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This DataEntry (" + dataEntry + ") cannot be destroyed since the DataEntryProperty " + dataEntryPropertyListOrphanCheckDataEntryProperty + " in its dataEntryPropertyList field has a non-nullable dataEntry field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             DataEntryType dataEntryType = dataEntry.getDataEntryType();
             if (dataEntryType != null) {

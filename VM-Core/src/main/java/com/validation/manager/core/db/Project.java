@@ -101,6 +101,9 @@ public class Project extends Versionable implements Serializable {
     private List<History> historyList;
     @OneToMany(mappedBy = "projectId")
     private List<UserHasRole> userHasRoleList;
+    @JoinColumn(name = "project_type_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private ProjectType projectTypeId;
 
     public Project(String name) {
         this.name = name;
@@ -213,5 +216,13 @@ public class Project extends Versionable implements Serializable {
 
     public void setUserHasRoleList(List<UserHasRole> userHasRoleList) {
         this.userHasRoleList = userHasRoleList;
+    }
+
+    public ProjectType getProjectTypeId() {
+        return projectTypeId;
+    }
+
+    public void setProjectTypeId(ProjectType projectTypeId) {
+        this.projectTypeId = projectTypeId;
     }
 }

@@ -76,11 +76,11 @@ public final class BaselineComponent extends Panel {
             });
             layout.addComponent(((ValidationManagerUI) UI.getCurrent())
                     .createRequirementHistoryTable(TRANSLATOR.translate("included.requirements"),
-                            potential));
+                            potential, true));
         } else {
             layout.addComponent(((ValidationManagerUI) UI.getCurrent())
                     .createRequirementHistoryTable(TRANSLATOR.translate("included.requirements"),
-                            baseline.getHistoryList()));
+                            baseline.getHistoryList(), true));
         }
         cancel.addClickListener((Button.ClickEvent event) -> {
             binder.discard();

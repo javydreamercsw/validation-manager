@@ -34,7 +34,8 @@ public final class StepServer extends Step implements EntityServer<Step> {
 
     public StepServer(TestCase tc, int stepSequence, String text)
             throws VMException {
-        super(new StepPK(tc.getId()), stepSequence, text.getBytes());
+        super(new StepPK(tc.getTestCasePK().getId()), stepSequence,
+                text.getBytes());
         setTestCase(tc);
         if (getTestCase() == null) {
             throw new VMException("Provided TestCase that doesn't exist in "

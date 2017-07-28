@@ -20,14 +20,16 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.TestPlan;
+import com.validation.manager.core.db.TestCaseType;
+import com.validation.manager.core.db.RiskControlHasTestCase;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.RiskControlHasTestCase;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -46,9 +48,9 @@ public class TestCaseJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(TestCase testCase) {
-        if (testCase.getTestPlanList() == null) {
-            testCase.setTestPlanList(new ArrayList<>());
+    public void create(TestCase testCase) throws PreexistingEntityException, Exception {
+        if (testCase.getTestCasePK() == null) {
+            testCase.setTestCasePK(new TestCasePK());
         }
         if (testCase.getRiskControlHasTestCaseList() == null) {
             testCase.setRiskControlHasTestCaseList(new ArrayList<>());
@@ -56,16 +58,16 @@ public class TestCaseJpaController implements Serializable {
         if (testCase.getStepList() == null) {
             testCase.setStepList(new ArrayList<>());
         }
+        testCase.getTestCasePK().setTestCaseTypeId(testCase.getTestCaseType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<TestPlan> attachedTestPlanList = new ArrayList<>();
-            for (TestPlan testPlanListTestPlanToAttach : testCase.getTestPlanList()) {
-                testPlanListTestPlanToAttach = em.getReference(testPlanListTestPlanToAttach.getClass(), testPlanListTestPlanToAttach.getTestPlanPK());
-                attachedTestPlanList.add(testPlanListTestPlanToAttach);
+            TestCaseType testCaseType = testCase.getTestCaseType();
+            if (testCaseType != null) {
+                testCaseType = em.getReference(testCaseType.getClass(), testCaseType.getId());
+                testCase.setTestCaseType(testCaseType);
             }
-            testCase.setTestPlanList(attachedTestPlanList);
             List<RiskControlHasTestCase> attachedRiskControlHasTestCaseList = new ArrayList<>();
             for (RiskControlHasTestCase riskControlHasTestCaseListRiskControlHasTestCaseToAttach : testCase.getRiskControlHasTestCaseList()) {
                 riskControlHasTestCaseListRiskControlHasTestCaseToAttach = em.getReference(riskControlHasTestCaseListRiskControlHasTestCaseToAttach.getClass(), riskControlHasTestCaseListRiskControlHasTestCaseToAttach.getRiskControlHasTestCasePK());
@@ -79,9 +81,9 @@ public class TestCaseJpaController implements Serializable {
             }
             testCase.setStepList(attachedStepList);
             em.persist(testCase);
-            for (TestPlan testPlanListTestPlan : testCase.getTestPlanList()) {
-                testPlanListTestPlan.getTestCaseList().add(testCase);
-                testPlanListTestPlan = em.merge(testPlanListTestPlan);
+            if (testCaseType != null) {
+                testCaseType.getTestCaseList().add(testCase);
+                testCaseType = em.merge(testCaseType);
             }
             for (RiskControlHasTestCase riskControlHasTestCaseListRiskControlHasTestCase : testCase.getRiskControlHasTestCaseList()) {
                 TestCase oldTestCaseOfRiskControlHasTestCaseListRiskControlHasTestCase = riskControlHasTestCaseListRiskControlHasTestCase.getTestCase();
@@ -103,6 +105,12 @@ public class TestCaseJpaController implements Serializable {
             }
             em.getTransaction().commit();
         }
+        catch (Exception ex) {
+            if (findTestCase(testCase.getTestCasePK()) != null) {
+                throw new PreexistingEntityException("TestCase " + testCase + " already exists.", ex);
+            }
+            throw ex;
+        }
         finally {
             if (em != null) {
                 em.close();
@@ -111,13 +119,14 @@ public class TestCaseJpaController implements Serializable {
     }
 
     public void edit(TestCase testCase) throws IllegalOrphanException, NonexistentEntityException, Exception {
+        testCase.getTestCasePK().setTestCaseTypeId(testCase.getTestCaseType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            TestCase persistentTestCase = em.find(TestCase.class, testCase.getId());
-            List<TestPlan> testPlanListOld = persistentTestCase.getTestPlanList();
-            List<TestPlan> testPlanListNew = testCase.getTestPlanList();
+            TestCase persistentTestCase = em.find(TestCase.class, testCase.getTestCasePK());
+            TestCaseType testCaseTypeOld = persistentTestCase.getTestCaseType();
+            TestCaseType testCaseTypeNew = testCase.getTestCaseType();
             List<RiskControlHasTestCase> riskControlHasTestCaseListOld = persistentTestCase.getRiskControlHasTestCaseList();
             List<RiskControlHasTestCase> riskControlHasTestCaseListNew = testCase.getRiskControlHasTestCaseList();
             List<Step> stepListOld = persistentTestCase.getStepList();
@@ -142,13 +151,10 @@ public class TestCaseJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<TestPlan> attachedTestPlanListNew = new ArrayList<>();
-            for (TestPlan testPlanListNewTestPlanToAttach : testPlanListNew) {
-                testPlanListNewTestPlanToAttach = em.getReference(testPlanListNewTestPlanToAttach.getClass(), testPlanListNewTestPlanToAttach.getTestPlanPK());
-                attachedTestPlanListNew.add(testPlanListNewTestPlanToAttach);
+            if (testCaseTypeNew != null) {
+                testCaseTypeNew = em.getReference(testCaseTypeNew.getClass(), testCaseTypeNew.getId());
+                testCase.setTestCaseType(testCaseTypeNew);
             }
-            testPlanListNew = attachedTestPlanListNew;
-            testCase.setTestPlanList(testPlanListNew);
             List<RiskControlHasTestCase> attachedRiskControlHasTestCaseListNew = new ArrayList<>();
             for (RiskControlHasTestCase riskControlHasTestCaseListNewRiskControlHasTestCaseToAttach : riskControlHasTestCaseListNew) {
                 riskControlHasTestCaseListNewRiskControlHasTestCaseToAttach = em.getReference(riskControlHasTestCaseListNewRiskControlHasTestCaseToAttach.getClass(), riskControlHasTestCaseListNewRiskControlHasTestCaseToAttach.getRiskControlHasTestCasePK());
@@ -164,17 +170,13 @@ public class TestCaseJpaController implements Serializable {
             stepListNew = attachedStepListNew;
             testCase.setStepList(stepListNew);
             testCase = em.merge(testCase);
-            for (TestPlan testPlanListOldTestPlan : testPlanListOld) {
-                if (!testPlanListNew.contains(testPlanListOldTestPlan)) {
-                    testPlanListOldTestPlan.getTestCaseList().remove(testCase);
-                    testPlanListOldTestPlan = em.merge(testPlanListOldTestPlan);
-                }
+            if (testCaseTypeOld != null && !testCaseTypeOld.equals(testCaseTypeNew)) {
+                testCaseTypeOld.getTestCaseList().remove(testCase);
+                testCaseTypeOld = em.merge(testCaseTypeOld);
             }
-            for (TestPlan testPlanListNewTestPlan : testPlanListNew) {
-                if (!testPlanListOld.contains(testPlanListNewTestPlan)) {
-                    testPlanListNewTestPlan.getTestCaseList().add(testCase);
-                    testPlanListNewTestPlan = em.merge(testPlanListNewTestPlan);
-                }
+            if (testCaseTypeNew != null && !testCaseTypeNew.equals(testCaseTypeOld)) {
+                testCaseTypeNew.getTestCaseList().add(testCase);
+                testCaseTypeNew = em.merge(testCaseTypeNew);
             }
             for (RiskControlHasTestCase riskControlHasTestCaseListNewRiskControlHasTestCase : riskControlHasTestCaseListNew) {
                 if (!riskControlHasTestCaseListOld.contains(riskControlHasTestCaseListNewRiskControlHasTestCase)) {
@@ -203,7 +205,7 @@ public class TestCaseJpaController implements Serializable {
         catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = testCase.getId();
+                TestCasePK id = testCase.getTestCasePK();
                 if (findTestCase(id) == null) {
                     throw new NonexistentEntityException("The testCase with id " + id + " no longer exists.");
                 }
@@ -217,7 +219,7 @@ public class TestCaseJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(TestCasePK id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -225,7 +227,7 @@ public class TestCaseJpaController implements Serializable {
             TestCase testCase;
             try {
                 testCase = em.getReference(TestCase.class, id);
-                testCase.getId();
+                testCase.getTestCasePK();
             }
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The testCase with id " + id + " no longer exists.", enfe);
@@ -248,10 +250,10 @@ public class TestCaseJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<TestPlan> testPlanList = testCase.getTestPlanList();
-            for (TestPlan testPlanListTestPlan : testPlanList) {
-                testPlanListTestPlan.getTestCaseList().remove(testCase);
-                testPlanListTestPlan = em.merge(testPlanListTestPlan);
+            TestCaseType testCaseType = testCase.getTestCaseType();
+            if (testCaseType != null) {
+                testCaseType.getTestCaseList().remove(testCase);
+                testCaseType = em.merge(testCaseType);
             }
             em.remove(testCase);
             em.getTransaction().commit();
@@ -288,7 +290,7 @@ public class TestCaseJpaController implements Serializable {
         }
     }
 
-    public TestCase findTestCase(Integer id) {
+    public TestCase findTestCase(TestCasePK id) {
         EntityManager em = getEntityManager();
         try {
             return em.find(TestCase.class, id);

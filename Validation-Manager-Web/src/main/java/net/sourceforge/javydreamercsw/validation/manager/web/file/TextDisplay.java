@@ -23,7 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
 import org.openide.util.lookup.ServiceProvider;

@@ -9,3 +9,4 @@ VM-Core/data/*
 \.conflict\~$
 /VM-Core/log/
 /target/
+/Validation-Manager-Web/nbproject/

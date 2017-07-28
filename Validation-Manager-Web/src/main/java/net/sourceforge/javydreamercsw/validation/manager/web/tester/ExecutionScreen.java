@@ -56,10 +56,10 @@ import net.sourceforge.javydreamercsw.validation.manager.web.quality.QualityScre
 public abstract class ExecutionScreen extends AbstractProvider {
 
     private ExecutionWindow executionWindow = null;
-    private final TreeTable testCaseTree
-            = new TreeTable("available.tests");
+    private final TreeTable testCaseTree;
 
     public ExecutionScreen() {
+        testCaseTree = new TreeTable("available.tests");
         testCaseTree.setAnimationsEnabled(true);
         testCaseTree.addContainerProperty("general.name",
                 String.class, "");
@@ -226,7 +226,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
     protected Map<String, Integer> getSummary(TestCaseExecution tce, int tcId) {
         Map<String, Integer> summary = new HashMap<>();
         tce.getExecutionStepList().forEach((ExecutionStep es) -> {
-            if (tcId == -1 || es.getStep().getTestCase().getId() == tcId) {
+            if (tcId == -1 || es.getStep().getTestCase().getTestCasePK().getId() == tcId) {
                 if (es.getExecutionStart() != null && es.getExecutionEnd() == null) {
                     //In progress
                     if (!summary.containsKey("progress")) {
@@ -296,6 +296,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
         VerticalLayout vl = new VerticalLayout();
         update();
         vl.addComponent(testCaseTree);
+        vl.setId(getComponentCaption());
         return vl;
     }
 
@@ -344,8 +345,8 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                                             .equals(ValidationManagerUI.getInstance()
                                                                     .getUser().getId()))) {
                                                 TestCase tc = es.getStep().getTestCase();
-                                                if (!tcids.contains(tc.getId())) {
-                                                    tcids.add(tc.getId());
+                                                if (!tcids.contains(tc.getTestCasePK().getId())) {
+                                                    tcids.add(tc.getTestCasePK().getId());
                                                     DateTimeFormatter format
                                                             = DateTimeFormatter.ofPattern("MMM d yyyy  hh:mm a");
                                                     LocalDateTime time
@@ -353,7 +354,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                                                     .toInstant(), ZoneId.systemDefault());
                                                     String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
                                                             + "-" + es.getStep().getStepPK().getId()
-                                                            + "-" + tc.getId();
+                                                            + "-" + tc.getTestCasePK().getId();
                                                     testCaseTree.addItem(new Object[]{tc.getName(),
                                                         tc.getSummary(), format.format(time),},
                                                             key);

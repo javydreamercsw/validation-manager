@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.quality;
 
-import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.IMainContentProvider;
@@ -49,13 +48,6 @@ public class QualityScreenProvider extends ExecutionScreen {
                         .checkRight("quality.assurance")
                 && setting != null
                 && setting.getBoolVal();
-    }
-
-    @Override
-    public Component getContent() {
-        Component content = super.getContent();
-        content.setId(getComponentCaption());
-        return content;
     }
 
     @Override

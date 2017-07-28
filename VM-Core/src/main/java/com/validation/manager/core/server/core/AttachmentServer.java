@@ -116,10 +116,10 @@ public final class AttachmentServer extends Attachment
         }
     }
 
-    public File getAttachedFile() {
+    public File getAttachedFile(String dest) {
         File result;
         try {
-            result = File.createTempFile("temp", "vm");
+            result = new File(dest + File.separator + getFileName());
             result.deleteOnExit();
             FileUtils.writeByteArrayToFile(result, getFile());
         }

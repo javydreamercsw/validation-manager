@@ -15,30 +15,30 @@
  */
 package com.validation.manager.core.db.controller;
 
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.db.ExecutionStep;
-import com.validation.manager.core.db.ExecutionStepAnswer;
-import com.validation.manager.core.db.ExecutionStepHasAttachment;
-import com.validation.manager.core.db.ExecutionStepHasIssue;
-import com.validation.manager.core.db.ExecutionStepHasVmUser;
-import com.validation.manager.core.db.ExecutionStepPK;
-import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.ReviewResult;
+import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCaseExecution;
-import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.History;
+import com.validation.manager.core.db.ExecutionStepHasAttachment;
+import java.util.ArrayList;
+import java.util.List;
+import com.validation.manager.core.db.ExecutionStepHasIssue;
+import com.validation.manager.core.db.ExecutionStepHasVmUser;
+import com.validation.manager.core.db.ExecutionStepAnswer;
+import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -74,9 +74,9 @@ public class ExecutionStepJpaController implements Serializable {
         if (executionStep.getExecutionStepAnswerList() == null) {
             executionStep.setExecutionStepAnswerList(new ArrayList<>());
         }
-        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
-        executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
         executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
+        executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
+        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -240,9 +240,9 @@ public class ExecutionStepJpaController implements Serializable {
     }
 
     public void edit(ExecutionStep executionStep) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
-        executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
         executionStep.getExecutionStepPK().setStepTestCaseId(executionStep.getStep().getStepPK().getTestCaseId());
+        executionStep.getExecutionStepPK().setTestCaseExecutionId(executionStep.getTestCaseExecution().getId());
+        executionStep.getExecutionStepPK().setStepId(executionStep.getStep().getStepPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

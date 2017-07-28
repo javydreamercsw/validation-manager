@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@ import com.vaadin.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.server.core.RoleServer;
@@ -39,8 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.TreeTableCheckBox;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.TreeTableCheckBox;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
@@ -94,10 +95,10 @@ public class AssignUserStep implements WizardStep {
         testTree.setWidth("20em");
         testCases.forEach((t) -> {
             testTree.addItem(new Object[]{new TreeTableCheckBox(testTree,
-                t.getName(), t.getId()),
+                t.getName(), t.getTestCasePK()),
                 t.getSummary() == null ? "" : new String(t.getSummary(),
-                StandardCharsets.UTF_8)}, t.getId());
-            testTree.setChildrenAllowed(t.getId(), false);
+                StandardCharsets.UTF_8)}, t.getTestCasePK());
+            testTree.setChildrenAllowed(t.getTestCasePK(), false);
         });
         testTree.setPageLength(testCases.size() + 1);
         testTree.setSizeFull();
@@ -122,7 +123,7 @@ public class AssignUserStep implements WizardStep {
     @Override
     public boolean onAdvance() {
         boolean selectedTestCase = false;
-        List<Integer> testCaseIds = new ArrayList<>();
+        List<TestCasePK> testCaseIds = new ArrayList<>();
         for (Object id : testTree.getItemIds()) {
             Item item = testTree.getItem(id);
             Object val = item.getItemProperty("general.name").getValue();
@@ -130,7 +131,7 @@ public class AssignUserStep implements WizardStep {
                 TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
                 if (ttcb.getValue()) {
                     selectedTestCase = true;
-                    testCaseIds.add((Integer) id);
+                    testCaseIds.add((TestCasePK) id);
                 }
             }
         }

@@ -53,6 +53,7 @@ import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepAnswer;
 import com.validation.manager.core.db.ExecutionStepHasAttachment;
 import com.validation.manager.core.db.ExecutionStepHasIssue;
+import com.validation.manager.core.db.IssueType;
 import com.validation.manager.core.db.ReviewResult;
 import com.validation.manager.core.db.controller.ExecutionResultJpaController;
 import com.validation.manager.core.db.controller.IssueTypeJpaController;
@@ -63,7 +64,6 @@ import com.validation.manager.core.server.core.DataEntryServer;
 import com.validation.manager.core.server.core.ExecutionResultServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.IssueServer;
-import com.validation.manager.core.server.core.IssueTypeServer;
 import com.validation.manager.core.server.core.ReviewResultServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import de.steinwedel.messagebox.ButtonOption;
@@ -77,9 +77,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
 import org.jodconverter.OfficeDocumentConverter;
@@ -132,18 +132,21 @@ public class ExecutionWizardStep implements WizardStep {
         it.findIssueTypeEntities().forEach(type -> {
             String item = Lookup.getDefault().lookup(InternationalizationProvider.class)
                     .translate(type.getTypeName());
-            issueType.addItem(type.getTypeName());
-            issueType.setItemCaption(type.getTypeName(), item);
+            issueType.addItem(type);
+            issueType.setItemCaption(type, item);
             switch (type.getId()) {
                 case 1:
-                    issueType.setItemIcon(type.getTypeName(), VaadinIcons.BUG);
+                    issueType.setItemIcon(type, VaadinIcons.BUG);
                     break;
                 case 2:
-                    issueType.setItemIcon(type.getTypeName(), VaadinIcons.EYE);
+                    issueType.setItemIcon(type, VaadinIcons.EYE);
                     break;
                 case 3:
-                    issueType.setItemIcon(type.getTypeName(), VaadinIcons.QUESTION);
+                    issueType.setItemIcon(type, VaadinIcons.QUESTION);
                     break;
+            }
+            if (type.getTypeName().equals("observation.name")) {
+                issueType.setValue(type);
             }
         });
         result.setReadOnly(false);
@@ -309,6 +312,10 @@ public class ExecutionWizardStep implements WizardStep {
                             String error = TRANSLATOR.translate("expected.result") + ": "
                                     + r.getPropertyValue();
                             tf.setRequiredError(error);
+                            tf.setRequired(DataEntryServer
+                                    .getProperty(de,
+                                            "property.required")
+                                    .getPropertyValue().equals("true"));
                             tf.addValidator((Object val) -> {
                                 //We have an expected result and a match case requirement
                                 if (stringCase != null
@@ -334,7 +341,10 @@ public class ExecutionWizardStep implements WizardStep {
                     field.setDecimal(true);
                     field.setDecimalSeparator('.');
                     field.setConverter(new StringToDoubleConverter());
-                    field.setRequired(true);
+                    field.setRequired(DataEntryServer
+                            .getProperty(de,
+                                    "property.required")
+                            .getPropertyValue().equals("true"));
                     field.setData(de.getEntryName());
                     Double min = null,
                      max = null;
@@ -381,7 +391,10 @@ public class ExecutionWizardStep implements WizardStep {
                     CheckBox cb = new CheckBox(TRANSLATOR
                             .translate(de.getEntryName()));
                     cb.setData(de.getEntryName());
-                    cb.setRequired(true);
+                    cb.setRequired(DataEntryServer
+                            .getProperty(de,
+                                    "property.required")
+                            .getPropertyValue().equals("true"));
                     if (VMSettingServer.getSetting("show.expected.result")
                             .getBoolVal()) {
                         DataEntryProperty r = DataEntryServer.getProperty(de,
@@ -583,9 +596,6 @@ public class ExecutionWizardStep implements WizardStep {
         layout.addComponent(issueType);
         if (is.getIssueType() != null) {
             issueType.setValue(is.getIssueType().getTypeName());
-        } else {
-            //Set it as observation
-            issueType.setValue(TRANSLATOR.translate("observation.name"));
         }
         //Lock if being created
         issueType.setReadOnly(is.getIssueType() == null);
@@ -599,7 +609,7 @@ public class ExecutionWizardStep implements WizardStep {
                         //Create the attachment
                         IssueServer issue = (IssueServer) mb.getData();
                         issue.setDescription(((TextArea) desc).getValue().trim());
-                        issue.setIssueType(IssueTypeServer.getType((String) issueType.getValue()));
+                        issue.setIssueType((IssueType) issueType.getValue());
                         issue.setCreationTime(creation.getValue());
                         issue.setTitle((String) title.getValue());
                         boolean toAdd = issue.getIssuePK() == null;
@@ -939,7 +949,7 @@ public class ExecutionWizardStep implements WizardStep {
                     }
                 },
                         ButtonOption.icon(VaadinIcons.CLOSE));
-        mb.getWindow().setCaption(TRANSLATOR.translate("issue.details"));
+        mb.getWindow().setCaption(TRANSLATOR.translate("issue.detail"));
         mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
         return mb;
     }

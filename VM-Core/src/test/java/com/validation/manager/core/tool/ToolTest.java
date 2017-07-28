@@ -17,8 +17,16 @@ package com.validation.manager.core.tool;
 
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
+import com.validation.manager.core.server.core.TestCaseTypeServer;
 import com.validation.manager.test.AbstractVMTestCase;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javax.swing.ImageIcon;
@@ -39,8 +47,8 @@ public class ToolTest extends AbstractVMTestCase {
         System.out.println("createImageIcon");
         String path = "/com/validation/manager/resources/icons/VMSmall.png";
         String description = "Test";
-        ImageIcon result = Tool.createImageIcon(path, description);
-        assertNotNull(result);
+        ImageIcon r = Tool.createImageIcon(path, description);
+        assertNotNull(r);
     }
 
     /**
@@ -51,8 +59,8 @@ public class ToolTest extends AbstractVMTestCase {
         System.out.println("createImageIcon");
         String path = "/com/validation/manager/resources/icons/VMSmall.png";
         String description = "Test";
-        ImageIcon result = Tool.createImageIcon(path, description, Tool.class);
-        assertNotNull(result);
+        ImageIcon r = Tool.createImageIcon(path, description, Tool.class);
+        assertNotNull(r);
     }
 
     /**
@@ -82,11 +90,13 @@ public class ToolTest extends AbstractVMTestCase {
         System.out.println("extractTCE");
         TestCaseExecutionServer tce = new TestCaseExecutionServer("Test Name",
                 "Test Scope");
-        TestCaseServer tc = new TestCaseServer("Test Case", new Date());
+        TestCaseServer tc = new TestCaseServer("Test Case", new Date(),
+                new TestCaseTypeServer(5).getEntity());
         tc.write2DB();
         tce.addTestCase(tc);
         tce.write2DB();
-        String key = "tce-" + tce.getId() + "-" + tc.getId();
+        String key = Tool.buildId(tce,
+                Tool.buildId(tc, null, false)).toString();
         TCEExtraction r = Tool.extractTCE(key);
         assertEquals(tce.getId(), r.getTestCaseExecution().getId());
         try {
@@ -96,5 +106,24 @@ public class ToolTest extends AbstractVMTestCase {
         catch (Exception ex) {
             //Expected
         }
+    }
+
+    /**
+     * Test of createZipFile method, of class Tool.
+     *
+     * @throws java.io.IOException
+     */
+    @Test
+    public void testCreateZipFile() throws IOException {
+        System.out.println("createZipFile");
+        File f = new File("target/Test.txt");
+        f.deleteOnExit();
+        List<String> lines = Arrays.asList("The first line", "The second line");
+        Path file = Paths.get(f.getAbsolutePath());
+        Files.write(file, lines, Charset.forName("UTF-8"));
+        File zip = Tool.createZipFile(Arrays.asList(file.toFile()), "Test");
+        zip.deleteOnExit();
+        assertNotNull(zip);
+        assertTrue(zip.getName().endsWith(".zip"));
     }
 }

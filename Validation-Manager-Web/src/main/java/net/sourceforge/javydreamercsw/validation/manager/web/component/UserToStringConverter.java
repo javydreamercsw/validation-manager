@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +19,13 @@ import com.vaadin.data.util.converter.Converter;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public class UserToStringConverter implements Converter<String, VmUser> {
-
-    private VmUser user;
 
     @Override
     public Class<VmUser> getModelType() {
@@ -41,13 +40,20 @@ public class UserToStringConverter implements Converter<String, VmUser> {
     @Override
     public VmUser convertToModel(String value,
             Class<? extends VmUser> targetType, Locale locale) throws ConversionException {
-        return user;
+        StringTokenizer st = new StringTokenizer(value, " ");
+        String name = st.nextToken();
+        String last = st.hasMoreTokens() ? st.nextToken() : "";
+        for (VMUserServer user : VMUserServer.getVMUsers()) {
+            if (user.getFirstName().equals(name) && user.getLastName().equals(last)) {
+                return user;
+            }
+        }
+        return null;
     }
 
     @Override
     public String convertToPresentation(VmUser value,
             Class<? extends String> targetType, Locale locale) throws ConversionException {
-        user = value;
         return new VMUserServer(value).toString();
     }
 }

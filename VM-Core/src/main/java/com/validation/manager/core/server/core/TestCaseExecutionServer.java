@@ -185,8 +185,8 @@ public final class TestCaseExecutionServer extends TestCaseExecution
     public void removeTestCase(TestCase tc) throws Exception {
         List<ExecutionStep> toDelete = new ArrayList<>();
         getExecutionStepList().forEach(es -> {
-            if (Objects.equals(es.getStep().getTestCase()
-                    .getId(), tc.getId())) {
+            if (Objects.equals(es.getStep().getTestCase().getTestCasePK(),
+                     tc.getTestCasePK())) {
                 //Same test case
                 toDelete.add(es);
             }
