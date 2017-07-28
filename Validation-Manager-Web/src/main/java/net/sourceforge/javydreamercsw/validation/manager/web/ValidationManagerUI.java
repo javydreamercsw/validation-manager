@@ -887,6 +887,9 @@ public class ValidationManagerUI extends UI implements VMUI {
                     }
                 });
         hsplit.setSecondComponent(tabSheet);
+        if (DataBaseManager.isDemo()) {
+            showTab("demo.tab.name");
+        }
         //This is a tabbed pane. Enable/Disable the panes based on role
         if (getUser() != null) {
             roles.clear();
@@ -942,7 +945,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         GridLayout gl = new GridLayout(3, 3);
         gl.addComponent(new Image("", LOGO), 0, 0);
         Label version = new Label(TRANSLATOR.translate("general.version")
-                + ": " + getVersion() + " (" + getBuild() + ")");
+                + ": " + getVersion());
         gl.addComponent(version, 2, 2);
         if (getUser() != null) {
             getUser().update();
