@@ -77,9 +77,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
 import org.jodconverter.OfficeDocumentConverter;
@@ -312,6 +312,10 @@ public class ExecutionWizardStep implements WizardStep {
                             String error = TRANSLATOR.translate("expected.result") + ": "
                                     + r.getPropertyValue();
                             tf.setRequiredError(error);
+                            tf.setRequired(DataEntryServer
+                                    .getProperty(de,
+                                            "property.required")
+                                    .getPropertyValue().equals("true"));
                             tf.addValidator((Object val) -> {
                                 //We have an expected result and a match case requirement
                                 if (stringCase != null
@@ -337,7 +341,10 @@ public class ExecutionWizardStep implements WizardStep {
                     field.setDecimal(true);
                     field.setDecimalSeparator('.');
                     field.setConverter(new StringToDoubleConverter());
-                    field.setRequired(true);
+                    field.setRequired(DataEntryServer
+                            .getProperty(de,
+                                    "property.required")
+                            .getPropertyValue().equals("true"));
                     field.setData(de.getEntryName());
                     Double min = null,
                      max = null;
@@ -384,7 +391,10 @@ public class ExecutionWizardStep implements WizardStep {
                     CheckBox cb = new CheckBox(TRANSLATOR
                             .translate(de.getEntryName()));
                     cb.setData(de.getEntryName());
-                    cb.setRequired(true);
+                    cb.setRequired(DataEntryServer
+                            .getProperty(de,
+                                    "property.required")
+                            .getPropertyValue().equals("true"));
                     if (VMSettingServer.getSetting("show.expected.result")
                             .getBoolVal()) {
                         DataEntryProperty r = DataEntryServer.getProperty(de,
