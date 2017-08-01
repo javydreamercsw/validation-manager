@@ -18,6 +18,7 @@ package net.sourceforge.javydreamercsw.validation.manager.web;
 import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.addon.contextmenu.MenuItem;
 import com.vaadin.addon.tableexport.TemporaryFileDownloadResource;
+import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
@@ -172,7 +173,7 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 @Theme("vmtheme")
 @SuppressWarnings("serial")
-//@PreserveOnRefresh
+@PreserveOnRefresh
 public class ValidationManagerUI extends UI implements VMUI {
 
     private static final InternationalizationProvider TRANSLATOR
