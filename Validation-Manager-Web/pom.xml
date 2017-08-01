@@ -189,6 +189,11 @@
             <artifactId>tableexport-for-vaadin</artifactId>
             <version>1.6.4-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>BorderLayout</artifactId>
+            <version>0.7</version>
+        </dependency>
     </dependencies>
     
     <build>
