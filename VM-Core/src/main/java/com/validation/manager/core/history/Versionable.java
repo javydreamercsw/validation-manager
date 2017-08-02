@@ -376,7 +376,7 @@ public abstract class Versionable implements Comparable<Versionable>,
                 }
             } else {
                 if (hs.getModifierId() != null) {
-                    VmUser temp = hs.getModifierId();
+                    VmUser temp = c.findVmUser(hs.getModifierId().getId());
                     if (temp.getHistoryModificationList() == null) {
                         temp.setHistoryModificationList(new ArrayList<>());
                     }
