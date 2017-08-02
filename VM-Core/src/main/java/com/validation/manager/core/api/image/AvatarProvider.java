@@ -15,8 +15,8 @@
  */
 package com.validation.manager.core.api.image;
 
+import com.vaadin.server.Resource;
 import com.validation.manager.core.db.VmUser;
-import javax.swing.ImageIcon;
 
 /**
  *
@@ -29,7 +29,15 @@ public interface AvatarProvider {
      *
      * @param user User to get avatar for
      * @param size Size in pixels (square)
-     * @return
+     * @return Avatar for the user
      */
-    ImageIcon getAvatar(VmUser user, int size);
+    Resource getAvatar(VmUser user, int size);
+
+    /**
+     * Get avatar for user.
+     *
+     * @param user User to get avatar for
+     * @return Avatar for the user
+     */
+    Resource getAvatar(VmUser user);
 }

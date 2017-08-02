@@ -15,7 +15,7 @@
  */
 package com.validation.manager.core.image;
 
-import javax.swing.ImageIcon;
+import com.vaadin.server.Resource;
 import static junit.framework.TestCase.*;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ public class GravatarProviderTest {
         System.out.println("getIcon");
         String email = "javier.ortiz.78@gmail.com";
         GravatarProvider instance = new GravatarProvider();
-        ImageIcon result = instance.getIcon(email, 0);
+        Resource result = instance.getIcon(email, 0);
         assertNotNull(result);
         result = instance.getIcon(email, 200);
         assertNotNull(result);

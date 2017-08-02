@@ -15,38 +15,36 @@
  */
 package com.validation.manager.core.image;
 
+import com.vaadin.server.ExternalResource;
+import com.vaadin.server.Resource;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.api.image.AvatarProvider;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.tool.MD5;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
+import org.openide.util.lookup.ServiceProvider;
 
+@ServiceProvider(service = AvatarProvider.class)
 public class GravatarProvider implements AvatarProvider {
 
     private static final Logger LOG
             = Logger.getLogger(GravatarProvider.class.getSimpleName());
 
     @Override
-    public ImageIcon getAvatar(VmUser user, int size) {
-        //First we need to make sure the user has an email defined
-        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-            return getIcon(user.getEmail(), size);
-        }
-        //Use default image
-        return null;
+    public Resource getAvatar(VmUser user, int size) {
+        return getIcon(user.getEmail(), size);
     }
 
-    protected ImageIcon getIcon(String email) {
-        return getIcon(email, 0);
+    @Override
+    public Resource getAvatar(VmUser user) {
+        return getAvatar(user, 0);
     }
 
-    protected ImageIcon getIcon(String email, int size) {
+    protected Resource getIcon(String email, int size) {
         try {
             //Calculate Gravatar email hash
             /**
@@ -63,17 +61,24 @@ public class GravatarProvider implements AvatarProvider {
              *
              * md5 hash the final string
              */
-            URL url = new URL("https://www.gravatar.com/avatar/"
-                    + MD5.encrypt(email.trim().toLowerCase())
-                    + (size > 0 ? "?s=" + size : ""));
-            LOG.log(Level.INFO, "Retrieving icon from: {0}", url);
-            BufferedImage c = ImageIO.read(url);
-            ImageIcon image = new ImageIcon(c);
-            return image;
+            URL url = getURL(email, size);
+            LOG.log(Level.FINE, "Retrieving icon from: {0}", url);
+            return new ExternalResource(url);
         }
         catch (VMException | IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+
+    private URL getURL(String email, int size) throws MalformedURLException, VMException {
+        if (email == null || email.trim().isEmpty()) {
+            return new URL("http://www.gravatar.com/avatar/?d=identicon"
+                    + (size > 0 ? "?s=" + size : ""));
+        } else {
+            return new URL("https://www.gravatar.com/avatar/"
+                    + MD5.encrypt(email.trim().toLowerCase())
+                    + (size > 0 ? "?s=" + size : ""));
+        }
     }
 }
