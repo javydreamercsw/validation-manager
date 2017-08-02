@@ -37,6 +37,7 @@ import com.validation.manager.core.db.ExecutionStepHasVmUser;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Notification;
 import com.validation.manager.core.db.UserHasRole;
+import com.validation.manager.core.db.Activity;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -112,6 +113,9 @@ public class VmUserJpaController implements Serializable {
         }
         if (vmUser.getUserHasRoleList() == null) {
             vmUser.setUserHasRoleList(new ArrayList<>());
+        }
+        if (vmUser.getActivityList() == null) {
+            vmUser.setActivityList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
@@ -230,6 +234,12 @@ public class VmUserJpaController implements Serializable {
                 attachedUserHasRoleList.add(userHasRoleListUserHasRoleToAttach);
             }
             vmUser.setUserHasRoleList(attachedUserHasRoleList);
+            List<Activity> attachedActivityList = new ArrayList<>();
+            for (Activity activityListActivityToAttach : vmUser.getActivityList()) {
+                activityListActivityToAttach = em.getReference(activityListActivityToAttach.getClass(), activityListActivityToAttach.getActivityPK());
+                attachedActivityList.add(activityListActivityToAttach);
+            }
+            vmUser.setActivityList(attachedActivityList);
             em.persist(vmUser);
             if (userStatusId != null) {
                 userStatusId.getVmUserList().add(vmUser);
@@ -377,6 +387,15 @@ public class VmUserJpaController implements Serializable {
                     oldVmUserOfUserHasRoleListUserHasRole = em.merge(oldVmUserOfUserHasRoleListUserHasRole);
                 }
             }
+            for (Activity activityListActivity : vmUser.getActivityList()) {
+                VmUser oldSourceUserOfActivityListActivity = activityListActivity.getSourceUser();
+                activityListActivity.setSourceUser(vmUser);
+                activityListActivity = em.merge(activityListActivity);
+                if (oldSourceUserOfActivityListActivity != null) {
+                    oldSourceUserOfActivityListActivity.getActivityList().remove(activityListActivity);
+                    oldSourceUserOfActivityListActivity = em.merge(oldSourceUserOfActivityListActivity);
+                }
+            }
             em.getTransaction().commit();
         }
         finally {
@@ -430,6 +449,8 @@ public class VmUserJpaController implements Serializable {
             List<History> historyListNew = vmUser.getHistoryList();
             List<UserHasRole> userHasRoleListOld = persistentVmUser.getUserHasRoleList();
             List<UserHasRole> userHasRoleListNew = vmUser.getUserHasRoleList();
+            List<Activity> activityListOld = persistentVmUser.getActivityList();
+            List<Activity> activityListNew = vmUser.getActivityList();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
@@ -525,6 +546,14 @@ public class VmUserJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain UserHasRole " + userHasRoleListOldUserHasRole + " since its vmUser field is not nullable.");
+                }
+            }
+            for (Activity activityListOldActivity : activityListOld) {
+                if (!activityListNew.contains(activityListOldActivity)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain Activity " + activityListOldActivity + " since its sourceUser field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -660,6 +689,13 @@ public class VmUserJpaController implements Serializable {
             }
             userHasRoleListNew = attachedUserHasRoleListNew;
             vmUser.setUserHasRoleList(userHasRoleListNew);
+            List<Activity> attachedActivityListNew = new ArrayList<>();
+            for (Activity activityListNewActivityToAttach : activityListNew) {
+                activityListNewActivityToAttach = em.getReference(activityListNewActivityToAttach.getClass(), activityListNewActivityToAttach.getActivityPK());
+                attachedActivityListNew.add(activityListNewActivityToAttach);
+            }
+            activityListNew = attachedActivityListNew;
+            vmUser.setActivityList(activityListNew);
             vmUser = em.merge(vmUser);
             if (userStatusIdOld != null && !userStatusIdOld.equals(userStatusIdNew)) {
                 userStatusIdOld.getVmUserList().remove(vmUser);
@@ -883,6 +919,17 @@ public class VmUserJpaController implements Serializable {
                     }
                 }
             }
+            for (Activity activityListNewActivity : activityListNew) {
+                if (!activityListOld.contains(activityListNewActivity)) {
+                    VmUser oldSourceUserOfActivityListNewActivity = activityListNewActivity.getSourceUser();
+                    activityListNewActivity.setSourceUser(vmUser);
+                    activityListNewActivity = em.merge(activityListNewActivity);
+                    if (oldSourceUserOfActivityListNewActivity != null && !oldSourceUserOfActivityListNewActivity.equals(vmUser)) {
+                        oldSourceUserOfActivityListNewActivity.getActivityList().remove(activityListNewActivity);
+                        oldSourceUserOfActivityListNewActivity = em.merge(oldSourceUserOfActivityListNewActivity);
+                    }
+                }
+            }
             em.getTransaction().commit();
         }
         catch (Exception ex) {
@@ -999,6 +1046,13 @@ public class VmUserJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the UserHasRole " + userHasRoleListOrphanCheckUserHasRole + " in its userHasRoleList field has a non-nullable vmUser field.");
+            }
+            List<Activity> activityListOrphanCheck = vmUser.getActivityList();
+            for (Activity activityListOrphanCheckActivity : activityListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the Activity " + activityListOrphanCheckActivity + " in its activityList field has a non-nullable sourceUser field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

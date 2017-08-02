@@ -46,13 +46,13 @@ public class ProjectTypeJpaController implements Serializable {
 
     public void create(ProjectType projectType) {
         if (projectType.getProjectList() == null) {
-            projectType.setProjectList(new ArrayList<Project>());
+            projectType.setProjectList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Project> attachedProjectList = new ArrayList<Project>();
+            List<Project> attachedProjectList = new ArrayList<>();
             for (Project projectListProjectToAttach : projectType.getProjectList()) {
                 projectListProjectToAttach = em.getReference(projectListProjectToAttach.getClass(), projectListProjectToAttach.getId());
                 attachedProjectList.add(projectListProjectToAttach);
@@ -89,7 +89,7 @@ public class ProjectTypeJpaController implements Serializable {
             for (Project projectListOldProject : projectListOld) {
                 if (!projectListNew.contains(projectListOldProject)) {
                     if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
+                        illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain Project " + projectListOldProject + " since its projectTypeId field is not nullable.");
                 }
@@ -97,7 +97,7 @@ public class ProjectTypeJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            List<Project> attachedProjectListNew = new ArrayList<Project>();
+            List<Project> attachedProjectListNew = new ArrayList<>();
             for (Project projectListNewProjectToAttach : projectListNew) {
                 projectListNewProjectToAttach = em.getReference(projectListNewProjectToAttach.getClass(), projectListNewProjectToAttach.getId());
                 attachedProjectListNew.add(projectListNewProjectToAttach);
@@ -152,7 +152,7 @@ public class ProjectTypeJpaController implements Serializable {
             List<Project> projectListOrphanCheck = projectType.getProjectList();
             for (Project projectListOrphanCheckProject : projectListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
+                    illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This ProjectType (" + projectType + ") cannot be destroyed since the Project " + projectListOrphanCheckProject + " in its projectList field has a non-nullable projectTypeId field.");
             }

@@ -139,6 +139,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.BaselineComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ExecutionStepComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.HistoryTable;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.LoginDialog;
@@ -156,7 +157,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.component.TestCaseE
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TestPlanComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TestProjectComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
-import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.ExecutionDashboard;
+import net.sourceforge.javydreamercsw.validation.manager.web.dashboard.DashboardProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.demo.DemoProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.importer.FileUploader;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.DesignerScreenProvider;
@@ -258,12 +259,6 @@ public class ValidationManagerUI extends UI implements VMUI {
             setLocale(l);
         }
         updateScreen();
-        if (DataBaseManager.isDemo()) {
-            showTab(Lookup.getDefault().lookup(DemoProvider.class)
-                    .getComponentCaption());
-        } else {
-            tabSheet.setSelectedTab(main);
-        }
     }
 
     private void displayRequirementSpecNode(RequirementSpecNode rsn,
@@ -888,9 +883,6 @@ public class ValidationManagerUI extends UI implements VMUI {
                     }
                 });
         hsplit.setSecondComponent(tabSheet);
-        if (DataBaseManager.isDemo()) {
-            showTab("demo.tab.name");
-        }
         //This is a tabbed pane. Enable/Disable the panes based on role
         if (getUser() != null) {
             roles.clear();
@@ -898,9 +890,6 @@ public class ValidationManagerUI extends UI implements VMUI {
             user.getRoleList().forEach((r) -> {
                 roles.add(r.getRoleName());
             });
-        }
-        if (main != null) {
-            main.setVisible(user != null);
         }
         hsplit.setSplitPosition(25, Unit.PERCENTAGE);
         return hsplit;
@@ -1020,6 +1009,15 @@ public class ValidationManagerUI extends UI implements VMUI {
         }
         //Add the content
         vs.setSecondComponent(getContentComponent());
+        if (getUser() != null) {
+            showTab(Lookup.getDefault().lookup(DashboardProvider.class)
+                    .getComponentCaption());
+        } else {
+            if (DataBaseManager.isDemo()) {
+                showTab(Lookup.getDefault().lookup(DemoProvider.class)
+                        .getComponentCaption());
+            }
+        }
         setContent(vs);
     }
 

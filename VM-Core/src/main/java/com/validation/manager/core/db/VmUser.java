@@ -70,6 +70,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT v FROM VmUser v WHERE v.attempts = :attempts")})
 public class VmUser extends Versionable implements Serializable {
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sourceUser")
+    private List<Activity> activityList;
+
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -459,5 +462,15 @@ public class VmUser extends Versionable implements Serializable {
 
     public void setUserHasRoleList(List<UserHasRole> userHasRoleList) {
         this.userHasRoleList = userHasRoleList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Activity> getActivityList() {
+        return activityList;
+    }
+
+    public void setActivityList(List<Activity> activityList) {
+        this.activityList = activityList;
     }
 }

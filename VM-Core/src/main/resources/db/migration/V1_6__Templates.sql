@@ -27,3 +27,9 @@ update `requirement_type` set description = 'hardware.specification.name' where 
 update `requirement_type` set description = 'module.specification.name', name = 'MS' where id =5;
 update `requirement_type` set description = 'labeling.specification.name' where id =6;
 update `requirement_type` set description = 'standards.specification.name' where id =7;
+
+/*Activity Stream*/
+INSERT INTO `activity_type` (`id`, `type_name`) VALUES (1, 'general.create');
+INSERT INTO `activity_type` (`id`, `type_name`) VALUES (2, 'general.edit');
+INSERT INTO `activity_type` (`id`, `type_name`) VALUES (3, 'test.execution');
+INSERT INTO `activity_type` (`id`, `type_name`) VALUES (4, 'test.review');
