@@ -336,6 +336,7 @@ public class ExecutionWizardStep implements WizardStep {
                     NumberField field = new NumberField(TRANSLATOR
                             .translate(de.getEntryName()));
                     field.setSigned(true);
+                    field.setNullRepresentation("");
                     field.setUseGrouping(true);
                     field.setGroupingSeparator(',');
                     field.setDecimal(true);

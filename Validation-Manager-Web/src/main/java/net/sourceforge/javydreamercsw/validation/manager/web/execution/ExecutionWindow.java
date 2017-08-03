@@ -18,26 +18,29 @@ package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.UI;
+import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
-import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.api.notification.NotificationTypes;
 import com.validation.manager.core.db.ExecutionStepHasVmUser;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.ExecutionStepAnswerJpaController;
 import com.validation.manager.core.db.controller.ExecutionStepHasVmUserJpaController;
+import com.validation.manager.core.server.core.ActivityServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.RoleServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
+import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
-import org.openide.util.Exceptions;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.notification.NotificationManager;
 import org.openide.util.Lookup;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.WizardStep;
@@ -127,10 +130,8 @@ public final class ExecutionWindow extends VMWindow {
             public void wizardCompleted(WizardCompletedEvent event) {
                 if (reviewer) {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                                    .translate("release.test.case.title"))
-                            .withMessage(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                                    .translate("release.test.case.message"))
+                            .withCaption(TRANSLATOR.translate("release.test.case.title"))
+                            .withMessage(TRANSLATOR.translate("release.test.case.message"))
                             .withYesButton(() -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)
@@ -144,10 +145,33 @@ public final class ExecutionWindow extends VMWindow {
                                                 }
                                                 ess.setReviewed(true);
                                                 save(ess);
+                                                new ActivityServer(4, new Date(),
+                                                        TRANSLATOR.translate("test.review.desc")
+                                                                .replaceAll("%u",
+                                                                        ((VMUI) UI.getCurrent())
+                                                                                .getUser().toString())
+                                                                .replaceAll("%i",
+                                                                        TRANSLATOR.translate("general.test.case")),
+                                                        ((VMUI) UI.getCurrent()).getUser().getEntity())
+                                                        .write2DB();
+                                                Lookup.getDefault().lookup(NotificationManager.class)
+                                                        .addNotification(TRANSLATOR.translate("notification.review.complete")
+                                                                .replaceAll("%r",
+                                                                        TRANSLATOR.translate(ess
+                                                                                .getReviewResultId()
+                                                                                .getReviewName()))
+                                                                .replaceAll("%i",
+                                                                        ess.getTestCaseExecution().getName()),
+                                                                NotificationTypes.REVIEW,
+                                                                ess.getAssignee(),
+                                                                ((VMUI) UI.getCurrent())
+                                                                        .getUser().getEntity());
                                                 ValidationManagerUI.getInstance()
                                                         .updateScreen();
                                             } catch (VMException ex) {
-                                                Exceptions.printStackTrace(ex);
+                                                LOG.log(Level.SEVERE, null, ex);
+                                            } catch (Exception ex) {
+                                                LOG.log(Level.SEVERE, null, ex);
                                             }
                                         });
                             }, ButtonOption.focus(),
@@ -157,10 +181,8 @@ public final class ExecutionWindow extends VMWindow {
                     prompt.open();
                 } else {
                     MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                                    .translate("lock.test.case.title"))
-                            .withMessage(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                                    .translate("lock.test.case.message"))
+                            .withCaption(TRANSLATOR.translate("lock.test.case.title"))
+                            .withMessage(TRANSLATOR.translate("lock.test.case.message"))
                             .withYesButton(() -> {
                                 for (WizardStep step : execution.getSteps()) {
                                     ExecutionWizardStep s = (ExecutionWizardStep) step;
@@ -170,10 +192,20 @@ public final class ExecutionWindow extends VMWindow {
                                         try {
                                             ess.setLocked(true);
                                             save(ess);
+                                            new ActivityServer(3, new Date(),
+                                                    TRANSLATOR.translate("test.execution.desc")
+                                                            .replaceAll("%u",
+                                                                    ((VMUI) UI.getCurrent())
+                                                                            .getUser().toString())
+                                                            .replaceAll("%i", s.getCaption()),
+                                                    ((VMUI) UI.getCurrent()).getUser().getEntity())
+                                                    .write2DB();
                                             ValidationManagerUI.getInstance()
                                                     .updateScreen();
                                         } catch (VMException ex) {
-                                            Exceptions.printStackTrace(ex);
+                                            LOG.log(Level.SEVERE, null, ex);
+                                        } catch (Exception ex) {
+                                            LOG.log(Level.SEVERE, null, ex);
                                         }
                                     }
                                 }
@@ -205,7 +237,7 @@ public final class ExecutionWindow extends VMWindow {
             try {
                 c.create(answer);
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
         });
         //Set tester/reviewer

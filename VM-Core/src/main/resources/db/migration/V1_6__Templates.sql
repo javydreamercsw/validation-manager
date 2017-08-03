@@ -33,3 +33,4 @@ INSERT INTO `activity_type` (`id`, `type_name`) VALUES (1, 'general.create');
 INSERT INTO `activity_type` (`id`, `type_name`) VALUES (2, 'general.edit');
 INSERT INTO `activity_type` (`id`, `type_name`) VALUES (3, 'test.execution');
 INSERT INTO `activity_type` (`id`, `type_name`) VALUES (4, 'test.review');
+INSERT INTO `activity_type` (`id`, `type_name`) VALUES (5, 'assign.test.case');

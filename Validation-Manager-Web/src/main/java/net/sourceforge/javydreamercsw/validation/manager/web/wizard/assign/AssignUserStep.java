@@ -23,12 +23,16 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TreeTable;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
+import com.validation.manager.core.server.core.ActivityServer;
 import com.validation.manager.core.server.core.RoleServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.server.core.TestCaseServer;
@@ -37,6 +41,7 @@ import com.validation.manager.core.tool.TCEExtraction;
 import com.validation.manager.core.tool.Tool;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -150,6 +155,14 @@ public class AssignUserStep implements WizardStep {
             testCaseIds.forEach((id) -> {
                 user.assignTestCase(tce, c.findTestCase(id), ui.getUser());
             });
+            new ActivityServer(5, new Date(),
+                    TRANSLATOR.translate("test.case.assign.desc")
+                            .replaceAll("%u",
+                                    ((VMUI) UI.getCurrent()).getUser().toString())
+                            .replaceAll("%i", TRANSLATOR.translate("general.test.case"))
+                            .replaceAll("%t", user.toString()),
+                    ((VMUI) UI.getCurrent()).getUser().getEntity())
+                    .write2DB();
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
