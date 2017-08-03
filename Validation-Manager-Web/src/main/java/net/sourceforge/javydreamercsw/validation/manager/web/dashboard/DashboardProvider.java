@@ -22,6 +22,7 @@ import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.data.util.converter.Converter;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
@@ -171,8 +172,11 @@ public class DashboardProvider extends AbstractProvider {
             Column avatar = grid.getColumn("avatar");
             avatar.setHeaderCaption("");
             avatar.setRenderer(new ImageRenderer());
+            Column time = grid.getColumn("activityTime");
+            time.setHeaderCaption(TRANSLATOR.translate("general.time"));
             grid.setColumns("avatar", "sourceUser", "activityType",
                     "description", "activityTime");
+            grid.sort("activityTime", SortDirection.DESCENDING);
             bl.addComponent(grid, BorderLayout.Constraint.CENTER);
             bl.setId(getComponentCaption());
             return bl;
