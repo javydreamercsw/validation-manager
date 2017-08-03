@@ -62,8 +62,10 @@ public class GravatarProvider implements AvatarProvider {
              * md5 hash the final string
              */
             URL url = getURL(email, size);
-            LOG.log(Level.FINE, "Retrieving icon from: {0}", url);
-            return new ExternalResource(url);
+            if (url != null) {
+                LOG.log(Level.FINE, "Retrieving icon from: {0}", url);
+                return new ExternalResource(url);
+            }
         }
         catch (VMException | IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -73,8 +75,7 @@ public class GravatarProvider implements AvatarProvider {
 
     private URL getURL(String email, int size) throws MalformedURLException, VMException {
         if (email == null || email.trim().isEmpty()) {
-            return new URL("http://www.gravatar.com/avatar/?d=identicon"
-                    + (size > 0 ? "?s=" + size : ""));
+            return null;
         } else {
             return new URL("https://www.gravatar.com/avatar/"
                     + MD5.encrypt(email.trim().toLowerCase())

@@ -7,6 +7,7 @@
     <persistence-unit-defaults>
       <entity-listeners>
         <entity-listener class="com.validation.manager.core.history.VersionListener"/>
+        <entity-listener class="com.validation.manager.core.activity.ActivityListener"/>
       </entity-listeners>
     </persistence-unit-defaults>
   </persistence-unit-metadata>
