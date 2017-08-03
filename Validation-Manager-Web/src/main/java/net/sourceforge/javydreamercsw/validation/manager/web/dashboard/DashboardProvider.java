@@ -176,7 +176,7 @@ public class DashboardProvider extends AbstractProvider {
             bl.addComponent(grid, BorderLayout.Constraint.CENTER);
             bl.setId(getComponentCaption());
             return bl;
-        } catch (Exception ex) {
+        } catch (IllegalArgumentException | IllegalStateException ex) {
             Exceptions.printStackTrace(ex);
         }
         return null;
