@@ -1679,7 +1679,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         for (UI ui : VaadinSession.getCurrent().getUIs()) {
             ui.access(() -> {
                 // Redirect from the page
-                ui.getPage().setLocation("/logout.html");
+                ui.getPage().setLocation("/static/logout.html");
             });
         }
         getSession().close();

@@ -18,6 +18,7 @@
         <openoffice.version>4.1.2</openoffice.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <activiti-version>5.22.0</activiti-version>
     </properties>
     <repositories>
         <repository>
@@ -194,6 +195,34 @@
             <artifactId>BorderLayout</artifactId>
             <version>0.7</version>
         </dependency>
+        <!--Workflows
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-engine</artifactId>
+            <version>${activiti-version}</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-modeler</artifactId>
+            <version>${activiti-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-webapp-explorer2</artifactId>
+            <version>${activiti-version}</version>
+            <type>war</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.25</version>
+        </dependency>
     </dependencies>
     
     <build>
@@ -273,6 +302,17 @@
                             <targetPath>META-INF/services</targetPath>
                         </resource>
                     </webResources>
+                    <overlays>
+                        <overlay>
+                            <groupId>org.activiti</groupId>
+                            <artifactId>activiti-webapp-explorer2</artifactId>
+                            <includes>
+                                <include>WEB-INF/classes/stencilset.json</include>   
+                                <include>editor-app/**</include>   
+                                <include>modeler.html</include>   
+                            </includes>
+                        </overlay>
+                    </overlays>
                 </configuration>
             </plugin>
             <plugin>
