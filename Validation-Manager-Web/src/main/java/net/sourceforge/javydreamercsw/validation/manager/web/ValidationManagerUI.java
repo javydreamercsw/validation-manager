@@ -34,6 +34,7 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.shared.ui.dd.VerticalDropLocation;
 import com.vaadin.ui.AbstractSelect;
@@ -45,6 +46,7 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
@@ -107,6 +109,7 @@ import com.validation.manager.core.tool.step.importer.TestCaseImportException;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.ButtonType;
 import de.steinwedel.messagebox.MessageBox;
+import elemental.json.JsonArray;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -117,10 +120,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
@@ -192,6 +197,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     private final List<String> roles = new ArrayList<>();
     private final String REQUIREMENT_REVIEW = "requirement.view";
     private static final ArrayList<Locale> LOCALES = new ArrayList<>();
+    private static final Map<String, Integer> SESSIONS = new HashMap<>();
 
     static {
         ResourceBundle locale = ResourceBundle
@@ -237,26 +243,43 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     /**
-     * @param user the user to set
+     * @param u the user to set
      */
-    public void setUser(VMUserServer user) {
-        this.user = user;
+    public void setUser(VMUserServer u) {
+        this.user = u;
         if (user != null) {
             user.update();
-            Locale l;
-            if (user.getLocale() == null) {
-                //Default locale
-                l = Locale.ENGLISH;
-                user.setLocale(l.getLanguage());
+            if (SESSIONS.containsValue(user.getId())) {
+                Notification.show(TRANSLATOR.translate("message.already.logged"),
+                        TRANSLATOR.translate("message.already.logged.desc"),
+                        Notification.Type.ERROR_MESSAGE);
+                this.user = null;
+            } else {
+                LOG.log(Level.FINE, "Adding session {1} for user: {0}",
+                        new Object[]{user.toString(),
+                            VaadinSession.getCurrent().getSession().getId()});
+                SESSIONS.put(VaadinSession.getCurrent().getSession().getId(),
+                        user.getId());
                 try {
                     user.write2DB();
                 } catch (VMException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
-            } else {
-                l = new Locale(user.getLocale());
+                Locale l;
+                if (user.getLocale() == null) {
+                    //Default locale
+                    l = Locale.ENGLISH;
+                    user.setLocale(l.getLanguage());
+                    try {
+                        user.write2DB();
+                    } catch (VMException ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                } else {
+                    l = new Locale(user.getLocale());
+                }
+                setLocale(l);
             }
-            setLocale(l);
         }
         updateScreen();
     }
@@ -949,6 +972,8 @@ public class ValidationManagerUI extends UI implements VMUI {
                     main = null;
                     setLocale(Locale.ENGLISH);
                     updateScreen();
+                    // Close the session
+                    closeSession();
                 } catch (VMException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
@@ -1288,6 +1313,23 @@ public class ValidationManagerUI extends UI implements VMUI {
                 System.getProperty("user.home"));
         Page.getCurrent().setTitle("Validation Manager");
         updateScreen();
+        //For the code below see: https://vaadin.com/forum#!/thread/1553240/8194235
+        JavaScript.getCurrent().addFunction("aboutToClose",
+                (JsonArray arguments) -> {
+                    try {
+                        if (user != null) {
+                            int id = SESSIONS.get(VaadinSession.getCurrent().getSession().getId());
+                            VMUserServer u = new VMUserServer(id);
+                            LOG.log(Level.FINE, "Clearing session for user: {0}", u.toString());
+                            SESSIONS.remove(VaadinSession.getCurrent().getSession().getId());
+                        }
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, null, ex);
+                    }
+                });
+
+        Page.getCurrent().getJavaScript()
+                .execute("window.onbeforeunload = function (e) { var e = e || window.event; aboutToClose(); return; };");
     }
 
     private static <V> void swapValues(SortedMap m, int i0, int i1) {
@@ -1631,6 +1673,16 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     .getValue())));
                         });
         dashboard.setEnabled(checkRight("testplan.planning"));
+    }
+
+    private void closeSession() {
+        for (UI ui : VaadinSession.getCurrent().getUIs()) {
+            ui.access(() -> {
+                // Redirect from the page
+                ui.getPage().setLocation("/logout.html");
+            });
+        }
+        getSession().close();
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
