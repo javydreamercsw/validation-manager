@@ -15,6 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
+import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.server.core.ExecutionResultServer;
@@ -52,7 +53,7 @@ public final class ExecutionDashboard extends VMWindow {
     }
 
     private void init() {
-        setCaption("execution.dash");
+        setCaption(TRANSLATOR.translate("execution.dash"));
         setHeight(100, Unit.PERCENTAGE);
         setWidth(100, Unit.PERCENTAGE);
         //Gather stats
@@ -76,9 +77,9 @@ public final class ExecutionDashboard extends VMWindow {
         });
         //Build bar graph
         JFreeChart chart = ChartFactory.createBarChart3D(
-                "execution.progress", // chart title
-                "test.case",
-                "general.amount",
+                TRANSLATOR.translate("execution.progress"), // chart title
+                TRANSLATOR.translate("test.case"),
+                TRANSLATOR.translate("general.amount"),
                 dataset, // data
                 PlotOrientation.VERTICAL,
                 true, // include legend
