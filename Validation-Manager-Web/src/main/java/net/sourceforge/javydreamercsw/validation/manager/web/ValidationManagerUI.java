@@ -292,12 +292,15 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     public void setTabContent(Tab target, Component content,
             String permission) {
-        Layout l = (Layout) target.getComponent();
-        if (l != null) {
+        Component c = target.getComponent();
+        if (c != null && c instanceof Layout) {
+            Layout l = (Layout) c;
             l.removeAllComponents();
             if (content != null) {
                 l.addComponent(content);
             }
+        } else {
+            LOG.log(Level.SEVERE, "Invalid target: {0}", target);
         }
         if (permission != null && !permission.isEmpty()) {
             //Hide tab based on permissions
@@ -1676,12 +1679,6 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void closeSession() {
-        for (UI ui : VaadinSession.getCurrent().getUIs()) {
-            ui.access(() -> {
-                // Redirect from the page
-                ui.getPage().setLocation("/logout.html");
-            });
-        }
         getSession().close();
     }
 
