@@ -39,6 +39,8 @@ import com.validation.manager.core.db.Notification;
 import com.validation.manager.core.db.UserHasRole;
 import com.validation.manager.core.db.Activity;
 import com.validation.manager.core.db.VmUser;
+import com.validation.manager.core.db.WorkflowInstance;
+import com.validation.manager.core.db.WorkflowInstanceHasTransition;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
@@ -116,6 +118,12 @@ public class VmUserJpaController implements Serializable {
         }
         if (vmUser.getActivityList() == null) {
             vmUser.setActivityList(new ArrayList<>());
+        }
+        if (vmUser.getWorkflowInstanceList() == null) {
+            vmUser.setWorkflowInstanceList(new ArrayList<>());
+        }
+        if (vmUser.getWorkflowInstanceHasTransitionList() == null) {
+            vmUser.setWorkflowInstanceHasTransitionList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
@@ -240,6 +248,18 @@ public class VmUserJpaController implements Serializable {
                 attachedActivityList.add(activityListActivityToAttach);
             }
             vmUser.setActivityList(attachedActivityList);
+            List<WorkflowInstance> attachedWorkflowInstanceList = new ArrayList<>();
+            for (WorkflowInstance workflowInstanceListWorkflowInstanceToAttach : vmUser.getWorkflowInstanceList()) {
+                workflowInstanceListWorkflowInstanceToAttach = em.getReference(workflowInstanceListWorkflowInstanceToAttach.getClass(), workflowInstanceListWorkflowInstanceToAttach.getWorkflowInstancePK());
+                attachedWorkflowInstanceList.add(workflowInstanceListWorkflowInstanceToAttach);
+            }
+            vmUser.setWorkflowInstanceList(attachedWorkflowInstanceList);
+            List<WorkflowInstanceHasTransition> attachedWorkflowInstanceHasTransitionList = new ArrayList<>();
+            for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListWorkflowInstanceHasTransitionToAttach : vmUser.getWorkflowInstanceHasTransitionList()) {
+                workflowInstanceHasTransitionListWorkflowInstanceHasTransitionToAttach = em.getReference(workflowInstanceHasTransitionListWorkflowInstanceHasTransitionToAttach.getClass(), workflowInstanceHasTransitionListWorkflowInstanceHasTransitionToAttach.getWorkflowInstanceHasTransitionPK());
+                attachedWorkflowInstanceHasTransitionList.add(workflowInstanceHasTransitionListWorkflowInstanceHasTransitionToAttach);
+            }
+            vmUser.setWorkflowInstanceHasTransitionList(attachedWorkflowInstanceHasTransitionList);
             em.persist(vmUser);
             if (userStatusId != null) {
                 userStatusId.getVmUserList().add(vmUser);
@@ -396,6 +416,24 @@ public class VmUserJpaController implements Serializable {
                     oldSourceUserOfActivityListActivity = em.merge(oldSourceUserOfActivityListActivity);
                 }
             }
+            for (WorkflowInstance workflowInstanceListWorkflowInstance : vmUser.getWorkflowInstanceList()) {
+                VmUser oldAssignedUserOfWorkflowInstanceListWorkflowInstance = workflowInstanceListWorkflowInstance.getAssignedUser();
+                workflowInstanceListWorkflowInstance.setAssignedUser(vmUser);
+                workflowInstanceListWorkflowInstance = em.merge(workflowInstanceListWorkflowInstance);
+                if (oldAssignedUserOfWorkflowInstanceListWorkflowInstance != null) {
+                    oldAssignedUserOfWorkflowInstanceListWorkflowInstance.getWorkflowInstanceList().remove(workflowInstanceListWorkflowInstance);
+                    oldAssignedUserOfWorkflowInstanceListWorkflowInstance = em.merge(oldAssignedUserOfWorkflowInstanceListWorkflowInstance);
+                }
+            }
+            for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListWorkflowInstanceHasTransition : vmUser.getWorkflowInstanceHasTransitionList()) {
+                VmUser oldTransitionerOfWorkflowInstanceHasTransitionListWorkflowInstanceHasTransition = workflowInstanceHasTransitionListWorkflowInstanceHasTransition.getTransitioner();
+                workflowInstanceHasTransitionListWorkflowInstanceHasTransition.setTransitioner(vmUser);
+                workflowInstanceHasTransitionListWorkflowInstanceHasTransition = em.merge(workflowInstanceHasTransitionListWorkflowInstanceHasTransition);
+                if (oldTransitionerOfWorkflowInstanceHasTransitionListWorkflowInstanceHasTransition != null) {
+                    oldTransitionerOfWorkflowInstanceHasTransitionListWorkflowInstanceHasTransition.getWorkflowInstanceHasTransitionList().remove(workflowInstanceHasTransitionListWorkflowInstanceHasTransition);
+                    oldTransitionerOfWorkflowInstanceHasTransitionListWorkflowInstanceHasTransition = em.merge(oldTransitionerOfWorkflowInstanceHasTransitionListWorkflowInstanceHasTransition);
+                }
+            }
             em.getTransaction().commit();
         }
         finally {
@@ -451,6 +489,10 @@ public class VmUserJpaController implements Serializable {
             List<UserHasRole> userHasRoleListNew = vmUser.getUserHasRoleList();
             List<Activity> activityListOld = persistentVmUser.getActivityList();
             List<Activity> activityListNew = vmUser.getActivityList();
+            List<WorkflowInstance> workflowInstanceListOld = persistentVmUser.getWorkflowInstanceList();
+            List<WorkflowInstance> workflowInstanceListNew = vmUser.getWorkflowInstanceList();
+            List<WorkflowInstanceHasTransition> workflowInstanceHasTransitionListOld = persistentVmUser.getWorkflowInstanceHasTransitionList();
+            List<WorkflowInstanceHasTransition> workflowInstanceHasTransitionListNew = vmUser.getWorkflowInstanceHasTransitionList();
             List<String> illegalOrphanMessages = null;
             for (UserTestProjectRole userTestProjectRoleListOldUserTestProjectRole : userTestProjectRoleListOld) {
                 if (!userTestProjectRoleListNew.contains(userTestProjectRoleListOldUserTestProjectRole)) {
@@ -554,6 +596,14 @@ public class VmUserJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain Activity " + activityListOldActivity + " since its sourceUser field is not nullable.");
+                }
+            }
+            for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListOldWorkflowInstanceHasTransition : workflowInstanceHasTransitionListOld) {
+                if (!workflowInstanceHasTransitionListNew.contains(workflowInstanceHasTransitionListOldWorkflowInstanceHasTransition)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain WorkflowInstanceHasTransition " + workflowInstanceHasTransitionListOldWorkflowInstanceHasTransition + " since its transitioner field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -696,6 +746,20 @@ public class VmUserJpaController implements Serializable {
             }
             activityListNew = attachedActivityListNew;
             vmUser.setActivityList(activityListNew);
+            List<WorkflowInstance> attachedWorkflowInstanceListNew = new ArrayList<>();
+            for (WorkflowInstance workflowInstanceListNewWorkflowInstanceToAttach : workflowInstanceListNew) {
+                workflowInstanceListNewWorkflowInstanceToAttach = em.getReference(workflowInstanceListNewWorkflowInstanceToAttach.getClass(), workflowInstanceListNewWorkflowInstanceToAttach.getWorkflowInstancePK());
+                attachedWorkflowInstanceListNew.add(workflowInstanceListNewWorkflowInstanceToAttach);
+            }
+            workflowInstanceListNew = attachedWorkflowInstanceListNew;
+            vmUser.setWorkflowInstanceList(workflowInstanceListNew);
+            List<WorkflowInstanceHasTransition> attachedWorkflowInstanceHasTransitionListNew = new ArrayList<>();
+            for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListNewWorkflowInstanceHasTransitionToAttach : workflowInstanceHasTransitionListNew) {
+                workflowInstanceHasTransitionListNewWorkflowInstanceHasTransitionToAttach = em.getReference(workflowInstanceHasTransitionListNewWorkflowInstanceHasTransitionToAttach.getClass(), workflowInstanceHasTransitionListNewWorkflowInstanceHasTransitionToAttach.getWorkflowInstanceHasTransitionPK());
+                attachedWorkflowInstanceHasTransitionListNew.add(workflowInstanceHasTransitionListNewWorkflowInstanceHasTransitionToAttach);
+            }
+            workflowInstanceHasTransitionListNew = attachedWorkflowInstanceHasTransitionListNew;
+            vmUser.setWorkflowInstanceHasTransitionList(workflowInstanceHasTransitionListNew);
             vmUser = em.merge(vmUser);
             if (userStatusIdOld != null && !userStatusIdOld.equals(userStatusIdNew)) {
                 userStatusIdOld.getVmUserList().remove(vmUser);
@@ -930,6 +994,34 @@ public class VmUserJpaController implements Serializable {
                     }
                 }
             }
+            for (WorkflowInstance workflowInstanceListOldWorkflowInstance : workflowInstanceListOld) {
+                if (!workflowInstanceListNew.contains(workflowInstanceListOldWorkflowInstance)) {
+                    workflowInstanceListOldWorkflowInstance.setAssignedUser(null);
+                    workflowInstanceListOldWorkflowInstance = em.merge(workflowInstanceListOldWorkflowInstance);
+                }
+            }
+            for (WorkflowInstance workflowInstanceListNewWorkflowInstance : workflowInstanceListNew) {
+                if (!workflowInstanceListOld.contains(workflowInstanceListNewWorkflowInstance)) {
+                    VmUser oldAssignedUserOfWorkflowInstanceListNewWorkflowInstance = workflowInstanceListNewWorkflowInstance.getAssignedUser();
+                    workflowInstanceListNewWorkflowInstance.setAssignedUser(vmUser);
+                    workflowInstanceListNewWorkflowInstance = em.merge(workflowInstanceListNewWorkflowInstance);
+                    if (oldAssignedUserOfWorkflowInstanceListNewWorkflowInstance != null && !oldAssignedUserOfWorkflowInstanceListNewWorkflowInstance.equals(vmUser)) {
+                        oldAssignedUserOfWorkflowInstanceListNewWorkflowInstance.getWorkflowInstanceList().remove(workflowInstanceListNewWorkflowInstance);
+                        oldAssignedUserOfWorkflowInstanceListNewWorkflowInstance = em.merge(oldAssignedUserOfWorkflowInstanceListNewWorkflowInstance);
+                    }
+                }
+            }
+            for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListNewWorkflowInstanceHasTransition : workflowInstanceHasTransitionListNew) {
+                if (!workflowInstanceHasTransitionListOld.contains(workflowInstanceHasTransitionListNewWorkflowInstanceHasTransition)) {
+                    VmUser oldTransitionerOfWorkflowInstanceHasTransitionListNewWorkflowInstanceHasTransition = workflowInstanceHasTransitionListNewWorkflowInstanceHasTransition.getTransitioner();
+                    workflowInstanceHasTransitionListNewWorkflowInstanceHasTransition.setTransitioner(vmUser);
+                    workflowInstanceHasTransitionListNewWorkflowInstanceHasTransition = em.merge(workflowInstanceHasTransitionListNewWorkflowInstanceHasTransition);
+                    if (oldTransitionerOfWorkflowInstanceHasTransitionListNewWorkflowInstanceHasTransition != null && !oldTransitionerOfWorkflowInstanceHasTransitionListNewWorkflowInstanceHasTransition.equals(vmUser)) {
+                        oldTransitionerOfWorkflowInstanceHasTransitionListNewWorkflowInstanceHasTransition.getWorkflowInstanceHasTransitionList().remove(workflowInstanceHasTransitionListNewWorkflowInstanceHasTransition);
+                        oldTransitionerOfWorkflowInstanceHasTransitionListNewWorkflowInstanceHasTransition = em.merge(oldTransitionerOfWorkflowInstanceHasTransitionListNewWorkflowInstanceHasTransition);
+                    }
+                }
+            }
             em.getTransaction().commit();
         }
         catch (Exception ex) {
@@ -1054,6 +1146,13 @@ public class VmUserJpaController implements Serializable {
                 }
                 illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the Activity " + activityListOrphanCheckActivity + " in its activityList field has a non-nullable sourceUser field.");
             }
+            List<WorkflowInstanceHasTransition> workflowInstanceHasTransitionListOrphanCheck = vmUser.getWorkflowInstanceHasTransitionList();
+            for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListOrphanCheckWorkflowInstanceHasTransition : workflowInstanceHasTransitionListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This VmUser (" + vmUser + ") cannot be destroyed since the WorkflowInstanceHasTransition " + workflowInstanceHasTransitionListOrphanCheckWorkflowInstanceHasTransition + " in its workflowInstanceHasTransitionList field has a non-nullable transitioner field.");
+            }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
@@ -1091,6 +1190,11 @@ public class VmUserJpaController implements Serializable {
             for (ExecutionStepHasIssue executionStepHasIssueListExecutionStepHasIssue : executionStepHasIssueList) {
                 executionStepHasIssueListExecutionStepHasIssue.getVmUserList().remove(vmUser);
                 executionStepHasIssueListExecutionStepHasIssue = em.merge(executionStepHasIssueListExecutionStepHasIssue);
+            }
+            List<WorkflowInstance> workflowInstanceList = vmUser.getWorkflowInstanceList();
+            for (WorkflowInstance workflowInstanceListWorkflowInstance : workflowInstanceList) {
+                workflowInstanceListWorkflowInstance.setAssignedUser(null);
+                workflowInstanceListWorkflowInstance = em.merge(workflowInstanceListWorkflowInstance);
             }
             em.remove(vmUser);
             em.getTransaction().commit();

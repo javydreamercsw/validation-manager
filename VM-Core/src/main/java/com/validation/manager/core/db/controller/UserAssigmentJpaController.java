@@ -50,9 +50,9 @@ public class UserAssigmentJpaController implements Serializable {
         if (userAssigment.getUserAssigmentPK() == null) {
             userAssigment.setUserAssigmentPK(new UserAssigmentPK());
         }
-        userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
         userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         userAssigment.getUserAssigmentPK().setAssignmentStatusId(userAssigment.getAssignmentStatus().getId());
+        userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -110,9 +110,9 @@ public class UserAssigmentJpaController implements Serializable {
     }
 
     public void edit(UserAssigment userAssigment) throws NonexistentEntityException, Exception {
-        userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
         userAssigment.getUserAssigmentPK().setAssignerId(userAssigment.getVmUser().getId());
         userAssigment.getUserAssigmentPK().setAssignmentStatusId(userAssigment.getAssignmentStatus().getId());
+        userAssigment.getUserAssigmentPK().setAssigmentTypeId(userAssigment.getAssigmentType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

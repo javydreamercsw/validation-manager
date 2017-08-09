@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,6 +62,8 @@ public class FieldType implements Serializable {
     private String typeName;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fieldType")
     private List<HistoryField> historyFieldList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fieldType")
+    private List<WorkflowStepField> workflowStepFieldList;
 
     public FieldType() {
     }
@@ -110,7 +112,7 @@ public class FieldType implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof FieldType)) {
             return false;
         }
@@ -122,5 +124,15 @@ public class FieldType implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.FieldType[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<WorkflowStepField> getWorkflowStepFieldList() {
+        return workflowStepFieldList;
+    }
+
+    public void setWorkflowStepFieldList(List<WorkflowStepField> workflowStepFieldList) {
+        this.workflowStepFieldList = workflowStepFieldList;
     }
 }

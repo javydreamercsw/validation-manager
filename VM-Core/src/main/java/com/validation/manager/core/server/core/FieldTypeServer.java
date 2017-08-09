@@ -70,6 +70,7 @@ public class FieldTypeServer extends FieldType
         target.setHistoryFieldList(source.getHistoryFieldList());
         target.setId(source.getId());
         target.setTypeName(source.getTypeName());
+        target.setWorkflowStepFieldList(source.getWorkflowStepFieldList());
     }
 
     @Override

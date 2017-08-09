@@ -50,10 +50,10 @@ public class ExecutionStepHasVmUserJpaController implements Serializable {
         if (executionStepHasVmUser.getExecutionStepHasVmUserPK() == null) {
             executionStepHasVmUser.setExecutionStepHasVmUserPK(new ExecutionStepHasVmUserPK());
         }
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setVmUserId(executionStepHasVmUser.getVmUser().getId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setVmUserId(executionStepHasVmUser.getVmUser().getId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setRoleId(executionStepHasVmUser.getRole().getId());
         EntityManager em = null;
         try {
@@ -103,10 +103,10 @@ public class ExecutionStepHasVmUserJpaController implements Serializable {
     }
 
     public void edit(ExecutionStepHasVmUser executionStepHasVmUser) throws NonexistentEntityException, Exception {
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setVmUserId(executionStepHasVmUser.getVmUser().getId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepId());
-        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepStepTestCaseId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setExecutionStepTestCaseExecutionId(executionStepHasVmUser.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
+        executionStepHasVmUser.getExecutionStepHasVmUserPK().setVmUserId(executionStepHasVmUser.getVmUser().getId());
         executionStepHasVmUser.getExecutionStepHasVmUserPK().setRoleId(executionStepHasVmUser.getRole().getId());
         EntityManager em = null;
         try {

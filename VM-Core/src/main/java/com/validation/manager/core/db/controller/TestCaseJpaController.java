@@ -21,9 +21,10 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.TestCaseType;
-import com.validation.manager.core.db.RiskControlHasTestCase;
+import com.validation.manager.core.db.TestPlan;
 import java.util.ArrayList;
 import java.util.List;
+import com.validation.manager.core.db.RiskControlHasTestCase;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCasePK;
@@ -52,6 +53,9 @@ public class TestCaseJpaController implements Serializable {
         if (testCase.getTestCasePK() == null) {
             testCase.setTestCasePK(new TestCasePK());
         }
+        if (testCase.getTestPlanList() == null) {
+            testCase.setTestPlanList(new ArrayList<>());
+        }
         if (testCase.getRiskControlHasTestCaseList() == null) {
             testCase.setRiskControlHasTestCaseList(new ArrayList<>());
         }
@@ -68,6 +72,12 @@ public class TestCaseJpaController implements Serializable {
                 testCaseType = em.getReference(testCaseType.getClass(), testCaseType.getId());
                 testCase.setTestCaseType(testCaseType);
             }
+            List<TestPlan> attachedTestPlanList = new ArrayList<>();
+            for (TestPlan testPlanListTestPlanToAttach : testCase.getTestPlanList()) {
+                testPlanListTestPlanToAttach = em.getReference(testPlanListTestPlanToAttach.getClass(), testPlanListTestPlanToAttach.getTestPlanPK());
+                attachedTestPlanList.add(testPlanListTestPlanToAttach);
+            }
+            testCase.setTestPlanList(attachedTestPlanList);
             List<RiskControlHasTestCase> attachedRiskControlHasTestCaseList = new ArrayList<>();
             for (RiskControlHasTestCase riskControlHasTestCaseListRiskControlHasTestCaseToAttach : testCase.getRiskControlHasTestCaseList()) {
                 riskControlHasTestCaseListRiskControlHasTestCaseToAttach = em.getReference(riskControlHasTestCaseListRiskControlHasTestCaseToAttach.getClass(), riskControlHasTestCaseListRiskControlHasTestCaseToAttach.getRiskControlHasTestCasePK());
@@ -84,6 +94,10 @@ public class TestCaseJpaController implements Serializable {
             if (testCaseType != null) {
                 testCaseType.getTestCaseList().add(testCase);
                 testCaseType = em.merge(testCaseType);
+            }
+            for (TestPlan testPlanListTestPlan : testCase.getTestPlanList()) {
+                testPlanListTestPlan.getTestCaseList().add(testCase);
+                testPlanListTestPlan = em.merge(testPlanListTestPlan);
             }
             for (RiskControlHasTestCase riskControlHasTestCaseListRiskControlHasTestCase : testCase.getRiskControlHasTestCaseList()) {
                 TestCase oldTestCaseOfRiskControlHasTestCaseListRiskControlHasTestCase = riskControlHasTestCaseListRiskControlHasTestCase.getTestCase();
@@ -127,6 +141,8 @@ public class TestCaseJpaController implements Serializable {
             TestCase persistentTestCase = em.find(TestCase.class, testCase.getTestCasePK());
             TestCaseType testCaseTypeOld = persistentTestCase.getTestCaseType();
             TestCaseType testCaseTypeNew = testCase.getTestCaseType();
+            List<TestPlan> testPlanListOld = persistentTestCase.getTestPlanList();
+            List<TestPlan> testPlanListNew = testCase.getTestPlanList();
             List<RiskControlHasTestCase> riskControlHasTestCaseListOld = persistentTestCase.getRiskControlHasTestCaseList();
             List<RiskControlHasTestCase> riskControlHasTestCaseListNew = testCase.getRiskControlHasTestCaseList();
             List<Step> stepListOld = persistentTestCase.getStepList();
@@ -155,6 +171,13 @@ public class TestCaseJpaController implements Serializable {
                 testCaseTypeNew = em.getReference(testCaseTypeNew.getClass(), testCaseTypeNew.getId());
                 testCase.setTestCaseType(testCaseTypeNew);
             }
+            List<TestPlan> attachedTestPlanListNew = new ArrayList<>();
+            for (TestPlan testPlanListNewTestPlanToAttach : testPlanListNew) {
+                testPlanListNewTestPlanToAttach = em.getReference(testPlanListNewTestPlanToAttach.getClass(), testPlanListNewTestPlanToAttach.getTestPlanPK());
+                attachedTestPlanListNew.add(testPlanListNewTestPlanToAttach);
+            }
+            testPlanListNew = attachedTestPlanListNew;
+            testCase.setTestPlanList(testPlanListNew);
             List<RiskControlHasTestCase> attachedRiskControlHasTestCaseListNew = new ArrayList<>();
             for (RiskControlHasTestCase riskControlHasTestCaseListNewRiskControlHasTestCaseToAttach : riskControlHasTestCaseListNew) {
                 riskControlHasTestCaseListNewRiskControlHasTestCaseToAttach = em.getReference(riskControlHasTestCaseListNewRiskControlHasTestCaseToAttach.getClass(), riskControlHasTestCaseListNewRiskControlHasTestCaseToAttach.getRiskControlHasTestCasePK());
@@ -177,6 +200,18 @@ public class TestCaseJpaController implements Serializable {
             if (testCaseTypeNew != null && !testCaseTypeNew.equals(testCaseTypeOld)) {
                 testCaseTypeNew.getTestCaseList().add(testCase);
                 testCaseTypeNew = em.merge(testCaseTypeNew);
+            }
+            for (TestPlan testPlanListOldTestPlan : testPlanListOld) {
+                if (!testPlanListNew.contains(testPlanListOldTestPlan)) {
+                    testPlanListOldTestPlan.getTestCaseList().remove(testCase);
+                    testPlanListOldTestPlan = em.merge(testPlanListOldTestPlan);
+                }
+            }
+            for (TestPlan testPlanListNewTestPlan : testPlanListNew) {
+                if (!testPlanListOld.contains(testPlanListNewTestPlan)) {
+                    testPlanListNewTestPlan.getTestCaseList().add(testCase);
+                    testPlanListNewTestPlan = em.merge(testPlanListNewTestPlan);
+                }
             }
             for (RiskControlHasTestCase riskControlHasTestCaseListNewRiskControlHasTestCase : riskControlHasTestCaseListNew) {
                 if (!riskControlHasTestCaseListOld.contains(riskControlHasTestCaseListNewRiskControlHasTestCase)) {
@@ -254,6 +289,11 @@ public class TestCaseJpaController implements Serializable {
             if (testCaseType != null) {
                 testCaseType.getTestCaseList().remove(testCase);
                 testCaseType = em.merge(testCaseType);
+            }
+            List<TestPlan> testPlanList = testCase.getTestPlanList();
+            for (TestPlan testPlanListTestPlan : testPlanList) {
+                testPlanListTestPlan.getTestCaseList().remove(testCase);
+                testPlanListTestPlan = em.merge(testPlanListTestPlan);
             }
             em.remove(testCase);
             em.getTransaction().commit();

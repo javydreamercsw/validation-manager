@@ -171,6 +171,10 @@ public class VmUser extends Versionable implements Serializable {
     private int attempts;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmUser")
     private List<UserHasRole> userHasRoleList;
+    @OneToMany(mappedBy = "assignedUser")
+    private List<WorkflowInstance> workflowInstanceList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "transitioner")
+    private List<WorkflowInstanceHasTransition> workflowInstanceHasTransitionList;
 
     public VmUser() {
         super();
@@ -472,5 +476,25 @@ public class VmUser extends Versionable implements Serializable {
 
     public void setActivityList(List<Activity> activityList) {
         this.activityList = activityList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<WorkflowInstance> getWorkflowInstanceList() {
+        return workflowInstanceList;
+    }
+
+    public void setWorkflowInstanceList(List<WorkflowInstance> workflowInstanceList) {
+        this.workflowInstanceList = workflowInstanceList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<WorkflowInstanceHasTransition> getWorkflowInstanceHasTransitionList() {
+        return workflowInstanceHasTransitionList;
+    }
+
+    public void setWorkflowInstanceHasTransitionList(List<WorkflowInstanceHasTransition> workflowInstanceHasTransitionList) {
+        this.workflowInstanceHasTransitionList = workflowInstanceHasTransitionList;
     }
 }

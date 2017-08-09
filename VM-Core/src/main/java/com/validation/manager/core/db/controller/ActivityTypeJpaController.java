@@ -60,12 +60,12 @@ public class ActivityTypeJpaController implements Serializable {
             activityType.setActivityList(attachedActivityList);
             em.persist(activityType);
             for (Activity activityListActivity : activityType.getActivityList()) {
-                ActivityType oldActivityType1OfActivityListActivity = activityListActivity.getActivityType();
+                ActivityType oldActivityTypeOfActivityListActivity = activityListActivity.getActivityType();
                 activityListActivity.setActivityType(activityType);
                 activityListActivity = em.merge(activityListActivity);
-                if (oldActivityType1OfActivityListActivity != null) {
-                    oldActivityType1OfActivityListActivity.getActivityList().remove(activityListActivity);
-                    oldActivityType1OfActivityListActivity = em.merge(oldActivityType1OfActivityListActivity);
+                if (oldActivityTypeOfActivityListActivity != null) {
+                    oldActivityTypeOfActivityListActivity.getActivityList().remove(activityListActivity);
+                    oldActivityTypeOfActivityListActivity = em.merge(oldActivityTypeOfActivityListActivity);
                 }
             }
             em.getTransaction().commit();
@@ -91,7 +91,7 @@ public class ActivityTypeJpaController implements Serializable {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<>();
                     }
-                    illegalOrphanMessages.add("You must retain Activity " + activityListOldActivity + " since its activityType1 field is not nullable.");
+                    illegalOrphanMessages.add("You must retain Activity " + activityListOldActivity + " since its activityType field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -107,12 +107,12 @@ public class ActivityTypeJpaController implements Serializable {
             activityType = em.merge(activityType);
             for (Activity activityListNewActivity : activityListNew) {
                 if (!activityListOld.contains(activityListNewActivity)) {
-                    ActivityType oldActivityType1OfActivityListNewActivity = activityListNewActivity.getActivityType();
+                    ActivityType oldActivityTypeOfActivityListNewActivity = activityListNewActivity.getActivityType();
                     activityListNewActivity.setActivityType(activityType);
                     activityListNewActivity = em.merge(activityListNewActivity);
-                    if (oldActivityType1OfActivityListNewActivity != null && !oldActivityType1OfActivityListNewActivity.equals(activityType)) {
-                        oldActivityType1OfActivityListNewActivity.getActivityList().remove(activityListNewActivity);
-                        oldActivityType1OfActivityListNewActivity = em.merge(oldActivityType1OfActivityListNewActivity);
+                    if (oldActivityTypeOfActivityListNewActivity != null && !oldActivityTypeOfActivityListNewActivity.equals(activityType)) {
+                        oldActivityTypeOfActivityListNewActivity.getActivityList().remove(activityListNewActivity);
+                        oldActivityTypeOfActivityListNewActivity = em.merge(oldActivityTypeOfActivityListNewActivity);
                     }
                 }
             }
@@ -154,7 +154,7 @@ public class ActivityTypeJpaController implements Serializable {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<>();
                 }
-                illegalOrphanMessages.add("This ActivityType (" + activityType + ") cannot be destroyed since the Activity " + activityListOrphanCheckActivity + " in its activityList field has a non-nullable activityType1 field.");
+                illegalOrphanMessages.add("This ActivityType (" + activityType + ") cannot be destroyed since the Activity " + activityListOrphanCheckActivity + " in its activityList field has a non-nullable activityType field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

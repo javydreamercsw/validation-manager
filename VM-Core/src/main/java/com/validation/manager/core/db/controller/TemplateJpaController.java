@@ -15,12 +15,13 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.Template;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.ProjectType;
+import com.validation.manager.core.db.Template;
 import com.validation.manager.core.db.TemplateNode;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -52,6 +53,11 @@ public class TemplateJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            ProjectType projectTypeId = template.getProjectTypeId();
+            if (projectTypeId != null) {
+                projectTypeId = em.getReference(projectTypeId.getClass(), projectTypeId.getId());
+                template.setProjectTypeId(projectTypeId);
+            }
             List<TemplateNode> attachedTemplateNodeList = new ArrayList<>();
             for (TemplateNode templateNodeListTemplateNodeToAttach : template.getTemplateNodeList()) {
                 templateNodeListTemplateNodeToAttach = em.getReference(templateNodeListTemplateNodeToAttach.getClass(), templateNodeListTemplateNodeToAttach.getTemplateNodePK());
@@ -59,6 +65,10 @@ public class TemplateJpaController implements Serializable {
             }
             template.setTemplateNodeList(attachedTemplateNodeList);
             em.persist(template);
+            if (projectTypeId != null) {
+                projectTypeId.getTemplateList().add(template);
+                projectTypeId = em.merge(projectTypeId);
+            }
             for (TemplateNode templateNodeListTemplateNode : template.getTemplateNodeList()) {
                 Template oldTemplateOfTemplateNodeListTemplateNode = templateNodeListTemplateNode.getTemplate();
                 templateNodeListTemplateNode.setTemplate(template);
@@ -83,6 +93,8 @@ public class TemplateJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Template persistentTemplate = em.find(Template.class, template.getId());
+            ProjectType projectTypeIdOld = persistentTemplate.getProjectTypeId();
+            ProjectType projectTypeIdNew = template.getProjectTypeId();
             List<TemplateNode> templateNodeListOld = persistentTemplate.getTemplateNodeList();
             List<TemplateNode> templateNodeListNew = template.getTemplateNodeList();
             List<String> illegalOrphanMessages = null;
@@ -97,6 +109,10 @@ public class TemplateJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
+            if (projectTypeIdNew != null) {
+                projectTypeIdNew = em.getReference(projectTypeIdNew.getClass(), projectTypeIdNew.getId());
+                template.setProjectTypeId(projectTypeIdNew);
+            }
             List<TemplateNode> attachedTemplateNodeListNew = new ArrayList<>();
             for (TemplateNode templateNodeListNewTemplateNodeToAttach : templateNodeListNew) {
                 templateNodeListNewTemplateNodeToAttach = em.getReference(templateNodeListNewTemplateNodeToAttach.getClass(), templateNodeListNewTemplateNodeToAttach.getTemplateNodePK());
@@ -105,6 +121,14 @@ public class TemplateJpaController implements Serializable {
             templateNodeListNew = attachedTemplateNodeListNew;
             template.setTemplateNodeList(templateNodeListNew);
             template = em.merge(template);
+            if (projectTypeIdOld != null && !projectTypeIdOld.equals(projectTypeIdNew)) {
+                projectTypeIdOld.getTemplateList().remove(template);
+                projectTypeIdOld = em.merge(projectTypeIdOld);
+            }
+            if (projectTypeIdNew != null && !projectTypeIdNew.equals(projectTypeIdOld)) {
+                projectTypeIdNew.getTemplateList().add(template);
+                projectTypeIdNew = em.merge(projectTypeIdNew);
+            }
             for (TemplateNode templateNodeListNewTemplateNode : templateNodeListNew) {
                 if (!templateNodeListOld.contains(templateNodeListNewTemplateNode)) {
                     Template oldTemplateOfTemplateNodeListNewTemplateNode = templateNodeListNewTemplateNode.getTemplate();
@@ -158,6 +182,11 @@ public class TemplateJpaController implements Serializable {
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            ProjectType projectTypeId = template.getProjectTypeId();
+            if (projectTypeId != null) {
+                projectTypeId.getTemplateList().remove(template);
+                projectTypeId = em.merge(projectTypeId);
             }
             em.remove(template);
             em.getTransaction().commit();

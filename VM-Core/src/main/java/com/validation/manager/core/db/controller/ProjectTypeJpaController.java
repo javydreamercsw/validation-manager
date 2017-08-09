@@ -22,10 +22,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.ProjectType;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import com.validation.manager.core.db.Template;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -48,6 +49,9 @@ public class ProjectTypeJpaController implements Serializable {
         if (projectType.getProjectList() == null) {
             projectType.setProjectList(new ArrayList<>());
         }
+        if (projectType.getTemplateList() == null) {
+            projectType.setTemplateList(new ArrayList<>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -58,6 +62,12 @@ public class ProjectTypeJpaController implements Serializable {
                 attachedProjectList.add(projectListProjectToAttach);
             }
             projectType.setProjectList(attachedProjectList);
+            List<Template> attachedTemplateList = new ArrayList<>();
+            for (Template templateListTemplateToAttach : projectType.getTemplateList()) {
+                templateListTemplateToAttach = em.getReference(templateListTemplateToAttach.getClass(), templateListTemplateToAttach.getId());
+                attachedTemplateList.add(templateListTemplateToAttach);
+            }
+            projectType.setTemplateList(attachedTemplateList);
             em.persist(projectType);
             for (Project projectListProject : projectType.getProjectList()) {
                 ProjectType oldProjectTypeIdOfProjectListProject = projectListProject.getProjectTypeId();
@@ -66,6 +76,15 @@ public class ProjectTypeJpaController implements Serializable {
                 if (oldProjectTypeIdOfProjectListProject != null) {
                     oldProjectTypeIdOfProjectListProject.getProjectList().remove(projectListProject);
                     oldProjectTypeIdOfProjectListProject = em.merge(oldProjectTypeIdOfProjectListProject);
+                }
+            }
+            for (Template templateListTemplate : projectType.getTemplateList()) {
+                ProjectType oldProjectTypeIdOfTemplateListTemplate = templateListTemplate.getProjectTypeId();
+                templateListTemplate.setProjectTypeId(projectType);
+                templateListTemplate = em.merge(templateListTemplate);
+                if (oldProjectTypeIdOfTemplateListTemplate != null) {
+                    oldProjectTypeIdOfTemplateListTemplate.getTemplateList().remove(templateListTemplate);
+                    oldProjectTypeIdOfTemplateListTemplate = em.merge(oldProjectTypeIdOfTemplateListTemplate);
                 }
             }
             em.getTransaction().commit();
@@ -85,6 +104,8 @@ public class ProjectTypeJpaController implements Serializable {
             ProjectType persistentProjectType = em.find(ProjectType.class, projectType.getId());
             List<Project> projectListOld = persistentProjectType.getProjectList();
             List<Project> projectListNew = projectType.getProjectList();
+            List<Template> templateListOld = persistentProjectType.getTemplateList();
+            List<Template> templateListNew = projectType.getTemplateList();
             List<String> illegalOrphanMessages = null;
             for (Project projectListOldProject : projectListOld) {
                 if (!projectListNew.contains(projectListOldProject)) {
@@ -92,6 +113,14 @@ public class ProjectTypeJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain Project " + projectListOldProject + " since its projectTypeId field is not nullable.");
+                }
+            }
+            for (Template templateListOldTemplate : templateListOld) {
+                if (!templateListNew.contains(templateListOldTemplate)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain Template " + templateListOldTemplate + " since its projectTypeId field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -104,6 +133,13 @@ public class ProjectTypeJpaController implements Serializable {
             }
             projectListNew = attachedProjectListNew;
             projectType.setProjectList(projectListNew);
+            List<Template> attachedTemplateListNew = new ArrayList<>();
+            for (Template templateListNewTemplateToAttach : templateListNew) {
+                templateListNewTemplateToAttach = em.getReference(templateListNewTemplateToAttach.getClass(), templateListNewTemplateToAttach.getId());
+                attachedTemplateListNew.add(templateListNewTemplateToAttach);
+            }
+            templateListNew = attachedTemplateListNew;
+            projectType.setTemplateList(templateListNew);
             projectType = em.merge(projectType);
             for (Project projectListNewProject : projectListNew) {
                 if (!projectListOld.contains(projectListNewProject)) {
@@ -113,6 +149,17 @@ public class ProjectTypeJpaController implements Serializable {
                     if (oldProjectTypeIdOfProjectListNewProject != null && !oldProjectTypeIdOfProjectListNewProject.equals(projectType)) {
                         oldProjectTypeIdOfProjectListNewProject.getProjectList().remove(projectListNewProject);
                         oldProjectTypeIdOfProjectListNewProject = em.merge(oldProjectTypeIdOfProjectListNewProject);
+                    }
+                }
+            }
+            for (Template templateListNewTemplate : templateListNew) {
+                if (!templateListOld.contains(templateListNewTemplate)) {
+                    ProjectType oldProjectTypeIdOfTemplateListNewTemplate = templateListNewTemplate.getProjectTypeId();
+                    templateListNewTemplate.setProjectTypeId(projectType);
+                    templateListNewTemplate = em.merge(templateListNewTemplate);
+                    if (oldProjectTypeIdOfTemplateListNewTemplate != null && !oldProjectTypeIdOfTemplateListNewTemplate.equals(projectType)) {
+                        oldProjectTypeIdOfTemplateListNewTemplate.getTemplateList().remove(templateListNewTemplate);
+                        oldProjectTypeIdOfTemplateListNewTemplate = em.merge(oldProjectTypeIdOfTemplateListNewTemplate);
                     }
                 }
             }
@@ -155,6 +202,13 @@ public class ProjectTypeJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This ProjectType (" + projectType + ") cannot be destroyed since the Project " + projectListOrphanCheckProject + " in its projectList field has a non-nullable projectTypeId field.");
+            }
+            List<Template> templateListOrphanCheck = projectType.getTemplateList();
+            for (Template templateListOrphanCheckTemplate : templateListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This ProjectType (" + projectType + ") cannot be destroyed since the Template " + templateListOrphanCheckTemplate + " in its templateList field has a non-nullable projectTypeId field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

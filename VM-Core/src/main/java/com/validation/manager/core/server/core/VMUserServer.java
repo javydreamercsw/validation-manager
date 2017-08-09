@@ -412,6 +412,8 @@ public final class VMUserServer extends VmUser implements EntityServer<VmUser> {
         target.setHistoryModificationList(source.getHistoryModificationList());
         target.setUserHasRoleList(source.getUserHasRoleList());
         target.setActivityList(source.getActivityList());
+        target.setWorkflowInstanceHasTransitionList(source.getWorkflowInstanceHasTransitionList());
+        target.setWorkflowInstanceList(source.getWorkflowInstanceList());
         super.update(target, source);
     }
 

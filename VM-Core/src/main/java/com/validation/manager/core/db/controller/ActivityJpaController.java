@@ -17,18 +17,18 @@ package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.Activity;
 import com.validation.manager.core.db.ActivityPK;
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.ActivityType;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -54,10 +54,10 @@ public class ActivityJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            ActivityType activityType1 = activity.getActivityType();
-            if (activityType1 != null) {
-                activityType1 = em.getReference(activityType1.getClass(), activityType1.getId());
-                activity.setActivityType(activityType1);
+            ActivityType activityType = activity.getActivityType();
+            if (activityType != null) {
+                activityType = em.getReference(activityType.getClass(), activityType.getId());
+                activity.setActivityType(activityType);
             }
             VmUser sourceUser = activity.getSourceUser();
             if (sourceUser != null) {
@@ -65,9 +65,9 @@ public class ActivityJpaController implements Serializable {
                 activity.setSourceUser(sourceUser);
             }
             em.persist(activity);
-            if (activityType1 != null) {
-                activityType1.getActivityList().add(activity);
-                activityType1 = em.merge(activityType1);
+            if (activityType != null) {
+                activityType.getActivityList().add(activity);
+                activityType = em.merge(activityType);
             }
             if (sourceUser != null) {
                 sourceUser.getActivityList().add(activity);
@@ -77,8 +77,7 @@ public class ActivityJpaController implements Serializable {
         }
         catch (Exception ex) {
             if (findActivity(activity.getActivityPK()) != null) {
-                throw new PreexistingEntityException("Activity "
-                        + activity + " already exists.", ex);
+                throw new PreexistingEntityException("Activity " + activity + " already exists.", ex);
             }
             throw ex;
         }
@@ -96,27 +95,26 @@ public class ActivityJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Activity persistentActivity = em.find(Activity.class, activity.getActivityPK());
-            ActivityType activityType1Old = persistentActivity.getActivityType();
-            ActivityType activityType1New = activity.getActivityType();
+            ActivityType activityTypeOld = persistentActivity.getActivityType();
+            ActivityType activityTypeNew = activity.getActivityType();
             VmUser sourceUserOld = persistentActivity.getSourceUser();
             VmUser sourceUserNew = activity.getSourceUser();
-            if (activityType1New != null) {
-                activityType1New = em.getReference(activityType1New.getClass(),
-                        activityType1New.getId());
-                activity.setActivityType(activityType1New);
+            if (activityTypeNew != null) {
+                activityTypeNew = em.getReference(activityTypeNew.getClass(), activityTypeNew.getId());
+                activity.setActivityType(activityTypeNew);
             }
             if (sourceUserNew != null) {
                 sourceUserNew = em.getReference(sourceUserNew.getClass(), sourceUserNew.getId());
                 activity.setSourceUser(sourceUserNew);
             }
             activity = em.merge(activity);
-            if (activityType1Old != null && !activityType1Old.equals(activityType1New)) {
-                activityType1Old.getActivityList().remove(activity);
-                activityType1Old = em.merge(activityType1Old);
+            if (activityTypeOld != null && !activityTypeOld.equals(activityTypeNew)) {
+                activityTypeOld.getActivityList().remove(activity);
+                activityTypeOld = em.merge(activityTypeOld);
             }
-            if (activityType1New != null && !activityType1New.equals(activityType1Old)) {
-                activityType1New.getActivityList().add(activity);
-                activityType1New = em.merge(activityType1New);
+            if (activityTypeNew != null && !activityTypeNew.equals(activityTypeOld)) {
+                activityTypeNew.getActivityList().add(activity);
+                activityTypeNew = em.merge(activityTypeNew);
             }
             if (sourceUserOld != null && !sourceUserOld.equals(sourceUserNew)) {
                 sourceUserOld.getActivityList().remove(activity);
@@ -158,10 +156,10 @@ public class ActivityJpaController implements Serializable {
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The activity with id " + id + " no longer exists.", enfe);
             }
-            ActivityType activityType1 = activity.getActivityType();
-            if (activityType1 != null) {
-                activityType1.getActivityList().remove(activity);
-                activityType1 = em.merge(activityType1);
+            ActivityType activityType = activity.getActivityType();
+            if (activityType != null) {
+                activityType.getActivityList().remove(activity);
+                activityType = em.merge(activityType);
             }
             VmUser sourceUser = activity.getSourceUser();
             if (sourceUser != null) {

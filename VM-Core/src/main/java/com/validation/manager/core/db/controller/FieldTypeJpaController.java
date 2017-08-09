@@ -22,10 +22,11 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.HistoryField;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import com.validation.manager.core.db.WorkflowStepField;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -48,6 +49,9 @@ public class FieldTypeJpaController implements Serializable {
         if (fieldType.getHistoryFieldList() == null) {
             fieldType.setHistoryFieldList(new ArrayList<>());
         }
+        if (fieldType.getWorkflowStepFieldList() == null) {
+            fieldType.setWorkflowStepFieldList(new ArrayList<>());
+        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -58,6 +62,12 @@ public class FieldTypeJpaController implements Serializable {
                 attachedHistoryFieldList.add(historyFieldListHistoryFieldToAttach);
             }
             fieldType.setHistoryFieldList(attachedHistoryFieldList);
+            List<WorkflowStepField> attachedWorkflowStepFieldList = new ArrayList<>();
+            for (WorkflowStepField workflowStepFieldListWorkflowStepFieldToAttach : fieldType.getWorkflowStepFieldList()) {
+                workflowStepFieldListWorkflowStepFieldToAttach = em.getReference(workflowStepFieldListWorkflowStepFieldToAttach.getClass(), workflowStepFieldListWorkflowStepFieldToAttach.getWorkflowStepFieldPK());
+                attachedWorkflowStepFieldList.add(workflowStepFieldListWorkflowStepFieldToAttach);
+            }
+            fieldType.setWorkflowStepFieldList(attachedWorkflowStepFieldList);
             em.persist(fieldType);
             for (HistoryField historyFieldListHistoryField : fieldType.getHistoryFieldList()) {
                 FieldType oldFieldTypeOfHistoryFieldListHistoryField = historyFieldListHistoryField.getFieldType();
@@ -66,6 +76,15 @@ public class FieldTypeJpaController implements Serializable {
                 if (oldFieldTypeOfHistoryFieldListHistoryField != null) {
                     oldFieldTypeOfHistoryFieldListHistoryField.getHistoryFieldList().remove(historyFieldListHistoryField);
                     oldFieldTypeOfHistoryFieldListHistoryField = em.merge(oldFieldTypeOfHistoryFieldListHistoryField);
+                }
+            }
+            for (WorkflowStepField workflowStepFieldListWorkflowStepField : fieldType.getWorkflowStepFieldList()) {
+                FieldType oldFieldTypeOfWorkflowStepFieldListWorkflowStepField = workflowStepFieldListWorkflowStepField.getFieldType();
+                workflowStepFieldListWorkflowStepField.setFieldType(fieldType);
+                workflowStepFieldListWorkflowStepField = em.merge(workflowStepFieldListWorkflowStepField);
+                if (oldFieldTypeOfWorkflowStepFieldListWorkflowStepField != null) {
+                    oldFieldTypeOfWorkflowStepFieldListWorkflowStepField.getWorkflowStepFieldList().remove(workflowStepFieldListWorkflowStepField);
+                    oldFieldTypeOfWorkflowStepFieldListWorkflowStepField = em.merge(oldFieldTypeOfWorkflowStepFieldListWorkflowStepField);
                 }
             }
             em.getTransaction().commit();
@@ -85,6 +104,8 @@ public class FieldTypeJpaController implements Serializable {
             FieldType persistentFieldType = em.find(FieldType.class, fieldType.getId());
             List<HistoryField> historyFieldListOld = persistentFieldType.getHistoryFieldList();
             List<HistoryField> historyFieldListNew = fieldType.getHistoryFieldList();
+            List<WorkflowStepField> workflowStepFieldListOld = persistentFieldType.getWorkflowStepFieldList();
+            List<WorkflowStepField> workflowStepFieldListNew = fieldType.getWorkflowStepFieldList();
             List<String> illegalOrphanMessages = null;
             for (HistoryField historyFieldListOldHistoryField : historyFieldListOld) {
                 if (!historyFieldListNew.contains(historyFieldListOldHistoryField)) {
@@ -92,6 +113,14 @@ public class FieldTypeJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain HistoryField " + historyFieldListOldHistoryField + " since its fieldType field is not nullable.");
+                }
+            }
+            for (WorkflowStepField workflowStepFieldListOldWorkflowStepField : workflowStepFieldListOld) {
+                if (!workflowStepFieldListNew.contains(workflowStepFieldListOldWorkflowStepField)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain WorkflowStepField " + workflowStepFieldListOldWorkflowStepField + " since its fieldType field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -104,6 +133,13 @@ public class FieldTypeJpaController implements Serializable {
             }
             historyFieldListNew = attachedHistoryFieldListNew;
             fieldType.setHistoryFieldList(historyFieldListNew);
+            List<WorkflowStepField> attachedWorkflowStepFieldListNew = new ArrayList<>();
+            for (WorkflowStepField workflowStepFieldListNewWorkflowStepFieldToAttach : workflowStepFieldListNew) {
+                workflowStepFieldListNewWorkflowStepFieldToAttach = em.getReference(workflowStepFieldListNewWorkflowStepFieldToAttach.getClass(), workflowStepFieldListNewWorkflowStepFieldToAttach.getWorkflowStepFieldPK());
+                attachedWorkflowStepFieldListNew.add(workflowStepFieldListNewWorkflowStepFieldToAttach);
+            }
+            workflowStepFieldListNew = attachedWorkflowStepFieldListNew;
+            fieldType.setWorkflowStepFieldList(workflowStepFieldListNew);
             fieldType = em.merge(fieldType);
             for (HistoryField historyFieldListNewHistoryField : historyFieldListNew) {
                 if (!historyFieldListOld.contains(historyFieldListNewHistoryField)) {
@@ -113,6 +149,17 @@ public class FieldTypeJpaController implements Serializable {
                     if (oldFieldTypeOfHistoryFieldListNewHistoryField != null && !oldFieldTypeOfHistoryFieldListNewHistoryField.equals(fieldType)) {
                         oldFieldTypeOfHistoryFieldListNewHistoryField.getHistoryFieldList().remove(historyFieldListNewHistoryField);
                         oldFieldTypeOfHistoryFieldListNewHistoryField = em.merge(oldFieldTypeOfHistoryFieldListNewHistoryField);
+                    }
+                }
+            }
+            for (WorkflowStepField workflowStepFieldListNewWorkflowStepField : workflowStepFieldListNew) {
+                if (!workflowStepFieldListOld.contains(workflowStepFieldListNewWorkflowStepField)) {
+                    FieldType oldFieldTypeOfWorkflowStepFieldListNewWorkflowStepField = workflowStepFieldListNewWorkflowStepField.getFieldType();
+                    workflowStepFieldListNewWorkflowStepField.setFieldType(fieldType);
+                    workflowStepFieldListNewWorkflowStepField = em.merge(workflowStepFieldListNewWorkflowStepField);
+                    if (oldFieldTypeOfWorkflowStepFieldListNewWorkflowStepField != null && !oldFieldTypeOfWorkflowStepFieldListNewWorkflowStepField.equals(fieldType)) {
+                        oldFieldTypeOfWorkflowStepFieldListNewWorkflowStepField.getWorkflowStepFieldList().remove(workflowStepFieldListNewWorkflowStepField);
+                        oldFieldTypeOfWorkflowStepFieldListNewWorkflowStepField = em.merge(oldFieldTypeOfWorkflowStepFieldListNewWorkflowStepField);
                     }
                 }
             }
@@ -155,6 +202,13 @@ public class FieldTypeJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This FieldType (" + fieldType + ") cannot be destroyed since the HistoryField " + historyFieldListOrphanCheckHistoryField + " in its historyFieldList field has a non-nullable fieldType field.");
+            }
+            List<WorkflowStepField> workflowStepFieldListOrphanCheck = fieldType.getWorkflowStepFieldList();
+            for (WorkflowStepField workflowStepFieldListOrphanCheckWorkflowStepField : workflowStepFieldListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This FieldType (" + fieldType + ") cannot be destroyed since the WorkflowStepField " + workflowStepFieldListOrphanCheckWorkflowStepField + " in its workflowStepFieldList field has a non-nullable fieldType field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
