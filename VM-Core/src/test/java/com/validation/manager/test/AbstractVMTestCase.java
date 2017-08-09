@@ -24,7 +24,6 @@ import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.history.Auditable;
 import com.validation.manager.core.history.Versionable;
 import com.validation.manager.core.server.core.VMUserServer;
-import static com.validation.manager.core.tool.MD5.encrypt;
 import static java.lang.Class.forName;
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -126,19 +125,19 @@ public abstract class AbstractVMTestCase extends TestCase {
     protected void createTestUsers() {
         try {
             VMUserServer temp = new VMUserServer("test1",
-                    "password", "test@test.com", "first", "last");
+                    "password", "Test", "Designer", "test@test.com");
             temp.write2DB();
             designer = new VmUserJpaController(DataBaseManager
                     .getEntityManagerFactory())
                     .findVmUser(temp.getId());
             temp = new VMUserServer("test2",
-                    "password", "test@test.com", "first", "last");
+                    "password", "Mr.", "Tester", "test@test.com");
             temp.write2DB();
             tester = new VmUserJpaController(DataBaseManager
                     .getEntityManagerFactory())
                     .findVmUser(temp.getId());
             temp = new VMUserServer("test3",
-                    encrypt("password"), "test@test.com", "first", "last");
+                    "password", "Test", "Lead", "test@test.com");
             temp.write2DB();
             leader = new VmUserJpaController(DataBaseManager
                     .getEntityManagerFactory())
