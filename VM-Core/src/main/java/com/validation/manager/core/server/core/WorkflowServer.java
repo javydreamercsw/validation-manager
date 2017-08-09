@@ -121,7 +121,6 @@ public final class WorkflowServer extends Workflow
                         .getEntityManagerFactory()).create(t);
                 source.getSourceTransitions().add(t);
                 target.getTargetTransitions().add(t);
-                System.out.println(source.getStepName() + "----->" + target.getStepName());
             }
             catch (Exception ex) {
                 throw new VMException(ex);

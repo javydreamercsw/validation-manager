@@ -17,6 +17,7 @@ package com.validation.manager.core.server.core;
 
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
+import com.validation.manager.core.db.WorkflowStep;
 import com.validation.manager.core.db.controller.StepTransitionsToStepJpaController;
 import com.validation.manager.core.db.controller.WorkflowJpaController;
 import com.validation.manager.core.db.controller.WorkflowStepJpaController;
@@ -73,9 +74,12 @@ public class WorkflowServerTest extends AbstractVMTestCase {
         for (int i = 1; i <= 5; i++) {
             ws.addStep("Step #" + i);
             //Add a transition from previous step
-            ws.addTransition(ws.getEntity()
-                    .getWorkflowStepList().get(i - 1),
-                    ws.getEntity().getWorkflowStepList().get(i));
+            WorkflowStep source = ws.getEntity()
+                    .getWorkflowStepList().get(i - 1);
+            WorkflowStep target = ws.getEntity().getWorkflowStepList().get(i);
+            ws.addTransition(source, target);
+            System.out.println(source.getStepName()
+                    + "----->" + target.getStepName());
         }
         //Create an instance
         WorkflowInstanceServer wis
@@ -91,17 +95,31 @@ public class WorkflowServerTest extends AbstractVMTestCase {
         catch (VMException ex) {
             //Expected failure
         }
-        //Attempt good transition
-        try {
-            assertEquals(0, wis.getWorkflowInstanceHasTransitionList().size());
-            wis.transition(ws.getWorkflowStepList().get(1), designer, "Test");
-            assertEquals(1, wis.getWorkflowInstanceHasTransitionList().size());
-            assertNotNull(wis.getWorkflowStep());
+        for (int i = 0; i < 5; i++) {
+            //Attempt good transition
+            try {
+                assertEquals(i, wis.getWorkflowInstanceHasTransitionList().size());
+                wis.transition(ws.getWorkflowStepList().get(i + 1), designer, "Test");
+                assertEquals(i + 1, wis.getWorkflowInstanceHasTransitionList().size());
+                assertNotNull(wis.getWorkflowStep());
+            }
+            catch (VMException ex) {
+                //Expected failure
+                Exceptions.printStackTrace(ex);
+                fail();
+            }
         }
-        catch (VMException ex) {
-            //Expected failure
-            Exceptions.printStackTrace(ex);
-            fail();
-        }
+        wis.getWorkflowInstanceHasTransitionList().forEach(t -> {
+            System.out.println("Transitioned from: "
+                    + t.getStepTransitionsToStep().getWorkflowStepSource()
+                            .getStepName()
+                    + " to "
+                    + t.getStepTransitionsToStep().getWorkflowStepTarget()
+                            .getStepName()
+                    + " on " + t.getTransitionDate()
+                    + " by: " + t.getTransitioner().getFirstName() + " "
+                    + t.getTransitioner().getLastName()
+                    + " Reason: " + t.getTransitionSource());
+        });
     }
 }
