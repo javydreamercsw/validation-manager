@@ -17,7 +17,9 @@ package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -27,6 +29,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -72,6 +76,11 @@ public class StepTransitionsToStep implements Serializable {
                 updatable = false)})
     @ManyToOne(optional = false)
     private WorkflowStep workflowStepTarget;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
+    @Column(name = "transition_name")
+    private String transitionName;
 
     public StepTransitionsToStep() {
     }
@@ -146,4 +155,11 @@ public class StepTransitionsToStep implements Serializable {
                 + stepTransitionsToStepPK + " ]";
     }
 
+    public String getTransitionName() {
+        return transitionName;
+    }
+
+    public void setTransitionName(String transitionName) {
+        this.transitionName = transitionName;
+    }
 }

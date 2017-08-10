@@ -149,12 +149,12 @@
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>javax.mail-api</artifactId>
-            <version>1.5.6</version>
+            <version>1.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
-            <version>1.5.6</version>
+            <version>1.6.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/de.saly/javamail-mock2-fullmock -->
         <dependency>
@@ -297,7 +297,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <pdfbox.version>2.0.6</pdfbox.version>
+        <pdfbox.version>2.0.7</pdfbox.version>
         <jacoco.version>0.7.9</jacoco.version>
         <jacoco.outputDir>${project.basedir}/target/jacoco.exec</jacoco.outputDir>
     </properties>

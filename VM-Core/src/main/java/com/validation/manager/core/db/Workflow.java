@@ -61,7 +61,7 @@ public class Workflow implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "workflow",
-            initialValue = 0,
+            initialValue = 1_000,
             allocationSize = 1)
     private Integer id;
     @Basic(optional = false)

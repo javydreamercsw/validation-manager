@@ -48,21 +48,22 @@ public class WorkflowServerTest extends AbstractVMTestCase {
         StepTransitionsToStepJpaController tc
                 = new StepTransitionsToStepJpaController(DataBaseManager
                         .getEntityManagerFactory());
-        assertEquals(0, c.getWorkflowCount());
+        int workflows = c.getWorkflowCount();
+        int steps = sc.getWorkflowStepCount();
         WorkflowServer instance = new WorkflowServer("Test");
         instance.write2DB();
-        assertEquals(1, c.getWorkflowCount());
-        assertEquals(1, sc.getWorkflowStepCount());
+        assertEquals(workflows + 1, c.getWorkflowCount());
+        assertEquals(steps + 1, sc.getWorkflowStepCount());
         instance.addStep("Step #1");
-        assertEquals(2, sc.getWorkflowStepCount());
+        assertEquals(steps + 2, sc.getWorkflowStepCount());
         assertEquals(2, instance.getEntity().getWorkflowStepList().size());
         instance.addStep("Step #2");
-        assertEquals(3, sc.getWorkflowStepCount());
+        assertEquals(steps + 3, sc.getWorkflowStepCount());
         assertEquals(3, instance.getEntity().getWorkflowStepList().size());
-        assertEquals(0, tc.getStepTransitionsToStepCount());
+        int transitions = tc.getStepTransitionsToStepCount();
         instance.addTransition(instance.getEntity().getWorkflowStepList().get(0),
-                instance.getEntity().getWorkflowStepList().get(1));
-        assertEquals(1, tc.getStepTransitionsToStepCount());
+                instance.getEntity().getWorkflowStepList().get(1), "Transition 1");
+        assertEquals(transitions + 1, tc.getStepTransitionsToStepCount());
     }
 
     @Test
@@ -77,7 +78,7 @@ public class WorkflowServerTest extends AbstractVMTestCase {
             WorkflowStep source = ws.getEntity()
                     .getWorkflowStepList().get(i - 1);
             WorkflowStep target = ws.getEntity().getWorkflowStepList().get(i);
-            ws.addTransition(source, target);
+            ws.addTransition(source, target, "Transition " + i);
             System.out.println(source.getStepName()
                     + "----->" + target.getStepName());
         }

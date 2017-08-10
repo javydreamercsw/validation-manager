@@ -1,1 +1,0 @@
-$wnd.net_sourceforge_javydreamercsw_validation_manager_web_AppWidgetSet.runAsyncCallback2('pib(1760,1,Uje);_.vc=function wsc(){uac((!nac&&(nac=new zac),nac),this.a.d)};kce(_h)(2);\n//# sourceURL=net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet-2.js\n')

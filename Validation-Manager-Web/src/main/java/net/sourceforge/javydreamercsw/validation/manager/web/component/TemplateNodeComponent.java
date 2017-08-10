@@ -58,7 +58,6 @@ public class TemplateNodeComponent extends Panel {
         BeanFieldGroup binder = new BeanFieldGroup(getNode().getClass());
         binder.setItemDataSource(getNode());
         binder.bind(type, "templateNodeType");
-        type.setNullSelectionAllowed(true);
         BeanItemContainer<TemplateNodeType> container
                 = new BeanItemContainer<>(TemplateNodeType.class,
                         new TemplateNodeTypeJpaController(DataBaseManager

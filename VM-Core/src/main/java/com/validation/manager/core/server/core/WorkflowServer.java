@@ -105,7 +105,7 @@ public final class WorkflowServer extends Workflow
         }
     }
 
-    public void addTransition(WorkflowStep source, WorkflowStep target)
+    public void addTransition(WorkflowStep source, WorkflowStep target, String name)
             throws VMException {
         if (getId() != null) {
             try {
@@ -115,6 +115,7 @@ public final class WorkflowServer extends Workflow
                                 source.getWorkflowStepPK().getWorkflow(),
                                 target.getWorkflowStepPK().getId(),
                                 target.getWorkflowStepPK().getWorkflow());
+                t.setTransitionName(name);
                 t.setWorkflowStepSource(source);
                 t.setWorkflowStepTarget(target);
                 new StepTransitionsToStepJpaController(DataBaseManager

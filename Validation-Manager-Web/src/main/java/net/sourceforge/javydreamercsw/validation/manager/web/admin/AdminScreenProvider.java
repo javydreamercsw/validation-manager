@@ -69,6 +69,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.component.Requireme
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TranslationConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.UserComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.workflow.WorkflowViewer;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -106,6 +107,9 @@ public class AdminScreenProvider extends AdminProvider {
         //Build configurable items management tab
         adminSheet.addTab(getConfigurableTab(), TRANSLATOR
                 .translate("general.configuration"));
+        //Build configurable items management tab
+        adminSheet.addTab(getWorkflowTab(), TRANSLATOR
+                .translate("workflow.manager"));
         layout.addComponent(adminSheet);
         layout.setId(getComponentCaption());
         return layout;
@@ -559,11 +563,22 @@ public class AdminScreenProvider extends AdminProvider {
         vl.addComponent(hl);
         grid.addSelectionListener(event -> { // Java 8
             // Get selection from the selection model
-            RequirementType selected = (RequirementType) ((SingleSelectionModel) grid.
-                    getSelectionModel()).getSelectedRow();
+            RequirementType selected
+                    = (RequirementType) ((SingleSelectionModel) grid.
+                            getSelectionModel()).getSelectedRow();
             //Only delete custom ones.
             delete.setEnabled(selected != null && selected.getId() >= 1000);
         });
+        return vl;
+    }
+
+    private Component getWorkflowTab() {
+        VerticalLayout vl = new VerticalLayout();
+        Button w = new Button(TRANSLATOR.translate("workflow.manager"));
+        w.addClickListener(listener -> {
+            UI.getCurrent().addWindow(new WorkflowViewer());
+        });
+        vl.addComponent(w);
         return vl;
     }
 }

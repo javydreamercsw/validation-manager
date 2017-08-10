@@ -194,6 +194,11 @@
             <artifactId>BorderLayout</artifactId>
             <version>0.7</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin.pontus</groupId>
+            <artifactId>vizcomponent</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
     
     <build>
