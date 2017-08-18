@@ -40,7 +40,7 @@ public class WorkflowStepPK implements Serializable {
             pkColumnName = "table_name",
             valueColumnName = "last_id",
             pkColumnValue = "workflow_step",
-            initialValue = 0,
+            initialValue = 1_000,
             allocationSize = 1)
     private int id;
     @Basic(optional = false)
@@ -89,15 +89,12 @@ public class WorkflowStepPK implements Serializable {
         if (this.id != other.id) {
             return false;
         }
-        if (this.workflow != other.workflow) {
-            return false;
-        }
-        return true;
+        return this.workflow == other.workflow;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.WorkflowStepPK[ id=" + id + ", workflow=" + workflow + " ]";
+        return "com.validation.manager.core.db.WorkflowStepPK[ id="
+                + id + ", workflow=" + workflow + " ]";
     }
-
 }
