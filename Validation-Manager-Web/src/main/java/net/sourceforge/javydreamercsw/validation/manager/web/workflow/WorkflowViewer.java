@@ -31,9 +31,11 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Workflow;
 import com.validation.manager.core.db.WorkflowStep;
 import com.validation.manager.core.db.controller.WorkflowJpaController;
+import com.validation.manager.core.server.core.WorkflowServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
 import java.util.AbstractMap;
@@ -67,6 +69,7 @@ public final class WorkflowViewer extends VMWindow {
     private final ListSelect workflows
             = new ListSelect(TRANSLATOR.translate("general.workflow"));
     private int count = 0;
+    private final String KEY = "key", ITEM_NAME = "itemName";
 
     public WorkflowViewer() {
         super(TRANSLATOR.translate("workflow.manager"));
@@ -135,7 +138,9 @@ public final class WorkflowViewer extends VMWindow {
                             Graph.Node node
                                     = new Graph.Node(TRANSLATOR.translate(name.getValue()));
                             nodes.put(--count, node);
-                            node.setParam("id", "" + count);
+                            node.setParam(KEY, "" + count);
+                            node.setParam(ITEM_NAME,
+                                    TRANSLATOR.translate(name.getValue()));
                             added.add(node);
                             refreshWorkflow();
                         }
@@ -178,7 +183,7 @@ public final class WorkflowViewer extends VMWindow {
                             edges.put(transitionName.getValue(),
                                     new AbstractMap.SimpleEntry<>(
                                             (Subgraph.Node) selected, edge));
-                            edge.setParam("id", "" + --count);
+                            edge.setParam(KEY, "" + --count);
                             added.add(edge);
                             refreshWorkflow();
                         }
@@ -233,12 +238,28 @@ public final class WorkflowViewer extends VMWindow {
         save.setWidth(100, Unit.PERCENTAGE);
         save.setEnabled(!added.isEmpty() || !deleted.isEmpty());
         save.addClickListener(listener -> {
+            List<Graph.Node> nodesToAdd = new ArrayList<>();
+            List<Subgraph.Edge> edgesToAdd = new ArrayList<>();
+            WorkflowServer ws
+                    = new WorkflowServer(((Workflow) workflows.getValue()).getId());
             added.forEach(a -> {
-                LOG.log(Level.INFO, "Add: {0}", a);
+                if (a instanceof Graph.Node) {
+                    nodesToAdd.add((Graph.Node) a);
+                } else if (a instanceof Subgraph.Edge) {
+                    edgesToAdd.add((Subgraph.Edge) a);
+                }
             });
             deleted.forEach(a -> {
                 LOG.log(Level.INFO, "Deleted: {0}", a);
             });
+            nodesToAdd.forEach(node -> {
+                try {
+                    ws.addStep(node.getParam(ITEM_NAME));
+                } catch (VMException ex) {
+                    LOG.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
+                }
+            });
+            displayWorkflow(ws.getEntity());
         });
         controls.addComponent(save);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
@@ -266,11 +287,11 @@ public final class WorkflowViewer extends VMWindow {
         nodes.clear();
         //Create the nodes
         w.getWorkflowStepList().forEach(step -> {
-            addStep(step);
+            addStep(step, graph);
             //Now add the links
             step.getSourceTransitions().forEach(t -> {
-                addStep(t.getWorkflowStepSource());
-                addStep(t.getWorkflowStepTarget());
+                addStep(t.getWorkflowStepSource(), graph);
+                addStep(t.getWorkflowStepTarget(), graph);
                 Subgraph.Edge edge
                         = graph.addEdge(nodes.get(t.getWorkflowStepSource()
                                 .getWorkflowStepPK().getId()),
@@ -306,12 +327,13 @@ public final class WorkflowViewer extends VMWindow {
         updateControls();
     }
 
-    private void addStep(WorkflowStep step) {
+    private void addStep(WorkflowStep step, Graph g) {
         if (!nodes.containsKey(step.getWorkflowStepPK().getId())) {
             Graph.Node node
                     = new Graph.Node(TRANSLATOR.translate(step.getStepName()));
             nodes.put(step.getWorkflowStepPK().getId(), node);
-            node.setParam("id", "" + step.getWorkflowStepPK().getId());
+            node.setParam(KEY, "" + step.getWorkflowStepPK().getId());
+            g.addNode(node);
         }
     }
 
