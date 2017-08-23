@@ -3,13 +3,18 @@
 [![Join the chat at https://gitter.im/validation-manager/Lobby](https://badges.gitter.im/validation-manager/Lobby.svg)](https://gitter.im/validation-manager/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/390b17b2843d4f29afde2f0194252b99)](https://www.codacy.com/app/javydreamercsw/validation-manager?utm_source=github.com&utm_medium=referral&utm_content=javydreamercsw/validation-manager&utm_campaign=badger)
+
 [![Build Status](https://travis-ci.org/javydreamercsw/validation-manager.svg?branch=master)](https://travis-ci.org/javydreamercsw/validation-manager)
 <a href="https://scan.coverity.com/projects/javydreamercsw-validation-manager">
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/12634/badge.svg"/>
 </a>
+
 [![Stories in Ready](https://badge.waffle.io/javydreamercsw/validation-manager.png?label=ready&title=Ready)](http://waffle.io/javydreamercsw/validation-manager)
+
 [![Dependency Status](https://www.versioneye.com/user/projects/596d2b19368b0800116ee85a/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/596d2b19368b0800116ee85a)
+
+[![Coverage Status](https://coveralls.io/repos/github/javydreamercsw/validation-manager/badge.svg?branch=master)](https://coveralls.io/github/javydreamercsw/validation-manager?branch=master)
 
 
 Welcome to Validation Manager Repository!
