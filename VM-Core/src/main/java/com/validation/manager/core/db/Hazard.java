@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,7 +82,9 @@ public class Hazard implements Serializable {
             inverseJoinColumns = {
                 @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
                 , @JoinColumn(name = "risk_item_FMEA_id",
-                        referencedColumnName = "FMEA_id")})
+                        referencedColumnName = "FMEA_id")
+                , @JoinColumn(name = "risk_item_FMEA_project_id",
+                        referencedColumnName = "FMEA_project_id")})
     @ManyToMany
     private List<RiskItem> riskItemList;
 
@@ -137,7 +139,7 @@ public class Hazard implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+
         if (!(object instanceof Hazard)) {
             return false;
         }

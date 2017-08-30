@@ -54,9 +54,9 @@ public class StepTransitionsToStepJpaController implements Serializable {
         if (stepTransitionsToStep.getWorkflowInstanceHasTransitionList() == null) {
             stepTransitionsToStep.setWorkflowInstanceHasTransitionList(new ArrayList<>());
         }
+        stepTransitionsToStep.getStepTransitionsToStepPK().setSourceStepWorkflow(stepTransitionsToStep.getWorkflowStepSource().getWorkflowStepPK().getWorkflow());
         stepTransitionsToStep.getStepTransitionsToStepPK().setTargetStepWorkflow(stepTransitionsToStep.getWorkflowStepTarget().getWorkflowStepPK().getWorkflow());
         stepTransitionsToStep.getStepTransitionsToStepPK().setSourceStep(stepTransitionsToStep.getWorkflowStepSource().getWorkflowStepPK().getId());
-        stepTransitionsToStep.getStepTransitionsToStepPK().setSourceStepWorkflow(stepTransitionsToStep.getWorkflowStepSource().getWorkflowStepPK().getWorkflow());
         stepTransitionsToStep.getStepTransitionsToStepPK().setTargetStep(stepTransitionsToStep.getWorkflowStepTarget().getWorkflowStepPK().getId());
         EntityManager em = null;
         try {
@@ -112,9 +112,9 @@ public class StepTransitionsToStepJpaController implements Serializable {
     }
 
     public void edit(StepTransitionsToStep stepTransitionsToStep) throws IllegalOrphanException, NonexistentEntityException, Exception {
+        stepTransitionsToStep.getStepTransitionsToStepPK().setSourceStepWorkflow(stepTransitionsToStep.getWorkflowStepSource().getWorkflowStepPK().getWorkflow());
         stepTransitionsToStep.getStepTransitionsToStepPK().setTargetStepWorkflow(stepTransitionsToStep.getWorkflowStepTarget().getWorkflowStepPK().getWorkflow());
         stepTransitionsToStep.getStepTransitionsToStepPK().setSourceStep(stepTransitionsToStep.getWorkflowStepSource().getWorkflowStepPK().getId());
-        stepTransitionsToStep.getStepTransitionsToStepPK().setSourceStepWorkflow(stepTransitionsToStep.getWorkflowStepSource().getWorkflowStepPK().getWorkflow());
         stepTransitionsToStep.getStepTransitionsToStepPK().setTargetStep(stepTransitionsToStep.getWorkflowStepTarget().getWorkflowStepPK().getId());
         EntityManager em = null;
         try {

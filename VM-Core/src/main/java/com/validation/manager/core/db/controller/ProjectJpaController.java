@@ -28,6 +28,7 @@ import java.util.List;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.UserHasRole;
+import com.validation.manager.core.db.Fmea;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
@@ -63,6 +64,9 @@ public class ProjectJpaController implements Serializable {
         }
         if (project.getUserHasRoleList() == null) {
             project.setUserHasRoleList(new ArrayList<>());
+        }
+        if (project.getFmeaList() == null) {
+            project.setFmeaList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
@@ -108,6 +112,12 @@ public class ProjectJpaController implements Serializable {
                 attachedUserHasRoleList.add(userHasRoleListUserHasRoleToAttach);
             }
             project.setUserHasRoleList(attachedUserHasRoleList);
+            List<Fmea> attachedFmeaList = new ArrayList<>();
+            for (Fmea fmeaListFmeaToAttach : project.getFmeaList()) {
+                fmeaListFmeaToAttach = em.getReference(fmeaListFmeaToAttach.getClass(), fmeaListFmeaToAttach.getFmeaPK());
+                attachedFmeaList.add(fmeaListFmeaToAttach);
+            }
+            project.setFmeaList(attachedFmeaList);
             em.persist(project);
             if (parentProjectId != null) {
                 parentProjectId.getProjectList().add(project);
@@ -157,6 +167,15 @@ public class ProjectJpaController implements Serializable {
                     oldProjectIdOfUserHasRoleListUserHasRole = em.merge(oldProjectIdOfUserHasRoleListUserHasRole);
                 }
             }
+            for (Fmea fmeaListFmea : project.getFmeaList()) {
+                Project oldProjectOfFmeaListFmea = fmeaListFmea.getProject();
+                fmeaListFmea.setProject(project);
+                fmeaListFmea = em.merge(fmeaListFmea);
+                if (oldProjectOfFmeaListFmea != null) {
+                    oldProjectOfFmeaListFmea.getFmeaList().remove(fmeaListFmea);
+                    oldProjectOfFmeaListFmea = em.merge(oldProjectOfFmeaListFmea);
+                }
+            }
             em.getTransaction().commit();
         }
         finally {
@@ -186,6 +205,8 @@ public class ProjectJpaController implements Serializable {
             List<History> historyListNew = project.getHistoryList();
             List<UserHasRole> userHasRoleListOld = persistentProject.getUserHasRoleList();
             List<UserHasRole> userHasRoleListNew = project.getUserHasRoleList();
+            List<Fmea> fmeaListOld = persistentProject.getFmeaList();
+            List<Fmea> fmeaListNew = project.getFmeaList();
             List<String> illegalOrphanMessages = null;
             for (RequirementSpec requirementSpecListOldRequirementSpec : requirementSpecListOld) {
                 if (!requirementSpecListNew.contains(requirementSpecListOldRequirementSpec)) {
@@ -201,6 +222,14 @@ public class ProjectJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain History " + historyListOldHistory + " since its projectId field is not nullable.");
+                }
+            }
+            for (Fmea fmeaListOldFmea : fmeaListOld) {
+                if (!fmeaListNew.contains(fmeaListOldFmea)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain Fmea " + fmeaListOldFmea + " since its project field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -249,6 +278,13 @@ public class ProjectJpaController implements Serializable {
             }
             userHasRoleListNew = attachedUserHasRoleListNew;
             project.setUserHasRoleList(userHasRoleListNew);
+            List<Fmea> attachedFmeaListNew = new ArrayList<>();
+            for (Fmea fmeaListNewFmeaToAttach : fmeaListNew) {
+                fmeaListNewFmeaToAttach = em.getReference(fmeaListNewFmeaToAttach.getClass(), fmeaListNewFmeaToAttach.getFmeaPK());
+                attachedFmeaListNew.add(fmeaListNewFmeaToAttach);
+            }
+            fmeaListNew = attachedFmeaListNew;
+            project.setFmeaList(fmeaListNew);
             project = em.merge(project);
             if (parentProjectIdOld != null && !parentProjectIdOld.equals(parentProjectIdNew)) {
                 parentProjectIdOld.getProjectList().remove(project);
@@ -334,6 +370,17 @@ public class ProjectJpaController implements Serializable {
                     }
                 }
             }
+            for (Fmea fmeaListNewFmea : fmeaListNew) {
+                if (!fmeaListOld.contains(fmeaListNewFmea)) {
+                    Project oldProjectOfFmeaListNewFmea = fmeaListNewFmea.getProject();
+                    fmeaListNewFmea.setProject(project);
+                    fmeaListNewFmea = em.merge(fmeaListNewFmea);
+                    if (oldProjectOfFmeaListNewFmea != null && !oldProjectOfFmeaListNewFmea.equals(project)) {
+                        oldProjectOfFmeaListNewFmea.getFmeaList().remove(fmeaListNewFmea);
+                        oldProjectOfFmeaListNewFmea = em.merge(oldProjectOfFmeaListNewFmea);
+                    }
+                }
+            }
             em.getTransaction().commit();
         }
         catch (Exception ex) {
@@ -380,6 +427,13 @@ public class ProjectJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<>();
                 }
                 illegalOrphanMessages.add("This Project (" + project + ") cannot be destroyed since the History " + historyListOrphanCheckHistory + " in its historyList field has a non-nullable projectId field.");
+            }
+            List<Fmea> fmeaListOrphanCheck = project.getFmeaList();
+            for (Fmea fmeaListOrphanCheckFmea : fmeaListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This Project (" + project + ") cannot be destroyed since the Fmea " + fmeaListOrphanCheckFmea + " in its fmeaList field has a non-nullable project field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

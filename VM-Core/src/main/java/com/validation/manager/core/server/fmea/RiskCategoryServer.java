@@ -31,25 +31,24 @@ public class RiskCategoryServer extends RiskCategory
 
     public RiskCategoryServer(String name, int min, int max) {
         super(name, min, max);
-        setId(0);
     }
 
     @Override
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
-        if (getId() > 0) {
+        if (getId() == null) {
+            RiskCategory rc = new RiskCategory(getName(), getMinimum(),
+                    getMaximum());
+            new RiskCategoryJpaController(
+                    getEntityManagerFactory()).create(rc);
+            setId(rc.getId());
+        } else {
             RiskCategory rc = new RiskCategoryJpaController(
                     getEntityManagerFactory())
                     .findRiskCategory(getId());
             update(rc, this);
             new RiskCategoryJpaController(
                     getEntityManagerFactory()).edit(rc);
-        } else {
-            RiskCategory rc = new RiskCategory(getName(), getMinimum(),
-                    getMaximum());
-            new RiskCategoryJpaController(
-                    getEntityManagerFactory()).create(rc);
-            setId(rc.getId());
         }
         return getId();
     }

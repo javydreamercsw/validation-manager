@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +58,9 @@ public class RiskControl implements Serializable {
             inverseJoinColumns = {
                 @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
                 , @JoinColumn(name = "risk_item_FMEA_id",
-                        referencedColumnName = "FMEA_id")})
+                        referencedColumnName = "FMEA_id")
+                , @JoinColumn(name = "risk_item_FMEA_project_id",
+                        referencedColumnName = "FMEA_project_id")})
     @ManyToMany
     private List<RiskItem> riskItemList;
     @JoinTable(name = "risk_control_has_residual_risk_item", joinColumns = {
@@ -68,7 +70,9 @@ public class RiskControl implements Serializable {
             inverseJoinColumns = {
                 @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
                 , @JoinColumn(name = "risk_item_FMEA_id",
-                        referencedColumnName = "FMEA_id")})
+                        referencedColumnName = "FMEA_id")
+                , @JoinColumn(name = "risk_item_FMEA_project_id",
+                        referencedColumnName = "FMEA_project_id")})
     @ManyToMany
     private List<RiskItem> riskItemList1;
     @JoinColumn(name = "risk_control_type_id", referencedColumnName = "id",
@@ -79,6 +83,8 @@ public class RiskControl implements Serializable {
     private List<RiskControlHasTestCase> riskControlHasTestCaseList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskControl")
     private List<RiskControlHasRequirement> riskControlHasRequirementList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskControl")
+    private List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList;
 
     public RiskControl() {
     }
@@ -156,7 +162,7 @@ public class RiskControl implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof RiskControl)) {
             return false;
         }
@@ -170,5 +176,15 @@ public class RiskControl implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RiskControl[ riskControlPK="
                 + riskControlPK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskControlHasResidualRiskItem> getRiskControlHasResidualRiskItemList() {
+        return riskControlHasResidualRiskItemList;
+    }
+
+    public void setRiskControlHasResidualRiskItemList(List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList) {
+        this.riskControlHasResidualRiskItemList = riskControlHasResidualRiskItemList;
     }
 }

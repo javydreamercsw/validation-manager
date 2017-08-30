@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +23,7 @@ import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -48,6 +49,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.id = :id")
     , @NamedQuery(name = "RiskItem.findByFMEAid",
             query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAid = :fMEAid")
+    , @NamedQuery(name = "RiskItem.findByFMEAprojectid",
+            query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAprojectid = :fMEAprojectid")
     , @NamedQuery(name = "RiskItem.findBySequence",
             query = "SELECT r FROM RiskItem r WHERE r.sequence = :sequence")
     , @NamedQuery(name = "RiskItem.findByVersion",
@@ -66,6 +69,16 @@ public class RiskItem implements Serializable {
     @Column(name = "version")
     private int version;
     @ManyToMany(mappedBy = "riskItemList")
+    private List<RiskCategory> riskCategoryList;
+    @JoinColumns({
+        @JoinColumn(name = "FMEA_id", referencedColumnName = "id",
+                insertable = false, updatable = false)
+        , @JoinColumn(name = "FMEA_project_id",
+                referencedColumnName = "project_id", insertable = false,
+                updatable = false)})
+    @ManyToOne(optional = false)
+    private Fmea fmea;
+    @ManyToMany(mappedBy = "riskItemList")
     private List<FailureMode> failureModeList;
     @ManyToMany(mappedBy = "riskItemList")
     private List<Hazard> hazardList;
@@ -75,12 +88,8 @@ public class RiskItem implements Serializable {
     private List<RiskControl> riskControlList1;
     @ManyToMany(mappedBy = "riskItemList")
     private List<Cause> causeList;
-    @JoinColumn(name = "FMEA_id", referencedColumnName = "id",
-            insertable = false, updatable = false)
-    @ManyToOne(optional = false)
-    private Fmea fmea;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskItem")
-    private List<RiskItemHasRiskCategory> riskItemHasRiskCategoryList;
+    private List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList;
 
     public RiskItem() {
     }
@@ -95,8 +104,12 @@ public class RiskItem implements Serializable {
         this.version = version;
     }
 
-    public RiskItem(int fMEAid) {
-        this.riskItemPK = new RiskItemPK(fMEAid);
+    public RiskItem(int fMEAid, int fMEAprojectid) {
+        this.riskItemPK = new RiskItemPK(fMEAid, fMEAprojectid);
+    }
+
+    public RiskItem(FmeaPK pk) {
+        this.riskItemPK = new RiskItemPK(pk.getId(), pk.getProjectId());
     }
 
     public RiskItemPK getRiskItemPK() {
@@ -181,16 +194,6 @@ public class RiskItem implements Serializable {
         this.fmea = fmea;
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskItemHasRiskCategory> getRiskItemHasRiskCategoryList() {
-        return riskItemHasRiskCategoryList;
-    }
-
-    public void setRiskItemHasRiskCategoryList(List<RiskItemHasRiskCategory> riskItemHasRiskCategoryList) {
-        this.riskItemHasRiskCategoryList = riskItemHasRiskCategoryList;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -200,7 +203,7 @@ public class RiskItem implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof RiskItem)) {
             return false;
         }
@@ -214,5 +217,25 @@ public class RiskItem implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RiskItem[ riskItemPK="
                 + riskItemPK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskCategory> getRiskCategoryList() {
+        return riskCategoryList;
+    }
+
+    public void setRiskCategoryList(List<RiskCategory> riskCategoryList) {
+        this.riskCategoryList = riskCategoryList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskControlHasResidualRiskItem> getRiskControlHasResidualRiskItemList() {
+        return riskControlHasResidualRiskItemList;
+    }
+
+    public void setRiskControlHasResidualRiskItemList(List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList) {
+        this.riskControlHasResidualRiskItemList = riskControlHasResidualRiskItemList;
     }
 }

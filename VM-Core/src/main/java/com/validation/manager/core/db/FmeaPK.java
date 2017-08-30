@@ -29,33 +29,29 @@ import javax.validation.constraints.NotNull;
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 @Embeddable
-public class RiskItemPK implements Serializable {
+public class FmeaPK implements Serializable {
 
     @Basic(optional = false)
+    @NotNull
+    @Column(name = "project_id")
+    private int projectId;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "RIGen")
-    @TableGenerator(name = "RIGen", table = "vm_id",
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "FMEAGen")
+    @TableGenerator(name = "FMEAGen", table = "vm_id",
             pkColumnName = "table_name",
             valueColumnName = "last_id",
-            pkColumnValue = "risk_item",
+            pkColumnValue = "fmea",
             allocationSize = 1,
             initialValue = 1_000)
     private int id;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "FMEA_id")
-    private int fMEAid;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "FMEA_project_id")
-    private int fMEAprojectid;
 
-    public RiskItemPK() {
+    public FmeaPK() {
     }
 
-    public RiskItemPK(int fMEAid, int fMEAprojectid) {
-        this.fMEAid = fMEAid;
-        this.fMEAprojectid = fMEAprojectid;
+    public FmeaPK(int projectId) {
+        this.projectId = projectId;
     }
 
     public int getId() {
@@ -66,50 +62,43 @@ public class RiskItemPK implements Serializable {
         this.id = id;
     }
 
-    public int getFMEAid() {
-        return fMEAid;
+    public int getProjectId() {
+        return projectId;
     }
 
-    public void setFMEAid(int fMEAid) {
-        this.fMEAid = fMEAid;
-    }
-
-    public int getFMEAprojectid() {
-        return fMEAprojectid;
-    }
-
-    public void setFMEAprojectid(int fMEAprojectid) {
-        this.fMEAprojectid = fMEAprojectid;
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
         hash += (int) id;
-        hash += (int) fMEAid;
-        hash += (int) fMEAprojectid;
+        hash += (int) projectId;
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof RiskItemPK)) {
+        if (!(object instanceof FmeaPK)) {
             return false;
         }
-        RiskItemPK other = (RiskItemPK) object;
+        FmeaPK other = (FmeaPK) object;
         if (this.id != other.id) {
             return false;
         }
-        if (this.fMEAid != other.fMEAid) {
-            return false;
-        }
-        return this.fMEAprojectid == other.fMEAprojectid;
+        return this.projectId == other.projectId;
     }
 
     @Override
     public String toString() {
-        return "com.validation.manager.core.db.RiskItemPK[ id=" + id
-                + ", fMEAid=" + fMEAid + ", fMEAprojectid=" + fMEAprojectid + " ]";
+        return "com.validation.manager.core.db.FmeaPK[ id=" + id
+                + ", projectId=" + projectId + " ]";
+    }
+
+    public FmeaPK(int id, int projectId) {
+        this.id = id;
+        this.projectId = projectId;
     }
 }

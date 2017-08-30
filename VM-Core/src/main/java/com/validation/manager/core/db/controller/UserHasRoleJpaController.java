@@ -50,8 +50,8 @@ public class UserHasRoleJpaController implements Serializable {
         if (userHasRole.getUserHasRolePK() == null) {
             userHasRole.setUserHasRolePK(new UserHasRolePK());
         }
-        userHasRole.getUserHasRolePK().setUserId(userHasRole.getVmUser().getId());
         userHasRole.getUserHasRolePK().setRoleId(userHasRole.getRole().getId());
+        userHasRole.getUserHasRolePK().setUserId(userHasRole.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -100,8 +100,8 @@ public class UserHasRoleJpaController implements Serializable {
     }
 
     public void edit(UserHasRole userHasRole) throws NonexistentEntityException, Exception {
-        userHasRole.getUserHasRolePK().setUserId(userHasRole.getVmUser().getId());
         userHasRole.getUserHasRolePK().setRoleId(userHasRole.getRole().getId());
+        userHasRole.getUserHasRolePK().setUserId(userHasRole.getVmUser().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

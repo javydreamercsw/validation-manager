@@ -53,15 +53,16 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT a FROM Attachment a WHERE a.fileName = :fileName")})
 public class Attachment implements Serializable {
 
+    @Lob
+    @Column(name = "file")
+    private byte[] file;
+
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected AttachmentPK attachmentPK;
     @Size(max = 255)
     @Column(name = "string_value")
     private String stringValue;
-    @Lob
-    @Column(name = "file")
-    private byte[] file;
     @Lob
     @Size(max = 2_147_483_647)
     @Column(name = "TEXT_VALUE")

@@ -56,8 +56,8 @@ public class DataEntryJpaController implements Serializable {
             dataEntry.setDataEntryPropertyList(new ArrayList<>());
         }
         dataEntry.getDataEntryPK().setStepTestCaseId(dataEntry.getStep().getStepPK().getTestCaseId());
-        dataEntry.getDataEntryPK().setStepId(dataEntry.getStep().getStepPK().getId());
         dataEntry.getDataEntryPK().setDataEntryTypeId(dataEntry.getDataEntryType().getId());
+        dataEntry.getDataEntryPK().setStepId(dataEntry.getStep().getStepPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -113,8 +113,8 @@ public class DataEntryJpaController implements Serializable {
 
     public void edit(DataEntry dataEntry) throws IllegalOrphanException, NonexistentEntityException, Exception {
         dataEntry.getDataEntryPK().setStepTestCaseId(dataEntry.getStep().getStepPK().getTestCaseId());
-        dataEntry.getDataEntryPK().setStepId(dataEntry.getStep().getStepPK().getId());
         dataEntry.getDataEntryPK().setDataEntryTypeId(dataEntry.getDataEntryType().getId());
+        dataEntry.getDataEntryPK().setStepId(dataEntry.getStep().getStepPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

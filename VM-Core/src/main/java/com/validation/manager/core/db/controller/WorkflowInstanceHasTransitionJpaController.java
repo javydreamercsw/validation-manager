@@ -56,12 +56,12 @@ public class WorkflowInstanceHasTransitionJpaController implements Serializable 
         if (workflowInstanceHasTransition.getWorkflowInstanceHasTransitionStepFieldList() == null) {
             workflowInstanceHasTransition.setWorkflowInstanceHasTransitionStepFieldList(new ArrayList<>());
         }
-        workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setWorkflowInstanceWorkflow(workflowInstanceHasTransition.getWorkflowInstance().getWorkflowInstancePK().getWorkflow());
-        workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepSourceStepWorkflow(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getSourceStepWorkflow());
         workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepSourceStep(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getSourceStep());
+        workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepSourceStepWorkflow(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getSourceStepWorkflow());
         workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepTargetStepWorkflow(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getTargetStepWorkflow());
         workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setWorkflowInstanceId(workflowInstanceHasTransition.getWorkflowInstance().getWorkflowInstancePK().getId());
         workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepTargetStep(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getTargetStep());
+        workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setWorkflowInstanceWorkflow(workflowInstanceHasTransition.getWorkflowInstance().getWorkflowInstancePK().getWorkflow());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -125,12 +125,12 @@ public class WorkflowInstanceHasTransitionJpaController implements Serializable 
     }
 
     public void edit(WorkflowInstanceHasTransition workflowInstanceHasTransition) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setWorkflowInstanceWorkflow(workflowInstanceHasTransition.getWorkflowInstance().getWorkflowInstancePK().getWorkflow());
-        workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepSourceStepWorkflow(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getSourceStepWorkflow());
         workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepSourceStep(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getSourceStep());
+        workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepSourceStepWorkflow(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getSourceStepWorkflow());
         workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepTargetStepWorkflow(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getTargetStepWorkflow());
         workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setWorkflowInstanceId(workflowInstanceHasTransition.getWorkflowInstance().getWorkflowInstancePK().getId());
         workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setStepTransitionsToStepTargetStep(workflowInstanceHasTransition.getStepTransitionsToStep().getStepTransitionsToStepPK().getTargetStep());
+        workflowInstanceHasTransition.getWorkflowInstanceHasTransitionPK().setWorkflowInstanceWorkflow(workflowInstanceHasTransition.getWorkflowInstance().getWorkflowInstancePK().getWorkflow());
         EntityManager em = null;
         try {
             em = getEntityManager();

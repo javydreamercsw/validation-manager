@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,16 +18,16 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
@@ -81,10 +81,16 @@ public class RiskCategory implements Serializable {
     @NotNull
     @Column(name = "maximum")
     private int maximum;
-    @ManyToMany(mappedBy = "riskCategoryList")
-    private List<Fmea> fmeaList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskCategory")
-    private List<RiskItemHasRiskCategory> riskItemHasRiskCategoryList;
+    @JoinTable(name = "risk_item_has_risk_category", joinColumns = {
+        @JoinColumn(name = "risk_category_id", referencedColumnName = "id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
+                , @JoinColumn(name = "risk_item_FMEA_id",
+                        referencedColumnName = "FMEA_id")
+                , @JoinColumn(name = "risk_item_FMEA_project_id",
+                        referencedColumnName = "FMEA_project_id")})
+    @ManyToMany
+    private List<RiskItem> riskItemList;
 
     public RiskCategory() {
     }
@@ -129,22 +135,12 @@ public class RiskCategory implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<Fmea> getFmeaList() {
-        return fmeaList;
+    public List<RiskItem> getRiskItemList() {
+        return riskItemList;
     }
 
-    public void setFmeaList(List<Fmea> fmeaList) {
-        this.fmeaList = fmeaList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskItemHasRiskCategory> getRiskItemHasRiskCategoryList() {
-        return riskItemHasRiskCategoryList;
-    }
-
-    public void setRiskItemHasRiskCategoryList(List<RiskItemHasRiskCategory> riskItemHasRiskCategoryList) {
-        this.riskItemHasRiskCategoryList = riskItemHasRiskCategoryList;
+    public void setRiskItemList(List<RiskItem> riskItemList) {
+        this.riskItemList = riskItemList;
     }
 
     @Override
@@ -156,7 +152,7 @@ public class RiskCategory implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        
+        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof RiskCategory)) {
             return false;
         }

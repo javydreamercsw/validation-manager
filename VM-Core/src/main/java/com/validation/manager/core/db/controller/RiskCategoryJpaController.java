@@ -15,18 +15,16 @@
  */
 package com.validation.manager.core.db.controller;
 
+import com.validation.manager.core.db.RiskCategory;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.Fmea;
-import com.validation.manager.core.db.RiskCategory;
+import com.validation.manager.core.db.RiskItem;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import com.validation.manager.core.db.RiskItemHasRiskCategory;
-import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -46,41 +44,23 @@ public class RiskCategoryJpaController implements Serializable {
     }
 
     public void create(RiskCategory riskCategory) {
-        if (riskCategory.getFmeaList() == null) {
-            riskCategory.setFmeaList(new ArrayList<>());
-        }
-        if (riskCategory.getRiskItemHasRiskCategoryList() == null) {
-            riskCategory.setRiskItemHasRiskCategoryList(new ArrayList<>());
+        if (riskCategory.getRiskItemList() == null) {
+            riskCategory.setRiskItemList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<Fmea> attachedFmeaList = new ArrayList<>();
-            for (Fmea fmeaListFmeaToAttach : riskCategory.getFmeaList()) {
-                fmeaListFmeaToAttach = em.getReference(fmeaListFmeaToAttach.getClass(), fmeaListFmeaToAttach.getId());
-                attachedFmeaList.add(fmeaListFmeaToAttach);
+            List<RiskItem> attachedRiskItemList = new ArrayList<>();
+            for (RiskItem riskItemListRiskItemToAttach : riskCategory.getRiskItemList()) {
+                riskItemListRiskItemToAttach = em.getReference(riskItemListRiskItemToAttach.getClass(), riskItemListRiskItemToAttach.getRiskItemPK());
+                attachedRiskItemList.add(riskItemListRiskItemToAttach);
             }
-            riskCategory.setFmeaList(attachedFmeaList);
-            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryList = new ArrayList<>();
-            for (RiskItemHasRiskCategory riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach : riskCategory.getRiskItemHasRiskCategoryList()) {
-                riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach = em.getReference(riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach.getClass(), riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach.getRiskItemHasRiskCategoryPK());
-                attachedRiskItemHasRiskCategoryList.add(riskItemHasRiskCategoryListRiskItemHasRiskCategoryToAttach);
-            }
-            riskCategory.setRiskItemHasRiskCategoryList(attachedRiskItemHasRiskCategoryList);
+            riskCategory.setRiskItemList(attachedRiskItemList);
             em.persist(riskCategory);
-            for (Fmea fmeaListFmea : riskCategory.getFmeaList()) {
-                fmeaListFmea.getRiskCategoryList().add(riskCategory);
-                fmeaListFmea = em.merge(fmeaListFmea);
-            }
-            for (RiskItemHasRiskCategory riskItemHasRiskCategoryListRiskItemHasRiskCategory : riskCategory.getRiskItemHasRiskCategoryList()) {
-                RiskCategory oldRiskCategoryOfRiskItemHasRiskCategoryListRiskItemHasRiskCategory = riskItemHasRiskCategoryListRiskItemHasRiskCategory.getRiskCategory();
-                riskItemHasRiskCategoryListRiskItemHasRiskCategory.setRiskCategory(riskCategory);
-                riskItemHasRiskCategoryListRiskItemHasRiskCategory = em.merge(riskItemHasRiskCategoryListRiskItemHasRiskCategory);
-                if (oldRiskCategoryOfRiskItemHasRiskCategoryListRiskItemHasRiskCategory != null) {
-                    oldRiskCategoryOfRiskItemHasRiskCategoryListRiskItemHasRiskCategory.getRiskItemHasRiskCategoryList().remove(riskItemHasRiskCategoryListRiskItemHasRiskCategory);
-                    oldRiskCategoryOfRiskItemHasRiskCategoryListRiskItemHasRiskCategory = em.merge(oldRiskCategoryOfRiskItemHasRiskCategoryListRiskItemHasRiskCategory);
-                }
+            for (RiskItem riskItemListRiskItem : riskCategory.getRiskItemList()) {
+                riskItemListRiskItem.getRiskCategoryList().add(riskCategory);
+                riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
             em.getTransaction().commit();
         }
@@ -91,64 +71,32 @@ public class RiskCategoryJpaController implements Serializable {
         }
     }
 
-    public void edit(RiskCategory riskCategory) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(RiskCategory riskCategory) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             RiskCategory persistentRiskCategory = em.find(RiskCategory.class, riskCategory.getId());
-            List<Fmea> fmeaListOld = persistentRiskCategory.getFmeaList();
-            List<Fmea> fmeaListNew = riskCategory.getFmeaList();
-            List<RiskItemHasRiskCategory> riskItemHasRiskCategoryListOld = persistentRiskCategory.getRiskItemHasRiskCategoryList();
-            List<RiskItemHasRiskCategory> riskItemHasRiskCategoryListNew = riskCategory.getRiskItemHasRiskCategoryList();
-            List<String> illegalOrphanMessages = null;
-            for (RiskItemHasRiskCategory riskItemHasRiskCategoryListOldRiskItemHasRiskCategory : riskItemHasRiskCategoryListOld) {
-                if (!riskItemHasRiskCategoryListNew.contains(riskItemHasRiskCategoryListOldRiskItemHasRiskCategory)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<>();
-                    }
-                    illegalOrphanMessages.add("You must retain RiskItemHasRiskCategory " + riskItemHasRiskCategoryListOldRiskItemHasRiskCategory + " since its riskCategory field is not nullable.");
-                }
+            List<RiskItem> riskItemListOld = persistentRiskCategory.getRiskItemList();
+            List<RiskItem> riskItemListNew = riskCategory.getRiskItemList();
+            List<RiskItem> attachedRiskItemListNew = new ArrayList<>();
+            for (RiskItem riskItemListNewRiskItemToAttach : riskItemListNew) {
+                riskItemListNewRiskItemToAttach = em.getReference(riskItemListNewRiskItemToAttach.getClass(), riskItemListNewRiskItemToAttach.getRiskItemPK());
+                attachedRiskItemListNew.add(riskItemListNewRiskItemToAttach);
             }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
-            List<Fmea> attachedFmeaListNew = new ArrayList<>();
-            for (Fmea fmeaListNewFmeaToAttach : fmeaListNew) {
-                fmeaListNewFmeaToAttach = em.getReference(fmeaListNewFmeaToAttach.getClass(), fmeaListNewFmeaToAttach.getId());
-                attachedFmeaListNew.add(fmeaListNewFmeaToAttach);
-            }
-            fmeaListNew = attachedFmeaListNew;
-            riskCategory.setFmeaList(fmeaListNew);
-            List<RiskItemHasRiskCategory> attachedRiskItemHasRiskCategoryListNew = new ArrayList<>();
-            for (RiskItemHasRiskCategory riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach : riskItemHasRiskCategoryListNew) {
-                riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach = em.getReference(riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach.getClass(), riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach.getRiskItemHasRiskCategoryPK());
-                attachedRiskItemHasRiskCategoryListNew.add(riskItemHasRiskCategoryListNewRiskItemHasRiskCategoryToAttach);
-            }
-            riskItemHasRiskCategoryListNew = attachedRiskItemHasRiskCategoryListNew;
-            riskCategory.setRiskItemHasRiskCategoryList(riskItemHasRiskCategoryListNew);
+            riskItemListNew = attachedRiskItemListNew;
+            riskCategory.setRiskItemList(riskItemListNew);
             riskCategory = em.merge(riskCategory);
-            for (Fmea fmeaListOldFmea : fmeaListOld) {
-                if (!fmeaListNew.contains(fmeaListOldFmea)) {
-                    fmeaListOldFmea.getRiskCategoryList().remove(riskCategory);
-                    fmeaListOldFmea = em.merge(fmeaListOldFmea);
+            for (RiskItem riskItemListOldRiskItem : riskItemListOld) {
+                if (!riskItemListNew.contains(riskItemListOldRiskItem)) {
+                    riskItemListOldRiskItem.getRiskCategoryList().remove(riskCategory);
+                    riskItemListOldRiskItem = em.merge(riskItemListOldRiskItem);
                 }
             }
-            for (Fmea fmeaListNewFmea : fmeaListNew) {
-                if (!fmeaListOld.contains(fmeaListNewFmea)) {
-                    fmeaListNewFmea.getRiskCategoryList().add(riskCategory);
-                    fmeaListNewFmea = em.merge(fmeaListNewFmea);
-                }
-            }
-            for (RiskItemHasRiskCategory riskItemHasRiskCategoryListNewRiskItemHasRiskCategory : riskItemHasRiskCategoryListNew) {
-                if (!riskItemHasRiskCategoryListOld.contains(riskItemHasRiskCategoryListNewRiskItemHasRiskCategory)) {
-                    RiskCategory oldRiskCategoryOfRiskItemHasRiskCategoryListNewRiskItemHasRiskCategory = riskItemHasRiskCategoryListNewRiskItemHasRiskCategory.getRiskCategory();
-                    riskItemHasRiskCategoryListNewRiskItemHasRiskCategory.setRiskCategory(riskCategory);
-                    riskItemHasRiskCategoryListNewRiskItemHasRiskCategory = em.merge(riskItemHasRiskCategoryListNewRiskItemHasRiskCategory);
-                    if (oldRiskCategoryOfRiskItemHasRiskCategoryListNewRiskItemHasRiskCategory != null && !oldRiskCategoryOfRiskItemHasRiskCategoryListNewRiskItemHasRiskCategory.equals(riskCategory)) {
-                        oldRiskCategoryOfRiskItemHasRiskCategoryListNewRiskItemHasRiskCategory.getRiskItemHasRiskCategoryList().remove(riskItemHasRiskCategoryListNewRiskItemHasRiskCategory);
-                        oldRiskCategoryOfRiskItemHasRiskCategoryListNewRiskItemHasRiskCategory = em.merge(oldRiskCategoryOfRiskItemHasRiskCategoryListNewRiskItemHasRiskCategory);
-                    }
+            for (RiskItem riskItemListNewRiskItem : riskItemListNew) {
+                if (!riskItemListOld.contains(riskItemListNewRiskItem)) {
+                    riskItemListNewRiskItem.getRiskCategoryList().add(riskCategory);
+                    riskItemListNewRiskItem = em.merge(riskItemListNewRiskItem);
                 }
             }
             em.getTransaction().commit();
@@ -170,7 +118,7 @@ public class RiskCategoryJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(Integer id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -183,21 +131,10 @@ public class RiskCategoryJpaController implements Serializable {
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskCategory with id " + id + " no longer exists.", enfe);
             }
-            List<String> illegalOrphanMessages = null;
-            List<RiskItemHasRiskCategory> riskItemHasRiskCategoryListOrphanCheck = riskCategory.getRiskItemHasRiskCategoryList();
-            for (RiskItemHasRiskCategory riskItemHasRiskCategoryListOrphanCheckRiskItemHasRiskCategory : riskItemHasRiskCategoryListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<>();
-                }
-                illegalOrphanMessages.add("This RiskCategory (" + riskCategory + ") cannot be destroyed since the RiskItemHasRiskCategory " + riskItemHasRiskCategoryListOrphanCheckRiskItemHasRiskCategory + " in its riskItemHasRiskCategoryList field has a non-nullable riskCategory field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
-            List<Fmea> fmeaList = riskCategory.getFmeaList();
-            for (Fmea fmeaListFmea : fmeaList) {
-                fmeaListFmea.getRiskCategoryList().remove(riskCategory);
-                fmeaListFmea = em.merge(fmeaListFmea);
+            List<RiskItem> riskItemList = riskCategory.getRiskItemList();
+            for (RiskItem riskItemListRiskItem : riskItemList) {
+                riskItemListRiskItem.getRiskCategoryList().remove(riskCategory);
+                riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
             em.remove(riskCategory);
             em.getTransaction().commit();

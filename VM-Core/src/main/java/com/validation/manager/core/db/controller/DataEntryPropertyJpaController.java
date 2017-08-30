@@ -48,10 +48,10 @@ public class DataEntryPropertyJpaController implements Serializable {
         if (dataEntryProperty.getDataEntryPropertyPK() == null) {
             dataEntryProperty.setDataEntryPropertyPK(new DataEntryPropertyPK());
         }
+        dataEntryProperty.getDataEntryPropertyPK().setDataEntryStepId(dataEntryProperty.getDataEntry().getDataEntryPK().getStepId());
         dataEntryProperty.getDataEntryPropertyPK().setDataEntryDataEntryTypeId(dataEntryProperty.getDataEntry().getDataEntryPK().getDataEntryTypeId());
         dataEntryProperty.getDataEntryPropertyPK().setDataEntryStepTestCaseId(dataEntryProperty.getDataEntry().getDataEntryPK().getStepTestCaseId());
         dataEntryProperty.getDataEntryPropertyPK().setDataEntryId(dataEntryProperty.getDataEntry().getDataEntryPK().getId());
-        dataEntryProperty.getDataEntryPropertyPK().setDataEntryStepId(dataEntryProperty.getDataEntry().getDataEntryPK().getStepId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -82,10 +82,10 @@ public class DataEntryPropertyJpaController implements Serializable {
     }
 
     public void edit(DataEntryProperty dataEntryProperty) throws NonexistentEntityException, Exception {
+        dataEntryProperty.getDataEntryPropertyPK().setDataEntryStepId(dataEntryProperty.getDataEntry().getDataEntryPK().getStepId());
         dataEntryProperty.getDataEntryPropertyPK().setDataEntryDataEntryTypeId(dataEntryProperty.getDataEntry().getDataEntryPK().getDataEntryTypeId());
         dataEntryProperty.getDataEntryPropertyPK().setDataEntryStepTestCaseId(dataEntryProperty.getDataEntry().getDataEntryPK().getStepTestCaseId());
         dataEntryProperty.getDataEntryPropertyPK().setDataEntryId(dataEntryProperty.getDataEntry().getDataEntryPK().getId());
-        dataEntryProperty.getDataEntryPropertyPK().setDataEntryStepId(dataEntryProperty.getDataEntry().getDataEntryPK().getStepId());
         EntityManager em = null;
         try {
             em = getEntityManager();

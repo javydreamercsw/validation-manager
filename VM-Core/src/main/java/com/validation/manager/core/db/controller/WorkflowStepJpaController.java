@@ -15,24 +15,24 @@
  */
 package com.validation.manager.core.db.controller;
 
-import com.validation.manager.core.db.StepTransitionsToStep;
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Workflow;
-import com.validation.manager.core.db.WorkflowInstance;
-import com.validation.manager.core.db.WorkflowStep;
 import com.validation.manager.core.db.WorkflowStepField;
+import java.util.ArrayList;
+import java.util.List;
+import com.validation.manager.core.db.WorkflowInstance;
+import com.validation.manager.core.db.StepTransitionsToStep;
+import com.validation.manager.core.db.WorkflowStep;
 import com.validation.manager.core.db.WorkflowStepPK;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -70,10 +70,10 @@ public class WorkflowStepJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Workflow workflow1 = workflowStep.getWorkflow();
-            if (workflow1 != null) {
-                workflow1 = em.getReference(workflow1.getClass(), workflow1.getId());
-                workflowStep.setWorkflow(workflow1);
+            Workflow workflow = workflowStep.getWorkflow();
+            if (workflow != null) {
+                workflow = em.getReference(workflow.getClass(), workflow.getId());
+                workflowStep.setWorkflow(workflow);
             }
             List<WorkflowStepField> attachedWorkflowStepFieldList = new ArrayList<>();
             for (WorkflowStepField workflowStepFieldListWorkflowStepFieldToAttach : workflowStep.getWorkflowStepFieldList()) {
@@ -87,22 +87,22 @@ public class WorkflowStepJpaController implements Serializable {
                 attachedWorkflowInstanceList.add(workflowInstanceListWorkflowInstanceToAttach);
             }
             workflowStep.setWorkflowInstanceList(attachedWorkflowInstanceList);
-            List<StepTransitionsToStep> attachedStepTransitionsToStepList = new ArrayList<>();
-            for (StepTransitionsToStep stepTransitionsToStepListStepTransitionsToStepToAttach : workflowStep.getSourceTransitions()) {
-                stepTransitionsToStepListStepTransitionsToStepToAttach = em.getReference(stepTransitionsToStepListStepTransitionsToStepToAttach.getClass(), stepTransitionsToStepListStepTransitionsToStepToAttach.getStepTransitionsToStepPK());
-                attachedStepTransitionsToStepList.add(stepTransitionsToStepListStepTransitionsToStepToAttach);
+            List<StepTransitionsToStep> attachedSourceTransitions = new ArrayList<>();
+            for (StepTransitionsToStep sourceTransitionsStepTransitionsToStepToAttach : workflowStep.getSourceTransitions()) {
+                sourceTransitionsStepTransitionsToStepToAttach = em.getReference(sourceTransitionsStepTransitionsToStepToAttach.getClass(), sourceTransitionsStepTransitionsToStepToAttach.getStepTransitionsToStepPK());
+                attachedSourceTransitions.add(sourceTransitionsStepTransitionsToStepToAttach);
             }
-            workflowStep.setSourceTransitions(attachedStepTransitionsToStepList);
-            List<StepTransitionsToStep> attachedStepTransitionsToStepList1 = new ArrayList<>();
-            for (StepTransitionsToStep stepTransitionsToStepList1StepTransitionsToStepToAttach : workflowStep.getTargetTransitions()) {
-                stepTransitionsToStepList1StepTransitionsToStepToAttach = em.getReference(stepTransitionsToStepList1StepTransitionsToStepToAttach.getClass(), stepTransitionsToStepList1StepTransitionsToStepToAttach.getStepTransitionsToStepPK());
-                attachedStepTransitionsToStepList1.add(stepTransitionsToStepList1StepTransitionsToStepToAttach);
+            workflowStep.setSourceTransitions(attachedSourceTransitions);
+            List<StepTransitionsToStep> attachedTargetTransitions = new ArrayList<>();
+            for (StepTransitionsToStep targetTransitionsStepTransitionsToStepToAttach : workflowStep.getTargetTransitions()) {
+                targetTransitionsStepTransitionsToStepToAttach = em.getReference(targetTransitionsStepTransitionsToStepToAttach.getClass(), targetTransitionsStepTransitionsToStepToAttach.getStepTransitionsToStepPK());
+                attachedTargetTransitions.add(targetTransitionsStepTransitionsToStepToAttach);
             }
-            workflowStep.setTargetTransitions(attachedStepTransitionsToStepList1);
+            workflowStep.setTargetTransitions(attachedTargetTransitions);
             em.persist(workflowStep);
-            if (workflow1 != null) {
-                workflow1.getWorkflowStepList().add(workflowStep);
-                workflow1 = em.merge(workflow1);
+            if (workflow != null) {
+                workflow.getWorkflowStepList().add(workflowStep);
+                workflow = em.merge(workflow);
             }
             for (WorkflowStepField workflowStepFieldListWorkflowStepField : workflowStep.getWorkflowStepFieldList()) {
                 workflowStepFieldListWorkflowStepField.getWorkflowStepList().add(workflowStep);
@@ -117,22 +117,22 @@ public class WorkflowStepJpaController implements Serializable {
                     oldWorkflowStepOfWorkflowInstanceListWorkflowInstance = em.merge(oldWorkflowStepOfWorkflowInstanceListWorkflowInstance);
                 }
             }
-            for (StepTransitionsToStep stepTransitionsToStepListStepTransitionsToStep : workflowStep.getSourceTransitions()) {
-                WorkflowStep oldWorkflowStepSourceOfStepTransitionsToStepListStepTransitionsToStep = stepTransitionsToStepListStepTransitionsToStep.getWorkflowStepSource();
-                stepTransitionsToStepListStepTransitionsToStep.setWorkflowStepSource(workflowStep);
-                stepTransitionsToStepListStepTransitionsToStep = em.merge(stepTransitionsToStepListStepTransitionsToStep);
-                if (oldWorkflowStepSourceOfStepTransitionsToStepListStepTransitionsToStep != null) {
-                    oldWorkflowStepSourceOfStepTransitionsToStepListStepTransitionsToStep.getSourceTransitions().remove(stepTransitionsToStepListStepTransitionsToStep);
-                    oldWorkflowStepSourceOfStepTransitionsToStepListStepTransitionsToStep = em.merge(oldWorkflowStepSourceOfStepTransitionsToStepListStepTransitionsToStep);
+            for (StepTransitionsToStep sourceTransitionsStepTransitionsToStep : workflowStep.getSourceTransitions()) {
+                WorkflowStep oldWorkflowStepSourceOfSourceTransitionsStepTransitionsToStep = sourceTransitionsStepTransitionsToStep.getWorkflowStepSource();
+                sourceTransitionsStepTransitionsToStep.setWorkflowStepSource(workflowStep);
+                sourceTransitionsStepTransitionsToStep = em.merge(sourceTransitionsStepTransitionsToStep);
+                if (oldWorkflowStepSourceOfSourceTransitionsStepTransitionsToStep != null) {
+                    oldWorkflowStepSourceOfSourceTransitionsStepTransitionsToStep.getSourceTransitions().remove(sourceTransitionsStepTransitionsToStep);
+                    oldWorkflowStepSourceOfSourceTransitionsStepTransitionsToStep = em.merge(oldWorkflowStepSourceOfSourceTransitionsStepTransitionsToStep);
                 }
             }
-            for (StepTransitionsToStep stepTransitionsToStepList1StepTransitionsToStep : workflowStep.getTargetTransitions()) {
-                WorkflowStep oldWorkflowStepTargetOfStepTransitionsToStepList1StepTransitionsToStep = stepTransitionsToStepList1StepTransitionsToStep.getWorkflowStepTarget();
-                stepTransitionsToStepList1StepTransitionsToStep.setWorkflowStepTarget(workflowStep);
-                stepTransitionsToStepList1StepTransitionsToStep = em.merge(stepTransitionsToStepList1StepTransitionsToStep);
-                if (oldWorkflowStepTargetOfStepTransitionsToStepList1StepTransitionsToStep != null) {
-                    oldWorkflowStepTargetOfStepTransitionsToStepList1StepTransitionsToStep.getTargetTransitions().remove(stepTransitionsToStepList1StepTransitionsToStep);
-                    oldWorkflowStepTargetOfStepTransitionsToStepList1StepTransitionsToStep = em.merge(oldWorkflowStepTargetOfStepTransitionsToStepList1StepTransitionsToStep);
+            for (StepTransitionsToStep targetTransitionsStepTransitionsToStep : workflowStep.getTargetTransitions()) {
+                WorkflowStep oldWorkflowStepTargetOfTargetTransitionsStepTransitionsToStep = targetTransitionsStepTransitionsToStep.getWorkflowStepTarget();
+                targetTransitionsStepTransitionsToStep.setWorkflowStepTarget(workflowStep);
+                targetTransitionsStepTransitionsToStep = em.merge(targetTransitionsStepTransitionsToStep);
+                if (oldWorkflowStepTargetOfTargetTransitionsStepTransitionsToStep != null) {
+                    oldWorkflowStepTargetOfTargetTransitionsStepTransitionsToStep.getTargetTransitions().remove(targetTransitionsStepTransitionsToStep);
+                    oldWorkflowStepTargetOfTargetTransitionsStepTransitionsToStep = em.merge(oldWorkflowStepTargetOfTargetTransitionsStepTransitionsToStep);
                 }
             }
             em.getTransaction().commit();
@@ -157,16 +157,16 @@ public class WorkflowStepJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             WorkflowStep persistentWorkflowStep = em.find(WorkflowStep.class, workflowStep.getWorkflowStepPK());
-            Workflow workflow1Old = persistentWorkflowStep.getWorkflow();
-            Workflow workflow1New = workflowStep.getWorkflow();
+            Workflow workflowOld = persistentWorkflowStep.getWorkflow();
+            Workflow workflowNew = workflowStep.getWorkflow();
             List<WorkflowStepField> workflowStepFieldListOld = persistentWorkflowStep.getWorkflowStepFieldList();
             List<WorkflowStepField> workflowStepFieldListNew = workflowStep.getWorkflowStepFieldList();
             List<WorkflowInstance> workflowInstanceListOld = persistentWorkflowStep.getWorkflowInstanceList();
             List<WorkflowInstance> workflowInstanceListNew = workflowStep.getWorkflowInstanceList();
-            List<StepTransitionsToStep> stepTransitionsToStepListOld = persistentWorkflowStep.getSourceTransitions();
-            List<StepTransitionsToStep> stepTransitionsToStepListNew = workflowStep.getSourceTransitions();
-            List<StepTransitionsToStep> stepTransitionsToStepList1Old = persistentWorkflowStep.getTargetTransitions();
-            List<StepTransitionsToStep> stepTransitionsToStepList1New = workflowStep.getTargetTransitions();
+            List<StepTransitionsToStep> sourceTransitionsOld = persistentWorkflowStep.getSourceTransitions();
+            List<StepTransitionsToStep> sourceTransitionsNew = workflowStep.getSourceTransitions();
+            List<StepTransitionsToStep> targetTransitionsOld = persistentWorkflowStep.getTargetTransitions();
+            List<StepTransitionsToStep> targetTransitionsNew = workflowStep.getTargetTransitions();
             List<String> illegalOrphanMessages = null;
             for (WorkflowInstance workflowInstanceListOldWorkflowInstance : workflowInstanceListOld) {
                 if (!workflowInstanceListNew.contains(workflowInstanceListOldWorkflowInstance)) {
@@ -176,28 +176,28 @@ public class WorkflowStepJpaController implements Serializable {
                     illegalOrphanMessages.add("You must retain WorkflowInstance " + workflowInstanceListOldWorkflowInstance + " since its workflowStep field is not nullable.");
                 }
             }
-            for (StepTransitionsToStep stepTransitionsToStepListOldStepTransitionsToStep : stepTransitionsToStepListOld) {
-                if (!stepTransitionsToStepListNew.contains(stepTransitionsToStepListOldStepTransitionsToStep)) {
+            for (StepTransitionsToStep sourceTransitionsOldStepTransitionsToStep : sourceTransitionsOld) {
+                if (!sourceTransitionsNew.contains(sourceTransitionsOldStepTransitionsToStep)) {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<>();
                     }
-                    illegalOrphanMessages.add("You must retain StepTransitionsToStep " + stepTransitionsToStepListOldStepTransitionsToStep + " since its workflowStepSource field is not nullable.");
+                    illegalOrphanMessages.add("You must retain StepTransitionsToStep " + sourceTransitionsOldStepTransitionsToStep + " since its workflowStepSource field is not nullable.");
                 }
             }
-            for (StepTransitionsToStep stepTransitionsToStepList1OldStepTransitionsToStep : stepTransitionsToStepList1Old) {
-                if (!stepTransitionsToStepList1New.contains(stepTransitionsToStepList1OldStepTransitionsToStep)) {
+            for (StepTransitionsToStep targetTransitionsOldStepTransitionsToStep : targetTransitionsOld) {
+                if (!targetTransitionsNew.contains(targetTransitionsOldStepTransitionsToStep)) {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<>();
                     }
-                    illegalOrphanMessages.add("You must retain StepTransitionsToStep " + stepTransitionsToStepList1OldStepTransitionsToStep + " since its workflowStepTarget field is not nullable.");
+                    illegalOrphanMessages.add("You must retain StepTransitionsToStep " + targetTransitionsOldStepTransitionsToStep + " since its workflowStepTarget field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            if (workflow1New != null) {
-                workflow1New = em.getReference(workflow1New.getClass(), workflow1New.getId());
-                workflowStep.setWorkflow(workflow1New);
+            if (workflowNew != null) {
+                workflowNew = em.getReference(workflowNew.getClass(), workflowNew.getId());
+                workflowStep.setWorkflow(workflowNew);
             }
             List<WorkflowStepField> attachedWorkflowStepFieldListNew = new ArrayList<>();
             for (WorkflowStepField workflowStepFieldListNewWorkflowStepFieldToAttach : workflowStepFieldListNew) {
@@ -213,28 +213,28 @@ public class WorkflowStepJpaController implements Serializable {
             }
             workflowInstanceListNew = attachedWorkflowInstanceListNew;
             workflowStep.setWorkflowInstanceList(workflowInstanceListNew);
-            List<StepTransitionsToStep> attachedStepTransitionsToStepListNew = new ArrayList<>();
-            for (StepTransitionsToStep stepTransitionsToStepListNewStepTransitionsToStepToAttach : stepTransitionsToStepListNew) {
-                stepTransitionsToStepListNewStepTransitionsToStepToAttach = em.getReference(stepTransitionsToStepListNewStepTransitionsToStepToAttach.getClass(), stepTransitionsToStepListNewStepTransitionsToStepToAttach.getStepTransitionsToStepPK());
-                attachedStepTransitionsToStepListNew.add(stepTransitionsToStepListNewStepTransitionsToStepToAttach);
+            List<StepTransitionsToStep> attachedSourceTransitionsNew = new ArrayList<>();
+            for (StepTransitionsToStep sourceTransitionsNewStepTransitionsToStepToAttach : sourceTransitionsNew) {
+                sourceTransitionsNewStepTransitionsToStepToAttach = em.getReference(sourceTransitionsNewStepTransitionsToStepToAttach.getClass(), sourceTransitionsNewStepTransitionsToStepToAttach.getStepTransitionsToStepPK());
+                attachedSourceTransitionsNew.add(sourceTransitionsNewStepTransitionsToStepToAttach);
             }
-            stepTransitionsToStepListNew = attachedStepTransitionsToStepListNew;
-            workflowStep.setSourceTransitions(stepTransitionsToStepListNew);
-            List<StepTransitionsToStep> attachedStepTransitionsToStepList1New = new ArrayList<>();
-            for (StepTransitionsToStep stepTransitionsToStepList1NewStepTransitionsToStepToAttach : stepTransitionsToStepList1New) {
-                stepTransitionsToStepList1NewStepTransitionsToStepToAttach = em.getReference(stepTransitionsToStepList1NewStepTransitionsToStepToAttach.getClass(), stepTransitionsToStepList1NewStepTransitionsToStepToAttach.getStepTransitionsToStepPK());
-                attachedStepTransitionsToStepList1New.add(stepTransitionsToStepList1NewStepTransitionsToStepToAttach);
+            sourceTransitionsNew = attachedSourceTransitionsNew;
+            workflowStep.setSourceTransitions(sourceTransitionsNew);
+            List<StepTransitionsToStep> attachedTargetTransitionsNew = new ArrayList<>();
+            for (StepTransitionsToStep targetTransitionsNewStepTransitionsToStepToAttach : targetTransitionsNew) {
+                targetTransitionsNewStepTransitionsToStepToAttach = em.getReference(targetTransitionsNewStepTransitionsToStepToAttach.getClass(), targetTransitionsNewStepTransitionsToStepToAttach.getStepTransitionsToStepPK());
+                attachedTargetTransitionsNew.add(targetTransitionsNewStepTransitionsToStepToAttach);
             }
-            stepTransitionsToStepList1New = attachedStepTransitionsToStepList1New;
-            workflowStep.setTargetTransitions(stepTransitionsToStepList1New);
+            targetTransitionsNew = attachedTargetTransitionsNew;
+            workflowStep.setTargetTransitions(targetTransitionsNew);
             workflowStep = em.merge(workflowStep);
-            if (workflow1Old != null && !workflow1Old.equals(workflow1New)) {
-                workflow1Old.getWorkflowStepList().remove(workflowStep);
-                workflow1Old = em.merge(workflow1Old);
+            if (workflowOld != null && !workflowOld.equals(workflowNew)) {
+                workflowOld.getWorkflowStepList().remove(workflowStep);
+                workflowOld = em.merge(workflowOld);
             }
-            if (workflow1New != null && !workflow1New.equals(workflow1Old)) {
-                workflow1New.getWorkflowStepList().add(workflowStep);
-                workflow1New = em.merge(workflow1New);
+            if (workflowNew != null && !workflowNew.equals(workflowOld)) {
+                workflowNew.getWorkflowStepList().add(workflowStep);
+                workflowNew = em.merge(workflowNew);
             }
             for (WorkflowStepField workflowStepFieldListOldWorkflowStepField : workflowStepFieldListOld) {
                 if (!workflowStepFieldListNew.contains(workflowStepFieldListOldWorkflowStepField)) {
@@ -259,25 +259,25 @@ public class WorkflowStepJpaController implements Serializable {
                     }
                 }
             }
-            for (StepTransitionsToStep stepTransitionsToStepListNewStepTransitionsToStep : stepTransitionsToStepListNew) {
-                if (!stepTransitionsToStepListOld.contains(stepTransitionsToStepListNewStepTransitionsToStep)) {
-                    WorkflowStep oldWorkflowStepSourceOfStepTransitionsToStepListNewStepTransitionsToStep = stepTransitionsToStepListNewStepTransitionsToStep.getWorkflowStepSource();
-                    stepTransitionsToStepListNewStepTransitionsToStep.setWorkflowStepSource(workflowStep);
-                    stepTransitionsToStepListNewStepTransitionsToStep = em.merge(stepTransitionsToStepListNewStepTransitionsToStep);
-                    if (oldWorkflowStepSourceOfStepTransitionsToStepListNewStepTransitionsToStep != null && !oldWorkflowStepSourceOfStepTransitionsToStepListNewStepTransitionsToStep.equals(workflowStep)) {
-                        oldWorkflowStepSourceOfStepTransitionsToStepListNewStepTransitionsToStep.getSourceTransitions().remove(stepTransitionsToStepListNewStepTransitionsToStep);
-                        oldWorkflowStepSourceOfStepTransitionsToStepListNewStepTransitionsToStep = em.merge(oldWorkflowStepSourceOfStepTransitionsToStepListNewStepTransitionsToStep);
+            for (StepTransitionsToStep sourceTransitionsNewStepTransitionsToStep : sourceTransitionsNew) {
+                if (!sourceTransitionsOld.contains(sourceTransitionsNewStepTransitionsToStep)) {
+                    WorkflowStep oldWorkflowStepSourceOfSourceTransitionsNewStepTransitionsToStep = sourceTransitionsNewStepTransitionsToStep.getWorkflowStepSource();
+                    sourceTransitionsNewStepTransitionsToStep.setWorkflowStepSource(workflowStep);
+                    sourceTransitionsNewStepTransitionsToStep = em.merge(sourceTransitionsNewStepTransitionsToStep);
+                    if (oldWorkflowStepSourceOfSourceTransitionsNewStepTransitionsToStep != null && !oldWorkflowStepSourceOfSourceTransitionsNewStepTransitionsToStep.equals(workflowStep)) {
+                        oldWorkflowStepSourceOfSourceTransitionsNewStepTransitionsToStep.getSourceTransitions().remove(sourceTransitionsNewStepTransitionsToStep);
+                        oldWorkflowStepSourceOfSourceTransitionsNewStepTransitionsToStep = em.merge(oldWorkflowStepSourceOfSourceTransitionsNewStepTransitionsToStep);
                     }
                 }
             }
-            for (StepTransitionsToStep stepTransitionsToStepList1NewStepTransitionsToStep : stepTransitionsToStepList1New) {
-                if (!stepTransitionsToStepList1Old.contains(stepTransitionsToStepList1NewStepTransitionsToStep)) {
-                    WorkflowStep oldWorkflowStepTargetOfStepTransitionsToStepList1NewStepTransitionsToStep = stepTransitionsToStepList1NewStepTransitionsToStep.getWorkflowStepTarget();
-                    stepTransitionsToStepList1NewStepTransitionsToStep.setWorkflowStepTarget(workflowStep);
-                    stepTransitionsToStepList1NewStepTransitionsToStep = em.merge(stepTransitionsToStepList1NewStepTransitionsToStep);
-                    if (oldWorkflowStepTargetOfStepTransitionsToStepList1NewStepTransitionsToStep != null && !oldWorkflowStepTargetOfStepTransitionsToStepList1NewStepTransitionsToStep.equals(workflowStep)) {
-                        oldWorkflowStepTargetOfStepTransitionsToStepList1NewStepTransitionsToStep.getTargetTransitions().remove(stepTransitionsToStepList1NewStepTransitionsToStep);
-                        oldWorkflowStepTargetOfStepTransitionsToStepList1NewStepTransitionsToStep = em.merge(oldWorkflowStepTargetOfStepTransitionsToStepList1NewStepTransitionsToStep);
+            for (StepTransitionsToStep targetTransitionsNewStepTransitionsToStep : targetTransitionsNew) {
+                if (!targetTransitionsOld.contains(targetTransitionsNewStepTransitionsToStep)) {
+                    WorkflowStep oldWorkflowStepTargetOfTargetTransitionsNewStepTransitionsToStep = targetTransitionsNewStepTransitionsToStep.getWorkflowStepTarget();
+                    targetTransitionsNewStepTransitionsToStep.setWorkflowStepTarget(workflowStep);
+                    targetTransitionsNewStepTransitionsToStep = em.merge(targetTransitionsNewStepTransitionsToStep);
+                    if (oldWorkflowStepTargetOfTargetTransitionsNewStepTransitionsToStep != null && !oldWorkflowStepTargetOfTargetTransitionsNewStepTransitionsToStep.equals(workflowStep)) {
+                        oldWorkflowStepTargetOfTargetTransitionsNewStepTransitionsToStep.getTargetTransitions().remove(targetTransitionsNewStepTransitionsToStep);
+                        oldWorkflowStepTargetOfTargetTransitionsNewStepTransitionsToStep = em.merge(oldWorkflowStepTargetOfTargetTransitionsNewStepTransitionsToStep);
                     }
                 }
             }
@@ -321,27 +321,27 @@ public class WorkflowStepJpaController implements Serializable {
                 }
                 illegalOrphanMessages.add("This WorkflowStep (" + workflowStep + ") cannot be destroyed since the WorkflowInstance " + workflowInstanceListOrphanCheckWorkflowInstance + " in its workflowInstanceList field has a non-nullable workflowStep field.");
             }
-            List<StepTransitionsToStep> stepTransitionsToStepListOrphanCheck = workflowStep.getSourceTransitions();
-            for (StepTransitionsToStep stepTransitionsToStepListOrphanCheckStepTransitionsToStep : stepTransitionsToStepListOrphanCheck) {
+            List<StepTransitionsToStep> sourceTransitionsOrphanCheck = workflowStep.getSourceTransitions();
+            for (StepTransitionsToStep sourceTransitionsOrphanCheckStepTransitionsToStep : sourceTransitionsOrphanCheck) {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<>();
                 }
-                illegalOrphanMessages.add("This WorkflowStep (" + workflowStep + ") cannot be destroyed since the StepTransitionsToStep " + stepTransitionsToStepListOrphanCheckStepTransitionsToStep + " in its stepTransitionsToStepList field has a non-nullable workflowStepSource field.");
+                illegalOrphanMessages.add("This WorkflowStep (" + workflowStep + ") cannot be destroyed since the StepTransitionsToStep " + sourceTransitionsOrphanCheckStepTransitionsToStep + " in its sourceTransitions field has a non-nullable workflowStepSource field.");
             }
-            List<StepTransitionsToStep> stepTransitionsToStepList1OrphanCheck = workflowStep.getTargetTransitions();
-            for (StepTransitionsToStep stepTransitionsToStepList1OrphanCheckStepTransitionsToStep : stepTransitionsToStepList1OrphanCheck) {
+            List<StepTransitionsToStep> targetTransitionsOrphanCheck = workflowStep.getTargetTransitions();
+            for (StepTransitionsToStep targetTransitionsOrphanCheckStepTransitionsToStep : targetTransitionsOrphanCheck) {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<>();
                 }
-                illegalOrphanMessages.add("This WorkflowStep (" + workflowStep + ") cannot be destroyed since the StepTransitionsToStep " + stepTransitionsToStepList1OrphanCheckStepTransitionsToStep + " in its stepTransitionsToStepList1 field has a non-nullable workflowStepTarget field.");
+                illegalOrphanMessages.add("This WorkflowStep (" + workflowStep + ") cannot be destroyed since the StepTransitionsToStep " + targetTransitionsOrphanCheckStepTransitionsToStep + " in its targetTransitions field has a non-nullable workflowStepTarget field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
-            Workflow workflow1 = workflowStep.getWorkflow();
-            if (workflow1 != null) {
-                workflow1.getWorkflowStepList().remove(workflowStep);
-                workflow1 = em.merge(workflow1);
+            Workflow workflow = workflowStep.getWorkflow();
+            if (workflow != null) {
+                workflow.getWorkflowStepList().remove(workflowStep);
+                workflow = em.merge(workflow);
             }
             List<WorkflowStepField> workflowStepFieldList = workflowStep.getWorkflowStepFieldList();
             for (WorkflowStepField workflowStepFieldListWorkflowStepField : workflowStepFieldList) {

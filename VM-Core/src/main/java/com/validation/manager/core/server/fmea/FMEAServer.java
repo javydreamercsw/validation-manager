@@ -18,9 +18,12 @@ package com.validation.manager.core.server.fmea;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Fmea;
+import com.validation.manager.core.db.FmeaPK;
+import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.controller.FmeaJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 
@@ -28,19 +31,22 @@ import static java.util.logging.Logger.getLogger;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class FMEAServer extends Fmea implements EntityServer<Fmea> {
+public final class FMEAServer extends Fmea implements EntityServer<Fmea> {
 
-    public FMEAServer(String name) {
+    public FMEAServer(String name, Project p) {
         super(name);
-        setId(0);
+        setFmeaPK(new FmeaPK(p.getId()));
+        setProject(p);
+        setFmeaList(new ArrayList<>());
+        setRiskItemList(new ArrayList<>());
     }
 
     @Override
     public int write2DB() throws IllegalOrphanException,
             NonexistentEntityException, Exception {
-        if (getId() > 0) {
+        if (getFmeaPK().getId() > 0) {
             Fmea fmea = new FmeaJpaController(
-                    getEntityManagerFactory()).findFmea(getId());
+                    getEntityManagerFactory()).findFmea(getFmeaPK());
             update(fmea, this);
             new FmeaJpaController(
                     getEntityManagerFactory()).edit(fmea);
@@ -49,18 +55,19 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
             update(fmea, this);
             new FmeaJpaController(
                     getEntityManagerFactory()).create(fmea);
-            setId(fmea.getId());
+            setFmeaPK(fmea.getFmeaPK());
         }
-        return getId();
+        return getFmeaPK().getId();
     }
 
-    public static boolean deleteFMEA(int id) {
+    public static boolean deleteFMEA(FmeaPK id) {
         boolean result = false;
         try {
             new FmeaJpaController(
                     getEntityManagerFactory()).destroy(id);
             result = true;
-        } catch (NonexistentEntityException | IllegalOrphanException ex) {
+        }
+        catch (NonexistentEntityException | IllegalOrphanException ex) {
             getLogger(FMEAServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
@@ -69,7 +76,7 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
     @Override
     public Fmea getEntity() {
         return new FmeaJpaController(
-                getEntityManagerFactory()).findFmea(getId());
+                getEntityManagerFactory()).findFmea(getFmeaPK());
     }
 
     @Override
@@ -77,6 +84,10 @@ public class FMEAServer extends Fmea implements EntityServer<Fmea> {
         target.setFmeaList(source.getFmeaList());
         target.setParent(source.getParent());
         target.setRiskItemList(source.getRiskItemList());
+        target.setProject(source.getProject());
+        target.setFmeaPK(source.getFmeaPK());
+        target.setName(source.getName());
+        target.setDescription(source.getDescription());
     }
 
     @Override

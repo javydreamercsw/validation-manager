@@ -97,6 +97,7 @@ public final class ProjectServer extends Project
         target.setId(source.getId());
         target.setUserHasRoleList(source.getUserHasRoleList());
         target.setProjectTypeId(source.getProjectTypeId());
+        target.setFmeaList(source.getFmeaList());
         super.update(target, source);
     }
 

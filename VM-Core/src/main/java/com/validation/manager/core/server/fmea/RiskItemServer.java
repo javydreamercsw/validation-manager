@@ -17,6 +17,7 @@ package com.validation.manager.core.server.fmea;
 
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.FmeaPK;
 import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.controller.FmeaJpaController;
 import com.validation.manager.core.db.controller.RiskItemJpaController;
@@ -27,9 +28,9 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
+public final class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
 
-    public RiskItemServer(int fMEAid, int sequence, int version) {
+    public RiskItemServer(FmeaPK fMEAid, int sequence, int version) {
         super(fMEAid);
         setSequence(sequence);
         setVersion(version);
@@ -46,7 +47,7 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
             new RiskItemJpaController(
                     getEntityManagerFactory()).edit(ri);
         } else {
-            RiskItem ri = new RiskItem(getFmea().getId());
+            RiskItem ri = new RiskItem(getFmea().getFmeaPK());
             update(ri, this);
             new RiskItemJpaController(
                     getEntityManagerFactory()).create(ri);
@@ -72,7 +73,8 @@ public class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
         }
         target.setFmea(new FmeaJpaController(
                 getEntityManagerFactory())
-                .findFmea(source.getRiskItemPK().getFMEAid()));
+                .findFmea(new FmeaPK(source.getRiskItemPK().getFMEAid(),
+                        source.getRiskItemPK().getFMEAprojectid())));
         if (source.getHazardList() != null) {
             target.setHazardList(source.getHazardList());
         }

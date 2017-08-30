@@ -45,6 +45,7 @@
     <class>com.validation.manager.core.db.ReviewResult</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
+    <class>com.validation.manager.core.db.RiskControlHasResidualRiskItem</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
     <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
     <class>com.validation.manager.core.db.RiskControlType</class>
@@ -138,6 +139,7 @@
     <class>com.validation.manager.core.db.ReviewResult</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
+    <class>com.validation.manager.core.db.RiskControlHasResidualRiskItem</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
     <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
     <class>com.validation.manager.core.db.RiskControlType</class>
@@ -233,6 +235,7 @@
     <class>com.validation.manager.core.db.ReviewResult</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
+    <class>com.validation.manager.core.db.RiskControlHasResidualRiskItem</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
     <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
     <class>com.validation.manager.core.db.RiskControlType</class>

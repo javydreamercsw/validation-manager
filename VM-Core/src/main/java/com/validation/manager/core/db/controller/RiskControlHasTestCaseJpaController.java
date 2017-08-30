@@ -50,8 +50,8 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
             riskControlHasTestCase.setRiskControlHasTestCasePK(new RiskControlHasTestCasePK());
         }
         riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlRiskControlTypeId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getRiskControlTypeId());
-        riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getId());
         riskControlHasTestCase.getRiskControlHasTestCasePK().setTestCaseId(riskControlHasTestCase.getTestCase().getTestCasePK().getId());
+        riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -92,8 +92,8 @@ public class RiskControlHasTestCaseJpaController implements Serializable {
 
     public void edit(RiskControlHasTestCase riskControlHasTestCase) throws NonexistentEntityException, Exception {
         riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlRiskControlTypeId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getRiskControlTypeId());
-        riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getId());
         riskControlHasTestCase.getRiskControlHasTestCasePK().setTestCaseId(riskControlHasTestCase.getTestCase().getTestCasePK().getId());
+        riskControlHasTestCase.getRiskControlHasTestCasePK().setRiskControlId(riskControlHasTestCase.getRiskControl().getRiskControlPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

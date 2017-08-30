@@ -25,29 +25,28 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class FailureModeServer extends FailureMode
+public final class FailureModeServer extends FailureMode
         implements EntityServer<FailureMode> {
 
     public FailureModeServer(String name, String description) {
         super(name, description);
-        setId(0);
     }
 
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
-        if (getId() > 0) {
+        if (getId() == null) {
+            FailureMode fm = new FailureMode();
+            update(fm, this);
+            new FailureModeJpaController(
+                    getEntityManagerFactory()).create(fm);
+            setId(fm.getId());
+        } else {
             FailureMode fm = new FailureModeJpaController(
                     getEntityManagerFactory())
                     .findFailureMode(getId());
             update(fm, this);
             new FailureModeJpaController(
                     getEntityManagerFactory()).edit(fm);
-        } else {
-            FailureMode fm = new FailureMode();
-            update(fm, this);
-            new FailureModeJpaController(
-                    getEntityManagerFactory()).create(fm);
-            setId(fm.getId());
         }
         return getId();
     }
@@ -72,7 +71,7 @@ public class FailureModeServer extends FailureMode
             target.setRiskItemList(source.getRiskItemList());
         }
     }
-    
+
     @Override
     public void update() {
         update(this, getEntity());

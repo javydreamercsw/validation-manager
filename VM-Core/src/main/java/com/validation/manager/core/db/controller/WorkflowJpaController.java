@@ -16,19 +16,19 @@
 package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.Workflow;
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.WorkflowInstance;
+import java.util.ArrayList;
+import java.util.List;
 import com.validation.manager.core.db.WorkflowStep;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -70,21 +70,21 @@ public class WorkflowJpaController implements Serializable {
             workflow.setWorkflowStepList(attachedWorkflowStepList);
             em.persist(workflow);
             for (WorkflowInstance workflowInstanceListWorkflowInstance : workflow.getWorkflowInstanceList()) {
-                Workflow oldWorkflow1OfWorkflowInstanceListWorkflowInstance = workflowInstanceListWorkflowInstance.getWorkflow();
+                Workflow oldWorkflowOfWorkflowInstanceListWorkflowInstance = workflowInstanceListWorkflowInstance.getWorkflow();
                 workflowInstanceListWorkflowInstance.setWorkflow(workflow);
                 workflowInstanceListWorkflowInstance = em.merge(workflowInstanceListWorkflowInstance);
-                if (oldWorkflow1OfWorkflowInstanceListWorkflowInstance != null) {
-                    oldWorkflow1OfWorkflowInstanceListWorkflowInstance.getWorkflowInstanceList().remove(workflowInstanceListWorkflowInstance);
-                    oldWorkflow1OfWorkflowInstanceListWorkflowInstance = em.merge(oldWorkflow1OfWorkflowInstanceListWorkflowInstance);
+                if (oldWorkflowOfWorkflowInstanceListWorkflowInstance != null) {
+                    oldWorkflowOfWorkflowInstanceListWorkflowInstance.getWorkflowInstanceList().remove(workflowInstanceListWorkflowInstance);
+                    oldWorkflowOfWorkflowInstanceListWorkflowInstance = em.merge(oldWorkflowOfWorkflowInstanceListWorkflowInstance);
                 }
             }
             for (WorkflowStep workflowStepListWorkflowStep : workflow.getWorkflowStepList()) {
-                Workflow oldWorkflow1OfWorkflowStepListWorkflowStep = workflowStepListWorkflowStep.getWorkflow();
+                Workflow oldWorkflowOfWorkflowStepListWorkflowStep = workflowStepListWorkflowStep.getWorkflow();
                 workflowStepListWorkflowStep.setWorkflow(workflow);
                 workflowStepListWorkflowStep = em.merge(workflowStepListWorkflowStep);
-                if (oldWorkflow1OfWorkflowStepListWorkflowStep != null) {
-                    oldWorkflow1OfWorkflowStepListWorkflowStep.getWorkflowStepList().remove(workflowStepListWorkflowStep);
-                    oldWorkflow1OfWorkflowStepListWorkflowStep = em.merge(oldWorkflow1OfWorkflowStepListWorkflowStep);
+                if (oldWorkflowOfWorkflowStepListWorkflowStep != null) {
+                    oldWorkflowOfWorkflowStepListWorkflowStep.getWorkflowStepList().remove(workflowStepListWorkflowStep);
+                    oldWorkflowOfWorkflowStepListWorkflowStep = em.merge(oldWorkflowOfWorkflowStepListWorkflowStep);
                 }
             }
             em.getTransaction().commit();
@@ -112,7 +112,7 @@ public class WorkflowJpaController implements Serializable {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<>();
                     }
-                    illegalOrphanMessages.add("You must retain WorkflowInstance " + workflowInstanceListOldWorkflowInstance + " since its workflow1 field is not nullable.");
+                    illegalOrphanMessages.add("You must retain WorkflowInstance " + workflowInstanceListOldWorkflowInstance + " since its workflow field is not nullable.");
                 }
             }
             for (WorkflowStep workflowStepListOldWorkflowStep : workflowStepListOld) {
@@ -120,7 +120,7 @@ public class WorkflowJpaController implements Serializable {
                     if (illegalOrphanMessages == null) {
                         illegalOrphanMessages = new ArrayList<>();
                     }
-                    illegalOrphanMessages.add("You must retain WorkflowStep " + workflowStepListOldWorkflowStep + " since its workflow1 field is not nullable.");
+                    illegalOrphanMessages.add("You must retain WorkflowStep " + workflowStepListOldWorkflowStep + " since its workflow field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -143,23 +143,23 @@ public class WorkflowJpaController implements Serializable {
             workflow = em.merge(workflow);
             for (WorkflowInstance workflowInstanceListNewWorkflowInstance : workflowInstanceListNew) {
                 if (!workflowInstanceListOld.contains(workflowInstanceListNewWorkflowInstance)) {
-                    Workflow oldWorkflow1OfWorkflowInstanceListNewWorkflowInstance = workflowInstanceListNewWorkflowInstance.getWorkflow();
+                    Workflow oldWorkflowOfWorkflowInstanceListNewWorkflowInstance = workflowInstanceListNewWorkflowInstance.getWorkflow();
                     workflowInstanceListNewWorkflowInstance.setWorkflow(workflow);
                     workflowInstanceListNewWorkflowInstance = em.merge(workflowInstanceListNewWorkflowInstance);
-                    if (oldWorkflow1OfWorkflowInstanceListNewWorkflowInstance != null && !oldWorkflow1OfWorkflowInstanceListNewWorkflowInstance.equals(workflow)) {
-                        oldWorkflow1OfWorkflowInstanceListNewWorkflowInstance.getWorkflowInstanceList().remove(workflowInstanceListNewWorkflowInstance);
-                        oldWorkflow1OfWorkflowInstanceListNewWorkflowInstance = em.merge(oldWorkflow1OfWorkflowInstanceListNewWorkflowInstance);
+                    if (oldWorkflowOfWorkflowInstanceListNewWorkflowInstance != null && !oldWorkflowOfWorkflowInstanceListNewWorkflowInstance.equals(workflow)) {
+                        oldWorkflowOfWorkflowInstanceListNewWorkflowInstance.getWorkflowInstanceList().remove(workflowInstanceListNewWorkflowInstance);
+                        oldWorkflowOfWorkflowInstanceListNewWorkflowInstance = em.merge(oldWorkflowOfWorkflowInstanceListNewWorkflowInstance);
                     }
                 }
             }
             for (WorkflowStep workflowStepListNewWorkflowStep : workflowStepListNew) {
                 if (!workflowStepListOld.contains(workflowStepListNewWorkflowStep)) {
-                    Workflow oldWorkflow1OfWorkflowStepListNewWorkflowStep = workflowStepListNewWorkflowStep.getWorkflow();
+                    Workflow oldWorkflowOfWorkflowStepListNewWorkflowStep = workflowStepListNewWorkflowStep.getWorkflow();
                     workflowStepListNewWorkflowStep.setWorkflow(workflow);
                     workflowStepListNewWorkflowStep = em.merge(workflowStepListNewWorkflowStep);
-                    if (oldWorkflow1OfWorkflowStepListNewWorkflowStep != null && !oldWorkflow1OfWorkflowStepListNewWorkflowStep.equals(workflow)) {
-                        oldWorkflow1OfWorkflowStepListNewWorkflowStep.getWorkflowStepList().remove(workflowStepListNewWorkflowStep);
-                        oldWorkflow1OfWorkflowStepListNewWorkflowStep = em.merge(oldWorkflow1OfWorkflowStepListNewWorkflowStep);
+                    if (oldWorkflowOfWorkflowStepListNewWorkflowStep != null && !oldWorkflowOfWorkflowStepListNewWorkflowStep.equals(workflow)) {
+                        oldWorkflowOfWorkflowStepListNewWorkflowStep.getWorkflowStepList().remove(workflowStepListNewWorkflowStep);
+                        oldWorkflowOfWorkflowStepListNewWorkflowStep = em.merge(oldWorkflowOfWorkflowStepListNewWorkflowStep);
                     }
                 }
             }
@@ -201,14 +201,14 @@ public class WorkflowJpaController implements Serializable {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<>();
                 }
-                illegalOrphanMessages.add("This Workflow (" + workflow + ") cannot be destroyed since the WorkflowInstance " + workflowInstanceListOrphanCheckWorkflowInstance + " in its workflowInstanceList field has a non-nullable workflow1 field.");
+                illegalOrphanMessages.add("This Workflow (" + workflow + ") cannot be destroyed since the WorkflowInstance " + workflowInstanceListOrphanCheckWorkflowInstance + " in its workflowInstanceList field has a non-nullable workflow field.");
             }
             List<WorkflowStep> workflowStepListOrphanCheck = workflow.getWorkflowStepList();
             for (WorkflowStep workflowStepListOrphanCheckWorkflowStep : workflowStepListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
                     illegalOrphanMessages = new ArrayList<>();
                 }
-                illegalOrphanMessages.add("This Workflow (" + workflow + ") cannot be destroyed since the WorkflowStep " + workflowStepListOrphanCheckWorkflowStep + " in its workflowStepList field has a non-nullable workflow1 field.");
+                illegalOrphanMessages.add("This Workflow (" + workflow + ") cannot be destroyed since the WorkflowStep " + workflowStepListOrphanCheckWorkflowStep + " in its workflowStepList field has a non-nullable workflow field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);

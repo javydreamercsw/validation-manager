@@ -104,6 +104,8 @@ public class Project extends Versionable implements Serializable {
     @JoinColumn(name = "project_type_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private ProjectType projectTypeId;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
+    private List<Fmea> fmeaList;
 
     public Project(String name) {
         this.name = name;
@@ -224,5 +226,15 @@ public class Project extends Versionable implements Serializable {
 
     public void setProjectTypeId(ProjectType projectTypeId) {
         this.projectTypeId = projectTypeId;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Fmea> getFmeaList() {
+        return fmeaList;
+    }
+
+    public void setFmeaList(List<Fmea> fmeaList) {
+        this.fmeaList = fmeaList;
     }
 }

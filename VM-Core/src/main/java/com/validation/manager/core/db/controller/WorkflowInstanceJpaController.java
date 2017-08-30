@@ -15,24 +15,24 @@
  */
 package com.validation.manager.core.db.controller;
 
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import com.validation.manager.core.db.WorkflowStep;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.db.Workflow;
 import com.validation.manager.core.db.WorkflowInstance;
 import com.validation.manager.core.db.WorkflowInstanceHasTransition;
 import com.validation.manager.core.db.WorkflowInstancePK;
-import com.validation.manager.core.db.WorkflowStep;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -71,10 +71,10 @@ public class WorkflowInstanceJpaController implements Serializable {
                 assignedUser = em.getReference(assignedUser.getClass(), assignedUser.getId());
                 workflowInstance.setAssignedUser(assignedUser);
             }
-            Workflow workflow1 = workflowInstance.getWorkflow();
-            if (workflow1 != null) {
-                workflow1 = em.getReference(workflow1.getClass(), workflow1.getId());
-                workflowInstance.setWorkflow(workflow1);
+            Workflow workflow = workflowInstance.getWorkflow();
+            if (workflow != null) {
+                workflow = em.getReference(workflow.getClass(), workflow.getId());
+                workflowInstance.setWorkflow(workflow);
             }
             List<WorkflowInstanceHasTransition> attachedWorkflowInstanceHasTransitionList = new ArrayList<>();
             for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListWorkflowInstanceHasTransitionToAttach : workflowInstance.getWorkflowInstanceHasTransitionList()) {
@@ -91,9 +91,9 @@ public class WorkflowInstanceJpaController implements Serializable {
                 assignedUser.getWorkflowInstanceList().add(workflowInstance);
                 assignedUser = em.merge(assignedUser);
             }
-            if (workflow1 != null) {
-                workflow1.getWorkflowInstanceList().add(workflowInstance);
-                workflow1 = em.merge(workflow1);
+            if (workflow != null) {
+                workflow.getWorkflowInstanceList().add(workflowInstance);
+                workflow = em.merge(workflow);
             }
             for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListWorkflowInstanceHasTransition : workflowInstance.getWorkflowInstanceHasTransitionList()) {
                 WorkflowInstance oldWorkflowInstanceOfWorkflowInstanceHasTransitionListWorkflowInstanceHasTransition = workflowInstanceHasTransitionListWorkflowInstanceHasTransition.getWorkflowInstance();
@@ -130,8 +130,8 @@ public class WorkflowInstanceJpaController implements Serializable {
             WorkflowStep workflowStepNew = workflowInstance.getWorkflowStep();
             VmUser assignedUserOld = persistentWorkflowInstance.getAssignedUser();
             VmUser assignedUserNew = workflowInstance.getAssignedUser();
-            Workflow workflow1Old = persistentWorkflowInstance.getWorkflow();
-            Workflow workflow1New = workflowInstance.getWorkflow();
+            Workflow workflowOld = persistentWorkflowInstance.getWorkflow();
+            Workflow workflowNew = workflowInstance.getWorkflow();
             List<WorkflowInstanceHasTransition> workflowInstanceHasTransitionListOld = persistentWorkflowInstance.getWorkflowInstanceHasTransitionList();
             List<WorkflowInstanceHasTransition> workflowInstanceHasTransitionListNew = workflowInstance.getWorkflowInstanceHasTransitionList();
             List<String> illegalOrphanMessages = null;
@@ -154,9 +154,9 @@ public class WorkflowInstanceJpaController implements Serializable {
                 assignedUserNew = em.getReference(assignedUserNew.getClass(), assignedUserNew.getId());
                 workflowInstance.setAssignedUser(assignedUserNew);
             }
-            if (workflow1New != null) {
-                workflow1New = em.getReference(workflow1New.getClass(), workflow1New.getId());
-                workflowInstance.setWorkflow(workflow1New);
+            if (workflowNew != null) {
+                workflowNew = em.getReference(workflowNew.getClass(), workflowNew.getId());
+                workflowInstance.setWorkflow(workflowNew);
             }
             List<WorkflowInstanceHasTransition> attachedWorkflowInstanceHasTransitionListNew = new ArrayList<>();
             for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListNewWorkflowInstanceHasTransitionToAttach : workflowInstanceHasTransitionListNew) {
@@ -182,13 +182,13 @@ public class WorkflowInstanceJpaController implements Serializable {
                 assignedUserNew.getWorkflowInstanceList().add(workflowInstance);
                 assignedUserNew = em.merge(assignedUserNew);
             }
-            if (workflow1Old != null && !workflow1Old.equals(workflow1New)) {
-                workflow1Old.getWorkflowInstanceList().remove(workflowInstance);
-                workflow1Old = em.merge(workflow1Old);
+            if (workflowOld != null && !workflowOld.equals(workflowNew)) {
+                workflowOld.getWorkflowInstanceList().remove(workflowInstance);
+                workflowOld = em.merge(workflowOld);
             }
-            if (workflow1New != null && !workflow1New.equals(workflow1Old)) {
-                workflow1New.getWorkflowInstanceList().add(workflowInstance);
-                workflow1New = em.merge(workflow1New);
+            if (workflowNew != null && !workflowNew.equals(workflowOld)) {
+                workflowNew.getWorkflowInstanceList().add(workflowInstance);
+                workflowNew = em.merge(workflowNew);
             }
             for (WorkflowInstanceHasTransition workflowInstanceHasTransitionListNewWorkflowInstanceHasTransition : workflowInstanceHasTransitionListNew) {
                 if (!workflowInstanceHasTransitionListOld.contains(workflowInstanceHasTransitionListNewWorkflowInstanceHasTransition)) {
@@ -254,10 +254,10 @@ public class WorkflowInstanceJpaController implements Serializable {
                 assignedUser.getWorkflowInstanceList().remove(workflowInstance);
                 assignedUser = em.merge(assignedUser);
             }
-            Workflow workflow1 = workflowInstance.getWorkflow();
-            if (workflow1 != null) {
-                workflow1.getWorkflowInstanceList().remove(workflowInstance);
-                workflow1 = em.merge(workflow1);
+            Workflow workflow = workflowInstance.getWorkflow();
+            if (workflow != null) {
+                workflow.getWorkflowInstanceList().remove(workflowInstance);
+                workflow = em.merge(workflow);
             }
             em.remove(workflowInstance);
             em.getTransaction().commit();
