@@ -23,6 +23,8 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.ItemClickEvent;
@@ -80,6 +82,7 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
@@ -613,6 +616,13 @@ public class ValidationManagerUI extends UI implements VMUI {
                             displayTraceMatrix((Project) tree.getValue());
                         });
         trace.setEnabled(checkRight("testplan.planning"));
+        MenuItem risk
+                = menu.addItem(TRANSLATOR.translate("general.risk.management"),
+                        VaadinIcons.SPLIT,
+                        (MenuItem selectedItem) -> {
+                            displayRiskManagement((Project) tree.getValue());
+                        });
+        risk.setEnabled(checkRight("risk.management.view"));
     }
 
     private void createRequirementMenu(ContextMenu menu) {
@@ -1680,6 +1690,28 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void closeSession() {
         getSession().close();
+    }
+
+    private void displayRiskManagement(Project project) {
+        VMWindow w = new VMWindow("general.risk.management");
+        GridLayout gl = new GridLayout(2, 1);
+        gl.setColumnExpandRatio(0, 1);
+        gl.setColumnExpandRatio(1, 10);
+        gl.setRowExpandRatio(0, 1);
+        VerticalLayout vl = new VerticalLayout();
+        Button b = new Button("1");
+        vl.addComponent(b);
+        gl.addComponent(vl, 0, 0);
+        Grid grid = new Grid("FMEA");
+        BeanItemContainer<RiskItem> histories
+                = new BeanItemContainer<>(RiskItem.class);
+        GeneratedPropertyContainer wrapperCont
+                = new GeneratedPropertyContainer(histories);
+        grid.setContainerDataSource(wrapperCont);
+        gl.addComponent(grid, 1, 0);
+        w.setContent(gl);
+        w.setSizeFull();
+        addWindow(w);
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
