@@ -1,9 +1,8 @@
-version: 0.4 build {build}
+version: VM {branch} build {build}
 skip_tags: true
 environment:
   MAVEN_VERSION: 3.3.9
   matrix:
-    - JAVA_HOME: C:\Program Files\Java\jdk1.7.0
     - JAVA_HOME: C:\Program Files\Java\jdk1.8.0
 install:
   - ps: |
