@@ -8,7 +8,7 @@
 </a>
 [![Stories in Ready](https://badge.waffle.io/javydreamercsw/validation-manager.png?label=ready&title=Ready)](http://waffle.io/javydreamercsw/validation-manager)
 [![Dependency Status](https://www.versioneye.com/user/projects/596d2b19368b0800116ee85a/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/596d2b19368b0800116ee85a)
-
+[![Build status](https://ci.appveyor.com/api/projects/status/mua2c4msswskobok?svg=true)](https://ci.appveyor.com/project/javydreamercsw/validation-manager)
 
 Welcome to Validation Manager Repository!
 
