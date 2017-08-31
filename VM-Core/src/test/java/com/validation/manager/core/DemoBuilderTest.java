@@ -18,7 +18,6 @@ package com.validation.manager.core;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
-import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestPlan;
 import com.validation.manager.core.db.TestProject;
@@ -63,9 +62,11 @@ public class DemoBuilderTest extends AbstractVMTestCase {
                     assertTrue(tp.getProjectList().size() > 0);
                     for (TestPlan plan : tp.getTestPlanList()) {
                         plans++;
-                        for (TestCase tc : plan.getTestCaseList()) {
+                        plan.getTestCaseList().stream().map((tc) -> {
                             //Check all test cases have steps.
                             assertTrue(tc.getStepList().size() > 0);
+                            return tc;
+                        }).forEachOrdered((tc) -> {
                             tc.getStepList().forEach(s -> {
                                 //Check all steps have related requirements.
                                 assertTrue(s.getRequirementList().size() > 0);
@@ -76,7 +77,7 @@ public class DemoBuilderTest extends AbstractVMTestCase {
                                     assertTrue(de.getDataEntryPropertyList().size() > 0);
                                 });
                             });
-                        }
+                        });
                     }
                 }
                 List<TestCaseExecution> executions
@@ -112,6 +113,14 @@ public class DemoBuilderTest extends AbstractVMTestCase {
                         Exceptions.printStackTrace(ex);
                         fail();
                     }
+                });
+                assertEquals(1, p.getFmeaList().size());
+                p.getFmeaList().forEach(fmea -> {
+                    assertTrue(fmea.getRiskItemList().size() > 0);
+                    fmea.getRiskItemList().forEach(item -> {
+                        assertTrue(item.getHazardList().size() > 0);
+                        assertTrue(item.getFailureModeList().size() > 0);
+                    });
                 });
             }
             assertTrue(testProjects > 0);
