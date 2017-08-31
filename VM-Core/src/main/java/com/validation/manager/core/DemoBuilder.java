@@ -347,7 +347,6 @@ public class DemoBuilder {
                 RISK_CATEGORIES.forEach(rc -> {
                     ri.getRiskCategoryList().add(rc);
                 });
-                ri.write2DB();
                 ri.setHazardList(new ArrayList<>());
                 for (int j = 0; j < (i + 1); j++) {
                     Hazard hazard = HAZARDS.get(j);
@@ -358,6 +357,7 @@ public class DemoBuilder {
                     FailureMode fm = FAILURE_MODES.get(j);
                     ri.getFailureModeList().add(fm);
                 }
+                ri.write2DB();
             }
         }
         catch (NonexistentEntityException ex) {
