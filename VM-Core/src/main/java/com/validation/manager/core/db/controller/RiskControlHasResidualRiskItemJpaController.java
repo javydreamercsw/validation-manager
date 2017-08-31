@@ -49,8 +49,9 @@ public class RiskControlHasResidualRiskItemJpaController implements Serializable
             riskControlHasResidualRiskItem.setRiskControlHasResidualRiskItemPK(new RiskControlHasResidualRiskItemPK());
         }
         riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskItemId(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getId());
-        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getId());
         riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlRiskControlTypeId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getRiskControlTypeId());
+        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskitemFMEAid(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getFMEAid());
+        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -82,8 +83,9 @@ public class RiskControlHasResidualRiskItemJpaController implements Serializable
 
     public void edit(RiskControlHasResidualRiskItem riskControlHasResidualRiskItem) throws NonexistentEntityException, Exception {
         riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskItemId(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getId());
-        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getId());
         riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlRiskControlTypeId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getRiskControlTypeId());
+        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskitemFMEAid(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getFMEAid());
+        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

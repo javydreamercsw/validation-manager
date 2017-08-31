@@ -15,14 +15,24 @@
  */
 package com.validation.manager.core.server.fmea;
 
+import com.validation.manager.core.DataBaseManager;
 import static com.validation.manager.core.DataBaseManager.getEntityManagerFactory;
 import com.validation.manager.core.EntityServer;
+import com.validation.manager.core.db.Cause;
+import com.validation.manager.core.db.FailureMode;
 import com.validation.manager.core.db.FmeaPK;
+import com.validation.manager.core.db.Hazard;
+import com.validation.manager.core.db.HazardHasFailureMode;
 import com.validation.manager.core.db.RiskItem;
+import com.validation.manager.core.db.RiskItemHasHazard;
 import com.validation.manager.core.db.controller.FmeaJpaController;
+import com.validation.manager.core.db.controller.HazardHasFailureModeJpaController;
+import com.validation.manager.core.db.controller.RiskItemHasHazardJpaController;
 import com.validation.manager.core.db.controller.RiskItemJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -64,30 +74,49 @@ public final class RiskItemServer extends RiskItem implements EntityServer<RiskI
 
     @Override
     public void update(RiskItem target, RiskItem source) {
-        if (source.getCauseList() != null) {
-            target.setCauseList(source.getCauseList());
-        }
-        if (source.getFailureModeList() != null) {
-            target.setFailureModeList(source.getFailureModeList());
-        }
         target.setFmea(new FmeaJpaController(
                 getEntityManagerFactory())
                 .findFmea(new FmeaPK(source.getRiskItemPK().getFMEAid(),
                         source.getRiskItemPK().getFMEAprojectid())));
-        if (source.getHazardList() != null) {
-            target.setHazardList(source.getHazardList());
-        }
-        if (source.getRiskControlList() != null) {
-            target.setRiskControlList(source.getRiskControlList());
-        }
-        if (source.getRiskControlList1() != null) {
-            target.setRiskControlList1(source.getRiskControlList1());
-        }
         target.setDescription(source.getDescription());
+        target.setRiskItemHasHazardList(source.getRiskItemHasHazardList());
+        target.setRiskItemPK(source.getRiskItemPK());
     }
 
     @Override
     public void update() {
         update(this, getEntity());
+    }
+
+    public void addHazard(Hazard hazard, List<FailureMode> fms,
+            List<Cause> causes) throws Exception {
+        RiskItemHasHazard rihh = new RiskItemHasHazard(getRiskItemPK().getId(),
+                getRiskItemPK().getFMEAid(),
+                getRiskItemPK().getFMEAprojectid(),
+                hazard.getId());
+        rihh.setHazard(hazard);
+        rihh.setRiskItem(getEntity());
+        new RiskItemHasHazardJpaController(DataBaseManager
+                .getEntityManagerFactory()).create(rihh);
+        if (fms != null) {
+            for (FailureMode fm : fms) {
+                HazardHasFailureMode hhfm
+                        = new HazardHasFailureMode(getRiskItemPK().getId(),
+                                getRiskItemPK().getFMEAid(),
+                                getRiskItemPK().getFMEAprojectid(),
+                                hazard.getId(),
+                                fm.getId());
+                hhfm.setFailureMode(fm);
+                hhfm.setRiskItemHasHazard(rihh);
+                hhfm.setCauseList(new ArrayList<>());
+                if (causes != null) {
+                    hhfm.getCauseList().addAll(causes);
+                }
+                new HazardHasFailureModeJpaController(DataBaseManager
+                        .getEntityManagerFactory()).create(hhfm);
+                rihh.getHazardHasFailureModeList().add(hhfm);
+            }
+        }
+        update();
     }
 }

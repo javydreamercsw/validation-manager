@@ -27,6 +27,7 @@
     <class>com.validation.manager.core.db.FieldType</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
+    <class>com.validation.manager.core.db.HazardHasFailureMode</class>
     <class>com.validation.manager.core.db.History</class>
     <class>com.validation.manager.core.db.HistoryField</class>
     <class>com.validation.manager.core.db.Investigation</class>
@@ -45,12 +46,12 @@
     <class>com.validation.manager.core.db.ReviewResult</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
-    <class>com.validation.manager.core.db.RiskControlHasResidualRiskItem</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
+    <class>com.validation.manager.core.db.RiskControlHasResidualRiskItem</class>
     <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
     <class>com.validation.manager.core.db.RiskControlType</class>
     <class>com.validation.manager.core.db.RiskItem</class>
-    <class>com.validation.manager.core.db.RiskItemHasRiskCategory</class>
+    <class>com.validation.manager.core.db.RiskItemHasHazard</class>
     <class>com.validation.manager.core.db.Role</class>
     <class>com.validation.manager.core.db.RootCause</class>
     <class>com.validation.manager.core.db.RootCauseType</class>
@@ -121,6 +122,7 @@
     <class>com.validation.manager.core.db.FieldType</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
+    <class>com.validation.manager.core.db.HazardHasFailureMode</class>
     <class>com.validation.manager.core.db.History</class>
     <class>com.validation.manager.core.db.HistoryField</class>
     <class>com.validation.manager.core.db.Investigation</class>
@@ -139,12 +141,12 @@
     <class>com.validation.manager.core.db.ReviewResult</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
-    <class>com.validation.manager.core.db.RiskControlHasResidualRiskItem</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
+    <class>com.validation.manager.core.db.RiskControlHasResidualRiskItem</class>
     <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
     <class>com.validation.manager.core.db.RiskControlType</class>
     <class>com.validation.manager.core.db.RiskItem</class>
-    <class>com.validation.manager.core.db.RiskItemHasRiskCategory</class>
+    <class>com.validation.manager.core.db.RiskItemHasHazard</class>
     <class>com.validation.manager.core.db.Role</class>
     <class>com.validation.manager.core.db.RootCause</class>
     <class>com.validation.manager.core.db.RootCauseType</class>
@@ -217,6 +219,7 @@
     <class>com.validation.manager.core.db.FieldType</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
+    <class>com.validation.manager.core.db.HazardHasFailureMode</class>
     <class>com.validation.manager.core.db.History</class>
     <class>com.validation.manager.core.db.HistoryField</class>
     <class>com.validation.manager.core.db.Investigation</class>
@@ -235,12 +238,12 @@
     <class>com.validation.manager.core.db.ReviewResult</class>
     <class>com.validation.manager.core.db.RiskCategory</class>
     <class>com.validation.manager.core.db.RiskControl</class>
-    <class>com.validation.manager.core.db.RiskControlHasResidualRiskItem</class>
     <class>com.validation.manager.core.db.RiskControlHasRequirement</class>
+    <class>com.validation.manager.core.db.RiskControlHasResidualRiskItem</class>
     <class>com.validation.manager.core.db.RiskControlHasTestCase</class>
     <class>com.validation.manager.core.db.RiskControlType</class>
     <class>com.validation.manager.core.db.RiskItem</class>
-    <class>com.validation.manager.core.db.RiskItemHasRiskCategory</class>
+    <class>com.validation.manager.core.db.RiskItemHasHazard</class>
     <class>com.validation.manager.core.db.Role</class>
     <class>com.validation.manager.core.db.RootCause</class>
     <class>com.validation.manager.core.db.RootCauseType</class>

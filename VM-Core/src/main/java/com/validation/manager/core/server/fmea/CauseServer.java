@@ -73,9 +73,8 @@ public final class CauseServer extends Cause implements EntityServer<Cause> {
     public void update(Cause target, Cause source) {
         target.setDescription(source.getDescription());
         target.setName(source.getName());
-        if (source.getRiskItemList() != null) {
-            target.setRiskItemList(source.getRiskItemList());
-        }
+        target.setId(source.getId());
+        target.setHazardHasFailureModeList(source.getHazardHasFailureModeList());
     }
 
     @Override

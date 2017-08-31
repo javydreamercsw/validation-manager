@@ -18,18 +18,18 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -44,14 +44,24 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 @Table(name = "failure_mode")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "FailureMode.findAll", query = "SELECT f FROM FailureMode f")
-    , @NamedQuery(name = "FailureMode.findById", query = "SELECT f FROM FailureMode f WHERE f.id = :id")
-    , @NamedQuery(name = "FailureMode.findByName", query = "SELECT f FROM FailureMode f WHERE f.name = :name")})
+    @NamedQuery(name = "FailureMode.findAll",
+            query = "SELECT f FROM FailureMode f")
+    , @NamedQuery(name = "FailureMode.findById",
+            query = "SELECT f FROM FailureMode f WHERE f.id = :id")
+    , @NamedQuery(name = "FailureMode.findByName",
+            query = "SELECT f FROM FailureMode f WHERE f.name = :name")})
 public class FailureMode implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE,
+            generator = "FM_IDGEN")
+    @TableGenerator(name = "FM_IDGEN", table = "vm_id",
+            pkColumnName = "table_name",
+            valueColumnName = "last_id",
+            pkColumnValue = "failure_mode",
+            initialValue = 1_000,
+            allocationSize = 1)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
@@ -66,15 +76,8 @@ public class FailureMode implements Serializable {
     @Size(min = 1, max = 65535)
     @Column(name = "description")
     private String description;
-    @JoinTable(name = "risk_item_has_failure_mode", joinColumns = {
-        @JoinColumn(name = "failure_mode_id", referencedColumnName = "id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
-        , @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")
-                , @JoinColumn(name = "risk_item_FMEA_project_id",
-                        referencedColumnName = "FMEA_project_id")})
-    @ManyToMany
-    private List<RiskItem> riskItemList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "failureMode")
+    private List<HazardHasFailureMode> hazardHasFailureModeList;
 
     public FailureMode() {
     }
@@ -110,12 +113,12 @@ public class FailureMode implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<RiskItem> getRiskItemList() {
-        return riskItemList;
+    public List<HazardHasFailureMode> getHazardHasFailureModeList() {
+        return hazardHasFailureModeList;
     }
 
-    public void setRiskItemList(List<RiskItem> riskItemList) {
-        this.riskItemList = riskItemList;
+    public void setHazardHasFailureModeList(List<HazardHasFailureMode> hazardHasFailureModeList) {
+        this.hazardHasFailureModeList = hazardHasFailureModeList;
     }
 
     @Override
@@ -127,7 +130,6 @@ public class FailureMode implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof FailureMode)) {
             return false;
         }

@@ -56,9 +56,9 @@ public class ExecutionStepHasIssueJpaController implements Serializable {
         }
         executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepTestCaseExecutionId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
-        executionStepHasIssue.getExecutionStepHasIssuePK().setIssueIssueTypeId(executionStepHasIssue.getIssue().getIssuePK().getIssueTypeId());
-        executionStepHasIssue.getExecutionStepHasIssuePK().setIssueId(executionStepHasIssue.getIssue().getIssuePK().getId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepTestCaseId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasIssue.getExecutionStepHasIssuePK().setIssueId(executionStepHasIssue.getIssue().getIssuePK().getId());
+        executionStepHasIssue.getExecutionStepHasIssuePK().setIssueIssueTypeId(executionStepHasIssue.getIssue().getIssuePK().getIssueTypeId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -110,9 +110,9 @@ public class ExecutionStepHasIssueJpaController implements Serializable {
     public void edit(ExecutionStepHasIssue executionStepHasIssue) throws NonexistentEntityException, Exception {
         executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepTestCaseExecutionId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
-        executionStepHasIssue.getExecutionStepHasIssuePK().setIssueIssueTypeId(executionStepHasIssue.getIssue().getIssuePK().getIssueTypeId());
-        executionStepHasIssue.getExecutionStepHasIssuePK().setIssueId(executionStepHasIssue.getIssue().getIssuePK().getId());
         executionStepHasIssue.getExecutionStepHasIssuePK().setExecutionStepStepTestCaseId(executionStepHasIssue.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
+        executionStepHasIssue.getExecutionStepHasIssuePK().setIssueId(executionStepHasIssue.getIssue().getIssuePK().getId());
+        executionStepHasIssue.getExecutionStepHasIssuePK().setIssueIssueTypeId(executionStepHasIssue.getIssue().getIssuePK().getIssueTypeId());
         EntityManager em = null;
         try {
             em = getEntityManager();

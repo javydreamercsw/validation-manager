@@ -21,7 +21,8 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.RiskItem;
+import com.validation.manager.core.db.RiskItemHasHazard;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,23 +45,28 @@ public class HazardJpaController implements Serializable {
     }
 
     public void create(Hazard hazard) {
-        if (hazard.getRiskItemList() == null) {
-            hazard.setRiskItemList(new ArrayList<>());
+        if (hazard.getRiskItemHasHazardList() == null) {
+            hazard.setRiskItemHasHazardList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<RiskItem> attachedRiskItemList = new ArrayList<>();
-            for (RiskItem riskItemListRiskItemToAttach : hazard.getRiskItemList()) {
-                riskItemListRiskItemToAttach = em.getReference(riskItemListRiskItemToAttach.getClass(), riskItemListRiskItemToAttach.getRiskItemPK());
-                attachedRiskItemList.add(riskItemListRiskItemToAttach);
+            List<RiskItemHasHazard> attachedRiskItemHasHazardList = new ArrayList<>();
+            for (RiskItemHasHazard riskItemHasHazardListRiskItemHasHazardToAttach : hazard.getRiskItemHasHazardList()) {
+                riskItemHasHazardListRiskItemHasHazardToAttach = em.getReference(riskItemHasHazardListRiskItemHasHazardToAttach.getClass(), riskItemHasHazardListRiskItemHasHazardToAttach.getRiskItemHasHazardPK());
+                attachedRiskItemHasHazardList.add(riskItemHasHazardListRiskItemHasHazardToAttach);
             }
-            hazard.setRiskItemList(attachedRiskItemList);
+            hazard.setRiskItemHasHazardList(attachedRiskItemHasHazardList);
             em.persist(hazard);
-            for (RiskItem riskItemListRiskItem : hazard.getRiskItemList()) {
-                riskItemListRiskItem.getHazardList().add(hazard);
-                riskItemListRiskItem = em.merge(riskItemListRiskItem);
+            for (RiskItemHasHazard riskItemHasHazardListRiskItemHasHazard : hazard.getRiskItemHasHazardList()) {
+                Hazard oldHazardOfRiskItemHasHazardListRiskItemHasHazard = riskItemHasHazardListRiskItemHasHazard.getHazard();
+                riskItemHasHazardListRiskItemHasHazard.setHazard(hazard);
+                riskItemHasHazardListRiskItemHasHazard = em.merge(riskItemHasHazardListRiskItemHasHazard);
+                if (oldHazardOfRiskItemHasHazardListRiskItemHasHazard != null) {
+                    oldHazardOfRiskItemHasHazardListRiskItemHasHazard.getRiskItemHasHazardList().remove(riskItemHasHazardListRiskItemHasHazard);
+                    oldHazardOfRiskItemHasHazardListRiskItemHasHazard = em.merge(oldHazardOfRiskItemHasHazardListRiskItemHasHazard);
+                }
             }
             em.getTransaction().commit();
         }
@@ -71,32 +77,43 @@ public class HazardJpaController implements Serializable {
         }
     }
 
-    public void edit(Hazard hazard) throws NonexistentEntityException, Exception {
+    public void edit(Hazard hazard) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             Hazard persistentHazard = em.find(Hazard.class, hazard.getId());
-            List<RiskItem> riskItemListOld = persistentHazard.getRiskItemList();
-            List<RiskItem> riskItemListNew = hazard.getRiskItemList();
-            List<RiskItem> attachedRiskItemListNew = new ArrayList<>();
-            for (RiskItem riskItemListNewRiskItemToAttach : riskItemListNew) {
-                riskItemListNewRiskItemToAttach = em.getReference(riskItemListNewRiskItemToAttach.getClass(), riskItemListNewRiskItemToAttach.getRiskItemPK());
-                attachedRiskItemListNew.add(riskItemListNewRiskItemToAttach);
-            }
-            riskItemListNew = attachedRiskItemListNew;
-            hazard.setRiskItemList(riskItemListNew);
-            hazard = em.merge(hazard);
-            for (RiskItem riskItemListOldRiskItem : riskItemListOld) {
-                if (!riskItemListNew.contains(riskItemListOldRiskItem)) {
-                    riskItemListOldRiskItem.getHazardList().remove(hazard);
-                    riskItemListOldRiskItem = em.merge(riskItemListOldRiskItem);
+            List<RiskItemHasHazard> riskItemHasHazardListOld = persistentHazard.getRiskItemHasHazardList();
+            List<RiskItemHasHazard> riskItemHasHazardListNew = hazard.getRiskItemHasHazardList();
+            List<String> illegalOrphanMessages = null;
+            for (RiskItemHasHazard riskItemHasHazardListOldRiskItemHasHazard : riskItemHasHazardListOld) {
+                if (!riskItemHasHazardListNew.contains(riskItemHasHazardListOldRiskItemHasHazard)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain RiskItemHasHazard " + riskItemHasHazardListOldRiskItemHasHazard + " since its hazard field is not nullable.");
                 }
             }
-            for (RiskItem riskItemListNewRiskItem : riskItemListNew) {
-                if (!riskItemListOld.contains(riskItemListNewRiskItem)) {
-                    riskItemListNewRiskItem.getHazardList().add(hazard);
-                    riskItemListNewRiskItem = em.merge(riskItemListNewRiskItem);
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            List<RiskItemHasHazard> attachedRiskItemHasHazardListNew = new ArrayList<>();
+            for (RiskItemHasHazard riskItemHasHazardListNewRiskItemHasHazardToAttach : riskItemHasHazardListNew) {
+                riskItemHasHazardListNewRiskItemHasHazardToAttach = em.getReference(riskItemHasHazardListNewRiskItemHasHazardToAttach.getClass(), riskItemHasHazardListNewRiskItemHasHazardToAttach.getRiskItemHasHazardPK());
+                attachedRiskItemHasHazardListNew.add(riskItemHasHazardListNewRiskItemHasHazardToAttach);
+            }
+            riskItemHasHazardListNew = attachedRiskItemHasHazardListNew;
+            hazard.setRiskItemHasHazardList(riskItemHasHazardListNew);
+            hazard = em.merge(hazard);
+            for (RiskItemHasHazard riskItemHasHazardListNewRiskItemHasHazard : riskItemHasHazardListNew) {
+                if (!riskItemHasHazardListOld.contains(riskItemHasHazardListNewRiskItemHasHazard)) {
+                    Hazard oldHazardOfRiskItemHasHazardListNewRiskItemHasHazard = riskItemHasHazardListNewRiskItemHasHazard.getHazard();
+                    riskItemHasHazardListNewRiskItemHasHazard.setHazard(hazard);
+                    riskItemHasHazardListNewRiskItemHasHazard = em.merge(riskItemHasHazardListNewRiskItemHasHazard);
+                    if (oldHazardOfRiskItemHasHazardListNewRiskItemHasHazard != null && !oldHazardOfRiskItemHasHazardListNewRiskItemHasHazard.equals(hazard)) {
+                        oldHazardOfRiskItemHasHazardListNewRiskItemHasHazard.getRiskItemHasHazardList().remove(riskItemHasHazardListNewRiskItemHasHazard);
+                        oldHazardOfRiskItemHasHazardListNewRiskItemHasHazard = em.merge(oldHazardOfRiskItemHasHazardListNewRiskItemHasHazard);
+                    }
                 }
             }
             em.getTransaction().commit();
@@ -118,7 +135,7 @@ public class HazardJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -131,10 +148,16 @@ public class HazardJpaController implements Serializable {
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The hazard with id " + id + " no longer exists.", enfe);
             }
-            List<RiskItem> riskItemList = hazard.getRiskItemList();
-            for (RiskItem riskItemListRiskItem : riskItemList) {
-                riskItemListRiskItem.getHazardList().remove(hazard);
-                riskItemListRiskItem = em.merge(riskItemListRiskItem);
+            List<String> illegalOrphanMessages = null;
+            List<RiskItemHasHazard> riskItemHasHazardListOrphanCheck = hazard.getRiskItemHasHazardList();
+            for (RiskItemHasHazard riskItemHasHazardListOrphanCheckRiskItemHasHazard : riskItemHasHazardListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This Hazard (" + hazard + ") cannot be destroyed since the RiskItemHasHazard " + riskItemHasHazardListOrphanCheckRiskItemHasHazard + " in its riskItemHasHazardList field has a non-nullable hazard field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             em.remove(hazard);
             em.getTransaction().commit();

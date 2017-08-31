@@ -15,6 +15,11 @@
  */
 package com.validation.manager.core.db.controller;
 
+import java.io.Serializable;
+import javax.persistence.Query;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Fmea;
 import com.validation.manager.core.db.FmeaPK;
 import com.validation.manager.core.db.Project;
@@ -22,15 +27,10 @@ import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 /**
  *
@@ -126,8 +126,7 @@ public class FmeaJpaController implements Serializable {
         }
     }
 
-    public void edit(Fmea fmea) throws IllegalOrphanException,
-            NonexistentEntityException, Exception {
+    public void edit(Fmea fmea) throws IllegalOrphanException, NonexistentEntityException, Exception {
         fmea.getFmeaPK().setProjectId(fmea.getProject().getId());
         EntityManager em = null;
         try {

@@ -55,6 +55,7 @@ import com.validation.manager.test.TestHelper;
 import static com.validation.manager.test.TestHelper.createProject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -134,13 +135,13 @@ public class FMEATest extends AbstractVMTestCase {
         }
         System.out.println("Done!");
         System.out.println("Create Hazards");
-        List<Hazard> hazards = new ArrayList<>();
+        List<Hazard> HAZARDS = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             HazardServer hs = new HazardServer("Hazard " + i,
                     "Hazard Description " + i);
             try {
                 hs.write2DB();
-                hazards.add(new HazardJpaController(DataBaseManager
+                HAZARDS.add(new HazardJpaController(DataBaseManager
                         .getEntityManagerFactory()).findHazard(hs.getId()));
             }
             catch (NonexistentEntityException ex) {
@@ -154,13 +155,13 @@ public class FMEATest extends AbstractVMTestCase {
         }
         System.out.println("Done!");
         System.out.println("Create Causes");
-        List<Cause> causes = new ArrayList<>();
+        List<Cause> CAUSES = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             CauseServer cs = new CauseServer("Cause " + i,
                     "Cause Description " + i);
             try {
                 cs.write2DB();
-                causes.add(new CauseJpaController(DataBaseManager
+                CAUSES.add(new CauseJpaController(DataBaseManager
                         .getEntityManagerFactory()).findCause(cs.getId()));
             }
             catch (VMException ex) {
@@ -272,7 +273,7 @@ public class FMEATest extends AbstractVMTestCase {
         }
         System.out.println("Done!");
         System.out.println("Create Failure Modes");
-        List<FailureMode> fms = new ArrayList<>();
+        List<FailureMode> FAILURE_MODES = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             FailureModeServer fm = new FailureModeServer("Failure Mode "
                     + i, "Failure Mode Desc " + i);
@@ -287,7 +288,7 @@ public class FMEATest extends AbstractVMTestCase {
                 LOG.log(Level.SEVERE, null, ex);
                 fail();
             }
-            fms.add(new FailureModeJpaController(DataBaseManager
+            FAILURE_MODES.add(new FailureModeJpaController(DataBaseManager
                     .getEntityManagerFactory()).findFailureMode(fm.getId()));
         }
         System.out.println("Done!");
@@ -299,62 +300,17 @@ public class FMEATest extends AbstractVMTestCase {
                         = new RiskItemServer(fmea.getFmeaPK(),
                                 "Desc " + (i + 1));
                 ri.write2DB();
-                riskCategories.forEach(rc -> {
-                    ri.getRiskCategoryList().add(rc);
-                });
-                ri.write2DB();
-                System.out.println(ri);
-                System.out.println("Adding hazards (" + (i + 1) + ")");
-                ri.setHazardList(new ArrayList<>());
+                ri.setRiskItemHasHazardList(new ArrayList<>());
                 for (int j = 0; j < (i + 1); j++) {
-                    Hazard hazard = hazards.get(j);
-                    System.out.println(hazard);
-                    ri.getHazardList().add(hazard);
+                    Hazard hazard = HAZARDS.get(j);
+                    ri.addHazard(hazard, FAILURE_MODES.subList(0, new Random()
+                            .nextInt(FAILURE_MODES.size())),
+                            CAUSES.subList(0, new Random()
+                                    .nextInt(CAUSES.size())));
+                    riskItems.add(new RiskItemJpaController(DataBaseManager
+                            .getEntityManagerFactory())
+                            .findRiskItem(ri.getRiskItemPK()));
                 }
-                System.out.println("Done!");
-                System.out.println("Adding failure modes (" + (i + 1) + ")");
-                ri.setFailureModeList(new ArrayList<>());
-                for (int j = 0; j < (i + 1); j++) {
-                    FailureMode fm = fms.get(j);
-                    System.out.println(fm);
-                    ri.getFailureModeList().add(fm);
-                }
-                System.out.println("Done!");
-                System.out.println("Adding causes (" + (i + 1) + ")");
-                ri.setCauseList(new ArrayList<>());
-                for (int j = 0; j < (i + 1); j++) {
-                    Cause cause = causes.get(j);
-                    System.out.println(cause);
-                    ri.getCauseList().add(cause);
-                }
-                System.out.println("Done!");
-                System.out.println("Adding Risk Controls (" + (i + 1) + ")");
-                ri.setRiskControlList(new ArrayList<>());
-                for (int j = 0; j < (i + 1); j++) {
-                    RiskControl control = controls.get(j);
-                    System.out.println(control);
-                    ri.getRiskControlList().add(control);
-                }
-                System.out.println("Done!");
-                System.out.println("Adding Risk Control (" + (i + 1) + ")");
-                for (int j = 0; j < (i + 1); j++) {
-                    RiskControl control = controls.get(j);
-                    System.out.println(control);
-                    ri.getRiskControlList().add(controls.get(j));
-                }
-                System.out.println("Done!");
-                System.out.println("Adding Residual Risk Controls ("
-                        + (i + 1) + ")");
-                ri.setRiskControlList1(new ArrayList<>());
-                for (int j = 0; j < (i + 1); j++) {
-                    RiskControl control = controls.get(j);
-                    System.out.println(control);
-                    ri.getRiskControlList1().add(control);
-                }
-                ri.write2DB();
-                System.out.println("Done!");
-                riskItems.add(new RiskItemJpaController(DataBaseManager
-                        .getEntityManagerFactory()).findRiskItem(ri.getRiskItemPK()));
             }
             catch (IllegalOrphanException ex) {
                 LOG.log(Level.SEVERE, null, ex);

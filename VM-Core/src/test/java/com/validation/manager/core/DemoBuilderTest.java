@@ -118,8 +118,13 @@ public class DemoBuilderTest extends AbstractVMTestCase {
                 p.getFmeaList().forEach(fmea -> {
                     assertTrue(fmea.getRiskItemList().size() > 0);
                     fmea.getRiskItemList().forEach(item -> {
-                        assertTrue(item.getHazardList().size() > 0);
-                        assertTrue(item.getFailureModeList().size() > 0);
+                        assertTrue(item.getRiskItemHasHazardList().size() > 0);
+                        item.getRiskItemHasHazardList().forEach(rihh -> {
+                            assertTrue(rihh.getHazardHasFailureModeList().size() > 0);
+                            rihh.getHazardHasFailureModeList().forEach(hhfm -> {
+                                assertTrue(hhfm.getCauseList().size() > 0);
+                            });
+                        });
                     });
                 });
             }

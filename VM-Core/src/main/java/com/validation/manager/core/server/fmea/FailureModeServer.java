@@ -19,6 +19,7 @@ import static com.validation.manager.core.DataBaseManager.getEntityManagerFactor
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.FailureMode;
 import com.validation.manager.core.db.controller.FailureModeJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 
 /**
@@ -51,7 +52,8 @@ public final class FailureModeServer extends FailureMode
         return getId();
     }
 
-    public static boolean deleteFailureMode(FailureMode fm) throws NonexistentEntityException {
+    public static boolean deleteFailureMode(FailureMode fm)
+            throws NonexistentEntityException, IllegalOrphanException {
         new FailureModeJpaController(
                 getEntityManagerFactory()).destroy(fm.getId());
         return true;
@@ -67,9 +69,8 @@ public final class FailureModeServer extends FailureMode
     public void update(FailureMode target, FailureMode source) {
         target.setName(source.getName());
         target.setDescription(source.getDescription());
-        if (source.getRiskItemList() != null) {
-            target.setRiskItemList(source.getRiskItemList());
-        }
+        target.setId(source.getId());
+        target.setHazardHasFailureModeList(source.getHazardHasFailureModeList());
     }
 
     @Override

@@ -16,17 +16,15 @@
 package com.validation.manager.core.db.controller;
 
 import com.validation.manager.core.db.RiskCategory;
+import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.io.Serializable;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.RiskItem;
-import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -44,24 +42,11 @@ public class RiskCategoryJpaController implements Serializable {
     }
 
     public void create(RiskCategory riskCategory) {
-        if (riskCategory.getRiskItemList() == null) {
-            riskCategory.setRiskItemList(new ArrayList<>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<RiskItem> attachedRiskItemList = new ArrayList<>();
-            for (RiskItem riskItemListRiskItemToAttach : riskCategory.getRiskItemList()) {
-                riskItemListRiskItemToAttach = em.getReference(riskItemListRiskItemToAttach.getClass(), riskItemListRiskItemToAttach.getRiskItemPK());
-                attachedRiskItemList.add(riskItemListRiskItemToAttach);
-            }
-            riskCategory.setRiskItemList(attachedRiskItemList);
             em.persist(riskCategory);
-            for (RiskItem riskItemListRiskItem : riskCategory.getRiskItemList()) {
-                riskItemListRiskItem.getRiskCategoryList().add(riskCategory);
-                riskItemListRiskItem = em.merge(riskItemListRiskItem);
-            }
             em.getTransaction().commit();
         }
         finally {
@@ -76,29 +61,7 @@ public class RiskCategoryJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            RiskCategory persistentRiskCategory = em.find(RiskCategory.class, riskCategory.getId());
-            List<RiskItem> riskItemListOld = persistentRiskCategory.getRiskItemList();
-            List<RiskItem> riskItemListNew = riskCategory.getRiskItemList();
-            List<RiskItem> attachedRiskItemListNew = new ArrayList<>();
-            for (RiskItem riskItemListNewRiskItemToAttach : riskItemListNew) {
-                riskItemListNewRiskItemToAttach = em.getReference(riskItemListNewRiskItemToAttach.getClass(), riskItemListNewRiskItemToAttach.getRiskItemPK());
-                attachedRiskItemListNew.add(riskItemListNewRiskItemToAttach);
-            }
-            riskItemListNew = attachedRiskItemListNew;
-            riskCategory.setRiskItemList(riskItemListNew);
             riskCategory = em.merge(riskCategory);
-            for (RiskItem riskItemListOldRiskItem : riskItemListOld) {
-                if (!riskItemListNew.contains(riskItemListOldRiskItem)) {
-                    riskItemListOldRiskItem.getRiskCategoryList().remove(riskCategory);
-                    riskItemListOldRiskItem = em.merge(riskItemListOldRiskItem);
-                }
-            }
-            for (RiskItem riskItemListNewRiskItem : riskItemListNew) {
-                if (!riskItemListOld.contains(riskItemListNewRiskItem)) {
-                    riskItemListNewRiskItem.getRiskCategoryList().add(riskCategory);
-                    riskItemListNewRiskItem = em.merge(riskItemListNewRiskItem);
-                }
-            }
             em.getTransaction().commit();
         }
         catch (Exception ex) {
@@ -130,11 +93,6 @@ public class RiskCategoryJpaController implements Serializable {
             }
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The riskCategory with id " + id + " no longer exists.", enfe);
-            }
-            List<RiskItem> riskItemList = riskCategory.getRiskItemList();
-            for (RiskItem riskItemListRiskItem : riskItemList) {
-                riskItemListRiskItem.getRiskCategoryList().remove(riskCategory);
-                riskItemListRiskItem = em.merge(riskItemListRiskItem);
             }
             em.remove(riskCategory);
             em.getTransaction().commit();

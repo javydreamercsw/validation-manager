@@ -76,14 +76,15 @@ public class Cause implements Serializable {
     @Size(min = 1, max = 65_535)
     @Column(name = "description")
     private String description;
-    @JoinTable(name = "risk_item_has_cause", joinColumns = {
-        @JoinColumn(name = "cause_id", referencedColumnName = "id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
-        , @JoinColumn(name = "risk_item_FMEA_id", referencedColumnName = "FMEA_id")
-        , @JoinColumn(name = "risk_item_FMEA_project_id", referencedColumnName = "FMEA_project_id")})
+    @JoinTable(name = "failure_mode_has_cause", joinColumns = {
+        @JoinColumn(name = "cause_id", referencedColumnName = "id")}, inverseJoinColumns = {
+        @JoinColumn(name = "risk_item_id", referencedColumnName = "risk_item_id")
+        , @JoinColumn(name = "FMEA_id", referencedColumnName = "FMEA_id")
+        , @JoinColumn(name = "project_id", referencedColumnName = "FMEA_project_id")
+        , @JoinColumn(name = "hazard_id", referencedColumnName = "hazard_id")
+        , @JoinColumn(name = "failure_mode_id", referencedColumnName = "failure_mode_id")})
     @ManyToMany
-    private List<RiskItem> riskItemList;
+    private List<HazardHasFailureMode> hazardHasFailureModeList;
 
     public Cause() {
     }
@@ -119,12 +120,12 @@ public class Cause implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<RiskItem> getRiskItemList() {
-        return riskItemList;
+    public List<HazardHasFailureMode> getHazardHasFailureModeList() {
+        return hazardHasFailureModeList;
     }
 
-    public void setRiskItemList(List<RiskItem> riskItemList) {
-        this.riskItemList = riskItemList;
+    public void setHazardHasFailureModeList(List<HazardHasFailureMode> hazardHasFailureModeList) {
+        this.hazardHasFailureModeList = hazardHasFailureModeList;
     }
 
     @Override
@@ -136,7 +137,6 @@ public class Cause implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-
         if (!(object instanceof Cause)) {
             return false;
         }

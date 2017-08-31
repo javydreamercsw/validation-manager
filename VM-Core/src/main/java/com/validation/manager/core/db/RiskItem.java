@@ -24,7 +24,6 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -64,8 +63,8 @@ public class RiskItem implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "description")
     private String description;
-    @ManyToMany(mappedBy = "riskItemList")
-    private List<RiskCategory> riskCategoryList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskItem")
+    private List<RiskItemHasHazard> riskItemHasHazardList;
     @JoinColumns({
         @JoinColumn(name = "FMEA_id", referencedColumnName = "id",
                 insertable = false, updatable = false)
@@ -74,18 +73,6 @@ public class RiskItem implements Serializable {
                 updatable = false)})
     @ManyToOne(optional = false)
     private Fmea fmea;
-    @ManyToMany(mappedBy = "riskItemList")
-    private List<FailureMode> failureModeList;
-    @ManyToMany(mappedBy = "riskItemList")
-    private List<Hazard> hazardList;
-    @ManyToMany(mappedBy = "riskItemList")
-    private List<RiskControl> riskControlList;
-    @ManyToMany(mappedBy = "riskItemList1")
-    private List<RiskControl> riskControlList1;
-    @ManyToMany(mappedBy = "riskItemList")
-    private List<Cause> causeList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskItem")
-    private List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList;
 
     public RiskItem() {
     }
@@ -115,54 +102,22 @@ public class RiskItem implements Serializable {
         this.riskItemPK = riskItemPK;
     }
 
-    @XmlTransient
-    @JsonIgnore
-    public List<FailureMode> getFailureModeList() {
-        return failureModeList;
+    public String getDescription() {
+        return description;
     }
 
-    public void setFailureModeList(List<FailureMode> failureModeList) {
-        this.failureModeList = failureModeList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<Hazard> getHazardList() {
-        return hazardList;
-    }
-
-    public void setHazardList(List<Hazard> hazardList) {
-        this.hazardList = hazardList;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @XmlTransient
     @JsonIgnore
-    public List<RiskControl> getRiskControlList() {
-        return riskControlList;
+    public List<RiskItemHasHazard> getRiskItemHasHazardList() {
+        return riskItemHasHazardList;
     }
 
-    public void setRiskControlList(List<RiskControl> riskControlList) {
-        this.riskControlList = riskControlList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskControl> getRiskControlList1() {
-        return riskControlList1;
-    }
-
-    public void setRiskControlList1(List<RiskControl> riskControlList1) {
-        this.riskControlList1 = riskControlList1;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<Cause> getCauseList() {
-        return causeList;
-    }
-
-    public void setCauseList(List<Cause> causeList) {
-        this.causeList = causeList;
+    public void setRiskItemHasHazardList(List<RiskItemHasHazard> riskItemHasHazardList) {
+        this.riskItemHasHazardList = riskItemHasHazardList;
     }
 
     public Fmea getFmea() {
@@ -182,7 +137,6 @@ public class RiskItem implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
         if (!(object instanceof RiskItem)) {
             return false;
         }
@@ -196,33 +150,5 @@ public class RiskItem implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RiskItem[ riskItemPK="
                 + riskItemPK + " ]";
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskCategory> getRiskCategoryList() {
-        return riskCategoryList;
-    }
-
-    public void setRiskCategoryList(List<RiskCategory> riskCategoryList) {
-        this.riskCategoryList = riskCategoryList;
-    }
-
-    @XmlTransient
-    @JsonIgnore
-    public List<RiskControlHasResidualRiskItem> getRiskControlHasResidualRiskItemList() {
-        return riskControlHasResidualRiskItemList;
-    }
-
-    public void setRiskControlHasResidualRiskItemList(List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList) {
-        this.riskControlHasResidualRiskItemList = riskControlHasResidualRiskItemList;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 }

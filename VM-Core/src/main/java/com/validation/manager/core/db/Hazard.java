@@ -18,17 +18,16 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
@@ -77,16 +76,8 @@ public class Hazard implements Serializable {
     @Size(min = 1, max = 65_535)
     @Column(name = "description")
     private String description;
-    @JoinTable(name = "risk_item_has_hazard", joinColumns = {
-        @JoinColumn(name = "hazard_id", referencedColumnName = "id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
-                , @JoinColumn(name = "risk_item_FMEA_id",
-                        referencedColumnName = "FMEA_id")
-                , @JoinColumn(name = "risk_item_FMEA_project_id",
-                        referencedColumnName = "FMEA_project_id")})
-    @ManyToMany
-    private List<RiskItem> riskItemList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hazard")
+    private List<RiskItemHasHazard> riskItemHasHazardList;
 
     public Hazard() {
     }
@@ -122,12 +113,12 @@ public class Hazard implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<RiskItem> getRiskItemList() {
-        return riskItemList;
+    public List<RiskItemHasHazard> getRiskItemHasHazardList() {
+        return riskItemHasHazardList;
     }
 
-    public void setRiskItemList(List<RiskItem> riskItemList) {
-        this.riskItemList = riskItemList;
+    public void setRiskItemHasHazardList(List<RiskItemHasHazard> riskItemHasHazardList) {
+        this.riskItemHasHazardList = riskItemHasHazardList;
     }
 
     @Override
@@ -139,7 +130,6 @@ public class Hazard implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-
         if (!(object instanceof Hazard)) {
             return false;
         }

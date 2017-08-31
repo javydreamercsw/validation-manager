@@ -19,6 +19,7 @@ import static com.validation.manager.core.DataBaseManager.getEntityManagerFactor
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Hazard;
 import com.validation.manager.core.db.controller.HazardJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 
 /**
@@ -29,30 +30,29 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
 
     public HazardServer(String name, String description) {
         super(name, description);
-        setId(0);
     }
 
     @Override
     public int write2DB() throws NonexistentEntityException, Exception {
-        if (getId() > 0) {
+        if (getId() == null) {
+            Hazard h = new Hazard();
+            update(h, this);
+            new HazardJpaController(
+                    getEntityManagerFactory()).create(h);
+            setId(h.getId());
+        } else {
             Hazard h = new HazardJpaController(
                     getEntityManagerFactory())
                     .findHazard(getId());
             update(h, this);
             new HazardJpaController(
                     getEntityManagerFactory()).edit(h);
-        } else {
-            Hazard h = new Hazard();
-            update(h, this);
-            new HazardJpaController(
-                    getEntityManagerFactory()).create(h);
-            setId(h.getId());
         }
         return getId();
     }
 
     public static boolean deleteHazard(Hazard h)
-            throws NonexistentEntityException {
+            throws NonexistentEntityException, IllegalOrphanException {
         new HazardJpaController(
                 getEntityManagerFactory()).destroy(h.getId());
         return true;
@@ -68,7 +68,8 @@ public class HazardServer extends Hazard implements EntityServer<Hazard> {
     public void update(Hazard target, Hazard source) {
         target.setDescription(source.getDescription());
         target.setName(source.getName());
-        target.setRiskItemList(source.getRiskItemList());
+        target.setId(source.getId());
+        target.setRiskItemHasHazardList(source.getRiskItemHasHazardList());
     }
     
     @Override

@@ -53,8 +53,8 @@ public class TemplateNodeJpaController implements Serializable {
         if (templateNode.getTemplateNodeList() == null) {
             templateNode.setTemplateNodeList(new ArrayList<>());
         }
-        templateNode.getTemplateNodePK().setTemplateNodeTypeId(templateNode.getTemplateNodeType().getId());
         templateNode.getTemplateNodePK().setTemplateId(templateNode.getTemplate().getId());
+        templateNode.getTemplateNodePK().setTemplateNodeTypeId(templateNode.getTemplateNodeType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -118,8 +118,8 @@ public class TemplateNodeJpaController implements Serializable {
     }
 
     public void edit(TemplateNode templateNode) throws NonexistentEntityException, Exception {
-        templateNode.getTemplateNodePK().setTemplateNodeTypeId(templateNode.getTemplateNodeType().getId());
         templateNode.getTemplateNodePK().setTemplateId(templateNode.getTemplate().getId());
+        templateNode.getTemplateNodePK().setTemplateNodeTypeId(templateNode.getTemplateNodeType().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
