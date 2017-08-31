@@ -30,10 +30,9 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
  */
 public final class RiskItemServer extends RiskItem implements EntityServer<RiskItem> {
 
-    public RiskItemServer(FmeaPK fMEAid, int sequence, int version) {
+    public RiskItemServer(FmeaPK fMEAid, String desc) {
         super(fMEAid);
-        setSequence(sequence);
-        setVersion(version);
+        setDescription(desc);
         setFmea(new FmeaJpaController(
                 getEntityManagerFactory()).findFmea(fMEAid));
     }
@@ -84,8 +83,7 @@ public final class RiskItemServer extends RiskItem implements EntityServer<RiskI
         if (source.getRiskControlList1() != null) {
             target.setRiskControlList1(source.getRiskControlList1());
         }
-        target.setSequence(source.getSequence());
-        target.setVersion(source.getVersion());
+        target.setDescription(source.getDescription());
     }
 
     @Override

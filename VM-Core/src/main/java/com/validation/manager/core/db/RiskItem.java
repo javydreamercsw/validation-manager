@@ -31,6 +31,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -51,10 +52,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
             query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAid = :fMEAid")
     , @NamedQuery(name = "RiskItem.findByFMEAprojectid",
             query = "SELECT r FROM RiskItem r WHERE r.riskItemPK.fMEAprojectid = :fMEAprojectid")
-    , @NamedQuery(name = "RiskItem.findBySequence",
-            query = "SELECT r FROM RiskItem r WHERE r.sequence = :sequence")
-    , @NamedQuery(name = "RiskItem.findByVersion",
-            query = "SELECT r FROM RiskItem r WHERE r.version = :version")})
+    , @NamedQuery(name = "RiskItem.findByDescription",
+            query = "SELECT r FROM RiskItem r WHERE r.description = :description")})
 public class RiskItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -62,12 +61,9 @@ public class RiskItem implements Serializable {
     protected RiskItemPK riskItemPK;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "sequence")
-    private int sequence;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "version")
-    private int version;
+    @Size(min = 1, max = 255)
+    @Column(name = "description")
+    private String description;
     @ManyToMany(mappedBy = "riskItemList")
     private List<RiskCategory> riskCategoryList;
     @JoinColumns({
@@ -98,10 +94,9 @@ public class RiskItem implements Serializable {
         this.riskItemPK = riskItemPK;
     }
 
-    public RiskItem(RiskItemPK riskItemPK, int sequence, int version) {
+    public RiskItem(RiskItemPK riskItemPK, String description) {
         this.riskItemPK = riskItemPK;
-        this.sequence = sequence;
-        this.version = version;
+        this.description = description;
     }
 
     public RiskItem(int fMEAid, int fMEAprojectid) {
@@ -118,22 +113,6 @@ public class RiskItem implements Serializable {
 
     public void setRiskItemPK(RiskItemPK riskItemPK) {
         this.riskItemPK = riskItemPK;
-    }
-
-    public int getSequence() {
-        return sequence;
-    }
-
-    public void setSequence(int sequence) {
-        this.sequence = sequence;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
     }
 
     @XmlTransient
@@ -237,5 +216,13 @@ public class RiskItem implements Serializable {
 
     public void setRiskControlHasResidualRiskItemList(List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList) {
         this.riskControlHasResidualRiskItemList = riskControlHasResidualRiskItemList;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

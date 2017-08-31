@@ -15,12 +15,18 @@
  */
 package com.validation.manager.core;
 
+import com.validation.manager.core.db.FailureMode;
+import com.validation.manager.core.db.Hazard;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
+import com.validation.manager.core.db.RiskCategory;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
+import com.validation.manager.core.db.controller.FailureModeJpaController;
+import com.validation.manager.core.db.controller.HazardJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
 import com.validation.manager.core.db.controller.RequirementJpaController;
+import com.validation.manager.core.db.controller.RiskCategoryJpaController;
 import com.validation.manager.core.db.controller.TestCaseJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.DataEntryServer;
@@ -37,6 +43,11 @@ import com.validation.manager.core.server.core.TestCaseTypeServer;
 import com.validation.manager.core.server.core.TestPlanServer;
 import com.validation.manager.core.server.core.TestProjectServer;
 import com.validation.manager.core.server.core.VMUserServer;
+import com.validation.manager.core.server.fmea.FMEAServer;
+import com.validation.manager.core.server.fmea.FailureModeServer;
+import com.validation.manager.core.server.fmea.HazardServer;
+import com.validation.manager.core.server.fmea.RiskCategoryServer;
+import com.validation.manager.core.server.fmea.RiskItemServer;
 import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,9 +66,43 @@ public class DemoBuilder {
     private static final Logger LOG
             = Logger.getLogger(DemoBuilder.class.getSimpleName());
     private static int tcCounter = 1, tpCounter, reqCounter;
+    private static final List<RiskCategory> RISK_CATEGORIES = new ArrayList<>();
+    private static final List<Hazard> HAZARDS = new ArrayList<>();
+    private static final List<FailureMode> FAILURE_MODES = new ArrayList<>();
 
     public static void buildDemoProject() throws Exception {
         LOG.info("Creating demo projects...");
+        RiskCategoryServer rcs;
+        rcs = new RiskCategoryServer("Severity", 1, 5);
+        rcs.write2DB();
+        RISK_CATEGORIES.add(new RiskCategoryJpaController(DataBaseManager
+                .getEntityManagerFactory()).findRiskCategory(rcs.getId()));
+        rcs = new RiskCategoryServer("Occurence", 1, 5);
+        rcs.write2DB();
+        RISK_CATEGORIES.add(new RiskCategoryJpaController(DataBaseManager
+                .getEntityManagerFactory()).findRiskCategory(rcs.getId()));
+        rcs = new RiskCategoryServer("Detectability", 1, 5);
+        rcs.write2DB();
+        RISK_CATEGORIES.add(new RiskCategoryJpaController(DataBaseManager
+                .getEntityManagerFactory()).findRiskCategory(rcs.getId()));
+
+        for (int i = 0; i < 5; i++) {
+            HazardServer hs = new HazardServer("Hazard " + i,
+                    "Hazard Description " + i);
+            hs.write2DB();
+            HAZARDS.add(new HazardJpaController(DataBaseManager
+                    .getEntityManagerFactory()).findHazard(hs.getId()));
+        }
+
+        System.out.println("Create Failure Modes");
+        for (int i = 0; i < 5; i++) {
+            FailureModeServer fm = new FailureModeServer("Failure Mode "
+                    + i, "Failure Mode Desc " + i);
+            fm.write2DB();
+            FAILURE_MODES.add(new FailureModeJpaController(DataBaseManager
+                    .getEntityManagerFactory()).findFailureMode(fm.getId()));
+        }
+
         ProjectServer rootProject = new ProjectServer("Demo", "Demo project",
                 new ProjectTypeServer(1).getEntity());
         rootProject.write2DB();
@@ -69,6 +114,7 @@ public class DemoBuilder {
             ps.write2DB();
             addDemoProjectRequirements(ps.getEntity());
             addDemoProjectTestProject(ps.getEntity());
+            addRiskManagement(ps.getEntity());
         }
         rootProject.update();
         //Link requirements with steps
@@ -101,6 +147,7 @@ public class DemoBuilder {
                 addDemoExecution(p);
             }
         }
+        addRiskManagement(rootProject.getEntity());
         LOG.info("Done!");
     }
 
@@ -280,5 +327,44 @@ public class DemoBuilder {
             ess.assignUser(r.nextBoolean() ? tester1.getEntity()
                     : tester2.getEntity(), assigner.getEntity());
         });
+    }
+
+    /**
+     * Create demo Risk management
+     *
+     * @param p Project to add the risk management memo data.
+     */
+    private static void addRiskManagement(Project p) {
+        try {
+            FMEAServer fmea = new FMEAServer("Demo FMEA", p);
+            fmea.write2DB();
+            for (int i = 0; i < 5; i++) {
+                RiskItemServer ri
+                        = new RiskItemServer(fmea.getFmeaPK(),
+                                "Desc " + (i + 1));
+                ri.write2DB();
+                ri.setRiskCategoryList(new ArrayList<>());
+                RISK_CATEGORIES.forEach(rc -> {
+                    ri.getRiskCategoryList().add(rc);
+                });
+                ri.write2DB();
+                ri.setHazardList(new ArrayList<>());
+                for (int j = 0; j < (i + 1); j++) {
+                    Hazard hazard = HAZARDS.get(j);
+                    ri.getHazardList().add(hazard);
+                }
+                ri.setFailureModeList(new ArrayList<>());
+                for (int j = 0; j < (i + 1); j++) {
+                    FailureMode fm = FAILURE_MODES.get(j);
+                    ri.getFailureModeList().add(fm);
+                }
+            }
+        }
+        catch (NonexistentEntityException ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
+        catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
     }
 }

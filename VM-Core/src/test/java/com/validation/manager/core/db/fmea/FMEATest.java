@@ -42,8 +42,6 @@ import com.validation.manager.core.db.controller.RiskControlTypeJpaController;
 import com.validation.manager.core.db.controller.RiskItemJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import com.validation.manager.core.server.core.ProjectServer;
-import com.validation.manager.core.server.core.ProjectTypeServer;
 import com.validation.manager.core.server.core.RiskControlServer;
 import com.validation.manager.core.server.fmea.CauseServer;
 import com.validation.manager.core.server.fmea.FMEAServer;
@@ -81,10 +79,7 @@ public class FMEATest extends AbstractVMTestCase {
         Project p = createProject("New Project", "Notes");
         FMEAServer fmea = new FMEAServer("Test FMEA", p);
         System.out.println("Create Project");
-        ProjectServer product = new ProjectServer("Test product",
-                "Project Notes", new ProjectTypeServer(1).getEntity());
         try {
-            product.write2DB();
             fmea.write2DB();
         }
         catch (VMException ex) {
@@ -201,8 +196,7 @@ public class FMEATest extends AbstractVMTestCase {
         System.out.println("Create Requirement Spec");
         RequirementSpec rss = null;
         try {
-            rss = TestHelper.createRequirementSpec("Test", "Test",
-                    product, 1);
+            rss = TestHelper.createRequirementSpec("Test", "Test", p, 1);
         }
         catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -302,7 +296,12 @@ public class FMEATest extends AbstractVMTestCase {
         for (int i = 0; i < 5; i++) {
             try {
                 RiskItemServer ri
-                        = new RiskItemServer(fmea.getFmeaPK(), (i + 1), 1);
+                        = new RiskItemServer(fmea.getFmeaPK(),
+                                "Desc " + (i + 1));
+                ri.write2DB();
+                riskCategories.forEach(rc -> {
+                    ri.getRiskCategoryList().add(rc);
+                });
                 ri.write2DB();
                 System.out.println(ri);
                 System.out.println("Adding hazards (" + (i + 1) + ")");
@@ -337,7 +336,7 @@ public class FMEATest extends AbstractVMTestCase {
                     ri.getRiskControlList().add(control);
                 }
                 System.out.println("Done!");
-                System.out.println("Adding Risk Item values (" + (i + 1) + ")");
+                System.out.println("Adding Risk Control (" + (i + 1) + ")");
                 for (int j = 0; j < (i + 1); j++) {
                     RiskControl control = controls.get(j);
                     System.out.println(control);
