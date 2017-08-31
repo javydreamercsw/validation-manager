@@ -23,7 +23,7 @@ build_script:
 - cmd: git submodule update --init --recursive
 - cmd: mvn install cobertura:cobertura -Dmaven.javadoc.skip=true -B -V --also-make-dependents
 artifacts:
-- path: '**/*.war'
+- path: 'Validation-Manager-Web/**/*.war'
   name: Validation Manager
 deploy:
 - provider: GitHub
