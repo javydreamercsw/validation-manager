@@ -85,6 +85,8 @@ public class RiskControl implements Serializable {
     private List<RiskControlHasRequirement> riskControlHasRequirementList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskControl")
     private List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList;
+    @ManyToMany(mappedBy = "riskControlList")
+    private List<FailureModeHasCause> failureModeHasCauseList;
 
     public RiskControl() {
     }
@@ -186,5 +188,15 @@ public class RiskControl implements Serializable {
 
     public void setRiskControlHasResidualRiskItemList(List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList) {
         this.riskControlHasResidualRiskItemList = riskControlHasResidualRiskItemList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<FailureModeHasCause> getFailureModeHasCauseList() {
+        return failureModeHasCauseList;
+    }
+
+    public void setFailureModeHasCauseList(List<FailureModeHasCause> failureModeHasCauseList) {
+        this.failureModeHasCauseList = failureModeHasCauseList;
     }
 }

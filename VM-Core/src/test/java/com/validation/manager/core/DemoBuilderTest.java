@@ -122,7 +122,13 @@ public class DemoBuilderTest extends AbstractVMTestCase {
                         item.getRiskItemHasHazardList().forEach(rihh -> {
                             assertTrue(rihh.getHazardHasFailureModeList().size() > 0);
                             rihh.getHazardHasFailureModeList().forEach(hhfm -> {
-                                assertTrue(hhfm.getCauseList().size() > 0);
+                                assertTrue(hhfm.getFailureModeHasCauseList().size() > 0);
+                                hhfm.getFailureModeHasCauseList().forEach(fmhc -> {
+                                    assertTrue(fmhc.getFailureModeHasCauseHasRiskCategoryList().size() > 0);
+                                    fmhc.getFailureModeHasCauseHasRiskCategoryList().forEach(fmhchrc -> {
+                                        assertTrue(fmhchrc.getCategoryValue() > 0);
+                                    });
+                                });
                             });
                         });
                     });

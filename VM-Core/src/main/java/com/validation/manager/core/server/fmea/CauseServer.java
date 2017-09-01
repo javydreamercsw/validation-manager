@@ -20,6 +20,7 @@ import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Cause;
 import com.validation.manager.core.db.controller.CauseJpaController;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 
 /**
@@ -57,7 +58,8 @@ public final class CauseServer extends Cause implements EntityServer<Cause> {
         return getId();
     }
 
-    public static boolean deleteCause(Cause c) throws NonexistentEntityException {
+    public static boolean deleteCause(Cause c)
+            throws NonexistentEntityException, IllegalOrphanException {
         new CauseJpaController(
                 getEntityManagerFactory()).destroy(c.getId());
         return true;
@@ -74,7 +76,7 @@ public final class CauseServer extends Cause implements EntityServer<Cause> {
         target.setDescription(source.getDescription());
         target.setName(source.getName());
         target.setId(source.getId());
-        target.setHazardHasFailureModeList(source.getHazardHasFailureModeList());
+        target.setFailureModeHasCauseList(source.getFailureModeHasCauseList());
     }
 
     @Override

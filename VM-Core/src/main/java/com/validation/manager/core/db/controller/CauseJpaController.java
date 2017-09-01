@@ -21,7 +21,8 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.validation.manager.core.db.HazardHasFailureMode;
+import com.validation.manager.core.db.FailureModeHasCause;
+import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,23 +45,28 @@ public class CauseJpaController implements Serializable {
     }
 
     public void create(Cause cause) {
-        if (cause.getHazardHasFailureModeList() == null) {
-            cause.setHazardHasFailureModeList(new ArrayList<>());
+        if (cause.getFailureModeHasCauseList() == null) {
+            cause.setFailureModeHasCauseList(new ArrayList<>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            List<HazardHasFailureMode> attachedHazardHasFailureModeList = new ArrayList<>();
-            for (HazardHasFailureMode hazardHasFailureModeListHazardHasFailureModeToAttach : cause.getHazardHasFailureModeList()) {
-                hazardHasFailureModeListHazardHasFailureModeToAttach = em.getReference(hazardHasFailureModeListHazardHasFailureModeToAttach.getClass(), hazardHasFailureModeListHazardHasFailureModeToAttach.getHazardHasFailureModePK());
-                attachedHazardHasFailureModeList.add(hazardHasFailureModeListHazardHasFailureModeToAttach);
+            List<FailureModeHasCause> attachedFailureModeHasCauseList = new ArrayList<>();
+            for (FailureModeHasCause failureModeHasCauseListFailureModeHasCauseToAttach : cause.getFailureModeHasCauseList()) {
+                failureModeHasCauseListFailureModeHasCauseToAttach = em.getReference(failureModeHasCauseListFailureModeHasCauseToAttach.getClass(), failureModeHasCauseListFailureModeHasCauseToAttach.getFailureModeHasCausePK());
+                attachedFailureModeHasCauseList.add(failureModeHasCauseListFailureModeHasCauseToAttach);
             }
-            cause.setHazardHasFailureModeList(attachedHazardHasFailureModeList);
+            cause.setFailureModeHasCauseList(attachedFailureModeHasCauseList);
             em.persist(cause);
-            for (HazardHasFailureMode hazardHasFailureModeListHazardHasFailureMode : cause.getHazardHasFailureModeList()) {
-                hazardHasFailureModeListHazardHasFailureMode.getCauseList().add(cause);
-                hazardHasFailureModeListHazardHasFailureMode = em.merge(hazardHasFailureModeListHazardHasFailureMode);
+            for (FailureModeHasCause failureModeHasCauseListFailureModeHasCause : cause.getFailureModeHasCauseList()) {
+                Cause oldCauseOfFailureModeHasCauseListFailureModeHasCause = failureModeHasCauseListFailureModeHasCause.getCause();
+                failureModeHasCauseListFailureModeHasCause.setCause(cause);
+                failureModeHasCauseListFailureModeHasCause = em.merge(failureModeHasCauseListFailureModeHasCause);
+                if (oldCauseOfFailureModeHasCauseListFailureModeHasCause != null) {
+                    oldCauseOfFailureModeHasCauseListFailureModeHasCause.getFailureModeHasCauseList().remove(failureModeHasCauseListFailureModeHasCause);
+                    oldCauseOfFailureModeHasCauseListFailureModeHasCause = em.merge(oldCauseOfFailureModeHasCauseListFailureModeHasCause);
+                }
             }
             em.getTransaction().commit();
         }
@@ -71,32 +77,43 @@ public class CauseJpaController implements Serializable {
         }
     }
 
-    public void edit(Cause cause) throws NonexistentEntityException, Exception {
+    public void edit(Cause cause) throws IllegalOrphanException, NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
             Cause persistentCause = em.find(Cause.class, cause.getId());
-            List<HazardHasFailureMode> hazardHasFailureModeListOld = persistentCause.getHazardHasFailureModeList();
-            List<HazardHasFailureMode> hazardHasFailureModeListNew = cause.getHazardHasFailureModeList();
-            List<HazardHasFailureMode> attachedHazardHasFailureModeListNew = new ArrayList<>();
-            for (HazardHasFailureMode hazardHasFailureModeListNewHazardHasFailureModeToAttach : hazardHasFailureModeListNew) {
-                hazardHasFailureModeListNewHazardHasFailureModeToAttach = em.getReference(hazardHasFailureModeListNewHazardHasFailureModeToAttach.getClass(), hazardHasFailureModeListNewHazardHasFailureModeToAttach.getHazardHasFailureModePK());
-                attachedHazardHasFailureModeListNew.add(hazardHasFailureModeListNewHazardHasFailureModeToAttach);
-            }
-            hazardHasFailureModeListNew = attachedHazardHasFailureModeListNew;
-            cause.setHazardHasFailureModeList(hazardHasFailureModeListNew);
-            cause = em.merge(cause);
-            for (HazardHasFailureMode hazardHasFailureModeListOldHazardHasFailureMode : hazardHasFailureModeListOld) {
-                if (!hazardHasFailureModeListNew.contains(hazardHasFailureModeListOldHazardHasFailureMode)) {
-                    hazardHasFailureModeListOldHazardHasFailureMode.getCauseList().remove(cause);
-                    hazardHasFailureModeListOldHazardHasFailureMode = em.merge(hazardHasFailureModeListOldHazardHasFailureMode);
+            List<FailureModeHasCause> failureModeHasCauseListOld = persistentCause.getFailureModeHasCauseList();
+            List<FailureModeHasCause> failureModeHasCauseListNew = cause.getFailureModeHasCauseList();
+            List<String> illegalOrphanMessages = null;
+            for (FailureModeHasCause failureModeHasCauseListOldFailureModeHasCause : failureModeHasCauseListOld) {
+                if (!failureModeHasCauseListNew.contains(failureModeHasCauseListOldFailureModeHasCause)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain FailureModeHasCause " + failureModeHasCauseListOldFailureModeHasCause + " since its cause field is not nullable.");
                 }
             }
-            for (HazardHasFailureMode hazardHasFailureModeListNewHazardHasFailureMode : hazardHasFailureModeListNew) {
-                if (!hazardHasFailureModeListOld.contains(hazardHasFailureModeListNewHazardHasFailureMode)) {
-                    hazardHasFailureModeListNewHazardHasFailureMode.getCauseList().add(cause);
-                    hazardHasFailureModeListNewHazardHasFailureMode = em.merge(hazardHasFailureModeListNewHazardHasFailureMode);
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+            List<FailureModeHasCause> attachedFailureModeHasCauseListNew = new ArrayList<>();
+            for (FailureModeHasCause failureModeHasCauseListNewFailureModeHasCauseToAttach : failureModeHasCauseListNew) {
+                failureModeHasCauseListNewFailureModeHasCauseToAttach = em.getReference(failureModeHasCauseListNewFailureModeHasCauseToAttach.getClass(), failureModeHasCauseListNewFailureModeHasCauseToAttach.getFailureModeHasCausePK());
+                attachedFailureModeHasCauseListNew.add(failureModeHasCauseListNewFailureModeHasCauseToAttach);
+            }
+            failureModeHasCauseListNew = attachedFailureModeHasCauseListNew;
+            cause.setFailureModeHasCauseList(failureModeHasCauseListNew);
+            cause = em.merge(cause);
+            for (FailureModeHasCause failureModeHasCauseListNewFailureModeHasCause : failureModeHasCauseListNew) {
+                if (!failureModeHasCauseListOld.contains(failureModeHasCauseListNewFailureModeHasCause)) {
+                    Cause oldCauseOfFailureModeHasCauseListNewFailureModeHasCause = failureModeHasCauseListNewFailureModeHasCause.getCause();
+                    failureModeHasCauseListNewFailureModeHasCause.setCause(cause);
+                    failureModeHasCauseListNewFailureModeHasCause = em.merge(failureModeHasCauseListNewFailureModeHasCause);
+                    if (oldCauseOfFailureModeHasCauseListNewFailureModeHasCause != null && !oldCauseOfFailureModeHasCauseListNewFailureModeHasCause.equals(cause)) {
+                        oldCauseOfFailureModeHasCauseListNewFailureModeHasCause.getFailureModeHasCauseList().remove(failureModeHasCauseListNewFailureModeHasCause);
+                        oldCauseOfFailureModeHasCauseListNewFailureModeHasCause = em.merge(oldCauseOfFailureModeHasCauseListNewFailureModeHasCause);
+                    }
                 }
             }
             em.getTransaction().commit();
@@ -118,7 +135,7 @@ public class CauseJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -131,10 +148,16 @@ public class CauseJpaController implements Serializable {
             catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The cause with id " + id + " no longer exists.", enfe);
             }
-            List<HazardHasFailureMode> hazardHasFailureModeList = cause.getHazardHasFailureModeList();
-            for (HazardHasFailureMode hazardHasFailureModeListHazardHasFailureMode : hazardHasFailureModeList) {
-                hazardHasFailureModeListHazardHasFailureMode.getCauseList().remove(cause);
-                hazardHasFailureModeListHazardHasFailureMode = em.merge(hazardHasFailureModeListHazardHasFailureMode);
+            List<String> illegalOrphanMessages = null;
+            List<FailureModeHasCause> failureModeHasCauseListOrphanCheck = cause.getFailureModeHasCauseList();
+            for (FailureModeHasCause failureModeHasCauseListOrphanCheckFailureModeHasCause : failureModeHasCauseListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This Cause (" + cause + ") cannot be destroyed since the FailureModeHasCause " + failureModeHasCauseListOrphanCheckFailureModeHasCause + " in its failureModeHasCauseList field has a non-nullable cause field.");
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             em.remove(cause);
             em.getTransaction().commit();

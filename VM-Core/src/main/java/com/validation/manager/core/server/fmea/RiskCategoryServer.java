@@ -70,6 +70,10 @@ public class RiskCategoryServer extends RiskCategory
     public void update(RiskCategory target, RiskCategory source) {
         target.setMaximum(source.getMaximum());
         target.setMinimum(source.getMinimum());
+        target.setFailureModeHasCauseHasRiskCategoryList(source
+                .getFailureModeHasCauseHasRiskCategoryList());
+        target.setFailureModeHasCauseList(source.getFailureModeHasCauseList());
+        target.setFmeaList(source.getFmeaList());
     }
     
     @Override

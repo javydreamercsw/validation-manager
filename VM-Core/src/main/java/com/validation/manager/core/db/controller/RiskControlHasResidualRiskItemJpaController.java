@@ -23,6 +23,7 @@ import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.RiskControl;
 import com.validation.manager.core.db.RiskControlHasResidualRiskItem;
 import com.validation.manager.core.db.RiskControlHasResidualRiskItemPK;
+import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.List;
@@ -49,9 +50,9 @@ public class RiskControlHasResidualRiskItemJpaController implements Serializable
             riskControlHasResidualRiskItem.setRiskControlHasResidualRiskItemPK(new RiskControlHasResidualRiskItemPK());
         }
         riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskItemId(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getId());
-        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlRiskControlTypeId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getRiskControlTypeId());
-        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskitemFMEAid(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getFMEAid());
         riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getId());
+        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskitemFMEAid(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getFMEAid());
+        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlRiskControlTypeId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getRiskControlTypeId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -61,10 +62,19 @@ public class RiskControlHasResidualRiskItemJpaController implements Serializable
                 riskControl = em.getReference(riskControl.getClass(), riskControl.getRiskControlPK());
                 riskControlHasResidualRiskItem.setRiskControl(riskControl);
             }
+            RiskItem riskItem = riskControlHasResidualRiskItem.getRiskItem();
+            if (riskItem != null) {
+                riskItem = em.getReference(riskItem.getClass(), riskItem.getRiskItemPK());
+                riskControlHasResidualRiskItem.setRiskItem(riskItem);
+            }
             em.persist(riskControlHasResidualRiskItem);
             if (riskControl != null) {
                 riskControl.getRiskControlHasResidualRiskItemList().add(riskControlHasResidualRiskItem);
                 riskControl = em.merge(riskControl);
+            }
+            if (riskItem != null) {
+                riskItem.getRiskControlHasResidualRiskItemList().add(riskControlHasResidualRiskItem);
+                riskItem = em.merge(riskItem);
             }
             em.getTransaction().commit();
         }
@@ -83,9 +93,9 @@ public class RiskControlHasResidualRiskItemJpaController implements Serializable
 
     public void edit(RiskControlHasResidualRiskItem riskControlHasResidualRiskItem) throws NonexistentEntityException, Exception {
         riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskItemId(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getId());
-        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlRiskControlTypeId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getRiskControlTypeId());
-        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskitemFMEAid(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getFMEAid());
         riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getId());
+        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskitemFMEAid(riskControlHasResidualRiskItem.getRiskItem().getRiskItemPK().getFMEAid());
+        riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK().setRiskControlRiskControlTypeId(riskControlHasResidualRiskItem.getRiskControl().getRiskControlPK().getRiskControlTypeId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -93,9 +103,15 @@ public class RiskControlHasResidualRiskItemJpaController implements Serializable
             RiskControlHasResidualRiskItem persistentRiskControlHasResidualRiskItem = em.find(RiskControlHasResidualRiskItem.class, riskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemPK());
             RiskControl riskControlOld = persistentRiskControlHasResidualRiskItem.getRiskControl();
             RiskControl riskControlNew = riskControlHasResidualRiskItem.getRiskControl();
+            RiskItem riskItemOld = persistentRiskControlHasResidualRiskItem.getRiskItem();
+            RiskItem riskItemNew = riskControlHasResidualRiskItem.getRiskItem();
             if (riskControlNew != null) {
                 riskControlNew = em.getReference(riskControlNew.getClass(), riskControlNew.getRiskControlPK());
                 riskControlHasResidualRiskItem.setRiskControl(riskControlNew);
+            }
+            if (riskItemNew != null) {
+                riskItemNew = em.getReference(riskItemNew.getClass(), riskItemNew.getRiskItemPK());
+                riskControlHasResidualRiskItem.setRiskItem(riskItemNew);
             }
             riskControlHasResidualRiskItem = em.merge(riskControlHasResidualRiskItem);
             if (riskControlOld != null && !riskControlOld.equals(riskControlNew)) {
@@ -105,6 +121,14 @@ public class RiskControlHasResidualRiskItemJpaController implements Serializable
             if (riskControlNew != null && !riskControlNew.equals(riskControlOld)) {
                 riskControlNew.getRiskControlHasResidualRiskItemList().add(riskControlHasResidualRiskItem);
                 riskControlNew = em.merge(riskControlNew);
+            }
+            if (riskItemOld != null && !riskItemOld.equals(riskItemNew)) {
+                riskItemOld.getRiskControlHasResidualRiskItemList().remove(riskControlHasResidualRiskItem);
+                riskItemOld = em.merge(riskItemOld);
+            }
+            if (riskItemNew != null && !riskItemNew.equals(riskItemOld)) {
+                riskItemNew.getRiskControlHasResidualRiskItemList().add(riskControlHasResidualRiskItem);
+                riskItemNew = em.merge(riskItemNew);
             }
             em.getTransaction().commit();
         }
@@ -142,6 +166,11 @@ public class RiskControlHasResidualRiskItemJpaController implements Serializable
             if (riskControl != null) {
                 riskControl.getRiskControlHasResidualRiskItemList().remove(riskControlHasResidualRiskItem);
                 riskControl = em.merge(riskControl);
+            }
+            RiskItem riskItem = riskControlHasResidualRiskItem.getRiskItem();
+            if (riskItem != null) {
+                riskItem.getRiskControlHasResidualRiskItemList().remove(riskControlHasResidualRiskItem);
+                riskItem = em.merge(riskItem);
             }
             em.remove(riskControlHasResidualRiskItem);
             em.getTransaction().commit();

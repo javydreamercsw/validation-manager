@@ -50,6 +50,11 @@ public class FmeaPK implements Serializable {
     public FmeaPK() {
     }
 
+    public FmeaPK(int id, int projectId) {
+        this.id = id;
+        this.projectId = projectId;
+    }
+
     public FmeaPK(int projectId) {
         this.projectId = projectId;
     }
@@ -95,10 +100,5 @@ public class FmeaPK implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.FmeaPK[ id=" + id
                 + ", projectId=" + projectId + " ]";
-    }
-
-    public FmeaPK(int id, int projectId) {
-        this.id = id;
-        this.projectId = projectId;
     }
 }

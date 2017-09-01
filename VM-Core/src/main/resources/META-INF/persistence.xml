@@ -24,6 +24,8 @@
     <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
     <class>com.validation.manager.core.db.ExecutionStepHasVmUser</class>
     <class>com.validation.manager.core.db.FailureMode</class>
+    <class>com.validation.manager.core.db.FailureModeHasCause</class>
+    <class>com.validation.manager.core.db.FailureModeHasCauseHasRiskCategory</class>
     <class>com.validation.manager.core.db.FieldType</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
@@ -119,6 +121,8 @@
     <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
     <class>com.validation.manager.core.db.ExecutionStepHasVmUser</class>
     <class>com.validation.manager.core.db.FailureMode</class>
+    <class>com.validation.manager.core.db.FailureModeHasCause</class>
+    <class>com.validation.manager.core.db.FailureModeHasCauseHasRiskCategory</class>
     <class>com.validation.manager.core.db.FieldType</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>
@@ -216,6 +220,8 @@
     <class>com.validation.manager.core.db.ExecutionStepHasIssue</class>
     <class>com.validation.manager.core.db.ExecutionStepHasVmUser</class>
     <class>com.validation.manager.core.db.FailureMode</class>
+    <class>com.validation.manager.core.db.FailureModeHasCause</class>
+    <class>com.validation.manager.core.db.FailureModeHasCauseHasRiskCategory</class>
     <class>com.validation.manager.core.db.FieldType</class>
     <class>com.validation.manager.core.db.Fmea</class>
     <class>com.validation.manager.core.db.Hazard</class>

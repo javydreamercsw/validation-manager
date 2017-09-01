@@ -17,14 +17,15 @@ package com.validation.manager.core.db;
 
 import java.io.Serializable;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -55,8 +56,6 @@ public class HazardHasFailureMode implements Serializable {
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected HazardHasFailureModePK hazardHasFailureModePK;
-    @ManyToMany(mappedBy = "hazardHasFailureModeList")
-    private List<Cause> causeList;
     @JoinColumn(name = "failure_mode_id", referencedColumnName = "id",
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
@@ -76,6 +75,8 @@ public class HazardHasFailureMode implements Serializable {
                 updatable = false)})
     @ManyToOne(optional = false)
     private RiskItemHasHazard riskItemHasHazard;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "hazardHasFailureMode")
+    private List<FailureModeHasCause> failureModeHasCauseList;
 
     public HazardHasFailureMode() {
     }
@@ -100,12 +101,12 @@ public class HazardHasFailureMode implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<Cause> getCauseList() {
-        return causeList;
+    public List<FailureModeHasCause> getFailureModeHasCauseList() {
+        return failureModeHasCauseList;
     }
 
-    public void setCauseList(List<Cause> causeList) {
-        this.causeList = causeList;
+    public void setFailureModeHasCauseList(List<FailureModeHasCause> failureModeHasCauseList) {
+        this.failureModeHasCauseList = failureModeHasCauseList;
     }
 
     public FailureMode getFailureMode() {

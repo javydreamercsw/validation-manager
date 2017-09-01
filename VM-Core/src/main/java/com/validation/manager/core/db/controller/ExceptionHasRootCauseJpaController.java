@@ -48,8 +48,8 @@ public class ExceptionHasRootCauseJpaController implements Serializable {
         if (exceptionHasRootCause.getExceptionHasRootCausePK() == null) {
             exceptionHasRootCause.setExceptionHasRootCausePK(new ExceptionHasRootCausePK());
         }
-        exceptionHasRootCause.getExceptionHasRootCausePK().setRootCauseId(exceptionHasRootCause.getRootCause().getRootCausePK().getId());
         exceptionHasRootCause.getExceptionHasRootCausePK().setRootCauseRootCauseTypeId(exceptionHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
+        exceptionHasRootCause.getExceptionHasRootCausePK().setRootCauseId(exceptionHasRootCause.getRootCause().getRootCausePK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -80,8 +80,8 @@ public class ExceptionHasRootCauseJpaController implements Serializable {
     }
 
     public void edit(ExceptionHasRootCause exceptionHasRootCause) throws NonexistentEntityException, Exception {
-        exceptionHasRootCause.getExceptionHasRootCausePK().setRootCauseId(exceptionHasRootCause.getRootCause().getRootCausePK().getId());
         exceptionHasRootCause.getExceptionHasRootCausePK().setRootCauseRootCauseTypeId(exceptionHasRootCause.getRootCause().getRootCausePK().getRootCauseTypeId());
+        exceptionHasRootCause.getExceptionHasRootCausePK().setRootCauseId(exceptionHasRootCause.getRootCause().getRootCausePK().getId());
         EntityManager em = null;
         try {
             em = getEntityManager();

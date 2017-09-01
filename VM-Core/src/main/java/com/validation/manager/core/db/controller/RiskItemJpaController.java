@@ -21,14 +21,16 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import com.validation.manager.core.db.Fmea;
-import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.RiskItemHasHazard;
+import java.util.ArrayList;
+import java.util.List;
+import com.validation.manager.core.db.RiskControl;
+import com.validation.manager.core.db.RiskControlHasResidualRiskItem;
+import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.RiskItemPK;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -54,8 +56,14 @@ public class RiskItemJpaController implements Serializable {
         if (riskItem.getRiskItemHasHazardList() == null) {
             riskItem.setRiskItemHasHazardList(new ArrayList<>());
         }
-        riskItem.getRiskItemPK().setFMEAprojectid(riskItem.getFmea().getFmeaPK().getProjectId());
+        if (riskItem.getRiskControlList() == null) {
+            riskItem.setRiskControlList(new ArrayList<>());
+        }
+        if (riskItem.getRiskControlHasResidualRiskItemList() == null) {
+            riskItem.setRiskControlHasResidualRiskItemList(new ArrayList<>());
+        }
         riskItem.getRiskItemPK().setFMEAid(riskItem.getFmea().getFmeaPK().getId());
+        riskItem.getRiskItemPK().setFMEAprojectid(riskItem.getFmea().getFmeaPK().getProjectId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -71,6 +79,18 @@ public class RiskItemJpaController implements Serializable {
                 attachedRiskItemHasHazardList.add(riskItemHasHazardListRiskItemHasHazardToAttach);
             }
             riskItem.setRiskItemHasHazardList(attachedRiskItemHasHazardList);
+            List<RiskControl> attachedRiskControlList = new ArrayList<>();
+            for (RiskControl riskControlListRiskControlToAttach : riskItem.getRiskControlList()) {
+                riskControlListRiskControlToAttach = em.getReference(riskControlListRiskControlToAttach.getClass(), riskControlListRiskControlToAttach.getRiskControlPK());
+                attachedRiskControlList.add(riskControlListRiskControlToAttach);
+            }
+            riskItem.setRiskControlList(attachedRiskControlList);
+            List<RiskControlHasResidualRiskItem> attachedRiskControlHasResidualRiskItemList = new ArrayList<>();
+            for (RiskControlHasResidualRiskItem riskControlHasResidualRiskItemListRiskControlHasResidualRiskItemToAttach : riskItem.getRiskControlHasResidualRiskItemList()) {
+                riskControlHasResidualRiskItemListRiskControlHasResidualRiskItemToAttach = em.getReference(riskControlHasResidualRiskItemListRiskControlHasResidualRiskItemToAttach.getClass(), riskControlHasResidualRiskItemListRiskControlHasResidualRiskItemToAttach.getRiskControlHasResidualRiskItemPK());
+                attachedRiskControlHasResidualRiskItemList.add(riskControlHasResidualRiskItemListRiskControlHasResidualRiskItemToAttach);
+            }
+            riskItem.setRiskControlHasResidualRiskItemList(attachedRiskControlHasResidualRiskItemList);
             em.persist(riskItem);
             if (fmea != null) {
                 fmea.getRiskItemList().add(riskItem);
@@ -83,6 +103,19 @@ public class RiskItemJpaController implements Serializable {
                 if (oldRiskItemOfRiskItemHasHazardListRiskItemHasHazard != null) {
                     oldRiskItemOfRiskItemHasHazardListRiskItemHasHazard.getRiskItemHasHazardList().remove(riskItemHasHazardListRiskItemHasHazard);
                     oldRiskItemOfRiskItemHasHazardListRiskItemHasHazard = em.merge(oldRiskItemOfRiskItemHasHazardListRiskItemHasHazard);
+                }
+            }
+            for (RiskControl riskControlListRiskControl : riskItem.getRiskControlList()) {
+                riskControlListRiskControl.getRiskItemList().add(riskItem);
+                riskControlListRiskControl = em.merge(riskControlListRiskControl);
+            }
+            for (RiskControlHasResidualRiskItem riskControlHasResidualRiskItemListRiskControlHasResidualRiskItem : riskItem.getRiskControlHasResidualRiskItemList()) {
+                RiskItem oldRiskItemOfRiskControlHasResidualRiskItemListRiskControlHasResidualRiskItem = riskControlHasResidualRiskItemListRiskControlHasResidualRiskItem.getRiskItem();
+                riskControlHasResidualRiskItemListRiskControlHasResidualRiskItem.setRiskItem(riskItem);
+                riskControlHasResidualRiskItemListRiskControlHasResidualRiskItem = em.merge(riskControlHasResidualRiskItemListRiskControlHasResidualRiskItem);
+                if (oldRiskItemOfRiskControlHasResidualRiskItemListRiskControlHasResidualRiskItem != null) {
+                    oldRiskItemOfRiskControlHasResidualRiskItemListRiskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemList().remove(riskControlHasResidualRiskItemListRiskControlHasResidualRiskItem);
+                    oldRiskItemOfRiskControlHasResidualRiskItemListRiskControlHasResidualRiskItem = em.merge(oldRiskItemOfRiskControlHasResidualRiskItemListRiskControlHasResidualRiskItem);
                 }
             }
             em.getTransaction().commit();
@@ -101,8 +134,8 @@ public class RiskItemJpaController implements Serializable {
     }
 
     public void edit(RiskItem riskItem) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        riskItem.getRiskItemPK().setFMEAprojectid(riskItem.getFmea().getFmeaPK().getProjectId());
         riskItem.getRiskItemPK().setFMEAid(riskItem.getFmea().getFmeaPK().getId());
+        riskItem.getRiskItemPK().setFMEAprojectid(riskItem.getFmea().getFmeaPK().getProjectId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -112,6 +145,10 @@ public class RiskItemJpaController implements Serializable {
             Fmea fmeaNew = riskItem.getFmea();
             List<RiskItemHasHazard> riskItemHasHazardListOld = persistentRiskItem.getRiskItemHasHazardList();
             List<RiskItemHasHazard> riskItemHasHazardListNew = riskItem.getRiskItemHasHazardList();
+            List<RiskControl> riskControlListOld = persistentRiskItem.getRiskControlList();
+            List<RiskControl> riskControlListNew = riskItem.getRiskControlList();
+            List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemListOld = persistentRiskItem.getRiskControlHasResidualRiskItemList();
+            List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemListNew = riskItem.getRiskControlHasResidualRiskItemList();
             List<String> illegalOrphanMessages = null;
             for (RiskItemHasHazard riskItemHasHazardListOldRiskItemHasHazard : riskItemHasHazardListOld) {
                 if (!riskItemHasHazardListNew.contains(riskItemHasHazardListOldRiskItemHasHazard)) {
@@ -119,6 +156,14 @@ public class RiskItemJpaController implements Serializable {
                         illegalOrphanMessages = new ArrayList<>();
                     }
                     illegalOrphanMessages.add("You must retain RiskItemHasHazard " + riskItemHasHazardListOldRiskItemHasHazard + " since its riskItem field is not nullable.");
+                }
+            }
+            for (RiskControlHasResidualRiskItem riskControlHasResidualRiskItemListOldRiskControlHasResidualRiskItem : riskControlHasResidualRiskItemListOld) {
+                if (!riskControlHasResidualRiskItemListNew.contains(riskControlHasResidualRiskItemListOldRiskControlHasResidualRiskItem)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<>();
+                    }
+                    illegalOrphanMessages.add("You must retain RiskControlHasResidualRiskItem " + riskControlHasResidualRiskItemListOldRiskControlHasResidualRiskItem + " since its riskItem field is not nullable.");
                 }
             }
             if (illegalOrphanMessages != null) {
@@ -135,6 +180,20 @@ public class RiskItemJpaController implements Serializable {
             }
             riskItemHasHazardListNew = attachedRiskItemHasHazardListNew;
             riskItem.setRiskItemHasHazardList(riskItemHasHazardListNew);
+            List<RiskControl> attachedRiskControlListNew = new ArrayList<>();
+            for (RiskControl riskControlListNewRiskControlToAttach : riskControlListNew) {
+                riskControlListNewRiskControlToAttach = em.getReference(riskControlListNewRiskControlToAttach.getClass(), riskControlListNewRiskControlToAttach.getRiskControlPK());
+                attachedRiskControlListNew.add(riskControlListNewRiskControlToAttach);
+            }
+            riskControlListNew = attachedRiskControlListNew;
+            riskItem.setRiskControlList(riskControlListNew);
+            List<RiskControlHasResidualRiskItem> attachedRiskControlHasResidualRiskItemListNew = new ArrayList<>();
+            for (RiskControlHasResidualRiskItem riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItemToAttach : riskControlHasResidualRiskItemListNew) {
+                riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItemToAttach = em.getReference(riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItemToAttach.getClass(), riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItemToAttach.getRiskControlHasResidualRiskItemPK());
+                attachedRiskControlHasResidualRiskItemListNew.add(riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItemToAttach);
+            }
+            riskControlHasResidualRiskItemListNew = attachedRiskControlHasResidualRiskItemListNew;
+            riskItem.setRiskControlHasResidualRiskItemList(riskControlHasResidualRiskItemListNew);
             riskItem = em.merge(riskItem);
             if (fmeaOld != null && !fmeaOld.equals(fmeaNew)) {
                 fmeaOld.getRiskItemList().remove(riskItem);
@@ -152,6 +211,29 @@ public class RiskItemJpaController implements Serializable {
                     if (oldRiskItemOfRiskItemHasHazardListNewRiskItemHasHazard != null && !oldRiskItemOfRiskItemHasHazardListNewRiskItemHasHazard.equals(riskItem)) {
                         oldRiskItemOfRiskItemHasHazardListNewRiskItemHasHazard.getRiskItemHasHazardList().remove(riskItemHasHazardListNewRiskItemHasHazard);
                         oldRiskItemOfRiskItemHasHazardListNewRiskItemHasHazard = em.merge(oldRiskItemOfRiskItemHasHazardListNewRiskItemHasHazard);
+                    }
+                }
+            }
+            for (RiskControl riskControlListOldRiskControl : riskControlListOld) {
+                if (!riskControlListNew.contains(riskControlListOldRiskControl)) {
+                    riskControlListOldRiskControl.getRiskItemList().remove(riskItem);
+                    riskControlListOldRiskControl = em.merge(riskControlListOldRiskControl);
+                }
+            }
+            for (RiskControl riskControlListNewRiskControl : riskControlListNew) {
+                if (!riskControlListOld.contains(riskControlListNewRiskControl)) {
+                    riskControlListNewRiskControl.getRiskItemList().add(riskItem);
+                    riskControlListNewRiskControl = em.merge(riskControlListNewRiskControl);
+                }
+            }
+            for (RiskControlHasResidualRiskItem riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem : riskControlHasResidualRiskItemListNew) {
+                if (!riskControlHasResidualRiskItemListOld.contains(riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem)) {
+                    RiskItem oldRiskItemOfRiskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem = riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem.getRiskItem();
+                    riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem.setRiskItem(riskItem);
+                    riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem = em.merge(riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem);
+                    if (oldRiskItemOfRiskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem != null && !oldRiskItemOfRiskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem.equals(riskItem)) {
+                        oldRiskItemOfRiskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem.getRiskControlHasResidualRiskItemList().remove(riskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem);
+                        oldRiskItemOfRiskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem = em.merge(oldRiskItemOfRiskControlHasResidualRiskItemListNewRiskControlHasResidualRiskItem);
                     }
                 }
             }
@@ -195,6 +277,13 @@ public class RiskItemJpaController implements Serializable {
                 }
                 illegalOrphanMessages.add("This RiskItem (" + riskItem + ") cannot be destroyed since the RiskItemHasHazard " + riskItemHasHazardListOrphanCheckRiskItemHasHazard + " in its riskItemHasHazardList field has a non-nullable riskItem field.");
             }
+            List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemListOrphanCheck = riskItem.getRiskControlHasResidualRiskItemList();
+            for (RiskControlHasResidualRiskItem riskControlHasResidualRiskItemListOrphanCheckRiskControlHasResidualRiskItem : riskControlHasResidualRiskItemListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<>();
+                }
+                illegalOrphanMessages.add("This RiskItem (" + riskItem + ") cannot be destroyed since the RiskControlHasResidualRiskItem " + riskControlHasResidualRiskItemListOrphanCheckRiskControlHasResidualRiskItem + " in its riskControlHasResidualRiskItemList field has a non-nullable riskItem field.");
+            }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
@@ -202,6 +291,11 @@ public class RiskItemJpaController implements Serializable {
             if (fmea != null) {
                 fmea.getRiskItemList().remove(riskItem);
                 fmea = em.merge(fmea);
+            }
+            List<RiskControl> riskControlList = riskItem.getRiskControlList();
+            for (RiskControl riskControlListRiskControl : riskControlList) {
+                riskControlListRiskControl.getRiskItemList().remove(riskItem);
+                riskControlListRiskControl = em.merge(riskControlListRiskControl);
             }
             em.remove(riskItem);
             em.getTransaction().commit();

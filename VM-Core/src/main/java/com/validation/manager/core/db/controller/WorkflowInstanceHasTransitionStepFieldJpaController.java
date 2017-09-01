@@ -49,14 +49,14 @@ public class WorkflowInstanceHasTransitionStepFieldJpaController implements Seri
         if (workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK() == null) {
             workflowInstanceHasTransitionStepField.setWorkflowInstanceHasTransitionStepFieldPK(new WorkflowInstanceHasTransitionStepFieldPK());
         }
+        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setTargetStep(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepTargetStep());
+        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setSourceStepWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepSourceStepWorkflow());
+        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setInstance(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getWorkflowInstanceId());
         workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setTargetStepWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepTargetStepWorkflow());
+        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getWorkflowInstanceWorkflow());
         workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setSourceStep(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepSourceStep());
         workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setStepFieldId(workflowInstanceHasTransitionStepField.getWorkflowStepField().getWorkflowStepFieldPK().getId());
         workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setFieldType(workflowInstanceHasTransitionStepField.getWorkflowStepField().getWorkflowStepFieldPK().getFieldType());
-        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setInstance(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getWorkflowInstanceId());
-        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setSourceStepWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepSourceStepWorkflow());
-        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getWorkflowInstanceWorkflow());
-        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setTargetStep(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepTargetStep());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -96,14 +96,14 @@ public class WorkflowInstanceHasTransitionStepFieldJpaController implements Seri
     }
 
     public void edit(WorkflowInstanceHasTransitionStepField workflowInstanceHasTransitionStepField) throws NonexistentEntityException, Exception {
+        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setTargetStep(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepTargetStep());
+        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setSourceStepWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepSourceStepWorkflow());
+        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setInstance(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getWorkflowInstanceId());
         workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setTargetStepWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepTargetStepWorkflow());
+        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getWorkflowInstanceWorkflow());
         workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setSourceStep(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepSourceStep());
         workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setStepFieldId(workflowInstanceHasTransitionStepField.getWorkflowStepField().getWorkflowStepFieldPK().getId());
         workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setFieldType(workflowInstanceHasTransitionStepField.getWorkflowStepField().getWorkflowStepFieldPK().getFieldType());
-        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setInstance(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getWorkflowInstanceId());
-        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setSourceStepWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepSourceStepWorkflow());
-        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setWorkflow(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getWorkflowInstanceWorkflow());
-        workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransitionStepFieldPK().setTargetStep(workflowInstanceHasTransitionStepField.getWorkflowInstanceHasTransition().getWorkflowInstanceHasTransitionPK().getStepTransitionsToStepTargetStep());
         EntityManager em = null;
         try {
             em = getEntityManager();

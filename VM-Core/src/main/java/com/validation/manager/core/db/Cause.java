@@ -18,17 +18,16 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
@@ -76,15 +75,8 @@ public class Cause implements Serializable {
     @Size(min = 1, max = 65_535)
     @Column(name = "description")
     private String description;
-    @JoinTable(name = "failure_mode_has_cause", joinColumns = {
-        @JoinColumn(name = "cause_id", referencedColumnName = "id")}, inverseJoinColumns = {
-        @JoinColumn(name = "risk_item_id", referencedColumnName = "risk_item_id")
-        , @JoinColumn(name = "FMEA_id", referencedColumnName = "FMEA_id")
-        , @JoinColumn(name = "project_id", referencedColumnName = "FMEA_project_id")
-        , @JoinColumn(name = "hazard_id", referencedColumnName = "hazard_id")
-        , @JoinColumn(name = "failure_mode_id", referencedColumnName = "failure_mode_id")})
-    @ManyToMany
-    private List<HazardHasFailureMode> hazardHasFailureModeList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "cause")
+    private List<FailureModeHasCause> failureModeHasCauseList;
 
     public Cause() {
     }
@@ -120,12 +112,12 @@ public class Cause implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<HazardHasFailureMode> getHazardHasFailureModeList() {
-        return hazardHasFailureModeList;
+    public List<FailureModeHasCause> getFailureModeHasCauseList() {
+        return failureModeHasCauseList;
     }
 
-    public void setHazardHasFailureModeList(List<HazardHasFailureMode> hazardHasFailureModeList) {
-        this.hazardHasFailureModeList = hazardHasFailureModeList;
+    public void setFailureModeHasCauseList(List<FailureModeHasCause> failureModeHasCauseList) {
+        this.failureModeHasCauseList = failureModeHasCauseList;
     }
 
     @Override

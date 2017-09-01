@@ -55,10 +55,10 @@ public class RiskItemHasHazardJpaController implements Serializable {
         if (riskItemHasHazard.getHazardHasFailureModeList() == null) {
             riskItemHasHazard.setHazardHasFailureModeList(new ArrayList<>());
         }
-        riskItemHasHazard.getRiskItemHasHazardPK().setRiskitemFMEAprojectid(riskItemHasHazard.getRiskItem().getRiskItemPK().getFMEAprojectid());
         riskItemHasHazard.getRiskItemHasHazardPK().setHazardId(riskItemHasHazard.getHazard().getId());
         riskItemHasHazard.getRiskItemHasHazardPK().setRiskitemFMEAid(riskItemHasHazard.getRiskItem().getRiskItemPK().getFMEAid());
         riskItemHasHazard.getRiskItemHasHazardPK().setRiskItemId(riskItemHasHazard.getRiskItem().getRiskItemPK().getId());
+        riskItemHasHazard.getRiskItemHasHazardPK().setRiskitemFMEAprojectid(riskItemHasHazard.getRiskItem().getRiskItemPK().getFMEAprojectid());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -113,10 +113,10 @@ public class RiskItemHasHazardJpaController implements Serializable {
     }
 
     public void edit(RiskItemHasHazard riskItemHasHazard) throws IllegalOrphanException, NonexistentEntityException, Exception {
-        riskItemHasHazard.getRiskItemHasHazardPK().setRiskitemFMEAprojectid(riskItemHasHazard.getRiskItem().getRiskItemPK().getFMEAprojectid());
         riskItemHasHazard.getRiskItemHasHazardPK().setHazardId(riskItemHasHazard.getHazard().getId());
         riskItemHasHazard.getRiskItemHasHazardPK().setRiskitemFMEAid(riskItemHasHazard.getRiskItem().getRiskItemPK().getFMEAid());
         riskItemHasHazard.getRiskItemHasHazardPK().setRiskItemId(riskItemHasHazard.getRiskItem().getRiskItemPK().getId());
+        riskItemHasHazard.getRiskItemHasHazardPK().setRiskitemFMEAprojectid(riskItemHasHazard.getRiskItem().getRiskItemPK().getFMEAprojectid());
         EntityManager em = null;
         try {
             em = getEntityManager();

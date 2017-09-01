@@ -20,19 +20,24 @@ import static com.validation.manager.core.DataBaseManager.getEntityManagerFactor
 import com.validation.manager.core.EntityServer;
 import com.validation.manager.core.db.Cause;
 import com.validation.manager.core.db.FailureMode;
+import com.validation.manager.core.db.FailureModeHasCause;
+import com.validation.manager.core.db.FailureModeHasCauseHasRiskCategory;
+import com.validation.manager.core.db.Fmea;
 import com.validation.manager.core.db.FmeaPK;
 import com.validation.manager.core.db.Hazard;
 import com.validation.manager.core.db.HazardHasFailureMode;
 import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.RiskItemHasHazard;
+import com.validation.manager.core.db.controller.FailureModeHasCauseHasRiskCategoryJpaController;
+import com.validation.manager.core.db.controller.FailureModeHasCauseJpaController;
 import com.validation.manager.core.db.controller.FmeaJpaController;
 import com.validation.manager.core.db.controller.HazardHasFailureModeJpaController;
 import com.validation.manager.core.db.controller.RiskItemHasHazardJpaController;
 import com.validation.manager.core.db.controller.RiskItemJpaController;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
-import java.util.ArrayList;
 import java.util.List;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -108,13 +113,54 @@ public final class RiskItemServer extends RiskItem implements EntityServer<RiskI
                                 fm.getId());
                 hhfm.setFailureMode(fm);
                 hhfm.setRiskItemHasHazard(rihh);
-                hhfm.setCauseList(new ArrayList<>());
-                if (causes != null) {
-                    hhfm.getCauseList().addAll(causes);
-                }
                 new HazardHasFailureModeJpaController(DataBaseManager
                         .getEntityManagerFactory()).create(hhfm);
-                rihh.getHazardHasFailureModeList().add(hhfm);
+                if (causes != null) {
+                    Fmea fmea = new FmeaJpaController(DataBaseManager
+                            .getEntityManagerFactory())
+                            .findFmea(new FmeaPK(getRiskItemPK().getFMEAid(),
+                                    getRiskItemPK().getFMEAprojectid()));
+                    causes.forEach(cause -> {
+                        try {
+                            FailureModeHasCause fmhc
+                                    = new FailureModeHasCause(getRiskItemPK().getId(),
+                                            getRiskItemPK().getFMEAid(),
+                                            getRiskItemPK().getFMEAprojectid(),
+                                            hazard.getId(),
+                                            fm.getId(),
+                                            cause.getId());
+                            fmhc.setCause(cause);
+                            fmhc.setHazardHasFailureMode(hhfm);
+                            new FailureModeHasCauseJpaController(DataBaseManager
+                                    .getEntityManagerFactory()).create(fmhc);
+                            FailureModeHasCauseHasRiskCategoryJpaController c
+                                    = new FailureModeHasCauseHasRiskCategoryJpaController(
+                                            DataBaseManager.getEntityManagerFactory());
+                            fmea.getRiskCategoryList().forEach(rc -> {
+                                try {
+                                    FailureModeHasCauseHasRiskCategory fmhchrc
+                                            = new FailureModeHasCauseHasRiskCategory(
+                                                    getRiskItemPK().getId(),
+                                                    getRiskItemPK().getFMEAid(),
+                                                    getRiskItemPK().getFMEAprojectid(),
+                                                    hazard.getId(),
+                                                    fm.getId(),
+                                                    cause.getId(),
+                                                    rc.getId());
+                                    fmhchrc.setFailureModeHasCause(fmhc);
+                                    fmhchrc.setRiskCategory(rc);
+                                    c.create(fmhchrc);
+                                }
+                                catch (Exception ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
+                            });
+                        }
+                        catch (Exception ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
+                    });
+                }
             }
         }
         update();

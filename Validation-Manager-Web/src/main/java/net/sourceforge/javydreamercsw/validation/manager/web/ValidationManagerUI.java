@@ -23,8 +23,6 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.ItemClickEvent;
@@ -82,7 +80,6 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
-import com.validation.manager.core.db.RiskItem;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
@@ -158,6 +155,7 @@ import net.sourceforge.javydreamercsw.validation.manager.web.component.Requireme
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementSelectionComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementSpecComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementSpecNodeComponent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.RiskManagementComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.StepComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TestCaseComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TestCaseExecutionComponent;
@@ -618,7 +616,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         trace.setEnabled(checkRight("testplan.planning"));
         MenuItem risk
                 = menu.addItem(TRANSLATOR.translate("general.risk.management"),
-                        VaadinIcons.SPLIT,
+                        VaadinIcons.BOLT,
                         (MenuItem selectedItem) -> {
                             displayRiskManagement((Project) tree.getValue());
                         });
@@ -1693,23 +1691,9 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private void displayRiskManagement(Project project) {
-        VMWindow w = new VMWindow("general.risk.management");
-        GridLayout gl = new GridLayout(2, 1);
-        gl.setColumnExpandRatio(0, 1);
-        gl.setColumnExpandRatio(1, 10);
-        gl.setRowExpandRatio(0, 1);
-        VerticalLayout vl = new VerticalLayout();
-        Button b = new Button("1");
-        vl.addComponent(b);
-        gl.addComponent(vl, 0, 0);
-        Grid grid = new Grid("FMEA");
-        BeanItemContainer<RiskItem> histories
-                = new BeanItemContainer<>(RiskItem.class);
-        GeneratedPropertyContainer wrapperCont
-                = new GeneratedPropertyContainer(histories);
-        grid.setContainerDataSource(wrapperCont);
-        gl.addComponent(grid, 1, 0);
-        w.setContent(gl);
+        VMWindow w = new VMWindow(TRANSLATOR
+                .translate("general.risk.management"));
+        w.setContent(new RiskManagementComponent(project));
         w.setSizeFull();
         addWindow(w);
     }

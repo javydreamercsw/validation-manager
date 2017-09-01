@@ -24,6 +24,7 @@ import com.validation.manager.core.db.RiskCategory;
 import com.validation.manager.core.db.Step;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.controller.CauseJpaController;
+import com.validation.manager.core.db.controller.FailureModeHasCauseHasRiskCategoryJpaController;
 import com.validation.manager.core.db.controller.FailureModeJpaController;
 import com.validation.manager.core.db.controller.HazardJpaController;
 import com.validation.manager.core.db.controller.ProjectJpaController;
@@ -57,8 +58,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -89,7 +92,11 @@ public class DemoBuilder {
         rcs.write2DB();
         RISK_CATEGORIES.add(new RiskCategoryJpaController(DataBaseManager
                 .getEntityManagerFactory()).findRiskCategory(rcs.getId()));
-
+        rcs = new RiskCategoryServer("RPN", 0, 1000);
+        rcs.setCategoryEquation("{rc-1000}*{rc-1001}*{rc-1002}");
+        rcs.write2DB();
+        RISK_CATEGORIES.add(new RiskCategoryJpaController(DataBaseManager
+                .getEntityManagerFactory()).findRiskCategory(rcs.getId()));
         for (int i = 0; i < 5; i++) {
             HazardServer hs = new HazardServer("Hazard " + i,
                     "Hazard Description " + i);
@@ -353,6 +360,8 @@ public class DemoBuilder {
     private static void addRiskManagement(Project p) {
         try {
             FMEAServer fmea = new FMEAServer("Demo FMEA", p);
+            fmea.setRiskCategoryList(new ArrayList<>());
+            fmea.getRiskCategoryList().addAll(RISK_CATEGORIES);
             fmea.write2DB();
             for (int i = 0; i < 5; i++) {
                 RiskItemServer ri
@@ -365,6 +374,25 @@ public class DemoBuilder {
                     ri.addHazard(hazard, FAILURE_MODES.subList(0, (i + 1)),
                             CAUSES.subList(0, (i + 1)));
                 }
+                //Now assing values for each non calculated category
+                ri.getRiskItemHasHazardList().forEach(h -> {
+                    h.getHazardHasFailureModeList().forEach(fm -> {
+                        fm.getFailureModeHasCauseList().forEach(c -> {
+                            c.getFailureModeHasCauseHasRiskCategoryList().forEach(cat -> {
+                                try {
+                                    cat.setCategoryValue(ThreadLocalRandom.current()
+                                            .nextInt(cat.getRiskCategory().getMinimum(),
+                                                    cat.getRiskCategory().getMaximum() + 1));
+                                    new FailureModeHasCauseHasRiskCategoryJpaController(DataBaseManager
+                                            .getEntityManagerFactory()).edit(cat);
+                                }
+                                catch (Exception ex) {
+                                    Exceptions.printStackTrace(ex);
+                                }
+                            });
+                        });
+                    });
+                });
             }
         }
         catch (NonexistentEntityException ex) {

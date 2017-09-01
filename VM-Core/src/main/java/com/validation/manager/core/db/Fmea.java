@@ -24,6 +24,8 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -80,6 +82,14 @@ public class Fmea implements Serializable {
             insertable = false, updatable = false)
     @ManyToOne(optional = false)
     private Project project;
+    @JoinTable(name = "fmea_has_risk_category", joinColumns = {
+        @JoinColumn(name = "FMEA_id", referencedColumnName = "id")
+        , @JoinColumn(name = "FMEA_project_id",
+                referencedColumnName = "project_id")},
+            inverseJoinColumns = {
+                @JoinColumn(name = "risk_category_id", referencedColumnName = "id")})
+    @ManyToMany
+    private List<RiskCategory> riskCategoryList;
 
     public Fmea() {
     }
@@ -182,5 +192,15 @@ public class Fmea implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.Fmea[ fmeaPK=" + fmeaPK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskCategory> getRiskCategoryList() {
+        return riskCategoryList;
+    }
+
+    public void setRiskCategoryList(List<RiskCategory> riskCategoryList) {
+        this.riskCategoryList = riskCategoryList;
     }
 }

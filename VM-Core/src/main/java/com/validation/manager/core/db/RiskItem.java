@@ -24,6 +24,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -73,6 +74,10 @@ public class RiskItem implements Serializable {
                 updatable = false)})
     @ManyToOne(optional = false)
     private Fmea fmea;
+    @ManyToMany(mappedBy = "riskItemList")
+    private List<RiskControl> riskControlList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskItem")
+    private List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList;
 
     public RiskItem() {
     }
@@ -150,5 +155,25 @@ public class RiskItem implements Serializable {
     public String toString() {
         return "com.validation.manager.core.db.RiskItem[ riskItemPK="
                 + riskItemPK + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskControl> getRiskControlList() {
+        return riskControlList;
+    }
+
+    public void setRiskControlList(List<RiskControl> riskControlList) {
+        this.riskControlList = riskControlList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<RiskControlHasResidualRiskItem> getRiskControlHasResidualRiskItemList() {
+        return riskControlHasResidualRiskItemList;
+    }
+
+    public void setRiskControlHasResidualRiskItemList(List<RiskControlHasResidualRiskItem> riskControlHasResidualRiskItemList) {
+        this.riskControlHasResidualRiskItemList = riskControlHasResidualRiskItemList;
     }
 }

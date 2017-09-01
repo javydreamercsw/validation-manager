@@ -49,8 +49,8 @@ public class ExecutionStepAnswerJpaController implements Serializable {
             executionStepAnswer.setExecutionStepAnswerPK(new ExecutionStepAnswerPK());
         }
         executionStepAnswer.getExecutionStepAnswerPK().setExecutionStepStepTestCaseId(executionStepAnswer.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
-        executionStepAnswer.getExecutionStepAnswerPK().setExecutionStepTestCaseExecutionId(executionStepAnswer.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepAnswer.getExecutionStepAnswerPK().setExecutionStepStepId(executionStepAnswer.getExecutionStep().getExecutionStepPK().getStepId());
+        executionStepAnswer.getExecutionStepAnswerPK().setExecutionStepTestCaseExecutionId(executionStepAnswer.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -82,8 +82,8 @@ public class ExecutionStepAnswerJpaController implements Serializable {
 
     public void edit(ExecutionStepAnswer executionStepAnswer) throws NonexistentEntityException, Exception {
         executionStepAnswer.getExecutionStepAnswerPK().setExecutionStepStepTestCaseId(executionStepAnswer.getExecutionStep().getExecutionStepPK().getStepTestCaseId());
-        executionStepAnswer.getExecutionStepAnswerPK().setExecutionStepTestCaseExecutionId(executionStepAnswer.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         executionStepAnswer.getExecutionStepAnswerPK().setExecutionStepStepId(executionStepAnswer.getExecutionStep().getExecutionStepPK().getStepId());
+        executionStepAnswer.getExecutionStepAnswerPK().setExecutionStepTestCaseExecutionId(executionStepAnswer.getExecutionStep().getExecutionStepPK().getTestCaseExecutionId());
         EntityManager em = null;
         try {
             em = getEntityManager();

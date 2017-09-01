@@ -18,16 +18,17 @@ package com.validation.manager.core.db;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
@@ -81,16 +82,16 @@ public class RiskCategory implements Serializable {
     @NotNull
     @Column(name = "maximum")
     private int maximum;
-    @JoinTable(name = "risk_item_has_risk_category", joinColumns = {
-        @JoinColumn(name = "risk_category_id", referencedColumnName = "id")},
-            inverseJoinColumns = {
-                @JoinColumn(name = "risk_item_id", referencedColumnName = "id")
-                , @JoinColumn(name = "risk_item_FMEA_id",
-                        referencedColumnName = "FMEA_id")
-                , @JoinColumn(name = "risk_item_FMEA_project_id",
-                        referencedColumnName = "FMEA_project_id")})
-    @ManyToMany
-    private List<RiskItem> riskItemList;
+    @ManyToMany(mappedBy = "riskCategoryList")
+    private List<FailureModeHasCause> failureModeHasCauseList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "riskCategory")
+    private List<FailureModeHasCauseHasRiskCategory> failureModeHasCauseHasRiskCategoryList;
+    @ManyToMany(mappedBy = "riskCategoryList")
+    private List<Fmea> fmeaList;
+    @Lob
+    @Size(max = 2147483647)
+    @Column(name = "category_equation")
+    private String categoryEquation;
 
     public RiskCategory() {
     }
@@ -135,12 +136,12 @@ public class RiskCategory implements Serializable {
 
     @XmlTransient
     @JsonIgnore
-    public List<RiskItem> getRiskItemList() {
-        return riskItemList;
+    public List<FailureModeHasCause> getFailureModeHasCauseList() {
+        return failureModeHasCauseList;
     }
 
-    public void setRiskItemList(List<RiskItem> riskItemList) {
-        this.riskItemList = riskItemList;
+    public void setFailureModeHasCauseList(List<FailureModeHasCause> failureModeHasCauseList) {
+        this.failureModeHasCauseList = failureModeHasCauseList;
     }
 
     @Override
@@ -164,5 +165,33 @@ public class RiskCategory implements Serializable {
     @Override
     public String toString() {
         return "com.validation.manager.core.db.RiskCategory[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<FailureModeHasCauseHasRiskCategory> getFailureModeHasCauseHasRiskCategoryList() {
+        return failureModeHasCauseHasRiskCategoryList;
+    }
+
+    public void setFailureModeHasCauseHasRiskCategoryList(List<FailureModeHasCauseHasRiskCategory> failureModeHasCauseHasRiskCategoryList) {
+        this.failureModeHasCauseHasRiskCategoryList = failureModeHasCauseHasRiskCategoryList;
+    }
+
+    @XmlTransient
+    @JsonIgnore
+    public List<Fmea> getFmeaList() {
+        return fmeaList;
+    }
+
+    public void setFmeaList(List<Fmea> fmeaList) {
+        this.fmeaList = fmeaList;
+    }
+
+    public String getCategoryEquation() {
+        return categoryEquation;
+    }
+
+    public void setCategoryEquation(String categoryEquation) {
+        this.categoryEquation = categoryEquation;
     }
 }

@@ -35,10 +35,12 @@ public final class FMEAServer extends Fmea implements EntityServer<Fmea> {
 
     public FMEAServer(String name, Project p) {
         super(name);
-        setFmeaPK(new FmeaPK(p.getId()));
+        setFmeaPK(new FmeaPK(0, p.getId()));
         setProject(p);
         setFmeaList(new ArrayList<>());
         setRiskItemList(new ArrayList<>());
+        setRiskCategoryList(new ArrayList<>());
+        setFmeaList(new ArrayList<>());
     }
 
     @Override
@@ -88,6 +90,7 @@ public final class FMEAServer extends Fmea implements EntityServer<Fmea> {
         target.setFmeaPK(source.getFmeaPK());
         target.setName(source.getName());
         target.setDescription(source.getDescription());
+        target.setRiskCategoryList(source.getRiskCategoryList());
     }
 
     @Override
