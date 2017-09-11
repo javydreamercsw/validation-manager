@@ -417,6 +417,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private static void buildDemoTree() {
         try {
+            DataBaseManager.clean();
             DemoBuilder.buildDemoProject();
         } catch (NonexistentEntityException ex) {
             LOG.log(Level.SEVERE, null, ex);
@@ -1355,10 +1356,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         ProjectJpaController controller
                 = new ProjectJpaController(DataBaseManager
                         .getEntityManagerFactory());
-        if (DataBaseManager.isDemo()
-                && controller.findProjectEntities().isEmpty()) {
-            buildDemoTree();
-        }
         List<Project> all = controller.findProjectEntities();
         projects.clear();
         all.stream().filter((p)
