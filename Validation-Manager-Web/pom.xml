@@ -124,12 +124,6 @@
             <artifactId>poi-scratchpad</artifactId>
             <version>${poi.version}</version>
         </dependency>
-        <!--Math Expresion Parser-->
-        <dependency>
-            <groupId>net.objecthunter</groupId>
-            <artifactId>exp4j</artifactId>
-            <version>0.4.8</version>
-        </dependency>
         <!--Vaadin Addons-->
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -32,13 +32,10 @@ import com.validation.manager.core.db.Fmea;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.RiskCategory;
 import com.validation.manager.core.db.controller.FailureModeHasCauseHasRiskCategoryJpaController;
-import java.util.HashMap;
-import java.util.Map;
+import com.validation.manager.core.tool.Tool;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 
 /**
@@ -46,6 +43,9 @@ import org.openide.util.Exceptions;
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
 public final class RiskManagementComponent extends HorizontalSplitPanel {
+
+    private static final Logger LOG
+            = Logger.getLogger(RiskManagementComponent.class.getSimpleName());
 
     public RiskManagementComponent(Project p) {
         setSplitPosition(25, Unit.PERCENTAGE);
@@ -100,50 +100,9 @@ public final class RiskManagementComponent extends HorizontalSplitPanel {
                                             if (cat.getCategoryEquation() != null
                                                     && !cat.getCategoryEquation().trim().isEmpty()) {
                                                 //Calculate based on equation
-                                                //Format: {rc-id} where id -s the category id
-                                                //i.e.: {rc-1} * {rc-2}
-                                                Map<Integer, Double> map = new HashMap<>();
-                                                fmhchrc.getFailureModeHasCause()
-                                                        .getFailureModeHasCauseHasRiskCategoryList()
-                                                        .forEach(temp -> {
-                                                            //Put result or null if calculated in map.
-                                                            map.put(temp.getRiskCategory().getId(),
-                                                                    temp.getRiskCategory().getCategoryEquation() == null
-                                                                    || temp.getRiskCategory()
-                                                                            .getCategoryEquation().trim()
-                                                                            .isEmpty()
-                                                                            ? temp.getCategoryValue() : null);
-                                                        });
-                                                //Make the calculation. All values are in map
-                                                String stringPattern = "\\{rc-\\d\\}";
-                                                String equation = fmhchrc.getRiskCategory()
-                                                        .getCategoryEquation().trim();
-                                                String finalEq = equation;
-                                                Pattern pattern = Pattern.compile(stringPattern);
-                                                Matcher matcher = pattern.matcher(equation);
-                                                Map<String, Double> variables = new HashMap<>();
-                                                int variableCounter = 0;
-                                                System.out.println("Calculating equation: " + equation);
-                                                if (matcher.matches()) {
-                                                    for (int i = 1; i <= matcher.groupCount(); i++) {
-                                                        //Replace with a variable
-                                                        String variable = str(variableCounter++).toLowerCase();
-                                                        String value = matcher.group(i);
-                                                        finalEq = equation.replaceAll(value, variable);
-                                                        variables.put(variable,
-                                                                map.get(Integer.parseInt(value
-                                                                        .substring(value.indexOf('-') + 1,
-                                                                                value.length() - 1))));
-                                                    }
-                                                }
-                                                System.out.println("Final equation: " + finalEq + "\n" + variables);
-                                                Expression e = new ExpressionBuilder(finalEq)
-                                                        .variables(variables.keySet())
-                                                        .build()
-                                                        .setVariables(variables);
-                                                double result = e.evaluate();
+                                                Double result = Tool.evaluateEquation(fmhchrc);
                                                 //Update record if result changed
-                                                System.out.println("Result: " + result);
+                                                LOG.log(Level.FINE, "Result: {0}", result);
                                                 if (result != fmhchrc.getCategoryValue()) {
                                                     try {
                                                         fmhchrc.setCategoryValue(result);
@@ -205,15 +164,5 @@ public final class RiskManagementComponent extends HorizontalSplitPanel {
         setFirstComponent(tree);
         setSecondComponent(ttable);
         setSizeFull();
-    }
-
-    /**
-     * See: https://stackoverflow.com/a/32532049/198108
-     *
-     * @param i Integer to convert
-     * @return Sequential letters.
-     */
-    private String str(int i) {
-        return i < 0 ? "" : str((i / 26) - 1) + (char) (65 + i % 26);
     }
 }
