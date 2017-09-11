@@ -108,8 +108,9 @@ public class AdminScreenProvider extends AdminProvider {
         adminSheet.addTab(getConfigurableTab(), TRANSLATOR
                 .translate("general.configuration"));
         //Build configurable items management tab
-        adminSheet.addTab(getWorkflowTab(), TRANSLATOR
-                .translate("workflow.manager"));
+        //TODO: Disabled for now.
+//        adminSheet.addTab(getWorkflowTab(), TRANSLATOR
+//                .translate("workflow.manager"));
         layout.addComponent(adminSheet);
         layout.setId(getComponentCaption());
         return layout;
