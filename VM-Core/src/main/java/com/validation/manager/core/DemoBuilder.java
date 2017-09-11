@@ -380,9 +380,16 @@ public class DemoBuilder {
                         fm.getFailureModeHasCauseList().forEach(c -> {
                             c.getFailureModeHasCauseHasRiskCategoryList().forEach(cat -> {
                                 try {
-                                    cat.setCategoryValue(ThreadLocalRandom.current()
-                                            .nextInt(cat.getRiskCategory().getMinimum(),
-                                                    cat.getRiskCategory().getMaximum() + 1));
+                                    if (cat.getRiskCategory().getCategoryEquation() == null
+                                            || cat.getRiskCategory().getCategoryEquation()
+                                                    .trim().isEmpty()) {
+                                        cat.setCategoryValue(ThreadLocalRandom.current()
+                                                .nextInt(cat.getRiskCategory().getMinimum(),
+                                                        cat.getRiskCategory().getMaximum() + 1));
+                                    } else {
+                                        //It is a calculated category
+                                        cat.setCategoryValue(Tool.evaluateEquation(cat));
+                                    }
                                     new FailureModeHasCauseHasRiskCategoryJpaController(DataBaseManager
                                             .getEntityManagerFactory()).edit(cat);
                                 }

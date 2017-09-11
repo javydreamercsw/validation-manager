@@ -39,6 +39,7 @@ public class RiskCategoryServer extends RiskCategory
         if (getId() == null) {
             RiskCategory rc = new RiskCategory(getName(), getMinimum(),
                     getMaximum());
+            update(rc, this);
             new RiskCategoryJpaController(
                     getEntityManagerFactory()).create(rc);
             setId(rc.getId());
@@ -50,6 +51,7 @@ public class RiskCategoryServer extends RiskCategory
             new RiskCategoryJpaController(
                     getEntityManagerFactory()).edit(rc);
         }
+        update();
         return getId();
     }
 
@@ -74,6 +76,8 @@ public class RiskCategoryServer extends RiskCategory
                 .getFailureModeHasCauseHasRiskCategoryList());
         target.setFailureModeHasCauseList(source.getFailureModeHasCauseList());
         target.setFmeaList(source.getFmeaList());
+        target.setCategoryEquation(source.getCategoryEquation());
+        target.setId(source.getId());
     }
     
     @Override

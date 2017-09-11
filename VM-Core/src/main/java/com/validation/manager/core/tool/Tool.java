@@ -18,11 +18,13 @@ package com.validation.manager.core.tool;
 import com.j256.simplemagic.ContentInfo;
 import com.j256.simplemagic.ContentInfoUtil;
 import com.validation.manager.core.db.ExecutionStep;
+import com.validation.manager.core.db.FailureModeHasCauseHasRiskCategory;
 import com.validation.manager.core.db.Issue;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
+import com.validation.manager.core.db.RiskCategory;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestCasePK;
@@ -39,16 +41,22 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.swing.ImageIcon;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.tools.TextToPDF;
@@ -280,5 +288,67 @@ public class Tool {
      */
     public static Object buildId(Object item, Object postfix) {
         return buildId(item, postfix, true);
+    }
+
+    public static Double evaluateEquation(FailureModeHasCauseHasRiskCategory fmhchrc) {
+        RiskCategory cat = fmhchrc.getRiskCategory();
+        if (cat.getCategoryEquation() != null
+                && !cat.getCategoryEquation().trim().isEmpty()) {
+            //Calculate based on equation
+            //Format: {rc-id} where id -s the category id
+            //i.e.: {rc-1} * {rc-2}
+            Map<Integer, Double> map = new HashMap<>();
+            fmhchrc.getFailureModeHasCause()
+                    .getFailureModeHasCauseHasRiskCategoryList()
+                    .forEach(temp -> {
+                        //Put result or null if calculated in map.
+                        map.put(temp.getRiskCategory().getId(),
+                                temp.getRiskCategory().getCategoryEquation() == null
+                                || temp.getRiskCategory()
+                                        .getCategoryEquation().trim()
+                                        .isEmpty()
+                                        ? temp.getCategoryValue() : null);
+                    });
+            //Make the calculation. All values are in map
+            String stringPattern = "rc-[0-9]+";
+            String equation = fmhchrc.getRiskCategory()
+                    .getCategoryEquation().trim();
+            String finalEq = equation;
+            Pattern pattern = Pattern.compile(stringPattern);
+            Matcher matcher = pattern.matcher(equation);
+            Map<String, Double> variables = new HashMap<>();
+            int variableCounter = 0;
+            LOG.log(Level.FINE, "Calculating equation: {0}", equation);
+            finalEq = finalEq.replaceAll("\\{", "").replaceAll("\\}", "");
+            while (matcher.find()) {
+                //Replace with a variable
+                String variable = getStringSequence(variableCounter++)
+                        .toLowerCase();
+                String value = matcher.group(0);
+                finalEq = finalEq.replaceAll(value, variable);
+                variables.put(variable,
+                        map.get(Integer.parseInt(value
+                                .substring(value.indexOf('-') + 1,
+                                        value.length()))));
+            }
+            LOG.log(Level.FINE, "Final equation: {0}\n{1}",
+                    new Object[]{finalEq, variables});
+            Expression e = new ExpressionBuilder(finalEq)
+                    .variables(variables.keySet())
+                    .build()
+                    .setVariables(variables);
+            return e.evaluate();
+        }
+        return new Double(0);
+    }
+
+    /**
+     * See: https://stackoverflow.com/a/32532049/198108
+     *
+     * @param i Integer to convert
+     * @return Sequential letters.
+     */
+    private static String getStringSequence(int i) {
+        return i < 0 ? "" : getStringSequence((i / 26) - 1) + (char) (65 + i % 26);
     }
 }
