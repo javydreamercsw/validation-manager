@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -103,11 +102,12 @@ public class DataBaseManager {
             LOG.warning("Resetting database since it is on demo mode.");
             //Clean the database on demo
             flyway.clean();
-            Properties p = new Properties();
+            Map<String, Object> p = new HashMap<>();
             p.put("eclipselink.ddl-generation", "drop-and-create-tables");
             p.put("eclipselink.ddl-generation.output-mode", "database");
             p.put("eclipselink.deploy-on-startup", "true");
-            JpaHelper.getEntityManagerFactory(getEntityManager()).refreshMetadata(p);
+            JpaHelper.getEntityManagerFactory(getEntityManager())
+                    .refreshMetadata(p);
             //Update the data
             flyway.init();
             flyway.migrate();
