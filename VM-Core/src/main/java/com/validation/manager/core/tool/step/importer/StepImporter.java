@@ -262,7 +262,8 @@ public class StepImporter implements ImporterInterface<Step> {
         return result;
     }
 
-    public static File exportTemplate() throws FileNotFoundException, IOException, InvalidFormatException {
+    public static File exportTemplate() throws FileNotFoundException,
+            IOException, InvalidFormatException {
         File template = new File("Template.xls");
         template.createNewFile();
         org.apache.poi.ss.usermodel.Workbook wb = new HSSFWorkbook();
@@ -273,7 +274,7 @@ public class StepImporter implements ImporterInterface<Step> {
         cs.setDataFormat(getBuiltinFormat("text"));
         Font f = wb.createFont();
         f.setFontHeightInPoints((short) 12);
-        f.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        f.setBold(true);
         f.setColor((short) Font.COLOR_NORMAL);
         cs.setFont(f);
         Row newRow = sheet.createRow(0);

@@ -24,7 +24,6 @@ import com.validation.manager.core.server.core.VMIdServer;
 import com.validation.manager.core.server.core.VMSettingServer;
 import static java.lang.Class.forName;
 import static java.lang.Long.valueOf;
-import static java.lang.Thread.sleep;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -151,21 +150,6 @@ public class DataBaseManager {
                         next.getTableName(), next.getLastId()});
                 });
             }
-        }
-    }
-
-    private static void generateIDs() {
-        if (!dbError) {
-            LOG.log(Level.FINE,
-                    "Creating ids to work around eclipse issue "
-                    + "(https://bugs.eclipse.org/bugs/show_bug.cgi?id=366852)...");
-            getEntityManager().getMetamodel().getEmbeddables().forEach((et) -> {
-                processFields(et.getJavaType().getDeclaredFields());
-            });
-            getEntityManager().getMetamodel().getEntities().forEach((et) -> {
-                processFields(et.getBindableJavaType().getDeclaredFields());
-            });
-            LOG.log(Level.FINE, "Done!");
         }
     }
 
@@ -395,14 +379,14 @@ public class DataBaseManager {
         }
         updateDBState();
         getEntityManager();
-        generateIDs();
     }
 
     public static void updateDBState() {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            dataSource = (javax.sql.DataSource) new InitialContext().lookup("java:comp/env/jdbc/VMDB");
+            dataSource = (javax.sql.DataSource) new InitialContext()
+                    .lookup("java:comp/env/jdbc/VMDB");
             connection = dataSource.getConnection();
         }
         catch (NamingException ne) {
@@ -525,7 +509,7 @@ public class DataBaseManager {
                     "Waiting for DB initialization. Current state: {0}",
                     (getState() != null ? getState().name() : null));
             try {
-                sleep(100);
+                Thread.currentThread().sleep(100);
             }
             catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, null, ex);

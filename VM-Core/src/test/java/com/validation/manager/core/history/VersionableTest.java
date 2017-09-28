@@ -151,8 +151,9 @@ public class VersionableTest extends AbstractVMTestCase {
                                     Auditable.class);
                     assertEquals(false, fields.isEmpty());
                     //Get one from the demo data
-                    Versionable v = (Versionable) DataBaseManager.createdQuery("Select a from "
-                            + entity.getJavaType().getSimpleName()
+                    Versionable v = (Versionable) DataBaseManager
+                            .createdQuery("Select a from "
+                                    + entity.getJavaType().getSimpleName()
                             + " a").get(0);
                     assertNotNull(v);
                     v.updateHistory();
@@ -188,7 +189,8 @@ public class VersionableTest extends AbstractVMTestCase {
                         } else if (f.getType() == byte[].class) {
                             byte[] current = (byte[]) f.get(v);
                             byte[] append = "1".getBytes();
-                            byte[] newValue = new byte[current.length + append.length];
+                            byte[] newValue = new byte[current.length
+                                    + append.length];
                             showChange(current, newValue);
                             f.set(v, newValue);
                         } else if (f.getType() == Boolean.class) {
@@ -203,7 +205,8 @@ public class VersionableTest extends AbstractVMTestCase {
                         assertTrue(Versionable.auditable(v));
                         v.updateHistory();
                         assertEquals(count, v.getHistoryList().size());
-                        history = v.getHistoryList().get(v.getHistoryList().size() - 1);
+                        history
+                                = v.getHistoryList().get(v.getHistoryList().size() - 1);
                         assertEquals(0, history.getMajorVersion());
                         assertEquals(0, history.getMidVersion());
                         assertEquals(count, history.getMinorVersion());
@@ -215,9 +218,9 @@ public class VersionableTest extends AbstractVMTestCase {
                         int total = new HistoryJpaController(DataBaseManager
                                 .getEntityManagerFactory()).getHistoryCount();
                         //Test for issue #25 https://github.com/javydreamercsw/validation-manager/issues/25
-
-                        v = (Versionable) DataBaseManager.getEntityManager().find(entity.getJavaType(),
-                                DataBaseManager.getEntityManagerFactory()
+                        v = (Versionable) DataBaseManager.getEntityManager()
+                                .find(entity.getJavaType(),
+                                        DataBaseManager.getEntityManagerFactory()
                                         .getPersistenceUnitUtil().getIdentifier(v));
                         assertTrue(checkHistory(v));
                         assertEquals(total, new HistoryJpaController(DataBaseManager
