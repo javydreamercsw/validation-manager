@@ -82,8 +82,8 @@ import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStr
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
-import org.jodconverter.OfficeDocumentConverter;
-import org.jodconverter.office.DefaultOfficeManagerBuilder;
+import org.jodconverter.LocalConverter;
+import org.jodconverter.office.LocalOfficeManager;
 import org.jodconverter.office.OfficeException;
 import org.jodconverter.office.OfficeManager;
 import org.openide.util.Lookup;
@@ -835,15 +835,18 @@ public class ExecutionWizardStep implements WizardStep {
             }
             // Connect to an OpenOffice.org instance running on available port
             try {
-                officeManager = new DefaultOfficeManagerBuilder()
-                        .setPortNumber(port)
-                        .setOfficeHome(home)
+                officeManager = LocalOfficeManager.builder()
+                        .portNumbers(port, 2003)
+                        .taskExecutionTimeout(60000)
+                        .portNumbers(port)
+                        .officeHome(home)
                         .build();
                 officeManager.start();
 
-                OfficeDocumentConverter converter
-                        = new OfficeDocumentConverter(officeManager);
-                converter.convert(source, dest);
+                LocalConverter.make(officeManager)
+                        .convert(source)
+                        .to(dest)
+                        .execute();
                 // close the connection
                 officeManager.stop();
                 return true;

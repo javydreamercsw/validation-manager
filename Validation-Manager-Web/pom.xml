@@ -116,8 +116,8 @@
         </dependency>
         <dependency>
             <groupId>org.jodconverter</groupId>
-            <artifactId>jodconverter-core</artifactId>
-            <version>4.0.0-RELEASE</version>
+            <artifactId>jodconverter-local</artifactId>
+            <version>4.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -188,7 +188,7 @@
         <dependency>
             <groupId>com.vaadin.addon</groupId>
             <artifactId>tableexport-for-vaadin</artifactId>
-            <version>1.6.4-SNAPSHOT</version>
+            <version>1.6.3</version>
         </dependency>
         <dependency>
             <groupId>org.vaadin.addons</groupId>
