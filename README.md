@@ -10,7 +10,7 @@
 
 [![Coverage Status](https://coveralls.io/repos/github/javydreamercsw/validation-manager/badge.svg?branch=master)](https://coveralls.io/github/javydreamercsw/validation-manager?branch=master)
 
-[![Known Vulnerabilities](https://snyk.io/test/github/javydreamercsw/validation-manager/badge.svg)](https://snyk.io/test/github/{username}/{repo})
+[![Known Vulnerabilities](https://snyk.io/test/github/javydreamercsw/validation-manager/badge.svg)](https://snyk.io/test/github/javydreamercsw/validation-manager)
 
 Welcome to Validation Manager Repository!
 
