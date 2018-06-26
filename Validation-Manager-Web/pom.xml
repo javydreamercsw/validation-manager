@@ -90,7 +90,7 @@
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
-            <version>1.0.19</version>
+            <version>1.5.0</version>
         </dependency>
         <!--PDF rendering with Open Office-->
         <dependency>
@@ -182,7 +182,7 @@
         <dependency>
             <groupId>tm.kod</groupId>
             <artifactId>numberfield7</artifactId>
-            <version>0.0.4</version>
+            <version>0.0.5</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin.addon</groupId>

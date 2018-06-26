@@ -16,21 +16,24 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
-import com.validation.manager.core.api.internationalization.InternationalizationProvider;
-import com.validation.manager.core.db.ExecutionResult;
-import com.validation.manager.core.server.core.ExecutionResultServer;
-import com.validation.manager.core.tool.TCEExtraction;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.openide.util.Lookup;
 import org.vaadin.addon.JFreeChartWrapper;
+
+import com.validation.manager.core.api.internationalization.InternationalizationProvider;
+import com.validation.manager.core.db.ExecutionResult;
+import com.validation.manager.core.server.core.ExecutionResultServer;
+import com.validation.manager.core.tool.TCEExtraction;
 
 /**
  *
@@ -76,8 +79,7 @@ public final class ExecutionDashboard extends VMWindow {
             });
         });
         //Build bar graph
-        JFreeChart chart = ChartFactory.createBarChart3D(
-                TRANSLATOR.translate("execution.progress"), // chart title
+        JFreeChart chart = ChartFactory.createBarChart(                TRANSLATOR.translate("execution.progress"), // chart title
                 TRANSLATOR.translate("test.case"),
                 TRANSLATOR.translate("general.amount"),
                 dataset, // data
