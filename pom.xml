@@ -63,7 +63,7 @@
         <netbeans.version>RELEASE82</netbeans.version>
         <junit.version>4.12</junit.version>
         <mysql.version>6.0.6</mysql.version>
-        <h2.version>1.4.197</h2.version>
+        <h2.version>1.4.198</h2.version>
         <poi.version>3.17</poi.version>
         <vaadin.icons.version>3.0.1</vaadin.icons.version>
     </properties>
