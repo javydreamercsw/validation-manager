@@ -62,7 +62,7 @@
         <vaadin.version>7.7.13</vaadin.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <junit.version>4.12</junit.version>
-        <mysql.version>6.0.6</mysql.version>
+        <mysql.version>8.0.16</mysql.version>
         <h2.version>1.4.197</h2.version>
         <poi.version>3.17</poi.version>
         <vaadin.icons.version>3.0.1</vaadin.icons.version>
