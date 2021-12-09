@@ -116,7 +116,7 @@
         <dependency>
             <groupId>org.jodconverter</groupId>
             <artifactId>jodconverter-local</artifactId>
-            <version>4.1.0</version>
+            <version>4.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -306,7 +306,7 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <configuration />
+                        <configuration/>
                         <goals>
                             <goal>clean</goal>
                             <goal>resources</goal>
@@ -354,7 +354,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
