@@ -59,12 +59,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vm.version>${project.version}</vm.version>
-        <vaadin.version>7.7.23</vaadin.version>
+        <vaadin.version>8.12.3</vaadin.version>
         <netbeans.version>RELEASE82</netbeans.version>
         <junit.version>4.12</junit.version>
-        <mysql.version>8.0.16</mysql.version>
+        <mysql.version>8.0.29</mysql.version>
         <h2.version>2.1.210</h2.version>
-        <poi.version>3.17</poi.version>
+        <poi.version>4.1.0</poi.version>
         <vaadin.icons.version>3.0.1</vaadin.icons.version>
     </properties>
     
