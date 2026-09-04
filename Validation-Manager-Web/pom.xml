@@ -22,7 +22,7 @@
     <repositories>
         <repository>
             <id>vaadin-addons</id>
-            <url>http://maven.vaadin.com/vaadin-addons</url>
+            <url>https://maven.vaadin.com/vaadin-addons</url>
         </repository>
     </repositories>
     <dependencies>
@@ -242,17 +242,10 @@
                     <debug>false</debug>
                 </configuration>
             </plugin>
-            <!-- As we are doing "inplace" GWT compilation, ensure the widgetset -->
-            <!-- directory is cleaned properly -->
+            <!-- The prebuilt widgetset is checked in (GWT 2.7 compilation needs a Java 8
+            toolchain), so clean must not delete it. -->
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>src/main/webapp/VAADIN/widgetsets</directory>
-                        </fileset>
-                    </filesets>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -308,12 +301,16 @@
                     <execution>
                         <configuration />
                         <goals>
-                            <goal>clean</goal>
+                            <!-- The plugin's clean goal also wipes the checked-in widgetset
+                            directory, so it must not run. -->
+                            <!-- <goal>clean</goal> -->
                             <goal>resources</goal>
                             <goal>update-theme</goal>
                             <goal>update-widgetset</goal>
                             <goal>compile-theme</goal>
-                            <goal>compile</goal>
+                            <!-- GWT widgetset compilation requires a Java 8 toolchain (GWT 2.7
+                            cannot run on JDK 9+); the widgetset is prebuilt and checked in -->
+                            <!-- <goal>compile</goal> -->
                         </goals>
                     </execution>
                 </executions>

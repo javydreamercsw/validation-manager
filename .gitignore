@@ -10,3 +10,4 @@ VM-Core/data/*
 /VM-Core/log/
 /target/
 /Validation-Manager-Web/nbproject/
+.idea/

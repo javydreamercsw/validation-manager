@@ -90,6 +90,12 @@
             <version>2.0.0.Final</version>
             <type>jar</type>
         </dependency>
+        <!-- JAXB annotations on entities; removed from the JDK in Java 11+ -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
@@ -116,6 +122,12 @@
         </dependency>
         <dependency>
             <artifactId>org-openide-util</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <type>jar</type>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>org-openide-util-ui</artifactId>
             <groupId>org.netbeans.api</groupId>
             <type>jar</type>
             <version>${netbeans.version}</version>
@@ -227,7 +239,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
+                <version>0.8.8</version>
                 <configuration>
                     <skip>${skipTests}</skip>
                     <output>file</output>
@@ -283,7 +295,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
+                <version>0.8.8</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -304,7 +316,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <pdfbox.version>2.0.7</pdfbox.version>
-        <jacoco.version>0.7.9</jacoco.version>
+        <jacoco.version>0.8.8</jacoco.version>
         <jacoco.outputDir>${project.basedir}/target/jacoco.exec</jacoco.outputDir>
     </properties>
 </project>

@@ -1,8 +1,8 @@
 [submodule "WizardsForVaadin"]
 	path = WizardsForVaadin
-	url = https://github.com/javydreamercsw/WizardsForVaadin.git
+	url = git@github.com:javydreamercsw/WizardsForVaadin.git
         branch = vaadin7
 [submodule "tableexport-for-vaadin"]
 	path = tableexport-for-vaadin
-	url = https://github.com/javydreamercsw/tableexport-for-vaadin.git
-        branch = vaadin7
+	url = git@github.com:javydreamercsw/tableexport-for-vaadin.git
+        branch = vaadin-7
