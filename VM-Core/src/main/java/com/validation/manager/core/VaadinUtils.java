@@ -18,6 +18,7 @@ package com.validation.manager.core;
 import com.vaadin.data.HasValue;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -108,7 +109,10 @@ public final class VaadinUtils {
         walkComponentTree(ui, (Component c) -> {
             String id = c.getId();
             String caption;
-            if (c instanceof HasValue
+            if (c instanceof Label) {
+                //v8 Label no longer implements HasValue
+                caption = ((Label) c).getValue();
+            } else if (c instanceof HasValue
                     && ((HasValue) c).getValue() instanceof String) {
                 caption = (String) ((HasValue) c).getValue();
             } else {
@@ -142,7 +146,9 @@ public final class VaadinUtils {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }
-                if (c instanceof HasValue) {
+                if (c instanceof Label) {
+                    ((Label) c).setValue(caption);
+                } else if (c instanceof HasValue) {
                     ((HasValue<String>) c).setValue(caption);
                 } else {
                     c.setCaption(caption);

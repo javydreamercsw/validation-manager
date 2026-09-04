@@ -15,12 +15,13 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.data.Converter;
+import com.vaadin.data.Result;
+import com.vaadin.data.ValueContext;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.UserStatus;
 import com.validation.manager.core.db.controller.UserStatusJpaController;
-import java.util.Locale;
 import org.openide.util.Lookup;
 
 /**
@@ -33,35 +34,21 @@ public class UserStatusConverter implements Converter<String, UserStatus> {
             = Lookup.getDefault().lookup(InternationalizationProvider.class);
 
     @Override
-    public UserStatus convertToModel(String value,
-            Class<? extends UserStatus> targetType,
-            Locale locale) throws Converter.ConversionException {
-        UserStatus status = null;
+    public Result<UserStatus> convertToModel(String value,
+            ValueContext context) {
         for (UserStatus us
                 : new UserStatusJpaController(DataBaseManager
                         .getEntityManagerFactory()).findUserStatusEntities()) {
             if (TRANSLATOR.translate(us.getStatus()).equals(value)) {
-                status = us;
-                break;
+                return Result.ok(us);
             }
         }
-        return status;
+        return Result.error("Unknown status: " + value);
     }
 
     @Override
     public String convertToPresentation(UserStatus value,
-            Class<? extends String> targetType,
-            Locale locale) throws Converter.ConversionException {
+            ValueContext context) {
         return value == null ? "" : TRANSLATOR.translate(value.getStatus());
-    }
-
-    @Override
-    public Class<UserStatus> getModelType() {
-        return UserStatus.class;
-    }
-
-    @Override
-    public Class<String> getPresentationType() {
-        return String.class;
     }
 }

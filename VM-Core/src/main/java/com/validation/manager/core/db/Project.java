@@ -190,7 +190,8 @@ public class Project extends Versionable implements Serializable {
             return false;
         }
         Project other = (Project) object;
-        return this.id.equals(other.id);
+        return (this.id == null && other.id == null)
+                || (this.id != null && this.id.equals(other.id));
     }
 
     @Override

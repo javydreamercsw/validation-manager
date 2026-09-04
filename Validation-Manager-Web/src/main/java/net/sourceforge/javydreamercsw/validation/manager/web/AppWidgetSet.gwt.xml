@@ -34,6 +34,4 @@ limitations under the License.
     <inherits name="pl.pdfviewer.PdfViewerWidgetSet" />
     
     <inherits name="com.vaadin.pontus.vizcomponent.WidgetSet" />
-
-    <inherits name="com.vaadin.v7.Vaadin7WidgetSet" />
 </module>

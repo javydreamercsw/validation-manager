@@ -18,7 +18,6 @@ package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 import com.vaadin.data.Binder;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -65,18 +64,13 @@ public class ProjectDetailsStep implements WizardStep {
 
     @Override
     public boolean onAdvance() {
-        if (getName().getValue() == null || "".equals(name.getValue())) {
-            Notification.show(TRANSLATOR.translate("unable.to.proceed"),
-                    TRANSLATOR.translate("missing.name.message"),
-                    Notification.Type.WARNING_MESSAGE);
-            return false;
-        }
         ps.setName(getName().getValue());
         if (getNotes().getValue() != null) {
             ps.setNotes(getNotes().getValue());
         }
         w.setProject(ps);
-        return true;
+        return getName().getValue() != null
+                && !"".equals(name.getValue());
     }
 
     @Override

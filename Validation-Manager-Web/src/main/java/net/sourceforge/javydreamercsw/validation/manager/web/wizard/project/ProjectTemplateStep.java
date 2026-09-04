@@ -17,7 +17,6 @@ package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.ContentProvider;
 import com.validation.manager.core.DataBaseManager;
@@ -94,11 +93,6 @@ class ProjectTemplateStep implements WizardStep {
         Template t = getTemplates().getValue();
         if (t != null) {
             wizard.setTemplate(t);
-        } else {
-            Notification.show(ContentProvider.TRANSLATOR
-                    .translate("unable.to.proceed"),
-                    ContentProvider.TRANSLATOR.translate("template.select"),
-                    Notification.Type.WARNING_MESSAGE);
         }
         return t != null;
     }

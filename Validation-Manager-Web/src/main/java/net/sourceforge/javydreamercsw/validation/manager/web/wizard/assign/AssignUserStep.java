@@ -62,7 +62,8 @@ public class AssignUserStep implements WizardStep {
     private final Object key;
     private final TreeData<Object> treeData = new TreeData<>();
     private final Map<Object, TreeTableCheckBox> checkboxes = new HashMap<>();
-    private final TreeGrid<Object> testTree = new TreeGrid<>("available.tests");
+    private final Map<Object, String> descriptions = new HashMap<>();
+    private final TreeGrid<Object> testTree = new TreeGrid<>();
     private final RadioButtonGroup<VmUser> userGroup
             = new RadioButtonGroup<>("available.tester");
     private TestCaseExecutionServer tce = null;
@@ -74,10 +75,12 @@ public class AssignUserStep implements WizardStep {
     public AssignUserStep(ValidationManagerUI ui, Object item) {
         this.key = item;
         this.ui = ui;
-        testTree.addColumn(o -> getCheckBoxFor(o)).setId("general.name")
+        testTree.setCaption("available.tests");
+        testTree.addComponentColumn(this::getCheckBoxFor)
+                .setId("general.name")
                 .setCaption("general.name")
                 .setRenderer(new ComponentRenderer());
-        testTree.addColumn(AssignUserStep::getDescription)
+        testTree.addColumn(this::getDescription)
                 .setId("general.description")
                 .setCaption("general.description");
         testTree.setWidth(20, Unit.EM);
@@ -89,20 +92,8 @@ public class AssignUserStep implements WizardStep {
         return checkboxes.get(id);
     }
 
-    private static String getDescription(Object id) {
-        TestCase tc = findTestCase(id);
-        return tc == null ? ""
-                : (tc.getSummary() == null ? ""
-                        : new String(tc.getSummary(), StandardCharsets.UTF_8));
-    }
-
-    private static TestCase findTestCase(Object id) {
-        if (id instanceof TestCasePK) {
-            TestCasePK pk = (TestCasePK) id;
-            return new TestCaseJpaController(DataBaseManager
-                    .getEntityManagerFactory()).findTestCase(pk);
-        }
-        return null;
+    private String getDescription(Object id) {
+        return descriptions.getOrDefault(id, "");
     }
 
     @Override
@@ -127,12 +118,16 @@ public class AssignUserStep implements WizardStep {
                         testCases.add(es.getStep().getTestCase());
                     });
         }
+        treeData.clear();
+        checkboxes.clear();
+        descriptions.clear();
         testCases.forEach((t) -> {
             TestCasePK id = t.getTestCasePK();
+            checkboxes.put(id, new TreeTableCheckBox(new TreeNavigatorImpl(),
+                    t.getName(), id));
+            descriptions.put(id, t.getSummary() == null ? ""
+                    : new String(t.getSummary(), StandardCharsets.UTF_8));
             treeData.addRootItems(id);
-            TreeTableCheckBox check = new TreeTableCheckBox(new TreeNavigatorImpl(),
-                    t.getName(), id);
-            checkboxes.put(id, check);
         });
         testTree.setHeightByRows(testCases.size() + 1);
         testTree.setDataProvider(new TreeDataProvider<>(treeData));
@@ -151,11 +146,11 @@ public class AssignUserStep implements WizardStep {
     public boolean onAdvance() {
         boolean selectedTestCase = false;
         List<TestCasePK> testCaseIds = new ArrayList<>();
-        for (TestCasePK id : treeData.getRootItems()) {
+        for (Object id : treeData.getRootItems()) {
             TreeTableCheckBox ttcb = checkboxes.get(id);
-            if (ttcb != null && ttcb.getValue() != null && ttcb.getValue()) {
+            if (ttcb != null && Boolean.TRUE.equals(ttcb.getValue())) {
                 selectedTestCase = true;
-                testCaseIds.add(id);
+                testCaseIds.add((TestCasePK) id);
             }
         }
         if (!selectedTestCase) {

@@ -15,29 +15,24 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.admin;
 
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
-import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.data.Binder;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.Field;
 import com.vaadin.ui.FormLayout;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.Grid.SelectionMode;
-import com.vaadin.v7.ui.Grid.SingleSelectionModel;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
-import com.vaadin.v7.ui.Tree;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -59,6 +54,8 @@ import com.validation.manager.core.server.core.VMSettingServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,7 +63,6 @@ import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI
 import net.sourceforge.javydreamercsw.validation.manager.web.component.IssueResolutionComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.IssueTypeComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.RequirementTypeComponent;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.TranslationConverter;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.UserComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.workflow.WorkflowViewer;
@@ -148,41 +144,46 @@ public class AdminScreenProvider extends AdminProvider {
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
-        binder.setItemDataSource(s);
-        Field<?> id = (TextField) binder.buildAndBind(TRANSLATOR
-                .translate("general.setting"), "setting");
+        Binder<VmSetting> binder = new Binder<>(VmSetting.class);
+        binder.setBean(s);
+        TextField id = new TextField(TRANSLATOR
+                .translate("general.setting"));
+        binder.forField(id).withNullRepresentation("").bind("setting");
         layout.addComponent(id);
-        Field bool = binder.buildAndBind(TRANSLATOR
-                .translate("bool.value"), "boolVal");
-        bool.setSizeFull();
+        CheckBox bool = new CheckBox(TRANSLATOR
+                .translate("bool.value"));
+        binder.bind(bool, "boolVal");
         layout.addComponent(bool);
-        Field integerVal = binder.buildAndBind(TRANSLATOR
-                .translate("int.value"), "intVal");
+        TextField integerVal = new TextField(TRANSLATOR
+                .translate("int.value"));
+        binder.forField(integerVal).withNullRepresentation("")
+                .withConverter(Integer::valueOf, String::valueOf)
+                .bind("intVal");
         integerVal.setSizeFull();
         layout.addComponent(integerVal);
-        Field longVal = binder.buildAndBind(TRANSLATOR
-                .translate("long.val"), "longVal");
+        TextField longVal = new TextField(TRANSLATOR
+                .translate("long.val"));
+        binder.bind(longVal, "longVal");
         longVal.setSizeFull();
         layout.addComponent(longVal);
-        Field stringVal = binder.buildAndBind(TRANSLATOR
-                .translate("string.val"), "stringVal",
-                TextArea.class);
+        TextArea stringVal = new TextArea(TRANSLATOR
+                .translate("string.val"));
+        binder.bind(stringVal, "stringVal");
         stringVal.setSizeFull();
         layout.addComponent(stringVal);
         Button cancel = new Button(TRANSLATOR
                 .translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
+            binder.readBean(s);
         });
         //Editing existing one
         Button update = new Button(TRANSLATOR
                 .translate("general.update"));
         update.addClickListener((Button.ClickEvent event) -> {
             try {
-                binder.commit();
+                binder.writeBean(s);
                 displaySetting(s);
-            } catch (FieldGroup.CommitException ex) {
+            } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 Notification.show(TRANSLATOR
                         .translate("general.error.record.update"),
@@ -197,11 +198,15 @@ public class AdminScreenProvider extends AdminProvider {
             hl.addComponent(cancel);
             layout.addComponent(hl);
         }
-        binder.setBuffered(true);
         binder.setReadOnly(edit);
-        binder.bindMemberFields(form);
-        //The version settigns are not modifiable from the GUI
-        binder.setEnabled(blocked);
+        //The version settings are not modifiable from the GUI
+        if (!blocked) {
+            //Read-only display for version settings
+            bool.setEnabled(false);
+            integerVal.setEnabled(false);
+            longVal.setEnabled(false);
+            stringVal.setEnabled(false);
+        }
         //Id is always blocked.
         id.setEnabled(false);
         form.setSizeFull();
@@ -212,25 +217,26 @@ public class AdminScreenProvider extends AdminProvider {
         VerticalLayout s2 = new VerticalLayout();
         HorizontalSplitPanel split2 = new HorizontalSplitPanel();
         s2.addComponent(split2);
-        Tree sTree2 = new Tree(TRANSLATOR
+        Tree<VmSetting> sTree2 = new Tree<>(TRANSLATOR
                 .translate("general.email.settings"));
-        sTree2.addValueChangeListener((Property.ValueChangeEvent event) -> {
-            if (sTree2.getValue() instanceof VmSetting) {
-                VmSetting vmSetting = (VmSetting) sTree2.getValue();
+        sTree2.asSingleSelect().addValueChangeListener(event -> {
+            if (event.getValue() instanceof VmSetting) {
+                VmSetting vmSetting = (VmSetting) event.getValue();
                 split2.setSecondComponent(
                         displaySetting(vmSetting,
                                 !vmSetting.getSetting().equals("mail.enable")));
             }
         });
         split2.setFirstComponent(sTree2);
+        List<VmSetting> mailSettings = new ArrayList<>();
         VMSettingServer.getSettings().forEach(s -> {
             if (s.getSetting().startsWith("mail")) {
-                sTree2.addItem(s);
-                sTree2.setChildrenAllowed(s, false);
-                sTree2.setItemCaption(s, TRANSLATOR
-                        .translate(s.getSetting()));
+                mailSettings.add(s);
             }
         });
+        sTree2.setItems(mailSettings);
+        sTree2.setItemCaptionGenerator(s -> TRANSLATOR
+                .translate(s.getSetting()));
         Button testEmail = new Button(TRANSLATOR
                 .translate("general.email.settings.test"),
                 listener -> {
@@ -287,23 +293,24 @@ public class AdminScreenProvider extends AdminProvider {
         VerticalLayout sl = new VerticalLayout();
         HorizontalSplitPanel split1 = new HorizontalSplitPanel();
         sl.addComponent(split1);
-        Tree sTree = new Tree(TRANSLATOR
+        Tree<VmSetting> sTree = new Tree<>(TRANSLATOR
                 .translate("general.settings"));
         split1.setFirstComponent(sTree);
-        sTree.addValueChangeListener((Property.ValueChangeEvent event) -> {
-            if (sTree.getValue() instanceof VmSetting) {
+        sTree.asSingleSelect().addValueChangeListener(event -> {
+            if (event.getValue() instanceof VmSetting) {
                 split1.setSecondComponent(
-                        displaySetting((VmSetting) sTree.getValue()));
+                        displaySetting((VmSetting) event.getValue()));
             }
         });
+        List<VmSetting> settings = new ArrayList<>();
         VMSettingServer.getSettings().forEach(s -> {
             if (!s.getSetting().startsWith("mail")) {
-                sTree.addItem(s);
-                sTree.setChildrenAllowed(s, false);
-                sTree.setItemCaption(s, TRANSLATOR
-                        .translate(s.getSetting()));
+                settings.add(s);
             }
         });
+        sTree.setItems(settings);
+        sTree.setItemCaptionGenerator(s -> TRANSLATOR
+                .translate(s.getSetting()));
         return sl;
     }
 
@@ -312,7 +319,7 @@ public class AdminScreenProvider extends AdminProvider {
         HorizontalSplitPanel split = new HorizontalSplitPanel();
         vl.addComponent(split);
         //Create left side
-        Tree users = new Tree();
+        Tree<VmUser> users = new Tree<>();
         //Menu
         VerticalLayout main = new VerticalLayout();
         main.addComponent(users);
@@ -325,18 +332,21 @@ public class AdminScreenProvider extends AdminProvider {
         hl.addComponent(addUser);
         main.addComponent(hl);
         split.setFirstComponent(main);
+        List<VmUser> userList = new ArrayList<>();
         VMUserServer.getVMUsers().forEach(user -> {
             if (!Objects.equals(user.getId(),
                     ((VMUI) UI.getCurrent()).getUser().getId())) {
-                users.addItem(user.getEntity());
-                users.setItemCaption(user.getEntity(), user.toString());
-                users.setItemIcon(user.getEntity(), VaadinIcons.USER);
-                users.setChildrenAllowed(user.getEntity(), false);
+                userList.add(user.getEntity());
             }
         });
-        users.addValueChangeListener((Property.ValueChangeEvent event) -> {
-            VmUser user = (VmUser) users.getValue();
-            split.setSecondComponent(new UserComponent(new VMUserServer(user), true));
+        users.setItems(userList);
+        users.setItemCaptionGenerator(user -> new VMUserServer(user).toString());
+        users.setItemIconGenerator(user -> VaadinIcons.USER);
+        users.asSingleSelect().addValueChangeListener(event -> {
+            VmUser user = event.getValue();
+            if (user != null) {
+                split.setSecondComponent(new UserComponent(new VMUserServer(user), true));
+            }
         });
         vl.setSizeFull();
         return vl;
@@ -344,21 +354,14 @@ public class AdminScreenProvider extends AdminProvider {
 
     private Component getConfigurableTab() {
         VerticalLayout vl = new VerticalLayout();
-        ComboBox options = new ComboBox();
-        options.addItem(ISSUE_TYPE);
-        options.setItemCaption(ISSUE_TYPE,
-                TRANSLATOR.translate(ISSUE_TYPE));
-        options.addItem(ISSUE_RESOLUTION);
-        options.setItemCaption(ISSUE_RESOLUTION,
-                TRANSLATOR.translate(ISSUE_RESOLUTION));
-        options.addItem(REQUIREMENT_TYPE);
-        options.setItemCaption(REQUIREMENT_TYPE,
-                TRANSLATOR.translate(REQUIREMENT_TYPE));
+        ComboBox<String> options = new ComboBox<>();
+        options.setItems(ISSUE_TYPE, ISSUE_RESOLUTION, REQUIREMENT_TYPE);
+        options.setItemCaptionGenerator(key -> TRANSLATOR.translate(key));
         options.setTextInputAllowed(false);
-        options.addValueChangeListener((Property.ValueChangeEvent event) -> {
+        options.addValueChangeListener(event -> {
             Component nextComp = null;
-            if (options.getValue() != null) {
-                switch ((String) options.getValue()) {
+            if (event.getValue() != null) {
+                switch (event.getValue()) {
                     case ISSUE_TYPE:
                         nextComp = displayIssueTypes();
                         break;
@@ -385,25 +388,23 @@ public class AdminScreenProvider extends AdminProvider {
 
     private Component displayIssueTypes() {
         VerticalLayout vl = new VerticalLayout();
-        Grid grid = new Grid(TRANSLATOR.translate(ISSUE_TYPE));
-        BeanItemContainer<IssueType> types
-                = new BeanItemContainer<>(IssueType.class);
-        types.addAll(new IssueTypeJpaController(DataBaseManager
+        List<IssueType> typeList = new IssueTypeJpaController(DataBaseManager
                 .getEntityManagerFactory())
-                .findIssueTypeEntities());
-        grid.setContainerDataSource(types);
-        grid.setSelectionMode(SelectionMode.SINGLE);
-        grid.setColumns("typeName", DESC);
-        Grid.Column name = grid.getColumn("typeName");
-        name.setHeaderCaption(TRANSLATOR.translate("general.name"));
-        name.setConverter(new TranslationConverter());
-        Grid.Column desc = grid.getColumn(DESC);
-        desc.setHeaderCaption(TRANSLATOR.translate("general.description"));
-        desc.setConverter(new TranslationConverter());
+                .findIssueTypeEntities();
+        Grid<IssueType> grid = new Grid<>(TRANSLATOR.translate(ISSUE_TYPE));
+        grid.setItems(typeList);
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+        //Columns translate their values through the TranslationConverter.
+        grid.addColumn(t -> TRANSLATOR.translate(t.getTypeName()))
+                .setId("typeName")
+                .setCaption(TRANSLATOR.translate("general.name"));
+        grid.addColumn(t -> TRANSLATOR.translate(t.getDescription()))
+                .setId(DESC)
+                .setCaption(TRANSLATOR.translate("general.description"));
         grid.setSizeFull();
         vl.addComponent(grid);
         grid.setHeightMode(HeightMode.ROW);
-        grid.setHeightByRows(types.size() > 5 ? 5 : types.size());
+        grid.setHeightByRows(typeList.size() > 5 ? 5 : typeList.size());
         //Menu
         HorizontalLayout hl = new HorizontalLayout();
         Button add = new Button(TRANSLATOR.translate("general.create"));
@@ -419,8 +420,7 @@ public class AdminScreenProvider extends AdminProvider {
         Button delete = new Button(TRANSLATOR.translate("general.delete"));
         delete.setEnabled(false);
         delete.addClickListener(listener -> {
-            IssueType selected = (IssueType) ((SingleSelectionModel) grid.
-                    getSelectionModel()).getSelectedRow();
+            IssueType selected = grid.asSingleSelect().getValue();
             if (selected != null && selected.getId() >= 1000) {
                 try {
                     new IssueTypeJpaController(DataBaseManager
@@ -437,10 +437,8 @@ public class AdminScreenProvider extends AdminProvider {
         });
         hl.addComponent(delete);
         vl.addComponent(hl);
-        grid.addSelectionListener(event -> { // Java 8
-            // Get selection from the selection model
-            IssueType selected = (IssueType) ((SingleSelectionModel) grid.
-                    getSelectionModel()).getSelectedRow();
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            IssueType selected = event.getValue();
             //Only delete custom ones.
             delete.setEnabled(selected != null && selected.getId() >= 1000);
         });
@@ -449,22 +447,21 @@ public class AdminScreenProvider extends AdminProvider {
 
     private Component displayIssueResolutions() {
         VerticalLayout vl = new VerticalLayout();
-        Grid grid = new Grid(TRANSLATOR.translate(ISSUE_RESOLUTION));
-        BeanItemContainer<IssueResolution> types
-                = new BeanItemContainer<>(IssueResolution.class);
-        types.addAll(new IssueResolutionJpaController(DataBaseManager
-                .getEntityManagerFactory())
-                .findIssueResolutionEntities());
-        grid.setContainerDataSource(types);
-        grid.setSelectionMode(SelectionMode.SINGLE);
-        grid.setColumns(NAME);
-        Grid.Column name = grid.getColumn(NAME);
-        name.setHeaderCaption(TRANSLATOR.translate("general.name"));
-        name.setConverter(new TranslationConverter());
+        List<IssueResolution> resolutionList
+                = new IssueResolutionJpaController(DataBaseManager
+                        .getEntityManagerFactory())
+                        .findIssueResolutionEntities();
+        Grid<IssueResolution> grid = new Grid<>(TRANSLATOR.translate(ISSUE_RESOLUTION));
+        grid.setItems(resolutionList);
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+        //Column translates its values through the TranslationConverter.
+        grid.addColumn(t -> TRANSLATOR.translate(t.getName()))
+                .setId(NAME)
+                .setCaption(TRANSLATOR.translate("general.name"));
         grid.setSizeFull();
         vl.addComponent(grid);
         grid.setHeightMode(HeightMode.ROW);
-        grid.setHeightByRows(types.size() > 5 ? 5 : types.size());
+        grid.setHeightByRows(resolutionList.size() > 5 ? 5 : resolutionList.size());
         //Menu
         HorizontalLayout hl = new HorizontalLayout();
         Button add = new Button(TRANSLATOR.translate("general.create"));
@@ -480,8 +477,7 @@ public class AdminScreenProvider extends AdminProvider {
         Button delete = new Button(TRANSLATOR.translate("general.delete"));
         delete.setEnabled(false);
         delete.addClickListener(listener -> {
-            IssueResolution selected = (IssueResolution) ((SingleSelectionModel) grid.
-                    getSelectionModel()).getSelectedRow();
+            IssueResolution selected = grid.asSingleSelect().getValue();
             if (selected != null && selected.getId() >= 1000) {
                 try {
                     new IssueResolutionJpaController(DataBaseManager
@@ -498,10 +494,8 @@ public class AdminScreenProvider extends AdminProvider {
         });
         hl.addComponent(delete);
         vl.addComponent(hl);
-        grid.addSelectionListener(event -> { // Java 8
-            // Get selection from the selection model
-            IssueResolution selected = (IssueResolution) ((SingleSelectionModel) grid.
-                    getSelectionModel()).getSelectedRow();
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            IssueResolution selected = event.getValue();
             //Only delete custom ones.
             delete.setEnabled(selected != null && selected.getId() >= 1000);
         });
@@ -510,25 +504,24 @@ public class AdminScreenProvider extends AdminProvider {
 
     private Component displayRequirementTypes() {
         VerticalLayout vl = new VerticalLayout();
-        Grid grid = new Grid(TRANSLATOR.translate(REQUIREMENT_TYPE));
-        BeanItemContainer<RequirementType> types
-                = new BeanItemContainer<>(RequirementType.class);
-        types.addAll(new RequirementTypeJpaController(DataBaseManager
-                .getEntityManagerFactory())
-                .findRequirementTypeEntities());
-        grid.setContainerDataSource(types);
-        grid.setSelectionMode(SelectionMode.SINGLE);
-        grid.setColumns(NAME, DESC);
-        Grid.Column name = grid.getColumn(NAME);
-        name.setHeaderCaption(TRANSLATOR.translate("general.name"));
-        name.setConverter(new TranslationConverter());
-        Grid.Column desc = grid.getColumn(DESC);
-        desc.setHeaderCaption(TRANSLATOR.translate("general.description"));
-        desc.setConverter(new TranslationConverter());
+        List<RequirementType> typeList
+                = new RequirementTypeJpaController(DataBaseManager
+                        .getEntityManagerFactory())
+                        .findRequirementTypeEntities();
+        Grid<RequirementType> grid = new Grid<>(TRANSLATOR.translate(REQUIREMENT_TYPE));
+        grid.setItems(typeList);
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+        //Columns translate their values through the TranslationConverter.
+        grid.addColumn(t -> TRANSLATOR.translate(t.getName()))
+                .setId(NAME)
+                .setCaption(TRANSLATOR.translate("general.name"));
+        grid.addColumn(t -> TRANSLATOR.translate(t.getDescription()))
+                .setId(DESC)
+                .setCaption(TRANSLATOR.translate("general.description"));
         grid.setSizeFull();
         vl.addComponent(grid);
         grid.setHeightMode(HeightMode.ROW);
-        grid.setHeightByRows(types.size() > 5 ? 5 : types.size());
+        grid.setHeightByRows(typeList.size() > 5 ? 5 : typeList.size());
         //Menu
         HorizontalLayout hl = new HorizontalLayout();
         Button add = new Button(TRANSLATOR.translate("general.create"));
@@ -544,8 +537,7 @@ public class AdminScreenProvider extends AdminProvider {
         Button delete = new Button(TRANSLATOR.translate("general.delete"));
         delete.setEnabled(false);
         delete.addClickListener(listener -> {
-            RequirementType selected = (RequirementType) ((SingleSelectionModel) grid.
-                    getSelectionModel()).getSelectedRow();
+            RequirementType selected = grid.asSingleSelect().getValue();
             if (selected != null && selected.getId() >= 1000) {
                 try {
                     new RequirementTypeJpaController(DataBaseManager
@@ -562,11 +554,8 @@ public class AdminScreenProvider extends AdminProvider {
         });
         hl.addComponent(delete);
         vl.addComponent(hl);
-        grid.addSelectionListener(event -> { // Java 8
-            // Get selection from the selection model
-            RequirementType selected
-                    = (RequirementType) ((SingleSelectionModel) grid.
-                            getSelectionModel()).getSelectedRow();
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            RequirementType selected = event.getValue();
             //Only delete custom ones.
             delete.setEnabled(selected != null && selected.getId() >= 1000);
         });

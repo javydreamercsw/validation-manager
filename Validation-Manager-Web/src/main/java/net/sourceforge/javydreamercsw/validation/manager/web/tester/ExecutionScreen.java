@@ -15,6 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.tester;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.addon.contextmenu.MenuItem;
 import com.vaadin.data.TreeData;
