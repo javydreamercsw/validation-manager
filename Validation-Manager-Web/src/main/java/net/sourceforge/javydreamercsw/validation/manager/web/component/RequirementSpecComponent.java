@@ -15,16 +15,16 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.DateTimeField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -37,6 +37,8 @@ import com.validation.manager.core.db.SpecLevel;
 import com.validation.manager.core.db.controller.RequirementSpecJpaController;
 import com.validation.manager.core.db.controller.SpecLevelJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -71,34 +73,34 @@ public final class RequirementSpecComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(rs.getClass());
-        binder.setItemDataSource(rs);
-        Field<?> name = binder.buildAndBind(TRANSLATOR.translate("general.name"), "name");
+        Binder<RequirementSpec> binder = new Binder<>(RequirementSpec.class);
+        binder.setBean(rs);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "name");
         layout.addComponent(name);
-        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.description"), "description",
-                TextArea.class);
+        TextArea desc = new TextArea(TRANSLATOR.translate("general.description"));
+        binder.bind(desc, "description");
         desc.setSizeFull();
         layout.addComponent(desc);
-        Field<?> date = binder.buildAndBind(TRANSLATOR.translate("general.modification.data"),
-                "modificationDate");
+        DateTimeField date = new DateTimeField(
+                TRANSLATOR.translate("general.modification.data"));
+        binder.forField(date)
+                .withConverter(this::toDate, this::toDateTime)
+                .bind("modificationDate");
         layout.addComponent(date);
         date.setEnabled(false);
         SpecLevelJpaController controller
                 = new SpecLevelJpaController(DataBaseManager
                         .getEntityManagerFactory());
         List<SpecLevel> levels = controller.findSpecLevelEntities();
-        BeanItemContainer<SpecLevel> specLevelContainer
-                = new BeanItemContainer<>(SpecLevel.class, levels);
-        ComboBox level = new ComboBox(TRANSLATOR.translate("spec.level"));
-        level.setContainerDataSource(specLevelContainer);
-        level.getItemIds().forEach(id -> {
-            level.setItemCaption(id, TRANSLATOR.translate(((SpecLevel) id).getName()));
-        });
+        ComboBox<SpecLevel> level
+                = new ComboBox<>(TRANSLATOR.translate("spec.level"));
+        level.setItems(levels);
+        level.setItemCaptionGenerator(id -> TRANSLATOR.translate(id.getName()));
         binder.bind(level, "specLevel");
         layout.addComponent(level);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             if (rs.getRequirementSpecPK() == null) {
                 ((VMUI) UI.getCurrent()).displayObject(rs.getProject());
             } else {
@@ -113,7 +115,7 @@ public final class RequirementSpecComponent extends Panel {
                     try {
                         rs.setName(name.getValue().toString());
                         rs.setModificationDate(new Date());
-                        rs.setSpecLevel((SpecLevel) level.getValue());
+                        rs.setSpecLevel(level.getValue());
                         rs.setProject(((Project) ((VMUI) UI.getCurrent())
                                 .getSelectdValue()));
                         rs.setRequirementSpecPK(new RequirementSpecPK(
@@ -145,7 +147,7 @@ public final class RequirementSpecComponent extends Panel {
                     try {
                         rs.setName(name.getValue().toString());
                         rs.setModificationDate(new Date());
-                        rs.setSpecLevel((SpecLevel) level.getValue());
+                        rs.setSpecLevel(level.getValue());
                         ((VMUI) UI.getCurrent()).handleVersioning(rs, () -> {
                             try {
                                 new RequirementSpecJpaController(DataBaseManager
@@ -177,8 +179,18 @@ public final class RequirementSpecComponent extends Panel {
             }
         }
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         layout.setSizeFull();
         setSizeFull();
+    }
+
+    private Date toDate(LocalDateTime dateTime) {
+        return dateTime == null ? null
+                : Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private LocalDateTime toDateTime(Date date) {
+        return date == null ? null
+                : LocalDateTime.ofInstant(date.toInstant(),
+                        ZoneId.systemDefault());
     }
 }

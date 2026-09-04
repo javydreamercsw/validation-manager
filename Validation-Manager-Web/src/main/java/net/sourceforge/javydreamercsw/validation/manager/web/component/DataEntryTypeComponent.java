@@ -15,11 +15,12 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.CustomField;
+import com.vaadin.ui.CustomField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.DataEntryType;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.List;
  */
 public class DataEntryTypeComponent extends CustomField<List<DataEntryType>> {
 
+    private List<DataEntryType> value;
     private final boolean edit;
 
     public DataEntryTypeComponent(boolean edit) {
@@ -41,19 +43,27 @@ public class DataEntryTypeComponent extends CustomField<List<DataEntryType>> {
         Panel p = new Panel();
         FormLayout l = new FormLayout();
         p.setContent(l);
-        BeanFieldGroup binder = new BeanFieldGroup(getInternalValue().getClass());
-        binder.setItemDataSource(getInternalValue());
-        l.addComponent(binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "typeName"));
-        l.addComponent(binder.buildAndBind(TRANSLATOR.translate("general.description"),
-                "typeDescription"));
+        Binder<DataEntryType> binder = new Binder<>(DataEntryType.class);
+        if (getValue() != null && !getValue().isEmpty()) {
+            binder.setBean(getValue().get(0));
+        }
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "typeName");
+        l.addComponent(name);
+        TextField desc = new TextField(TRANSLATOR.translate("general.description"));
+        binder.bind(desc, "typeDescription");
+        l.addComponent(desc);
         binder.setReadOnly(!edit);
         return p;
     }
 
     @Override
-    public Class<? extends List<DataEntryType>> getType() {
-        Class clazz = List.class;
-        return (Class<? extends List<DataEntryType>>) clazz;
+    public List<DataEntryType> getValue() {
+        return value;
+    }
+
+    @Override
+    protected void doSetValue(List<DataEntryType> value) {
+        this.value = value;
     }
 }

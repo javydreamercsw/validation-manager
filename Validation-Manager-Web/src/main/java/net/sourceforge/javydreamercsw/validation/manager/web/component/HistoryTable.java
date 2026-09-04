@@ -15,6 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Grid;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.History;
@@ -37,7 +38,8 @@ public final class HistoryTable extends Grid<History> {
         setItems(historyItems);
         //Generated properties become plain columns computed from the item.
         for (String field : fields) {
-            addColumn(this.<String>fieldValue(field))
+            addColumn((com.vaadin.data.ValueProvider<History, String>) (History v)
+                    -> fieldValue(v, field))
                     .setId(field);
         }
         if (showVersionFields) {
@@ -81,6 +83,7 @@ public final class HistoryTable extends Grid<History> {
             }
         }
         if (!historyItems.isEmpty()) {
+            setHeightMode(HeightMode.ROW);
             setHeightByRows(historyItems.size() > 5 ? 5 : historyItems.size());
         }
         setSizeFull();
@@ -95,10 +98,5 @@ public final class HistoryTable extends Grid<History> {
             }
         }
         return result;
-    }
-
-    private com.vaadin.data.ValueProvider<History, String> fieldValue(
-            String field) {
-        return (History v) -> fieldValue(v, field);
     }
 }

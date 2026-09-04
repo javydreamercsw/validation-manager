@@ -16,13 +16,13 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.CustomField;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.CustomField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.TextField;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.DataEntryProperty;
 import java.util.List;
@@ -35,6 +35,7 @@ public final class DataEntryPropertyComponent extends
         CustomField<List<DataEntryProperty>> {
 
     private final boolean edit;
+    private List<DataEntryProperty> value;
 
     public DataEntryPropertyComponent(boolean edit) {
         setCaption(TRANSLATOR.translate("general.properties"));
@@ -45,7 +46,7 @@ public final class DataEntryPropertyComponent extends
     protected Component initContent() {
         Panel p = new Panel();
         FormLayout l = new FormLayout();
-        getInternalValue().forEach(prop -> {
+        getValue().forEach(prop -> {
             if (!prop.getPropertyName().equals("property.expected.result")) {
                 HorizontalLayout hl = new HorizontalLayout();
                 TextField tf = new TextField(
@@ -57,7 +58,7 @@ public final class DataEntryPropertyComponent extends
                     Button delete = new Button();
                     delete.setIcon(VaadinIcons.MINUS);
                     delete.addClickListener(listener -> {
-                        getInternalValue().remove(prop);
+                        getValue().remove(prop);
                         l.removeComponent(hl);
                     });
                     hl.addComponent(delete);
@@ -70,8 +71,12 @@ public final class DataEntryPropertyComponent extends
     }
 
     @Override
-    public Class<? extends List<DataEntryProperty>> getType() {
-        Class clazz = List.class;
-        return (Class<? extends List<DataEntryProperty>>) clazz;
+    public List<DataEntryProperty> getValue() {
+        return value;
+    }
+
+    @Override
+    protected void doSetValue(List<DataEntryProperty> value) {
+        this.value = value;
     }
 }

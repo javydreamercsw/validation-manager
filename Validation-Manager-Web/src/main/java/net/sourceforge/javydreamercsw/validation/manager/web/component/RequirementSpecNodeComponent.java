@@ -15,14 +15,14 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -64,22 +64,20 @@ public final class RequirementSpecNodeComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(rsn.getClass());
-        binder.setItemDataSource(rsn);
-        Field<?> name = binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "name");
+        Binder<RequirementSpecNode> binder = new Binder<>(RequirementSpecNode.class);
+        binder.setBean(rsn);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "name");
         layout.addComponent(name);
-        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.description"),
-                "description",
-                TextArea.class);
+        TextArea desc = new TextArea(TRANSLATOR.translate("general.description"));
+        binder.bind(desc, "description");
         desc.setSizeFull();
         layout.addComponent(desc);
-        Field<?> scope = binder.buildAndBind(TRANSLATOR.translate("general.scope"),
-                "scope");
+        TextField scope = new TextField(TRANSLATOR.translate("general.scope"));
+        binder.bind(scope, "scope");
         layout.addComponent(scope);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             if (rsn.getRequirementSpecNodePK() == null) {
                 ((VMUI) UI.getCurrent()).displayObject(rsn.getRequirementSpec());
             } else {
@@ -148,7 +146,6 @@ public final class RequirementSpecNodeComponent extends Panel {
             }
         }
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         layout.setSizeFull();
         setSizeFull();
     }

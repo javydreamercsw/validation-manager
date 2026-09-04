@@ -15,16 +15,16 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.Binder;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -88,15 +88,14 @@ public final class TestCaseExecutionComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(tce.getClass());
-        binder.setItemDataSource(tce);
-        Field<?> name = binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "name");
-        name.setRequired(true);
-        name.setRequiredError(TRANSLATOR.translate("missing.name.message"));
+        Binder<TestCaseExecution> binder = new Binder<>(TestCaseExecution.class);
+        binder.setBean(tce);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "name");
+        name.setRequiredIndicatorVisible(true);
         layout.addComponent(name);
-        Field<?> scope = binder.buildAndBind(TRANSLATOR.translate("general.scope"),
-                "scope");
+        TextField scope = new TextField(TRANSLATOR.translate("general.scope"));
+        binder.bind(scope, "scope");
         layout.addComponent(scope);
         //TODO: Show when finished
         TextArea conclusion = new TextArea(TRANSLATOR.translate("general.conclusion"));
@@ -104,7 +103,6 @@ public final class TestCaseExecutionComponent extends Panel {
         layout.addComponent(conclusion);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             if (tce.getId() == null) {
                 ((VMUI) UI.getCurrent()).displayObject(((VMUI) UI.getCurrent())
                         .getSelectdValue());
@@ -118,8 +116,9 @@ public final class TestCaseExecutionComponent extends Panel {
                 //Creating a new one
                 Button save = new Button(TRANSLATOR.translate("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
-                    if (name.getValue() == null) {
-                        Notification.show(name.getRequiredError(),
+                    if (name.getValue() == null
+                            || name.getValue().trim().isEmpty()) {
+                        Notification.show(TRANSLATOR.translate("missing.name.message"),
                                 Notification.Type.ERROR_MESSAGE);
                         return;
                     }
@@ -274,7 +273,6 @@ public final class TestCaseExecutionComponent extends Panel {
             }
         }
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         layout.setSizeFull();
         setSizeFull();
     }
