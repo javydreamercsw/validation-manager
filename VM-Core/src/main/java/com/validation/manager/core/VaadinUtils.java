@@ -15,7 +15,7 @@
  */
 package com.validation.manager.core;
 
-import com.vaadin.v7.data.Property;
+import com.vaadin.data.HasValue;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HasComponents;
 import com.vaadin.ui.UI;
@@ -108,9 +108,9 @@ public final class VaadinUtils {
         walkComponentTree(ui, (Component c) -> {
             String id = c.getId();
             String caption;
-            if (c instanceof Property
-                    && ((Property) c).getValue() instanceof String) {
-                caption = (String) ((Property) c).getValue();
+            if (c instanceof HasValue
+                    && ((HasValue) c).getValue() instanceof String) {
+                caption = (String) ((HasValue) c).getValue();
             } else {
                 caption = c.getCaption();
             }
@@ -142,8 +142,8 @@ public final class VaadinUtils {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }
-                if (c instanceof Property) {
-                    ((Property) c).setValue(caption);
+                if (c instanceof HasValue) {
+                    ((HasValue<String>) c).setValue(caption);
                 } else {
                     c.setCaption(caption);
                 }
