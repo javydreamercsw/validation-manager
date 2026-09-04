@@ -15,19 +15,18 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.validator.NullValidator;
-import com.vaadin.v7.shared.ui.datefield.Resolution;
+import com.vaadin.data.Binder;
+import com.vaadin.shared.ui.datefield.DateTimeResolution;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.DateTimeField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.PopupDateField;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -41,7 +40,8 @@ import com.validation.manager.core.db.controller.TestCaseTypeJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.TestCaseTypeServer;
 import com.validation.manager.core.server.core.VMSettingServer;
-import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,47 +75,39 @@ public final class TestCaseComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(t.getClass());
-        binder.setItemDataSource(t);
-        Field<?> name = binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "name");
+        Binder<TestCase> binder = new Binder<>(TestCase.class);
+        binder.setBean(t);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "name");
         layout.addComponent(name);
         TextArea summary = new TextArea(TRANSLATOR.translate("general.summary"));
-        summary.setConverter(new ByteToStringConverter());
-        binder.bind(summary, "summary");
+        binder.forField(summary)
+                .withConverter(new ByteToStringConverter())
+                .bind("summary");
         layout.addComponent(summary);
-        PopupDateField creation = new PopupDateField(TRANSLATOR
+        DateTimeField creation = new DateTimeField(TRANSLATOR
                 .translate("general.creation.date"));
-        creation.setResolution(Resolution.SECOND);
+        creation.setResolution(DateTimeResolution.SECOND);
         creation.setDateFormat(VMSettingServer.getSetting("date.format")
                 .getStringVal());
-        binder.bind(creation, "creationDate");
+        binder.forField(creation)
+                .withConverter(this::toDate, this::toDateTime)
+                .bind("creationDate");
         layout.addComponent(creation);
-        Field<?> active = binder.buildAndBind(TRANSLATOR.translate("general.active"),
-                "active");
+        CheckBox active = new CheckBox(TRANSLATOR.translate("general.active"));
+        binder.bind(active, "active");
         layout.addComponent(active);
-        Field<?> open = binder.buildAndBind(TRANSLATOR.translate("general.open"),
-                "isOpen");
+        CheckBox open = new CheckBox(TRANSLATOR.translate("general.open"));
+        binder.bind(open, "isOpen");
         layout.addComponent(open);
-        ComboBox type = new ComboBox(TRANSLATOR.translate("general.test.case.type"));
-        type.setNewItemsAllowed(false);
+        ComboBox<TestCaseType> type = new ComboBox<>(TRANSLATOR.translate("general.test.case.type"));
         type.setTextInputAllowed(false);
-        type.addValidator(new NullValidator(TRANSLATOR
-                .translate("message.required.field.missing")
-                .replaceAll("%f",
-                        TRANSLATOR.translate("general.test.case.type")),
-                false));
-        BeanItemContainer<TestCaseType> container
-                = new BeanItemContainer<>(TestCaseType.class,
-                        new TestCaseTypeJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findTestCaseTypeEntities());
-        type.setContainerDataSource(container);
-        type.getItemIds().forEach(id -> {
-            TestCaseType temp = ((TestCaseType) id);
-            type.setItemCaption(id,
-                    TRANSLATOR.translate(temp.getTypeName()));
-        });
+        type.setRequiredIndicatorVisible(true);
+        type.setItems(new TestCaseTypeJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findTestCaseTypeEntities());
+        type.setItemCaptionGenerator(temp
+                -> TRANSLATOR.translate(temp.getTypeName()));
         if (t.getTestCaseType() == null) {
             //Pre-select Requirement
             type.setValue(new TestCaseTypeServer(5).getEntity());
@@ -124,7 +116,6 @@ public final class TestCaseComponent extends Panel {
         layout.addComponent(type);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             if (t.getTestCasePK().getId() == 0) {
                 ((VMUI) UI.getCurrent()).displayObject(((VMUI) UI.getCurrent())
                         .getSelectdValue());
@@ -140,12 +131,12 @@ public final class TestCaseComponent extends Panel {
                     try {
                         t.setName(name.getValue().toString());
                         t.setSummary(summary.getValue().getBytes("UTF-8"));
-                        t.setCreationDate((Date) creation.getValue());
-                        t.setActive((Boolean) active.getValue());
-                        t.setIsOpen((Boolean) open.getValue());
+                        t.setCreationDate(toDate(creation.getValue()));
+                        t.setActive(active.getValue());
+                        t.setIsOpen(open.getValue());
                         t.getTestPlanList().add((TestPlan) ((VMUI) UI.getCurrent())
                                 .getSelectdValue());
-                        t.setTestCaseType((TestCaseType) type.getValue());
+                        t.setTestCaseType(type.getValue());
                         new TestCaseJpaController(DataBaseManager
                                 .getEntityManagerFactory()).create(t);
                         setVisible(false);
@@ -154,11 +145,6 @@ public final class TestCaseComponent extends Panel {
                         ((VMUI) UI.getCurrent()).buildProjectTree(t);
                         ((VMUI) UI.getCurrent()).displayObject(t, false);
                         ((VMUI) UI.getCurrent()).updateScreen();
-                    } catch (UnsupportedEncodingException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.creation"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show(TRANSLATOR.translate("general.error.record.creation"),
@@ -177,9 +163,9 @@ public final class TestCaseComponent extends Panel {
                     try {
                         t.setName(name.getValue().toString());
                         t.setSummary(summary.getValue().getBytes("UTF-8"));
-                        t.setCreationDate((Date) creation.getValue());
-                        t.setActive((Boolean) active.getValue());
-                        t.setIsOpen((Boolean) open.getValue());
+                        t.setCreationDate(toDate(creation.getValue()));
+                        t.setActive(active.getValue());
+                        t.setIsOpen(open.getValue());
                         ((VMUI) UI.getCurrent()).handleVersioning(t, () -> {
                             try {
                                 new TestCaseJpaController(DataBaseManager
@@ -197,7 +183,7 @@ public final class TestCaseComponent extends Panel {
                                         Notification.Type.ERROR_MESSAGE);
                             }
                         });
-                    } catch (UnsupportedEncodingException ex) {
+                    } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                         Notification.show(TRANSLATOR.translate("general.error.record.creation"),
                                 ex.getLocalizedMessage(),
@@ -212,8 +198,18 @@ public final class TestCaseComponent extends Panel {
         }
         binder.setReadOnly(!edit);
         creation.setEnabled(false);
-        binder.bindMemberFields(this);
         layout.setSizeFull();
         setSizeFull();
+    }
+
+    private Date toDate(LocalDateTime dateTime) {
+        return dateTime == null ? null
+                : Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private LocalDateTime toDateTime(Date date) {
+        return date == null ? null
+                : LocalDateTime.ofInstant(date.toInstant(),
+                        ZoneId.systemDefault());
     }
 }

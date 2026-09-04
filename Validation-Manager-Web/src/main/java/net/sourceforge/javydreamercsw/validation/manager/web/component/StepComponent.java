@@ -15,19 +15,17 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.validator.NullValidator;
-import com.vaadin.v7.ui.AbstractSelect;
+import com.vaadin.data.Binder;
+import com.vaadin.data.HasValue;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.ComboBox;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
@@ -43,6 +41,7 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.server.core.DataEntryServer;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -81,21 +80,23 @@ public final class StepComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(s.getClass());
-        binder.setItemDataSource(s);
-        Field<?> sequence = binder.buildAndBind(TRANSLATOR.translate("general.sequence"),
-                "stepSequence");
+        Binder<Step> binder = new Binder<>(Step.class);
+        binder.setBean(s);
+        TextField sequence = new TextField(TRANSLATOR.translate("general.sequence"));
+        binder.bind(sequence, "stepSequence");
         layout.addComponent(sequence);
         TextArea text = new TextArea(TRANSLATOR.translate("general.text"));
-        text.setConverter(new ByteToStringConverter());
-        binder.bind(text, "text");
+        binder.forField(text)
+                .withConverter(new ByteToStringConverter())
+                .bind("text");
         layout.addComponent(text);
         TextArea result = new TextArea(TRANSLATOR.translate("expected.result"));
-        result.setConverter(new ByteToStringConverter());
-        binder.bind(result, "expectedResult");
+        binder.forField(result)
+                .withConverter(new ByteToStringConverter())
+                .bind("expectedResult");
         layout.addComponent(result);
-        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"),
-                "notes", TextArea.class);
+        TextArea notes = new TextArea(TRANSLATOR.translate("general.notes"));
+        binder.bind(notes, "notes");
         notes.setSizeFull();
         layout.addComponent(notes);
         if (!s.getRequirementList().isEmpty() && !edit) {
@@ -104,35 +105,31 @@ public final class StepComponent extends Panel {
                             TRANSLATOR.translate("related.requirements"),
                             s.getRequirementList()));
         } else {
-            AbstractSelect requirements = ((ValidationManagerUI) UI.getCurrent())
-                    .getRequirementSelectionComponent();
+            HasValue<Set<Requirement>> requirements
+                    = ((ValidationManagerUI) UI.getCurrent())
+                            .getRequirementSelectionComponent();
             //Select the exisitng ones.
             if (s.getRequirementList() != null) {
-                s.getRequirementList().forEach((r) -> {
-                    requirements.select(r);
-                });
+                requirements.setValue(new HashSet<>(s.getRequirementList()));
             }
             requirements.addValueChangeListener(event -> {
-                Set<Requirement> selected
-                        = (Set<Requirement>) event.getProperty().getValue();
+                Set<Requirement> selected = event.getValue();
                 s.getRequirementList().clear();
                 selected.forEach(r -> {
                     s.getRequirementList().add(r);
                 });
             });
-            layout.addComponent(requirements);
+            layout.addComponent((Component) requirements);
         }
         DataEntryComponent fields = new DataEntryComponent(edit);
-        binder.bind(fields, "dataEntryList");
         layout.addComponent(fields);
         binder.setReadOnly(edit);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             if (s.getStepPK() == null) {
                 ((ValidationManagerUI) UI.getCurrent())
                         .displayObject(((ValidationManagerUI) UI.getCurrent())
-                                .getTree().getValue());
+                                .getTree().asSingleSelect().getValue());
             } else {
                 ((ValidationManagerUI) UI.getCurrent()).displayObject(s, false);
             }
@@ -142,33 +139,30 @@ public final class StepComponent extends Panel {
             add.addClickListener(listener -> {
                 VMWindow w = new VMWindow();
                 FormLayout fl = new FormLayout();
-                ComboBox newType = new ComboBox(TRANSLATOR
+                ComboBox<DataEntryType> newType = new ComboBox<>(TRANSLATOR
                         .translate("general.type"));
-                newType.setNewItemsAllowed(false);
                 newType.setTextInputAllowed(false);
-                newType.addValidator(new NullValidator(TRANSLATOR
-                        .translate("message.required.field.missing")
-                        .replaceAll("%f",
-                                TRANSLATOR.translate("general.type")),
-                        false));
-                BeanItemContainer<DataEntryType> container
-                        = new BeanItemContainer<>(DataEntryType.class,
-                                new DataEntryTypeJpaController(DataBaseManager
-                                        .getEntityManagerFactory())
-                                        .findDataEntryTypeEntities());
-                newType.setContainerDataSource(container);
-                newType.getItemIds().forEach(id -> {
-                    DataEntryType temp = ((DataEntryType) id);
-                    newType.setItemCaption(id,
-                            TRANSLATOR.translate(temp.getTypeName()));
-                });
+                newType.setRequiredIndicatorVisible(true);
+                newType.setItems(new DataEntryTypeJpaController(DataBaseManager
+                        .getEntityManagerFactory())
+                        .findDataEntryTypeEntities());
+                newType.setItemCaptionGenerator(type
+                        -> TRANSLATOR.translate(type.getTypeName()));
                 fl.addComponent(newType);
                 TextField tf = new TextField(TRANSLATOR.translate("general.name"));
                 fl.addComponent(tf);
                 HorizontalLayout hl = new HorizontalLayout();
                 Button a = new Button(TRANSLATOR.translate("general.add"));
                 a.addClickListener(l -> {
-                    DataEntryType det = (DataEntryType) newType.getValue();
+                    if (newType.getValue() == null) {
+                        Notification.show(TRANSLATOR
+                                .translate("message.required.field.missing")
+                                .replaceAll("%f",
+                                        TRANSLATOR.translate("general.type")),
+                                Notification.Type.WARNING_MESSAGE);
+                        return;
+                    }
+                    DataEntryType det = newType.getValue();
                     DataEntry de = null;
                     switch (det.getId()) {
                         case 1:
@@ -206,14 +200,14 @@ public final class StepComponent extends Panel {
                 Button save = new Button(TRANSLATOR.translate("general.save"));
                 save.addClickListener(listener -> {
                     try {
-                        s.setExpectedResult(((TextArea) result).getValue()
+                        s.setExpectedResult(result.getValue()
                                 .getBytes(encoding));
                         s.setNotes(notes.getValue() == null ? ""
                                 : notes.getValue().toString());
                         s.setStepSequence(Integer.parseInt(sequence
                                 .getValue().toString()));
                         s.setTestCase((TestCase) ((ValidationManagerUI) UI
-                                .getCurrent()).getTree().getValue());
+                                .getCurrent()).getTree().asSingleSelect().getValue());
                         s.setText(text.getValue().getBytes(encoding));
                         if (s.getRequirementList() == null) {
                             s.setRequirementList(new ArrayList<>());
@@ -243,7 +237,7 @@ public final class StepComponent extends Panel {
                 Button update = new Button(TRANSLATOR.translate("general.update"));
                 update.addClickListener((Button.ClickEvent event) -> {
                     try {
-                        s.setExpectedResult(((TextArea) result).getValue()
+                        s.setExpectedResult(result.getValue()
                                 .getBytes(encoding));
                         s.setNotes(notes.getValue().toString());
                         s.setStepSequence(Integer.parseInt(sequence.getValue().toString()));
@@ -283,7 +277,6 @@ public final class StepComponent extends Panel {
             }
         }
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         layout.setSizeFull();
         setSizeFull();
     }

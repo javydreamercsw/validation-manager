@@ -21,48 +21,43 @@ import com.vaadin.addon.tableexport.TemporaryFileDownloadResource;
 import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.Property;
-import com.vaadin.v7.data.util.HierarchicalContainer;
-import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
-import com.vaadin.v7.event.ItemClickEvent;
-import com.vaadin.event.Transferable;
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Page;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.shared.ui.dd.VerticalDropLocation;
-import com.vaadin.v7.ui.AbstractSelect;
+import com.vaadin.shared.ui.ValueChangeMode;
+import com.vaadin.shared.ui.grid.DropMode;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.Grid;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.JavaScript;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Layout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.TabSheet.Tab;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.Tree;
-import com.vaadin.v7.ui.Tree.TreeDragMode;
-import com.vaadin.v7.ui.Tree.TreeDropCriterion;
-import com.vaadin.v7.ui.Tree.TreeTargetDetails;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.Tree;
+import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.UI;
-import com.vaadin.v7.ui.Upload;
+import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.components.grid.TreeGridDragSource;
+import com.vaadin.ui.components.grid.TreeGridDropEvent;
+import com.vaadin.ui.components.grid.TreeGridDropTarget;
+import com.vaadin.ui.components.grid.GridDragStartEvent;
+import com.vaadin.data.TreeData;
+import com.vaadin.shared.ui.grid.DropLocation;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
 import com.validation.manager.core.IMainContentProvider;
@@ -194,6 +189,22 @@ public class ValidationManagerUI extends UI implements VMUI {
     private final TabSheet tabSheet = new TabSheet();
     private final List<Project> projects = new ArrayList<>();
     private ProjectTreeComponent tree;
+
+    /**
+     * Select an item in the project tree and expand its ancestors.
+     */
+    private void showItemInTree(Object item) {
+        if (item == null) {
+            tree.expand(projTreeRoot);
+        } else {
+            tree.asSingleSelect().setValue(item);
+            Object parent = tree.getTreeData().getParent(item);
+            while (parent != null) {
+                tree.expand(parent);
+                parent = tree.getTreeData().getParent(parent);
+            }
+        }
+    }
     private Tab main;
     private final List<String> roles = new ArrayList<>();
     private final String REQUIREMENT_REVIEW = "requirement.view";
@@ -224,7 +235,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         return user;
     }
 
-    public Tree getTree() {
+    public TreeGrid<Object> getTree() {
         return tree;
     }
 
@@ -441,19 +452,6 @@ public class ValidationManagerUI extends UI implements VMUI {
         showItemInTree(item);
     }
 
-    private void showItemInTree(Object item) {
-        if (item == null) {
-            tree.expandItem(projTreeRoot);
-        } else {
-            tree.select(item);
-            Object parent = tree.getParent(item);
-            while (parent != null) {
-                tree.expandItem(parent);
-                parent = tree.getParent(parent);
-            }
-        }
-    }
-
     private void addTestCaseAssignment(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("assign.test.case.execution"),
@@ -461,7 +459,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             Wizard w = new Wizard();
                             Window sw = new VMWindow();
                             w.addStep(new AssignUserStep(ValidationManagerUI.this,
-                                    tree.getValue()));
+                                    tree.asSingleSelect().getValue()));
                             w.addListener(new WizardProgressListener() {
                                 @Override
                                 public void activeStepChanged(WizardStepActivationEvent event) {
@@ -509,7 +507,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.execution"),
                         EXECUTIONS_ICON, (MenuItem selectedItem) -> {
-                            int projectId = Integer.parseInt(((String) tree.getValue())
+                            int projectId = Integer.parseInt(((String) tree.asSingleSelect().getValue())
                                     .substring(TRANSLATOR.translate("general.execution").length()));
                             displayTestCaseExecution(new TestCaseExecution(),
                                     new ProjectServer(projectId), true);
@@ -528,7 +526,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("edit.execution"),
                         EXECUTION_ICON, (MenuItem selectedItem) -> {
                             displayTestCaseExecution((TestCaseExecution) tree
-                                    .getValue(), true);
+                                    .asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("testplan.planning"));
         addDeleteExecution(menu);
@@ -543,7 +541,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         (MenuItem selectedItem) -> {
                             TestCase tc = new TestCase();
                             tc.setTestPlanList(new ArrayList<>());
-                            tc.getTestPlanList().add((TestPlan) tree.getValue());
+                            tc.getTestPlanList().add((TestPlan) tree.asSingleSelect().getValue());
                             tc.setCreationDate(new Date());
                             displayTestCase(tc, true);
                         });
@@ -551,7 +549,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.test.plan"),
                         SPEC_ICON, (MenuItem selectedItem) -> {
-                            displayTestPlan((TestPlan) tree.getValue(),
+                            displayTestPlan((TestPlan) tree.asSingleSelect().getValue(),
                                     true);
                         });
         edit.setEnabled(checkRight("testplan.planning"));
@@ -559,7 +557,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("general.export"),
                         VaadinIcons.DOWNLOAD,
                         (MenuItem selectedItem) -> {
-                            TestPlan tp = (TestPlan) tree.getValue();
+                            TestPlan tp = (TestPlan) tree.asSingleSelect().getValue();
                             UI.getCurrent().addWindow(TestCaseExporter
                                     .getTestCaseExporter(tp.getTestCaseList()));
                         });
@@ -572,7 +570,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         PROJECT_ICON,
                         (MenuItem selectedItem) -> {
                             Project project = new Project();
-                            project.setParentProjectId((Project) tree.getValue());
+                            project.setParentProjectId((Project) tree.asSingleSelect().getValue());
                             displayProject(project, true);
                         });
         create.setEnabled(checkRight("requirement.modify"));
@@ -581,7 +579,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         SPEC_ICON,
                         (MenuItem selectedItem) -> {
                             RequirementSpec rs = new RequirementSpec();
-                            rs.setProject((Project) tree.getValue());
+                            rs.setProject((Project) tree.asSingleSelect().getValue());
                             displayRequirementSpec(rs, true);
                         });
         createSpec.setEnabled(checkRight("requirement.modify"));
@@ -591,7 +589,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         (MenuItem selectedItem) -> {
                             TestProject tp = new TestProject();
                             tp.setProjectList(new ArrayList<>());
-                            tp.getProjectList().add((Project) tree.getValue());
+                            tp.getProjectList().add((Project) tree.asSingleSelect().getValue());
                             displayTestProject(tp, true);
                         });
         createTest.setEnabled(checkRight("requirement.modify"));
@@ -599,27 +597,27 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("edit.project"),
                         EDIT_ICON,
                         (MenuItem selectedItem) -> {
-                            displayProject((Project) tree.getValue(), true);
+                            displayProject((Project) tree.asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("product.modify"));
         MenuItem plan
                 = menu.addItem(TRANSLATOR.translate("plan.testing"),
                         PLAN_ICON, (MenuItem selectedItem) -> {
-                            displayTestPlanning((Project) tree.getValue());
+                            displayTestPlanning((Project) tree.asSingleSelect().getValue());
                         });
         plan.setEnabled(checkRight("testplan.planning"));
         MenuItem trace
                 = menu.addItem(TRANSLATOR.translate("trace.matrix"),
                         VaadinIcons.SPLIT,
                         (MenuItem selectedItem) -> {
-                            displayTraceMatrix((Project) tree.getValue());
+                            displayTraceMatrix((Project) tree.asSingleSelect().getValue());
                         });
         trace.setEnabled(checkRight("testplan.planning"));
         MenuItem risk
                 = menu.addItem(TRANSLATOR.translate("general.risk.management"),
                         VaadinIcons.BOLT,
                         (MenuItem selectedItem) -> {
-                            displayRiskManagement((Project) tree.getValue());
+                            displayRiskManagement((Project) tree.asSingleSelect().getValue());
                         });
         risk.setEnabled(checkRight("risk.management.view"));
     }
@@ -629,7 +627,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("edit.req"),
                         EDIT_ICON,
                         (MenuItem selectedItem) -> {
-                            displayRequirement((Requirement) tree.getValue(),
+                            displayRequirement((Requirement) tree.asSingleSelect().getValue(),
                                     true);
                         });
         edit.setEnabled(checkRight("requirement.modify"));
@@ -640,7 +638,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("create.req.spec.node"),
                         SPEC_ICON, (MenuItem selectedItem) -> {
                             RequirementSpecNode rs = new RequirementSpecNode();
-                            rs.setRequirementSpec((RequirementSpec) tree.getValue());
+                            rs.setRequirementSpec((RequirementSpec) tree.asSingleSelect().getValue());
                             displayRequirementSpecNode(rs, true);
                         });
         create.setEnabled(checkRight("requirement.modify"));
@@ -648,7 +646,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("edit.req.spec"),
                         SPEC_ICON,
                         (MenuItem selectedItem) -> {
-                            displayRequirementSpec((RequirementSpec) tree.getValue(),
+                            displayRequirementSpec((RequirementSpec) tree.asSingleSelect().getValue(),
                                     true);
                         });
         edit.setEnabled(checkRight("requirement.modify"));
@@ -657,7 +655,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         BASELINE_ICON,
                         (MenuItem selectedItem) -> {
                             displayBaseline(new Baseline(), true,
-                                    (RequirementSpec) tree.getValue());
+                                    (RequirementSpec) tree.asSingleSelect().getValue());
                         });
         baseline.setEnabled(checkRight("testcase.modify"));
     }
@@ -668,7 +666,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         VaadinIcons.PLUS, (MenuItem selectedItem) -> {
                             Requirement r = new Requirement();
                             r.setRequirementSpecNode((RequirementSpecNode) tree
-                                    .getValue());
+                                    .asSingleSelect().getValue());
                             displayRequirement(r, true);
                         });
         create.setEnabled(checkRight("requirement.modify"));
@@ -677,7 +675,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         EDIT_ICON,
                         (MenuItem selectedItem) -> {
                             displayRequirementSpecNode((RequirementSpecNode) tree
-                                    .getValue(),
+                                    .asSingleSelect().getValue(),
                                     true);
                         });
         edit.setEnabled(checkRight("requirement.modify"));
@@ -705,11 +703,11 @@ public class ValidationManagerUI extends UI implements VMUI {
                                             = new RequirementImporter(receiver
                                                     .getFile(),
                                                     (RequirementSpecNode) tree
-                                                            .getValue());
+                                                            .asSingleSelect().getValue());
 
                                     importer.importFile(cb.getValue());
                                     importer.processImport();
-                                    buildProjectTree(tree.getValue());
+                                    buildProjectTree(tree.asSingleSelect().getValue());
                                     updateScreen();
                                 } catch (RequirementImportException ex) {
                                     LOG.log(Level.SEVERE, TRANSLATOR.translate("import.error"),
@@ -740,7 +738,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("create.step"),
                         VaadinIcons.PLUS,
                         (MenuItem selectedItem) -> {
-                            TestCase tc = (TestCase) tree.getValue();
+                            TestCase tc = (TestCase) tree.asSingleSelect().getValue();
                             Step s = new Step();
                             s.setStepSequence(tc.getStepList().size() + 1);
                             s.setTestCase(tc);
@@ -751,7 +749,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("edit.test.case"),
                         EDIT_ICON,
                         (MenuItem selectedItem) -> {
-                            displayTestCase((TestCase) tree.getValue(), true);
+                            displayTestCase((TestCase) tree.asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("testcase.modify"));
         MenuItem importSteps
@@ -774,7 +772,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     subWindow.close();
                                     //TODO: Display the excel file (partially), map columns and import
                                     //Process the file
-                                    TestCase tc = (TestCase) tree.getValue();
+                                    TestCase tc = (TestCase) tree.asSingleSelect().getValue();
                                     StepImporter importer
                                             = new StepImporter(receiver.getFile(), tc);
                                     importer.importFile(cb.getValue());
@@ -822,7 +820,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("general.export"),
                         VaadinIcons.DOWNLOAD,
                         (MenuItem selectedItem) -> {
-                            TestCase tc = (TestCase) tree.getValue();
+                            TestCase tc = (TestCase) tree.asSingleSelect().getValue();
                             UI.getCurrent().addWindow(TestCaseExporter
                                     .getTestCaseExporter(Arrays.asList(tc)));
                         });
@@ -834,7 +832,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.step"), EDIT_ICON,
                         (MenuItem selectedItem) -> {
-                            displayStep((Step) tree.getValue(), true);
+                            displayStep((Step) tree.asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("testcase.modify"));
     }
@@ -845,7 +843,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         VaadinIcons.PLUS,
                         (MenuItem selectedItem) -> {
                             TestPlan tp = new TestPlan();
-                            tp.setTestProject((TestProject) tree.getValue());
+                            tp.setTestProject((TestProject) tree.asSingleSelect().getValue());
                             displayTestPlan(tp, true);
                         });
         create.setEnabled(checkRight("testplan.planning"));
@@ -853,7 +851,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("edit.test.project"),
                         EDIT_ICON,
                         (MenuItem selectedItem) -> {
-                            displayTestProject((TestProject) tree.getValue(), true);
+                            displayTestProject((TestProject) tree.asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("testplan.planning"));
     }
@@ -1091,211 +1089,149 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createTree() {
         tree = new ProjectTreeComponent();
         // Set the tree in drag source mode
-        tree.setDragMode(TreeDragMode.NODE);
+        TreeGridDragSource<Object> dragSource
+                = new TreeGridDragSource<>(tree);
+        //Remember the dragged item so the drop handler can read it
+        dragSource.addGridDragStartListener((GridDragStartEvent<Object> event) -> {
+            List<Object> dragged = event.getDraggedItems();
+            dragSource.setDragData(dragged.isEmpty() ? null
+                    : dragged.get(0));
+        });
+        dragSource.addGridDragEndListener(event -> dragSource.setDragData(null));
         // Allow the tree to receive drag drops and handle them
-        tree.setDropHandler(new DropHandler() {
-            @Override
-            public AcceptCriterion getAcceptCriterion() {
-                TreeDropCriterion criterion = new TreeDropCriterion() {
-                    @Override
-                    protected Set<Object> getAllowedItemIds(
-                            DragAndDropEvent dragEvent, Tree tree) {
-                        HashSet<Object> allowed = new HashSet<>();
-                        tree.getItemIds().stream().filter((itemId)
-                                -> (itemId instanceof Step)
-                                || (itemId instanceof Requirement))
-                                .forEachOrdered((itemId) -> {
-                                    allowed.add(itemId);
-                                });
-                        return allowed;
-                    }
-                };
-                return criterion;
+        TreeGridDropTarget<Object> dropTarget
+                = new TreeGridDropTarget<>(tree, DropMode.ON_TOP_OR_BETWEEN);
+        dropTarget.addTreeGridDropListener((TreeGridDropEvent<Object> event) -> {
+            // Make sure the drag source is the same tree
+            if (!event.getDragSourceComponent().isPresent()
+                    || event.getDragSourceComponent().get() != tree) {
+                return;
+            }
+            // Get the dragged item and the target item
+            TreeData<Object> treeData = tree.getTreeData();
+            Object sourceItemId = event.getDragData().orElse(null);
+            if (sourceItemId == null) {
+                return;
+            }
+            Object targetItemId = event.getDropTargetRow().orElse(null);
+            if (targetItemId == null) {
+                return;
             }
 
-            @Override
-            public void drop(DragAndDropEvent event) {
-                // Wrapper for the object that is dragged
-                Transferable t = event.getTransferable();
+            LOG.log(Level.INFO, "Source: {0}", sourceItemId);
+            LOG.log(Level.INFO, "Target: {0}", targetItemId);
 
-                // Make sure the drag source is the same tree
-                if (t.getSourceComponent() != tree) {
-                    return;
-                }
+            // On which side of the target the item was dropped
+            DropLocation location = event.getDropLocation();
 
-                TreeTargetDetails target
-                        = (TreeTargetDetails) event.getTargetDetails();
-
-                // Get ids of the dragged item and the target item
-                Object sourceItemId = t.getData("itemId");
-                Object targetItemId = target.getItemIdOver();
-
-                LOG.log(Level.INFO, "Source: {0}", sourceItemId);
-                LOG.log(Level.INFO, "Target: {0}", targetItemId);
-
-                // On which side of the target the item was dropped
-                VerticalDropLocation location = target.getDropLocation();
-
-                HierarchicalContainer container
-                        = (HierarchicalContainer) tree.getContainerDataSource();
-
-                if (null != location) // Drop right on an item -> make it a child
-                {
-                    switch (location) {
-
-                        case MIDDLE:
-                            if (tree.areChildrenAllowed(targetItemId)) {
-                                tree.setParent(sourceItemId, targetItemId);
-                            }
-                            break;
-                        case TOP: {
-                            boolean valid = false;
-                            //for Steps we need to update the sequence number
-                            if (sourceItemId instanceof Step
-                                    && targetItemId instanceof Step) {
-                                Step targetItem = (Step) targetItemId;
-                                Step sourceItem = (Step) sourceItemId;
-                                StepJpaController stepController
-                                        = new StepJpaController(DataBaseManager
-                                                .getEntityManagerFactory());
-                                if (targetItem.getTestCase().equals(sourceItem
-                                        .getTestCase())) {
-                                    //Same Test Case, just re-arrange
-                                    LOG.info("Same Test Case!");
-                                    SortedMap<Integer, Step> map
-                                            = new TreeMap<>();
-                                    targetItem.getTestCase().getStepList()
-                                            .forEach((s) -> {
-                                                map.put(s.getStepSequence(), s);
-                                            });
-                                    //Now swap the two that switched
-                                    swapValues(map, sourceItem.getStepSequence(),
-                                            targetItem.getStepSequence());
-                                    //Now update the sequence numbers
-                                    int count = 0;
-                                    for (Entry<Integer, Step> entry
-                                            : map.entrySet()) {
-                                        entry.getValue()
-                                                .setStepSequence(++count);
-                                        try {
-                                            stepController.edit(entry
-                                                    .getValue());
-                                        } catch (Exception ex) {
-                                            LOG.log(Level.SEVERE, null, ex);
-                                        }
-                                    }
-                                    valid = true;
-                                } else {
-                                    //Diferent Test Case
-                                    LOG.info("Different Test Case!");
-//                                    //Remove from source test case
-//                                    SortedMap<Integer, Step> map = new TreeMap<>();
-//                                    sourceItem.getTestCase().getStepList().forEach((s) -> {
-//                                        map.put(s.getStepSequence(), s);
-//                                    });
-//                                    //Now swap the two that switched
-//                                    //First we remove the one from the source Test Case
-//                                    Step removed = map.remove(sourceItem.getStepSequence() - 1);
-//                                    sourceItem.getTestCase().getStepList().remove(removed);
-//                                    removed.setTestCase(targetItem.getTestCase());
-//                                    try {
-//                                        stepController.edit(removed);
-//                                        tcController.edit(sourceItem.getTestCase());
-//                                    } catch (NonexistentEntityException ex) {
-//                                         LOG.log(Level.SEVERE, null, ex);
-//                                    } catch (Exception ex) {
-//                                         LOG.log(Level.SEVERE, null, ex);
-//                                    }
-//                                    //Now update the sequence numbers
-//                                    int count = 0;
-//                                    for (Entry<Integer, Step> entry : map.entrySet()) {
-//                                        entry.getValue().setStepSequence(++count);
-//                                        try {
-//                                            stepController.edit(entry.getValue());
-//                                        } catch (Exception ex) {
-//                                             LOG.log(Level.SEVERE, null, ex);
-//                                        }
-//                                    }
-//                                    //And add it to the target test Case
-//                                    SortedMap<Integer, Step> map2 = new TreeMap<>();
-//                                    targetItem.getTestCase().getStepList().forEach((s) -> {
-//                                        map2.put(s.getStepSequence(), s);
-//                                    });
-//                                    map2.put(targetItem.getStepSequence() - 1, removed);
-//                                    count = 0;
-//                                    for (Entry<Integer, Step> entry : map2.entrySet()) {
-//                                        entry.getValue().setStepSequence(++count);
-//                                        try {
-//                                            stepController.edit(entry.getValue());
-//                                        } catch (Exception ex) {
-//                                             LOG.log(Level.SEVERE, null, ex);
-//                                        }
-//                                    }
-//                                    //Add it to the Test Case
-//                                    targetItem.getTestCase().getStepList().add(removed);
+            // Drop right on an item -> make it a child
+            switch (location) {
+                case ON_TOP:
+                    if (!treeData.getChildren(targetItemId).isEmpty()
+                            || hasPotentialChildren(targetItemId)) {
+                        treeData.setParent(sourceItemId, targetItemId);
+                        refreshTree();
+                    }
+                    break;
+                case ABOVE: {
+                    boolean valid = true;
+                    //for Steps we need to update the sequence number
+                    if (sourceItemId instanceof Step
+                            && targetItemId instanceof Step) {
+                        Step targetItem = (Step) targetItemId;
+                        Step sourceItem = (Step) sourceItemId;
+                        StepJpaController stepController
+                                = new StepJpaController(DataBaseManager
+                                        .getEntityManagerFactory());
+                        if (targetItem.getTestCase().equals(sourceItem
+                                .getTestCase())) {
+                            //Same Test Case, just re-arrange
+                            LOG.info("Same Test Case!");
+                            SortedMap<Integer, Step> map
+                                    = new TreeMap<>();
+                            targetItem.getTestCase().getStepList()
+                                    .forEach((s) -> {
+                                        map.put(s.getStepSequence(), s);
+                                    });
+                            //Now swap the two that switched
+                            swapValues(map, sourceItem.getStepSequence(),
+                                    targetItem.getStepSequence());
+                            //Now update the sequence numbers
+                            int count = 0;
+                            for (Entry<Integer, Step> entry
+                                    : map.entrySet()) {
+                                entry.getValue()
+                                        .setStepSequence(++count);
+                                try {
+                                    stepController.edit(entry
+                                            .getValue());
+                                } catch (Exception ex) {
+                                    LOG.log(Level.SEVERE, null, ex);
                                 }
                             }
-                            if (valid) {
-                                // Drop at the top of a subtree -> make it previous
-                                Object parentId
-                                        = container.getParent(targetItemId);
-                                container.setParent(sourceItemId, parentId);
-                                container.moveAfterSibling(sourceItemId,
-                                        targetItemId);
-                                container.moveAfterSibling(targetItemId,
-                                        sourceItemId);
-                                buildProjectTree(targetItemId);
-                                updateScreen();
-                            }
-                            break;
+                            valid = true;
+                        } else {
+                            //Diferent Test Case
+                            LOG.info("Different Test Case!");
+                            valid = false;
                         }
-                        case BOTTOM: {
-                            // Drop below another item -> make it next
-                            Object parentId = container.getParent(targetItemId);
-                            container.setParent(sourceItemId, parentId);
-                            container.moveAfterSibling(sourceItemId,
-                                    targetItemId);
-                            break;
-                        }
-                        default:
-                            break;
                     }
+                    if (valid) {
+                        // Drop above an item -> make it previous
+                        Object parentId = treeData.getParent(targetItemId);
+                        treeData.setParent(sourceItemId, parentId);
+                        treeData.moveAfterSibling(sourceItemId, targetItemId);
+                        treeData.moveAfterSibling(targetItemId, sourceItemId);
+                        refreshTree();
+                        showItemInTree(sourceItemId);
+                        updateScreen();
+                    }
+                    break;
                 }
+                case BELOW: {
+                    // Drop below another item -> make it next
+                    Object parentId = treeData.getParent(targetItemId);
+                    treeData.setParent(sourceItemId, parentId);
+                    treeData.moveAfterSibling(sourceItemId, targetItemId);
+                    refreshTree();
+                    break;
+                }
+                default:
+                    break;
             }
         });
-        tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
-            displayObject(tree.getValue());
+        tree.asSingleSelect().addValueChangeListener(event -> {
+            displayObject(tree.asSingleSelect().getValue());
         });
         //Select item on right click as well
-        tree.addItemClickListener((ItemClickEvent event) -> {
+        tree.addItemClickListener((Grid.ItemClick<Object> event) -> {
             if (event.getSource() == tree
-                    && event.getButton() == MouseButton.RIGHT) {
-                if (event.getItem() != null) {
-                    Item clicked = event.getItem();
-                    tree.select(event.getItemId());
-                }
+                    && event.getMouseEventDetails().getButton()
+                    == MouseButton.RIGHT) {
+                tree.asSingleSelect().setValue(event.getItem());
             }
         });
         ContextMenu contextMenu = new ContextMenu(tree, true);
-        tree.addItemClickListener((ItemClickEvent event) -> {
-            if (event.getButton() == MouseButton.RIGHT) {
+        tree.addItemClickListener((Grid.ItemClick<Object> event) -> {
+            if (event.getMouseEventDetails().getButton() == MouseButton.RIGHT) {
                 contextMenu.removeItems();
-                if (tree.getValue() instanceof Project) {
+                Object selected = event.getItem();
+                if (selected instanceof Project) {
                     createProjectMenu(contextMenu);
-                } else if (tree.getValue() instanceof Requirement) {
+                } else if (selected instanceof Requirement) {
                     createRequirementMenu(contextMenu);
-                } else if (tree.getValue() instanceof RequirementSpec) {
+                } else if (selected instanceof RequirementSpec) {
                     createRequirementSpecMenu(contextMenu);
-                } else if (tree.getValue() instanceof RequirementSpecNode) {
+                } else if (selected instanceof RequirementSpecNode) {
                     createRequirementSpecNodeMenu(contextMenu);
-                } else if (tree.getValue() instanceof TestProject) {
+                } else if (selected instanceof TestProject) {
                     createTestProjectMenu(contextMenu);
-                } else if (tree.getValue() instanceof Step) {
+                } else if (selected instanceof Step) {
                     createStepMenu(contextMenu);
-                } else if (tree.getValue() instanceof TestCase) {
+                } else if (selected instanceof TestCase) {
                     createTestCaseMenu(contextMenu);
-                } else if (tree.getValue() instanceof String) {
-                    String val = (String) tree.getValue();
+                } else if (selected instanceof String) {
+                    String val = (String) selected;
                     if (val.startsWith("tce")) {
                         createTestExecutionMenu(contextMenu);
                     } else if (val.startsWith("executions")) {
@@ -1304,19 +1240,40 @@ public class ValidationManagerUI extends UI implements VMUI {
                         //We are at the root
                         createRootMenu(contextMenu);
                     }
-                } else if (tree.getValue() instanceof TestPlan) {
+                } else if (selected instanceof TestPlan) {
                     createTestPlanMenu(contextMenu);
-                } else if (tree.getValue() instanceof TestCaseExecution) {
+                } else if (selected instanceof TestCaseExecution) {
                     createTestCaseExecutionPlanMenu(contextMenu);
-                } else if (tree.getValue() instanceof Baseline) {
+                } else if (selected instanceof Baseline) {
 //                        createBaselineMenu(contextMenu);
                 }
             }
         });
-        tree.setImmediate(true);
-        tree.expandItem(projTreeRoot);
         tree.setSizeFull();
         updateProjectList();
+    }
+
+    /**
+     * Only Steps and Requirements are valid drag sources for re-parenting.
+     */
+    private boolean hasPotentialChildren(Object item) {
+        return item instanceof Project
+                || item instanceof RequirementSpec
+                || item instanceof RequirementSpecNode
+                || item instanceof TestProject
+                || item instanceof TestPlan
+                || item instanceof TestCase
+                || item instanceof TestCaseExecution
+                || (item instanceof String
+                && (((String) item).startsWith("tce")
+                || ((String) item).startsWith("executions")));
+    }
+
+    /**
+     * Refresh the tree UI after a structural change to its data.
+     */
+    private void refreshTree() {
+        tree.getDataProvider().refreshAll();
     }
 
     @Override
@@ -1385,10 +1342,10 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private Project getParentProject() {
-        Object current = tree.getValue();
+        Object current = tree.asSingleSelect().getValue();
         Project result = null;
         while (current != null && !(current instanceof Project)) {
-            current = tree.getParent(current);
+            current = tree.getTreeData().getParent(current);
         }
         if (current instanceof Project) {
             result = (Project) current;
@@ -1473,7 +1430,7 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     @Override
     public Object getSelectdValue() {
-        return tree.getValue();
+        return tree.asSingleSelect().getValue();
     }
 
     public void displayBaseline(Baseline baseline, boolean edit) {
@@ -1489,30 +1446,26 @@ public class ValidationManagerUI extends UI implements VMUI {
     @Override
     public Component createStepHistoryTable(String title,
             List<History> historyItems, boolean showVersionFields) {
-        Grid grid = new HistoryTable(title, historyItems, null,
+        Grid<History> grid = new HistoryTable(title, historyItems, null,
                 showVersionFields,
                 "text", "expectedResult", "notes");
-        Grid.Column text = grid.getColumn("text");
-        text.setHeaderCaption(TRANSLATOR.translate("step.text"));
-        Grid.Column result = grid.getColumn("expectedResult");
-        result.setHeaderCaption(TRANSLATOR.translate("expected.result"));
-        Grid.Column notes = grid.getColumn("notes");
-        notes.setHeaderCaption(TRANSLATOR.translate("general.notes"));
+        grid.getColumn("text").setCaption(TRANSLATOR.translate("step.text"));
+        grid.getColumn("expectedResult").setCaption(TRANSLATOR
+                .translate("expected.result"));
+        grid.getColumn("notes").setCaption(TRANSLATOR.translate("general.notes"));
         return grid;
     }
 
     @Override
     public Component createRequirementHistoryTable(String title,
             List<History> historyItems, boolean showVersionFields) {
-        Grid grid = new HistoryTable(title, historyItems, "uniqueId",
+        Grid<History> grid = new HistoryTable(title, historyItems, "uniqueId",
                 showVersionFields,
                 "uniqueId", "description", "notes");
-        Grid.Column uniqueId = grid.getColumn("uniqueId");
-        uniqueId.setHeaderCaption(TRANSLATOR.translate("unique.id"));
-        Grid.Column description = grid.getColumn("description");
-        description.setHeaderCaption(TRANSLATOR.translate("general.description"));
-        Grid.Column notes = grid.getColumn("notes");
-        notes.setHeaderCaption(TRANSLATOR.translate("general.notes"));
+        grid.getColumn("uniqueId").setCaption(TRANSLATOR.translate("unique.id"));
+        grid.getColumn("description").setCaption(TRANSLATOR
+                .translate("general.description"));
+        grid.getColumn("notes").setCaption(TRANSLATOR.translate("general.notes"));
         return grid;
     }
 
@@ -1530,7 +1483,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     @Override
-    public AbstractSelect getRequirementSelectionComponent() {
+    public RequirementSelectionComponent getRequirementSelectionComponent() {
         return new RequirementSelectionComponent(getParentProject());
     }
 
@@ -1545,7 +1498,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                 = menu.addItem(TRANSLATOR.translate("delete.execution"),
                         DELETE_ICON,
                         (MenuItem selectedItem) -> {//Delete only if no execution has been started yet.
-                            TCEExtraction tcee = Tool.extractTCE(tree.getValue());
+                            TCEExtraction tcee = Tool.extractTCE(tree.asSingleSelect().getValue());
                             TestCaseExecution tce = tcee.getTestCaseExecution();
                             if (tce == null) {
                                 LOG.info("Invalid");
@@ -1678,7 +1631,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                         VaadinIcons.DASHBOARD,
                         (MenuItem selectedItem) -> {
                             addWindow(new ExecutionDashboard(Tool.extractTCE(tree
-                                    .getValue())));
+                                    .asSingleSelect().getValue())));
                         });
         dashboard.setEnabled(checkRight("testplan.planning"));
     }
@@ -1858,10 +1811,11 @@ public class ValidationManagerUI extends UI implements VMUI {
                 .withNoButton(ButtonOption
                         .icon(VaadinIcons.CLOSE));
         prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-        desc.addTextChangeListener((TextChangeEvent event1) -> {
+        desc.setValueChangeMode(ValueChangeMode.LAZY);
+        desc.addValueChangeListener(event1 -> {
             //Enable if there is a description change.
             prompt.getButton(ButtonType.YES)
-                    .setEnabled(!event1.getText().trim().isEmpty());
+                    .setEnabled(!desc.getValue().trim().isEmpty());
         });
         prompt.getWindow().setWidth(50, Unit.PERCENTAGE);
         prompt.getWindow().setHeight(50, Unit.PERCENTAGE);

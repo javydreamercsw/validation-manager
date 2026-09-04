@@ -19,6 +19,8 @@ import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -35,35 +37,34 @@ import org.vaadin.easyuploads.MultiFileUpload;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.WizardStep;
 
-import com.vaadin.v7.data.Validator.InvalidValueException;
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.util.converter.StringToDoubleConverter;
-import com.vaadin.v7.data.validator.DoubleRangeValidator;
-import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
+import com.vaadin.data.Binder;
+import com.vaadin.data.HasValue;
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.UserError;
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
-import com.vaadin.v7.shared.ui.datefield.Resolution;
-import com.vaadin.v7.ui.AbstractField;
-import com.vaadin.v7.ui.AbstractTextField;
+import com.vaadin.shared.ui.ValueChangeMode;
+import com.vaadin.shared.ui.datefield.DateTimeResolution;
+import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.AbstractTextField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.CheckBox;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.DateField;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.ui.DateTimeField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
+import com.validation.manager.core.db.Step;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.AttachmentType;
 import com.validation.manager.core.db.DataEntryProperty;
@@ -104,22 +105,22 @@ public class ExecutionWizardStep implements WizardStep
 
   private final Wizard w;
   private final ExecutionStepServer step;
-  private final ComboBox result
-          = new ComboBox(TRANSLATOR.translate("general.result"));
-  private final ComboBox review
-          = new ComboBox(TRANSLATOR.translate("quality.review"));
-  private final ComboBox issueType
-          = new ComboBox(TRANSLATOR.translate("issue.type"));
+  private final ComboBox<String> result
+          = new ComboBox<>(TRANSLATOR.translate("general.result"));
+  private final ComboBox<String> review
+          = new ComboBox<>(TRANSLATOR.translate("quality.review"));
+  private final ComboBox<IssueType> issueType
+          = new ComboBox<>(TRANSLATOR.translate("issue.type"));
   private Button attach;
   private Button bug;
   private Button comment;
-  private DateField start;
-  private DateField end;
-  private DateField reviewDate;
+  private DateTimeField start;
+  private DateTimeField end;
+  private DateTimeField reviewDate;
   private static final Logger LOG
           = Logger.getLogger(ExecutionWizardStep.class.getSimpleName());
   private boolean reviewer = false;
-  private final List<AbstractField> fields = new ArrayList<>();
+  private final List<HasValue> fields = new ArrayList<>();
 
   public ExecutionWizardStep(Wizard w, ExecutionStep step,
           boolean reviewer)
@@ -129,92 +130,98 @@ public class ExecutionWizardStep implements WizardStep
     this.step = new ExecutionStepServer(step);
     issueType.setSizeFull();
     issueType.setReadOnly(false);
-    issueType.setRequired(true);
-    issueType.setRequiredError(TRANSLATOR.translate("missing.type"));
+    issueType.setRequiredIndicatorVisible(true);
+    List<IssueType> issueTypes = new ArrayList<>();
     IssueTypeJpaController it
             = new IssueTypeJpaController(DataBaseManager
                     .getEntityManagerFactory());
     it.findIssueTypeEntities().forEach(type ->
     {
-      String item = Lookup.getDefault().lookup(InternationalizationProvider.class)
-              .translate(type.getTypeName());
-      issueType.addItem(type);
-      issueType.setItemCaption(type, item);
-      switch (type.getId())
-      {
-        case 1:
-          issueType.setItemIcon(type, VaadinIcons.BUG);
-          break;
-        case 2:
-          issueType.setItemIcon(type, VaadinIcons.EYE);
-          break;
-        case 3:
-          issueType.setItemIcon(type, VaadinIcons.QUESTION);
-          break;
-      }
+      issueTypes.add(type);
       if (type.getTypeName().equals("observation.name"))
       {
         issueType.setValue(type);
       }
     });
+    issueType.setItems(issueTypes);
+    issueType.setItemCaptionGenerator(t -> Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate(t.getTypeName()));
+    issueType.setItemIconGenerator(t ->
+    {
+      switch (t.getId())
+      {
+        case 1:
+          return VaadinIcons.BUG;
+        case 2:
+          return VaadinIcons.EYE;
+        case 3:
+          return VaadinIcons.QUESTION;
+        default:
+          return null;
+      }
+    });
+    issueType.setItems(issueTypes);
+    issueType.setItemCaptionGenerator(t -> Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate(t.getTypeName()));
     result.setReadOnly(false);
-    result.setRequired(true);
-    result.setRequiredError(TRANSLATOR.translate("missing.result"));
+    result.setRequiredIndicatorVisible(true);
     result.setTextInputAllowed(false);
     review.setReadOnly(false);
-    review.setRequired(true);
-    review.setRequiredError(TRANSLATOR.translate("missing.reviiew.result"));
+    review.setRequiredIndicatorVisible(true);
     review.setTextInputAllowed(false);
     ReviewResultJpaController c2
             = new ReviewResultJpaController(DataBaseManager
                     .getEntityManagerFactory());
+    List<String> reviewResults = new ArrayList<>();
     c2.findReviewResultEntities().forEach(r ->
     {
-      String item = Lookup.getDefault().lookup(InternationalizationProvider.class)
-              .translate(r.getReviewName());
-      review.addItem(r.getReviewName());
-      review.setItemCaption(r.getReviewName(), item);
-      Resource icon;
-      switch (r.getId())
+      reviewResults.add(r.getReviewName());
+    });
+    review.setItems(reviewResults);
+    review.setItemCaptionGenerator(item -> Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate(item));
+    review.setItemIconGenerator(item ->
+    {
+      //ReviewResult ids are stable: 1 pass, 2 fail, anything else pending
+      switch (reviewResults.indexOf(item) + 1)
       {
         case 1:
-          icon = VaadinIcons.CHECK;
-          break;
+          return VaadinIcons.CHECK;
         case 2:
-          icon = VaadinIcons.CLOSE;
-          break;
+          return VaadinIcons.CLOSE;
         default:
-          icon = VaadinIcons.CLOCK;
-          break;
+          return VaadinIcons.CLOCK;
       }
-      review.setItemIcon(r.getReviewName(), icon);
     });
     ExecutionResultJpaController c
             = new ExecutionResultJpaController(DataBaseManager
                     .getEntityManagerFactory());
+    List<String> executionResults = new ArrayList<>();
     c.findExecutionResultEntities().forEach(r ->
     {
-      String item = Lookup.getDefault().lookup(InternationalizationProvider.class)
-              .translate(r.getResultName());
-      result.addItem(r.getResultName());
-      result.setItemCaption(r.getResultName(), item);
-      Resource icon;
-      switch (r.getId())
+      executionResults.add(r.getResultName());
+    });
+    result.setItems(executionResults);
+    result.setItemCaptionGenerator(item -> Lookup.getDefault()
+            .lookup(InternationalizationProvider.class)
+            .translate(item));
+    result.setItemIconGenerator(item ->
+    {
+      //ExecutionResult ids are stable: 1 pass, 2 fail, 3 pause, else pending
+      switch (executionResults.indexOf(item) + 1)
       {
         case 1:
-          icon = VaadinIcons.CHECK;
-          break;
+          return VaadinIcons.CHECK;
         case 2:
-          icon = VaadinIcons.CLOSE;
-          break;
+          return VaadinIcons.CLOSE;
         case 3:
-          icon = VaadinIcons.PAUSE;
-          break;
+          return VaadinIcons.PAUSE;
         default:
-          icon = VaadinIcons.CLOCK;
-          break;
+          return VaadinIcons.CLOCK;
       }
-      result.setItemIcon(r.getResultName(), icon);
     });
   }
 
@@ -238,38 +245,39 @@ public class ExecutionWizardStep implements WizardStep
     FormLayout layout = new FormLayout();
     form.setContent(layout);
     form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-    BeanFieldGroup binder = new BeanFieldGroup(getExecutionStep().getStep().getClass());
-    binder.setItemDataSource(getExecutionStep().getStep());
+    Binder<Step> binder = new Binder<>(Step.class);
+    binder.setBean(getExecutionStep().getStep());
+    binder.setReadOnly(true);
     TextArea text = new TextArea(TRANSLATOR.translate("general.text"));
-    text.setConverter(new ByteToStringConverter());
-    binder.bind(text, "text");
+    binder.forField(text)
+            .withConverter(new ByteToStringConverter())
+            .bind("text");
     text.setSizeFull();
     layout.addComponent(text);
-    Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"),
-            "notes", TextArea.class);
+    TextField notes = new TextField(TRANSLATOR.translate("general.notes"));
+    binder.bind(notes, "notes");
     notes.setSizeFull();
     layout.addComponent(notes);
     if (getExecutionStep().getExecutionStart() != null)
     {
-      start = new DateField(TRANSLATOR.translate("start.date"));
-      start.setResolution(Resolution.SECOND);
+      start = new DateTimeField(TRANSLATOR.translate("start.date"));
+      start.setResolution(DateTimeResolution.SECOND);
       start.setDateFormat(VMSettingServer.getSetting("date.format")
               .getStringVal());
-      start.setValue(getExecutionStep().getExecutionStart());
+      start.setValue(toDateTime(getExecutionStep().getExecutionStart()));
       start.setReadOnly(true);
       layout.addComponent(start);
     }
     if (getExecutionStep().getExecutionEnd() != null)
     {
-      end = new DateField(TRANSLATOR.translate("end.date"));
+      end = new DateTimeField(TRANSLATOR.translate("end.date"));
       end.setDateFormat(VMSettingServer.getSetting("date.format")
               .getStringVal());
-      end.setResolution(Resolution.SECOND);
-      end.setValue(getExecutionStep().getExecutionEnd());
+      end.setResolution(DateTimeResolution.SECOND);
+      end.setValue(toDateTime(getExecutionStep().getExecutionEnd()));
       end.setReadOnly(true);
       layout.addComponent(end);
     }
-    binder.setReadOnly(true);
     //Space to record result
     if (getExecutionStep().getResultId() != null)
     {
@@ -296,12 +304,12 @@ public class ExecutionWizardStep implements WizardStep
     }
     if (getExecutionStep().getReviewDate() != null)
     {
-      reviewDate = new DateField(TRANSLATOR
+      reviewDate = new DateTimeField(TRANSLATOR
               .translate("review.date"));
       reviewDate.setDateFormat(VMSettingServer.getSetting("date.format")
               .getStringVal());
-      reviewDate.setResolution(Resolution.SECOND);
-      reviewDate.setValue(getExecutionStep().getReviewDate());
+      reviewDate.setResolution(DateTimeResolution.SECOND);
+      reviewDate.setValue(toDateTime(getExecutionStep().getReviewDate()));
       reviewDate.setReadOnly(true);
       layout.addComponent(reviewDate);
     }
@@ -309,8 +317,9 @@ public class ExecutionWizardStep implements WizardStep
     {
       TextArea expectedResult
               = new TextArea(TRANSLATOR.translate("expected.result"));
-      expectedResult.setConverter(new ByteToStringConverter());
-      binder.bind(expectedResult, "expectedResult");
+      binder.forField(expectedResult)
+              .withConverter(new ByteToStringConverter())
+              .bind("expectedResult");
       expectedResult.setSizeFull();
       layout.addComponent(expectedResult);
     }
@@ -323,7 +332,10 @@ public class ExecutionWizardStep implements WizardStep
         case 1://String
           TextField tf = new TextField(TRANSLATOR
                   .translate(de.getEntryName()));
-          tf.setRequired(true);
+          ((HasValue) tf).setRequiredIndicatorVisible(DataEntryServer
+                  .getProperty(de,
+                          "property.required")
+                  .getPropertyValue().equals("true"));
           tf.setData(de.getEntryName());
           if (VMSettingServer.getSetting("show.expected.result")
                   .getBoolVal())
@@ -338,22 +350,14 @@ public class ExecutionWizardStep implements WizardStep
             {
               String error = TRANSLATOR.translate("expected.result") + ": "
                       + r.getPropertyValue();
-              tf.setRequiredError(error);
-              tf.setRequired(DataEntryServer
-                      .getProperty(de,
-                              "property.required")
-                      .getPropertyValue().equals("true"));
-              tf.addValidator((Object val) ->
+              if (stringCase != null
+                      && stringCase.getPropertyValue().equals("true")
+                      ? !tf.getValue().equals(r.getPropertyValue())
+                      : !tf.getValue().equalsIgnoreCase(r.getPropertyValue()))
               {
                 //We have an expected result and a match case requirement
-                if (stringCase != null
-                        && stringCase.getPropertyValue().equals("true")
-                        ? !((String) val).equals(r.getPropertyValue())
-                        : !((String) val).equalsIgnoreCase(r.getPropertyValue()))
-                {
-                  throw new InvalidValueException(error);
-                }
-              });
+                tf.setComponentError(new UserError(error));
+              }
             }
           }
           fields.add(tf);
@@ -362,16 +366,15 @@ public class ExecutionWizardStep implements WizardStep
           layout.addComponent(tf);
           break;
         case 2://Numeric
-          // numberfield7 addon has no Vaadin 8 release; use a v7 TextField
+          // numberfield7 addon has no Vaadin 8 release; use a TextField
           // with a converter and range validation.
-          com.vaadin.v7.ui.TextField field = new com.vaadin.v7.ui.TextField(
+          TextField nf = new TextField(
                   TRANSLATOR.translate(de.getEntryName()));
-          field.setConverter(new StringToDoubleConverter());
-          field.setRequired(DataEntryServer
+          ((HasValue) nf).setRequiredIndicatorVisible(DataEntryServer
                   .getProperty(de,
                           "property.required")
                   .getPropertyValue().equals("true"));
-          field.setData(de.getEntryName());
+          nf.setData(de.getEntryName());
           Double min = null,
            max = null;
           for (DataEntryProperty prop : de.getDataEntryPropertyList())
@@ -415,20 +418,18 @@ public class ExecutionWizardStep implements WizardStep
                             : (TRANSLATOR
                                     .translate("property.max")
                             + ": " + max));
-            field.setRequiredError(error);
-            field.addValidator(new DoubleRangeValidator(error,
-                    min, max));
+            nf.setComponentError(new UserError(error));
           }
-          fields.add(field);
+          fields.add(nf);
           //Set value if already recorded
-          updateValue(field);
-          layout.addComponent(field);
+          updateValue(nf);
+          layout.addComponent(nf);
           break;
         case 3://Boolean
           CheckBox cb = new CheckBox(TRANSLATOR
                   .translate(de.getEntryName()));
           cb.setData(de.getEntryName());
-          cb.setRequired(DataEntryServer
+          cb.setRequiredIndicatorVisible(DataEntryServer
                   .getProperty(de,
                           "property.required")
                   .getPropertyValue().equals("true"));
@@ -442,13 +443,10 @@ public class ExecutionWizardStep implements WizardStep
               //Add expected result
               String error = TRANSLATOR.translate("expected.result") + ": "
                       + r.getPropertyValue();
-              cb.addValidator((Object val) ->
+              if (!cb.getValue().toString().equals(r.getPropertyValue()))
               {
-                if (!val.toString().equals(r.getPropertyValue()))
-                {
-                  throw new InvalidValueException(error);
-                }
-              });
+                cb.setComponentError(new UserError(error));
+              }
             }
           }
           fields.add(cb);
@@ -643,32 +641,28 @@ public class ExecutionWizardStep implements WizardStep
       //Set creation date
       is.setCreationTime(new Date());
     }
-    BeanFieldGroup binder = new BeanFieldGroup(is.getClass());
-    binder.setItemDataSource(is);
-    Field title = binder.buildAndBind(TRANSLATOR.translate("general.summary"),
-            "title",
-            TextField.class);
+    Binder<IssueServer> binder = new Binder<>(IssueServer.class);
+    binder.setBean(is);
+    TextField title = new TextField(TRANSLATOR.translate("general.summary"));
+    binder.bind(title, "title");
     title.setSizeFull();
     layout.addComponent(title);
-    Field desc = binder.buildAndBind(TRANSLATOR.translate("general.description"),
-            "description",
-            TextArea.class);
+    TextArea desc = new TextArea(TRANSLATOR.translate("general.description"));
+    binder.bind(desc, "description");
     desc.setSizeFull();
     layout.addComponent(desc);
-    DateField creation = (DateField) binder
-            .buildAndBind(TRANSLATOR.translate("creation.time"),
-                    "creationTime",
-                    DateField.class);
+    DateTimeField creation = new DateTimeField(TRANSLATOR.translate("creation.time"));
+    binder.bind(creation, "creationTime");
     creation.setReadOnly(true);
     creation.setDateFormat(VMSettingServer.getSetting("date.format")
             .getStringVal());
-    creation.setResolution(Resolution.SECOND);
+    creation.setResolution(DateTimeResolution.SECOND);
     layout.addComponent(creation);
     //Add the result
     layout.addComponent(issueType);
     if (is.getIssueType() != null)
     {
-      issueType.setValue(is.getIssueType().getTypeName());
+      issueType.setValue(is.getIssueType());
     }
     //Lock if being created
     issueType.setReadOnly(is.getIssueType() == null);
@@ -683,10 +677,13 @@ public class ExecutionWizardStep implements WizardStep
               {
                 //Create the attachment
                 IssueServer issue = (IssueServer) mb.getData();
-                issue.setDescription(((TextArea) desc).getValue().trim());
-                issue.setIssueType((IssueType) issueType.getValue());
-                issue.setCreationTime(creation.getValue());
-                issue.setTitle((String) title.getValue());
+                issue.setDescription(desc.getValue().trim());
+                issue.setIssueType(issueType.getValue());
+                issue.setCreationTime(creation.getValue() == null
+                        ? null
+                        : Date.from(creation.getValue()
+                                .atZone(ZoneId.systemDefault()).toInstant()));
+                issue.setTitle(title.getValue());
                 boolean toAdd = issue.getIssuePK() == null;
                 issue.write2DB();
                 if (toAdd)
@@ -712,19 +709,23 @@ public class ExecutionWizardStep implements WizardStep
             .withCancelButton(ButtonOption.icon(VaadinIcons.CLOSE));
     mb.getWindow().setCaption(TRANSLATOR.translate("issue.detail"));
     mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-    ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) ->
+    //Enable the OK button only when both fields have content. Vaadin 8 has
+    //no per-keystroke TextChangeEvent, so react to value changes instead.
+    desc.setValueChangeMode(ValueChangeMode.LAZY);
+    title.setValueChangeMode(ValueChangeMode.LAZY);
+    desc.addValueChangeListener(event1 ->
     {
-      //Enable if there is a description change.
+      //Enable if there is a description.
       mb.getButton(ButtonType.OK)
               .setEnabled(!step.getLocked()
-                      && !event1.getText().trim().isEmpty());
+                      && !desc.getValue().trim().isEmpty());
     });
-    ((TextField) title).addTextChangeListener((TextChangeEvent event1) ->
+    title.addValueChangeListener(event1 ->
     {
-      //Enable if there is a title change.
+      //Enable if there is a title.
       mb.getButton(ButtonType.OK)
               .setEnabled(!step.getLocked()
-                      && !event1.getText().trim().isEmpty());
+                      && !title.getValue().trim().isEmpty());
     });
     mb.open();
   }
@@ -734,11 +735,10 @@ public class ExecutionWizardStep implements WizardStep
     Panel form = new Panel(TRANSLATOR.translate("general.comment"));
     FormLayout layout = new FormLayout();
     form.setContent(layout);
-    BeanFieldGroup binder = new BeanFieldGroup(as.getClass());
-    binder.setItemDataSource(as);
-    Field desc = binder.buildAndBind(TRANSLATOR.translate("general.text"),
-            "textValue",
-            TextArea.class);
+    Binder<AttachmentServer> binder = new Binder<>(AttachmentServer.class);
+    binder.setBean(as);
+    TextArea desc = new TextArea(TRANSLATOR.translate("general.text"));
+    binder.bind(desc, "textValue");
     desc.setSizeFull();
     layout.addComponent(desc);
     MessageBox mb = MessageBox.create();
@@ -752,7 +752,7 @@ public class ExecutionWizardStep implements WizardStep
               {
                 //Create the attachment
                 AttachmentServer a = (AttachmentServer) mb.getData();
-                a.setTextValue(((TextArea) desc).getValue().trim());
+                a.setTextValue(desc.getValue().trim());
                 boolean toAdd = a.getAttachmentPK() == null;
                 a.write2DB();
                 if (toAdd)
@@ -777,12 +777,13 @@ public class ExecutionWizardStep implements WizardStep
             .withCancelButton(ButtonOption.icon(VaadinIcons.CLOSE));
     mb.getWindow().setCaption(TRANSLATOR.translate("enter.comment"));
     mb.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-    ((TextArea) desc).addTextChangeListener((TextChangeEvent event1) ->
+    desc.setValueChangeMode(ValueChangeMode.LAZY);
+    desc.addValueChangeListener(event1 ->
     {
       //Enable only when there is a comment.
       mb.getButton(ButtonType.OK)
               .setEnabled(!step.getLocked()
-                      && !event1.getText().trim().isEmpty());
+                      && !desc.getValue().trim().isEmpty());
     });
     mb.open();
   }
@@ -791,31 +792,34 @@ public class ExecutionWizardStep implements WizardStep
   public boolean onAdvance()
   {
     //Can only proceed after the current step is executed and documented.
-    String answer = ((String) result.getValue());
-    String answer2 = ((String) review.getValue());
+    String answer = result.getValue();
+    String answer2 = review.getValue();
     boolean pass = true;
     if (answer == null)
     {
       Notification.show(TRANSLATOR.translate("unable.to.proceed"),
-              result.getRequiredError(),
+              TRANSLATOR.translate("missing.result"),
               Notification.Type.WARNING_MESSAGE);
     }
     else if (reviewer && answer2 == null)
     {
       Notification.show(TRANSLATOR.translate("unable.to.proceed"),
-              review.getRequiredError(),
+              TRANSLATOR.translate("missing.reviiew.result"),
               Notification.Type.WARNING_MESSAGE);
     }
     else
     {
       //Check all fields for answers
-      for (AbstractField field : fields)
+      for (HasValue field : fields)
       {
-        if (field.isRequired() && !(field instanceof CheckBox)
-                && field.isEmpty())
+        boolean required = field.isRequiredIndicatorVisible();
+        boolean empty = field.getValue() == null
+                || (field.getValue() instanceof String
+                && ((String) field.getValue()).trim().isEmpty());
+        if (required && !(field instanceof CheckBox) && empty)
         {
           Notification.show(TRANSLATOR.translate("unable.to.proceed"),
-                  field.getRequiredError(),
+                  TRANSLATOR.translate("missing.answer"),
                   Notification.Type.WARNING_MESSAGE);
           pass = false;
         }
@@ -828,7 +832,7 @@ public class ExecutionWizardStep implements WizardStep
           ExecutionResult newResult = ExecutionResultServer
                   .getResult(answer);
           ReviewResult newReview = ReviewResultServer.getReview(answer2);
-          getExecutionStep().setExecutionStart(start.getValue());
+          getExecutionStep().setExecutionStart(toDate(start.getValue()));
           if (getExecutionStep().getResultId() == null
                   || !Objects.equals(getExecutionStep().getResultId().getId(),
                           newResult.getId()))
@@ -863,10 +867,10 @@ public class ExecutionWizardStep implements WizardStep
             getExecutionStep().setExecutionStepHasVmUserList(new ArrayList<>());
           }
           getExecutionStep().getExecutionStepAnswerList().clear();
-          for (AbstractField field : fields)
+          for (HasValue field : fields)
           {
             //The field has the field name as data
-            if (field.getData() == null)
+            if (((AbstractComponent) field).getData() == null)
             {
               pass = false;
               LOG.log(Level.SEVERE, "Field missing data! {0}",
@@ -874,7 +878,8 @@ public class ExecutionWizardStep implements WizardStep
             }
             else
             {
-              String fieldName = (String) field.getData();
+              String fieldName = (String) ((AbstractComponent) field)
+                      .getData();
               ExecutionStepAnswer stepAnswer
                       = new ExecutionStepAnswer(getExecutionStep()
                               .getExecutionStepPK()
@@ -886,7 +891,7 @@ public class ExecutionWizardStep implements WizardStep
                       );
               stepAnswer.setExecutionStep(getExecutionStep().getEntity());
               stepAnswer.setFieldName(fieldName);
-              stepAnswer.setFieldAnswer(field.getValue().toString());
+              stepAnswer.setFieldAnswer(String.valueOf(field.getValue()));
               getExecutionStep().getExecutionStepAnswerList()
                       .add(stepAnswer);
             }
@@ -1102,14 +1107,16 @@ public class ExecutionWizardStep implements WizardStep
     return mb;
   }
 
-  private void updateValue(AbstractField field)
+  private void updateValue(HasValue field)
   {
-    if (field.getData() != null)
+    if (field instanceof AbstractComponent
+            && ((AbstractComponent) field).getData() != null)
     {
       //Look for the answer in the database
       getExecutionStep().getExecutionStepAnswerList().forEach(answer ->
       {
-        if (answer.getFieldName().equals(field.getData()))
+        if (answer.getFieldName().equals(
+                ((AbstractComponent) field).getData()))
         {
           if (field instanceof AbstractTextField)
           {//This includes NumberField
@@ -1117,7 +1124,7 @@ public class ExecutionWizardStep implements WizardStep
           }
           else if (field instanceof CheckBox)
           {
-            field.setValue(answer.getFieldAnswer().equals("true"));
+            field.setValue(Boolean.valueOf(answer.getFieldAnswer()));
           }
         }
       });
@@ -1126,5 +1133,32 @@ public class ExecutionWizardStep implements WizardStep
     {
       LOG.log(Level.SEVERE, "Field missing data! {0}", field);
     }
+  }
+
+  /**
+   * The DB stores {@link Date} while the Vaadin 8 date fields work with
+   * {@link LocalDateTime}.
+   *
+   * @param date date to convert, may be null
+   * @return the equivalent LocalDateTime or null
+   */
+  private static LocalDateTime toDateTime(Date date)
+  {
+    return date == null ? null
+            : LocalDateTime.ofInstant(date.toInstant(),
+                    ZoneId.systemDefault());
+  }
+
+  /**
+   * The DB stores {@link Date} while the Vaadin 8 date fields work with
+   * {@link LocalDateTime}.
+   *
+   * @param dateTime value to convert, may be null
+   * @return the equivalent Date or null
+   */
+  private static Date toDate(LocalDateTime dateTime)
+  {
+    return dateTime == null ? null
+            : Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
   }
 }

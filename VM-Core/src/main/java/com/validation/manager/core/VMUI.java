@@ -17,8 +17,8 @@ package com.validation.manager.core;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.v7.ui.AbstractSelect;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.validation.manager.core.db.History;
@@ -264,5 +264,5 @@ public interface VMUI {
      *
      * @return Requirement selection component.
      */
-    public AbstractSelect getRequirementSelectionComponent();
+    public TwinColSelect<Requirement> getRequirementSelectionComponent();
 }

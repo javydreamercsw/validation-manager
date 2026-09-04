@@ -15,12 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.data.util.PropertyValueGenerator;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.Grid;
+import com.vaadin.ui.Grid;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.HistoryField;
@@ -32,106 +27,31 @@ import java.util.List;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class HistoryTable extends Grid {
+public final class HistoryTable extends Grid<History> {
 
     public HistoryTable(String title,
             List<History> historyItems, String sortByField,
             boolean showVersionFields,
             String... fields) {
         super(title);
-        BeanItemContainer<History> histories
-                = new BeanItemContainer<>(History.class);
-        GeneratedPropertyContainer wrapperCont
-                = new GeneratedPropertyContainer(histories);
-        histories.addAll(historyItems);
-        setContainerDataSource(wrapperCont);
-        if (wrapperCont.size() > 0) {
-            setHeightMode(HeightMode.ROW);
-            setHeightByRows(wrapperCont.size() > 5 ? 5 : wrapperCont.size());
-        }
+        setItems(historyItems);
+        //Generated properties become plain columns computed from the item.
         for (String field : fields) {
-            wrapperCont.addGeneratedProperty(field,
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    String result = "";
-                    for (HistoryField hf : v.getHistoryFieldList()) {
-                        if (hf.getFieldName().equals(field)) {
-                            result = hf.getFieldValue();
-                            break;
-                        }
-                    }
-                    return result;
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
+            addColumn(this.<String>fieldValue(field))
+                    .setId(field);
         }
         if (showVersionFields) {
-            wrapperCont.addGeneratedProperty("version",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getMajorVersion() + "." + v.getMidVersion()
-                            + "." + v.getMinorVersion();
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-            wrapperCont.addGeneratedProperty("modifier",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getModifierId().getFirstName() + " "
-                            + v.getModifierId().getLastName();
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-            wrapperCont.addGeneratedProperty("modificationDate",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getModificationTime().toString();
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
-            wrapperCont.addGeneratedProperty("modificationReason",
-                    new PropertyValueGenerator<String>() {
-
-                @Override
-                public String getValue(Item item, Object itemId, Object propertyId) {
-                    History v = (History) itemId;
-                    return v.getReason() == null ? ""
-                            : TRANSLATOR.translate(v.getReason());
-                }
-
-                @Override
-                public Class<String> getType() {
-                    return String.class;
-                }
-            });
+            addColumn(history -> history.getMajorVersion() + "."
+                    + history.getMidVersion() + "." + history.getMinorVersion())
+                    .setId("version");
+            addColumn(history -> history.getModifierId().getFirstName() + " "
+                    + history.getModifierId().getLastName())
+                    .setId("modifier");
+            addColumn(history -> history.getModificationTime().toString())
+                    .setId("modificationDate");
+            addColumn(history -> history.getReason() == null ? ""
+                    : TRANSLATOR.translate(history.getReason()))
+                    .setId("modificationReason");
         }
         List<String> fieldList = new ArrayList<>();
         //Add specified fields
@@ -143,20 +63,42 @@ public final class HistoryTable extends Grid {
             fieldList.add("modificationDate");
             fieldList.add("modificationReason");
         }
-        setColumns(fieldList.toArray());
+        setColumns(fieldList.toArray(new String[0]));
         if (showVersionFields) {
-            Grid.Column version = getColumn("version");
-            version.setHeaderCaption(TRANSLATOR.translate("general.version"));
-            Grid.Column mod = getColumn("modifier");
-            mod.setHeaderCaption(TRANSLATOR.translate("general.modifier"));
-            Grid.Column modDate = getColumn("modificationDate");
-            modDate.setHeaderCaption(TRANSLATOR.translate("modification.date"));
-            Grid.Column modReason = getColumn("modificationReason");
-            modReason.setHeaderCaption(TRANSLATOR.translate("general.reason"));
+            getColumn("version").setCaption(TRANSLATOR.translate("general.version"));
+            getColumn("modifier").setCaption(TRANSLATOR.translate("general.modifier"));
+            getColumn("modificationDate").setCaption(TRANSLATOR
+                    .translate("modification.date"));
+            getColumn("modificationReason").setCaption(TRANSLATOR
+                    .translate("general.reason"));
         }
         if (sortByField != null && !sortByField.trim().isEmpty()) {
-            wrapperCont.sort(new Object[]{sortByField}, new boolean[]{true});
+            //Sort on the underlying history item property
+            if ("uniqueId".equals(sortByField)) {
+                historyItems.sort((h1, h2) -> fieldValue(h1, "uniqueId")
+                        .compareTo(fieldValue(h2, "uniqueId")));
+                setItems(historyItems);
+            }
+        }
+        if (!historyItems.isEmpty()) {
+            setHeightByRows(historyItems.size() > 5 ? 5 : historyItems.size());
         }
         setSizeFull();
+    }
+
+    private String fieldValue(History v, String field) {
+        String result = "";
+        for (HistoryField hf : v.getHistoryFieldList()) {
+            if (hf.getFieldName().equals(field)) {
+                result = hf.getFieldValue();
+                break;
+            }
+        }
+        return result;
+    }
+
+    private com.vaadin.data.ValueProvider<History, String> fieldValue(
+            String field) {
+        return (History v) -> fieldValue(v, field);
     }
 }

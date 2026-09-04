@@ -21,7 +21,7 @@ import com.vaadin.v7.event.ItemClickEvent;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.ui.Label;
 import com.vaadin.v7.ui.Table;
 import com.vaadin.v7.ui.Tree;
 import com.vaadin.v7.ui.TreeTable;

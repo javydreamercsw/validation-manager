@@ -86,7 +86,7 @@ public final class BaselineComponent extends Panel {
             binder.discard();
             ((ValidationManagerUI) UI.getCurrent())
                     .displayObject(((ValidationManagerUI) UI.getCurrent())
-                            .getTree().getValue());
+                            .getTree().asSingleSelect().getValue());
         });
         if (edit) {
             if (baseline.getId() == null) {
@@ -122,7 +122,7 @@ public final class BaselineComponent extends Panel {
                                     .withNoButton(() -> {
                                         ((ValidationManagerUI) UI.getCurrent())
                                                 .displayObject(((ValidationManagerUI) UI
-                                                        .getCurrent()).getTree().getValue());
+                                                        .getCurrent()).getTree().asSingleSelect().getValue());
                                     },
                                             ButtonOption
                                                     .icon(VaadinIcons.CLOSE));
