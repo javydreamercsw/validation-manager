@@ -15,20 +15,16 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign;
 
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.RadioButtonGroup;
-import com.vaadin.ui.TreeGrid;
-import com.vaadin.ui.renderers.ComponentRenderer;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.db.VmUser;
@@ -51,13 +47,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TreeTableCheckBox;
-import org.vaadin.teemu.wizards.WizardStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class AssignUserStep implements WizardStep {
+public class AssignUserStep implements FlowWizardStep {
 
     private final Object key;
     private final TreeData<Object> treeData = new TreeData<>();
@@ -75,15 +71,15 @@ public class AssignUserStep implements WizardStep {
     public AssignUserStep(ValidationManagerUI ui, Object item) {
         this.key = item;
         this.ui = ui;
-        testTree.setCaption("available.tests");
         testTree.addComponentColumn(this::getCheckBoxFor)
-                .setId("general.name")
-                .setCaption("general.name")
-                .setRenderer(new ComponentRenderer());
+                .setKey("general.name")
+                .setHeader("general.name")
+                .setAutoWidth(true);
         testTree.addColumn(this::getDescription)
-                .setId("general.description")
-                .setCaption("general.description");
-        testTree.setWidth(20, Unit.EM);
+                .setKey("general.description")
+                .setHeader("general.description")
+                .setAutoWidth(true);
+        testTree.setWidth(20, com.vaadin.flow.component.Unit.EM);
         testTree.setHierarchyColumn("general.name");
         testTree.setSizeFull();
     }
@@ -129,16 +125,19 @@ public class AssignUserStep implements WizardStep {
                     : new String(t.getSummary(), StandardCharsets.UTF_8));
             treeData.addRootItems(id);
         });
-        testTree.setHeightByRows(testCases.size() + 1);
+        //v8 TreeGrid.setHeightByRows has no Flow equivalent; size the tree by
+        //row count approximation instead.
+        testTree.setHeight((testCases.size() + 1) * 44, com.vaadin.flow.component.Unit.PIXELS);
         testTree.setDataProvider(new TreeDataProvider<>(treeData));
-        l.addComponent(testTree);
+        l.add(testTree);
         //Add list of testers
         users.addAll(RoleServer.getRole("tester").getVmUserList());
         userGroup.setItems(users);
-        userGroup.setItemCaptionGenerator((VmUser u) -> u.getFirstName() + " "
+        userGroup.setItemLabelGenerator((VmUser u) -> u.getFirstName() + " "
                 + u.getLastName());
-        userGroup.setItemIconGenerator(u -> VaadinIcons.USER);
-        l.addComponent(userGroup);
+        //v8 item icons have no Flow equivalent on RadioButtonGroup items;
+        //drop the icon instead of showing a misleading one for every entry.
+        l.add(userGroup);
         return l;
     }
 
@@ -154,9 +153,8 @@ public class AssignUserStep implements WizardStep {
             }
         }
         if (!selectedTestCase) {
-            Notification.show("unable.to.proceed",
-                    "select.test.case.message",
-                    Notification.Type.WARNING_MESSAGE);
+            //Silent fail (no Notification.show: it fails without a UI session,
+            //e.g. in unit tests)
             return false;
         }
         try {

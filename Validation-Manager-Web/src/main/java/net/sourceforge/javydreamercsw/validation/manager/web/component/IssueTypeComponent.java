@@ -15,16 +15,16 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Binder;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.IssueType;
 import com.validation.manager.core.db.controller.IssueTypeJpaController;
@@ -36,7 +36,7 @@ import org.openide.util.Lookup;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class IssueTypeComponent extends Panel {
+public final class IssueTypeComponent extends VerticalLayout {
 
     private final IssueType it;
     private boolean edit = false;
@@ -46,52 +46,51 @@ public final class IssueTypeComponent extends Panel {
             = Logger.getLogger(IssueTypeComponent.class.getSimpleName());
 
     public IssueTypeComponent(IssueType it, boolean edit) {
-        setCaption(TRANSLATOR.translate("issue.type"));
+        add(new Span(TRANSLATOR.translate("issue.type")));
         this.it = it;
         this.edit = edit;
         init();
     }
 
     public IssueTypeComponent(IssueType it, String caption, boolean edit) {
-        super(caption);
+        add(new Span(caption));
         this.it = it;
         this.edit = edit;
         init();
     }
 
     public IssueTypeComponent(IssueType it) {
-        setCaption(TRANSLATOR.translate("issue.type"));
+        add(new Span(TRANSLATOR.translate("issue.type")));
         this.it = it;
         init();
     }
 
     public IssueTypeComponent(IssueType it, String caption) {
-        super(caption);
+        add(new Span(caption));
         this.it = it;
         init();
     }
 
     private void init() {
         FormLayout layout = new FormLayout();
-        setContent(layout);
-        addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        add(layout);
         Binder<IssueType> binder = new Binder<>(IssueType.class);
         binder.setBean(it);
         TextField name = new TextField(TRANSLATOR
                 .translate("general.name"));
         binder.bind(name, "typeName");
-        layout.addComponent(name);
+        layout.add(name);
         TextField desc = new TextField(TRANSLATOR
                 .translate("general.description"));
         binder.bind(desc, "description");
-        layout.addComponent(desc);
+        layout.add(desc);
         if (edit) {
             Button update = new Button(it.getId() == null
                     ? TRANSLATOR.
                             translate("general.create")
                     : TRANSLATOR.
                             translate("general.update"));
-            update.addClickListener((Button.ClickEvent event) -> {
+            update.addClickListener((event) -> {
                 IssueTypeJpaController c
                         = new IssueTypeJpaController(DataBaseManager.
                                 getEntityManagerFactory());
@@ -110,14 +109,14 @@ public final class IssueTypeComponent extends Panel {
             Button cancel = new Button(Lookup.getDefault()
                     .lookup(InternationalizationProvider.class).
                     translate("general.cancel"));
-            cancel.addClickListener((Button.ClickEvent event) -> {
-                ((VMUI) UI.getCurrent()).updateScreen();
+            cancel.addClickListener((event) -> {
+                ((ValidationManagerUI) UI.getCurrent()).updateScreen();
             });
             binder.setReadOnly(!edit);
             HorizontalLayout hl = new HorizontalLayout();
-            hl.addComponent(update);
-            hl.addComponent(cancel);
-            layout.addComponent(hl);
+            hl.add(update);
+            hl.add(cancel);
+            layout.add(hl);
         }
     }
 }

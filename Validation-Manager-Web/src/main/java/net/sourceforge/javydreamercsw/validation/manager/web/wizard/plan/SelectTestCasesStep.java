@@ -15,14 +15,13 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.TreeGrid;
-import com.vaadin.ui.renderers.ComponentRenderer;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.tool.Tool;
@@ -36,14 +35,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TreeTableCheckBox;
-import org.vaadin.teemu.wizards.Wizard;
-import org.vaadin.teemu.wizards.WizardStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class SelectTestCasesStep implements WizardStep {
+public class SelectTestCasesStep implements FlowWizardStep {
 
     /**
      * Row ids keep the same synthetic String ids the v7 TreeTable used
@@ -53,7 +52,7 @@ public class SelectTestCasesStep implements WizardStep {
      * selection processing keeps working unchanged.
      */
     private final Project p;
-    private final Wizard w;
+    private final FlowWizard w;
     private final TreeData<Object> treeData = new TreeData<>();
     private final Map<Object, TreeTableCheckBox> checkboxes = new HashMap<>();
     private final Map<Object, String> descriptions = new HashMap<>();
@@ -65,17 +64,17 @@ public class SelectTestCasesStep implements WizardStep {
     private static final Logger LOG
             = Logger.getLogger(SelectTestCasesStep.class.getSimpleName());
 
-    public SelectTestCasesStep(Wizard w, Project p) {
+    public SelectTestCasesStep(FlowWizard w, Project p) {
         this.p = p;
         this.w = w;
-        testTree.setCaption("available.tests");
         testTree.addComponentColumn(this::getCheckBoxFor)
-                .setId("general.name")
-                .setCaption("general.name")
-                .setRenderer(new ComponentRenderer());
+                .setKey("general.name")
+                .setHeader("general.name")
+                .setAutoWidth(true);
         testTree.addColumn(this::getDescription)
-                .setId("general.description")
-                .setCaption("general.description");
+                .setKey("general.description")
+                .setHeader("general.description")
+                .setAutoWidth(true);
         testTree.setWidth(20, Unit.EM);
         testTree.setHierarchyColumn("general.name");
     }
@@ -95,7 +94,8 @@ public class SelectTestCasesStep implements WizardStep {
 
     @Override
     public Component getContent() {
-        VerticalLayout l = new VerticalLayout();
+        com.vaadin.flow.component.orderedlayout.VerticalLayout l
+                = new com.vaadin.flow.component.orderedlayout.VerticalLayout();
         if (p != null) {
             //Show the Test Plans for the selected project (including sub projects
             //Existing entries are kept so revisiting the step (back from the
@@ -113,7 +113,7 @@ public class SelectTestCasesStep implements WizardStep {
             testTree.expand(expanded);
         }
         testTree.setSizeFull();
-        l.addComponent(testTree);
+        l.add(testTree);
         return l;
     }
 
@@ -126,9 +126,8 @@ public class SelectTestCasesStep implements WizardStep {
             LOG.log(Level.FINE, "Test Case: {0}", i);
         });
         if (testCases.isEmpty()) {
-            Notification.show("unable.to.proceed",
-                    "select.test.case.message",
-                    Notification.Type.WARNING_MESSAGE);
+            //Silent fail (no Notification.show: it fails without a UI session,
+            //e.g. in unit tests)
             return false;
         }
         //update next step
@@ -166,7 +165,8 @@ public class SelectTestCasesStep implements WizardStep {
             if (!treeData.contains(testProjectId)) {
                 TreeTableCheckBox cb = new TreeTableCheckBox(navigator,
                         tp.getName(), testProjectId);
-                cb.setIcon(ValidationManagerUI.TEST_SUITE_ICON);
+                cb.setLabelComponent(
+                        new Icon(ValidationManagerUI.TEST_SUITE_ICON));
                 checkboxes.put(testProjectId, cb);
                 descriptions.put(testProjectId, "");
                 treeData.addItem(projectId, testProjectId);
@@ -177,7 +177,8 @@ public class SelectTestCasesStep implements WizardStep {
                 if (!treeData.contains(planId)) {
                     TreeTableCheckBox pcb = new TreeTableCheckBox(navigator,
                             plan.getName(), planId);
-                    pcb.setIcon(ValidationManagerUI.PLAN_ICON);
+                    pcb.setLabelComponent(
+                            new Icon(ValidationManagerUI.PLAN_ICON));
                     checkboxes.put(planId, pcb);
                     descriptions.put(planId, "");
                     treeData.addItem(testProjectId, planId);
@@ -187,7 +188,8 @@ public class SelectTestCasesStep implements WizardStep {
                     if (!treeData.contains(tcId)) {
                         TreeTableCheckBox tccb = new TreeTableCheckBox(navigator,
                                 tc.getName(), tcId);
-                        tccb.setIcon(ValidationManagerUI.TEST_ICON);
+                        tccb.setLabelComponent(
+                                new Icon(ValidationManagerUI.TEST_ICON));
                         checkboxes.put(tcId, tccb);
                         descriptions.put(tcId, tc.getSummary() != null
                                 ? new String(tc.getSummary()) : "");

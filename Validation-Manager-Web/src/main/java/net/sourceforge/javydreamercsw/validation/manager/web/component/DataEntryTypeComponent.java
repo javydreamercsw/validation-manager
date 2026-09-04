@@ -15,14 +15,13 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Binder;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.DataEntryType;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import java.util.List;
 
 /**
@@ -33,28 +32,27 @@ public class DataEntryTypeComponent extends CustomField<List<DataEntryType>> {
 
     private List<DataEntryType> value;
     private final boolean edit;
+    private final FormLayout l = new FormLayout();
+    private Binder<DataEntryType> binder;
 
     public DataEntryTypeComponent(boolean edit) {
         this.edit = edit;
+        add(new Scroller(l));
     }
 
-    @Override
-    protected Component initContent() {
-        Panel p = new Panel();
-        FormLayout l = new FormLayout();
-        p.setContent(l);
-        Binder<DataEntryType> binder = new Binder<>(DataEntryType.class);
+    private void buildContent() {
+        l.removeAll();
+        binder = new Binder<>(DataEntryType.class);
         if (getValue() != null && !getValue().isEmpty()) {
             binder.setBean(getValue().get(0));
         }
         TextField name = new TextField(TRANSLATOR.translate("general.name"));
         binder.bind(name, "typeName");
-        l.addComponent(name);
+        l.add(name);
         TextField desc = new TextField(TRANSLATOR.translate("general.description"));
         binder.bind(desc, "typeDescription");
-        l.addComponent(desc);
+        l.add(desc);
         binder.setReadOnly(!edit);
-        return p;
     }
 
     @Override
@@ -63,7 +61,13 @@ public class DataEntryTypeComponent extends CustomField<List<DataEntryType>> {
     }
 
     @Override
-    protected void doSetValue(List<DataEntryType> value) {
+    protected void setPresentationValue(List<DataEntryType> value) {
         this.value = value;
+        buildContent();
+    }
+
+    @Override
+    protected List<DataEntryType> generateModelValue() {
+        return value;
     }
 }

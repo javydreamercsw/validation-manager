@@ -15,19 +15,20 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.provider;
 
-import com.vaadin.ui.Component;
-import com.validation.manager.core.IMainContentProvider;
+import com.vaadin.flow.component.Component;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
 import com.validation.manager.core.db.Project;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCancelledEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardProgressListener;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepCompletionEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepActivationEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepSetChangedEvent;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.DetailStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan.SelectTestCasesStep;
 import org.openide.util.lookup.ServiceProvider;
-import org.vaadin.teemu.wizards.Wizard;
-import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
-import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
-import org.vaadin.teemu.wizards.event.WizardProgressListener;
-import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
-import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 @ServiceProvider(service = IMainContentProvider.class, position = 3)
 public class DesignerScreenProvider extends AbstractProvider {
@@ -36,28 +37,33 @@ public class DesignerScreenProvider extends AbstractProvider {
 
     @Override
     public Component getContent() {
-        Wizard w = new Wizard();
+        FlowWizard w = new FlowWizard();
         w.addStep(new SelectTestCasesStep(w, p));
         w.addStep(new DetailStep());
-        w.addListener(new WizardProgressListener() {
+        w.addListener(new FlowWizardProgressListener() {
             @Override
-            public void activeStepChanged(WizardStepActivationEvent event) {
+            public void activeStepChanged(FlowWizardStepActivationEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void stepSetChanged(WizardStepSetChangedEvent event) {
+            public void stepSetChanged(FlowWizardStepSetChangedEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void wizardCompleted(WizardCompletedEvent event) {
+            public void stepCompleted(FlowWizardStepCompletionEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(FlowWizardCompletedEvent event) {
                 p = null;
                 ValidationManagerUI.getInstance().updateScreen();
             }
 
             @Override
-            public void wizardCancelled(WizardCancelledEvent event) {
+            public void wizardCancelled(FlowWizardCancelledEvent event) {
                 p = null;
                 ValidationManagerUI.getInstance().updateScreen();
             }

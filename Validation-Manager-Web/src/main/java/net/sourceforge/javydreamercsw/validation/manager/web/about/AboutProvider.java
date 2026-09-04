@@ -15,17 +15,15 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.about;
 
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.Link;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.validation.manager.core.IMainContentProvider;
-import static com.validation.manager.core.VMUI.LOGO;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI.LOGO;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.lookup.ServiceProvider;
@@ -50,15 +48,15 @@ public class AboutProvider extends AbstractProvider {
     @Override
     public Component getContent() {
         VerticalLayout vl = new VerticalLayout();
-        vl.addComponent(new Image("", LOGO));
+        vl.add(new Icon(LOGO));
         TextField version = new TextField(TRANSLATOR.translate("general.version"));
         version.setValue(((ValidationManagerUI) UI.getCurrent()).getVersion());
         version.setReadOnly(true);
-        vl.addComponent(version);
+        vl.add(version);
         TextField build = new TextField(TRANSLATOR.translate("general.build"));
         build.setValue(((ValidationManagerUI) UI.getCurrent()).getBuild());
         build.setReadOnly(true);
-        vl.addComponent(build);
+        vl.add(build);
         TextArea desc = new TextArea();
         desc.setValue("Validation Manager is a tool to handle all the "
                 + "cumbersome paperwork of regulated environment validations. "
@@ -66,11 +64,12 @@ public class AboutProvider extends AbstractProvider {
                 + "executions and exceptions. Keeping everything in one "
                 + "place and best of all paperless. ");
         desc.setReadOnly(true);
-        desc.setWidth(100, Unit.PERCENTAGE);
-        Link link = new Link("Get more information here",
-                new ExternalResource("https://github.com/javydreamercsw/validation-manager"));
-        vl.addComponent(desc);
-        vl.addComponent(link);
+        desc.setWidth("100%");
+        Anchor link = new Anchor(
+                "https://github.com/javydreamercsw/validation-manager",
+                "Get more information here");
+        vl.add(desc);
+        vl.add(link);
         vl.setId(getComponentCaption());
         return vl;
     }

@@ -35,16 +35,6 @@
             <artifactId>simplemagic</artifactId>
             <version>1.12</version>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-server</artifactId>
-            <version>${vaadin.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-icons</artifactId>
-            <version>${vaadin.icons.version}</version>
-        </dependency>
         <!--Flyway, Database update (9.22.3 is the last release with H2 support built in; 10+ splits it out)-->
         <dependency>
             <groupId>org.flywaydb</groupId>

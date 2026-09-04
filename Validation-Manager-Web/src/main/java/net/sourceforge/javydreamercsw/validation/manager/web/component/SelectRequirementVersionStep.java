@@ -15,20 +15,19 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Requirement;
-import java.util.List;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 import org.openide.util.Lookup;
-import org.vaadin.teemu.wizards.WizardStep;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class SelectRequirementVersionStep implements WizardStep {
+public class SelectRequirementVersionStep implements FlowWizardStep {
 
     private History h;
     private final Requirement r;
@@ -48,7 +47,7 @@ public class SelectRequirementVersionStep implements WizardStep {
     @Override
     public Component getContent() {
         history.setItems(getRequirement().getHistoryList());
-        history.setItemCaptionGenerator(temp -> {
+        history.setItemLabelGenerator(temp -> {
             String version = temp.getMajorVersion() + "."
                     + temp.getMidVersion() + "." + temp.getMinorVersion();
             return version;

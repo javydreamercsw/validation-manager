@@ -15,9 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.tester;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
-import com.validation.manager.core.IMainContentProvider;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.notification.Notification;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
@@ -55,10 +55,10 @@ public class TesterScreenProvider extends ExecutionScreen {
                 if (es.getExecutionStart() == null) {
                     //It has been assigned but not started
                     Notification.show(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                            .translate("test.pending.title"),
-                            Lookup.getDefault().lookup(InternationalizationProvider.class)
-                                    .translate("test.pending.message"),
-                            Notification.Type.TRAY_NOTIFICATION);
+                            .translate("test.pending.title")
+                            + " "
+                            + Lookup.getDefault().lookup(InternationalizationProvider.class)
+                                    .translate("test.pending.message") + ": " + 3000, 3000, Notification.Position.BOTTOM_START);
                     break;
                 }
             }

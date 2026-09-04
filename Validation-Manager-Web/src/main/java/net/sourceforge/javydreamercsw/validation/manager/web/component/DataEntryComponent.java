@@ -15,16 +15,17 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.Converter;
-import com.vaadin.data.Result;
-import com.vaadin.data.ValueContext;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.DataEntryType;
 import com.validation.manager.core.server.core.DataEntryServer;
@@ -40,10 +41,12 @@ public final class DataEntryComponent extends CustomField<List<DataEntry>> {
 
     private final boolean edit;
     private List<DataEntry> value;
+    private final VerticalLayout content = new VerticalLayout();
 
     public DataEntryComponent(boolean edit) {
-        setCaption(TRANSLATOR.translate("general.fields"));
+        setLabel(TRANSLATOR.translate("general.fields"));
         this.edit = edit;
+        add(new Scroller(content));
     }
 
     @Override
@@ -52,15 +55,18 @@ public final class DataEntryComponent extends CustomField<List<DataEntry>> {
     }
 
     @Override
-    protected void doSetValue(List<DataEntry> value) {
+    protected void setPresentationValue(List<DataEntry> value) {
         this.value = value;
+        buildContent();
     }
 
     @Override
-    protected Component initContent() {
-        Panel p = new Panel();
-        FormLayout layout = new FormLayout();
-        p.setContent(layout);
+    protected List<DataEntry> generateModelValue() {
+        return value;
+    }
+
+    private void buildContent() {
+        content.removeAll();
         getValue().forEach(de -> {
             Binder<DataEntry> binder = new Binder<>(DataEntry.class);
             binder.setBean(de);
@@ -68,7 +74,7 @@ public final class DataEntryComponent extends CustomField<List<DataEntry>> {
             binder.forField(name)
                     .withConverter(new TranslationConverter())
                     .bind("entryName");
-            layout.addComponent(name);
+            content.add(name);
             TextField type = new TextField(TRANSLATOR.translate("general.type"));
             binder.forField(type)
                     .withConverter(new Converter<String, DataEntryType>() {
@@ -95,11 +101,10 @@ public final class DataEntryComponent extends CustomField<List<DataEntry>> {
             DataEntryPropertyComponent properties
                     = new DataEntryPropertyComponent(edit);
             binder.bind(properties, "dataEntryPropertyList");
-            layout.addComponent(properties);
+            content.add(properties);
             binder.setReadOnly(!edit);
             type.setReadOnly(true);
         });
-        return p;
     }
 
     /**

@@ -15,7 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.ValueContext;
+import com.vaadin.flow.data.binder.ValueContext;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.test.AbstractVMTestCase;

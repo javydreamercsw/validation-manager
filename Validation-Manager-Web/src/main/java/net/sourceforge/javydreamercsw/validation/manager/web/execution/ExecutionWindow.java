@@ -15,13 +15,14 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.execution;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.UI;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.UI;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 import com.validation.manager.core.api.notification.NotificationTypes;
 import com.validation.manager.core.db.ExecutionStepHasVmUser;
 import com.validation.manager.core.db.VmUser;
@@ -31,8 +32,6 @@ import com.validation.manager.core.server.core.ActivityServer;
 import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.RoleServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
-import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.MessageBox;
 import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
@@ -40,15 +39,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCancelledEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardProgressListener;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepActivationEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepCompletionEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepSetChangedEvent;
 import net.sourceforge.javydreamercsw.validation.manager.web.notification.NotificationManager;
 import org.openide.util.Lookup;
-import org.vaadin.teemu.wizards.Wizard;
-import org.vaadin.teemu.wizards.WizardStep;
-import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
-import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
-import org.vaadin.teemu.wizards.event.WizardProgressListener;
-import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
-import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 /**
  *
@@ -90,7 +90,7 @@ public final class ExecutionWindow extends VMWindow {
 
     private void init(List<TestCaseExecutionServer> executions, int tcID) {
         HorizontalLayout layout = new HorizontalLayout();
-        Wizard execution = new Wizard();
+        FlowWizard execution = new FlowWizard();
         TreeMap<Integer, TreeMap<Integer, ExecutionWizardStep>> sorted
                 = new TreeMap<>();
         executions.forEach((tce) -> {
@@ -114,25 +114,32 @@ public final class ExecutionWindow extends VMWindow {
                 execution.addStep(ew);
             });
         });
-        execution.setDisplayedMaxTitles(3);
-        execution.addListener(new WizardProgressListener() {
+        //v8 wizard.setDisplayedMaxTitles has no Flow equivalent; the step
+        //counter in the header serves the same purpose.
+        execution.addListener(new FlowWizardProgressListener() {
             @Override
-            public void activeStepChanged(WizardStepActivationEvent event) {
+            public void activeStepChanged(FlowWizardStepActivationEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void stepSetChanged(WizardStepSetChangedEvent event) {
+            public void stepSetChanged(FlowWizardStepSetChangedEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void wizardCompleted(WizardCompletedEvent event) {
+            public void stepCompleted(FlowWizardStepCompletionEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(FlowWizardCompletedEvent event) {
                 if (reviewer) {
-                    MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption(TRANSLATOR.translate("release.test.case.title"))
-                            .withMessage(TRANSLATOR.translate("release.test.case.message"))
-                            .withYesButton(() -> {
+                    ConfirmDialog prompt = new ConfirmDialog();
+                    prompt.setHeader(TRANSLATOR.translate("release.test.case.title"));
+                    prompt.setText(TRANSLATOR.translate("release.test.case.message"));
+                    prompt.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                            (ComponentEventListener<ConfirmDialog.ConfirmEvent>) e -> {
                                 execution.getSteps().stream().map((step)
                                         -> (ExecutionWizardStep) step).map((s)
                                         -> s.getExecutionStep()).filter((ess) -> (!ess.getLocked()
@@ -174,17 +181,19 @@ public final class ExecutionWindow extends VMWindow {
                                                 LOG.log(Level.SEVERE, null, ex);
                                             }
                                         });
-                            }, ButtonOption.focus(),
-                                    ButtonOption.icon(VaadinIcons.CHECK))
-                            .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
-                    prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                            });
+                    prompt.setCancelButton(TRANSLATOR.translate("general.no"),
+                            (ComponentEventListener<ConfirmDialog.CancelEvent>) (e) -> {
+                                //Do nothing
+                            });
                     prompt.open();
                 } else {
-                    MessageBox prompt = MessageBox.createQuestion()
-                            .withCaption(TRANSLATOR.translate("lock.test.case.title"))
-                            .withMessage(TRANSLATOR.translate("lock.test.case.message"))
-                            .withYesButton(() -> {
-                                for (WizardStep step : execution.getSteps()) {
+                    ConfirmDialog prompt = new ConfirmDialog();
+                    prompt.setHeader(TRANSLATOR.translate("lock.test.case.title"));
+                    prompt.setText(TRANSLATOR.translate("lock.test.case.message"));
+                    prompt.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                            (ComponentEventListener<ConfirmDialog.ConfirmEvent>) (e) -> {
+                                for (var step : execution.getSteps()) {
                                     ExecutionWizardStep s = (ExecutionWizardStep) step;
                                     ExecutionStepServer ess = s.getExecutionStep();
                                     if (!ess.getLocked()
@@ -209,23 +218,27 @@ public final class ExecutionWindow extends VMWindow {
                                         }
                                     }
                                 }
-                            }, ButtonOption.focus(),
-                                    ButtonOption.icon(VaadinIcons.CHECK))
-                            .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
-                    prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                            });
+                    prompt.setCancelButton(TRANSLATOR.translate("general.no"),
+                            (ComponentEventListener<ConfirmDialog.CancelEvent>) (e) -> {
+                                //Do nothing
+                            });
                     prompt.open();
                 }
-                ValidationManagerUI.getInstance().removeWindow(ExecutionWindow.this);
+                //Flow equivalent of v8 UI.removeWindow(this)
+                ValidationManagerUI.getInstance().closeDialog(ExecutionWindow.this);
             }
 
             @Override
-            public void wizardCancelled(WizardCancelledEvent event) {
-                ValidationManagerUI.getInstance().removeWindow(ExecutionWindow.this);
+            public void wizardCancelled(FlowWizardCancelledEvent event) {
+                ValidationManagerUI.getInstance().closeDialog(ExecutionWindow.this);
             }
         });
-        layout.addComponent(execution);
+        layout.add(execution);
         layout.setSizeFull();
-        setContent(layout);
+        add(layout);
+        setWidth("100%");
+        setHeight("100%");
     }
 
     private void save(ExecutionStepServer ess) throws VMException {

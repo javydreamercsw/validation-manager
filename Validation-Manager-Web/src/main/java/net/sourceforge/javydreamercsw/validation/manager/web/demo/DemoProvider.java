@@ -15,12 +15,11 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.demo;
 
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.IMainContentProvider;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.tool.MD5;
@@ -46,16 +45,15 @@ public class DemoProvider extends AbstractProvider {
 
     @Override
     public void update() {
-        layout.removeAllComponents();
+        layout.removeAll();
         VmUserJpaController controller
                 = new VmUserJpaController(DataBaseManager
                         .getEntityManagerFactory());
-        layout.addComponent(new Label("<h1>"
-                + TRANSLATOR.translate("demo.tab.title") + "</h1>",
-                ContentMode.HTML));
-        Label l = new Label();
+        layout.add(new Html("<h1>"
+                + TRANSLATOR.translate("demo.tab.title") + "</h1>"));
+        Html l = new Html("<span></span>");
         l.setId("demo.tab.message");
-        layout.addComponent(l);
+        layout.add(l);
         StringBuilder sb = new StringBuilder("<ul>");
         controller.findVmUserEntities().stream().filter((u)
                 -> (u.getId() < 1_000)).forEachOrdered((u) -> {
@@ -85,8 +83,7 @@ public class DemoProvider extends AbstractProvider {
             }
         });
         sb.append("</ul>");
-        layout.addComponent(new Label(sb.toString(),
-                ContentMode.HTML));
+        layout.add(new Html(sb.toString()));
         layout.setId(getComponentCaption());
     }
 

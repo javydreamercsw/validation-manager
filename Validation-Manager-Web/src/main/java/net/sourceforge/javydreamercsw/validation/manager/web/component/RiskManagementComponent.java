@@ -15,14 +15,13 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.TreeGrid;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.FailureModeHasCauseHasRiskCategory;
 import com.validation.manager.core.db.FailureModeHasCauseHasRiskCategoryPK;
@@ -31,6 +30,7 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.RiskCategory;
 import com.validation.manager.core.db.controller.FailureModeHasCauseHasRiskCategoryJpaController;
 import com.validation.manager.core.tool.Tool;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -43,7 +43,7 @@ import org.openide.util.Exceptions;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class RiskManagementComponent extends HorizontalSplitPanel {
+public final class RiskManagementComponent extends SplitLayout {
 
     private static final Logger LOG
             = Logger.getLogger(RiskManagementComponent.class.getSimpleName());
@@ -88,30 +88,28 @@ public final class RiskManagementComponent extends HorizontalSplitPanel {
     }
 
     public RiskManagementComponent(Project p) {
-        setSplitPosition(25, Unit.PERCENTAGE);
-        setLocked(true);
-        Tree<Object> tree = new Tree<>("Test");
+        setOrientation(SplitLayout.Orientation.HORIZONTAL);
+        setSplitterPosition(25);
+        //Flow has no standalone Tree: the FMEA hierarchy renders in a TreeGrid.
+        TreeGrid<Object> tree = new TreeGrid<>();
         TreeData<Object> treeData = new TreeData<>();
         treeData.addRootItems(p);
-        tree.setItemCaptionGenerator(item -> item instanceof Project
+        tree.setDataProvider(new TreeDataProvider<>(treeData));
+        tree.addComponentHierarchyColumn(item -> new Span(item instanceof Project
                 ? ((Project) item).getName()
                 : item instanceof Fmea ? ((Fmea) item).getName()
-                : String.valueOf(item));
-        p.getFmeaList().forEach(fmea -> {
-            treeData.addItem(p, fmea);
-        });
-        tree.setDataProvider(new TreeDataProvider<>(treeData));
+                : String.valueOf(item)))
+                .setKey("caption");
         tree.setSizeFull();
         tree.expand(p);
         TreeGrid<Row> ttable = new TreeGrid<>();
-        ttable.setCaption("FMEA");
-        ttable.addColumn(Row::getName).setId("Name").setCaption("Name");
-        ttable.addColumn(Row::getHazard).setId("Hazard").setCaption("Hazard");
-        ttable.addColumn(Row::getFailureMode).setId("Failure Mode")
-                .setCaption("Failure Mode");
-        ttable.addColumn(Row::getCause).setId("Cause").setCaption("Cause");
+        ttable.addColumn(Row::getName).setKey("Name").setHeader("Name");
+        ttable.addColumn(Row::getHazard).setKey("Hazard").setHeader("Hazard");
+        ttable.addColumn(Row::getFailureMode).setKey("Failure Mode")
+                .setHeader("Failure Mode");
+        ttable.addColumn(Row::getCause).setKey("Cause").setHeader("Cause");
         ttable.setSizeFull();
-        tree.addItemClickListener((Tree.ItemClick<Object> event) -> {
+        tree.addItemClickListener((ItemClickEvent<Object> event) -> {
             tree.asSingleSelect().setValue(event.getItem());
             if (tree.asSingleSelect().getValue() != null
                     && tree.asSingleSelect().getValue() instanceof Fmea) {
@@ -120,7 +118,7 @@ public final class RiskManagementComponent extends HorizontalSplitPanel {
                 //Replace the generated category columns on each selection
                 //to match the v7 addGeneratedColumn() semantics.
                 ttable.getColumns().stream()
-                        .filter(col -> !FIRST_COLUMNS.contains(col.getId()))
+                        .filter(col -> !FIRST_COLUMNS.contains(col.getKey()))
                         .collect(Collectors.toList())
                         .forEach(col -> ttable.removeColumn(col));
                 //One column per risk category with a computed cell
@@ -162,24 +160,23 @@ public final class RiskManagementComponent extends HorizontalSplitPanel {
                                     }
                                 }
                                 //Return result as text.
-                                return "" + fmhchrc.getCategoryValue();
+                                return "" + fmhchchrcValue(fmhchrc);
                             }
                         }
                         return "";
-                    }).setCaption(rc.getName());
+                    }).setHeader(rc.getName());
                 });
                 ttable.setDataProvider(buildRows(fmea));
             }
         });
-        ContextMenu contextMenu = new ContextMenu(tree, true);
-        tree.addItemClickListener((Tree.ItemClick<Object> event) -> {
-            if (event.getMouseEventDetails().getButton() == MouseButton.RIGHT) {
-                contextMenu.removeItems();
-            }
-        });
-        setFirstComponent(tree);
-        setSecondComponent(ttable);
+        ContextMenu contextMenu = new ContextMenu(tree);
+        addToPrimary(tree);
+        addToSecondary(ttable);
         setSizeFull();
+    }
+
+    private static String fmhchchrcValue(FailureModeHasCauseHasRiskCategory fmhchrc) {
+        return "" + fmhchrc.getCategoryValue();
     }
 
     private static TreeDataProvider<Row> buildRows(

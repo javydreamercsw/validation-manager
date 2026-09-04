@@ -15,41 +15,38 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.template;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.UI;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.IMainContentProvider;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.Template;
 import com.validation.manager.core.db.controller.TemplateJpaController;
 import com.validation.manager.core.server.core.TemplateServer;
-import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.MessageBox;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.admin.AdminProvider;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TemplateComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCancelledEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardProgressListener;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepActivationEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepCompletionEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepSetChangedEvent;
 import org.openide.util.lookup.ServiceProvider;
-import org.vaadin.teemu.wizards.Wizard;
-import org.vaadin.teemu.wizards.WizardStep;
-import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
-import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
-import org.vaadin.teemu.wizards.event.WizardProgressListener;
-import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
-import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 /**
  *
@@ -58,10 +55,13 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 @ServiceProvider(service = IMainContentProvider.class, position = 6)
 public class TemplateScreenProvider extends AdminProvider {
 
-    private final NativeSelect<Template> templates;
+    private final Select<Template> templates;
+    private final Button create = new Button(TRANSLATOR.translate("general.add"));
+    private final Button copy = new Button(TRANSLATOR.translate("general.copy"));
+    private final Button delete = new Button(TRANSLATOR.translate("general.delete"));
     private static final Logger LOG
             = Logger.getLogger(TemplateScreenProvider.class.getSimpleName());
-    private final HorizontalSplitPanel hs = new HorizontalSplitPanel();
+    private final SplitLayout hs = new SplitLayout();
 
     @Override
     public String getComponentCaption() {
@@ -69,15 +69,16 @@ public class TemplateScreenProvider extends AdminProvider {
     }
 
     public TemplateScreenProvider() {
-        templates = new NativeSelect<>(TRANSLATOR.translate("template.tab.list.name"));
+        templates = new Select<>();
+        templates.setLabel(TRANSLATOR.translate("template.tab.list.name"));
     }
 
     @Override
     public Component getContent() {
-        Panel p = new Panel();
-        hs.setSplitPosition(30, Sizeable.Unit.PERCENTAGE);
-        hs.setFirstComponent(getLeftComponent());
-        hs.setSecondComponent(getRightComponent());
+        Scroller p = new Scroller();
+        hs.setSplitterPosition(30);
+        hs.addToPrimary(getLeftComponent());
+        hs.addToSecondary(getRightComponent());
         hs.setSizeFull();
         p.setContent(hs);
         p.setId(getComponentCaption());
@@ -85,37 +86,17 @@ public class TemplateScreenProvider extends AdminProvider {
     }
 
     private Component getLeftComponent() {
-        Panel p = new Panel();
+        Scroller p = new Scroller();
         VerticalLayout layout = new VerticalLayout();
-        templates.setEmptySelectionAllowed(true);
-        templates.setWidth(100, Sizeable.Unit.PERCENTAGE);
+        templates.setWidthFull();
         templates.setItems(new TemplateJpaController(DataBaseManager
                 .getEntityManagerFactory())
                 .findTemplateEntities());
-        templates.setItemCaptionGenerator(temp
+        templates.setItemLabelGenerator(temp
                 -> TRANSLATOR.translate(temp.getTemplateName()));
         templates.addValueChangeListener(event -> {
-            hs.setSecondComponent(getRightComponent());
+            hs.addToSecondary(getRightComponent());
         });
-        templates.setEmptySelectionAllowed(false);
-        templates.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        layout.addComponent(templates);
-        HorizontalLayout hl = new HorizontalLayout();
-        Button create = new Button(TRANSLATOR.translate("general.add"));
-        create.addClickListener(listener -> {
-            displayTemplateCreateWizard();
-        });
-        hl.addComponent(create);
-        Button copy = new Button(TRANSLATOR.translate("general.copy"));
-        copy.addClickListener(listener -> {
-            displayTemplateCopyWizard();
-        });
-        hl.addComponent(copy);
-        Button delete = new Button(TRANSLATOR.translate("general.delete"));
-        delete.addClickListener(listener -> {
-            displayTemplateDeleteWizard();
-        });
-        hl.addComponent(delete);
         templates.addValueChangeListener(listener -> {
             if (templates.getValue() != null) {
                 Template t = templates.getValue();
@@ -123,7 +104,21 @@ public class TemplateScreenProvider extends AdminProvider {
                 copy.setEnabled(t.getTemplateNodeList().size() > 0);
             }
         });
-        layout.addComponent(hl);
+        layout.add(templates);
+        HorizontalLayout hl = new HorizontalLayout();
+        create.addClickListener(listener -> {
+            displayTemplateCreateWizard();
+        });
+        hl.add(create);
+        copy.addClickListener(listener -> {
+            displayTemplateCopyWizard();
+        });
+        hl.add(copy);
+        delete.addClickListener(listener -> {
+            displayTemplateDeleteWizard();
+        });
+        hl.add(delete);
+        layout.add(hl);
         layout.setSizeFull();
         p.setContent(layout);
         p.setSizeFull();
@@ -132,15 +127,15 @@ public class TemplateScreenProvider extends AdminProvider {
 
     private Component getRightComponent() {
         Template t = templates.getValue();
-        return t == null ? new Panel()
+        return t == null ? new VerticalLayout()
                 : new TemplateComponent(t, t.getId() >= 1000);
     }
 
     private void displayTemplateCopyWizard() {
-        Wizard w = new Wizard();
-        Window cw = new VMWindow();
+        FlowWizard w = new FlowWizard();
+        VMWindow cw = new VMWindow();
         TemplateComponent tc = new TemplateComponent(new Template(), true);
-        w.addStep(new WizardStep() {
+        w.addStep(new FlowWizardStep() {
 
             @Override
             public String getCaption() {
@@ -161,9 +156,8 @@ public class TemplateScreenProvider extends AdminProvider {
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                     Notification.show(TRANSLATOR
-                            .translate("general.error.record.creation"),
-                            ex.getLocalizedMessage(),
-                            Notification.Type.ERROR_MESSAGE);
+                            .translate("general.error.record.creation") + ": "
+                            + ex.getLocalizedMessage());
                 }
                 return false;
             }
@@ -173,39 +167,43 @@ public class TemplateScreenProvider extends AdminProvider {
                 return false;
             }
         });
-        w.addListener(new WizardProgressListener() {
+        w.addListener(new FlowWizardProgressListener() {
             @Override
-            public void activeStepChanged(WizardStepActivationEvent event) {
+            public void activeStepChanged(FlowWizardStepActivationEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void stepSetChanged(WizardStepSetChangedEvent event) {
+            public void stepSetChanged(FlowWizardStepSetChangedEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void wizardCompleted(WizardCompletedEvent event) {
+            public void stepCompleted(FlowWizardStepCompletionEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(FlowWizardCompletedEvent event) {
                 ((VMUI) UI.getCurrent()).updateScreen();
                 ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
-                UI.getCurrent().removeWindow(cw);
+                ((VMUI) UI.getCurrent()).closeDialog(cw);
             }
 
             @Override
-            public void wizardCancelled(WizardCancelledEvent event) {
-                UI.getCurrent().removeWindow(cw);
+            public void wizardCancelled(FlowWizardCancelledEvent event) {
+                ((VMUI) UI.getCurrent()).closeDialog(cw);
             }
         });
-        cw.setContent(w);
-        cw.setSizeFull();
-        UI.getCurrent().addWindow(cw);
+        cw.add(w);
+        ((VMUI) UI.getCurrent()).openDialog(cw);
     }
 
     private void displayTemplateCreateWizard() {
-        Wizard w = new Wizard();
-        Window cw = new VMWindow();
+        FlowWizard w = new FlowWizard();
+        VMWindow cw = new VMWindow();
         TemplateComponent tc = new TemplateComponent(new Template(), true);
-        w.addStep(new WizardStep() {
+        w.addStep(new FlowWizardStep() {
             private final TextField nameField
                     = new TextField(TRANSLATOR.translate("general.name"));
 
@@ -228,9 +226,8 @@ public class TemplateScreenProvider extends AdminProvider {
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                     Notification.show(TRANSLATOR
-                            .translate("general.error.record.creation"),
-                            ex.getLocalizedMessage(),
-                            Notification.Type.ERROR_MESSAGE);
+                            .translate("general.error.record.creation") + ": "
+                            + ex.getLocalizedMessage());
                 }
                 return false;
             }
@@ -240,59 +237,59 @@ public class TemplateScreenProvider extends AdminProvider {
                 return false;
             }
         });
-        w.addListener(new WizardProgressListener() {
+        w.addListener(new FlowWizardProgressListener() {
             @Override
-            public void activeStepChanged(WizardStepActivationEvent event) {
+            public void activeStepChanged(FlowWizardStepActivationEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void stepSetChanged(WizardStepSetChangedEvent event) {
+            public void stepSetChanged(FlowWizardStepSetChangedEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void wizardCompleted(WizardCompletedEvent event) {
+            public void stepCompleted(FlowWizardStepCompletionEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(FlowWizardCompletedEvent event) {
                 ((VMUI) UI.getCurrent()).updateScreen();
                 ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
-                UI.getCurrent().removeWindow(cw);
+                ((VMUI) UI.getCurrent()).closeDialog(cw);
             }
 
             @Override
-            public void wizardCancelled(WizardCancelledEvent event) {
-                UI.getCurrent().removeWindow(cw);
+            public void wizardCancelled(FlowWizardCancelledEvent event) {
+                ((VMUI) UI.getCurrent()).closeDialog(cw);
             }
         });
-        cw.setContent(w);
-        cw.setSizeFull();
-        UI.getCurrent().addWindow(cw);
+        cw.add(w);
+        ((VMUI) UI.getCurrent()).openDialog(cw);
     }
 
     private void displayTemplateDeleteWizard() {
-        MessageBox prompt = MessageBox.createQuestion()
-                .withCaption(TRANSLATOR.translate("template.delete.title"))
-                .withMessage(TRANSLATOR.translate("template.delete.message"))
-                .withYesButton(() -> {
-                    if (templates.getValue() != null) {
-                        try {
-                            //Delete nodes
-                            TemplateServer t
-                                    = new TemplateServer(templates
-                                            .getValue());
-                            t.delete();
-                            ((VMUI) UI.getCurrent()).updateScreen();
-                            ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
-                        } catch (VMException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
-                        }
-                    }
-                },
-                        ButtonOption.focus(),
-                        ButtonOption
-                                .icon(VaadinIcons.CHECK))
-                .withNoButton(ButtonOption
-                        .icon(VaadinIcons.CLOSE));
-        prompt.getWindow().setIcon(VMUI.SMALL_APP_ICON);
+        ConfirmDialog prompt = new ConfirmDialog(
+                TRANSLATOR.translate("template.delete.title"),
+                TRANSLATOR.translate("template.delete.message"),
+                TRANSLATOR.translate("general.confirm"), confirmEvent -> {
+            if (templates.getValue() != null) {
+                try {
+                    //Delete nodes
+                    TemplateServer t
+                            = new TemplateServer(templates
+                                    .getValue());
+                    t.delete();
+                    ((VMUI) UI.getCurrent()).updateScreen();
+                    ((VMUI) UI.getCurrent()).showTab(getComponentCaption());
+                } catch (VMException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        prompt.setConfirmButtonTheme("primary");
+        prompt.setRejectable(false);
         prompt.open();
     }
 }

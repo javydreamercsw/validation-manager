@@ -24,13 +24,13 @@ import com.validation.manager.core.db.controller.TemplateJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.ProjectTypeServer;
 import com.validation.manager.test.AbstractVMTestCase;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCancelledEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardProgressListener;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepActivationEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepSetChangedEvent;
 import org.junit.Test;
-import org.vaadin.teemu.wizards.Wizard;
-import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
-import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
-import org.vaadin.teemu.wizards.event.WizardProgressListener;
-import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
-import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 /**
  *
@@ -50,26 +50,32 @@ public class ProjectCreationWizardTest extends AbstractVMTestCase {
         ProjectServer ps = new ProjectServer("", "",
                 new ProjectTypeServer(1).getEntity());
         ProjectCreationWizard instance = new ProjectCreationWizard(ps);
-        Wizard w = instance.getWizard();
-        w.addListener(new WizardProgressListener() {
+        FlowWizard w = instance.getWizard();
+        w.addListener(new FlowWizardProgressListener() {
             @Override
-            public void activeStepChanged(WizardStepActivationEvent event) {
+            public void activeStepChanged(FlowWizardStepActivationEvent event) {
                 System.out.println("Activated step: "
-                        + event.getActivatedStep().getCaption());
+                        + event.getStep().getCaption());
             }
 
             @Override
-            public void stepSetChanged(WizardStepSetChangedEvent event) {
+            public void stepSetChanged(FlowWizardStepSetChangedEvent event) {
                 System.out.println("Step set changed!");
             }
 
             @Override
-            public void wizardCompleted(WizardCompletedEvent event) {
+            public void stepCompleted(
+                    net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepCompletionEvent event) {
+                System.out.println("Step completed");
+            }
+
+            @Override
+            public void wizardCompleted(FlowWizardCompletedEvent event) {
                 System.out.println("Wizard completed");
             }
 
             @Override
-            public void wizardCancelled(WizardCancelledEvent event) {
+            public void wizardCancelled(FlowWizardCancelledEvent event) {
                 System.out.println("Wizard cancelled");
             }
         });
@@ -94,7 +100,7 @@ public class ProjectCreationWizardTest extends AbstractVMTestCase {
         //Step 3
         GAMPStep step3 = (GAMPStep) w.getSteps().get(2);
         assertFalse(step3.onAdvance());
-        assertEquals(2, ((com.vaadin.data.provider.ListDataProvider<String>) step3
+        assertEquals(2, ((com.vaadin.flow.data.provider.ListDataProvider<String>) step3
                 .getCategory().getDataProvider()).getItems().size());
         //Select category 1
         step3.getCategory().setValue("template.gamp5.hw.cat1");
@@ -122,7 +128,7 @@ public class ProjectCreationWizardTest extends AbstractVMTestCase {
         step1.getType().setValue("general.software");
         step1.onAdvance();//Set the new type
         step3.getContent();//Refresh the categories
-        assertEquals(4, ((com.vaadin.data.provider.ListDataProvider<String>) step3
+        assertEquals(4, ((com.vaadin.flow.data.provider.ListDataProvider<String>) step3
                 .getCategory().getDataProvider()).getItems().size());
         assertNull(instance.getProcess());
         //Select category 1

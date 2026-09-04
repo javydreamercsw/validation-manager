@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.file;
 
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Component;
 import java.io.File;
 import java.io.IOException;
 
@@ -48,7 +48,7 @@ public interface IFileDisplay {
      * @param f File to display
      * @return Component to view this file.
      */
-    Window getViewer(File f);
+    Component getViewer(File f);
 
     /**
      * Load the file from a byte array (stored in the database)

@@ -15,20 +15,21 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.file;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.IFrame;
+import com.vaadin.flow.server.StreamResource;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.lookup.ServiceProvider;
-import pl.pdfviewer.PdfViewer;
 
 /**
- * Display a PDF file. Based on code from:
- * http://jcraane.blogspot.co.uk/2010/09/printing-in-vaadin.html
- *
- * This class creates a PDF with the iText library. This class implements the
- * StreamSource interface which defines the getStream method.
+ * Display a PDF file. The pdfviewer add-on has no Flow port; browsers render
+ * PDFs natively, so the file is streamed into an iframe pointed at a
+ * {@link StreamResource}.
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
@@ -41,13 +42,24 @@ public class PDFDisplay extends AbstractFileDisplay {
     }
 
     @Override
-    public Window getViewer(File f) {
-        VMWindow w = new VMWindow(f.getName());
-        PdfViewer pdfViewer = new PdfViewer(f);
-        pdfViewer.setSizeFull();
-        w.setContent(pdfViewer);
-        w.setHeight(80, Sizeable.Unit.PERCENTAGE);
-        w.setWidth(80, Sizeable.Unit.PERCENTAGE);
+    public Component getViewer(File f) {
+        Dialog w = new VMWindow(f.getName());
+        IFrame viewer = new IFrame();
+        viewer.setSrc(toResource(f));
+        viewer.setSizeFull();
+        w.add(viewer);
+        w.setWidth("80%");
+        w.setHeight("80%");
         return w;
+    }
+
+    private StreamResource toResource(File file) {
+        return new StreamResource(file.getName(), () -> {
+            try {
+                return new FileInputStream(file);
+            } catch (IOException ex) {
+                return new java.io.ByteArrayInputStream(new byte[0]);
+            }
+        });
     }
 }
