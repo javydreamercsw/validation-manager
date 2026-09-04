@@ -15,7 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
-import com.vaadin.v7.ui.AbstractSelect;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.UI;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.Template;
@@ -157,12 +157,9 @@ public final class ProjectCreationWizard extends VMWindow {
         this.ps = ps;
     }
 
-    public void translateSelect(AbstractSelect s) {
-        for (Object o : s.getItemIds()) {
-            String id = ((String) o);
-            s.setItemCaption(id, (id.startsWith("template")
-                    ? (id.substring(id.length() - 1) + "-") : "")
-                    + TRANSLATOR.translate((String) id));
-        }
+    public void translateSelect(ComboBox<String> s) {
+        s.setItemCaptionGenerator(id -> (id.startsWith("template")
+                ? (id.substring(id.length() - 1) + "-") : "")
+                + TRANSLATOR.translate(id));
     }
 }

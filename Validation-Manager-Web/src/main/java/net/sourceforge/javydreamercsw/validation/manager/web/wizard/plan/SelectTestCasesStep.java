@@ -15,17 +15,22 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
-import com.vaadin.v7.data.Item;
+import com.vaadin.data.TreeData;
+import com.vaadin.data.provider.TreeDataProvider;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
-import com.vaadin.v7.ui.TreeTable;
+import com.vaadin.ui.TreeGrid;
+import com.vaadin.ui.renderers.ComponentRenderer;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.tool.Tool;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,9 +45,22 @@ import org.vaadin.teemu.wizards.WizardStep;
  */
 public class SelectTestCasesStep implements WizardStep {
 
+    /**
+     * Row ids keep the same synthetic String ids the v7 TreeTable used
+     * ("project" + project id, "testproject" + test project id and
+     * {@link Tool#buildId(java.lang.Object)} test case ids) mixed with
+     * {@link com.validation.manager.core.db.TestPlanPK} plan ids, so the
+     * selection processing keeps working unchanged.
+     */
     private final Project p;
     private final Wizard w;
-    private final TreeTable testTree = new TreeTable("available.tests");
+    private final TreeData<Object> treeData = new TreeData<>();
+    private final Map<Object, TreeTableCheckBox> checkboxes = new HashMap<>();
+    private final Map<Object, String> descriptions = new HashMap<>();
+    private final TreeNavigatorImpl navigator
+            = new TreeNavigatorImpl(treeData, checkboxes);
+    private final TreeGrid<Object> testTree = new TreeGrid<>();
+    private TreeDataProvider<Object> dataProvider;
     private final List<Integer> projects = new ArrayList<>();
     private static final Logger LOG
             = Logger.getLogger(SelectTestCasesStep.class.getSimpleName());
@@ -50,6 +68,24 @@ public class SelectTestCasesStep implements WizardStep {
     public SelectTestCasesStep(Wizard w, Project p) {
         this.p = p;
         this.w = w;
+        testTree.setCaption("available.tests");
+        testTree.addComponentColumn(this::getCheckBoxFor)
+                .setId("general.name")
+                .setCaption("general.name")
+                .setRenderer(new ComponentRenderer());
+        testTree.addColumn(this::getDescription)
+                .setId("general.description")
+                .setCaption("general.description");
+        testTree.setWidth(20, Unit.EM);
+        testTree.setHierarchyColumn("general.name");
+    }
+
+    private TreeTableCheckBox getCheckBoxFor(Object id) {
+        return checkboxes.get(id);
+    }
+
+    private String getDescription(Object id) {
+        return descriptions.getOrDefault(id, "");
     }
 
     @Override
@@ -60,19 +96,23 @@ public class SelectTestCasesStep implements WizardStep {
     @Override
     public Component getContent() {
         VerticalLayout l = new VerticalLayout();
-        //Add menu
-        HorizontalLayout menu = new HorizontalLayout();
         if (p != null) {
             //Show the Test Plans for the selected project (including sub projects
-            testTree.addContainerProperty("general.name",
-                    TreeTableCheckBox.class, "");
-            testTree.addContainerProperty("general.description",
-                    String.class, "");
-            testTree.setWidth("20em");
-            addProjectTestPlanning(testTree, p);
+            //Existing entries are kept so revisiting the step (back from the
+            //detail step) keeps the current selection and expansion, like the
+            //v7 TreeTable
+            List<Object> expanded = new ArrayList<>();
+            addProjectTestPlanning(p, expanded);
+            if (dataProvider == null) {
+                dataProvider = new TreeDataProvider<>(treeData);
+                testTree.setDataProvider(dataProvider);
+            } else {
+                dataProvider.refreshAll();
+            }
+            //Projects and test projects start expanded, test plans collapsed
+            testTree.expand(expanded);
         }
         testTree.setSizeFull();
-        l.addComponent(menu);
         l.addComponent(testTree);
         return l;
     }
@@ -102,109 +142,106 @@ public class SelectTestCasesStep implements WizardStep {
         return false;
     }
 
-    private void addProjectTestPlanning(TreeTable testTree, Project p) {
+    private void addProjectTestPlanning(Project p, List<Object> expanded) {
         //Add the test projects
-        testTree.addItem(new Object[]{new TreeTableCheckBox(testTree,
-            p.getName(), "project" + p.getId()), ""},
-                "project" + p.getId());
-        if (p.getParentProjectId() != null) {
-            //Add as child
-            testTree.setParent("project" + p.getId(),
-                    "project" + p.getParentProjectId().getId());
+        String projectId = "project" + p.getId();
+        if (!treeData.contains(projectId)) {
+            checkboxes.put(projectId, new TreeTableCheckBox(navigator,
+                    p.getName(), projectId));
+            descriptions.put(projectId, "");
+            treeData.addRootItems(projectId);
+            expanded.add(projectId);
         }
-        p.getTestProjectList().stream().map((tp) -> {
-            TreeTableCheckBox cb = new TreeTableCheckBox(testTree,
-                    tp.getName(), "testproject" + tp.getId());
-            cb.setIcon(ValidationManagerUI.TEST_SUITE_ICON);
-            testTree.addItem(new Object[]{cb, ""},
-                    "testproject" + tp.getId());
-            return tp;
-        }).map((tp) -> {
-            testTree.setParent("testproject" + tp.getId(),
-                    "project" + p.getId());
-            return tp;
-        }).map((tp) -> {
-            tp.getTestPlanList().stream().map((plan) -> {
-                TreeTableCheckBox pcb = new TreeTableCheckBox(testTree,
-                        plan.getName(), plan.getTestPlanPK());
-                pcb.setIcon(ValidationManagerUI.PLAN_ICON);
-                testTree.addItem(new Object[]{pcb, ""},
-                        plan.getTestPlanPK());
-                return plan;
-            }).map((plan) -> {
-                testTree.setParent(plan.getTestPlanPK(),
-                        "testproject" + tp.getId());
-                return plan;
-            }).forEachOrdered((plan) -> {
-                plan.getTestCaseList().stream().map((tc) -> {
-                    TreeTableCheckBox tccb = new TreeTableCheckBox(testTree,
-                            tc.getName(), Tool.buildId(tc));
-                    tccb.setIcon(ValidationManagerUI.TEST_ICON);
-                    testTree.addItem(new Object[]{tccb,
-                        tc.getSummary() != null
-                        ? new String(tc.getSummary()) : ""},
-                            Tool.buildId(tc));
-                    return tc;
-                }).map((tc) -> {
-                    testTree.setParent(Tool.buildId(tc),
-                            plan.getTestPlanPK());
-                    return tc;
-                }).forEachOrdered((tc) -> {
-                    testTree.setChildrenAllowed(Tool.buildId(tc), false);
+        if (p.getParentProjectId() != null) {
+            //Add as child of the parent project when that is part of the
+            //tree, as root item otherwise (the v7 TreeTable silently
+            //ignored the re-parenting in that case)
+            String parentId = "project" + p.getParentProjectId().getId();
+            if (treeData.contains(parentId)) {
+                treeData.setParent(projectId, parentId);
+            }
+        }
+        p.getTestProjectList().forEach((tp) -> {
+            String testProjectId = "testproject" + tp.getId();
+            if (!treeData.contains(testProjectId)) {
+                TreeTableCheckBox cb = new TreeTableCheckBox(navigator,
+                        tp.getName(), testProjectId);
+                cb.setIcon(ValidationManagerUI.TEST_SUITE_ICON);
+                checkboxes.put(testProjectId, cb);
+                descriptions.put(testProjectId, "");
+                treeData.addItem(projectId, testProjectId);
+                expanded.add(testProjectId);
+            }
+            tp.getTestPlanList().forEach((plan) -> {
+                Object planId = plan.getTestPlanPK();
+                if (!treeData.contains(planId)) {
+                    TreeTableCheckBox pcb = new TreeTableCheckBox(navigator,
+                            plan.getName(), planId);
+                    pcb.setIcon(ValidationManagerUI.PLAN_ICON);
+                    checkboxes.put(planId, pcb);
+                    descriptions.put(planId, "");
+                    treeData.addItem(testProjectId, planId);
+                }
+                plan.getTestCaseList().forEach((tc) -> {
+                    Object tcId = Tool.buildId(tc);
+                    if (!treeData.contains(tcId)) {
+                        TreeTableCheckBox tccb = new TreeTableCheckBox(navigator,
+                                tc.getName(), tcId);
+                        tccb.setIcon(ValidationManagerUI.TEST_ICON);
+                        checkboxes.put(tcId, tccb);
+                        descriptions.put(tcId, tc.getSummary() != null
+                                ? new String(tc.getSummary()) : "");
+                        treeData.addItem(planId, tcId);
+                    }
                 });
             });
-            return tp;
-        }).forEachOrdered((tp) -> {
-            testTree.setCollapsed("testproject" + tp.getId(), false);
         });
         p.getProjectList().forEach((sp) -> {
-            addProjectTestPlanning(testTree, sp);
+            addProjectTestPlanning(sp, expanded);
         });
-        testTree.setCollapsed("project" + p.getId(), false);
     }
 
     private List<TestCasePK> processChildren(Object parent) {
         List<TestCasePK> testCases = new ArrayList<>();
         //Get a list of selected test cases
-        testTree.getChildren(parent).stream().map((o) -> {
+        if (!treeData.contains(parent)) {
+            return testCases;
+        }
+        for (Object o : treeData.getChildren(parent)) {
             if (o instanceof String) {
                 String id = (String) o;
                 if (id.startsWith("tc")) {
                     //Is a Test Case
-                    Item item = testTree.getItem(id);
-                    Object val = item.getItemProperty("general.name").getValue();
-                    if (val instanceof TreeTableCheckBox) {
-                        TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
-                        if (ttcb.getValue()) {
-                            //Selected
-                            LOG.log(Level.FINE, "Included TC: {0}",
-                                    ttcb.getObjectId());
-                            StringTokenizer st = new StringTokenizer(id, "-");
-                            st.nextToken();//Ignore tc
-                            testCases.add(new TestCasePK(Integer
-                                    .parseInt(st.nextToken()),
-                                    Integer.parseInt(st.nextToken())));
-                            Object pid = id;
-                            //Add the related project to the list.
-                            while (pid != null) {
-                                if (pid instanceof String) {
-                                    String s = (String) pid;
-                                    if (s.startsWith("project")) {
-                                        LOG.log(Level.FINE, "Processing: {0}", s);
-                                        getProjects().add(Integer.parseInt(s.substring(7)));
-                                        break;
-                                    }
+                    TreeTableCheckBox ttcb = checkboxes.get(id);
+                    if (ttcb != null && Boolean.TRUE.equals(ttcb.getValue())) {
+                        //Selected
+                        LOG.log(Level.FINE, "Included TC: {0}",
+                                ttcb.getObjectId());
+                        StringTokenizer st = new StringTokenizer(id, "-");
+                        st.nextToken();//Ignore tc
+                        testCases.add(new TestCasePK(Integer
+                                .parseInt(st.nextToken()),
+                                Integer.parseInt(st.nextToken())));
+                        Object pid = id;
+                        //Add the related project to the list.
+                        while (pid != null) {
+                            if (pid instanceof String) {
+                                String s = (String) pid;
+                                if (s.startsWith("project")) {
+                                    LOG.log(Level.FINE, "Processing: {0}", s);
+                                    getProjects().add(Integer.parseInt(s.substring(7)));
+                                    break;
                                 }
-                                pid = testTree.getParent(pid);
                             }
+                            pid = navigator.getParent(pid);
                         }
                     }
                 }
             }
-            return o;
-        }).filter((o) -> (testTree.hasChildren(o))).forEachOrdered((o) -> {
-            testCases.addAll(processChildren(o));
-        });
+            if (navigator.hasChildren(o)) {
+                testCases.addAll(processChildren(o));
+            }
+        }
         return testCases;
     }
 
@@ -213,5 +250,46 @@ public class SelectTestCasesStep implements WizardStep {
      */
     public List<Integer> getProjects() {
         return projects;
+    }
+
+    /**
+     * Tree access backing the checkboxes' parent/child cascade.
+     */
+    private static class TreeNavigatorImpl
+            implements TreeTableCheckBox.TreeNavigator {
+
+        private final TreeData<Object> treeData;
+        private final Map<Object, TreeTableCheckBox> checkboxes;
+
+        TreeNavigatorImpl(TreeData<Object> treeData,
+                Map<Object, TreeTableCheckBox> checkboxes) {
+            this.treeData = treeData;
+            this.checkboxes = checkboxes;
+        }
+
+        @Override
+        public boolean hasChildren(Object objectId) {
+            return treeData.contains(objectId)
+                    && !treeData.getChildren(objectId).isEmpty();
+        }
+
+        @Override
+        public Collection<Object> getChildren(Object objectId) {
+            if (!treeData.contains(objectId)) {
+                return new ArrayList<>();
+            }
+            return treeData.getChildren(objectId);
+        }
+
+        @Override
+        public Object getParent(Object objectId) {
+            return treeData.contains(objectId)
+                    ? treeData.getParent(objectId) : null;
+        }
+
+        @Override
+        public TreeTableCheckBox getCheckBox(Object objectId) {
+            return checkboxes.get(objectId);
+        }
     }
 }

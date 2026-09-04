@@ -15,9 +15,6 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.Container;
-import com.vaadin.v7.data.util.HierarchicalContainer;
-
 public class ProjectTreeComponentBuilder {
 
     private String caption;
@@ -25,7 +22,6 @@ public class ProjectTreeComponentBuilder {
     private boolean showRequirement = true;
     private boolean showTestCase = true;
     private boolean showExecution = true;
-    private Container dataSource = new HierarchicalContainer();
 
     public ProjectTreeComponentBuilder() {
     }
@@ -55,13 +51,9 @@ public class ProjectTreeComponentBuilder {
         return this;
     }
 
-    public ProjectTreeComponentBuilder setDataSource(Container dataSource) {
-        this.dataSource = dataSource;
-        return this;
-    }
-
     public ProjectTreeComponent createProjectTreeComponent() {
-        return new ProjectTreeComponent(caption, dataSource,
+        //The v7 Container data source parameter has no v8 equivalent.
+        return new ProjectTreeComponent(caption, null,
                 showProject, showRequirement, showTestCase, showExecution);
     }
 }

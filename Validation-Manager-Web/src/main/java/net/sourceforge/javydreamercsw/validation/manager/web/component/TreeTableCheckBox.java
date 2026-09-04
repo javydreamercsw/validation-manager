@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.Item;
 import com.vaadin.sebastian.indeterminatecheckbox.IndeterminateCheckBox;
-import com.vaadin.v7.ui.TreeTable;
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,28 +28,50 @@ import java.util.logging.Logger;
  */
 public final class TreeTableCheckBox extends IndeterminateCheckBox {
 
-    private final TreeTable tt;
+    /**
+     * Minimal tree access the checkbox needs to keep parent and children in
+     * sync. Implemented by the caller on top of its Vaadin 8 tree
+     * ({@link com.vaadin.data.TreeData} backed) structure, which also resolves
+     * the checkbox shown for each item.
+     */
+    public interface TreeNavigator extends Serializable {
+
+        boolean hasChildren(Object objectId);
+
+        Collection<Object> getChildren(Object objectId);
+
+        Object getParent(Object objectId);
+
+        /**
+         * @return the checkbox displayed for the given item, or null if the
+         * item has none.
+         */
+        TreeTableCheckBox getCheckBox(Object objectId);
+    }
+
     private final static Logger LOG
             = Logger.getLogger(TreeTableCheckBox.class.getSimpleName());
+    private final TreeNavigator navigator;
     private final Object objectId;
 
-    public TreeTableCheckBox(TreeTable tt, Object objectId) {
-        this.tt = tt;
+    public TreeTableCheckBox(TreeNavigator navigator, Object objectId) {
+        this.navigator = navigator;
         this.objectId = objectId;
         initialize();
     }
 
-    public TreeTableCheckBox(TreeTable tt, String caption, Object objectId) {
+    public TreeTableCheckBox(TreeNavigator navigator, String caption,
+            Object objectId) {
         super(caption);
-        this.tt = tt;
+        this.navigator = navigator;
         this.objectId = objectId;
         initialize();
     }
 
-    public TreeTableCheckBox(TreeTable tt, String caption,
+    public TreeTableCheckBox(TreeNavigator navigator, String caption,
             boolean initialState, Object objectId) {
         super(caption, initialState);
-        this.tt = tt;
+        this.navigator = navigator;
         this.objectId = objectId;
         initialize();
     }
@@ -59,29 +81,31 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
     }
 
     @Override
-    protected void setInternalValue(Boolean value) {
-        if (tt != null
+    public Boolean getValue() {
+        return getState().value;
+    }
+
+    @Override
+    protected void doSetValue(Boolean value) {
+        if (navigator != null
                 && value != null
                 && !Objects.equals(value, getState().value)) {
-            if (tt.hasChildren(getObjectId())
+            if (navigator.hasChildren(getObjectId())
                     && getState().value != null) {
                 //Switching from false to true. Select all children
-                tt.getChildren(getObjectId()).forEach((o) -> {
-                    Item item = tt.getItem(o);
-                    Object val = item.getItemProperty("Name").getValue();
-                    if (val instanceof TreeTableCheckBox) {
-                        TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
+                navigator.getChildren(getObjectId()).forEach((o) -> {
+                    TreeTableCheckBox ttcb = navigator.getCheckBox(o);
+                    if (ttcb != null) {
                         ttcb.setValue(value);
                     }
                 });
             }
-            Object parentId = tt.getParent(getObjectId());
+            Object parentId = navigator.getParent(getObjectId());
             if (!value && parentId != null) {
                 //Switching from true to false. Mark parent as undeterminated
-                TreeTableCheckBox parent
-                        = ((TreeTableCheckBox) tt.getItem(parentId)
-                                .getItemProperty("Name").getValue());
-                if (parent.getValue() != null && parent.getValue()) {
+                TreeTableCheckBox parent = navigator.getCheckBox(parentId);
+                if (parent != null && parent.getValue() != null
+                        && parent.getValue()) {
                     LOG.log(Level.INFO, "Setting {0} to undetermined.",
                             parentId);
                     parent.setValue(null);
@@ -90,7 +114,7 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
                 }
             }
         }
-        super.setInternalValue(value);
+        getState().value = value;
     }
 
     /**

@@ -15,13 +15,12 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
@@ -76,13 +75,15 @@ public final class IssueTypeComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(it.getClass());
-        binder.setItemDataSource(it);
-        Field<?> name = binder.buildAndBind(TRANSLATOR
-                .translate("general.name"), "typeName");
+        Binder<IssueType> binder = new Binder<>(IssueType.class);
+        binder.setBean(it);
+        TextField name = new TextField(TRANSLATOR
+                .translate("general.name"));
+        binder.bind(name, "typeName");
         layout.addComponent(name);
-        Field<?> desc = binder.buildAndBind(TRANSLATOR
-                .translate("general.description"), "description");
+        TextField desc = new TextField(TRANSLATOR
+                .translate("general.description"));
+        binder.bind(desc, "description");
         layout.addComponent(desc);
         if (edit) {
             Button update = new Button(it.getId() == null
@@ -100,8 +101,8 @@ public final class IssueTypeComponent extends Panel {
                     c.create(it);
                 } else {
                     try {
-                        binder.commit();
-                    } catch (FieldGroup.CommitException ex) {
+                        binder.writeBean(it);
+                    } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }
@@ -110,11 +111,9 @@ public final class IssueTypeComponent extends Panel {
                     .lookup(InternationalizationProvider.class).
                     translate("general.cancel"));
             cancel.addClickListener((Button.ClickEvent event) -> {
-                binder.discard();
                 ((VMUI) UI.getCurrent()).updateScreen();
             });
             binder.setReadOnly(!edit);
-            binder.setBuffered(true);
             HorizontalLayout hl = new HorizontalLayout();
             hl.addComponent(update);
             hl.addComponent(cancel);

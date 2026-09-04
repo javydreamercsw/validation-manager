@@ -15,16 +15,15 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.fieldgroup.FieldGroup;
+import com.vaadin.data.Binder;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -59,13 +58,13 @@ public final class BaselineComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(baseline.getClass());
-        binder.setItemDataSource(baseline);
-        Field<?> id = binder.buildAndBind(TRANSLATOR.translate("general.name"), "baselineName");
-        layout.addComponent(id);
-        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.description"), "description",
-                TextArea.class
-        );
+        Binder<Baseline> binder = new Binder<>(Baseline.class);
+        binder.setBean(baseline);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "baselineName");
+        layout.addComponent(name);
+        TextArea desc = new TextArea(TRANSLATOR.translate("general.description"));
+        binder.bind(desc, "description");
         desc.setSizeFull();
         layout.addComponent(desc);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
@@ -83,60 +82,54 @@ public final class BaselineComponent extends Panel {
                             baseline.getHistoryList(), true));
         }
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             ((ValidationManagerUI) UI.getCurrent())
                     .displayObject(((ValidationManagerUI) UI.getCurrent())
-                            .getTree().getValue());
+                            .getTree().asSingleSelect().getValue());
         });
         if (edit) {
             if (baseline.getId() == null) {
                 //Creating a new one
                 Button save = new Button(TRANSLATOR.translate("general.save"));
                 save.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        binder.commit();
-                        if (rs != null) {
-                            MessageBox prompt = MessageBox.createQuestion()
-                                    .withCaption(TRANSLATOR.translate("save.baseline.title"))
-                                    .withMessage(TRANSLATOR.translate("save.baseine.message")
-                                            + "requirements will be released to a new major version")
-                                    .withYesButton(() -> {
-                                        Baseline entity = BaselineServer
-                                                .createBaseline(
-                                                        baseline.getBaselineName(),
-                                                        baseline.getDescription(),
-                                                        rs)
-                                                .getEntity();
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .updateProjectList();
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .buildProjectTree(entity);
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .displayObject(entity, false);
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .updateScreen();
-                                    },
-                                            ButtonOption.focus(),
-                                            ButtonOption
-                                                    .icon(VaadinIcons.CHECK))
-                                    .withNoButton(() -> {
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .displayObject(((ValidationManagerUI) UI
-                                                        .getCurrent()).getTree().getValue());
-                                    },
-                                            ButtonOption
-                                                    .icon(VaadinIcons.CLOSE));
-                            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-                            prompt.open();
-                        } else {
-                            //Recreate the tree to show the addition
-                            ((ValidationManagerUI) UI.getCurrent()).displayObject(baseline, true);
-                        }
-                        ((ValidationManagerUI) UI.getCurrent()).updateProjectList();
-                        ((ValidationManagerUI) UI.getCurrent()).updateScreen();
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
+                    if (rs != null) {
+                        MessageBox prompt = MessageBox.createQuestion()
+                                .withCaption(TRANSLATOR.translate("save.baseline.title"))
+                                .withMessage(TRANSLATOR.translate("save.baseine.message")
+                                        + "requirements will be released to a new major version")
+                                .withYesButton(() -> {
+                                    Baseline entity = BaselineServer
+                                            .createBaseline(
+                                                    baseline.getBaselineName(),
+                                                    baseline.getDescription(),
+                                                    rs)
+                                            .getEntity();
+                                    ((ValidationManagerUI) UI.getCurrent())
+                                            .updateProjectList();
+                                    ((ValidationManagerUI) UI.getCurrent())
+                                            .buildProjectTree(entity);
+                                    ((ValidationManagerUI) UI.getCurrent())
+                                            .displayObject(entity, false);
+                                    ((ValidationManagerUI) UI.getCurrent())
+                                            .updateScreen();
+                                },
+                                        ButtonOption.focus(),
+                                        ButtonOption
+                                                .icon(VaadinIcons.CHECK))
+                                .withNoButton(() -> {
+                                    ((ValidationManagerUI) UI.getCurrent())
+                                            .displayObject(((ValidationManagerUI) UI
+                                                    .getCurrent()).getTree().asSingleSelect().getValue());
+                                },
+                                        ButtonOption
+                                                .icon(VaadinIcons.CLOSE));
+                        prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                        prompt.open();
+                    } else {
+                        //Recreate the tree to show the addition
+                        ((ValidationManagerUI) UI.getCurrent()).displayObject(baseline, true);
                     }
+                    ((ValidationManagerUI) UI.getCurrent()).updateProjectList();
+                    ((ValidationManagerUI) UI.getCurrent()).updateScreen();
                 });
                 HorizontalLayout hl = new HorizontalLayout();
                 hl.addComponent(save);
@@ -179,9 +172,7 @@ public final class BaselineComponent extends Panel {
                 layout.addComponent(hl);
             }
         }
-        binder.setBuffered(true);
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         setSizeFull();
     }
 

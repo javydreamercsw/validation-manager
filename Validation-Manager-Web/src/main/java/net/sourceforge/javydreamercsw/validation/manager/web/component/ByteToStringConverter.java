@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,10 +15,10 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.util.converter.Converter;
-import java.io.UnsupportedEncodingException;
+import com.vaadin.data.Converter;
+import com.vaadin.data.Result;
+import com.vaadin.data.ValueContext;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,35 +32,21 @@ public class ByteToStringConverter implements Converter<String, byte[]> {
             = Logger.getLogger(ByteToStringConverter.class.getSimpleName());
 
     @Override
-    public byte[] convertToModel(String value,
-            Class<? extends byte[]> targetType, Locale locale)
-            throws ConversionException {
+    public Result<byte[]> convertToModel(String value, ValueContext context) {
         try {
             String result = value;
             if (value == null) {
                 result = "null";
             }
-            return result.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException ex) {
+            return Result.ok(result.getBytes(StandardCharsets.UTF_8));
+        } catch (RuntimeException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
-        return null;
+        return Result.ok(new byte[0]);
     }
 
     @Override
-    public String convertToPresentation(byte[] value,
-            Class<? extends String> targetType, Locale locale)
-            throws ConversionException {
+    public String convertToPresentation(byte[] value, ValueContext context) {
         return value == null ? "null" : new String(value, StandardCharsets.UTF_8);
-    }
-
-    @Override
-    public Class<byte[]> getModelType() {
-        return byte[].class;
-    }
-
-    @Override
-    public Class<String> getPresentationType() {
-        return String.class;
     }
 }

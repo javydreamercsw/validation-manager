@@ -15,15 +15,15 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.ui.AbstractSelect;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -37,6 +37,7 @@ import com.validation.manager.core.db.controller.RequirementJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.RequirementServer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -71,22 +72,17 @@ public final class RequirementComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(req.getClass());
-        binder.setItemDataSource(req);
-        TextField id = (TextField) binder.buildAndBind(TRANSLATOR.translate("requirement.id"),
-                "uniqueId", TextField.class);
-        id.setNullRepresentation("");
+        Binder<Requirement> binder = new Binder<>(Requirement.class);
+        binder.setBean(req);
+        TextField id = new TextField(TRANSLATOR.translate("requirement.id"));
+        binder.bind(id, "uniqueId");
         layout.addComponent(id);
-        TextArea desc = (TextArea) binder.buildAndBind(TRANSLATOR.translate("general.description"),
-                "description",
-                TextArea.class);
-        desc.setNullRepresentation("");
+        TextArea desc = new TextArea(TRANSLATOR.translate("general.description"));
+        binder.bind(desc, "description");
         desc.setSizeFull();
         layout.addComponent(desc);
-        TextArea notes = (TextArea) binder.buildAndBind(TRANSLATOR.translate("general.notes"),
-                "notes",
-                TextArea.class);
-        notes.setNullRepresentation("");
+        TextArea notes = new TextArea(TRANSLATOR.translate("general.notes"));
+        binder.bind(notes, "notes");
         notes.setSizeFull();
         layout.addComponent(notes);
         if (req.getParentRequirementId() != null) {
@@ -104,13 +100,11 @@ public final class RequirementComponent extends Panel {
                     req.getRequirementList()));
         } else if (edit) {
             //Allow user to add children
-            AbstractSelect as = ((VMUI) UI.getCurrent()).getRequirementSelectionComponent();
-            req.getRequirementList().forEach(sub -> {
-                as.select(sub);
-            });
+            TwinColSelect<Requirement> as = ((VMUI) UI.getCurrent())
+                    .getRequirementSelectionComponent();
+            as.setValue(new HashSet<>(req.getRequirementList()));
             as.addValueChangeListener(event -> {
-                Set<Requirement> selected
-                        = (Set<Requirement>) event.getProperty().getValue();
+                Set<Requirement> selected = event.getValue();
                 req.getRequirementList().clear();
                 selected.forEach(r -> {
                     req.getRequirementList().add(r);
@@ -120,7 +114,6 @@ public final class RequirementComponent extends Panel {
         }
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             if (req.getId() == null) {
                 ((VMUI) UI.getCurrent()).displayObject(req.getRequirementSpecNode());
             } else {
@@ -204,9 +197,7 @@ public final class RequirementComponent extends Panel {
         } catch (VMException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
-        binder.setBuffered(true);
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         setSizeFull();
     }
 }

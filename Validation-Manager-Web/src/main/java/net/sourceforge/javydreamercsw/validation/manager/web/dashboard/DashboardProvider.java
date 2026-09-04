@@ -15,30 +15,18 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.dashboard;
 
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.util.GeneratedPropertyContainer;
-import com.vaadin.v7.data.util.PropertyValueGenerator;
-import com.vaadin.v7.data.util.converter.Converter;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.data.sort.SortDirection;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.Grid;
-import com.vaadin.v7.ui.Grid.Column;
-import com.vaadin.v7.ui.renderers.ImageRenderer;
-import com.validation.manager.core.DataBaseManager;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.renderers.ImageRenderer;
 import com.validation.manager.core.IMainContentProvider;
 import com.validation.manager.core.api.image.AvatarProvider;
 import com.validation.manager.core.db.Activity;
-import com.validation.manager.core.db.ActivityType;
-import com.validation.manager.core.db.VmUser;
-import com.validation.manager.core.db.controller.ActivityTypeJpaController;
-import com.validation.manager.core.db.controller.VmUserJpaController;
 import com.validation.manager.core.server.core.ActivityServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.List;
-import java.util.Locale;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.Exceptions;
@@ -69,113 +57,44 @@ public class DashboardProvider extends AbstractProvider {
             BorderLayout bl = new BorderLayout();
             //Add activity stream
             List<Activity> activities = ActivityServer.getActivities();
-            BeanItemContainer<Activity> container
-                    = new BeanItemContainer<>(Activity.class, activities);
-            GeneratedPropertyContainer gpc
-                    = new GeneratedPropertyContainer(container);
-            gpc.addGeneratedProperty("avatar",
-                    new PropertyValueGenerator<Resource>() {
-
-                @Override
-                public Resource getValue(Item item, Object itemId,
-                        Object propertyId) {
-                    VmUser user = ((Activity) itemId).getSourceUser();
-                    Resource image = new ThemeResource("VMSmall.png");
-                    AvatarProvider ap = Lookup.getDefault()
-                            .lookup(AvatarProvider.class);
-                    Resource icon = ap == null ? null
-                            : ap.getAvatar(user, 30);
-                    if (icon != null) {
-                        image = icon;
-                    }
-                    return image;
+            Grid<Activity> grid = new Grid<>(
+                    TRANSLATOR.translate("general.activity.stream"));
+            grid.setItems(activities);
+            grid.addColumn(activity -> {
+                Resource image = new ThemeResource("VMSmall.png");
+                AvatarProvider ap = Lookup.getDefault()
+                        .lookup(AvatarProvider.class);
+                Resource icon = ap == null ? null
+                        : ap.getAvatar(activity.getSourceUser(), 30);
+                if (icon != null) {
+                    image = icon;
                 }
-
-                @Override
-                public Class<Resource> getType() {
-                    return Resource.class;
+                return image;
+            })
+                    .setId("avatar")
+                    .setCaption("")
+                    .setRenderer(new ImageRenderer<>());
+            grid.addColumn(a -> {
+                try {
+                    return new VMUserServer(a.getSourceUser().getId())
+                            .toString();
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
                 }
-            });
-            Grid grid = new Grid(TRANSLATOR.translate("general.activity.stream"),
-                    gpc);
-            Column at = grid.getColumn("activityType");
-            at.setHeaderCaption(TRANSLATOR.translate("activity.type"));
-            at.setConverter(new Converter<String, ActivityType>() {
-                int type;
-
-                @Override
-                public ActivityType convertToModel(String value,
-                        Class<? extends ActivityType> targetType,
-                        Locale locale) throws Converter.ConversionException {
-                    return new ActivityTypeJpaController(DataBaseManager
-                            .getEntityManagerFactory()).findActivityType(type);
-                }
-
-                @Override
-                public String convertToPresentation(ActivityType value,
-                        Class<? extends String> targetType, Locale locale)
-                        throws Converter.ConversionException {
-                    type = value.getId();
-                    return TRANSLATOR.translate(value.getTypeName());
-                }
-
-                @Override
-                public Class<ActivityType> getModelType() {
-                    return ActivityType.class;
-                }
-
-                @Override
-                public Class<String> getPresentationType() {
-                    return String.class;
-                }
-            });
-            Column type = grid.getColumn("activityType");
-            type.setHeaderCaption(TRANSLATOR.translate("general.type"));
-            Column desc = grid.getColumn("description");
-            desc.setHeaderCaption(TRANSLATOR.translate("general.description"));
-            Column user = grid.getColumn("sourceUser");
-            user.setHeaderCaption(TRANSLATOR.translate("general.user"));
-            user.setConverter(new Converter<String, VmUser>() {
-                private int user;
-
-                @Override
-                public String convertToPresentation(VmUser value,
-                        Class<? extends String> targetType, Locale l)
-                        throws Converter.ConversionException {
-                    try {
-                        user = value.getId();
-                        return new VMUserServer(user).toString();
-                    } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                    return "";
-                }
-
-                @Override
-                public Class<VmUser> getModelType() {
-                    return VmUser.class;
-                }
-
-                @Override
-                public Class<String> getPresentationType() {
-                    return String.class;
-                }
-
-                @Override
-                public VmUser convertToModel(String value,
-                        Class<? extends VmUser> targetType, Locale locale)
-                        throws Converter.ConversionException {
-                    return new VmUserJpaController(DataBaseManager
-                            .getEntityManagerFactory()).findVmUser(user);
-                }
-            });
-            Column avatar = grid.getColumn("avatar");
-            avatar.setHeaderCaption("");
-            avatar.setRenderer(new ImageRenderer());
-            Column time = grid.getColumn("activityTime");
-            time.setHeaderCaption(TRANSLATOR.translate("general.time"));
-            grid.setColumns("avatar", "sourceUser", "activityType",
-                    "description", "activityTime");
+                return "";
+            })
+                    .setId("sourceUser")
+                    .setCaption(TRANSLATOR.translate("general.user"));
+            grid.addColumn(a -> a.getActivityType() == null ? ""
+                    : TRANSLATOR.translate(a.getActivityType().getTypeName()))
+                    .setId("activityType")
+                    .setCaption(TRANSLATOR.translate("general.type"));
+            grid.addColumn(Activity::getDescription)
+                    .setId("description")
+                    .setCaption(TRANSLATOR.translate("general.description"));
+            grid.addColumn(Activity::getActivityTime)
+                    .setId("activityTime")
+                    .setCaption(TRANSLATOR.translate("general.time"));
             grid.sort("activityTime", SortDirection.DESCENDING);
             bl.addComponent(grid, BorderLayout.Constraint.CENTER);
             bl.setId(getComponentCaption());

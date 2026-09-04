@@ -15,14 +15,15 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -63,22 +64,20 @@ public final class TestProjectComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(tp.getClass());
-        binder.setItemDataSource(tp);
-        Field<?> name = binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "name");
+        Binder<TestProject> binder = new Binder<>(TestProject.class);
+        binder.setBean(tp);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "name");
         layout.addComponent(name);
-        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"),
-                "notes",
-                TextArea.class);
+        TextArea notes = new TextArea(TRANSLATOR.translate("general.notes"));
+        binder.bind(notes, "notes");
         notes.setSizeFull();
         layout.addComponent(notes);
-        Field<?> active = binder.buildAndBind(TRANSLATOR.translate("general.active"),
-                "active");
+        CheckBox active = new CheckBox(TRANSLATOR.translate("general.active"));
+        binder.bind(active, "active");
         layout.addComponent(active);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             if (tp.getId() == null) {
                 ((VMUI) UI.getCurrent()).displayObject(((VMUI) UI.getCurrent())
                         .getSelectdValue());
@@ -153,7 +152,6 @@ public final class TestProjectComponent extends Panel {
             }
         }
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         layout.setSizeFull();
         setSizeFull();
     }

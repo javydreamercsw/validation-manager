@@ -15,22 +15,23 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.fieldgroup.FieldGroupFieldFactory;
-import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.Field;
+import com.vaadin.ui.DateTimeField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.VmUser;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.logging.Logger;
 
 /**
@@ -59,33 +60,14 @@ public final class ExecutionStepComponent extends Panel {
         FormLayout layout = new FormLayout();
         setContent(layout);
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(es.getClass());
-        binder.setItemDataSource(es);
-        FieldGroupFieldFactory defaultFactory = binder.getFieldFactory();
-        binder.setFieldFactory(new FieldGroupFieldFactory() {
-
-            @Override
-            public <T extends Field> T createField(Class<?> dataType, Class<T> fieldType) {
-                if (dataType.isAssignableFrom(VmUser.class)) {
-                    BeanItemContainer<VmUser> userEntityContainer
-                            = new BeanItemContainer<>(VmUser.class);
-                    userEntityContainer.addBean(es.getAssignee());
-                    Field field = new TextField(es.getAssignee() == null
-                            ? TRANSLATOR.translate("general.not.applicable")
-                            : es.getAssignee().getFirstName() + " "
-                            + es.getAssignee().getLastName());
-                    return fieldType.cast(field);
-                }
-
-                return defaultFactory.createField(dataType, fieldType);
-            }
-        });
+        Binder<ExecutionStep> binder = new Binder<>(ExecutionStep.class);
+        binder.setBean(es);
         layout.addComponent(((VMUI) UI.getCurrent())
                 .createStepHistoryTable(TRANSLATOR.translate("step.detail"),
                         Arrays.asList(es.getStepHistory()), false));
         if (es.getResultId() != null) {
-            Field<?> result = binder.buildAndBind(TRANSLATOR.translate("general.result"),
-                    "resultId.resultName");
+            TextField result = new TextField(TRANSLATOR.translate("general.result"));
+            binder.bind(result, "resultId.resultName");
             layout.addComponent(result);
         }
         if (es.getComment() != null) {
@@ -101,18 +83,24 @@ public final class ExecutionStepComponent extends Panel {
             layout.addComponent(assignee);
         }
         if (es.getExecutionStart() != null) {
-            Field<?> start = binder.buildAndBind(TRANSLATOR.translate("execution.start"),
-                    "executionStart");
+            DateTimeField start = new DateTimeField(TRANSLATOR.translate("execution.start"));
+            binder.forField(start)
+                    .withConverter(this::toDate, this::toDateTime)
+                    .bind("executionStart");
             layout.addComponent(start);
         }
         if (es.getExecutionEnd() != null) {
-            Field<?> end = binder.buildAndBind(TRANSLATOR.translate("execution.end"),
-                    "executionEnd");
+            DateTimeField end = new DateTimeField(TRANSLATOR.translate("execution.end"));
+            binder.forField(end)
+                    .withConverter(this::toDate, this::toDateTime)
+                    .bind("executionEnd");
             layout.addComponent(end);
         }
         if (es.getExecutionTime() != null && es.getExecutionTime() > 0) {
-            Field<?> time = binder.buildAndBind(TRANSLATOR.translate("execution.time"),
-                    "executionTime");
+            TextField time = new TextField(TRANSLATOR.translate("execution.time"));
+            binder.forField(time)
+                    .withConverter(Double::parseDouble, String::valueOf)
+                    .bind("executionTime");
             layout.addComponent(time);
         }
         if (!es.getHistoryList().isEmpty()) {
@@ -123,7 +111,6 @@ public final class ExecutionStepComponent extends Panel {
         }
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             if (es.getExecutionStepPK() == null) {
                 ((VMUI) UI.getCurrent()).displayObject(((VMUI) UI.getCurrent())
                         .getSelectdValue());
@@ -132,8 +119,18 @@ public final class ExecutionStepComponent extends Panel {
             }
         });
         binder.setReadOnly(true);
-        binder.bindMemberFields(this);
         layout.setSizeFull();
         setSizeFull();
+    }
+
+    private Date toDate(LocalDateTime dateTime) {
+        return dateTime == null ? null
+                : Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private LocalDateTime toDateTime(Date date) {
+        return date == null ? null
+                : LocalDateTime.ofInstant(date.toInstant(),
+                        ZoneId.systemDefault());
     }
 }

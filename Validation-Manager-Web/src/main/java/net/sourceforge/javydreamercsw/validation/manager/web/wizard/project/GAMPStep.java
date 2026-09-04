@@ -16,9 +16,9 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
 import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.Label;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.VMException;
@@ -43,8 +43,8 @@ import org.vaadin.teemu.wizards.WizardStep;
 public final class GAMPStep implements WizardStep {
 
     private final ProjectCreationWizard wizard;
-    private final ComboBox category
-            = new ComboBox(TRANSLATOR.translate("general.category"));
+    private final ComboBox<String> category
+            = new ComboBox<>(TRANSLATOR.translate("general.category"));
     private final boolean version = true;
     private final boolean iq = true;
     private boolean urs = false;//User Requirement Spec
@@ -70,7 +70,7 @@ public final class GAMPStep implements WizardStep {
                 cs = false;
                 LOG.log(Level.INFO, "Type: {0}\nCategory: {1}\nTemplate: {2}",
                         new Object[]{wizard.getType(), getCategory().getValue(), "GAMP5"});
-                String c = ((String) getCategory().getValue());
+                String c = getCategory().getValue();
                 int cat = Integer.parseInt(c.substring(c.length() - 1));
                 if (wizard.getType().equals("general.software")) {
                     switch (cat) {
@@ -124,19 +124,18 @@ public final class GAMPStep implements WizardStep {
         text.setSizeFull();
         text.setEnabled(false);
         text.setValue(TRANSLATOR.translate("template.gamp5.disclaimer"));
-        getCategory().removeAllItems();
+        getCategory().setItems(new String[]{});
         switch (wizard.getType()) {
             case "general.software":
                 //Load SW options
-                getCategory().addItem("template.gamp5.sw.cat1");
-                getCategory().addItem("template.gamp5.sw.cat3");
-                getCategory().addItem("template.gamp5.sw.cat4");
-                getCategory().addItem("template.gamp5.sw.cat5");
+                getCategory().setItems("template.gamp5.sw.cat1",
+                        "template.gamp5.sw.cat3", "template.gamp5.sw.cat4",
+                        "template.gamp5.sw.cat5");
                 break;
             default:
                 //Load HW options
-                getCategory().addItem("template.gamp5.hw.cat1");
-                getCategory().addItem("template.gamp5.hw.cat2");
+                getCategory().setItems("template.gamp5.hw.cat1",
+                        "template.gamp5.hw.cat2");
         }
         wizard.translateSelect(getCategory());
         vl.addComponent(getCategory());
@@ -148,7 +147,7 @@ public final class GAMPStep implements WizardStep {
     @Override
     public boolean onAdvance() {
         if (getCategory().getValue() != null) {
-            wizard.setCategory((String) getCategory().getValue());
+            wizard.setCategory(getCategory().getValue());
         }
         if (getCategory().getValue() != null) {
             wizard.setProcess(new ProjectTemplateManager() {
@@ -297,7 +296,7 @@ public final class GAMPStep implements WizardStep {
     /**
      * @return the category
      */
-    public ComboBox getCategory() {
+    public ComboBox<String> getCategory() {
         return category;
     }
 

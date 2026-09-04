@@ -15,11 +15,11 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
+import com.vaadin.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMUI;
@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStringConverter;
 import org.vaadin.teemu.wizards.WizardStep;
 
 /**
@@ -62,26 +61,22 @@ public class DetailStep implements WizardStep {
         FormLayout layout = new FormLayout();
         form.setContent(layout);
         form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(TestCaseExecution.class);
-        binder.setItemDataSource(tce);
+        Binder<TestCaseExecution> binder = new Binder<>(TestCaseExecution.class);
+        binder.setBean(tce);
+        binder.setReadOnly(false);
         TextArea name = new TextArea("general.name");
-        name.setConverter(new ByteToStringConverter());
         binder.bind(name, "name");
         layout.addComponent(name);
         TextArea scope = new TextArea("general.scope");
-        scope.setConverter(new ByteToStringConverter());
         binder.bind(scope, "scope");
         layout.addComponent(scope);
         if (tce.getId() != null) {
             TextArea conclusion = new TextArea("general.conclusion");
-            conclusion.setConverter(new ByteToStringConverter());
             binder.bind(conclusion, "conclusion");
             layout.addComponent(conclusion);
             conclusion.setSizeFull();
             layout.addComponent(conclusion);
         }
-        binder.setBuffered(false);
-        binder.bindMemberFields(form);
         form.setSizeFull();
         return form;
     }

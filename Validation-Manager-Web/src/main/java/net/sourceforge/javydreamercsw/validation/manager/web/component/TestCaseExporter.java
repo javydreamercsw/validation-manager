@@ -15,13 +15,16 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
+import com.vaadin.addon.tableexport.DefaultGridHolder;
 import com.vaadin.addon.tableexport.ExcelExport;
+import com.vaadin.data.TreeData;
+import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.v7.ui.Label;
-import com.vaadin.v7.ui.TreeTable;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.TreeGrid;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -43,11 +46,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.ArrayUtils;
 import org.openide.util.Exceptions;
 
 /**
@@ -59,120 +62,117 @@ public class TestCaseExporter {
     private static final Logger LOG
             = Logger.getLogger(TestCaseExporter.class.getSimpleName());
 
+    /**
+     * One row of the export tree: a test case, a step or a data entry field.
+     */
+    private static final class Row {
+
+        private String testCase = "";
+        private String sequence = "";
+        private String text = "";
+        private String notes = "";
+        private String expectedResult = "";
+        private String result = "";
+        private HorizontalLayout attachments;
+        private String tester = "";
+        private String startDate = "";
+        private String endDate = "";
+        private String reviewer = "";
+        private String reviewDate = "";
+
+        private static Row ofTestCase(String name) {
+            Row r = new Row();
+            r.testCase = name;
+            return r;
+        }
+
+        private static Row ofStep(String sequence, String text, String notes,
+                String expectedResult, String result,
+                HorizontalLayout attachments, String tester, String startDate,
+                String endDate, String reviewer, String reviewDate) {
+            Row r = new Row();
+            r.sequence = sequence;
+            r.text = text;
+            r.notes = notes;
+            r.expectedResult = expectedResult;
+            r.result = result;
+            r.attachments = attachments;
+            r.tester = tester;
+            r.startDate = startDate;
+            r.endDate = endDate;
+            r.reviewer = reviewer;
+            r.reviewDate = reviewDate;
+            return r;
+        }
+
+        private static Row ofField(String name) {
+            Row r = new Row();
+            r.result = name;
+            return r;
+        }
+    }
+
     public static Window getTestCaseExporter(List<TestCase> testCases) {
-        TreeTable summary = new TreeTable();
-        summary.addContainerProperty(TRANSLATOR.translate("general.test.case"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.sequence"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.text"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.notes"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("expected.result"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("expected.result"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.result"),
-                String.class, "");
+        TreeGrid<Row> summary = new TreeGrid<>();
+        TreeData<Row> treeData = new TreeData<>();
+        addColumns(summary);
+        Map<Object, Row> caseRows = new HashMap<>();
         testCases.forEach(tc -> {
             for (Step step : tc.getStepList()) {
                 //Add test case if not there already
-                if (!summary.containsId(step.getTestCase().getTestCasePK())) {
-                    summary.addItem(new Object[]{step
-                        .getTestCase().getName(),
-                        "", "", "", "", ""},
-                            step.getTestCase().getTestCasePK());
+                if (!caseRows.containsKey(tc.getTestCasePK())) {
+                    Row caseRow = Row.ofTestCase(tc.getName());
+                    treeData.addRootItems(caseRow);
+                    caseRows.put(tc.getTestCasePK(), caseRow);
                 }
                 //Add the step
-                String stepId = step.getTestCase().getTestCasePK().getId() + "."
-                        + step.getStepSequence();
-                String text = new String(step.getText(), StandardCharsets.UTF_8),
-                        notes = step.getNotes(),
-                        expected = new String(step.getExpectedResult(),
-                                StandardCharsets.UTF_8);
-                summary.addItem(new Object[]{"", ""
-                    + step.getStepSequence(),//Sequence
-                    text, //Text
-                    notes, //Notes
-                    expected, //Expected Result
-                    ""},
-                        stepId);
-                //Put step under the test case
-                summary.setParent(stepId,
-                        step.getTestCase().getTestCasePK());
+                String text = new String(step.getText(), StandardCharsets.UTF_8);
+                Row stepRow = Row.ofStep("" + step.getStepSequence(), text,
+                        step.getNotes(),
+                        new String(step.getExpectedResult(),
+                                StandardCharsets.UTF_8),
+                        "", null, "", "", "", "", "");
+                treeData.addItem(caseRows.get(tc.getTestCasePK()), stepRow);
                 //Add the fields of the test case
                 for (DataEntry de : step.getDataEntryList()) {
-                    String fieldId = step.getTestCase().getTestCasePK() + "."
-                            + step.getStepSequence()
-                            + "" + (summary.getChildren(stepId) == null ? 0
-                            : summary.getChildren(stepId).size());
-                    summary.addItem(new Object[]{"", "",//Sequence
-                        "", //Text
-                        "", //Notes
-                        "", //Expected Result
-                        de.getEntryName()},//Field
-                            fieldId);
-                    summary.setParent(fieldId, stepId);
-                    //Mark test case as a leaf
-                    summary.setChildrenAllowed(fieldId, false);
+                    Row fieldRow = Row.ofField(de.getEntryName());
+                    treeData.addItem(stepRow, fieldRow);
                 }
             }
         });
+        summary.setDataProvider(new TreeDataProvider<>(treeData));
+        summary.expand(treeData.getRootItems());
         summary.setSizeFull();
         return getExportWindow(summary, null, -1);
     }
 
     public static Window getExecutionExporter(List<TestCaseExecutionServer> executions,
             int tcID) {
-        TreeTable summary = new TreeTable();
-        summary.addContainerProperty(TRANSLATOR.translate("general.test.case"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.sequence"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.text"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.notes"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("expected.result"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.result"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.attachment"),
-                HorizontalLayout.class, new HorizontalLayout());
-        summary.addContainerProperty(TRANSLATOR.translate("tester.desc"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("start.date"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("end.date"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("general.reviewer"),
-                String.class, "");
-        summary.addContainerProperty(TRANSLATOR.translate("review.date"),
-                String.class, "");
+        TreeGrid<Row> summary = new TreeGrid<>();
+        TreeData<Row> treeData = new TreeData<>();
+        addColumns(summary);
+        SimpleDateFormat format = new SimpleDateFormat(
+                VMSettingServer.getSetting("date.format")
+                        .getStringVal());
+        Map<Object, Row> caseRows = new HashMap<>();
         for (TestCaseExecutionServer execution : executions) {
             for (ExecutionStep es : execution.getExecutionStepList()) {
                 if (tcID < 0
                         || es.getExecutionStepPK().getStepTestCaseId() == tcID) {
                     //Add test case if not there already
-                    if (!summary.containsId(es.getStep().getTestCase().getTestCasePK())) {
-                        summary.addItem(new Object[]{es.getStep()
-                            .getTestCase().getName(),
-                            "", "", "", "", "", new HorizontalLayout(), "", "",
-                            "", "", ""},
-                                es.getStep().getTestCase().getTestCasePK());
+                    if (!caseRows.containsKey(es.getStep().getTestCase()
+                            .getTestCasePK())) {
+                        Row caseRow = Row.ofTestCase(es.getStep().getTestCase()
+                                .getName());
+                        treeData.addRootItems(caseRow);
+                        caseRows.put(es.getStep().getTestCase().getTestCasePK(),
+                                caseRow);
                     }
-                    //Add the step
                     //First calculate the sequence number
-                    Collection c = summary.getChildren(es.getStep()
-                            .getTestCase().getTestCasePK());
-                    int i = c == null ? 1 : c.size() + 1;
-                    String stepId = es.getStep().getTestCase().getTestCasePK() + "."
-                            + i;
+                    List<Row> siblings = treeData.getChildren(caseRows.get(es
+                            .getStep().getTestCase().getTestCasePK()));
+                    int i = siblings == null ? 1 : siblings.size() + 1;
                     //Calculate the fields from History
-                    SimpleDateFormat format = new SimpleDateFormat(
-                            VMSettingServer.getSetting("date.format")
-                                    .getStringVal());
                     String text = "";
                     String notes = "";
                     String expected = "";
@@ -211,16 +211,8 @@ public class TestCaseExporter {
                     if (!es.getExecutionStepHasAttachmentList().isEmpty()) {
                         es.getExecutionStepHasAttachmentList().forEach(esha -> {
                             Label temp = new Label();
-                            switch (esha.getAttachment().getAttachmentType().getType()) {
-                                case "comment":
-                                    temp.setIcon(VaadinIcons.PAPERCLIP);
-                                    attachments.addComponent(temp);
-                                    break;
-                                default:
-                                    temp.setIcon(VaadinIcons.PAPERCLIP);
-                                    attachments.addComponent(temp);
-                                    break;
-                            }
+                            temp.setIcon(VaadinIcons.PAPERCLIP);
+                            attachments.addComponent(temp);
                         });
                     }
                     if (!es.getExecutionStepHasIssueList().isEmpty()) {
@@ -228,36 +220,70 @@ public class TestCaseExporter {
                         temp.setIcon(VaadinIcons.BUG);
                         attachments.addComponent(temp);
                     }
-                    summary.addItem(new Object[]{"", "" + i,//Sequence
-                        text, //Text
-                        notes, //Notes
-                        expected, //Expected Result
-                        es.getResultId() == null
-                        ? TRANSLATOR.translate("result.pending")
-                        : TRANSLATOR.translate(es.getResultId()
-                        .getResultName()), //Result
-                        attachments,//Attachments, issues and comments
-                        tester,//Tester
-                        es.getExecutionStart() == null ? ""
-                        : format.format(es.getExecutionStart()), //Start Date
-                        es.getExecutionEnd() == null ? ""
-                        : format.format(es.getExecutionEnd()),//End Date
-                        reviewer,//Reviewer
-                        es.getReviewDate() == null ? ""
-                        : format.format(es.getReviewDate())},//Review Date
-                            stepId);
-                    //Put step under the test case
-                    summary.setParent(stepId,
-                            es.getStep().getTestCase().getTestCasePK());
-                    //Mark test case as a leaf
-                    summary.setChildrenAllowed(stepId, false);
+                    Row stepRow = Row.ofStep("" + i, text, notes, expected,
+                            es.getResultId() == null
+                            ? TRANSLATOR.translate("result.pending")
+                            : TRANSLATOR.translate(es.getResultId()
+                            .getResultName()),
+                            attachments, tester,
+                            es.getExecutionStart() == null ? ""
+                            : format.format(es.getExecutionStart()),
+                            es.getExecutionEnd() == null ? ""
+                            : format.format(es.getExecutionEnd()),
+                            reviewer,
+                            es.getReviewDate() == null ? ""
+                            : format.format(es.getReviewDate()));
+                    treeData.addItem(caseRows.get(es.getStep().getTestCase()
+                            .getTestCasePK()), stepRow);
                 }
             }
         }
+        summary.setDataProvider(new TreeDataProvider<>(treeData));
+        summary.expand(treeData.getRootItems());
         return getExportWindow(summary, executions, tcID);
     }
 
-    private static Window getExportWindow(TreeTable summary,
+    private static void addColumns(TreeGrid<Row> summary) {
+        summary.addColumn(row -> row.testCase)
+                .setId("general.test.case")
+                .setCaption(TRANSLATOR.translate("general.test.case"));
+        summary.addColumn(row -> row.sequence)
+                .setId("general.sequence")
+                .setCaption(TRANSLATOR.translate("general.sequence"));
+        summary.addColumn(row -> row.text)
+                .setId("general.text")
+                .setCaption(TRANSLATOR.translate("general.text"));
+        summary.addColumn(row -> row.notes)
+                .setId("general.notes")
+                .setCaption(TRANSLATOR.translate("general.notes"));
+        summary.addColumn(row -> row.expectedResult)
+                .setId("expected.result")
+                .setCaption(TRANSLATOR.translate("expected.result"));
+        summary.addColumn(row -> row.result)
+                .setId("general.result")
+                .setCaption(TRANSLATOR.translate("general.result"));
+        summary.addComponentColumn(row -> row.attachments == null
+                ? new HorizontalLayout() : row.attachments)
+                .setId("general.attachment")
+                .setCaption(TRANSLATOR.translate("general.attachment"));
+        summary.addColumn(row -> row.tester)
+                .setId("tester.desc")
+                .setCaption(TRANSLATOR.translate("tester.desc"));
+        summary.addColumn(row -> row.startDate)
+                .setId("start.date")
+                .setCaption(TRANSLATOR.translate("start.date"));
+        summary.addColumn(row -> row.endDate)
+                .setId("end.date")
+                .setCaption(TRANSLATOR.translate("end.date"));
+        summary.addColumn(row -> row.reviewer)
+                .setId("general.reviewer")
+                .setCaption(TRANSLATOR.translate("general.reviewer"));
+        summary.addColumn(row -> row.reviewDate)
+                .setId("review.date")
+                .setCaption(TRANSLATOR.translate("review.date"));
+    }
+
+    private static Window getExportWindow(TreeGrid<Row> summary,
             List<TestCaseExecutionServer> executions, int tcID) {
         VMWindow w = new VMWindow(TRANSLATOR.translate("general.export"));
         VerticalLayout vl = new VerticalLayout();
@@ -266,13 +292,13 @@ public class TestCaseExporter {
         Button export = new Button(TRANSLATOR.translate("general.export"));
         List<File> attachments = new ArrayList<>();
         export.addClickListener(listener -> {
-            if (ArrayUtils.contains(summary.getColumnHeaders(),
-                    TRANSLATOR.translate("general.attachment"))) {
-                //Hide the attachment column as it doesn't work well on the export.
-                summary.setColumnCollapsingAllowed(true);
-                summary.setColumnCollapsed(TRANSLATOR
-                        .translate("general.attachment"), true);
-            }
+            //Hide the attachment column as it doesn't work well on the export.
+            summary.getColumns().forEach(col -> {
+                if (TRANSLATOR.translate("general.attachment")
+                        .equals(col.getCaption())) {
+                    col.setHidden(true);
+                }
+            });
             String basePath = VaadinService.getCurrent()
                     .getBaseDirectory().getAbsolutePath()
                     + File.separator
@@ -394,8 +420,7 @@ public class TestCaseExporter {
             }
             //Create the Excel file
             ExcelExport excelExport = new ExcelExport(
-                    new com.vaadin.addon.tableexport.v7.DefaultTableHolder(
-                            summary));
+                    new DefaultGridHolder(summary));
             excelExport.excludeCollapsedColumns();
             excelExport.setReportTitle(TRANSLATOR.translate("general.export"));
             excelExport.setDisplayTotals(false);
@@ -403,12 +428,6 @@ public class TestCaseExporter {
             UI.getCurrent().removeWindow(w);
         });
         vl.addComponent(export);
-        summary.getItemIds().forEach(id -> {
-            summary.setCollapsed(id, false);
-            summary.getChildren(id).forEach(child -> {
-                summary.setCollapsed(child, false);
-            });
-        });
         w.setContent(vl);
         w.setSizeFull();
         return w;

@@ -15,7 +15,6 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.workflow;
 
-import com.vaadin.v7.data.util.BeanItemContainer;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.pontus.vizcomponent.VizComponent;
 import com.vaadin.pontus.vizcomponent.VizComponent.EdgeClickEvent;
@@ -24,8 +23,8 @@ import com.vaadin.pontus.vizcomponent.model.Graph;
 import com.vaadin.pontus.vizcomponent.model.Subgraph;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
-import com.vaadin.v7.ui.ListSelect;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.NativeSelect;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -66,8 +65,8 @@ public final class WorkflowViewer extends VMWindow {
             = Logger.getLogger(WorkflowViewer.class.getSimpleName());
     private Object selected = null;
     private final BorderLayout bl = new BorderLayout();
-    private final ListSelect workflows
-            = new ListSelect(TRANSLATOR.translate("general.workflow"));
+    private final NativeSelect<Workflow> workflows
+            = new NativeSelect<>(TRANSLATOR.translate("general.workflow"));
     private int count = 0;
     private final String KEY = "key", ITEM_NAME = "itemName";
 
@@ -158,15 +157,11 @@ public final class WorkflowViewer extends VMWindow {
         Button addTransition = new Button(TRANSLATOR.translate("general.add.transition"));
         VerticalLayout vl2 = new VerticalLayout();
         TextField transitionName = new TextField(TRANSLATOR.translate("general.name"));
-        ListSelect nodeList = new ListSelect(TRANSLATOR.translate("general.step"));
-        BeanItemContainer<Graph.Node> container
-                = new BeanItemContainer<>(Graph.Node.class, nodes.values());
-        nodeList.setContainerDataSource(container);
-        nodeList.getItemIds().forEach(id -> {
-            Graph.Node temp = ((Graph.Node) id);
-            nodeList.setItemCaption(id, temp.getId());
-        });
-        nodeList.setNullSelectionAllowed(false);
+        NativeSelect<Subgraph.Node> nodeList
+                = new NativeSelect<>(TRANSLATOR.translate("general.step"));
+        nodeList.setItems(nodes.values());
+        nodeList.setItemCaptionGenerator(node -> node.getId());
+        nodeList.setEmptySelectionAllowed(false);
         vl2.addComponent(transitionName);
         vl2.addComponent(nodeList);
         addTransition.addClickListener(listener -> {
@@ -179,7 +174,7 @@ public final class WorkflowViewer extends VMWindow {
                                 && selected instanceof Subgraph.Node) {
                             Subgraph.Edge edge
                                     = new Subgraph.Edge();
-                            edge.setDest((Subgraph.Node) nodeList.getValue());
+                            edge.setDest(nodeList.getValue());
                             edges.put(transitionName.getValue(),
                                     new AbstractMap.SimpleEntry<>(
                                             (Subgraph.Node) selected, edge));
@@ -241,7 +236,7 @@ public final class WorkflowViewer extends VMWindow {
             List<Graph.Node> nodesToAdd = new ArrayList<>();
             List<Subgraph.Edge> edgesToAdd = new ArrayList<>();
             WorkflowServer ws
-                    = new WorkflowServer(((Workflow) workflows.getValue()).getId());
+                    = new WorkflowServer(workflows.getValue().getId());
             added.forEach(a -> {
                 if (a instanceof Graph.Node) {
                     nodesToAdd.add((Graph.Node) a);
@@ -266,7 +261,7 @@ public final class WorkflowViewer extends VMWindow {
         cancel.setWidth(100, Unit.PERCENTAGE);
         cancel.setEnabled(selected != null);
         cancel.addClickListener(listener -> {
-            Workflow w = (Workflow) workflows.getValue();
+            Workflow w = workflows.getValue();
             if (w != null) {
                 displayWorkflow(w);
             }
@@ -314,7 +309,7 @@ public final class WorkflowViewer extends VMWindow {
      * Recreate graph with the edited values
      */
     private void refreshWorkflow() {
-        Graph graph = new Graph(((Workflow) workflows.getValue())
+        Graph graph = new Graph(workflows.getValue()
                 .getWorkflowName(), Graph.DIGRAPH);
         nodes.values().forEach(node -> {
             graph.addNode(node);
@@ -338,20 +333,14 @@ public final class WorkflowViewer extends VMWindow {
     }
 
     private Component getList() {
-        BeanItemContainer<Workflow> container
-                = new BeanItemContainer<>(Workflow.class,
-                        new WorkflowJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findWorkflowEntities());
-        workflows.setContainerDataSource(container);
-        workflows.getItemIds().forEach(id -> {
-            Workflow temp = ((Workflow) id);
-            workflows.setItemCaption(id,
-                    TRANSLATOR.translate(temp.getWorkflowName()));
-        });
-        workflows.setNullSelectionAllowed(false);
+        workflows.setItems(new WorkflowJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findWorkflowEntities());
+        workflows.setItemCaptionGenerator(temp
+                -> TRANSLATOR.translate(temp.getWorkflowName()));
+        workflows.setEmptySelectionAllowed(false);
         workflows.addValueChangeListener(listener -> {
-            Workflow w = (Workflow) workflows.getValue();
+            Workflow w = workflows.getValue();
             if (w != null) {
                 displayWorkflow(w);
             }

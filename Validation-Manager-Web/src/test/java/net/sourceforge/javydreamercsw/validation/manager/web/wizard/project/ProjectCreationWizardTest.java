@@ -94,7 +94,8 @@ public class ProjectCreationWizardTest extends AbstractVMTestCase {
         //Step 3
         GAMPStep step3 = (GAMPStep) w.getSteps().get(2);
         assertFalse(step3.onAdvance());
-        assertEquals(2, step3.getCategory().getItemIds().size());
+        assertEquals(2, ((com.vaadin.data.provider.ListDataProvider<String>) step3
+                .getCategory().getDataProvider()).getItems().size());
         //Select category 1
         step3.getCategory().setValue("template.gamp5.hw.cat1");
         assertEquals(true, step3.isIq());
@@ -121,7 +122,8 @@ public class ProjectCreationWizardTest extends AbstractVMTestCase {
         step1.getType().setValue("general.software");
         step1.onAdvance();//Set the new type
         step3.getContent();//Refresh the categories
-        assertEquals(4, step3.getCategory().getItemIds().size());
+        assertEquals(4, ((com.vaadin.data.provider.ListDataProvider<String>) step3
+                .getCategory().getDataProvider()).getItems().size());
         assertNull(instance.getProcess());
         //Select category 1
         step3.getCategory().setValue("template.gamp5.sw.cat1");

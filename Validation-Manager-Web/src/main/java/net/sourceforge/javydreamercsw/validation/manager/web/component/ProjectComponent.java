@@ -15,17 +15,15 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.data.validator.NullValidator;
+import com.vaadin.data.Binder;
 import com.vaadin.ui.Button;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextArea;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.ValoTheme;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -51,7 +49,7 @@ public final class ProjectComponent extends Panel {
             = Logger.getLogger(ProjectComponent.class.getSimpleName());
     private TextField name;
     private TextArea notes;
-    private ComboBox type;
+    private ComboBox<ProjectType> type;
     private final Button save = new Button(TRANSLATOR.translate("general.save"));
     private final Button update = new Button(TRANSLATOR.translate("general.update"));
 
@@ -71,45 +69,30 @@ public final class ProjectComponent extends Panel {
 
     private void init() {
         addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        type = new ComboBox(TRANSLATOR.translate("general.type"));
+        type = new ComboBox<>(TRANSLATOR.translate("general.type"));
         FormLayout layout = new FormLayout();
         setContent(layout);
-        BeanFieldGroup binder = new BeanFieldGroup(getProject().getClass());
-        binder.setItemDataSource(getProject());
-        name = (TextField) binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "name", TextField.class);
-        name.setNullRepresentation("");
-        notes = (TextArea) binder.buildAndBind(TRANSLATOR.translate("general.notes"),
-                "notes", TextArea.class);
-        getNotes().setNullRepresentation("");
+        Binder<Project> binder = new Binder<>(Project.class);
+        binder.setBean(getProject());
+        name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.forField(name).withNullRepresentation("").bind("name");
+        notes = new TextArea(TRANSLATOR.translate("general.notes"));
+        binder.forField(notes).withNullRepresentation("").bind("notes");
         getNotes().setSizeFull();
-        getName().setRequired(true);
-        getName().setRequiredError(TRANSLATOR.translate("missing.name.message"));
+        getName().setRequiredIndicatorVisible(true);
         layout.addComponent(getName());
         layout.addComponent(getNotes());
-        type.setNewItemsAllowed(false);
         type.setTextInputAllowed(false);
-        type.addValidator(new NullValidator(TRANSLATOR
-                .translate("message.required.field.missing")
-                .replaceAll("%f",
-                        TRANSLATOR.translate("general.type")),
-                false));
-        BeanItemContainer<ProjectType> container
-                = new BeanItemContainer<>(ProjectType.class,
-                        new ProjectTypeJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findProjectTypeEntities());
-        type.setContainerDataSource(container);
-        type.getItemIds().forEach(id -> {
-            ProjectType temp = ((ProjectType) id);
-            type.setItemCaption(id,
-                    TRANSLATOR.translate(temp.getTypeName()));
-        });
+        type.setRequiredIndicatorVisible(true);
+        type.setItems(new ProjectTypeJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findProjectTypeEntities());
+        type.setItemCaptionGenerator(temp
+                -> TRANSLATOR.translate(temp.getTypeName()));
         layout.addComponent(type);
         binder.bind(type, "projectTypeId");
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
             if (getProject().getId() == null) {
                 ((VMUI) UI.getCurrent()).displayObject(((VMUI) UI.getCurrent())
                         .getSelectdValue());
@@ -121,8 +104,9 @@ public final class ProjectComponent extends Panel {
             if (getProject().getId() == null) {
                 //Creating a new one
                 getSave().addClickListener((Button.ClickEvent event) -> {
-                    if (getName().getValue() == null) {
-                        Notification.show(getName().getRequiredError(),
+                    if (getName().getValue() == null
+                            || getName().getValue().trim().isEmpty()) {
+                        Notification.show(TRANSLATOR.translate("missing.name.message"),
                                 Notification.Type.ERROR_MESSAGE);
                         return;
                     }
@@ -131,7 +115,10 @@ public final class ProjectComponent extends Panel {
                         getProject().setNotes(getNotes().getValue());
                     }
                     if (type.getValue() == null) {
-                        Notification.show(type.getRequiredError(),
+                        Notification.show(TRANSLATOR
+                                .translate("message.required.field.missing")
+                                .replaceAll("%f",
+                                        TRANSLATOR.translate("general.type")),
                                 Notification.Type.ERROR_MESSAGE);
                         return;
                     }
@@ -158,7 +145,10 @@ public final class ProjectComponent extends Panel {
                             getProject().setNotes(getNotes().getValue());
                         }
                         if (type.getValue() == null) {
-                            Notification.show(type.getRequiredError(),
+                            Notification.show(TRANSLATOR
+                                    .translate("message.required.field.missing")
+                                    .replaceAll("%f",
+                                            TRANSLATOR.translate("general.type")),
                                     Notification.Type.ERROR_MESSAGE);
                             return;
                         }
@@ -188,9 +178,7 @@ public final class ProjectComponent extends Panel {
                 layout.addComponent(hl);
             }
         }
-        binder.setBuffered(true);
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         setSizeFull();
     }
 

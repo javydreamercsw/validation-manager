@@ -15,11 +15,10 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.Container;
-import com.vaadin.v7.ui.Tree;
+import com.vaadin.data.TreeData;
+import com.vaadin.data.provider.TreeDataProvider;
+import com.vaadin.ui.TreeGrid;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
-import static com.validation.manager.core.VMUI.PROJECT_ICON;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
@@ -42,10 +41,13 @@ import java.util.List;
 import org.openide.util.Lookup;
 
 /**
+ * Project hierarchy rendered as a {@link TreeGrid}. The tree mixes several
+ * entity types (plus a few synthetic String nodes), so items are identified by
+ * their natural object identity.
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class ProjectTreeComponent extends Tree {
+public final class ProjectTreeComponent extends TreeGrid<Object> {
 
     private static final InternationalizationProvider TRANSLATOR
             = Lookup.getDefault().lookup(InternationalizationProvider.class);
@@ -53,6 +55,7 @@ public final class ProjectTreeComponent extends Tree {
             .translate("project.root.label");
     private boolean showProject = true, showRequirement = true,
             showTestCase = true, showExecution = true;
+    private TreeDataProvider<Object> dataProvider;
 
     public ProjectTreeComponent() {
         update();
@@ -60,30 +63,55 @@ public final class ProjectTreeComponent extends Tree {
 
     public ProjectTreeComponent(String caption, boolean showProject,
             boolean showRequirement, boolean showTestCase) {
-        super(caption);
+        super();
+        setCaption(caption);
         this.showProject = showProject;
         this.showRequirement = showRequirement;
         this.showTestCase = showTestCase;
         update();
     }
 
-    public ProjectTreeComponent(String caption, Container dataSource,
+    public ProjectTreeComponent(String caption, Object dataSource,
             boolean showProject, boolean showRequirement, boolean showTestCase,
             boolean showExecution) {
-        super(caption, dataSource);
-        this.showProject = showProject;
-        this.showRequirement = showRequirement;
-        this.showTestCase = showTestCase;
+        //The v7 Container based constructor is no longer applicable.
+        this(caption, showProject, showRequirement, showTestCase);
         this.showExecution = showExecution;
-        update();
+    }
+
+    public TreeDataProvider<Object> getProjectDataProvider() {
+        if (dataProvider == null) {
+            update();
+        }
+        return dataProvider;
+    }
+
+    /**
+     * Direct access to the underlying tree data for structural edits.
+     */
+    public TreeData<Object> getTreeData() {
+        return getProjectDataProvider().getTreeData();
+    }
+
+    @Override
+    public void setDataProvider(
+            com.vaadin.data.provider.DataProvider<Object, ?> dataProvider) {
+        super.setDataProvider(dataProvider);
+        if (dataProvider instanceof TreeDataProvider) {
+            this.dataProvider = (TreeDataProvider<Object>) dataProvider;
+        }
     }
 
     public void update() {
-        removeAllItems();
-        addItem(projTreeRoot);
-        setImmediate(true);
-        expandItem(projTreeRoot);
+        TreeData<Object> treeData = new TreeData<>();
+        treeData.addRootItems(projTreeRoot);
         setSizeFull();
+        if (getColumn("caption") == null) {
+            addColumn(this::getCaptionFor)
+                    .setId("caption")
+                    .setCaption(projTreeRoot);
+            setHierarchyColumn("caption");
+        }
         new ProjectJpaController(DataBaseManager.getEntityManagerFactory())
                 .findProjectEntities().forEach((p) -> {
                     if (p.getParentProjectId() == null) {
@@ -92,109 +120,78 @@ public final class ProjectTreeComponent extends Tree {
 //                                && ((VMUI) UI.getCurrent()).checkAnyProjectRole(p, null)
 //                                || !((VMUI) UI.getCurrent()).getUser()
 //                                        .getRoleList().isEmpty()) {
-                        addProject(p);
+                        addProject(p, treeData);
 //                        }
                     }
                 });
+        setDataProvider(new TreeDataProvider<>(treeData));
+        expand(projTreeRoot);
     }
 
-    public void addProject(Project p) {
+    private void addProject(Project p, TreeData<Object> treeData) {
         if (showProject) {
-            addItem(p);
-            setItemCaption(p, p.getName());
-            setParent(p, p.getParentProjectId() == null
-                    ? projTreeRoot : p.getParentProjectId());
-            setItemIcon(p, PROJECT_ICON);
-            boolean children = false;
+            treeData.addItem(p.getParentProjectId() == null
+                    ? projTreeRoot : p.getParentProjectId(), p);
             if (showProject && !p.getProjectList().isEmpty()) {
                 p.getProjectList().forEach((sp) -> {
-                    addProject(sp);
+                    addProject(sp, treeData);
                 });
-                children = true;
             }
             if (showRequirement && !p.getRequirementSpecList().isEmpty()) {
                 p.getRequirementSpecList().forEach((rs) -> {
-                    addRequirementSpec(rs);
+                    addRequirementSpec(rs, treeData);
                 });
-                children = true;
             }
             if (showTestCase && !p.getTestProjectList().isEmpty()) {
                 p.getTestProjectList().forEach((tp) -> {
-                    addTestProject(tp);
+                    addTestProject(tp, treeData);
                 });
-                children = true;
             }
             if (showExecution) {
                 List<TestCaseExecution> executions = TestCaseExecutionServer
                         .getExecutions(p);
                 String id = "executions" + p.getId();
-                addItem(id);
-                setItemCaption(id, TRANSLATOR.translate("general.execution"));
-                setItemIcon(id, VMUI.EXECUTIONS_ICON);
-                setParent(id, p);
+                treeData.addItem(p, id);
                 executions.forEach((tce) -> {
-                    addTestCaseExecutions(id, tce);
+                    addTestCaseExecutions(id, tce, treeData);
                 });
-                children = true;
-            }
-            if (!children) {
-                // No subprojects
-                setChildrenAllowed(p, false);
             }
         }
     }
 
-    private void addRequirementSpec(RequirementSpec rs) {
+    private void addRequirementSpec(RequirementSpec rs,
+            TreeData<Object> treeData) {
         if (showRequirement) {
             // Add the item as a regular item.
-            addItem(rs);
-            setItemCaption(rs, rs.getName());
-            setItemIcon(rs, VMUI.SPEC_ICON);
-            // Set it to be a child.
-            setParent(rs, rs.getProject());
-            if (rs.getRequirementSpecNodeList().isEmpty()
-                    && rs.getBaselineList().isEmpty()) {
-                //No children
-                setChildrenAllowed(rs, false);
-            } else {
-                rs.getRequirementSpecNodeList().forEach((rsn) -> {
-                    addRequirementSpecsNode(rsn);
-                });
-                //Add the baseline to the spec
-                rs.getBaselineList().forEach(bl -> {
-                    addBaseline(bl);
-                });
-            }
+            treeData.addItem(rs.getProject(), rs);
+            rs.getRequirementSpecNodeList().forEach((rsn) -> {
+                addRequirementSpecsNode(rsn, treeData);
+            });
+            //Add the baseline to the spec
+            rs.getBaselineList().forEach(bl -> {
+                addBaseline(bl, treeData);
+            });
         }
     }
 
-    private void addTestProject(TestProject tp) {
+    private void addTestProject(TestProject tp, TreeData<Object> treeData) {
         if (showTestCase) {
-            addItem(tp);
-            setItemCaption(tp, tp.getName());
-            setItemIcon(tp, VMUI.TEST_SUITE_ICON);
-            setParent(tp, tp.getProjectList().get(0));
-            boolean children = false;
-            if (!tp.getTestPlanList().isEmpty()) {
-                tp.getTestPlanList().forEach((plan) -> {
-                    addTestPlan(plan);
-                });
-                children = true;
-            }
-            setChildrenAllowed(tp, children);
+            treeData.addItem(tp.getProjectList().get(0), tp);
+            tp.getTestPlanList().forEach((plan) -> {
+                addTestPlan(plan, treeData);
+            });
         }
     }
 
-    private void addTestCaseExecutions(String parent, TestCaseExecution tce) {
+    private void addTestCaseExecutions(String parent, TestCaseExecution tce,
+            TreeData<Object> treeData) {
         if (showExecution) {
-            addItem(tce);
-            setItemCaption(tce, tce.getName());
-            setItemIcon(tce, VMUI.EXECUTION_ICON);
-            setParent(tce, parent);
+            //Attach the execution under the synthetic "executions" node
+            treeData.addItem(parent, tce);
             for (ExecutionStep es : tce.getExecutionStepList()) {
                 //Group under the Test Case
                 TestCase tc = es.getStep().getTestCase();
-                Collection<?> children = getChildren(tce);
+                Collection<Object> children = treeData.getChildren(tce);
                 String node = Tool.buildId(tce,
                         Tool.buildId(tc, null, false)).toString();
                 boolean add = true;
@@ -209,116 +206,106 @@ public final class ProjectTreeComponent extends Tree {
                 }
                 if (add) {
                     //Add Test Case if not there
-                    addItem(node);
-                    setItemCaption(node, tc.getName());
-                    setItemIcon(node, VMUI.TEST_ICON);
-                    setParent(node, tce);
+                    treeData.addItem(tce, node);
                 }
-                addItem(es);
-                setItemCaption(es, "Step #" + es.getStep().getStepSequence());
-                //Use icon based on result of step
-                setItemIcon(es, VMUI.STEP_ICON);
-                setParent(es, node);
-                setChildrenAllowed(es, false);
+                treeData.addItem(node, es);
+                treeData.setParent(es, node);
             }
         }
     }
 
-    private void addRequirementSpecsNode(RequirementSpecNode rsn) {
+    private void addRequirementSpecsNode(RequirementSpecNode rsn,
+            TreeData<Object> treeData) {
         if (showRequirement) {
             // Add the item as a regular item.
-            addItem(rsn);
-            setItemCaption(rsn, rsn.getName());
-            setItemIcon(rsn, VMUI.SPEC_ICON);
-            // Set it to be a child.
-            setParent(rsn, rsn.getRequirementSpec());
-            if (rsn.getRequirementList().isEmpty()) {
-                //No children
-                setChildrenAllowed(rsn, false);
-            } else {
-                ArrayList<Requirement> list
-                        = new ArrayList<>(rsn.getRequirementList());
-                Collections.sort(list,
-                        (Requirement o1, Requirement o2)
-                        -> o1.getUniqueId().compareTo(o2.getUniqueId()));
-                list.forEach((req) -> {
-                    addRequirement(req);
-                });
-            }
-        }
-    }
-
-    private void addBaseline(Baseline bl) {
-        if (showRequirement && !containsId(bl)) {
-            addItem(bl);
-            setItemCaption(bl, bl.getBaselineName());
-            setItemIcon(bl, VMUI.BASELINE_ICON);
-            setParent(bl, bl.getRequirementSpec());
-            //No children
-            setChildrenAllowed(bl, false);
-        }
-    }
-
-    private void addTestPlan(TestPlan tp) {
-        if (showTestCase) {
-            addItem(tp);
-            setItemCaption(tp, tp.getName());
-            setItemIcon(tp, VMUI.TEST_PLAN_ICON);
-            setParent(tp, tp.getTestProject());
-            if (!tp.getTestCaseList().isEmpty()) {
-                tp.getTestCaseList().forEach((tc) -> {
-                    addTestCase(tc, tp);
-                });
-            } else {
-                setChildrenAllowed(tp, false);
-            }
-        }
-    }
-
-    private void addRequirement(Requirement req) {
-        if (showRequirement) {
-            // Add the item as a regular item.
-            addItem(req);
-            setItemCaption(req, req.getUniqueId());
-            setItemIcon(req, VMUI.REQUIREMENT_ICON);
-            setParent(req, req.getRequirementSpecNode());
-            //No children
-            setChildrenAllowed(req, false);
-        }
-    }
-
-    private void addTestCase(TestCase t, TestPlan plan) {
-        if (showTestCase) {
-            addItem(t);
-            setItemCaption(t, t.getName());
-            setItemIcon(t, VMUI.TEST_ICON);
-            setParent(t, plan);
-            List<Step> stepList = t.getStepList();
-            Collections.sort(stepList, (Step o1, Step o2)
-                    -> o1.getStepSequence() - o2.getStepSequence());
-            stepList.forEach((s) -> {
-                addStep(s);
+            treeData.addItem(rsn.getRequirementSpec(), rsn);
+            ArrayList<Requirement> list
+                    = new ArrayList<>(rsn.getRequirementList());
+            Collections.sort(list,
+                    (Requirement o1, Requirement o2)
+                    -> o1.getUniqueId().compareTo(o2.getUniqueId()));
+            list.forEach((req) -> {
+                addRequirement(req, treeData);
             });
         }
     }
 
-    private void addStep(Step s) {
-        if (showTestCase) {
-            addStep(s, null);
+    private void addBaseline(Baseline bl, TreeData<Object> treeData) {
+        if (showRequirement && !treeData.contains(bl)) {
+            treeData.addItem(bl.getRequirementSpec(), bl);
         }
     }
 
-    private void addStep(Step s, Object parent) {
+    private void addTestPlan(TestPlan tp, TreeData<Object> treeData) {
         if (showTestCase) {
-            addItem(s);
-            setItemCaption(s, "Step # " + s.getStepSequence());
-            setItemIcon(s, VMUI.STEP_ICON);
+            treeData.addItem(tp.getTestProject(), tp);
+            tp.getTestCaseList().forEach((tc) -> {
+                addTestCase(tc, tp, treeData);
+            });
+        }
+    }
+
+    private void addRequirement(Requirement req, TreeData<Object> treeData) {
+        if (showRequirement) {
+            // Add the item as a regular item.
+            treeData.addItem(req.getRequirementSpecNode(), req);
+        }
+    }
+
+    private void addTestCase(TestCase t, TestPlan plan,
+            TreeData<Object> treeData) {
+        if (showTestCase) {
+            treeData.addItem(plan, t);
+            List<Step> stepList = t.getStepList();
+            Collections.sort(stepList, (Step o1, Step o2)
+                    -> o1.getStepSequence() - o2.getStepSequence());
+            stepList.forEach((s) -> {
+                addStep(s, t, treeData);
+            });
+        }
+    }
+
+    private void addStep(Step s, Object parent, TreeData<Object> treeData) {
+        if (showTestCase) {
             Object parentId = s.getTestCase();
             if (parent != null) {
                 parentId = parent;
             }
-            setParent(s, parentId);
-            setChildrenAllowed(s, false);
+            treeData.addItem(parentId, s);
         }
+    }
+
+    private String getCaptionFor(Object item) {
+        if (item instanceof Project) {
+            return ((Project) item).getName();
+        } else if (item instanceof RequirementSpec) {
+            return ((RequirementSpec) item).getName();
+        } else if (item instanceof RequirementSpecNode) {
+            return ((RequirementSpecNode) item).getName();
+        } else if (item instanceof Requirement) {
+            return ((Requirement) item).getUniqueId();
+        } else if (item instanceof TestProject) {
+            return ((TestProject) item).getName();
+        } else if (item instanceof TestPlan) {
+            return ((TestPlan) item).getName();
+        } else if (item instanceof TestCase) {
+            return ((TestCase) item).getName();
+        } else if (item instanceof TestCaseExecution) {
+            return ((TestCaseExecution) item).getName();
+        } else if (item instanceof Step) {
+            return "Step # " + ((Step) item).getStepSequence();
+        } else if (item instanceof Baseline) {
+            return ((Baseline) item).getBaselineName();
+        } else if (item instanceof String) {
+            String val = (String) item;
+            if (val.equals(projTreeRoot)) {
+                return projTreeRoot;
+            } else if (val.startsWith("executions")) {
+                return TRANSLATOR.translate("general.execution");
+            } else if (val.startsWith("tce")) {
+                return TRANSLATOR.translate("general.execution");
+            }
+        }
+        return String.valueOf(item);
     }
 }

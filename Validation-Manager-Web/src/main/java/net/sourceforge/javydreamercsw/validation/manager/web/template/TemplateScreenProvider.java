@@ -15,17 +15,16 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.template;
 
-import com.vaadin.v7.data.util.BeanItemContainer;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.v7.ui.ListSelect;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -59,7 +58,7 @@ import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 @ServiceProvider(service = IMainContentProvider.class, position = 6)
 public class TemplateScreenProvider extends AdminProvider {
 
-    private final ListSelect templates;
+    private final NativeSelect<Template> templates;
     private static final Logger LOG
             = Logger.getLogger(TemplateScreenProvider.class.getSimpleName());
     private final HorizontalSplitPanel hs = new HorizontalSplitPanel();
@@ -70,7 +69,7 @@ public class TemplateScreenProvider extends AdminProvider {
     }
 
     public TemplateScreenProvider() {
-        templates = new ListSelect(TRANSLATOR.translate("template.tab.list.name"));
+        templates = new NativeSelect<>(TRANSLATOR.translate("template.tab.list.name"));
     }
 
     @Override
@@ -88,23 +87,17 @@ public class TemplateScreenProvider extends AdminProvider {
     private Component getLeftComponent() {
         Panel p = new Panel();
         VerticalLayout layout = new VerticalLayout();
-        templates.setNullSelectionAllowed(true);
+        templates.setEmptySelectionAllowed(true);
         templates.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        BeanItemContainer<Template> container
-                = new BeanItemContainer<>(Template.class,
-                        new TemplateJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findTemplateEntities());
-        templates.setContainerDataSource(container);
-        templates.getItemIds().forEach(id -> {
-            Template temp = ((Template) id);
-            templates.setItemCaption(id,
-                    TRANSLATOR.translate(temp.getTemplateName()));
-        });
+        templates.setItems(new TemplateJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findTemplateEntities());
+        templates.setItemCaptionGenerator(temp
+                -> TRANSLATOR.translate(temp.getTemplateName()));
         templates.addValueChangeListener(event -> {
             hs.setSecondComponent(getRightComponent());
         });
-        templates.setNullSelectionAllowed(false);
+        templates.setEmptySelectionAllowed(false);
         templates.setWidth(100, Sizeable.Unit.PERCENTAGE);
         layout.addComponent(templates);
         HorizontalLayout hl = new HorizontalLayout();
@@ -125,7 +118,7 @@ public class TemplateScreenProvider extends AdminProvider {
         hl.addComponent(delete);
         templates.addValueChangeListener(listener -> {
             if (templates.getValue() != null) {
-                Template t = (Template) templates.getValue();
+                Template t = templates.getValue();
                 delete.setEnabled(t.getId() >= 1_000);
                 copy.setEnabled(t.getTemplateNodeList().size() > 0);
             }
@@ -138,7 +131,7 @@ public class TemplateScreenProvider extends AdminProvider {
     }
 
     private Component getRightComponent() {
-        Template t = (Template) templates.getValue();
+        Template t = templates.getValue();
         return t == null ? new Panel()
                 : new TemplateComponent(t, t.getId() >= 1000);
     }
@@ -284,8 +277,8 @@ public class TemplateScreenProvider extends AdminProvider {
                         try {
                             //Delete nodes
                             TemplateServer t
-                                    = new TemplateServer(((Template) templates
-                                            .getValue()));
+                                    = new TemplateServer(templates
+                                            .getValue());
                             t.delete();
                             ((VMUI) UI.getCurrent()).updateScreen();
                             ((VMUI) UI.getCurrent()).showTab(getComponentCaption());

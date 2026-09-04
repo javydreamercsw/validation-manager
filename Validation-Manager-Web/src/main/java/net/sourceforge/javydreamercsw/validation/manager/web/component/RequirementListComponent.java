@@ -15,9 +15,8 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.shared.ui.grid.HeightMode;
-import com.vaadin.v7.ui.Grid;
+import com.vaadin.shared.ui.grid.HeightMode;
+import com.vaadin.ui.Grid;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Requirement;
 import java.util.List;
@@ -27,7 +26,7 @@ import org.openide.util.Lookup;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class RequirementListComponent extends Grid {
+public final class RequirementListComponent extends Grid<Requirement> {
 
     private final List<Requirement> requirementList;
     private static final InternationalizationProvider TRANSLATOR
@@ -47,16 +46,13 @@ public final class RequirementListComponent extends Grid {
     }
 
     private void init() {
-        BeanItemContainer<Requirement> children
-                = new BeanItemContainer<>(Requirement.class);
-        children.addAll(requirementList);
-        setContainerDataSource(children);
-        setColumns("uniqueId");
-        Grid.Column uniqueId = getColumn("uniqueId");
-        uniqueId.setHeaderCaption(TRANSLATOR.translate("unique.id"));
+        setItems(requirementList);
+        Grid.Column<Requirement, String> uniqueId
+                = addColumn(Requirement::getUniqueId);
+        uniqueId.setCaption(TRANSLATOR.translate("unique.id"));
         setHeightMode(HeightMode.ROW);
-        setHeightByRows(children.size() > 5 ? 5 : children.size());
+        setHeightByRows(requirementList.size() > 5 ? 5 : requirementList.size());
         setSizeFull();
-        children.sort(new Object[]{"uniqueId"}, new boolean[]{true});
+        sort(uniqueId);
     }
 }

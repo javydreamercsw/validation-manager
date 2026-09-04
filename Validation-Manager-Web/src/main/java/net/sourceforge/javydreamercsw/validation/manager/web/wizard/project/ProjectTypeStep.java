@@ -16,7 +16,7 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
 import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.VerticalLayout;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -28,13 +28,12 @@ import org.vaadin.teemu.wizards.WizardStep;
  */
 public class ProjectTypeStep implements WizardStep {
 
-    private final ComboBox type;
+    private final ComboBox<String> type;
     private final ProjectCreationWizard wizard;
 
     public ProjectTypeStep(ProjectCreationWizard wizard) {
-        type = new ComboBox(TRANSLATOR.translate("general.type"));
-        type.addItem("general.software");
-        type.addItem("general.hardware");
+        type = new ComboBox<>(TRANSLATOR.translate("general.type"));
+        type.setItems("general.software", "general.hardware");
         type.setTextInputAllowed(false);
         type.setWidth(100, Unit.PERCENTAGE);
         this.wizard = wizard;
@@ -56,7 +55,7 @@ public class ProjectTypeStep implements WizardStep {
     @Override
     public boolean onAdvance() {
         if (getType().getValue() != null) {
-            wizard.setType((String) getType().getValue());
+            wizard.setType(getType().getValue());
         }
         return getType().getValue() != null;
     }
@@ -69,7 +68,7 @@ public class ProjectTypeStep implements WizardStep {
     /**
      * @return the type
      */
-    protected ComboBox getType() {
+    protected ComboBox<String> getType() {
         return type;
     }
 }

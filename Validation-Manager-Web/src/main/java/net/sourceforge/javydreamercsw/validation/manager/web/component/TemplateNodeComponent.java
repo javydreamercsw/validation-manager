@@ -15,11 +15,10 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.ui.ListSelect;
+import com.vaadin.data.Binder;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
@@ -35,12 +34,14 @@ public class TemplateNodeComponent extends Panel {
 
     private final TemplateNode node;
     private final boolean edit;
-    private ListSelect type;
-    private TextField name;
+    private final ComboBox<TemplateNodeType> type;
+    private final TextField name;
 
     public TemplateNodeComponent(TemplateNode node, boolean edit) {
         this.node = node;
         this.edit = edit;
+        type = new ComboBox<>(TRANSLATOR.translate("general.type"));
+        name = new TextField(TRANSLATOR.translate("general.name"));
         init();
     }
 
@@ -48,35 +49,29 @@ public class TemplateNodeComponent extends Panel {
         super(caption);
         this.node = node;
         this.edit = edit;
+        type = new ComboBox<>(TRANSLATOR.translate("general.type"));
+        name = new TextField(TRANSLATOR.translate("general.name"));
         init();
     }
 
     private void init() {
-        type = new ListSelect(TRANSLATOR.translate("general.type"));
-        name = new TextField(TRANSLATOR.translate("general.name"));
         VerticalLayout vl = new VerticalLayout();
-        BeanFieldGroup binder = new BeanFieldGroup(getNode().getClass());
-        binder.setItemDataSource(getNode());
-        binder.bind(type, "templateNodeType");
-        BeanItemContainer<TemplateNodeType> container
-                = new BeanItemContainer<>(TemplateNodeType.class,
-                        new TemplateNodeTypeJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findTemplateNodeTypeEntities());
-        type.setContainerDataSource(container);
-        type.getItemIds().forEach(id -> {
-            TemplateNodeType temp = ((TemplateNodeType) id);
-            type.setItemCaption(id,
-                    TRANSLATOR.translate(temp.getTypeName()));
-        });
-        type.setNullSelectionAllowed(false);
+        Binder<TemplateNode> binder = new Binder<>(TemplateNode.class);
+        binder.setBean(getNode());
+        type.setItems(new TemplateNodeTypeJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findTemplateNodeTypeEntities());
+        type.setItemCaptionGenerator(temp
+                -> TRANSLATOR.translate(temp.getTypeName()));
+        type.setEmptySelectionAllowed(false);
+        type.setValue(getNode().getTemplateNodeType());
         type.addValueChangeListener(listener -> {
-            getNode().setTemplateNodeType((TemplateNodeType) type.getValue());
+            getNode().setTemplateNodeType(type.getValue());
         });
-        name = (TextField) binder.buildAndBind(TRANSLATOR
-                .translate("general.name"),
-                "nodeName", TextField.class);
-        name.setNullRepresentation("");
+        binder.bind(type, "templateNodeType");
+        binder.forField(name)
+                .withNullRepresentation("")
+                .bind("nodeName");
         name.addValueChangeListener(listener -> {
             getNode().setNodeName(name.getValue());
         });

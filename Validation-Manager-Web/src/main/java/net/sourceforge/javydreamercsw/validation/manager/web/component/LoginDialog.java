@@ -15,7 +15,6 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.validator.StringLengthValidator;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.event.ShortcutAction;
@@ -26,8 +25,8 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
-import com.vaadin.v7.ui.PasswordField;
-import com.vaadin.v7.ui.TextField;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;
@@ -94,20 +93,6 @@ public final class LoginDialog extends VMWindow {
         layout.addComponent(password);
         name.focus();
         name.setWidth(100, Unit.PERCENTAGE);
-        StringLengthValidator nameVal = new StringLengthValidator(
-                Lookup.getDefault()
-                        .lookup(InternationalizationProvider.class).
-                        translate("password.length.message"));
-        nameVal.setMinLength(5);
-        name.addValidator(nameVal);
-        name.setImmediate(true);
-        StringLengthValidator passVal = new StringLengthValidator(
-                Lookup.getDefault()
-                        .lookup(InternationalizationProvider.class).
-                        translate("password.empty.message"));
-        passVal.setMinLength(3);
-        password.addValidator(passVal);
-        password.setImmediate(true);
         password.setWidth(100, Unit.PERCENTAGE);
         layout.addComponent(hlayout);
         layout.setComponentAlignment(name, Alignment.TOP_LEFT);
@@ -132,6 +117,15 @@ public final class LoginDialog extends VMWindow {
     }
 
     private void tryToLogIn() {
+        if (name.getValue() == null || name.getValue().trim().length() < 5
+                || password.getValue() == null
+                || password.getValue().length() < 3) {
+            Notification.show(Lookup.getDefault()
+                    .lookup(InternationalizationProvider.class)
+                    .translate("password.length.message"),
+                    Notification.Type.WARNING_MESSAGE);
+            return;
+        }
         try {
             //Throws exception if credentials are wrong.
             VMUserServer user = new VMUserServer(name.getValue(),

@@ -15,10 +15,11 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.v7.data.util.converter.Converter;
+import com.vaadin.data.Converter;
+import com.vaadin.data.Result;
+import com.vaadin.data.ValueContext;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMUserServer;
-import java.util.Locale;
 import java.util.StringTokenizer;
 
 /**
@@ -28,32 +29,20 @@ import java.util.StringTokenizer;
 public class UserToStringConverter implements Converter<String, VmUser> {
 
     @Override
-    public Class<VmUser> getModelType() {
-        return VmUser.class;
-    }
-
-    @Override
-    public Class<String> getPresentationType() {
-        return String.class;
-    }
-
-    @Override
-    public VmUser convertToModel(String value,
-            Class<? extends VmUser> targetType, Locale locale) throws ConversionException {
+    public Result<VmUser> convertToModel(String value, ValueContext context) {
         StringTokenizer st = new StringTokenizer(value, " ");
         String name = st.nextToken();
         String last = st.hasMoreTokens() ? st.nextToken() : "";
         for (VMUserServer user : VMUserServer.getVMUsers()) {
             if (user.getFirstName().equals(name) && user.getLastName().equals(last)) {
-                return user;
+                return Result.ok(user);
             }
         }
-        return null;
+        return Result.error("Unknown user: " + value);
     }
 
     @Override
-    public String convertToPresentation(VmUser value,
-            Class<? extends String> targetType, Locale locale) throws ConversionException {
+    public String convertToPresentation(VmUser value, ValueContext context) {
         return new VMUserServer(value).toString();
     }
 }
