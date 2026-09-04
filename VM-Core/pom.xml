@@ -45,11 +45,11 @@
             <artifactId>vaadin-icons</artifactId>
             <version>${vaadin.icons.version}</version>
         </dependency>
-        <!--Flyway, Database update (2.3.1 predates the fluent API and modern H2 metadata queries)-->
+        <!--Flyway, Database update (9.22.3 is the last release with H2 support built in; 10+ splits it out)-->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>5.2.4</version>
+            <version>9.22.3</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -60,13 +60,13 @@
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
-            <!-- 2.7.0 (2017) fails to generate complete DDL on H2 2.x; 2.7.16 supports it, still javax.persistence -->
-            <version>2.7.16</version>
+            <!-- Jakarta EE 10 line (jakarta.persistence 3.1); 2.x was javax -->
+            <version>4.0.9</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-            <version>2.1.1</version>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -86,9 +86,9 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <version>2.0.0.Final</version>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.0.2</version>
             <type>jar</type>
         </dependency>
         <!-- JAXB annotations on entities; removed from the JDK in Java 11+ -->
@@ -315,8 +315,8 @@
         </plugins>
     </reporting>
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <!-- EclipseLink 4.x is Java 11 bytecode; source/target 1.8 would reject it -->
+        <maven.compiler.release>11</maven.compiler.release>
         <pdfbox.version>2.0.24</pdfbox.version>
         <jacoco.version>0.8.8</jacoco.version>
         <jacoco.outputDir>${project.basedir}/target/jacoco.exec</jacoco.outputDir>

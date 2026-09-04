@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,12 +41,12 @@ import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import static javax.persistence.Persistence.createEntityManagerFactory;
-import javax.persistence.Query;
-import javax.persistence.TableGenerator;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import static jakarta.persistence.Persistence.createEntityManagerFactory;
+import jakarta.persistence.Query;
+import jakarta.persistence.TableGenerator;
 import javax.sql.DataSource;
 import org.eclipse.persistence.jpa.JpaHelper;
 import org.h2.jdbcx.JdbcDataSource;
@@ -101,6 +102,8 @@ public class DataBaseManager {
                 // JPA (EclipseLink) creates the schema before Flyway runs, so the
                 // schema history table must be baselined into an existing schema.
                 .baselineOnMigrate(true)
+                // Flyway 9 disables clean() by default; demo reset depends on it.
+                .cleanDisabled(false)
                 .load();
         if (isDemo()) {
             LOG.warning("Resetting database since it is on demo mode.");
@@ -487,6 +490,7 @@ public class DataBaseManager {
             LOG.fine("Starting migration...");
             flyway.migrate();
             LOG.fine("Done!");
+            resyncIdentityColumns(dataSource);
         }
         catch (FlywayException fe) {
             LOG.log(Level.SEVERE, "Unable to migrate data", fe);
@@ -507,6 +511,51 @@ public class DataBaseManager {
 
     protected static void setState(DBState newState) {
         state = newState;
+    }
+
+    /**
+     * H2 1.x advanced an identity column's counter on explicit-ID inserts; H2
+     * 2.x does not. Flyway's seed scripts insert explicit IDs, so after
+     * migrating, every identity column's counter must be restarted past the
+     * highest seeded ID or the next JPA insert collides with seeded rows.
+     */
+    private static void resyncIdentityColumns(DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection()) {
+            List<Object> tables = nativeQuery(
+                    "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
+                    + "WHERE TABLE_SCHEMA = 'PUBLIC'");
+            for (Object tableObj : tables) {
+                String table = (String) tableObj;
+                try (ResultSet cols = conn.getMetaData().getColumns(
+                        null, "PUBLIC", table, null)) {
+                    while (cols.next()) {
+                        if (!"YES".equalsIgnoreCase(cols.getString("IS_AUTOINCREMENT"))) {
+                            continue;
+                        }
+                        String idCol = cols.getString("COLUMN_NAME");
+                        try (Statement st = conn.createStatement();
+                                ResultSet maxRs = st.executeQuery(
+                                        "SELECT MAX(\"" + idCol + "\") FROM \""
+                                        + table + "\"")) {
+                            if (maxRs != null && maxRs.next()) {
+                                long max = maxRs.getLong(1);
+                                if (!maxRs.wasNull()) {
+                                    st.execute("ALTER TABLE \"" + table
+                                            + "\" ALTER COLUMN \"" + idCol
+                                            + "\" RESTART WITH " + (max + 1));
+                                    LOG.log(Level.FINE,
+                                            "Restarted identity on {0}.{1} to {2}",
+                                            new Object[]{table, idCol, max + 1});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (SQLException ex) {
+            LOG.log(Level.SEVERE, "Unable to resync identity columns", ex);
+        }
     }
 
     public static void waitForDB() {

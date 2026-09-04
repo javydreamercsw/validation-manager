@@ -48,9 +48,9 @@
         <netbeans.version>RELEASE126</netbeans.version>
         <junit.version>4.12</junit.version>
         <mysql.version>8.0.31</mysql.version>
-        <!-- 2.x removed syntax EclipseLink 2.7 emits (bare IDENTITY); 1.4.200 is the
-        last release compatible with the current JPA stack (see phase-2 notes) -->
-        <h2.version>1.4.200</h2.version>
+        <!-- 2.x removed syntax EclipseLink 2.7 emits (bare IDENTITY); EclipseLink 4.x
+        (jakarta, phase-4) generates H2 2.x-compatible DDL -->
+        <h2.version>2.4.240</h2.version>
         <poi.version>4.1.1</poi.version>
         <vaadin.icons.version>3.0.1</vaadin.icons.version>
     </properties>

@@ -18,10 +18,10 @@ package com.validation.manager.core.db.controller;
 import com.validation.manager.core.db.StepTransitionsToStep;
 import com.validation.manager.core.db.StepTransitionsToStepPK;
 import java.io.Serializable;
-import javax.persistence.Query;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.Query;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import com.validation.manager.core.db.WorkflowStep;
 import com.validation.manager.core.db.WorkflowInstanceHasTransition;
 import com.validation.manager.core.db.controller.exceptions.IllegalOrphanException;
@@ -29,8 +29,8 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.db.controller.exceptions.PreexistingEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 
 /**
  *
