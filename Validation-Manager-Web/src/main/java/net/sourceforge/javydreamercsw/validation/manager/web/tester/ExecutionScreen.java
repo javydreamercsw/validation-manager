@@ -15,22 +15,18 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.tester;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.addon.contextmenu.MenuItem;
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TreeGrid;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
-import com.validation.manager.core.VMUI;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.TestCase;
@@ -106,37 +102,41 @@ public abstract class ExecutionScreen extends AbstractProvider {
 
     private ExecutionWindow executionWindow = null;
     private final TreeGrid<Row> testCaseTree;
+    //v8 Grid caption has no Flow equivalent; rendered as a Span above the grid
+    private final com.vaadin.flow.component.html.Span treeCaption
+            = new com.vaadin.flow.component.html.Span();
     private final Map<String, Row> rows = new HashMap<>();
 
     public ExecutionScreen() {
         testCaseTree = new TreeGrid<>();
         testCaseTree.addColumn(Row::getName)
-                .setId("general.name")
-                .setCaption(TRANSLATOR.translate("general.name"));
+                .setKey("general.name")
+                .setHeader(TRANSLATOR.translate("general.name"))
+                .setFlexGrow(1);
         testCaseTree.addComponentColumn(this::getStatusComponent)
-                .setId("general.status")
-                .setCaption(TRANSLATOR.translate("general.status"));
+                .setKey("general.status")
+                .setHeader(TRANSLATOR.translate("general.status"))
+                .setFlexGrow(1);
         testCaseTree.addColumn(Row::getSummary)
-                .setId("general.summary")
-                .setCaption(TRANSLATOR.translate("general.summary"));
+                .setKey("general.summary")
+                .setHeader(TRANSLATOR.translate("general.summary"));
         testCaseTree.addColumn(Row::getAssignmentDate)
-                .setId("general.assignment.date")
-                .setCaption(TRANSLATOR.translate("general.assignment.date"));
+                .setKey("general.assignment.date")
+                .setHeader(TRANSLATOR.translate("general.assignment.date"));
         testCaseTree.setHierarchyColumn("general.name");
-        //v7 setColumnExpandRatio applied to the first two visible columns
-        testCaseTree.getColumn("general.name").setExpandRatio(1);
-        testCaseTree.getColumn("general.status").setExpandRatio(1);
-        //Context menu replacing the v7 Action.Handler
-        ContextMenu contextMenu = new ContextMenu(testCaseTree, true);
-        testCaseTree.addItemClickListener((Grid.ItemClick<Row> event) -> {
-            if (event.getMouseEventDetails().getButton() == MouseButton.RIGHT) {
-                //Select item on right click and rebuild the menu for it
-                testCaseTree.asSingleSelect().setValue(event.getItem());
-                contextMenu.removeItems();
-                Row selected = event.getItem();
-                if (selected != null) {
-                    addContextMenuItems(contextMenu, selected.getId());
-                }
+        treeCaption.setText(TRANSLATOR.translate("available.tests"));
+        //Context menu replacing the v7 Action.Handler. The native menu opens
+        //on right click by itself; a right-click listener only needs to select
+        //the row so the menu can be rebuilt for it.
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setTarget(testCaseTree);
+        testCaseTree.addItemClickListener((com.vaadin.flow.component.grid.ItemClickEvent<Row> event) -> {
+            //Select item on right click and rebuild the menu for it
+            testCaseTree.asSingleSelect().setValue(event.getItem());
+            contextMenu.removeAll();
+            Row selected = event.getItem();
+            if (selected != null) {
+                addContextMenuItems(contextMenu, selected.getId());
             }
         });
     }
@@ -147,12 +147,10 @@ public abstract class ExecutionScreen extends AbstractProvider {
         HorizontalLayout icons = new HorizontalLayout();
         Button label = new Button();
         Button label2 = new Button();
-        icons.addComponent(label2);
-        icons.addComponent(label);
-        label.addStyleName(ValoTheme.BUTTON_BORDERLESS
-                + " labelButton");
-        label2.addStyleName(ValoTheme.BUTTON_BORDERLESS
-                + " labelButton");
+        icons.add(label2);
+        icons.add(label);
+        label.addThemeNames("tertiary");
+        label2.addThemeNames("tertiary");
         Map<String, Integer> summary = new HashMap<>();
         boolean locked = false;
         if (id.startsWith("tce")) {
@@ -171,8 +169,8 @@ public abstract class ExecutionScreen extends AbstractProvider {
             locked = es.getLocked();
         }
         if (locked) {
-            label2.setIcon(VaadinIcons.LOCK);
-            label2.setDescription(TRANSLATOR.translate("message.locked"));
+            label2.setIcon(new Icon(VaadinIcon.LOCK));
+            label2.setTooltipText(TRANSLATOR.translate("message.locked"));
         }
         if (!summary.isEmpty()) {
             if (summary.containsKey("result.fail")) {
@@ -193,29 +191,29 @@ public abstract class ExecutionScreen extends AbstractProvider {
                 //All is pass
                 message = "result.pass";
             }
-            label.setCaption(TRANSLATOR
+            label.setText(TRANSLATOR
                     .translate(message));
-            label.setDescription(TRANSLATOR
+            label.setTooltipText(TRANSLATOR
                     .translate(message));
             //Completed. Now check result
             switch (message) {
                 case "result.pass":
-                    label.setIcon(VaadinIcons.CHECK);
+                    label.setIcon(new Icon(VaadinIcon.CHECK));
                     break;
                 case "result.fail":
-                    label.setIcon(VaadinIcons.CLOSE);
+                    label.setIcon(new Icon(VaadinIcon.CLOSE));
                     break;
                 case "result.blocked":
-                    label.setIcon(VaadinIcons.PAUSE);
+                    label.setIcon(new Icon(VaadinIcon.PAUSE));
                     break;
                 case "result.pending":
-                    label.setIcon(VaadinIcons.CLOCK);
+                    label.setIcon(new Icon(VaadinIcon.CLOCK));
                     break;
                 case "result.progress":
-                    label.setIcon(VaadinIcons.AUTOMATION);
+                    label.setIcon(new Icon(VaadinIcon.AUTOMATION));
                     break;
                 default:
-                    label.setIcon(VaadinIcons.CLOCK);
+                    label.setIcon(new Icon(VaadinIcon.CLOCK));
                     break;
             }
             return icons;
@@ -248,22 +246,20 @@ public abstract class ExecutionScreen extends AbstractProvider {
                 && ExecutionScreen.this instanceof TesterScreenProvider) {
             menu.addItem(TRANSLATOR
                     .translate("general.execute"),
-                    VMUI.EXECUTION_ICON,
-                    (MenuItem selectedItem) -> {
+                    (selectedItem) -> {
                         showExecutionFor(id);
                     });
         } else if (isLocked(tce, tcID)
                 && ExecutionScreen.this instanceof QualityScreenProvider) {
             menu.addItem(TRANSLATOR
                     .translate("general.review"),
-                    VaadinIcons.EYE,
-                    (MenuItem selectedItem) -> {
+                    (selectedItem) -> {
                         showExecutionFor(id);
                     });
         }
         menu.addItem(TRANSLATOR
-                .translate("general.export"), VaadinIcons.DOWNLOAD,
-                (MenuItem selectedItem) -> {
+                .translate("general.export"),
+                (selectedItem) -> {
                     exportFor(id);
                 });
     }
@@ -299,7 +295,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
 
     private void viewExecutionScreen(List<TestCaseExecutionServer> executions,
             int tcID) {
-        UI.getCurrent().addWindow(TestCaseExporter
+        ValidationManagerUI.getInstance().openDialog(TestCaseExporter
                 .getExecutionExporter(executions, tcID));
     }
 
@@ -357,17 +353,13 @@ public abstract class ExecutionScreen extends AbstractProvider {
         if (executionWindow == null) {
             executionWindow = new ExecutionWindow(executions, tcID,
                     this instanceof QualityScreenProvider);
-            executionWindow.setCaption(TRANSLATOR
+            executionWindow.setHeaderTitle(TRANSLATOR
                     .translate("test.execution"));
-            executionWindow.setVisible(true);
-            executionWindow.setClosable(false);
             executionWindow.setResizable(false);
-            executionWindow.center();
-            executionWindow.setModal(true);
             executionWindow.setSizeFull();
         }
-        if (!ValidationManagerUI.getInstance().getWindows().contains(executionWindow)) {
-            ValidationManagerUI.getInstance().addWindow(executionWindow);
+        if (!ValidationManagerUI.getInstance().isOpen(executionWindow)) {
+            ValidationManagerUI.getInstance().openDialog(executionWindow);
         }
     }
 
@@ -375,7 +367,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
     public Component getContent() {
         VerticalLayout vl = new VerticalLayout();
         update();
-        vl.addComponent(testCaseTree);
+        vl.add(treeCaption, testCaseTree);
         vl.setId(getComponentCaption());
         return vl;
     }
@@ -383,10 +375,10 @@ public abstract class ExecutionScreen extends AbstractProvider {
     @Override
     public void update() {
         if (executionWindow != null) {
-            executionWindow.setCaption(TRANSLATOR
+            executionWindow.setHeaderTitle(TRANSLATOR
                     .translate("test.execution"));
         }
-        testCaseTree.setCaption(TRANSLATOR
+        treeCaption.setText(TRANSLATOR
                 .translate("available.tests"));
         TreeData<Row> treeData = new TreeData<>();
         rows.clear();
@@ -453,7 +445,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
         //Update column titles
         for (String h : new String[]{"general.name", "general.status",
             "general.summary", "general.assignment.date"}) {
-            testCaseTree.getColumn(h).setCaption(TRANSLATOR.translate(h));
+            testCaseTree.getColumnByKey(h).setHeader(TRANSLATOR.translate(h));
         }
         testCaseTree.setSizeFull();
     }

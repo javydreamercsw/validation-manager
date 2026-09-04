@@ -15,14 +15,14 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.dashboard;
 
-import com.vaadin.server.Resource;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.shared.data.sort.SortDirection;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.renderers.ImageRenderer;
-import com.validation.manager.core.IMainContentProvider;
-import com.validation.manager.core.api.image.AvatarProvider;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.AvatarProvider;
 import com.validation.manager.core.db.Activity;
 import com.validation.manager.core.server.core.ActivityServer;
 import com.validation.manager.core.server.core.VMUserServer;
@@ -32,7 +32,6 @@ import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractPr
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
-import org.vaadin.addon.borderlayout.BorderLayout;
 
 /**
  *
@@ -54,26 +53,27 @@ public class DashboardProvider extends AbstractProvider {
     @Override
     public Component getContent() {
         try {
-            BorderLayout bl = new BorderLayout();
             //Add activity stream
             List<Activity> activities = ActivityServer.getActivities();
-            Grid<Activity> grid = new Grid<>(
-                    TRANSLATOR.translate("general.activity.stream"));
+            VerticalLayout layout = new VerticalLayout();
+            Grid<Activity> grid = new Grid<>();
             grid.setItems(activities);
-            grid.addColumn(activity -> {
-                Resource image = new ThemeResource("VMSmall.png");
+            grid.addColumn(new ComponentRenderer<>(activity -> {
+                Image image = new Image("/VAADIN/themes/vmtheme/VMSmall.png",
+                        "");
                 AvatarProvider ap = Lookup.getDefault()
                         .lookup(AvatarProvider.class);
-                Resource icon = ap == null ? null
+                String icon = ap == null ? null
                         : ap.getAvatar(activity.getSourceUser(), 30);
                 if (icon != null) {
-                    image = icon;
+                    image = new Image(icon, "");
                 }
+                image.setWidth("30px");
+                image.setHeight("30px");
                 return image;
-            })
-                    .setId("avatar")
-                    .setCaption("")
-                    .setRenderer(new ImageRenderer<>());
+            }))
+                    .setKey("avatar")
+                    .setHeader("");
             grid.addColumn(a -> {
                 try {
                     return new VMUserServer(a.getSourceUser().getId())
@@ -83,22 +83,25 @@ public class DashboardProvider extends AbstractProvider {
                 }
                 return "";
             })
-                    .setId("sourceUser")
-                    .setCaption(TRANSLATOR.translate("general.user"));
+                    .setKey("sourceUser")
+                    .setHeader(TRANSLATOR.translate("general.user"));
             grid.addColumn(a -> a.getActivityType() == null ? ""
                     : TRANSLATOR.translate(a.getActivityType().getTypeName()))
-                    .setId("activityType")
-                    .setCaption(TRANSLATOR.translate("general.type"));
+                    .setKey("activityType")
+                    .setHeader(TRANSLATOR.translate("general.type"));
             grid.addColumn(Activity::getDescription)
-                    .setId("description")
-                    .setCaption(TRANSLATOR.translate("general.description"));
+                    .setKey("description")
+                    .setHeader(TRANSLATOR.translate("general.description"));
             grid.addColumn(Activity::getActivityTime)
-                    .setId("activityTime")
-                    .setCaption(TRANSLATOR.translate("general.time"));
-            grid.sort("activityTime", SortDirection.DESCENDING);
-            bl.addComponent(grid, BorderLayout.Constraint.CENTER);
-            bl.setId(getComponentCaption());
-            return bl;
+                    .setKey("activityTime")
+                    .setHeader(TRANSLATOR.translate("general.time"));
+            grid.sort(GridSortOrder.desc(
+                    grid.getColumnByKey("activityTime")).build());
+            layout.add(grid);
+            layout.setId(getComponentCaption());
+            layout.setSizeFull();
+            grid.setSizeFull();
+            return layout;
         } catch (IllegalArgumentException | IllegalStateException ex) {
             Exceptions.printStackTrace(ex);
         }

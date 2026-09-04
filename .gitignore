@@ -11,3 +11,6 @@ VM-Core/data/*
 /target/
 /Validation-Manager-Web/nbproject/
 .idea/
+/fserversrc/
+/Validation-Manager-Web/src/main/frontend/generated/
+/Validation-Manager-Web/node_modules/

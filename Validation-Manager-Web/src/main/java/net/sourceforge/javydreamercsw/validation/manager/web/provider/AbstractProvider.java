@@ -15,15 +15,15 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.provider;
 
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HasComponents;
-import com.validation.manager.core.IMainContentProvider;
-import com.validation.manager.core.VMUI;
-import com.validation.manager.core.VaadinUtils;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VaadinUtils;
 import org.openide.util.Lookup;
 
 public abstract class AbstractProvider implements IMainContentProvider {

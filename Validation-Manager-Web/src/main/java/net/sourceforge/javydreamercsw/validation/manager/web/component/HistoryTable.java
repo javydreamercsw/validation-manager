@@ -15,11 +15,10 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Grid;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.HistoryField;
+import com.vaadin.flow.component.grid.Grid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,27 +33,9 @@ public final class HistoryTable extends Grid<History> {
             List<History> historyItems, String sortByField,
             boolean showVersionFields,
             String... fields) {
-        super(title);
-        setItems(historyItems);
-        //Generated properties become plain columns computed from the item.
-        for (String field : fields) {
-            addColumn((com.vaadin.data.ValueProvider<History, String>) (History v)
-                    -> fieldValue(v, field))
-                    .setId(field);
-        }
-        if (showVersionFields) {
-            addColumn(history -> history.getMajorVersion() + "."
-                    + history.getMidVersion() + "." + history.getMinorVersion())
-                    .setId("version");
-            addColumn(history -> history.getModifierId().getFirstName() + " "
-                    + history.getModifierId().getLastName())
-                    .setId("modifier");
-            addColumn(history -> history.getModificationTime().toString())
-                    .setId("modificationDate");
-            addColumn(history -> history.getReason() == null ? ""
-                    : TRANSLATOR.translate(history.getReason()))
-                    .setId("modificationReason");
-        }
+        //Column order follows the requested field order (Flow Grid has no
+        //setColumns(String...) for non-bean grids; columns are ordered by
+        //insertion instead).
         List<String> fieldList = new ArrayList<>();
         //Add specified fields
         fieldList.addAll(Arrays.asList(fields));
@@ -65,14 +46,42 @@ public final class HistoryTable extends Grid<History> {
             fieldList.add("modificationDate");
             fieldList.add("modificationReason");
         }
-        setColumns(fieldList.toArray(new String[0]));
-        if (showVersionFields) {
-            getColumn("version").setCaption(TRANSLATOR.translate("general.version"));
-            getColumn("modifier").setCaption(TRANSLATOR.translate("general.modifier"));
-            getColumn("modificationDate").setCaption(TRANSLATOR
-                    .translate("modification.date"));
-            getColumn("modificationReason").setCaption(TRANSLATOR
-                    .translate("general.reason"));
+        setItems(historyItems);
+        //Generated properties become plain columns computed from the item.
+        for (String field : fieldList) {
+            switch (field) {
+                case "version":
+                    addColumn(history -> history.getMajorVersion() + "."
+                            + history.getMidVersion() + "."
+                            + history.getMinorVersion())
+                            .setKey("version")
+                            .setHeader(TRANSLATOR.translate("general.version"));
+                    break;
+                case "modifier":
+                    addColumn(history -> history.getModifierId().getFirstName()
+                            + " " + history.getModifierId().getLastName())
+                            .setKey("modifier")
+                            .setHeader(TRANSLATOR.translate("general.modifier"));
+                    break;
+                case "modificationDate":
+                    addColumn(history -> history.getModificationTime().toString())
+                            .setKey("modificationDate")
+                            .setHeader(TRANSLATOR
+                                    .translate("modification.date"));
+                    break;
+                case "modificationReason":
+                    addColumn(history -> history.getReason() == null ? ""
+                            : TRANSLATOR.translate(history.getReason()))
+                            .setKey("modificationReason")
+                            .setHeader(TRANSLATOR
+                                    .translate("general.reason"));
+                    break;
+                default:
+                    addColumn((com.vaadin.flow.function.ValueProvider<History, String>) (History v)
+                            -> fieldValue(v, field))
+                            .setKey(field);
+                    break;
+            }
         }
         if (sortByField != null && !sortByField.trim().isEmpty()) {
             //Sort on the underlying history item property
@@ -83,8 +92,12 @@ public final class HistoryTable extends Grid<History> {
             }
         }
         if (!historyItems.isEmpty()) {
-            setHeightMode(HeightMode.ROW);
-            setHeightByRows(historyItems.size() > 5 ? 5 : historyItems.size());
+            // v8 HeightMode.ROW: cap the visible rows (Flow has no
+            // setHeightByRows; emulate with a fixed height).
+            // TODO: (phase-4b-2) replace with setAllRowsVisible(true) when the
+            // surrounding layout can grow.
+            setHeight(historyItems.size() > 5 ? "160px" : (historyItems.size() * 40)
+                    + "px");
         }
         setSizeFull();
     }

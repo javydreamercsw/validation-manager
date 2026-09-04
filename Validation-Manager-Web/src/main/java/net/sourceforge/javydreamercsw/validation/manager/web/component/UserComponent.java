@@ -15,29 +15,26 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Binder;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Resource;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.TwinColSelect;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Role;
@@ -49,8 +46,6 @@ import com.validation.manager.core.db.controller.UserStatusJpaController;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.core.tool.MD5;
-import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.MessageBox;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -69,7 +64,7 @@ import org.openide.util.Lookup;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class UserComponent extends Panel {
+public class UserComponent extends VerticalLayout {
 
     private final VMUserServer user;
     private static final Logger LOG
@@ -85,30 +80,30 @@ public class UserComponent extends Panel {
     }
 
     public UserComponent(VMUserServer user, String caption, boolean edit) {
-        super(caption);
         this.user = user;
         this.edit = edit;
+        // v8 Panel caption: render as a header.
+        if (caption != null) {
+            Span header = new Span(caption);
+            add(header);
+        }
         init();
     }
 
     private void init() {
         FormLayout layout = new FormLayout();
-        setContent(layout);
-        addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        Binder<VMUserServer> binder = new Binder<>(VMUserServer.class);
+        com.vaadin.flow.data.binder.Binder<VMUserServer> binder
+                = new com.vaadin.flow.data.binder.Binder<>(VMUserServer.class);
         binder.setBean(user);
         TextField fn = new TextField(TRANSLATOR.
                 translate("general.first.name"));
         binder.forField(fn).bind("firstName");
-        layout.addComponent(fn);
         TextField ln = new TextField(TRANSLATOR.
                 translate("general.last.name"));
         binder.forField(ln).bind("lastName");
-        layout.addComponent(ln);
         TextField username = new TextField(TRANSLATOR.
                 translate("general.username"));
         binder.forField(username).bind("username");
-        layout.addComponent(username);
         PasswordField pw = new PasswordField(TRANSLATOR.
                 translate("general.password"));
         // The stored value is the MD5 hash; only take user input into the
@@ -118,40 +113,40 @@ public class UserComponent extends Panel {
                 .bind("password");
         PasswordChangeListener listener = new PasswordChangeListener();
         pw.addValueChangeListener(e -> listener.textChanged());
-        layout.addComponent(pw);
         TextField email = new TextField(TRANSLATOR.
                 translate("general.email"));
         binder.forField(email).bind("email");
-        layout.addComponent(email);
         ComboBox<String> locale = new ComboBox<>(TRANSLATOR.
                 translate("general.locale"));
-        locale.setTextInputAllowed(false);
         locale.setItems(ValidationManagerUI.getAvailableLocales().stream()
                 .map(Locale::toString).collect(Collectors.toList()));
         binder.forField(locale).bind("locale");
-        layout.addComponent(locale);
         //Status
         ComboBox<UserStatus> status = new ComboBox<>(TRANSLATOR.
                 translate("general.status"));
         status.setItems(new UserStatusJpaController(
                 DataBaseManager.getEntityManagerFactory())
                 .findUserStatusEntities());
-        status.setItemCaptionGenerator(us
+        status.setItemLabelGenerator(us
                 -> TRANSLATOR.translate(us.getStatus()));
         binder.forField(status).bind("userStatusId");
-        status.setTextInputAllowed(false);
-        layout.addComponent(status);
         List<UserHasRole> userRoles = new ArrayList<>();
         //Project specific roles
         if (!user.getUserHasRoleList().isEmpty()) {
-            Tree<TreePair> roles
-                    = new Tree<>(TRANSLATOR.translate("project.specific.role"));
+            TreeGrid<TreePair> roles = new TreeGrid<>();
+            roles.addColumn(TreePair::getCaption)
+                    .setHeader(TRANSLATOR.translate("project.specific.role"));
+            roles.addComponentColumn(tp -> {
+                Icon icon = new Icon(tp.getIcon());
+                icon.setSize("16px");
+                return icon;
+            }).setHeader("");
             List<TreePair> treeData = new ArrayList<>();
             user.getUserHasRoleList().forEach(uhr -> {
                 if (uhr.getProjectId() != null) {
                     Project p = uhr.getProjectId();
                     TreePair proj = new TreePair(p, p.getName(),
-                            VMUI.PROJECT_ICON);
+                            VaadinIcon.RECORDS);
                     int idx = treeData.indexOf(proj);
                     if (idx < 0) {
                         treeData.add(proj);
@@ -160,25 +155,33 @@ public class UserComponent extends Panel {
                     }
                     proj.getChildren().add(new TreePair(uhr, TRANSLATOR
                             .translate(uhr.getRole().getRoleName()),
-                            VaadinIcons.USER_CARD));
+                            VaadinIcon.USER_CARD));
                 }
             });
-            roles.setItems(treeData, TreePair::getChildren);
-            roles.setItemIconGenerator(tp -> tp.getIcon());
-            roles.setItemCaptionGenerator(tp -> tp.getCaption());
+            TreeData<TreePair> tdata = new TreeData<>();
+            treeData.forEach(root -> {
+                tdata.addItem(null, root);
+                root.getChildren().forEach(child -> {
+                    tdata.addItem(root, child);
+                });
+            });
+            roles.setDataProvider(new TreeDataProvider<>(tdata));
             if (!treeData.isEmpty()) {
-                layout.addComponent(roles);
+                add(roles);
             }
         }
         //Roles
-        if (edit && ((VMUI) UI.getCurrent()).checkRight("system.configuration")) {
+        if (edit && ((ValidationManagerUI) getUI()
+                .orElseGet(com.vaadin.flow.component.UI::getCurrent))
+                .checkRight("system.configuration")) {
             Button projectRole = new Button(TRANSLATOR.translate("manage.project.role"));
             projectRole.addClickListener(l -> {
                 VMWindow w = new VMWindow(TRANSLATOR.translate("manage.project.role"));
-                w.setContent(getProjectRoleManager());
-                ((VMUI) UI.getCurrent()).addWindow(w);
+                w.add(getProjectRoleManager());
+                ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                        .openDialog(w);
             });
-            layout.addComponent(projectRole);
+            add(projectRole);
             List<Role> list = new RoleJpaController(DataBaseManager
                     .getEntityManagerFactory())
                     .findRoleEntities();
@@ -186,14 +189,11 @@ public class UserComponent extends Panel {
                     -> TRANSLATOR.translate(r1.getRoleName())
                             .compareTo(TRANSLATOR
                                     .translate(r2.getRoleName())));
-            TwinColSelect<Role> roles
-                    = new TwinColSelect<>(TRANSLATOR.translate("general.role"));
+            MultiSelectComboBox<Role> roles
+                    = new MultiSelectComboBox<>(TRANSLATOR.translate("general.role"));
             roles.setItems(list);
-            roles.setRows(5);
-            roles.setItemCaptionGenerator(r
+            roles.setItemLabelGenerator(r
                     -> TRANSLATOR.translate(r.getDescription()));
-            roles.setLeftColumnCaption(TRANSLATOR.translate("available.roles"));
-            roles.setRightColumnCaption(TRANSLATOR.translate("current.roles"));
             if (user.getUserHasRoleList() != null) {
                 Set<Role> rs = new HashSet<>();
                 user.getUserHasRoleList().forEach(uhr -> {
@@ -212,20 +212,19 @@ public class UserComponent extends Panel {
                     userRoles.add(temp);
                 });
             });
-            layout.addComponent(roles);
+            add(roles);
         } else {
             if (!user.getUserHasRoleList().isEmpty()) {
-                Grid<Role> roles = new Grid<>(TRANSLATOR.translate("general.role"));
+                Grid<Role> roles = new Grid<>();
+                roles.setSelectionMode(Grid.SelectionMode.NONE);
                 List<Role> roleList = new ArrayList<>();
                 user.getUserHasRoleList().forEach(uhr
                         -> roleList.add(uhr.getRole()));
                 roles.setItems(roleList);
                 roles.addColumn(r -> TRANSLATOR.translate(r.getRoleName()))
-                        .setCaption(TRANSLATOR.translate("general.role"));
-                roles.addColumn(r -> "")
-                        .setId("icon");
+                        .setHeader(TRANSLATOR.translate("general.role"));
                 roles.setWidth("300px");
-                layout.addComponent(roles);
+                add(roles);
             }
         }
         Button update = new Button(user.getId() == null
@@ -233,7 +232,7 @@ public class UserComponent extends Panel {
                         translate("general.create")
                 : TRANSLATOR.
                         translate("general.update"));
-        update.addClickListener((Button.ClickEvent event) -> {
+        update.addClickListener((event) -> {
             try {
                 if (binder.validate().isOk()) {
                     binder.writeBean(user);
@@ -273,73 +272,73 @@ public class UserComponent extends Panel {
                 if (listener.isChanged()
                         && !password.equals(user.getPassword())) {
                     //Different password. Prompt for confirmation
-                    MessageBox mb = MessageBox.create();
+                    ConfirmDialog mb = new ConfirmDialog();
                     VerticalLayout vl = new VerticalLayout();
-                    Label l = new Label(TRANSLATOR.
+                    Span l = new Span(TRANSLATOR.
                             translate("password.confirm.pw.message"));
-                    vl.addComponent(l);
+                    vl.add(l);
                     PasswordField np = new PasswordField(Lookup.getDefault()
                             .lookup(InternationalizationProvider.class)
                             .translate("general.password"));
-                    vl.addComponent(np);
-                    mb.asModal(true)
-                            .withCaption(Lookup.getDefault()
-                                    .lookup(InternationalizationProvider.class).
-                                    translate("password.confirm.pw"))
-                            .withMessage(vl)
-                            .withButtonAlignment(Alignment.MIDDLE_CENTER)
-                            .withOkButton(() -> {
+                    vl.add(np);
+                    mb.setHeader(Lookup.getDefault()
+                            .lookup(InternationalizationProvider.class).
+                            translate("password.confirm.pw"));
+                    mb.setText(vl);
+                    mb.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                            (e) -> {
                                 try {
                                     if (password.equals(MD5.encrypt(np.getValue()))) {
                                         us.setHashPassword(true);
                                         us.setPassword(np.getValue());
                                         us.write2DB();
                                         Notification.show(TRANSLATOR.
-                                                translate("audit.user.account.password.change"),
-                                                Notification.Type.ASSISTIVE_NOTIFICATION);
-                                        ((VMUI) UI.getCurrent()).updateScreen();
+                                                translate("audit.user.account.password.change"));
+                                        ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                                .updateScreen();
                                     } else {
                                         Notification.show(TRANSLATOR.
-                                                translate("password.does.not.match"),
-                                                Notification.Type.WARNING_MESSAGE);
+                                                translate("password.does.not.match"));
                                     }
                                     mb.close();
                                 } catch (VMException ex) {
                                     Exceptions.printStackTrace(ex);
                                 }
-                            }, ButtonOption.focus(),
-                                    ButtonOption.closeOnClick(false),
-                                    ButtonOption.icon(VaadinIcons.CHECK))
-                            .withCancelButton(
-                                    ButtonOption.icon(VaadinIcons.CLOSE)
-                            ).getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                            });
+                    mb.setCancelable(true);
+                    mb.setCancelButton(TRANSLATOR.translate("general.cancel"),
+                            (e) -> {
+                                //Nothing to do
+                            });
                     mb.open();
                 } else {
                     us.write2DB();
                 }
-                ((VMUI) UI.getCurrent()).getUser().update();
-                ((VMUI) UI.getCurrent()).setLocale(new Locale(us.getLocale()));
-                ((VMUI) UI.getCurrent()).updateScreen();
+                ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                        .getUser().update();
+                ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                        .setLocale(new Locale(us.getLocale()));
+                ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                        .updateScreen();
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, null, ex);
                 Notification.show(TRANSLATOR.
-                        translate("general.error.record.update"),
-                        ex.getLocalizedMessage(),
-                        Notification.Type.ERROR_MESSAGE);
+                        translate("general.error.record.update"));
             }
         });
         Button cancel = new Button(Lookup.getDefault()
                 .lookup(InternationalizationProvider.class).
                 translate("general.cancel"));
-        cancel.addClickListener((Button.ClickEvent event) -> {
+        cancel.addClickListener((event) -> {
             binder.readBean(user);
-            ((VMUI) UI.getCurrent()).updateScreen();
+            ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                    .updateScreen();
         });
         binder.setReadOnly(!edit);
         HorizontalLayout hl = new HorizontalLayout();
-        hl.addComponent(update);
-        hl.addComponent(cancel);
-        layout.addComponent(hl);
+        hl.add(update, cancel);
+        layout.add(fn, ln, username, pw, email, locale, status, hl);
+        add(layout);
     }
 
     private Component getProjectRoleManager() {
@@ -349,9 +348,9 @@ public class UserComponent extends Panel {
                 .setShowTestCase(false)
                 .setShowExecution(false)
                 .createProjectTreeComponent();
-        vl.addComponent(tree);
-        TwinColSelect<Role> roles
-                = new TwinColSelect<>(TRANSLATOR.translate("general.role"));
+        vl.add(tree);
+        MultiSelectComboBox<Role> roles
+                = new MultiSelectComboBox<>(TRANSLATOR.translate("general.role"));
         tree.asSingleSelect().addValueChangeListener(event -> {
             Project selected = event.getValue() instanceof Project
                     ? (Project) event.getValue() : null;
@@ -378,11 +377,8 @@ public class UserComponent extends Panel {
                         .compareTo(TRANSLATOR
                                 .translate(r2.getRoleName())));
         roles.setItems(list);
-        roles.setRows(5);
-        roles.setItemCaptionGenerator(r
+        roles.setItemLabelGenerator(r
                 -> TRANSLATOR.translate(r.getDescription()));
-        roles.setLeftColumnCaption(TRANSLATOR.translate("available.roles"));
-        roles.setRightColumnCaption(TRANSLATOR.translate("current.roles"));
         roles.addValueChangeListener(event -> {
             Set<Role> selected = event.getValue();
             UserHasRoleJpaController c
@@ -417,7 +413,7 @@ public class UserComponent extends Panel {
                 }
             });
         });
-        vl.addComponent(roles);
+        vl.add(roles);
         return vl;
     }
 
@@ -445,10 +441,10 @@ public class UserComponent extends Panel {
 
         private final Object id;
         private final String caption;
-        private final Resource icon;
+        private final VaadinIcon icon;
         private final List<TreePair> children = new ArrayList<>();
 
-        TreePair(Object id, String caption, Resource icon) {
+        TreePair(Object id, String caption, VaadinIcon icon) {
             this.id = id;
             this.caption = caption;
             this.icon = icon;
@@ -462,7 +458,7 @@ public class UserComponent extends Panel {
             return caption;
         }
 
-        public Resource getIcon() {
+        public VaadinIcon getIcon() {
             return icon;
         }
 

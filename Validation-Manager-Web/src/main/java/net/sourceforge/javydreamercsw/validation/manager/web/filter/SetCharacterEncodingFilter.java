@@ -16,7 +16,7 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.filter;
 
 import java.io.IOException;
-import javax.servlet.*;
+import jakarta.servlet.*;
 
 /**
  *
@@ -84,7 +84,7 @@ public class SetCharacterEncodingFilter implements Filter {
      * Place this filter into service.
      *
      * @param filterConfig The filter configuration object
-     * @throws javax.servlet.ServletException
+     * @throws jakarta.servlet.ServletException
      */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

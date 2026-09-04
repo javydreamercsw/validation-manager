@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.validation.manager.core;
+package net.sourceforge.javydreamercsw.validation.manager.web.core;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -40,15 +40,15 @@ public class VaadinUtilsTest {
             System.out.println("updateLocaleId");
             String key = "demo.tab.message";
             VerticalLayout vl = new VerticalLayout();
-            Label l = new Label();
+            Span l = new Span();
             l.setId(key);
-            vl.addComponent(l);
+            vl.add(l);
             ResourceBundle rb = ResourceBundle.getBundle(
                     "com.validation.manager.resources.VMMessages",
                     new Locale("es"));
             VaadinUtils.updateLocale(vl, new Locale("es"), rb);
             assertEquals(new String(rb.getString(key)
-                    .getBytes("ISO-8859-1"), "UTF-8"), l.getCaption());
+                    .getBytes("ISO-8859-1"), "UTF-8"), l.getText());
         }
         catch (UnsupportedEncodingException ex) {
             Exceptions.printStackTrace(ex);
@@ -69,11 +69,11 @@ public class VaadinUtilsTest {
             VerticalLayout vl = new VerticalLayout();
             String message = "This is a test: select.test.case and "
                     + "select.test.case.message";
-            Label l = new Label(message);
+            Span l = new Span(message);
             //Now test complex captions
             Button b = new Button(message);
-            vl.addComponent(l);
-            vl.addComponent(b);
+            vl.add(l);
+            vl.add(b);
             VaadinUtils.updateLocale(vl, new Locale("es"), rb);
             String expected = message.replaceAll("select.test.case.message",
                     new String(rb.getString("select.test.case.message")
@@ -81,8 +81,8 @@ public class VaadinUtilsTest {
                     .replaceAll("select.test.case",
                             new String(rb.getString("select.test.case")
                                     .getBytes("ISO-8859-1"), "UTF-8"));
-            assertEquals(expected, b.getCaption());
-            assertEquals(expected, l.getValue());
+            assertEquals(expected, b.getText());
+            assertEquals(expected, l.getText());
         }
         catch (UnsupportedEncodingException ex) {
             Exceptions.printStackTrace(ex);

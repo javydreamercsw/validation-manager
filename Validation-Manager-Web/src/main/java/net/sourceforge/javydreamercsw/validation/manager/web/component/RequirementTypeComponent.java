@@ -15,17 +15,17 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Binder;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.RequirementType;
 import com.validation.manager.core.db.controller.RequirementTypeJpaController;
@@ -37,7 +37,7 @@ import org.openide.util.Lookup;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class RequirementTypeComponent extends Panel {
+public final class RequirementTypeComponent extends VerticalLayout {
 
     private final RequirementType rt;
     private boolean edit = false;
@@ -47,7 +47,7 @@ public final class RequirementTypeComponent extends Panel {
             = Logger.getLogger(RequirementTypeComponent.class.getSimpleName());
 
     public RequirementTypeComponent(RequirementType rt, boolean edit) {
-        setCaption(TRANSLATOR.translate("issue.resolution"));
+        add(new Span(TRANSLATOR.translate("issue.resolution")));
         this.rt = rt;
         this.edit = edit;
         init();
@@ -55,8 +55,8 @@ public final class RequirementTypeComponent extends Panel {
 
     public RequirementTypeComponent(RequirementType rt, Component content,
             boolean edit) {
-        super(content);
-        setCaption(TRANSLATOR.translate("issue.resolution"));
+        add(content);
+        add(new Span(TRANSLATOR.translate("issue.resolution")));
         this.rt = rt;
         this.edit = edit;
         init();
@@ -64,7 +64,7 @@ public final class RequirementTypeComponent extends Panel {
 
     public RequirementTypeComponent(RequirementType rt, String caption,
             boolean edit) {
-        super(caption);
+        add(new Span(caption));
         this.rt = rt;
         this.edit = edit;
         init();
@@ -72,7 +72,8 @@ public final class RequirementTypeComponent extends Panel {
 
     public RequirementTypeComponent(RequirementType rt, String caption,
             Component content, boolean edit) {
-        super(caption, content);
+        add(new Span(caption));
+        add(content);
         this.rt = rt;
         this.edit = edit;
         init();
@@ -80,25 +81,24 @@ public final class RequirementTypeComponent extends Panel {
 
     private void init() {
         FormLayout layout = new FormLayout();
-        setContent(layout);
-        addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        add(layout);
         Binder<RequirementType> binder = new Binder<>(RequirementType.class);
         binder.setBean(rt);
         TextField name = new TextField(TRANSLATOR
                 .translate("general.name"));
         binder.bind(name, "name");
-        layout.addComponent(name);
+        layout.add(name);
         TextField desc = new TextField(TRANSLATOR
                 .translate("general.description"));
         binder.bind(desc, "description");
-        layout.addComponent(desc);
+        layout.add(desc);
         if (edit) {
             Button update = new Button(rt.getId() == null
                     ? TRANSLATOR.
                             translate("general.create")
                     : TRANSLATOR.
                             translate("general.update"));
-            update.addClickListener((Button.ClickEvent event) -> {
+            update.addClickListener((event) -> {
                 RequirementTypeJpaController c
                         = new RequirementTypeJpaController(DataBaseManager.
                                 getEntityManagerFactory());
@@ -117,14 +117,14 @@ public final class RequirementTypeComponent extends Panel {
             Button cancel = new Button(Lookup.getDefault()
                     .lookup(InternationalizationProvider.class).
                     translate("general.cancel"));
-            cancel.addClickListener((Button.ClickEvent event) -> {
-                ((VMUI) UI.getCurrent()).updateScreen();
+            cancel.addClickListener((event) -> {
+                ((ValidationManagerUI) UI.getCurrent()).updateScreen();
             });
             binder.setReadOnly(!edit);
             HorizontalLayout hl = new HorizontalLayout();
-            hl.addComponent(update);
-            hl.addComponent(cancel);
-            layout.addComponent(hl);
+            hl.add(update);
+            hl.add(cancel);
+            layout.add(hl);
         }
     }
 }

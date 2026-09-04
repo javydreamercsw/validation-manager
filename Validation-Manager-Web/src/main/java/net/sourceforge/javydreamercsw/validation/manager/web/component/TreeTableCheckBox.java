@@ -15,7 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.sebastian.indeterminatecheckbox.IndeterminateCheckBox;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
@@ -26,13 +26,12 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class TreeTableCheckBox extends IndeterminateCheckBox {
+public final class TreeTableCheckBox extends Checkbox {
 
     /**
      * Minimal tree access the checkbox needs to keep parent and children in
-     * sync. Implemented by the caller on top of its Vaadin 8 tree
-     * ({@link com.vaadin.data.TreeData} backed) structure, which also resolves
-     * the checkbox shown for each item.
+     * sync. Implemented by the caller on top of its tree ({@link com.vaadin.flow.data.provider.hierarchy.TreeData}
+     * backed) structure, which also resolves the checkbox shown for each item.
      */
     public interface TreeNavigator extends Serializable {
 
@@ -53,6 +52,9 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
             = Logger.getLogger(TreeTableCheckBox.class.getSimpleName());
     private final TreeNavigator navigator;
     private final Object objectId;
+    // Tri-state mirror of the v8 value: null models the indeterminate state
+    // (the Flow Checkbox's model value can't hold null).
+    private Boolean value;
 
     public TreeTableCheckBox(TreeNavigator navigator, Object objectId) {
         this.navigator = navigator;
@@ -77,21 +79,49 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
     }
 
     private void initialize() {
-        setUserCanToggleIndeterminate(false);
+        //The parent/child cascade runs for both user toggles and programmatic
+        //value changes, like the v8 doSetValue() did.
+        // TODO: (phase-4b-2) native Checkbox is bi-state on click; the
+        // tri-state (indeterminate) mirror here is programmatic only.
+        addValueChangeListener(e -> applyValue(e.getValue()));
+        if (this.value == null) {
+            setIndeterminate(true);
+        }
     }
 
+    /**
+     * @return the tri-state value; null means indeterminate (v8 semantics).
+     */
     @Override
     public Boolean getValue() {
-        return getState().value;
+        return value;
     }
 
     @Override
-    protected void doSetValue(Boolean value) {
+    public void setValue(Boolean value) {
+        if (value == null) {
+            //Tri-state: mark indeterminate without touching "checked".
+            this.value = null;
+            setIndeterminate(true);
+        } else {
+            //Triggers setPresentationValue() and the value change listeners.
+            super.setValue(value);
+        }
+    }
+
+    @Override
+    protected void setPresentationValue(Boolean value) {
+        applyValue(value);
+        setIndeterminate(false);
+        super.setPresentationValue(value);
+    }
+
+    private void applyValue(Boolean value) {
         if (navigator != null
                 && value != null
-                && !Objects.equals(value, getState().value)) {
+                && !Objects.equals(value, this.value)) {
             if (navigator.hasChildren(getObjectId())
-                    && getState().value != null) {
+                    && this.value != null) {
                 //Switching from false to true. Select all children
                 navigator.getChildren(getObjectId()).forEach((o) -> {
                     TreeTableCheckBox ttcb = navigator.getCheckBox(o);
@@ -104,8 +134,7 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
             if (!value && parentId != null) {
                 //Switching from true to false. Mark parent as undeterminated
                 TreeTableCheckBox parent = navigator.getCheckBox(parentId);
-                if (parent != null && parent.getValue() != null
-                        && parent.getValue()) {
+                if (parent != null && Boolean.TRUE.equals(parent.getValue())) {
                     LOG.log(Level.INFO, "Setting {0} to undetermined.",
                             parentId);
                     parent.setValue(null);
@@ -114,7 +143,7 @@ public final class TreeTableCheckBox extends IndeterminateCheckBox {
                 }
             }
         }
-        getState().value = value;
+        this.value = value;
     }
 
     /**

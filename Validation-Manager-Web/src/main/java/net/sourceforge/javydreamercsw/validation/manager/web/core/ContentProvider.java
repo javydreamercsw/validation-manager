@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.validation.manager.core;
+package net.sourceforge.javydreamercsw.validation.manager.web.core;
 
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import org.openide.util.Lookup;
 

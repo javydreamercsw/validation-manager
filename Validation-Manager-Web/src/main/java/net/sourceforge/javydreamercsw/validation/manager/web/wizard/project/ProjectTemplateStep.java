@@ -15,22 +15,22 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.VerticalLayout;
-import com.validation.manager.core.ContentProvider;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Template;
 import com.validation.manager.core.db.controller.TemplateJpaController;
 import java.util.ArrayList;
 import java.util.List;
-import org.vaadin.teemu.wizards.WizardStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-class ProjectTemplateStep implements WizardStep {
+class ProjectTemplateStep implements FlowWizardStep {
 
     private ComboBox<Template> templates;
     private final ProjectCreationWizard wizard;
@@ -62,7 +62,7 @@ class ProjectTemplateStep implements WizardStep {
                     }
                 });
         getTemplates().setItems(templateList);
-        getTemplates().setItemCaptionGenerator(t -> ContentProvider.TRANSLATOR
+        getTemplates().setItemLabelGenerator(t -> ContentProvider.TRANSLATOR
                 .translate(t.getTemplateName()));
         getTemplates().addValueChangeListener(event -> {
             Template t = getTemplates().getValue();
@@ -77,14 +77,14 @@ class ProjectTemplateStep implements WizardStep {
                 }
                 wizard.getWizard().addStep(new ProjectDetailsStep(wizard));
             } else {
-                //Remove added steps
-                List<WizardStep> steps = wizard.getWizard().getSteps();
-                for (int i = 1; i < steps.size(); i++) {
-                    wizard.getWizard().removeStep(steps.get(i));
-                }
+                //Remove added steps. The Flow wizard has no removeStep; the
+                //GAMP/details steps become unreachable because onAdvance of
+                //this step keeps gating progress (TODO(phase-4b-2): add
+                //removeStep to FlowWizard and restore exact removal).
+                //Do nothing beyond leaving the extra steps in place.
             }
         });
-        vl.addComponent(getTemplates());
+        vl.add(getTemplates());
         return vl;
     }
 

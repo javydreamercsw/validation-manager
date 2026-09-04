@@ -15,9 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.ui.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Baseline;
@@ -64,7 +64,11 @@ public final class ProjectTreeComponent extends TreeGrid<Object> {
     public ProjectTreeComponent(String caption, boolean showProject,
             boolean showRequirement, boolean showTestCase) {
         super();
-        setCaption(caption);
+        //v8 caption: rendered as a header div above the tree.
+        if (caption != null) {
+            getElement().insertChild(0,
+                    com.vaadin.flow.dom.ElementFactory.createDiv(caption));
+        }
         this.showProject = showProject;
         this.showRequirement = showRequirement;
         this.showTestCase = showTestCase;
@@ -95,7 +99,7 @@ public final class ProjectTreeComponent extends TreeGrid<Object> {
 
     @Override
     public void setDataProvider(
-            com.vaadin.data.provider.DataProvider<Object, ?> dataProvider) {
+            com.vaadin.flow.data.provider.DataProvider<Object, ?> dataProvider) {
         super.setDataProvider(dataProvider);
         if (dataProvider instanceof TreeDataProvider) {
             this.dataProvider = (TreeDataProvider<Object>) dataProvider;
@@ -106,11 +110,10 @@ public final class ProjectTreeComponent extends TreeGrid<Object> {
         TreeData<Object> treeData = new TreeData<>();
         treeData.addRootItems(projTreeRoot);
         setSizeFull();
-        if (getColumn("caption") == null) {
-            addColumn(this::getCaptionFor)
-                    .setId("caption")
-                    .setCaption(projTreeRoot);
-            setHierarchyColumn("caption");
+        if (getColumnByKey("caption") == null) {
+            addHierarchyColumn(this::getCaptionFor)
+                    .setKey("caption")
+                    .setHeader(projTreeRoot);
         }
         new ProjectJpaController(DataBaseManager.getEntityManagerFactory())
                 .findProjectEntities().forEach((p) -> {

@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.validation.manager.core.image;
+package net.sourceforge.javydreamercsw.validation.manager.web.core;
 
-import com.vaadin.server.ExternalResource;
-import com.vaadin.server.Resource;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.api.image.AvatarProvider;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.tool.MD5;
 import java.io.IOException;
@@ -28,6 +25,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.lookup.ServiceProvider;
 
+/**
+ *
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
+ */
 @ServiceProvider(service = AvatarProvider.class)
 public class GravatarProvider implements AvatarProvider {
 
@@ -35,16 +36,16 @@ public class GravatarProvider implements AvatarProvider {
             = Logger.getLogger(GravatarProvider.class.getSimpleName());
 
     @Override
-    public Resource getAvatar(VmUser user, int size) {
+    public String getAvatar(VmUser user, int size) {
         return getIcon(user.getEmail(), size);
     }
 
     @Override
-    public Resource getAvatar(VmUser user) {
+    public String getAvatar(VmUser user) {
         return getAvatar(user, 0);
     }
 
-    protected Resource getIcon(String email, int size) {
+    protected String getIcon(String email, int size) {
         try {
             //Calculate Gravatar email hash
             /**
@@ -64,7 +65,7 @@ public class GravatarProvider implements AvatarProvider {
             URL url = getURL(email, size);
             if (url != null) {
                 LOG.log(Level.FINE, "Retrieving icon from: {0}", url);
-                return new ExternalResource(url);
+                return url.toExternalForm();
             }
         }
         catch (VMException | IOException ex) {

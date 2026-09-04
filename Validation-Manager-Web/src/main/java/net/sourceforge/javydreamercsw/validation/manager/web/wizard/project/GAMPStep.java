@@ -15,12 +15,11 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.ProjectServer;
@@ -33,14 +32,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.vaadin.teemu.wizards.WizardStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 
 /**
  * GAMP specific configuration.
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class GAMPStep implements WizardStep {
+public final class GAMPStep implements FlowWizardStep {
 
     private final ProjectCreationWizard wizard;
     private final ComboBox<String> category
@@ -58,8 +57,8 @@ public final class GAMPStep implements WizardStep {
 
     public GAMPStep(ProjectCreationWizard wizard) {
         this.wizard = wizard;
-        getCategory().setWidth(100, Unit.PERCENTAGE);
-        getCategory().setTextInputAllowed(false);
+        getCategory().setWidthFull();
+        getCategory().setAllowCustomValue(false);
         getCategory().addValueChangeListener(event -> {
             if (getCategory().getValue() != null) {
                 urs = false;
@@ -120,10 +119,10 @@ public final class GAMPStep implements WizardStep {
     @Override
     public Component getContent() {
         VerticalLayout vl = new VerticalLayout();
-        Label text = new Label();
+        Span text = new Span();
         text.setSizeFull();
         text.setEnabled(false);
-        text.setValue(TRANSLATOR.translate("template.gamp5.disclaimer"));
+        text.setText(TRANSLATOR.translate("template.gamp5.disclaimer"));
         getCategory().setItems(new String[]{});
         switch (wizard.getType()) {
             case "general.software":
@@ -138,8 +137,8 @@ public final class GAMPStep implements WizardStep {
                         "template.gamp5.hw.cat2");
         }
         wizard.translateSelect(getCategory());
-        vl.addComponent(getCategory());
-        vl.addComponent(text);
+        vl.add(getCategory());
+        vl.add(text);
         vl.setSizeFull();
         return vl;
     }

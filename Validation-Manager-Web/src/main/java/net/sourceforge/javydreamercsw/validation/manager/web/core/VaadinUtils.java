@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.validation.manager.core;
+package net.sourceforge.javydreamercsw.validation.manager.web.core;
 
-import com.vaadin.data.HasValue;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HasComponents;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.UI;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -49,12 +49,13 @@ public final class VaadinUtils {
 
     /**
      * Change all {@code Locale} dependant properties of the
-     * {@code com.vaadin.ui.Component}s within of the given component container
-     * (typically an {@link UI} or other top level layout component). If the
-     * specified {@code Locale} is the same as the current {@code Locale} of the
-     * component container, this method does nothing. Otherwise it'll go thru
-     * the components searching for it's component id. If it is in the resource
-     * bundle, it'll set it's caption to the right translated string.
+     * {@code com.vaadin.flow.component.Component}s within of the given
+     * component container (typically an {@link UI} or other top level layout
+     * component). If the specified {@code Locale} is the same as the current
+     * {@code Locale} of the component container, this method does nothing.
+     * Otherwise it'll go thru the components searching for it's component id.
+     * If it is in the resource bundle, it'll set it's caption to the right
+     * translated string.
      *
      * <p>
      * To use this method, do something like:
@@ -84,7 +85,7 @@ public final class VaadinUtils {
      *      It also works with components implementing Property:
      *
      *      VerticalLayout vl = new VerticalLayout();
-     *      Label l = new Label(key);
+     *      Span l = new Span(key);
      *      vl.addComponent(l);
      *      ResourceBundle rb = ResourceBundle.getBundle(
      *              "resource.bundle",
@@ -102,27 +103,30 @@ public final class VaadinUtils {
             final ResourceBundle rb) {
 
         // locale may not be null, however the current UI Locale may be null!
-        if (locale.equals(ui.getLocale())) {
+        com.vaadin.flow.component.UI current
+                = com.vaadin.flow.component.UI.getCurrent();
+        if (current != null && locale.equals(current.getLocale())) {
             return;
         }
         final long time = System.currentTimeMillis();
-        walkComponentTree(ui, (Component c) -> {
-            String id = c.getId();
+        walkComponentTree((Component) ui, (Component c) -> {
+            String id = c.getId().orElse(null);
             String caption;
-            if (c instanceof Label) {
-                //v8 Label no longer implements HasValue
-                caption = ((Label) c).getValue();
-            } else if (c instanceof HasValue
-                    && ((HasValue) c).getValue() instanceof String) {
-                caption = (String) ((HasValue) c).getValue();
+            if (c instanceof HasValue
+                    && ((HasValue<?, ?>) c).getValue() instanceof String) {
+                caption = (String) ((HasValue<?, ?>) c).getValue();
+            } else if (c instanceof HasText) {
+                caption = ((HasText) c).getText();
             } else {
-                caption = c.getCaption();
+                caption = null;
             }
             if (id != null && !id.trim().isEmpty()) {
                 if (rb.containsKey(id)) {
                     try {
-                        c.setCaption(new String(rb.getString(id)
-                                .getBytes("ISO-8859-1"), "UTF-8"));
+                        if (c instanceof HasText) {
+                            ((HasText) c).setText(new String(rb.getString(id)
+                                    .getBytes("ISO-8859-1"), "UTF-8"));
+                        }
                     }
                     catch (UnsupportedEncodingException ex) {
                         LOG.log(Level.SEVERE, null, ex);
@@ -146,17 +150,16 @@ public final class VaadinUtils {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }
-                if (c instanceof Label) {
-                    ((Label) c).setValue(caption);
-                } else if (c instanceof HasValue) {
-                    ((HasValue<String>) c).setValue(caption);
-                } else {
-                    c.setCaption(caption);
+                if (c instanceof HasValue
+                        && ((HasValue<?, ?>) c).getValue() instanceof String) {
+                    ((HasValue<?, String>) c).setValue(caption);
+                } else if (c instanceof HasText) {
+                    ((HasText) c).setText(caption);
                 }
             }
         });
         LOG.log(Level.FINE, "Locale updated: {0} -> {1} in {2} ms.",
-                new Object[]{ui.getLocale(), locale,
+                new Object[]{locale, locale,
                     System.currentTimeMillis() - time});
     }
 
@@ -172,9 +175,9 @@ public final class VaadinUtils {
     private static void walkComponentTree(Component c, Consumer<Component> visitor) {
         visitor.accept(c);
         if (c instanceof HasComponents) {
-            for (Component child : ((HasComponents) c)) {
+            ((HasComponents) c).getChildren().forEach(child -> {
                 walkComponentTree(child, visitor);
-            }
+            });
         }
     }
 }

@@ -15,16 +15,16 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.traceability;
 
-import com.vaadin.addon.tableexport.DefaultGridHolder;
-import com.vaadin.addon.tableexport.ExcelExport;
-import com.vaadin.data.TreeData;
-import com.vaadin.data.provider.TreeDataProvider;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TreeGrid;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.flow.server.StreamResource;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepHasIssue;
@@ -32,10 +32,18 @@ import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.tool.Tool;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Trace Matrix component. Traces relationship from requirements to test case
@@ -45,8 +53,11 @@ import java.util.Map;
  */
 public class TraceMatrix extends TreeGrid<TraceMatrix.TraceRow> {
 
+    private static final Logger LOG
+            = Logger.getLogger(TraceMatrix.class.getSimpleName());
     private final Project p;
-    private final TreeData<TraceRow> treeData = new TreeData<>();
+    private final com.vaadin.flow.data.provider.hierarchy.TreeData<TraceRow> treeData
+            = new com.vaadin.flow.data.provider.hierarchy.TreeData<>();
     private final Map<Object, TraceRow> rows = new HashMap<>();
 
     /**
@@ -110,24 +121,24 @@ public class TraceMatrix extends TreeGrid<TraceMatrix.TraceRow> {
     }
 
     public TraceMatrix(Project p, String caption) {
-        setCaption(caption);
+        setId(caption);
         this.p = p;
         init();
     }
 
     private void init() {
         addColumn(TraceRow::getRequirement)
-                .setId("general.requirement")
-                .setCaption(TRANSLATOR.translate("general.requirement"));
+                .setKey("general.requirement")
+                .setHeader(TRANSLATOR.translate("general.requirement"));
         addColumn(TraceRow::getTestCase)
-                .setId("general.test.case")
-                .setCaption(TRANSLATOR.translate("general.test.case"));
+                .setKey("general.test.case")
+                .setHeader(TRANSLATOR.translate("general.test.case"));
         addColumn(TraceRow::getResult)
-                .setId("general.result")
-                .setCaption(TRANSLATOR.translate("general.result"));
+                .setKey("general.result")
+                .setHeader(TRANSLATOR.translate("general.result"));
         addColumn(TraceRow::getIssue)
-                .setId("general.issue")
-                .setCaption(TRANSLATOR.translate("general.issue"));
+                .setKey("general.issue")
+                .setHeader(TRANSLATOR.translate("general.issue"));
         setHierarchyColumn("general.requirement");
         rebuild(null);
         setSizeFull();
@@ -248,9 +259,10 @@ public class TraceMatrix extends TreeGrid<TraceMatrix.TraceRow> {
 
     public Component getMenu() {
         HorizontalLayout hl = new HorizontalLayout();
-        ComboBox<Baseline> baseline
-                = new ComboBox<>(TRANSLATOR.translate("baseline.filter"));
-        baseline.setTextInputAllowed(false);
+        com.vaadin.flow.component.combobox.ComboBox<Baseline> baseline
+                = new com.vaadin.flow.component.combobox.ComboBox<>(
+                        TRANSLATOR.translate("baseline.filter"));
+        baseline.setAllowCustomValue(false);
         List<Baseline> baselines = new ArrayList<>();
         Tool.extractRequirements(p).forEach(r -> {
             r.getHistoryList().forEach(h -> {
@@ -262,22 +274,55 @@ public class TraceMatrix extends TreeGrid<TraceMatrix.TraceRow> {
             });
         });
         baseline.setItems(baselines);
-        baseline.setItemCaptionGenerator(b -> b.getBaselineName());
+        baseline.setItemLabelGenerator(b -> b.getBaselineName());
         baseline.addValueChangeListener(event -> {
             rebuild(event.getValue());
         });
-        hl.addComponent(baseline);
+        hl.add(baseline);
+        //The tableexport addon is gone; export the visible matrix as an
+        //Excel file served from a temporary StreamResource (POI is already
+        //a dependency).
         Button export = new Button(TRANSLATOR.translate("general.export"));
         export.addClickListener(listener -> {
-            //Create the Excel file
-            ExcelExport excelExport = new ExcelExport(
-                    new DefaultGridHolder(this));
-            excelExport.excludeCollapsedColumns();
-            excelExport.setReportTitle(TRANSLATOR.translate("trace.matrix"));
-            excelExport.setDisplayTotals(false);
-            excelExport.export();
+            try (XSSFWorkbook wb = new XSSFWorkbook()) {
+                Sheet sheet = wb.createSheet(
+                        TRANSLATOR.translate("trace.matrix"));
+                Row header = sheet.createRow(0);
+                List<com.vaadin.flow.component.grid.Grid.Column<TraceRow>> columns
+                        = getColumns();
+                for (int i = 0; i < columns.size(); i++) {
+                    header.createCell(i).setCellValue(columns.get(i)
+                            .getHeaderText());
+                }
+                int rowCount = 1;
+                for (TraceRow row : rows.values()) {
+                    Row r = sheet.createRow(rowCount++);
+                    r.createCell(0).setCellValue(row.getRequirement());
+                    r.createCell(1).setCellValue(row.getTestCase());
+                    r.createCell(2).setCellValue(row.getResult());
+                    r.createCell(3).setCellValue(row.getIssue());
+                }
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                wb.write(bos);
+                StreamResource resource = new StreamResource(
+                        "trace-matrix.xlsx",
+                        () -> new java.io.ByteArrayInputStream(bos.toByteArray()));
+                resource.setContentType(
+                        "application/vnd.openxmlformats-officedocument"
+                        + ".spreadsheetml.sheet");
+                String url = com.vaadin.flow.component.UI.getCurrent()
+                        .getSession().getResourceRegistry()
+                        .registerResource(resource).getResourceUri().toString();
+                Anchor download = new Anchor(url,
+                        TRANSLATOR.translate("general.export"));
+                download.getElement().setAttribute("download",
+                        "trace-matrix.xlsx");
+                hl.add(download);
+            } catch (IOException ex) {
+                LOG.log(Level.SEVERE, null, ex);
+            }
         });
-        hl.addComponent(export);
+        hl.add(export);
         return hl;
     }
 }

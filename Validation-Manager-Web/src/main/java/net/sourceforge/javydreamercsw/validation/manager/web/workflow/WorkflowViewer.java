@@ -15,29 +15,23 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.workflow;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.pontus.vizcomponent.VizComponent;
-import com.vaadin.pontus.vizcomponent.VizComponent.EdgeClickEvent;
-import com.vaadin.pontus.vizcomponent.VizComponent.NodeClickEvent;
-import com.vaadin.pontus.vizcomponent.model.Graph;
-import com.vaadin.pontus.vizcomponent.model.Subgraph;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.NativeSelect;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.TextField;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.db.Workflow;
 import com.validation.manager.core.db.WorkflowStep;
 import com.validation.manager.core.db.controller.WorkflowJpaController;
 import com.validation.manager.core.server.core.WorkflowServer;
-import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.MessageBox;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,27 +40,34 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
-import org.vaadin.addon.borderlayout.BorderLayout;
-import org.vaadin.addon.borderlayout.BorderLayout.Constraint;
 
 /**
+ * Workflow manager screen. The graphviz based vizcomponent addon has no Flow
+ * port, so the graph is shown as an indented text outline until a proper Flow
+ * graph viewer is integrated.
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
+// TODO: (phase-4b-2) render the workflow as a graph once a Flow graphviz
+// component is available.
 public final class WorkflowViewer extends VMWindow {
 
-    private final VizComponent diagram = new VizComponent();
+    private final Span diagram = new Span();
     private final List<Object> added = new ArrayList<>();
     private final List<Object> deleted = new ArrayList<>();
-    private final Map<Integer, Graph.Node> nodes = new HashMap<>();
-    //Map has source node and edge. Destination is part of the Edge object
-    private final Map<String, AbstractMap.SimpleEntry<Graph.Node, Subgraph.Edge>> edges = new HashMap<>();
+    private final Map<Integer, String> nodes = new HashMap<>();
+    //Map has source node and edge destination name.
+    private final Map<String, Map.Entry<Integer, String>> edges = new HashMap<>();
     private static final Logger LOG
             = Logger.getLogger(WorkflowViewer.class.getSimpleName());
     private Object selected = null;
-    private final BorderLayout bl = new BorderLayout();
-    private final NativeSelect<Workflow> workflows
-            = new NativeSelect<>(TRANSLATOR.translate("general.workflow"));
+    private final VerticalLayout bl = new VerticalLayout();
+    private VerticalLayout controls = null;
+    private final Select<Workflow> workflows = new Select<>();
+
+    {
+        workflows.setLabel(TRANSLATOR.translate("general.workflow"));
+    }
     private int count = 0;
     private final String KEY = "key", ITEM_NAME = "itemName";
 
@@ -81,44 +82,23 @@ public final class WorkflowViewer extends VMWindow {
     }
 
     private void cleanGraph() {
-        //Reset nodes to black
-        nodes.values().forEach(node -> {
-            diagram.addCss(node, "stroke", "black");
-            diagram.addTextCss(node, "fill", "black");
-        });
-        //Reset edges to black
-        edges.values().forEach(edge -> {
-            diagram.addCss(edge.getValue(), "stroke", "black");
-            diagram.addTextCss(edge.getValue(), "fill", "black");
-        });
+        //Nothing to clean in the text based fallback
     }
 
     protected void init() {
         setSizeFull();
         setModal(false);
-        diagram.addClickListener((NodeClickEvent e) -> {
-            cleanGraph();
-            diagram.addCss(e.getNode(), "stroke", "blue");
-            diagram.addTextCss(e.getNode(), "fill", "blue");
-            selected = e.getNode();
-            updateControls();
-        });
-        diagram.addClickListener((EdgeClickEvent e) -> {
-            cleanGraph();
-            diagram.addCss(e.getEdge(), "stroke", "blue");
-            diagram.addTextCss(e.getEdge(), "fill", "blue");
-            selected = e.getEdge();
-            updateControls();
-        });
-        diagram.setSizeFull();
         String width = "200px";
-        bl.setMinimumWestWidth(width);
-        bl.setMinimumEastWidth(width);
-        bl.addComponent(getControls(), Constraint.EAST);
-        bl.addComponent(getList(), Constraint.WEST);
-        bl.addComponent(diagram, Constraint.CENTER);
+        VerticalLayout west = getList();
+        west.setWidth(width);
+        controls = (VerticalLayout) getControls();
+        controls.setWidth(width);
+        west.setSizeFull();
+        diagram.setSizeFull();
+        bl.add(west, diagram, controls);
         bl.setSizeFull();
-        setContent(bl);
+        bl.expand(diagram);
+        add(bl);
     }
 
     private Component getControls() {
@@ -126,122 +106,114 @@ public final class WorkflowViewer extends VMWindow {
         Button addStep = new Button(TRANSLATOR.translate("general.add.step"));
         VerticalLayout vl = new VerticalLayout();
         TextField name = new TextField(TRANSLATOR.translate("general.name"));
-        vl.addComponent(name);
+        vl.add(name);
         addStep.addClickListener(listener -> {
-            MessageBox prompt = MessageBox.createQuestion()
-                    .withCaption(TRANSLATOR.translate("general.add.step"))
-                    .withMessage(vl)
-                    .withYesButton(() -> {
+            ConfirmDialog prompt = new ConfirmDialog();
+            prompt.setHeader(TRANSLATOR.translate("general.add.step"));
+            prompt.setText(vl);
+            prompt.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                    e -> {
                         if (name.getValue() != null
                                 && !name.getValue().isEmpty()) {
-                            Graph.Node node
-                                    = new Graph.Node(TRANSLATOR.translate(name.getValue()));
-                            nodes.put(--count, node);
-                            node.setParam(KEY, "" + count);
-                            node.setParam(ITEM_NAME,
+                            nodes.put(--count,
                                     TRANSLATOR.translate(name.getValue()));
-                            added.add(node);
+                            added.add(name.getValue());
                             refreshWorkflow();
                         }
-                    },
-                            ButtonOption.focus(),
-                            ButtonOption
-                                    .icon(VaadinIcons.CHECK))
-                    .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
-            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                        prompt.close();
+                    });
+            prompt.setCancelButton(TRANSLATOR.translate("general.cancel"),
+                    e -> prompt.close());
             prompt.open();
         });
-        addStep.setWidth(100, Unit.PERCENTAGE);
+        addStep.setWidth("100%");
         addStep.setEnabled(workflows.getValue() != null);
-        controls.addComponent(addStep);
+        controls.add(addStep);
         Button addTransition = new Button(TRANSLATOR.translate("general.add.transition"));
         VerticalLayout vl2 = new VerticalLayout();
         TextField transitionName = new TextField(TRANSLATOR.translate("general.name"));
-        NativeSelect<Subgraph.Node> nodeList
-                = new NativeSelect<>(TRANSLATOR.translate("general.step"));
-        nodeList.setItems(nodes.values());
-        nodeList.setItemCaptionGenerator(node -> node.getId());
-        nodeList.setEmptySelectionAllowed(false);
-        vl2.addComponent(transitionName);
-        vl2.addComponent(nodeList);
+        Select<Integer> nodeList = new Select<>();
+        nodeList.setLabel(TRANSLATOR.translate("general.step"));
+        nodeList.setItems(nodes.keySet());
+        nodeList.setItemLabelGenerator(node -> String.valueOf(nodes.get(node)));
+        vl2.add(transitionName);
+        vl2.add(nodeList);
         addTransition.addClickListener(listener -> {
-            MessageBox prompt = MessageBox.createQuestion()
-                    .withCaption(TRANSLATOR.translate("general.add.transition"))
-                    .withMessage(vl2)
-                    .withYesButton(() -> {
+            ConfirmDialog prompt = new ConfirmDialog();
+            prompt.setHeader(TRANSLATOR.translate("general.add.transition"));
+            prompt.setText(vl2);
+            prompt.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                    e -> {
                         if (transitionName.getValue() != null
                                 && !transitionName.getValue().isEmpty()
-                                && selected instanceof Subgraph.Node) {
-                            Subgraph.Edge edge
-                                    = new Subgraph.Edge();
-                            edge.setDest(nodeList.getValue());
+                                && selected instanceof Integer) {
                             edges.put(transitionName.getValue(),
-                                    new AbstractMap.SimpleEntry<>(
-                                            (Subgraph.Node) selected, edge));
-                            edge.setParam(KEY, "" + --count);
-                            added.add(edge);
+                                    new HashMap.SimpleEntry<>(
+                                            (Integer) selected,
+                                            nodeList.getValue() == null
+                                            ? null : String.valueOf(
+                                                    nodeList.getValue())));
+                            edges.put(KEY + "--" + transitionName.getValue(),
+                                    edges.get(transitionName.getValue()));
+                            added.add(transitionName.getValue());
                             refreshWorkflow();
                         }
-                    },
-                            ButtonOption.focus(),
-                            ButtonOption
-                                    .icon(VaadinIcons.CHECK))
-                    .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
-            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                        prompt.close();
+                    });
+            prompt.setCancelButton(TRANSLATOR.translate("general.cancel"),
+                    e -> prompt.close());
             prompt.open();
         });
-        addTransition.setWidth(100, Unit.PERCENTAGE);
-        addTransition.setEnabled(selected instanceof Subgraph.Node);
-        controls.addComponent(addTransition);
+        addTransition.setWidth("100%");
+        addTransition.setEnabled(selected instanceof Integer);
+        controls.add(addTransition);
         Button delete = new Button(TRANSLATOR.translate("general.delete"));
         delete.setEnabled(selected != null);
-        delete.setWidth(100, Unit.PERCENTAGE);
         delete.addClickListener(listener -> {
-            MessageBox prompt = MessageBox.createQuestion()
-                    .withCaption(TRANSLATOR.translate("general.delete"))
-                    .withMessage(TRANSLATOR.translate("general.delete.confirmation"))
-                    .withYesButton(() -> {
-                        if (selected instanceof Subgraph.Edge) {
-                            Subgraph.Edge edge = (Subgraph.Edge) selected;
-                            edges.remove(edge.getParam("label"));
-                            addToDelete(edge);
-                        } else {
-                    Graph.Node node = (Graph.Node) selected;
-                    addToDelete(node);
-                }
-                refreshWorkflow();
-                    },
-                            ButtonOption.focus(),
-                            ButtonOption
-                                    .icon(VaadinIcons.CHECK))
-                    .withNoButton(ButtonOption.icon(VaadinIcons.CLOSE));
-            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+            ConfirmDialog prompt = new ConfirmDialog();
+            prompt.setHeader(TRANSLATOR.translate("general.delete"));
+            prompt.setText(TRANSLATOR.translate("general.delete.confirmation"));
+            prompt.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                    e -> {
+                        if (selected instanceof String) {
+                            String edgeName = (String) selected;
+                            Map.Entry<Integer, String> edge
+                                    = edges.remove(edgeName);
+                            if (edge != null) {
+                                addToDelete(edge);
+                            }
+                        } else if (selected instanceof Integer) {
+                            GraphNode node = new GraphNode((Integer) selected);
+                            addToDelete(node);
+                        }
+                        refreshWorkflow();
+                        prompt.close();
+                    });
+            prompt.setCancelButton(TRANSLATOR.translate("general.cancel"),
+                    e -> prompt.close());
             prompt.open();
         });
-        controls.addComponent(delete);
+        controls.add(delete);
         Button rename = new Button(TRANSLATOR.translate("general.rename"));
-        rename.setWidth(100, Unit.PERCENTAGE);
+        rename.setWidth("100%");
         rename.setEnabled(selected != null);
         rename.addClickListener(listener -> {
-            Window w = new VMWindow(TRANSLATOR.translate("general.rename"));
-            w.setWidth(25, Unit.PERCENTAGE);
-            w.setHeight(25, Unit.PERCENTAGE);
-            UI.getCurrent().addWindow(w);
+            VMWindow w = new VMWindow(TRANSLATOR.translate("general.rename"));
+            w.setWidth("25%");
+            w.setHeight("25%");
+            ValidationManagerUI.getInstance().openDialog(w);
         });
-        controls.addComponent(rename);
+        controls.add(rename);
         Button save = new Button(TRANSLATOR.translate("general.save"));
-        save.setWidth(100, Unit.PERCENTAGE);
+        save.setWidth("100%");
         save.setEnabled(!added.isEmpty() || !deleted.isEmpty());
         save.addClickListener(listener -> {
-            List<Graph.Node> nodesToAdd = new ArrayList<>();
-            List<Subgraph.Edge> edgesToAdd = new ArrayList<>();
+            List<String> nodesToAdd = new ArrayList<>();
             WorkflowServer ws
                     = new WorkflowServer(workflows.getValue().getId());
             added.forEach(a -> {
-                if (a instanceof Graph.Node) {
-                    nodesToAdd.add((Graph.Node) a);
-                } else if (a instanceof Subgraph.Edge) {
-                    edgesToAdd.add((Subgraph.Edge) a);
+                if (a instanceof String) {
+                    nodesToAdd.add((String) a);
                 }
             });
             deleted.forEach(a -> {
@@ -249,16 +221,16 @@ public final class WorkflowViewer extends VMWindow {
             });
             nodesToAdd.forEach(node -> {
                 try {
-                    ws.addStep(node.getParam(ITEM_NAME));
+                    ws.addStep(node);
                 } catch (VMException ex) {
                     LOG.log(Level.SEVERE, ex.getLocalizedMessage(), ex);
                 }
             });
             displayWorkflow(ws.getEntity());
         });
-        controls.addComponent(save);
+        controls.add(save);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
-        cancel.setWidth(100, Unit.PERCENTAGE);
+        cancel.setWidth("100%");
         cancel.setEnabled(selected != null);
         cancel.addClickListener(listener -> {
             Workflow w = workflows.getValue();
@@ -268,7 +240,7 @@ public final class WorkflowViewer extends VMWindow {
             deleted.clear();
             added.clear();
         });
-        controls.addComponent(cancel);
+        controls.add(cancel);
         return controls;
     }
 
@@ -278,65 +250,59 @@ public final class WorkflowViewer extends VMWindow {
      * @param w workflow to create from
      */
     private void displayWorkflow(Workflow w) {
-        Graph graph = new Graph(w.getWorkflowName(), Graph.DIGRAPH);
+        StringBuilder sb = new StringBuilder();
         nodes.clear();
         //Create the nodes
         w.getWorkflowStepList().forEach(step -> {
-            addStep(step, graph);
+            addStep(step, sb);
             //Now add the links
             step.getSourceTransitions().forEach(t -> {
-                addStep(t.getWorkflowStepSource(), graph);
-                addStep(t.getWorkflowStepTarget(), graph);
-                Subgraph.Edge edge
-                        = graph.addEdge(nodes.get(t.getWorkflowStepSource()
-                                .getWorkflowStepPK().getId()),
-                                nodes.get(t.getWorkflowStepTarget()
-                                        .getWorkflowStepPK().getId()));
-                edge.setParam("label", TRANSLATOR.translate(t.getTransitionName()));
-                //Workaround https://github.com/pontusbostrom/VaadinGraphvizComponent/issues/9
-                edge.setDest(nodes.get(t.getWorkflowStepTarget()
-                        .getWorkflowStepPK().getId()));
-                edges.put(TRANSLATOR.translate(t.getTransitionName()),
-                        new AbstractMap.SimpleEntry<>(
-                                nodes.get(t.getWorkflowStepSource()
-                                        .getWorkflowStepPK().getId()), edge));
+                addStep(t.getWorkflowStepSource(), sb);
+                addStep(t.getWorkflowStepTarget(), sb);
+                sb.append("<br/>")
+                        .append(TRANSLATOR.translate(t.getTransitionName()))
+                        .append(": ")
+                        .append(TRANSLATOR.translate(t.getWorkflowStepSource()
+                                .getStepName()))
+                        .append(" -&gt; ")
+                        .append(TRANSLATOR.translate(t.getWorkflowStepTarget()
+                                .getStepName()));
             });
         });
-        diagram.drawGraph(graph);
+        diagram.getElement().setProperty("innerHTML", sb.toString());
     }
 
     /**
      * Recreate graph with the edited values
      */
     private void refreshWorkflow() {
-        Graph graph = new Graph(workflows.getValue()
-                .getWorkflowName(), Graph.DIGRAPH);
+        StringBuilder sb = new StringBuilder();
         nodes.values().forEach(node -> {
-            graph.addNode(node);
+            sb.append("<br/>").append(node);
         });
         edges.values().forEach(edge -> {
-            graph.addEdge(edge.getKey(), edge.getValue().getDest());
+            sb.append("<br/>").append(edge.getKey()).append(" -&gt; ")
+                    .append(edge.getValue());
         });
-        diagram.drawGraph(graph);
+        diagram.getElement().setProperty("innerHTML", sb.toString());
         selected = null;
         updateControls();
     }
 
-    private void addStep(WorkflowStep step, Graph g) {
+    private void addStep(WorkflowStep step, StringBuilder sb) {
         if (!nodes.containsKey(step.getWorkflowStepPK().getId())) {
-            Graph.Node node
-                    = new Graph.Node(TRANSLATOR.translate(step.getStepName()));
+            String node = TRANSLATOR.translate(step.getStepName());
             nodes.put(step.getWorkflowStepPK().getId(), node);
-            node.setParam(KEY, "" + step.getWorkflowStepPK().getId());
-            g.addNode(node);
+            sb.append("<br/>").append(node);
         }
     }
 
-    private Component getList() {
+    private VerticalLayout getList() {
+        VerticalLayout holder = new VerticalLayout();
         workflows.setItems(new WorkflowJpaController(DataBaseManager
                 .getEntityManagerFactory())
                 .findWorkflowEntities());
-        workflows.setItemCaptionGenerator(temp
+        workflows.setItemLabelGenerator(temp
                 -> TRANSLATOR.translate(temp.getWorkflowName()));
         workflows.setEmptySelectionAllowed(false);
         workflows.addValueChangeListener(listener -> {
@@ -347,12 +313,17 @@ public final class WorkflowViewer extends VMWindow {
             updateControls();
         });
         workflows.setSizeFull();
-        return workflows;
+        holder.add(workflows);
+        return holder;
     }
 
     private void updateControls() {
-        bl.removeComponent(Constraint.EAST);
-        bl.addComponent(getControls(), Constraint.EAST);
+        //Rebuild the control column in place (v8 BorderLayout EAST slot)
+        if (controls != null) {
+            bl.remove(controls);
+        }
+        controls = (VerticalLayout) getControls();
+        bl.addComponentAtIndex(2, controls);
     }
 
     private void addToDelete(Object obj) {
@@ -363,5 +334,26 @@ public final class WorkflowViewer extends VMWindow {
     private void addToAdd(Object obj) {
         LOG.log(Level.INFO, "Adding to add list: {0}", obj);
         added.add(obj);
+    }
+
+    /**
+     * Marker for a node pending deletion.
+     */
+    private static final class GraphNode {
+
+        private final Integer id;
+
+        GraphNode(Integer id) {
+            this.id = id;
+        }
+
+        Integer getId() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return "Node " + id;
+        }
     }
 }

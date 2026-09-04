@@ -15,14 +15,13 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
-import com.vaadin.data.Binder;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.data.binder.Binder;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 import com.validation.manager.core.db.TestCaseExecution;
 import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.db.controller.TestCaseExecutionJpaController;
@@ -33,13 +32,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
-import org.vaadin.teemu.wizards.WizardStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class DetailStep implements WizardStep {
+public class DetailStep implements FlowWizardStep {
 
     private List<TestCasePK> testCases;
     private final TestCaseExecution tce;
@@ -57,25 +56,24 @@ public class DetailStep implements WizardStep {
 
     @Override
     public Component getContent() {
-        Panel form = new Panel("execution.detail");
+        //v8 Panel with a light FormLayout; Flow: Scroller + FormLayout
+        //(Panel is gone in Flow)
         FormLayout layout = new FormLayout();
-        form.setContent(layout);
-        form.addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
+        Scroller form = new Scroller(layout);
         Binder<TestCaseExecution> binder = new Binder<>(TestCaseExecution.class);
         binder.setBean(tce);
         binder.setReadOnly(false);
         TextArea name = new TextArea("general.name");
         binder.bind(name, "name");
-        layout.addComponent(name);
+        layout.add(name);
         TextArea scope = new TextArea("general.scope");
         binder.bind(scope, "scope");
-        layout.addComponent(scope);
+        layout.add(scope);
         if (tce.getId() != null) {
             TextArea conclusion = new TextArea("general.conclusion");
             binder.bind(conclusion, "conclusion");
-            layout.addComponent(conclusion);
             conclusion.setSizeFull();
-            layout.addComponent(conclusion);
+            layout.add(conclusion);
         }
         form.setSizeFull();
         return form;

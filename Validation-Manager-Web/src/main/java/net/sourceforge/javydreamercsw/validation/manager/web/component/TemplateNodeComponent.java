@@ -15,22 +15,21 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Binder;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.TemplateNode;
 import com.validation.manager.core.db.TemplateNodeType;
 import com.validation.manager.core.db.controller.TemplateNodeTypeJpaController;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class TemplateNodeComponent extends Panel {
+public class TemplateNodeComponent extends VerticalLayout {
 
     private final TemplateNode node;
     private final boolean edit;
@@ -46,11 +45,11 @@ public class TemplateNodeComponent extends Panel {
     }
 
     public TemplateNodeComponent(TemplateNode node, boolean edit, String caption) {
-        super(caption);
         this.node = node;
         this.edit = edit;
         type = new ComboBox<>(TRANSLATOR.translate("general.type"));
         name = new TextField(TRANSLATOR.translate("general.name"));
+        add(new com.vaadin.flow.component.html.Span(caption));
         init();
     }
 
@@ -61,24 +60,22 @@ public class TemplateNodeComponent extends Panel {
         type.setItems(new TemplateNodeTypeJpaController(DataBaseManager
                 .getEntityManagerFactory())
                 .findTemplateNodeTypeEntities());
-        type.setItemCaptionGenerator(temp
+        type.setItemLabelGenerator(temp
                 -> TRANSLATOR.translate(temp.getTypeName()));
-        type.setEmptySelectionAllowed(false);
+        type.setAllowCustomValue(false);
         type.setValue(getNode().getTemplateNodeType());
         type.addValueChangeListener(listener -> {
             getNode().setTemplateNodeType(type.getValue());
         });
         binder.bind(type, "templateNodeType");
         binder.forField(name)
-                .withNullRepresentation("")
                 .bind("nodeName");
         name.addValueChangeListener(listener -> {
             getNode().setNodeName(name.getValue());
         });
-        vl.addComponent(name);
-        vl.addComponent(type);
+        vl.add(name, type);
         binder.setReadOnly(!edit);
-        setContent(vl);
+        add(vl);
     }
 
     public boolean isValid() {

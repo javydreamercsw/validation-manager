@@ -15,35 +15,30 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.notification;
 
-import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.addon.contextmenu.MenuItem;
-import com.vaadin.data.ValueProvider;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.SerializablePredicate;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.renderers.TextRenderer;
-import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.IMainContentProvider;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.data.renderer.TextRenderer;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Notification;
 import com.validation.manager.core.server.core.NotificationServer;
 import com.validation.manager.core.server.core.VMSettingServer;
+import com.vaadin.flow.component.UI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
-import org.vaadin.gridutil.cell.GridCellFilter;
 
 /**
  *
@@ -73,46 +68,41 @@ public class NotificationScreenProvider extends AbstractProvider {
         List<Notification> notifications
                 = ValidationManagerUI.getInstance().getUser().getNotificationList();
         TextArea text = new TextArea(TRANSLATOR.translate("general.text"));
-        text.setWordWrap(true);
         text.setReadOnly(true);
         text.setSizeFull();
-        Grid<Notification> grid = new Grid<>(
-                TRANSLATOR.translate("general.notifications"));
+        Grid<Notification> grid = new Grid<>();
         grid.setItems(notifications);
-        grid.addColumn(Notification::getNotificationType)
-                .setId("notificationType")
-                .setCaption(TRANSLATOR.translate("notification.type"))
-                .setRenderer(value -> Lookup.getDefault()
-                        .lookup(InternationalizationProvider.class)
-                        .translate(((com.validation.manager.core.db.NotificationType) value)
-                                .getTypeName()), new TextRenderer());
+        grid.addColumn(new TextRenderer<>(value -> Lookup.getDefault()
+                .lookup(InternationalizationProvider.class)
+                .translate(((com.validation.manager.core.db.Notification) value)
+                        .getNotificationType().getTypeName())))
+                .setKey("notificationType")
+                .setHeader(TRANSLATOR.translate("notification.type"));
         grid.addColumn(n -> n.getAuthor())
-                .setId("author")
-                .setCaption(TRANSLATOR.translate("notification.author"));
+                .setKey("author")
+                .setHeader(TRANSLATOR.translate("notification.author"));
         java.text.DateFormat format = new SimpleDateFormat(
                 VMSettingServer.getSetting("date.format").getStringVal());
         grid.addColumn(n -> n.getCreationDate() == null ? ""
                 : format.format(n.getCreationDate()))
-                .setId("creationDate")
-                .setCaption(TRANSLATOR.translate("creation.time"));
+                .setKey("creationDate")
+                .setHeader(TRANSLATOR.translate("creation.time"));
         grid.addColumn(n -> n.getArchieved()
                 ? TRANSLATOR.translate("general.yes")
                 : TRANSLATOR.translate("general.no"))
-                .setId("archieved")
-                .setCaption(TRANSLATOR.translate("general.archived"));
+                .setKey("archieved")
+                .setHeader(TRANSLATOR.translate("general.archived"));
         if (!notifications.isEmpty()) {
-            grid.setHeightByRows(notifications.size() > 5 ? 5
-                    : notifications.size());
+            //v8 capped the grid at 5 rows; Flow shows all rows instead.
+            grid.setAllRowsVisible(true);
         }
-        GridCellFilter<Notification> filter = new GridCellFilter<>(grid);
-        filter.setDateFilter("creationDate",
-                new SimpleDateFormat(VMSettingServer.getSetting("date.format")
-                        .getStringVal()), true);
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.setSizeFull();
-        ContextMenu menu = new ContextMenu(grid, true);
+        //The gridutil date filter row has no Flow equivalent; the date is
+        //still sortable via the column header.
+        ContextMenu menu = new ContextMenu(grid);
         menu.addItem(TRANSLATOR.translate("notification.mark.unread"),
-                (MenuItem selectedItem) -> {
+                e -> {
                     Notification selected = grid.getSelectedItems().stream()
                             .findFirst().orElse(null);
                     if (selected != null) {
@@ -129,7 +119,7 @@ public class NotificationScreenProvider extends AbstractProvider {
                     }
                 });
         menu.addItem(TRANSLATOR.translate("notification.archive"),
-                (MenuItem selectedItem) -> {
+                e -> {
                     Notification selected = grid.getSelectedItems().stream()
                             .findFirst().orElse(null);
                     if (selected != null) {
@@ -166,8 +156,8 @@ public class NotificationScreenProvider extends AbstractProvider {
                 }
             }
         });
-        vs.addComponent(grid);
-        vs.addComponent(text);
+        vs.add(grid);
+        vs.add(text);
         vs.setSizeFull();
         vs.setId(getComponentCaption());
         return vs;
