@@ -14,3 +14,4 @@ VM-Core/data/*
 /fserversrc/
 /Validation-Manager-Web/src/main/frontend/generated/
 /Validation-Manager-Web/node_modules/
+/Validation-Manager-Web/src/main/bundles/

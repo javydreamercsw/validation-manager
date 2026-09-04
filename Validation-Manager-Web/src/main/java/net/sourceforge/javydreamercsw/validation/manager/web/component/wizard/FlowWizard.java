@@ -140,6 +140,51 @@ public class FlowWizard extends VerticalLayout {
     }
 
     /**
+     * Removes the given step from this wizard. An {@link IllegalStateException}
+     * is thrown if the step is already completed or is the currently active
+     * step (the Teemu add-on's semantics).
+     *
+     * @param stepToRemove the step to remove
+     */
+    public void removeStep(FlowWizardStep stepToRemove) {
+        if (steps.contains(stepToRemove)) {
+            if (steps.indexOf(stepToRemove) < current) {
+                throw new IllegalStateException(
+                        "Already completed step cannot be removed.");
+            }
+            if (stepToRemove == getCurrentStep()) {
+                throw new IllegalStateException(
+                        "Currently active step cannot be removed.");
+            }
+            steps.remove(stepToRemove);
+            if (current >= steps.size()) {
+                //Removed step(s) sat after the active one; clamp defensively.
+                if (steps.isEmpty()) {
+                    current = 0;
+                    contentArea.removeAll();
+                    stepHeader.setText("");
+                } else {
+                    showStep(steps.size() - 1);
+                }
+            }
+            updateButtons();
+            listeners.forEach(l -> l.stepSetChanged(
+                    new FlowWizardStepSetChangedEvent(this, steps)));
+        }
+    }
+
+    /**
+     * Update the displayed step. Re-renders the current step, e.g. after its
+     * content changed dynamically (the Teemu add-on's
+     * {@code updateCurrentStep()}).
+     */
+    public void updateCurrentStep() {
+        if (!steps.isEmpty()) {
+            showStep(current);
+        }
+    }
+
+    /**
      * @return the (unmodifiable) list of registered steps
      */
     public List<FlowWizardStep> getSteps() {
