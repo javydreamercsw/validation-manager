@@ -15,9 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.ContentProvider;
 import com.validation.manager.core.DataBaseManager;
@@ -33,15 +33,15 @@ import org.vaadin.teemu.wizards.WizardStep;
  */
 class ProjectTemplateStep implements WizardStep {
 
-    private ComboBox templates;
+    private ComboBox<Template> templates;
     private final ProjectCreationWizard wizard;
 
     public ProjectTemplateStep(ProjectCreationWizard wizard) {
         this.wizard = wizard;
         this.templates
-                = new ComboBox(ContentProvider.TRANSLATOR
+                = new ComboBox<>(ContentProvider.TRANSLATOR
                         .translate("template.tab.list.name"));
-        this.templates.setRequired(true);
+        this.templates.setRequiredIndicatorVisible(true);
     }
 
     @Override
@@ -52,7 +52,7 @@ class ProjectTemplateStep implements WizardStep {
     @Override
     public Component getContent() {
         VerticalLayout vl = new VerticalLayout();
-        getTemplates().removeAllItems();
+        getTemplates().setItems(new ArrayList<>());
         List<Template> templateList = new ArrayList<>();
         new TemplateJpaController(DataBaseManager
                 .getEntityManagerFactory())
@@ -62,16 +62,11 @@ class ProjectTemplateStep implements WizardStep {
                         templateList.add(t);
                     }
                 });
-        BeanItemContainer<Template> container
-                = new BeanItemContainer<>(Template.class, templateList);
-        getTemplates().setContainerDataSource(container);
-        getTemplates().getItemIds().forEach(id -> {
-            Template temp = (Template) id;
-            getTemplates().setItemCaption(id, ContentProvider.TRANSLATOR
-                    .translate(temp.getTemplateName()));
-        });
+        getTemplates().setItems(templateList);
+        getTemplates().setItemCaptionGenerator(t -> ContentProvider.TRANSLATOR
+                .translate(t.getTemplateName()));
         getTemplates().addValueChangeListener(event -> {
-            Template t = (Template) getTemplates().getValue();
+            Template t = getTemplates().getValue();
             if (t != null) {
                 switch (t.getId()) {
                     case 1:
@@ -96,9 +91,14 @@ class ProjectTemplateStep implements WizardStep {
 
     @Override
     public boolean onAdvance() {
-        Template t = (Template) getTemplates().getValue();
+        Template t = getTemplates().getValue();
         if (t != null) {
             wizard.setTemplate(t);
+        } else {
+            Notification.show(ContentProvider.TRANSLATOR
+                    .translate("unable.to.proceed"),
+                    ContentProvider.TRANSLATOR.translate("template.select"),
+                    Notification.Type.WARNING_MESSAGE);
         }
         return t != null;
     }
@@ -111,14 +111,14 @@ class ProjectTemplateStep implements WizardStep {
     /**
      * @return the templates
      */
-    public ComboBox getTemplates() {
+    public ComboBox<Template> getTemplates() {
         return templates;
     }
 
     /**
      * @param templates the templates to set
      */
-    public void setTemplates(ComboBox templates) {
+    public void setTemplates(ComboBox<Template> templates) {
         this.templates = templates;
     }
 }

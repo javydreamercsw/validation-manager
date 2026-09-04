@@ -15,14 +15,15 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign;
 
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.data.TreeData;
+import com.vaadin.data.provider.TreeDataProvider;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
-import com.vaadin.v7.ui.OptionGroup;
-import com.vaadin.v7.ui.TreeTable;
+import com.vaadin.ui.RadioButtonGroup;
+import com.vaadin.ui.TreeGrid;
+import com.vaadin.ui.renderers.ComponentRenderer;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
@@ -41,8 +42,11 @@ import com.validation.manager.core.tool.TCEExtraction;
 import com.validation.manager.core.tool.Tool;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
@@ -56,10 +60,11 @@ import org.vaadin.teemu.wizards.WizardStep;
 public class AssignUserStep implements WizardStep {
 
     private final Object key;
-    private final TreeTable testTree
-            = new TreeTable("available.tests");
-    private final OptionGroup userGroup
-            = new OptionGroup("available.tester");
+    private final TreeData<Object> treeData = new TreeData<>();
+    private final Map<Object, TreeTableCheckBox> checkboxes = new HashMap<>();
+    private final TreeGrid<Object> testTree = new TreeGrid<>("available.tests");
+    private final RadioButtonGroup<VmUser> userGroup
+            = new RadioButtonGroup<>("available.tester");
     private TestCaseExecutionServer tce = null;
     private TestCaseServer tc = null;
     private static final Logger LOG
@@ -69,6 +74,35 @@ public class AssignUserStep implements WizardStep {
     public AssignUserStep(ValidationManagerUI ui, Object item) {
         this.key = item;
         this.ui = ui;
+        testTree.addColumn(o -> getCheckBoxFor(o)).setId("general.name")
+                .setCaption("general.name")
+                .setRenderer(new ComponentRenderer());
+        testTree.addColumn(AssignUserStep::getDescription)
+                .setId("general.description")
+                .setCaption("general.description");
+        testTree.setWidth(20, Unit.EM);
+        testTree.setHierarchyColumn("general.name");
+        testTree.setSizeFull();
+    }
+
+    private TreeTableCheckBox getCheckBoxFor(Object id) {
+        return checkboxes.get(id);
+    }
+
+    private static String getDescription(Object id) {
+        TestCase tc = findTestCase(id);
+        return tc == null ? ""
+                : (tc.getSummary() == null ? ""
+                        : new String(tc.getSummary(), StandardCharsets.UTF_8));
+    }
+
+    private static TestCase findTestCase(Object id) {
+        if (id instanceof TestCasePK) {
+            TestCasePK pk = (TestCasePK) id;
+            return new TestCaseJpaController(DataBaseManager
+                    .getEntityManagerFactory()).findTestCase(pk);
+        }
+        return null;
     }
 
     @Override
@@ -93,34 +127,22 @@ public class AssignUserStep implements WizardStep {
                         testCases.add(es.getStep().getTestCase());
                     });
         }
-        testTree.addContainerProperty("general.name",
-                TreeTableCheckBox.class, "");
-        testTree.addContainerProperty("general.description",
-                String.class, "");
-        testTree.setWidth("20em");
         testCases.forEach((t) -> {
-            testTree.addItem(new Object[]{new TreeTableCheckBox(testTree,
-                t.getName(), t.getTestCasePK()),
-                t.getSummary() == null ? "" : new String(t.getSummary(),
-                StandardCharsets.UTF_8)}, t.getTestCasePK());
-            testTree.setChildrenAllowed(t.getTestCasePK(), false);
+            TestCasePK id = t.getTestCasePK();
+            treeData.addRootItems(id);
+            TreeTableCheckBox check = new TreeTableCheckBox(new TreeNavigatorImpl(),
+                    t.getName(), id);
+            checkboxes.put(id, check);
         });
-        testTree.setPageLength(testCases.size() + 1);
-        testTree.setSizeFull();
+        testTree.setHeightByRows(testCases.size() + 1);
+        testTree.setDataProvider(new TreeDataProvider<>(treeData));
         l.addComponent(testTree);
         //Add list of testers
         users.addAll(RoleServer.getRole("tester").getVmUserList());
-        BeanItemContainer<VmUser> userContainer
-                = new BeanItemContainer<>(VmUser.class);
-        userContainer.addAll(users);
-        userGroup.setContainerDataSource(userContainer);
-        userGroup.setItemCaptionMode(ItemCaptionMode.EXPLICIT);
-        userGroup.getItemIds().forEach(id -> {
-            VmUser u = (VmUser) id;
-            userGroup.setItemCaption(id, u.getFirstName() + " "
-                    + u.getLastName());
-            userGroup.setItemIcon(id, VaadinIcons.USER);
-        });
+        userGroup.setItems(users);
+        userGroup.setItemCaptionGenerator((VmUser u) -> u.getFirstName() + " "
+                + u.getLastName());
+        userGroup.setItemIconGenerator(u -> VaadinIcons.USER);
         l.addComponent(userGroup);
         return l;
     }
@@ -129,15 +151,11 @@ public class AssignUserStep implements WizardStep {
     public boolean onAdvance() {
         boolean selectedTestCase = false;
         List<TestCasePK> testCaseIds = new ArrayList<>();
-        for (Object id : testTree.getItemIds()) {
-            Item item = testTree.getItem(id);
-            Object val = item.getItemProperty("general.name").getValue();
-            if (val instanceof TreeTableCheckBox) {
-                TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
-                if (ttcb.getValue()) {
-                    selectedTestCase = true;
-                    testCaseIds.add((TestCasePK) id);
-                }
+        for (TestCasePK id : treeData.getRootItems()) {
+            TreeTableCheckBox ttcb = checkboxes.get(id);
+            if (ttcb != null && ttcb.getValue() != null && ttcb.getValue()) {
+                selectedTestCase = true;
+                testCaseIds.add(id);
             }
         }
         if (!selectedTestCase) {
@@ -148,7 +166,7 @@ public class AssignUserStep implements WizardStep {
         }
         try {
             //Now process the data
-            VMUserServer user = new VMUserServer((VmUser) userGroup.getValue());
+            VMUserServer user = new VMUserServer(userGroup.getValue());
             TestCaseJpaController c
                     = new TestCaseJpaController(DataBaseManager
                             .getEntityManagerFactory());
@@ -172,5 +190,36 @@ public class AssignUserStep implements WizardStep {
     @Override
     public boolean onBack() {
         return false;
+    }
+
+    /**
+     * Tree access backing the checkboxes' parent/child cascade.
+     */
+    private class TreeNavigatorImpl implements TreeTableCheckBox.TreeNavigator {
+
+        @Override
+        public boolean hasChildren(Object objectId) {
+            return treeData.contains(objectId)
+                    && !treeData.getChildren(objectId).isEmpty();
+        }
+
+        @Override
+        public Collection<Object> getChildren(Object objectId) {
+            if (!treeData.contains(objectId)) {
+                return new ArrayList<>();
+            }
+            return treeData.getChildren(objectId);
+        }
+
+        @Override
+        public Object getParent(Object objectId) {
+            return treeData.contains(objectId)
+                    ? treeData.getParent(objectId) : null;
+        }
+
+        @Override
+        public TreeTableCheckBox getCheckBox(Object objectId) {
+            return checkboxes.get(objectId);
+        }
     }
 }
