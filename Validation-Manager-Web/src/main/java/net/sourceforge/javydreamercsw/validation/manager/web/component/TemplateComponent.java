@@ -17,18 +17,18 @@ package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.addon.contextmenu.ContextMenu;
 import com.vaadin.addon.contextmenu.MenuItem;
-import com.vaadin.v7.data.Item;
-import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.v7.data.util.BeanItemContainer;
-import com.vaadin.v7.event.ItemClickEvent;
+import com.vaadin.data.Binder;
+import com.vaadin.data.TreeData;
+import com.vaadin.data.provider.TreeDataProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.MouseEventDetails;
-import com.vaadin.v7.ui.ComboBox;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.SingleSelect;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Panel;
-import com.vaadin.v7.ui.TextField;
-import com.vaadin.v7.ui.Tree;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.Tree;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -46,6 +46,8 @@ import com.validation.manager.core.db.controller.exceptions.NonexistentEntityExc
 import com.validation.manager.core.server.core.TemplateNodeServer;
 import de.steinwedel.messagebox.ButtonOption;
 import de.steinwedel.messagebox.MessageBox;
+import java.util.HashMap;
+import java.util.Map;
 import org.openide.util.Exceptions;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.WizardStep;
@@ -63,7 +65,13 @@ public class TemplateComponent extends Panel {
 
     private final Template template;
     private final boolean edit;
-    private Tree tree;
+    private Tree<Object> tree;
+    //The template is the root item, template nodes are keyed by their PK.
+    private final TreeData<Object> treeData = new TreeData<>();
+    private final Map<TemplateNodePK, TemplateNode> nodeIndex
+            = new HashMap<>();
+    private TreeDataProvider<Object> dataProvider;
+    private SingleSelect<Object> selection;
 
     public TemplateComponent(Template t, boolean edit) {
         super(TRANSLATOR.translate("general.template"));
@@ -80,10 +88,9 @@ public class TemplateComponent extends Panel {
     }
 
     private void init() {
-        tree = new Tree();
-        tree.addItem(getTemplate());
-        tree.setItemIcon(getTemplate(), VaadinIcons.FILE_TREE);
-        tree.setItemCaption(getTemplate(), getTemplate().getTemplateName());
+        tree = new Tree<>();
+        selection = tree.asSingleSelect();
+        treeData.addRootItems(getTemplate());
         if (getTemplate().getTemplateNodeList() != null) {
             getTemplate().getTemplateNodeList().forEach(node -> {
                 if (node.getTemplateNode() == null) {
@@ -92,25 +99,29 @@ public class TemplateComponent extends Panel {
                 }
             });
         }
+        dataProvider = new TreeDataProvider<>(treeData);
+        tree.setDataProvider(dataProvider);
+        tree.setItemCaptionGenerator(this::getCaptionFor);
+        tree.setItemIconGenerator(this::getIconFor);
         //Select item on right click as well
-        tree.addItemClickListener((ItemClickEvent event) -> {
+        tree.addItemClickListener((Tree.ItemClick<Object> event) -> {
             if (event.getSource() == tree
-                    && event.getButton() == MouseEventDetails.MouseButton.RIGHT) {
+                    && event.getMouseEventDetails().getButton()
+                    == MouseEventDetails.MouseButton.RIGHT) {
                 if (event.getItem() != null) {
-                    Item clicked = event.getItem();
-                    tree.select(event.getItemId());
+                    tree.select(event.getItem());
                 }
             }
         });
         //Add context menu
         ContextMenu menu = new ContextMenu(tree, true);
         if (edit) {
-            tree.addItemClickListener((ItemClickEvent event) -> {
+            tree.addContextClickListener((event) -> {
                 if (event.getButton() == MouseEventDetails.MouseButton.RIGHT) {
                     menu.removeItems();
-                    if (tree.getValue() != null) {
-                        if (tree.getValue() instanceof Template) {
-                            Template t = (Template) tree.getValue();
+                    if (selection.getValue() != null) {
+                        if (selection.getValue() instanceof Template) {
+                            Template t = (Template) selection.getValue();
                             if (t.getId() < 1_000) {
                                 return;
                             }
@@ -126,38 +137,36 @@ public class TemplateComponent extends Panel {
                                             displayChildDeletionWizard();
                                         });
                         //Don't allow to delete the root node.
-                        delete.setEnabled(!tree.isRoot(tree.getValue()));
+                        delete.setEnabled(treeData
+                                .getParent(selection.getValue()) != null);
                     }
                 }
             });
         }
+        Binder<Template> binder = new Binder<>(Template.class);
+        binder.setBean(getTemplate());
         TextField nameField
                 = new TextField(TRANSLATOR.translate("general.name"));
-        VerticalLayout vl = new VerticalLayout();
-        BeanFieldGroup binder = new BeanFieldGroup(getTemplate().getClass());
-        binder.setItemDataSource(getTemplate());
-        binder.bind(nameField, "templateName");
+        binder.forField(nameField)
+                .withNullRepresentation("")
+                .bind("templateName");
         nameField.addValueChangeListener(listener -> {
             getTemplate().setTemplateName(nameField.getValue());
         });
-        nameField.setNullRepresentation("");
-        ComboBox type = new ComboBox(TRANSLATOR.translate("general.type"));
-        BeanItemContainer<ProjectType> container
-                = new BeanItemContainer<>(ProjectType.class,
-                        new ProjectTypeJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findProjectTypeEntities());
-        type.setContainerDataSource(container);
-        for (Object o : type.getItemIds()) {
-            ProjectType id = ((ProjectType) o);
-            type.setItemCaption(id, TRANSLATOR.translate(id.getTypeName()));
-        }
+        ComboBox<ProjectType> type
+                = new ComboBox<>(TRANSLATOR.translate("general.type"));
+        type.setItems(new ProjectTypeJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findProjectTypeEntities());
+        type.setItemCaptionGenerator(id
+                -> TRANSLATOR.translate(id.getTypeName()));
         type.addValueChangeListener(listener -> {
             if (type.getValue() != null) {
-                getTemplate().setProjectTypeId((ProjectType) type.getValue());
+                getTemplate().setProjectTypeId(type.getValue());
             }
         });
         binder.bind(type, "projectTypeId");
+        VerticalLayout vl = new VerticalLayout();
         vl.addComponent(nameField);
         vl.addComponent(type);
         if (template.getId() != null) {
@@ -165,6 +174,41 @@ public class TemplateComponent extends Panel {
         }
         binder.setReadOnly(!edit);
         setContent(vl);
+    }
+
+    private String getCaptionFor(Object item) {
+        if (item instanceof Template) {
+            return ((Template) item).getTemplateName();
+        } else if (item instanceof TemplateNodePK) {
+            TemplateNode node = nodeIndex.get((TemplateNodePK) item);
+            return node == null ? String.valueOf(item)
+                    : TRANSLATOR.translate(node.getNodeName());
+        }
+        return String.valueOf(item);
+    }
+
+    private Resource getIconFor(Object item) {
+        if (item instanceof Template) {
+            return VaadinIcons.FILE_TREE;
+        } else if (item instanceof TemplateNodePK) {
+            TemplateNode node = nodeIndex.get((TemplateNodePK) item);
+            if (node == null || node.getTemplateNodeType() == null) {
+                return VaadinIcons.FOLDER;
+            }
+            switch (node.getTemplateNodeType().getId()) {
+                case 1://Requirement
+                    return VMUI.REQUIREMENT_ICON;
+                case 2://Test Plan
+                    return VMUI.PLAN_ICON;
+                case 3://Just a folder
+                    return VaadinIcons.FOLDER;
+                case 4://Risk Management
+                    return VaadinIcons.EYE;
+                default://Folder by default
+                    return VaadinIcons.FOLDER;
+            }
+        }
+        return null;
     }
 
     private void displayChildCreationWizard() {
@@ -211,13 +255,13 @@ public class TemplateComponent extends Panel {
                     //Add the item
                     TemplateNode tn = tc.getNode(), parent = null;
                     Template template = null;
-                    if (tree.getValue() instanceof TemplateNodePK) {
+                    if (selection.getValue() instanceof TemplateNodePK) {
                         TemplateNodeServer node
-                                = new TemplateNodeServer((TemplateNodePK) tree.getValue());
+                                = new TemplateNodeServer((TemplateNodePK) selection.getValue());
                         template = node.getTemplate();
                         parent = node.getEntity();
-                    } else if (tree.getValue() instanceof Template) {
-                        template = (Template) tree.getValue();
+                    } else if (selection.getValue() instanceof Template) {
+                        template = (Template) selection.getValue();
                     }
                     tn.setTemplate(template);
                     if (parent != null) {
@@ -226,6 +270,7 @@ public class TemplateComponent extends Panel {
                     new TemplateNodeJpaController(DataBaseManager
                             .getEntityManagerFactory()).create(tn);
                     addTemplateNode(tn);
+                    dataProvider.refreshAll();
                     UI.getCurrent().removeWindow(cw);
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
@@ -244,39 +289,17 @@ public class TemplateComponent extends Panel {
 
     private void addTemplateNode(TemplateNode node) {
         Object key = node.getTemplateNodePK();
-        tree.addItem(key);
-        tree.setItemCaption(key,
-                TRANSLATOR.translate(node.getNodeName()));
-        tree.setChildrenAllowed(key,
-                !node.getTemplateNodeList().isEmpty());
-        if (node.getTemplateNode() != null) {
-            tree.setParent(key,
-                    node.getTemplateNode().getTemplateNodePK());
-        } else {
-            tree.setParent(key,
-                    node.getTemplate());
+        nodeIndex.put((TemplateNodePK) key, node);
+        //Parent is set on insertion; children presence implies children allowed
+        treeData.addItem(node.getTemplateNode() != null
+                ? node.getTemplateNode().getTemplateNodePK()
+                : node.getTemplate(),
+                key);
+        if (node.getTemplateNodeList() != null) {
+            node.getTemplateNodeList().forEach(sub -> {
+                addTemplateNode(sub);
+            });
         }
-        Resource icon;
-        switch (node.getTemplateNodeType().getId()) {
-            case 1://Requirement
-                icon = VMUI.REQUIREMENT_ICON;
-                break;
-            case 2://Test Plan
-                icon = VMUI.PLAN_ICON;
-                break;
-            case 3://Just a folder
-                icon = VaadinIcons.FOLDER;
-                break;
-            case 4://Risk Management
-                icon = VaadinIcons.EYE;
-                break;
-            default://Folder by default
-                icon = VaadinIcons.FOLDER;
-        }
-        tree.setItemIcon(key, icon);
-        node.getTemplateNodeList().forEach(sub -> {
-            addTemplateNode(sub);
-        });
     }
 
     private void displayChildDeletionWizard() {
@@ -286,12 +309,11 @@ public class TemplateComponent extends Panel {
                 .withYesButton(() -> {
                     try {
                         TemplateNodeServer node
-                                = new TemplateNodeServer((TemplateNodePK) tree.getValue());
+                                = new TemplateNodeServer((TemplateNodePK) selection.getValue());
                         TemplateNodeServer.delete(node.getEntity());
-                        tree.getChildren(tree.getValue()).forEach(child -> {
-                            tree.removeItem(child);
-                        });
-                        tree.removeItem(node.getTemplateNodePK());
+                        //Removes the node and its children
+                        treeData.removeItem(node.getTemplateNodePK());
+                        dataProvider.refreshAll();
                     } catch (NonexistentEntityException ex) {
                         Exceptions.printStackTrace(ex);
                     }
