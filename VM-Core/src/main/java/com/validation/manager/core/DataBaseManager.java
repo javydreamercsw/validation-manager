@@ -15,10 +15,10 @@
  */
 package com.validation.manager.core;
 
-import com.googlecode.flyway.core.Flyway;
-import com.googlecode.flyway.core.api.FlywayException;
-import com.googlecode.flyway.core.api.MigrationInfo;
-import com.googlecode.flyway.core.api.MigrationState;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
+import org.flywaydb.core.api.MigrationInfo;
+import org.flywaydb.core.api.MigrationState;
 import com.validation.manager.core.db.controller.VmIdJpaController;
 import com.validation.manager.core.server.core.VMIdServer;
 import com.validation.manager.core.server.core.VMSettingServer;
@@ -95,8 +95,13 @@ public class DataBaseManager {
     }
 
     public static void clean() {
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                // JPA (EclipseLink) creates the schema before Flyway runs, so the
+                // schema history table must be baselined into an existing schema.
+                .baselineOnMigrate(true)
+                .load();
         if (isDemo()) {
             LOG.warning("Resetting database since it is on demo mode.");
             //Clean the database on demo
@@ -108,7 +113,6 @@ public class DataBaseManager {
             JpaHelper.getEntityManagerFactory(getEntityManager())
                     .refreshMetadata(p);
             //Update the data
-            flyway.init();
             flyway.migrate();
         }
     }
@@ -472,10 +476,14 @@ public class DataBaseManager {
     }
 
     private static void updateDatabase(DataSource dataSource) {
-        Flyway flyway = new Flyway();
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                // JPA (EclipseLink) creates the schema before Flyway runs, so the
+                // schema history table must be baselined into an existing schema.
+                .baselineOnMigrate(true)
+                .load();
         try {
-            flyway.setDataSource(dataSource);
-            flyway.setLocations("db.migration");
             LOG.fine("Starting migration...");
             flyway.migrate();
             LOG.fine("Done!");
@@ -563,8 +571,13 @@ public class DataBaseManager {
     private static void initializeFlyway(DataSource dataSource) {
         assert dataSource != null;
         setState(DBState.START_UP);
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                // JPA (EclipseLink) creates the schema before Flyway runs, so the
+                // schema history table must be baselined into an existing schema.
+                .baselineOnMigrate(true)
+                .load();
         if (isDemo()) {
             //Clean the database on demo
             clean();
@@ -574,15 +587,7 @@ public class DataBaseManager {
         MigrationInfo status = flyway.info().current();
         if (status == null) {
             setState(DBState.NEED_INIT);
-            LOG.fine("Initialize the metadata...");
-            try {
-                flyway.init();
-                LOG.fine("Done!");
-            }
-            catch (FlywayException fe) {
-                LOG.log(Level.SEVERE, "Unable to initialize database", fe);
-                setState(DBState.ERROR);
-            }
+            LOG.fine("Metadata created on first migration...");
         } else {
             LOG.fine("Database has Flyway metadata already...");
             displayDBStatus(status);

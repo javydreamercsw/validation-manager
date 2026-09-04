@@ -113,10 +113,11 @@
             <artifactId>unoil</artifactId>
             <version>${openoffice.version}</version>
         </dependency>
+        <!-- 4.4.x renamed org.jodconverter.office.* packages; the sources use the 4.2.x API -->
         <dependency>
             <groupId>org.jodconverter</groupId>
             <artifactId>jodconverter-local</artifactId>
-            <version>4.4.0</version>
+            <version>4.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>

@@ -45,11 +45,11 @@
             <artifactId>vaadin-icons</artifactId>
             <version>${vaadin.icons.version}</version>
         </dependency>
-        <!--Flyway, Database update-->
+        <!--Flyway, Database update (2.3.1 predates the fluent API and modern H2 metadata queries)-->
         <dependency>
-            <groupId>com.googlecode.flyway</groupId>
+            <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>2.3.1</version>
+            <version>5.2.4</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -60,7 +60,8 @@
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
-            <version>2.7.0</version>
+            <!-- 2.7.0 (2017) fails to generate complete DDL on H2 2.x; 2.7.16 supports it, still javax.persistence -->
+            <version>2.7.16</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
