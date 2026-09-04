@@ -228,13 +228,13 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Disable annotation processors during normal compilation -->
+            <!-- Disable annotation processors during normal compilation. VM-Core is
+            compiled for Java 11 (EclipseLink 4.x requirement), so match it. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>11</release>
                     <debug>false</debug>
                 </configuration>
             </plugin>

@@ -42,7 +42,7 @@ import java.util.List;
 import static java.util.Locale.getDefault;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.EntityTransaction;
+import jakarta.persistence.EntityTransaction;
 import org.openide.util.Exceptions;
 
 /**

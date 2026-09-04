@@ -84,11 +84,11 @@ public abstract class AbstractVMTestCase extends TestCase {
                             .getProperties();
             DataSource ds = new JdbcDataSource();
             ((JdbcDataSource) ds).setPassword((String) properties
-                    .get("javax.persistence.jdbc.password"));
+                    .get("jakarta.persistence.jdbc.password"));
             ((JdbcDataSource) ds).setUser((String) properties
-                    .get("javax.persistence.jdbc.user"));
+                    .get("jakarta.persistence.jdbc.user"));
             ((JdbcDataSource) ds).setURL((String) properties
-                    .get("javax.persistence.jdbc.url"));
+                    .get("jakarta.persistence.jdbc.url"));
             //Load the H2 driver
             forName("org.h2.Driver");
             conn = ds.getConnection();
