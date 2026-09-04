@@ -4,12 +4,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/390b17b2843d4f29afde2f0194252b99)](https://www.codacy.com/app/javydreamercsw/validation-manager?utm_source=github.com&utm_medium=referral&utm_content=javydreamercsw/validation-manager&utm_campaign=badger)
 
-[![Build Status](https://travis-ci.org/javydreamercsw/validation-manager.svg?branch=master)](https://travis-ci.org/javydreamercsw/validation-manager)
-
-[![Dependency Status](https://www.versioneye.com/user/projects/596d2b19368b0800116ee85a/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/596d2b19368b0800116ee85a)
-[![Build status](https://ci.appveyor.com/api/projects/status/mua2c4msswskobok?svg=true)](https://ci.appveyor.com/project/javydreamercsw/validation-manager)
-
-[![Coverage Status](https://coveralls.io/repos/github/javydreamercsw/validation-manager/badge.svg?branch=master)](https://coveralls.io/github/javydreamercsw/validation-manager?branch=master)
+[![CI](https://github.com/javydreamercsw/validation-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/javydreamercsw/validation-manager/actions/workflows/ci.yml)
 
 [![Known Vulnerabilities](https://snyk.io/test/github/javydreamercsw/validation-manager/badge.svg)](https://snyk.io/test/github/javydreamercsw/validation-manager)
 
