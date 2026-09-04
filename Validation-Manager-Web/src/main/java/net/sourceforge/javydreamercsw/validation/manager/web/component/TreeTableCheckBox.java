@@ -15,9 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Item;
+import com.vaadin.v7.data.Item;
 import com.vaadin.sebastian.indeterminatecheckbox.IndeterminateCheckBox;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.v7.ui.TreeTable;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;

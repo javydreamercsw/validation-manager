@@ -35,31 +35,31 @@ import org.vaadin.easyuploads.MultiFileUpload;
 import org.vaadin.teemu.wizards.Wizard;
 import org.vaadin.teemu.wizards.WizardStep;
 
-import com.vaadin.data.Validator.InvalidValueException;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.converter.StringToDoubleConverter;
-import com.vaadin.data.validator.DoubleRangeValidator;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.v7.data.Validator.InvalidValueException;
+import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.v7.data.util.converter.StringToDoubleConverter;
+import com.vaadin.v7.data.validator.DoubleRangeValidator;
+import com.vaadin.v7.event.FieldEvents.TextChangeEvent;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
-import com.vaadin.shared.ui.datefield.Resolution;
-import com.vaadin.ui.AbstractField;
-import com.vaadin.ui.AbstractTextField;
+import com.vaadin.v7.shared.ui.datefield.Resolution;
+import com.vaadin.v7.ui.AbstractField;
+import com.vaadin.v7.ui.AbstractTextField;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.v7.ui.CheckBox;
+import com.vaadin.v7.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.Field;
+import com.vaadin.v7.ui.DateField;
+import com.vaadin.v7.ui.Field;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.v7.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
+import com.vaadin.v7.ui.TextArea;
+import com.vaadin.v7.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
@@ -94,7 +94,6 @@ import net.sourceforge.javydreamercsw.validation.manager.web.component.ByteToStr
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.IFileDisplay;
 import net.sourceforge.javydreamercsw.validation.manager.web.file.PDFDisplay;
-import tm.kod.widgets.numberfield.NumberField;
 
 /**
  *
@@ -363,12 +362,10 @@ public class ExecutionWizardStep implements WizardStep
           layout.addComponent(tf);
           break;
         case 2://Numeric
-          NumberField field = new NumberField(TRANSLATOR
-                  .translate(de.getEntryName()));
-          field.setSigned(true);
-          field.setUseGrouping(true);
-          field.setGroupingSeparator(',');
-          field.setDecimalSeparator('.');
+          // numberfield7 addon has no Vaadin 8 release; use a v7 TextField
+          // with a converter and range validation.
+          com.vaadin.v7.ui.TextField field = new com.vaadin.v7.ui.TextField(
+                  TRANSLATOR.translate(de.getEntryName()));
           field.setConverter(new StringToDoubleConverter());
           field.setRequired(DataEntryServer
                   .getProperty(de,

@@ -15,7 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.workflow;
 
-import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.v7.data.util.BeanItemContainer;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.pontus.vizcomponent.VizComponent;
 import com.vaadin.pontus.vizcomponent.VizComponent.EdgeClickEvent;
@@ -24,8 +24,8 @@ import com.vaadin.pontus.vizcomponent.model.Graph;
 import com.vaadin.pontus.vizcomponent.model.Subgraph;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.ListSelect;
-import com.vaadin.ui.TextField;
+import com.vaadin.v7.ui.ListSelect;
+import com.vaadin.v7.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;

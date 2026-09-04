@@ -15,14 +15,14 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign;
 
-import com.vaadin.data.Item;
-import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.v7.data.Item;
+import com.vaadin.v7.data.util.BeanItemContainer;
 import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
+import com.vaadin.v7.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.v7.ui.OptionGroup;
+import com.vaadin.v7.ui.TreeTable;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;

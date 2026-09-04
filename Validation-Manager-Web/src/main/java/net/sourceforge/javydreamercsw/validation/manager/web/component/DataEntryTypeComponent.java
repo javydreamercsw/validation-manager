@@ -15,9 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
+import com.vaadin.v7.ui.CustomField;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Panel;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;

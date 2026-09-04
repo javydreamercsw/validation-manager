@@ -16,15 +16,15 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
 import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.data.Item;
-import com.vaadin.event.ItemClickEvent;
+import com.vaadin.v7.data.Item;
+import com.vaadin.v7.event.ItemClickEvent;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.MouseEventDetails.MouseButton;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.v7.ui.Label;
+import com.vaadin.v7.ui.Table;
+import com.vaadin.v7.ui.Tree;
+import com.vaadin.v7.ui.TreeTable;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.FailureModeHasCauseHasRiskCategory;
 import com.validation.manager.core.db.FailureModeHasCauseHasRiskCategoryPK;

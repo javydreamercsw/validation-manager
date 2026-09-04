@@ -16,7 +16,7 @@
 package com.validation.manager.core;
 
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
+import com.vaadin.v7.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;

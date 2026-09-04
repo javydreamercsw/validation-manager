@@ -28,17 +28,17 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-server</artifactId>
+            <artifactId>vaadin-compatibility-server</artifactId>
             <version>${vaadin.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-client-compiled</artifactId>
+            <artifactId>vaadin-compatibility-client-compiled</artifactId>
             <version>${vaadin.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-client</artifactId>
+            <artifactId>vaadin-compatibility-client</artifactId>
             <version>${vaadin.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -47,6 +47,12 @@
             <artifactId>vaadin-push</artifactId>
             <version>${vaadin.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-compatibility-themes</artifactId>
+            <version>${vaadin.version}</version>
+        </dependency>
+        <!-- vmtheme extends valo, which ships in the standard themes jar -->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-themes</artifactId>
@@ -133,7 +139,7 @@
         <dependency>
             <groupId>com.vaadin.addon</groupId>
             <artifactId>vaadin-context-menu</artifactId>
-            <version>0.7.5</version>
+            <version>0.7.6</version>
         </dependency>
         <dependency>
             <groupId>org.vaadin.addons</groupId>
@@ -173,22 +179,17 @@
         <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>wizards-for-vaadin</artifactId>
-            <version>1.1.2</version>
+            <version>2.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>vaadin-grid-util</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>tm.kod</groupId>
-            <artifactId>numberfield7</artifactId>
-            <version>0.0.4</version>
+            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin.addon</groupId>
             <artifactId>tableexport-for-vaadin</artifactId>
-            <version>1.6.3</version>
+            <version>1.8.0</version>
         </dependency>
         <dependency>
             <groupId>org.vaadin.addons</groupId>
