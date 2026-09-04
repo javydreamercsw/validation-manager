@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-server</artifactId>
+            <artifactId>vaadin-compatibility-server</artifactId>
             <version>${vaadin.version}</version>
         </dependency>
         <dependency>
@@ -103,9 +103,10 @@
             <version>1.9.13</version>
             <type>jar</type>
         </dependency>
+        <!-- MySQL Connector/J moved to reverse-DNS coordinates (was mysql:mysql-connector-java) -->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
             <version>${mysql.version}</version>
             <scope>runtime</scope>
         </dependency>

@@ -15,12 +15,12 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Item;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.GeneratedPropertyContainer;
-import com.vaadin.data.util.PropertyValueGenerator;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Grid;
+import com.vaadin.v7.data.Item;
+import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.v7.data.util.GeneratedPropertyContainer;
+import com.vaadin.v7.data.util.PropertyValueGenerator;
+import com.vaadin.v7.shared.ui.grid.HeightMode;
+import com.vaadin.v7.ui.Grid;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.HistoryField;

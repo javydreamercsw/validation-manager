@@ -16,9 +16,9 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
 import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.v7.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.Label;
+import com.vaadin.v7.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.VMException;

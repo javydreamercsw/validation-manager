@@ -15,7 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.validator.StringLengthValidator;
+import com.vaadin.v7.data.validator.StringLengthValidator;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.event.ShortcutAction;
@@ -26,8 +26,8 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
+import com.vaadin.v7.ui.PasswordField;
+import com.vaadin.v7.ui.TextField;
 import com.vaadin.ui.UI;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.VMUI;

@@ -15,7 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.util.converter.Converter;
+import com.vaadin.v7.data.util.converter.Converter;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.tool.MD5;
 import java.util.Locale;

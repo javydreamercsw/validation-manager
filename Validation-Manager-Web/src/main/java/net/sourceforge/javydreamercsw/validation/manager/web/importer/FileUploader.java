@@ -15,7 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.importer;
 
-import com.vaadin.ui.Upload;
+import com.vaadin.v7.ui.Upload;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

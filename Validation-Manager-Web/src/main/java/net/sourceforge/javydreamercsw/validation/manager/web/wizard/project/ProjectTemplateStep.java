@@ -15,8 +15,8 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.v7.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.ContentProvider;

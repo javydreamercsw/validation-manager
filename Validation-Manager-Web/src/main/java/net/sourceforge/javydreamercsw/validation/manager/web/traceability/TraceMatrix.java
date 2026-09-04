@@ -19,10 +19,10 @@ import com.vaadin.addon.tableexport.ExcelExport;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
+import com.vaadin.v7.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.v7.ui.TreeTable;
 import static com.validation.manager.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.Baseline;
@@ -199,7 +199,9 @@ public class TraceMatrix extends TreeTable {
         Button export = new Button(TRANSLATOR.translate("general.export"));
         export.addClickListener(listener -> {
             //Create the Excel file
-            ExcelExport excelExport = new ExcelExport(this);
+            ExcelExport excelExport = new ExcelExport(
+                    new com.vaadin.addon.tableexport.v7.DefaultTableHolder(
+                            this));
             excelExport.excludeCollapsedColumns();
             excelExport.setReportTitle(TRANSLATOR.translate("trace.matrix"));
             excelExport.setDisplayTotals(false);

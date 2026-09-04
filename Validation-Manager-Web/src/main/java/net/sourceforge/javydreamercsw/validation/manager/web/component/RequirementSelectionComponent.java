@@ -15,8 +15,8 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.ui.TwinColSelect;
+import com.vaadin.v7.data.util.BeanItemContainer;
+import com.vaadin.v7.ui.TwinColSelect;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;

@@ -15,8 +15,8 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Container;
-import com.vaadin.ui.Tree;
+import com.vaadin.v7.data.Container;
+import com.vaadin.v7.ui.Tree;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMUI;
 import static com.validation.manager.core.VMUI.PROJECT_ICON;

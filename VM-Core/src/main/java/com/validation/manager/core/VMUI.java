@@ -17,7 +17,7 @@ package com.validation.manager.core;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.AbstractSelect;
+import com.vaadin.v7.ui.AbstractSelect;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;

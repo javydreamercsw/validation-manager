@@ -15,11 +15,11 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
-import com.vaadin.data.Item;
+import com.vaadin.v7.data.Item;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.TreeTable;
+import com.vaadin.v7.ui.TreeTable;
 import com.vaadin.ui.VerticalLayout;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.TestCasePK;

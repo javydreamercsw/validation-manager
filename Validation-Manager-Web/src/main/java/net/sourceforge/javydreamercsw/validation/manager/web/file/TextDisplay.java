@@ -16,7 +16,7 @@
 package net.sourceforge.javydreamercsw.validation.manager.web.file;
 
 import com.vaadin.server.Sizeable;
-import com.vaadin.ui.TextArea;
+import com.vaadin.v7.ui.TextArea;
 import com.vaadin.ui.Window;
 import java.io.BufferedReader;
 import java.io.File;

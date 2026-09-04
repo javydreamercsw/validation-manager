@@ -15,11 +15,11 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.plan;
 
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
+import com.vaadin.v7.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
+import com.vaadin.v7.ui.TextArea;
 import com.vaadin.ui.themes.ValoTheme;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.VMUI;

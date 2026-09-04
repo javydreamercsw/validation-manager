@@ -15,8 +15,8 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Container;
-import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.v7.data.Container;
+import com.vaadin.v7.data.util.HierarchicalContainer;
 
 public class ProjectTreeComponentBuilder {
 
