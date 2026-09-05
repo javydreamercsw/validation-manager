@@ -163,7 +163,7 @@ public class RequirementImporter implements ImporterInterface<Requirement> {
                                 Cell cell = row.getCell(c);
                                 String value = "";
                                 if (cell != null) {
-                                    switch (cell.getCellTypeEnum()) {
+                                    switch (cell.getCellType()) {
                                         case FORMULA:
                                             value = cell.getCellFormula();
                                             break;
