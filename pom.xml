@@ -231,8 +231,11 @@
     <modules>
         <module>VM-Core</module>
         <module>Validation-Manager-Web</module>
-        <module>WizardsForVaadin</module>
-        <module>tableexport-for-vaadin</module>
+        <!-- WizardsForVaadin and tableexport-for-vaadin submodules are no
+            longer referenced by the Flow application (their Vaadin 8 add-ons
+            were replaced in phase 4b). They are excluded from the build because
+            their Vaadin 8 dependency stack carries known CVEs; delete or
+            migrate them separately. -->
     </modules>
     
     <profiles>
