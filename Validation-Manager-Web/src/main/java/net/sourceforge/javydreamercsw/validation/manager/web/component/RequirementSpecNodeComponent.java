@@ -15,19 +15,19 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import com.validation.manager.core.db.RequirementSpec;
 import com.validation.manager.core.db.RequirementSpecNode;
 import com.validation.manager.core.db.controller.RequirementSpecNodeJpaController;
@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class RequirementSpecNodeComponent extends Panel {
+public final class RequirementSpecNodeComponent extends VerticalLayout {
 
     private final RequirementSpecNode rsn;
     private final boolean edit;
@@ -54,101 +54,93 @@ public final class RequirementSpecNodeComponent extends Panel {
 
     public RequirementSpecNodeComponent(RequirementSpecNode rsn, boolean edit,
             String caption) {
-        super(caption);
         this.rsn = rsn;
         this.edit = edit;
+        add(new Span(caption));
         init();
     }
 
     private void init() {
         FormLayout layout = new FormLayout();
-        setContent(layout);
-        addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(rsn.getClass());
-        binder.setItemDataSource(rsn);
-        Field<?> name = binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "name");
-        layout.addComponent(name);
-        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.description"),
-                "description",
-                TextArea.class);
+        add(layout);
+        Binder<RequirementSpecNode> binder = new Binder<>(RequirementSpecNode.class);
+        binder.setBean(rsn);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "name");
+        layout.add(name);
+        TextArea desc = new TextArea(TRANSLATOR.translate("general.description"));
+        binder.bind(desc, "description");
         desc.setSizeFull();
-        layout.addComponent(desc);
-        Field<?> scope = binder.buildAndBind(TRANSLATOR.translate("general.scope"),
-                "scope");
-        layout.addComponent(scope);
+        layout.add(desc);
+        TextField scope = new TextField(TRANSLATOR.translate("general.scope"));
+        binder.bind(scope, "scope");
+        layout.add(scope);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
-        cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
+        cancel.addClickListener((event) -> {
             if (rsn.getRequirementSpecNodePK() == null) {
-                ((VMUI) UI.getCurrent()).displayObject(rsn.getRequirementSpec());
+                ((ValidationManagerUI) UI.getCurrent()).displayObject(rsn.getRequirementSpec());
             } else {
-                ((VMUI) UI.getCurrent()).displayObject(rsn, false);
+                ((ValidationManagerUI) UI.getCurrent()).displayObject(rsn, false);
             }
         });
         if (edit) {
             if (rsn.getRequirementSpecNodePK() == null) {
                 //Creating a new one
                 Button save = new Button(TRANSLATOR.translate("general.save"));
-                save.addClickListener((Button.ClickEvent event) -> {
+                save.addClickListener((event) -> {
                     try {
                         rsn.setName(name.getValue().toString());
                         rsn.setDescription(desc.getValue().toString());
                         rsn.setScope(scope.getValue().toString());
-                        rsn.setRequirementSpec((RequirementSpec) ((VMUI) UI.getCurrent())
+                        rsn.setRequirementSpec((RequirementSpec) ((ValidationManagerUI) UI.getCurrent())
                                 .getSelectdValue());
                         new RequirementSpecNodeJpaController(DataBaseManager
                                 .getEntityManagerFactory()).create(rsn);
                         setVisible(false);
                         //Recreate the tree to show the addition
-                        ((VMUI) UI.getCurrent()).updateProjectList();
-                        ((VMUI) UI.getCurrent()).buildProjectTree(rsn);
-                        ((VMUI) UI.getCurrent()).displayObject(rsn, true);
-                        ((VMUI) UI.getCurrent()).updateScreen();
+                        ((ValidationManagerUI) UI.getCurrent()).updateProjectList();
+                        ((ValidationManagerUI) UI.getCurrent()).buildProjectTree(rsn);
+                        ((ValidationManagerUI) UI.getCurrent()).displayObject(rsn, true);
+                        ((ValidationManagerUI) UI.getCurrent()).updateScreen();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.creation"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        Notification.show(TRANSLATOR.translate("general.error.record.creation"));
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
+                hl.add(save);
+                hl.add(cancel);
+                layout.add(hl);
             } else {
                 //Editing existing one
                 Button update = new Button(TRANSLATOR.translate("general.update"));
-                update.addClickListener((Button.ClickEvent event) -> {
+                update.addClickListener((event) -> {
                     rsn.setName(name.getValue().toString());
                     rsn.setDescription(desc.getValue().toString());
                     rsn.setScope(scope.getValue().toString());
-                    ((VMUI) UI.getCurrent()).handleVersioning(rsn, () -> {
+                    ((ValidationManagerUI) UI.getCurrent()).handleVersioning(rsn, () -> {
                         try {
                             new RequirementSpecNodeJpaController(DataBaseManager
                                     .getEntityManagerFactory()).edit(rsn);
-                            ((VMUI) UI.getCurrent()).displayObject(rsn, true);
+                            ((ValidationManagerUI) UI.getCurrent()).displayObject(rsn, true);
                         } catch (NonexistentEntityException ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                    ex.getLocalizedMessage(),
-                                    Notification.Type.ERROR_MESSAGE);
+                            Notification.show(TRANSLATOR.translate("general.error.record.update")
+                                    + ": " + ex.getLocalizedMessage());
                         } catch (Exception ex) {
                             LOG.log(Level.SEVERE, null, ex);
-                            Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                    ex.getLocalizedMessage(),
-                                    Notification.Type.ERROR_MESSAGE);
+                            Notification.show(TRANSLATOR.translate("general.error.record.update")
+                                    + ": " + ex.getLocalizedMessage());
                         }
                     });
                 });
                 HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
+                hl.add(update);
+                hl.add(cancel);
+                layout.add(hl);
             }
         }
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         layout.setSizeFull();
         setSizeFull();
     }

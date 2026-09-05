@@ -15,14 +15,16 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.icon.Icon;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 
 /**
+ * Modal dialog base for the Vaadin 8 windows.
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class VMWindow extends Window {
+public class VMWindow extends Dialog {
 
     protected final ValidationManagerUI menu;
 
@@ -33,13 +35,15 @@ public class VMWindow extends Window {
     }
 
     public VMWindow(String caption) {
-        super(caption);
+        super();
+        setHeaderTitle(caption);
         menu = null;
         init();
     }
 
     public VMWindow(ValidationManagerUI menu, String caption) {
-        super(caption);
+        super();
+        setHeaderTitle(caption);
         this.menu = menu;
         init();
     }
@@ -51,8 +55,7 @@ public class VMWindow extends Window {
     }
 
     private void init() {
-        setIcon(ValidationManagerUI.SMALL_APP_ICON);
+        setHeaderTitle(getHeaderTitle());
         setModal(true);
-        center();
     }
 }

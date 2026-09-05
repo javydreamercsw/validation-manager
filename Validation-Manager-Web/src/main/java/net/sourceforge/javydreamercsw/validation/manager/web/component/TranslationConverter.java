@@ -15,9 +15,10 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.util.converter.Converter;
+import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
-import java.util.Locale;
 import org.openide.util.Lookup;
 
 /**
@@ -30,26 +31,12 @@ public class TranslationConverter implements Converter<String, String> {
             = Lookup.getDefault().lookup(InternationalizationProvider.class);
 
     @Override
-    public String convertToModel(String value,
-            Class<? extends String> targetType, Locale locale)
-            throws ConversionException {
-        return value;
+    public Result<String> convertToModel(String value, ValueContext context) {
+        return Result.ok(value);
     }
 
     @Override
-    public String convertToPresentation(String value,
-            Class<? extends String> targetType, Locale locale)
-            throws ConversionException {
+    public String convertToPresentation(String value, ValueContext context) {
         return TRANSLATOR.translate(value);
-    }
-
-    @Override
-    public Class<String> getModelType() {
-        return String.class;
-    }
-
-    @Override
-    public Class<String> getPresentationType() {
-        return String.class;
     }
 }

@@ -15,21 +15,23 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.Validator;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.converter.Converter;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.DataEntry;
 import com.validation.manager.core.db.DataEntryType;
 import com.validation.manager.core.server.core.DataEntryServer;
 import com.validation.manager.core.server.core.DataEntryTypeServer;
 import java.util.List;
-import java.util.Locale;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -38,82 +40,82 @@ import java.util.Locale;
 public final class DataEntryComponent extends CustomField<List<DataEntry>> {
 
     private final boolean edit;
+    private List<DataEntry> value;
+    private final VerticalLayout content = new VerticalLayout();
 
     public DataEntryComponent(boolean edit) {
-        setCaption(TRANSLATOR.translate("general.fields"));
+        setLabel(TRANSLATOR.translate("general.fields"));
         this.edit = edit;
+        add(new Scroller(content));
     }
 
     @Override
-    protected Component initContent() {
-        Panel p = new Panel();
-        FormLayout layout = new FormLayout();
-        p.setContent(layout);
-        getInternalValue().forEach(de -> {
-            BeanFieldGroup binder = new BeanFieldGroup(de.getClass());
-            binder.setItemDataSource(de);
+    public List<DataEntry> getValue() {
+        return value;
+    }
+
+    @Override
+    protected void setPresentationValue(List<DataEntry> value) {
+        this.value = value;
+        buildContent();
+    }
+
+    @Override
+    protected List<DataEntry> generateModelValue() {
+        return value;
+    }
+
+    private void buildContent() {
+        content.removeAll();
+        getValue().forEach(de -> {
+            Binder<DataEntry> binder = new Binder<>(DataEntry.class);
+            binder.setBean(de);
             TextField name = new TextField(TRANSLATOR.translate("general.name"));
-            binder.bind(name, "entryName");
-            name.setConverter(new TranslationConverter());
-            layout.addComponent(name);
+            binder.forField(name)
+                    .withConverter(new TranslationConverter())
+                    .bind("entryName");
+            content.add(name);
             TextField type = new TextField(TRANSLATOR.translate("general.type"));
-            type.setConverter(new Converter<String, DataEntryType>() {
+            binder.forField(type)
+                    .withConverter(new Converter<String, DataEntryType>() {
 
                 @Override
-                public DataEntryType convertToModel(String value,
-                        Class<? extends DataEntryType> targetType,
-                        Locale locale) throws Converter.ConversionException {
+                public Result<DataEntryType> convertToModel(String value,
+                        ValueContext context) {
                     for (DataEntryType det : DataEntryTypeServer.getTypes()) {
-                        if (TRANSLATOR.translate(det.getTypeName()).equals(value)) {
-                            return det;
+                        if (TRANSLATOR.translate(det.getTypeName())
+                                .equals(value)) {
+                            return Result.ok(det);
                         }
                     }
-                    return null;
+                    return Result.error(TRANSLATOR.translate("general.error"));
                 }
 
                 @Override
                 public String convertToPresentation(DataEntryType value,
-                        Class<? extends String> targetType, Locale locale)
-                        throws Converter.ConversionException {
+                        ValueContext context) {
                     return TRANSLATOR.translate(value.getTypeName());
                 }
-
-                @Override
-                public Class<DataEntryType> getModelType() {
-                    return DataEntryType.class;
-                }
-
-                @Override
-                public Class<String> getPresentationType() {
-                    return String.class;
-                }
-            });
+            })
+                    .bind("dataEntryType");
             DataEntryPropertyComponent properties
                     = new DataEntryPropertyComponent(edit);
-            binder.bind(type, "dataEntryType");
-            layout.addComponent(type);
             binder.bind(properties, "dataEntryPropertyList");
-            layout.addComponent(properties);
+            content.add(properties);
             binder.setReadOnly(!edit);
             type.setReadOnly(true);
         });
-        return p;
     }
 
-    @Override
-    public Class<? extends List<DataEntry>> getType() {
-        Class clazz = List.class;
-        return (Class<? extends List<DataEntry>>) clazz;
-    }
-
-    @Override
-    public void commit() throws SourceException, Validator.InvalidValueException {
-        getInternalValue().forEach(de -> {
+    /**
+     * Persist any edits made to the entries.
+     */
+    public void save() {
+        getValue().forEach(de -> {
             try {
                 new DataEntryServer(de).write2DB();
             } catch (Exception ex) {
-                throw new Validator.InvalidValueException(ex
-                        .getLocalizedMessage());
+                org.openide.util.Exceptions.printStackTrace(ex);
             }
         });
     }

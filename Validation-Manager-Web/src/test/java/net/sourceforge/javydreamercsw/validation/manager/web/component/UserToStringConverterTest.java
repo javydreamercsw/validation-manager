@@ -15,10 +15,10 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
+import com.vaadin.flow.data.binder.ValueContext;
 import com.validation.manager.core.db.VmUser;
 import com.validation.manager.core.server.core.VMUserServer;
 import com.validation.manager.test.AbstractVMTestCase;
-import java.util.Locale;
 import org.junit.Test;
 
 /**
@@ -37,10 +37,9 @@ public class UserToStringConverterTest extends AbstractVMTestCase {
         System.out.println("convertToModel");
         VMUserServer user = new VMUserServer(1);
         String value = user.toString();
-        Class<? extends VmUser> targetType = null;
-        Locale locale = null;
         UserToStringConverter instance = new UserToStringConverter();
-        VmUser r = instance.convertToModel(value, targetType, locale);
+        VmUser r = instance.convertToModel(value, new ValueContext())
+                .getOrThrow(msg -> new AssertionError(msg));
         assertEquals(1, (int) r.getId());
     }
 
@@ -53,11 +52,10 @@ public class UserToStringConverterTest extends AbstractVMTestCase {
     public void testConvertToPresentation() throws Exception {
         System.out.println("convertToPresentation");
         VMUserServer user = new VMUserServer(1);
-        Class<? extends String> targetType = null;
-        Locale locale = null;
         UserToStringConverter instance = new UserToStringConverter();
         String expResult = user.toString();
-        String r = instance.convertToPresentation(user.getEntity(), targetType, locale);
+        String r = instance.convertToPresentation(user.getEntity(),
+                new ValueContext());
         assertEquals(expResult, r);
     }
 }

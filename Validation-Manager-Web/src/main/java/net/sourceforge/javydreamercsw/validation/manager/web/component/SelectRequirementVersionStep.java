@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2017 Javier A. Ortiz Bultron javier.ortiz.78@gmail.com.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,24 +15,23 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Requirement;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 import org.openide.util.Lookup;
-import org.vaadin.teemu.wizards.WizardStep;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class SelectRequirementVersionStep implements WizardStep {
+public class SelectRequirementVersionStep implements FlowWizardStep {
 
     private History h;
     private final Requirement r;
-    private final ComboBox history = new ComboBox(Lookup.getDefault()
+    private final ComboBox<History> history = new ComboBox<>(Lookup.getDefault()
             .lookup(InternationalizationProvider.class)
             .translate("general.history"));
 
@@ -47,15 +46,11 @@ public class SelectRequirementVersionStep implements WizardStep {
 
     @Override
     public Component getContent() {
-        BeanItemContainer<History> historyContainer
-                = new BeanItemContainer<>(History.class,
-                        getRequirement().getHistoryList());
-        history.setContainerDataSource(historyContainer);
-        history.getItemIds().forEach(id -> {
-            History temp = ((History) id);
+        history.setItems(getRequirement().getHistoryList());
+        history.setItemLabelGenerator(temp -> {
             String version = temp.getMajorVersion() + "."
                     + temp.getMidVersion() + "." + temp.getMinorVersion();
-            history.setItemCaption(id, version);
+            return version;
         });
         if (r.getHistoryList().size() == 1) {
             //Only one, pre-select it.
@@ -67,7 +62,7 @@ public class SelectRequirementVersionStep implements WizardStep {
     @Override
     public boolean onAdvance() {
         if (history.getValue() != null) {
-            h = (History) history.getValue();
+            h = history.getValue();
             return true;
         }
         return false;

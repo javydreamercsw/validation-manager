@@ -35,21 +35,11 @@
             <artifactId>simplemagic</artifactId>
             <version>1.12</version>
         </dependency>
+        <!--Flyway, Database update (9.22.3 is the last release with H2 support built in; 10+ splits it out)-->
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-server</artifactId>
-            <version>${vaadin.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-icons</artifactId>
-            <version>${vaadin.icons.version}</version>
-        </dependency>
-        <!--Flyway, Database update-->
-        <dependency>
-            <groupId>com.googlecode.flyway</groupId>
+            <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>2.3.1</version>
+            <version>9.22.3</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -60,12 +50,13 @@
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
-            <version>2.7.0</version>
+            <!-- Jakarta EE 10 line (jakarta.persistence 3.1); 2.x was javax -->
+            <version>4.0.9</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>javax.persistence</artifactId>
-            <version>2.1.1</version>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -85,10 +76,16 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <version>2.0.0.Final</version>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.0.2</version>
             <type>jar</type>
+        </dependency>
+        <!-- JAXB annotations on entities; removed from the JDK in Java 11+ -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -96,9 +93,10 @@
             <version>1.9.13</version>
             <type>jar</type>
         </dependency>
+        <!-- MySQL Connector/J moved to reverse-DNS coordinates (was mysql:mysql-connector-java) -->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
             <version>${mysql.version}</version>
             <scope>runtime</scope>
         </dependency>
@@ -121,14 +119,24 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
+            <artifactId>org-openide-util-ui</artifactId>
+            <groupId>org.netbeans.api</groupId>
+            <type>jar</type>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.14.0</version>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.6</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
@@ -227,7 +235,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
+                <version>0.8.8</version>
                 <configuration>
                     <skip>${skipTests}</skip>
                     <output>file</output>
@@ -283,7 +291,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
+                <version>0.8.8</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -301,10 +309,10 @@
         </plugins>
     </reporting>
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <pdfbox.version>2.0.24</pdfbox.version>
-        <jacoco.version>0.7.9</jacoco.version>
+        <!-- EclipseLink 4.x is Java 11 bytecode; source/target 1.8 would reject it -->
+        <maven.compiler.release>11</maven.compiler.release>
+        <pdfbox.version>2.0.37</pdfbox.version>
+        <jacoco.version>0.8.8</jacoco.version>
         <jacoco.outputDir>${project.basedir}/target/jacoco.exec</jacoco.outputDir>
     </properties>
 </project>

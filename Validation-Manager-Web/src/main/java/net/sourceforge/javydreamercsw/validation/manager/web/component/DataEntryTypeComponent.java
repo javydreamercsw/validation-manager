@@ -15,13 +15,13 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.Panel;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.DataEntryType;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import java.util.List;
 
 /**
@@ -30,30 +30,44 @@ import java.util.List;
  */
 public class DataEntryTypeComponent extends CustomField<List<DataEntryType>> {
 
+    private List<DataEntryType> value;
     private final boolean edit;
+    private final FormLayout l = new FormLayout();
+    private Binder<DataEntryType> binder;
 
     public DataEntryTypeComponent(boolean edit) {
         this.edit = edit;
+        add(new Scroller(l));
     }
 
-    @Override
-    protected Component initContent() {
-        Panel p = new Panel();
-        FormLayout l = new FormLayout();
-        p.setContent(l);
-        BeanFieldGroup binder = new BeanFieldGroup(getInternalValue().getClass());
-        binder.setItemDataSource(getInternalValue());
-        l.addComponent(binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "typeName"));
-        l.addComponent(binder.buildAndBind(TRANSLATOR.translate("general.description"),
-                "typeDescription"));
+    private void buildContent() {
+        l.removeAll();
+        binder = new Binder<>(DataEntryType.class);
+        if (getValue() != null && !getValue().isEmpty()) {
+            binder.setBean(getValue().get(0));
+        }
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "typeName");
+        l.add(name);
+        TextField desc = new TextField(TRANSLATOR.translate("general.description"));
+        binder.bind(desc, "typeDescription");
+        l.add(desc);
         binder.setReadOnly(!edit);
-        return p;
     }
 
     @Override
-    public Class<? extends List<DataEntryType>> getType() {
-        Class clazz = List.class;
-        return (Class<? extends List<DataEntryType>>) clazz;
+    public List<DataEntryType> getValue() {
+        return value;
+    }
+
+    @Override
+    protected void setPresentationValue(List<DataEntryType> value) {
+        this.value = value;
+        buildContent();
+    }
+
+    @Override
+    protected List<DataEntryType> generateModelValue() {
+        return value;
     }
 }

@@ -15,10 +15,10 @@
  */
 package com.validation.manager.core;
 
-import com.googlecode.flyway.core.Flyway;
-import com.googlecode.flyway.core.api.FlywayException;
-import com.googlecode.flyway.core.api.MigrationInfo;
-import com.googlecode.flyway.core.api.MigrationState;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
+import org.flywaydb.core.api.MigrationInfo;
+import org.flywaydb.core.api.MigrationState;
 import com.validation.manager.core.db.controller.VmIdJpaController;
 import com.validation.manager.core.server.core.VMIdServer;
 import com.validation.manager.core.server.core.VMSettingServer;
@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,12 +41,12 @@ import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import static javax.persistence.Persistence.createEntityManagerFactory;
-import javax.persistence.Query;
-import javax.persistence.TableGenerator;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import static jakarta.persistence.Persistence.createEntityManagerFactory;
+import jakarta.persistence.Query;
+import jakarta.persistence.TableGenerator;
 import javax.sql.DataSource;
 import org.eclipse.persistence.jpa.JpaHelper;
 import org.h2.jdbcx.JdbcDataSource;
@@ -95,8 +96,15 @@ public class DataBaseManager {
     }
 
     public static void clean() {
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                // JPA (EclipseLink) creates the schema before Flyway runs, so the
+                // schema history table must be baselined into an existing schema.
+                .baselineOnMigrate(true)
+                // Flyway 9 disables clean() by default; demo reset depends on it.
+                .cleanDisabled(false)
+                .load();
         if (isDemo()) {
             LOG.warning("Resetting database since it is on demo mode.");
             //Clean the database on demo
@@ -108,7 +116,6 @@ public class DataBaseManager {
             JpaHelper.getEntityManagerFactory(getEntityManager())
                     .refreshMetadata(p);
             //Update the data
-            flyway.init();
             flyway.migrate();
         }
     }
@@ -472,13 +479,18 @@ public class DataBaseManager {
     }
 
     private static void updateDatabase(DataSource dataSource) {
-        Flyway flyway = new Flyway();
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                // JPA (EclipseLink) creates the schema before Flyway runs, so the
+                // schema history table must be baselined into an existing schema.
+                .baselineOnMigrate(true)
+                .load();
         try {
-            flyway.setDataSource(dataSource);
-            flyway.setLocations("db.migration");
             LOG.fine("Starting migration...");
             flyway.migrate();
             LOG.fine("Done!");
+            resyncIdentityColumns(dataSource);
         }
         catch (FlywayException fe) {
             LOG.log(Level.SEVERE, "Unable to migrate data", fe);
@@ -499,6 +511,51 @@ public class DataBaseManager {
 
     protected static void setState(DBState newState) {
         state = newState;
+    }
+
+    /**
+     * H2 1.x advanced an identity column's counter on explicit-ID inserts; H2
+     * 2.x does not. Flyway's seed scripts insert explicit IDs, so after
+     * migrating, every identity column's counter must be restarted past the
+     * highest seeded ID or the next JPA insert collides with seeded rows.
+     */
+    private static void resyncIdentityColumns(DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection()) {
+            List<Object> tables = nativeQuery(
+                    "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
+                    + "WHERE TABLE_SCHEMA = 'PUBLIC'");
+            for (Object tableObj : tables) {
+                String table = (String) tableObj;
+                try (ResultSet cols = conn.getMetaData().getColumns(
+                        null, "PUBLIC", table, null)) {
+                    while (cols.next()) {
+                        if (!"YES".equalsIgnoreCase(cols.getString("IS_AUTOINCREMENT"))) {
+                            continue;
+                        }
+                        String idCol = cols.getString("COLUMN_NAME");
+                        try (Statement st = conn.createStatement();
+                                ResultSet maxRs = st.executeQuery(
+                                        "SELECT MAX(\"" + idCol + "\") FROM \""
+                                        + table + "\"")) {
+                            if (maxRs != null && maxRs.next()) {
+                                long max = maxRs.getLong(1);
+                                if (!maxRs.wasNull()) {
+                                    st.execute("ALTER TABLE \"" + table
+                                            + "\" ALTER COLUMN \"" + idCol
+                                            + "\" RESTART WITH " + (max + 1));
+                                    LOG.log(Level.FINE,
+                                            "Restarted identity on {0}.{1} to {2}",
+                                            new Object[]{table, idCol, max + 1});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (SQLException ex) {
+            LOG.log(Level.SEVERE, "Unable to resync identity columns", ex);
+        }
     }
 
     public static void waitForDB() {
@@ -563,8 +620,13 @@ public class DataBaseManager {
     private static void initializeFlyway(DataSource dataSource) {
         assert dataSource != null;
         setState(DBState.START_UP);
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration")
+                // JPA (EclipseLink) creates the schema before Flyway runs, so the
+                // schema history table must be baselined into an existing schema.
+                .baselineOnMigrate(true)
+                .load();
         if (isDemo()) {
             //Clean the database on demo
             clean();
@@ -574,15 +636,7 @@ public class DataBaseManager {
         MigrationInfo status = flyway.info().current();
         if (status == null) {
             setState(DBState.NEED_INIT);
-            LOG.fine("Initialize the metadata...");
-            try {
-                flyway.init();
-                LOG.fine("Done!");
-            }
-            catch (FlywayException fe) {
-                LOG.log(Level.SEVERE, "Unable to initialize database", fe);
-                setState(DBState.ERROR);
-            }
+            LOG.fine("Metadata created on first migration...");
         } else {
             LOG.fine("Database has Flyway metadata already...");
             displayDBStatus(status);

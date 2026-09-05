@@ -41,7 +41,6 @@ import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import static org.apache.poi.hssf.usermodel.HSSFDataFormat.getBuiltinFormat;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -138,13 +137,13 @@ public class StepImporter implements ImporterInterface<Step> {
                             if (cell != null) {
                                 switch (cell.getCellType()) {
 
-                                    case Cell.CELL_TYPE_FORMULA:
+                                    case FORMULA:
                                         value = cell.getCellFormula();
                                         break;
-                                    case Cell.CELL_TYPE_NUMERIC:
+                                    case NUMERIC:
                                         value = "" + cell.getNumericCellValue();
                                         break;
-                                    case Cell.CELL_TYPE_STRING:
+                                    case STRING:
                                         value = cell.getStringCellValue();
                                         break;
                                     default:
@@ -224,7 +223,7 @@ public class StepImporter implements ImporterInterface<Step> {
                         step.setTestCase(tc);
                         steps.add(step);
                     }
-                } catch (InvalidFormatException | IOException ex) {
+                } catch (IOException ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 } finally {
                     try {
@@ -263,7 +262,7 @@ public class StepImporter implements ImporterInterface<Step> {
     }
 
     public static File exportTemplate() throws FileNotFoundException,
-            IOException, InvalidFormatException {
+            IOException {
         File template = new File("Template.xls");
         template.createNewFile();
         org.apache.poi.ss.usermodel.Workbook wb = new HSSFWorkbook();
@@ -302,7 +301,7 @@ public class StepImporter implements ImporterInterface<Step> {
             System.out.println(file.getAbsolutePath());
         } catch (FileNotFoundException ex) {
             LOG.log(Level.SEVERE, null, ex);
-        } catch (IOException | InvalidFormatException ex) {
+        } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
     }

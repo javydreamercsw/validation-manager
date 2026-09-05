@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+<web-app version="5.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd">
     <display-name>validation-manager</display-name>
     <!--Comment if not using H2 database-->
     <context-param>
@@ -27,32 +27,11 @@
             <param-value>UTF-8</param-value>
         </init-param>
     </filter>
-    <listener>
-        <listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
-    </listener>
-    <servlet>
-        <servlet-name>Vaadin Application Servlet</servlet-name>
-        <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
-        <init-param>
-            <description>Vaadin UI to display</description>
-            <param-name>UI</param-name>
-            <param-value>net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI</param-value>
-        </init-param>
-        <init-param>
-            <description>Application widgetset</description>
-            <param-name>widgetset</param-name>
-            <param-value>net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet</param-value>
-        </init-param>
-    </servlet>
-    <servlet>
-        <servlet-name>VMWebService</servlet-name>
-        <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>VMWebService</servlet-name>
-        <url-pattern>/VMWebService</url-pattern>
-    </servlet-mapping>
+    <!-- Flow's VaadinServlet is registered via @WebServlet on
+         ValidationManagerUI.Servlet; the V8 servlet block and widgetset
+         init-param are gone. The JAX-WS listener/servlet were removed with
+         the javax JAX-WS stack (VMWebService is now jakarta.jws-annotated and
+         deployed through the Metro 4 runtime). -->
     <session-config>
         <session-timeout>
             30

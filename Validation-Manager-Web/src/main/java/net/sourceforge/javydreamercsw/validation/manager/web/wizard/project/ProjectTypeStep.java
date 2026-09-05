@@ -15,28 +15,26 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
-import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.VerticalLayout;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
-import org.vaadin.teemu.wizards.WizardStep;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class ProjectTypeStep implements WizardStep {
+public class ProjectTypeStep implements FlowWizardStep {
 
-    private final ComboBox type;
+    private final ComboBox<String> type;
     private final ProjectCreationWizard wizard;
 
     public ProjectTypeStep(ProjectCreationWizard wizard) {
-        type = new ComboBox(TRANSLATOR.translate("general.type"));
-        type.addItem("general.software");
-        type.addItem("general.hardware");
-        type.setTextInputAllowed(false);
-        type.setWidth(100, Unit.PERCENTAGE);
+        type = new ComboBox<>(TRANSLATOR.translate("general.type"));
+        type.setItems("general.software", "general.hardware");
+        type.setAllowCustomValue(false);
+        type.setWidthFull();
         this.wizard = wizard;
     }
 
@@ -49,14 +47,14 @@ public class ProjectTypeStep implements WizardStep {
     public Component getContent() {
         VerticalLayout vl = new VerticalLayout();
         wizard.translateSelect(getType());
-        vl.addComponent(getType());
+        vl.add(getType());
         return vl;
     }
 
     @Override
     public boolean onAdvance() {
         if (getType().getValue() != null) {
-            wizard.setType((String) getType().getValue());
+            wizard.setType(getType().getValue());
         }
         return getType().getValue() != null;
     }
@@ -69,7 +67,7 @@ public class ProjectTypeStep implements WizardStep {
     /**
      * @return the type
      */
-    protected ComboBox getType() {
+    protected ComboBox<String> getType() {
         return type;
     }
 }

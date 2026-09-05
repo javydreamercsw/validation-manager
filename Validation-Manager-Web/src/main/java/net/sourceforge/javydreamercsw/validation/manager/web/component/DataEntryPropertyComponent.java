@@ -15,15 +15,17 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CustomField;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.DataEntryProperty;
 import java.util.List;
 
@@ -35,43 +37,51 @@ public final class DataEntryPropertyComponent extends
         CustomField<List<DataEntryProperty>> {
 
     private final boolean edit;
+    private List<DataEntryProperty> value;
+    private final FormLayout l = new FormLayout();
 
     public DataEntryPropertyComponent(boolean edit) {
-        setCaption(TRANSLATOR.translate("general.properties"));
+        setLabel(TRANSLATOR.translate("general.properties"));
         this.edit = edit;
+        add(new Scroller(l));
     }
 
-    @Override
-    protected Component initContent() {
-        Panel p = new Panel();
-        FormLayout l = new FormLayout();
-        getInternalValue().forEach(prop -> {
+    private void buildContent() {
+        l.removeAll();
+        getValue().forEach(prop -> {
             if (!prop.getPropertyName().equals("property.expected.result")) {
                 HorizontalLayout hl = new HorizontalLayout();
                 TextField tf = new TextField(
                         TRANSLATOR.translate(prop.getPropertyName()),
                         prop.getPropertyValue());
-                hl.addComponent(tf);
+                hl.add(tf);
                 if (edit) {
                     //Add button for deleting this property.
-                    Button delete = new Button();
-                    delete.setIcon(VaadinIcons.MINUS);
+                    Button delete = new Button(new Icon(VaadinIcon.MINUS));
                     delete.addClickListener(listener -> {
-                        getInternalValue().remove(prop);
-                        l.removeComponent(hl);
+                        getValue().remove(prop);
+                        l.remove(hl);
                     });
-                    hl.addComponent(delete);
+                    hl.add(delete);
                 }
-                l.addComponent(hl);
+                l.add(hl);
             }
         });
-        p.setContent(l);
-        return p;
     }
 
     @Override
-    public Class<? extends List<DataEntryProperty>> getType() {
-        Class clazz = List.class;
-        return (Class<? extends List<DataEntryProperty>>) clazz;
+    public List<DataEntryProperty> getValue() {
+        return value;
+    }
+
+    @Override
+    protected void setPresentationValue(List<DataEntryProperty> value) {
+        this.value = value;
+        buildContent();
+    }
+
+    @Override
+    protected List<DataEntryProperty> generateModelValue() {
+        return value;
     }
 }

@@ -15,9 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.quality;
 
-import com.vaadin.ui.Notification;
+import com.vaadin.flow.component.notification.Notification;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.IMainContentProvider;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.VmSetting;
@@ -59,11 +59,11 @@ public class QualityScreenProvider extends ExecutionScreen {
             for (ExecutionStep es : c.findExecutionStepEntities()) {
                 if (es.getLocked() && !es.getReviewed()) {
                     //It has been assigned but not started
-                    Notification.show(Lookup.getDefault().lookup(InternationalizationProvider.class)
-                            .translate("quality.review.pending.title"),
+                    com.vaadin.flow.component.notification.Notification.show(
                             Lookup.getDefault().lookup(InternationalizationProvider.class)
-                                    .translate("quality.review.pending.message"),
-                            Notification.Type.TRAY_NOTIFICATION);
+                                    .translate("quality.review.pending.title"),
+                            3000,
+                            com.vaadin.flow.component.notification.Notification.Position.TOP_CENTER);
                     break;
                 }
             }

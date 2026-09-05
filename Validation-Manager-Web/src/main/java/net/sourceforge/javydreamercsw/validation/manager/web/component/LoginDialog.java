@@ -15,22 +15,18 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.validator.StringLengthValidator;
-import com.vaadin.event.Action;
-import com.vaadin.event.Action.Handler;
-import com.vaadin.event.ShortcutAction;
-import com.vaadin.server.Page;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Shortcuts;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.util.logging.Level;
@@ -49,11 +45,6 @@ public final class LoginDialog extends VMWindow {
             = Lookup.getDefault().lookup(InternationalizationProvider.class);
     private static final Logger LOG
             = Logger.getLogger(LoginDialog.class.getSimpleName());
-    private final ShortcutAction enterKey
-            = new ShortcutAction(Lookup.getDefault()
-                    .lookup(InternationalizationProvider.class)
-                    .translate("general.login"),
-                    ShortcutAction.KeyCode.ENTER, null);
 
     private final TextField name = new TextField(Lookup.getDefault()
             .lookup(InternationalizationProvider.class)
@@ -65,14 +56,14 @@ public final class LoginDialog extends VMWindow {
     private final Button loginButton = new Button(Lookup.getDefault()
             .lookup(InternationalizationProvider.class)
             .translate("general.login"),
-            (ClickEvent event) -> {
+            (event) -> {
                 tryToLogIn();
             });
 
     private final Button cancelButton = new Button(Lookup.getDefault()
             .lookup(InternationalizationProvider.class)
             .translate("general.cancel"),
-            (ClickEvent event) -> {
+            (event) -> {
                 LoginDialog.this.close();
             });
 
@@ -86,52 +77,26 @@ public final class LoginDialog extends VMWindow {
     public void init() {
         //Layout
         FormLayout layout = new FormLayout();
-        setContent(layout);
+        add(layout);
         HorizontalLayout hlayout = new HorizontalLayout();
-        hlayout.addComponent(loginButton);
-        hlayout.addComponent(cancelButton);
-        layout.addComponent(name);
-        layout.addComponent(password);
+        hlayout.add(loginButton, cancelButton);
+        layout.add(name, password, hlayout);
         name.focus();
-        name.setWidth(100, Unit.PERCENTAGE);
-        StringLengthValidator nameVal = new StringLengthValidator(
-                Lookup.getDefault()
-                        .lookup(InternationalizationProvider.class).
-                        translate("password.length.message"));
-        nameVal.setMinLength(5);
-        name.addValidator(nameVal);
-        name.setImmediate(true);
-        StringLengthValidator passVal = new StringLengthValidator(
-                Lookup.getDefault()
-                        .lookup(InternationalizationProvider.class).
-                        translate("password.empty.message"));
-        passVal.setMinLength(3);
-        password.addValidator(passVal);
-        password.setImmediate(true);
-        password.setWidth(100, Unit.PERCENTAGE);
-        layout.addComponent(hlayout);
-        layout.setComponentAlignment(name, Alignment.TOP_LEFT);
-        layout.setComponentAlignment(password, Alignment.MIDDLE_LEFT);
-        layout.setComponentAlignment(hlayout, Alignment.BOTTOM_LEFT);
-        layout.setSpacing(true);
-        layout.setMargin(true);
-
+        name.setWidthFull();
+        password.setWidthFull();
         // Keyboard navigation - enter key is a shortcut to login
-        addActionHandler(new Handler() {
-            @Override
-            public Action[] getActions(Object target, Object sender) {
-                return new Action[]{enterKey};
-            }
-
-            @Override
-            public void handleAction(Action action, Object sender,
-                    Object target) {
-                tryToLogIn();
-            }
-        });
+        Shortcuts.addShortcutListener(this, this::tryToLogIn, Key.ENTER);
     }
 
     private void tryToLogIn() {
+        if (name.getValue() == null || name.getValue().trim().length() < 5
+                || password.getValue() == null
+                || password.getValue().length() < 3) {
+            Notification.show(Lookup.getDefault()
+                    .lookup(InternationalizationProvider.class)
+                    .translate("password.length.message") + ": " + 3000, 3000, Notification.Position.MIDDLE);
+            return;
+        }
         try {
             //Throws exception if credentials are wrong.
             VMUserServer user = new VMUserServer(name.getValue(),
@@ -148,52 +113,42 @@ public final class LoginDialog extends VMWindow {
                             break;
                         case 3:
                             //Locked
-                            new Notification(Lookup.getDefault()
+                            Notification.show(Lookup.getDefault()
                                     .lookup(InternationalizationProvider.class).
-                                    translate("audit.user.account.lock"),
-                                    Lookup.getDefault()
+                                    translate("audit.user.account.lock")
+                                    + "\n" + Lookup.getDefault()
                                             .lookup(InternationalizationProvider.class).
-                                            translate("menu.connection.error.user"),
-                                    Notification.Type.ERROR_MESSAGE, true)
-                                    .show(Page.getCurrent());
+                                    translate("menu.connection.error.user") + ": " + 3000, 3000, Notification.Position.MIDDLE);
                             clear();
                             break;
                         case 4:
                             //Password Aged
-                            new Notification(Lookup.getDefault()
+                            Notification.show(Lookup.getDefault()
                                     .lookup(InternationalizationProvider.class).
-                                    translate("user.status.aged"),
-                                    Lookup.getDefault()
-                                            .lookup(InternationalizationProvider.class).
-                                            translate("user.status.aged"),
-                                    Notification.Type.WARNING_MESSAGE, true)
-                                    .show(Page.getCurrent());
+                                    translate("user.status.aged") + ": " + 3000, 3000, Notification.Position.MIDDLE);
                             menu.setUser(user);
                             //Open the profile page
-                            ((VMUI) UI.getCurrent()).showTab("message.admin.userProfile");
+                            ((ValidationManagerUI) UI.getCurrent())
+                                    .showTab("message.admin.userProfile");
                             close();
                             break;
                         default:
                             LOG.log(Level.SEVERE, "Unexpected User Status: {0}",
                                     user.getUserStatusId().getId());
-                            Notification.show("Unexpected User Status",
-                                    "Unexpected User Status: "
+                            Notification.show("Unexpected User Status: "
                                     + user.getUserStatusId().getId()
-                                    + "\n" + TRANSLATOR.translate("message.db.error"),
-                                    Notification.Type.ERROR_MESSAGE);
+                                    + "\n" + TRANSLATOR.translate("message.db.error") + ": " + 3000, 3000, Notification.Position.MIDDLE);
                             menu.setUser(null);
                             close();
                             break;
                     }
                 } else {
-                    new Notification(Lookup.getDefault()
+                    Notification.show(Lookup.getDefault()
                             .lookup(InternationalizationProvider.class).
-                            translate("general.login.invalid.title"),
-                            Lookup.getDefault()
+                            translate("general.login.invalid.title")
+                            + "\n" + Lookup.getDefault()
                                     .lookup(InternationalizationProvider.class).
-                                    translate("general.login.invalid.message"),
-                            Notification.Type.ERROR_MESSAGE, true)
-                            .show(Page.getCurrent());
+                            translate("general.login.invalid.message") + ": " + 3000, 3000, Notification.Position.MIDDLE);
                     clear();
                 }
             }
@@ -201,14 +156,12 @@ public final class LoginDialog extends VMWindow {
             if (menu != null) {
                 menu.setUser(null);
             }
-            new Notification(Lookup.getDefault()
+            Notification.show(Lookup.getDefault()
                     .lookup(InternationalizationProvider.class).
-                    translate("general.login.invalid.title"),
-                    Lookup.getDefault()
+                    translate("general.login.invalid.title")
+                    + "\n" + Lookup.getDefault()
                             .lookup(InternationalizationProvider.class).
-                            translate("general.login.invalid.message"),
-                    Notification.Type.WARNING_MESSAGE, true)
-                    .show(Page.getCurrent());
+                    translate("general.login.invalid.message") + ": " + 3000, 3000, Notification.Position.MIDDLE);
             password.setValue("");
         }
     }

@@ -15,9 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
+import com.vaadin.flow.data.binder.ValueContext;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.tool.MD5;
-import java.util.Locale;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -34,10 +34,10 @@ public class UserPasswordConverterTest {
     public void testConvertToModel() {
         System.out.println("convertToModel");
         String value = "test";
-        Class<? extends String> targetType = null;
-        Locale locale = null;
         UserPasswordConverter instance = new UserPasswordConverter();
-        assertEquals(value, instance.convertToModel(value, targetType, locale));
+        assertEquals(value,
+                instance.convertToModel(value, new ValueContext())
+                        .getOrThrow(r -> new AssertionError(r)));
     }
 
     /**
@@ -49,11 +49,10 @@ public class UserPasswordConverterTest {
     public void testConvertToPresentation() throws VMException {
         System.out.println("convertToPresentation");
         String value = "test";
-        Class<? extends String> targetType = null;
-        Locale locale = null;
         UserPasswordConverter instance = new UserPasswordConverter();
         String expResult = MD5.encrypt(value);
-        String result = instance.convertToPresentation(value, targetType, locale);
+        String result = instance.convertToPresentation(value,
+                new ValueContext());
         assertEquals(expResult, result);
     }
 }

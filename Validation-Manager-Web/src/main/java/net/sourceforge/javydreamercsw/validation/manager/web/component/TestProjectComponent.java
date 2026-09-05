@@ -15,19 +15,19 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import com.validation.manager.core.db.TestProject;
 import com.validation.manager.core.db.controller.TestProjectJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class TestProjectComponent extends Panel {
+public final class TestProjectComponent extends VerticalLayout {
 
     private final TestProject tp;
     private final boolean edit;
@@ -48,12 +48,12 @@ public final class TestProjectComponent extends Panel {
     public TestProjectComponent(TestProject tp, boolean edit) {
         this.tp = tp;
         this.edit = edit;
-        setCaption(TRANSLATOR.translate("test.project.detail"));
+        add(new com.vaadin.flow.component.html.Span(TRANSLATOR.translate("test.project.detail")));
         init();
     }
 
     public TestProjectComponent(TestProject tp, boolean edit, String caption) {
-        super(caption);
+        add(new com.vaadin.flow.component.html.Span(caption));
         this.tp = tp;
         this.edit = edit;
         init();
@@ -61,99 +61,87 @@ public final class TestProjectComponent extends Panel {
 
     private void init() {
         FormLayout layout = new FormLayout();
-        setContent(layout);
-        addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(tp.getClass());
-        binder.setItemDataSource(tp);
-        Field<?> name = binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "name");
-        layout.addComponent(name);
-        Field notes = binder.buildAndBind(TRANSLATOR.translate("general.notes"),
-                "notes",
-                TextArea.class);
+        add(layout);
+        Binder<TestProject> binder = new Binder<>(TestProject.class);
+        binder.setBean(tp);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "name");
+        layout.add(name);
+        TextArea notes = new TextArea(TRANSLATOR.translate("general.notes"));
+        binder.bind(notes, "notes");
         notes.setSizeFull();
-        layout.addComponent(notes);
-        Field<?> active = binder.buildAndBind(TRANSLATOR.translate("general.active"),
-                "active");
-        layout.addComponent(active);
+        layout.add(notes);
+        Checkbox active = new Checkbox(TRANSLATOR.translate("general.active"));
+        binder.bind(active, "active");
+        layout.add(active);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
-        cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
+        cancel.addClickListener((event) -> {
             if (tp.getId() == null) {
-                ((VMUI) UI.getCurrent()).displayObject(((VMUI) UI.getCurrent())
+                ((ValidationManagerUI) UI.getCurrent()).displayObject(((ValidationManagerUI) UI.getCurrent())
                         .getSelectdValue());
             } else {
-                ((VMUI) UI.getCurrent()).displayObject(tp, false);
+                ((ValidationManagerUI) UI.getCurrent()).displayObject(tp, false);
             }
         });
         if (edit) {
             if (tp.getId() == null) {
                 //Creating a new one
                 Button save = new Button(TRANSLATOR.translate("general.save"));
-                save.addClickListener((Button.ClickEvent event) -> {
+                save.addClickListener((event) -> {
                     try {
                         tp.setName(name.getValue().toString());
                         tp.setNotes(notes.getValue().toString());
-                        tp.setActive((Boolean) active.getValue());
+                        tp.setActive(active.getValue());
                         new TestProjectJpaController(DataBaseManager
                                 .getEntityManagerFactory()).create(tp);
                         setVisible(false);
                         //Recreate the tree to show the addition
-                        ((VMUI) UI.getCurrent()).updateProjectList();
-                        ((VMUI) UI.getCurrent()).buildProjectTree(tp);
-                        ((VMUI) UI.getCurrent()).displayObject(tp, false);
-                        ((VMUI) UI.getCurrent()).updateScreen();
+                        ((ValidationManagerUI) UI.getCurrent()).updateProjectList();
+                        ((ValidationManagerUI) UI.getCurrent()).buildProjectTree(tp);
+                        ((ValidationManagerUI) UI.getCurrent()).displayObject(tp, false);
+                        ((ValidationManagerUI) UI.getCurrent()).updateScreen();
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.creation"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        Notification.show(TRANSLATOR.translate("general.error.record.creation") + ": " + ex.getLocalizedMessage());
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
+                hl.add(save);
+                hl.add(cancel);
+                layout.add(hl);
             } else {
                 //Editing existing one
                 Button update = new Button(TRANSLATOR.translate("general.update"));
-                update.addClickListener((Button.ClickEvent event) -> {
+                update.addClickListener((event) -> {
                     try {
                         tp.setName(name.getValue().toString());
                         tp.setNotes(notes.getValue().toString());
-                        tp.setActive((Boolean) active.getValue());
-                        ((VMUI) UI.getCurrent()).handleVersioning(tp, () -> {
+                        tp.setActive(active.getValue());
+                        ((ValidationManagerUI) UI.getCurrent()).handleVersioning(tp, () -> {
                             try {
                                 new TestProjectJpaController(DataBaseManager
                                         .getEntityManagerFactory()).edit(tp);
-                                ((VMUI) UI.getCurrent()).displayObject(tp, true);
+                                ((ValidationManagerUI) UI.getCurrent()).displayObject(tp, true);
                             } catch (NonexistentEntityException ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
+                                Notification.show(TRANSLATOR.translate("general.error.record.update") + ": " + ex.getLocalizedMessage());
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
+                                Notification.show(TRANSLATOR.translate("general.error.record.update") + ": " + ex.getLocalizedMessage());
                             }
                         });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.creation"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        Notification.show(TRANSLATOR.translate("general.error.record.creation") + ": " + ex.getLocalizedMessage());
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
+                hl.add(update);
+                hl.add(cancel);
+                layout.add(hl);
             }
         }
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         layout.setSizeFull();
         setSizeFull();
     }

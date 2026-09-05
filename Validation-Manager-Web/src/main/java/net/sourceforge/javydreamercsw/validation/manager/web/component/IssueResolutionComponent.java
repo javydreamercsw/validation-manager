@@ -15,18 +15,17 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.IssueResolution;
 import com.validation.manager.core.db.controller.IssueResolutionJpaController;
@@ -38,7 +37,7 @@ import org.openide.util.Lookup;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class IssueResolutionComponent extends Panel {
+public final class IssueResolutionComponent extends VerticalLayout {
 
     private final IssueResolution ir;
     private boolean edit = false;
@@ -48,7 +47,7 @@ public final class IssueResolutionComponent extends Panel {
             = Logger.getLogger(IssueResolutionComponent.class.getSimpleName());
 
     public IssueResolutionComponent(IssueResolution ir, boolean edit) {
-        setCaption(TRANSLATOR.translate("issue.resolution"));
+        add(new Span(TRANSLATOR.translate("issue.resolution")));
         this.ir = ir;
         this.edit = edit;
         init();
@@ -56,8 +55,8 @@ public final class IssueResolutionComponent extends Panel {
 
     public IssueResolutionComponent(IssueResolution ir, Component content,
             boolean edit) {
-        super(content);
-        setCaption(TRANSLATOR.translate("issue.resolution"));
+        add(content);
+        add(new Span(TRANSLATOR.translate("issue.resolution")));
         this.ir = ir;
         this.edit = edit;
         init();
@@ -65,7 +64,7 @@ public final class IssueResolutionComponent extends Panel {
 
     public IssueResolutionComponent(IssueResolution ir, String caption,
             boolean edit) {
-        super(caption);
+        add(new Span(caption));
         this.ir = ir;
         this.edit = edit;
         init();
@@ -73,7 +72,8 @@ public final class IssueResolutionComponent extends Panel {
 
     public IssueResolutionComponent(IssueResolution ir, String caption,
             Component content, boolean edit) {
-        super(caption, content);
+        add(new Span(caption));
+        add(content);
         this.ir = ir;
         this.edit = edit;
         init();
@@ -81,20 +81,20 @@ public final class IssueResolutionComponent extends Panel {
 
     private void init() {
         FormLayout layout = new FormLayout();
-        setContent(layout);
-        addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(ir.getClass());
-        binder.setItemDataSource(ir);
-        Field<?> name = binder.buildAndBind(TRANSLATOR
-                .translate("general.name"), "name");
-        layout.addComponent(name);
+        add(layout);
+        Binder<IssueResolution> binder = new Binder<>(IssueResolution.class);
+        binder.setBean(ir);
+        TextField name = new TextField(TRANSLATOR
+                .translate("general.name"));
+        binder.bind(name, "name");
+        layout.add(name);
         if (edit) {
             Button update = new Button(ir.getId() == null
                     ? TRANSLATOR.
                             translate("general.create")
                     : TRANSLATOR.
                             translate("general.update"));
-            update.addClickListener((Button.ClickEvent event) -> {
+            update.addClickListener((event) -> {
                 IssueResolutionJpaController c
                         = new IssueResolutionJpaController(DataBaseManager.
                                 getEntityManagerFactory());
@@ -103,8 +103,8 @@ public final class IssueResolutionComponent extends Panel {
                     c.create(ir);
                 } else {
                     try {
-                        binder.commit();
-                    } catch (FieldGroup.CommitException ex) {
+                        binder.writeBean(ir);
+                    } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 }
@@ -112,16 +112,14 @@ public final class IssueResolutionComponent extends Panel {
             Button cancel = new Button(Lookup.getDefault()
                     .lookup(InternationalizationProvider.class).
                     translate("general.cancel"));
-            cancel.addClickListener((Button.ClickEvent event) -> {
-                binder.discard();
-                ((VMUI) UI.getCurrent()).updateScreen();
+            cancel.addClickListener((event) -> {
+                ((ValidationManagerUI) UI.getCurrent()).updateScreen();
             });
             binder.setReadOnly(!edit);
-            binder.setBuffered(true);
             HorizontalLayout hl = new HorizontalLayout();
-            hl.addComponent(update);
-            hl.addComponent(cancel);
-            layout.addComponent(hl);
+            hl.add(update);
+            hl.add(cancel);
+            layout.add(hl);
         }
     }
 }

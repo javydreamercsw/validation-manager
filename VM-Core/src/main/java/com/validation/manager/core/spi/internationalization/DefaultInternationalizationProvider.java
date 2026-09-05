@@ -15,8 +15,6 @@
  */
 package com.validation.manager.core.spi.internationalization;
 
-import com.vaadin.ui.UI;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.server.core.VMUserServer;
 import java.io.UnsupportedEncodingException;
@@ -37,10 +35,29 @@ public class DefaultInternationalizationProvider
 
     @Override
     public String translate(String mess) {
-        VMUI ui = (VMUI) UI.getCurrent();
-        VMUserServer user = ui == null ? null : ui.getUser();
+        VMUserServer user = getCurrentUser();
         return translate(mess, user == null ? Locale.getDefault()
                 : new Locale(user.getLocale()));
+    }
+
+    /**
+     * Resolve the logged-in user via the web layer if present (VMUI lives in
+     * the web module; reflected here to keep VM-Core web-free).
+     */
+    private VMUserServer getCurrentUser() {
+        try {
+            Object ui = Class.forName("com.vaadin.flow.component.UI")
+                    .getMethod("getCurrent").invoke(null);
+            if (ui == null) {
+                return null;
+            }
+            Object vmui = ui.getClass().getMethod("getUser").invoke(ui);
+            return vmui instanceof VMUserServer
+                    ? (VMUserServer) vmui : null;
+        } catch (Exception ex) {
+            //Headless (tests) or web module absent: default locale.
+            return null;
+        }
     }
 
     @Override

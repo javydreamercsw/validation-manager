@@ -6,10 +6,6 @@
     <version>0.4.0-SNAPSHOT</version>
     <groupId>net.sourceforge.javydreamercsw</groupId>
     <packaging>pom</packaging>
-    
-    <prerequisites>
-        <maven>3.3.9</maven>
-    </prerequisites>
 
     <name>Validation Manager</name>
     <url>https://sourceforge.net/projects/validationmgr/</url>
@@ -44,27 +40,18 @@
         <system>GitHub Actions</system>
         <url>https://github.com/javydreamercsw/validation-manager/actions</url>
     </ciManagement>
-    
-    <pluginRepositories>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-cy6ergn0m-maven</id>
-            <name>bintray-plugins</name>
-            <url>http://dl.bintray.com/cy6ergn0m/maven</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vm.version>${project.version}</vm.version>
-        <vaadin.version>7.7.34</vaadin.version>
-        <netbeans.version>RELEASE82</netbeans.version>
-        <junit.version>4.12</junit.version>
-        <mysql.version>8.0.31</mysql.version>
-        <h2.version>2.1.210</h2.version>
-        <poi.version>3.17</poi.version>
+        <vaadin.version>8.14.3</vaadin.version>
+        <netbeans.version>RELEASE310</netbeans.version>
+        <junit.version>4.13.2</junit.version>
+        <mysql.version>9.5.0</mysql.version>
+        <!-- 2.x removed syntax EclipseLink 2.7 emits (bare IDENTITY); EclipseLink 4.x
+        (jakarta, phase-4) generates H2 2.x-compatible DDL -->
+        <h2.version>2.4.240</h2.version>
+        <poi.version>5.5.1</poi.version>
         <vaadin.icons.version>3.0.1</vaadin.icons.version>
     </properties>
     
@@ -94,7 +81,7 @@
                 <plugin>
                     <groupId>org.bsc.maven</groupId>
                     <artifactId>maven-processor-plugin</artifactId>
-                    <version>3.3.3</version>
+                    <version>3.3.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -139,7 +126,7 @@
                             <format>html</format>
                             <format>xml</format>
                         </formats>
-                        <check/>
+                        <check />
                     </configuration>
                 </plugin>
                 <!--Flyway configuration-->
@@ -212,69 +199,43 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.versioneye</groupId>
-                <artifactId>versioneye-maven-plugin</artifactId>
-                <version>3.11.4</version>
-                <configuration>
-                    <apiKey>19ba1c57f2f513b502ce</apiKey>
-                    <organisation>javydreamercsw_orga</organisation>
-                    <team>Owners</team>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.9.9</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
 
     <repositories>
         <repository>
-            <id>vaadin-snapshots</id>
-            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
             <id>vaadin-addons</id>
-            <url>https://mvnrepository.com</url>
-        </repository>
-        <repository>
-            <id>EclipseLink Repo</id>
-            <!-- note that ampersands in this URL are escaped because this is in an xml file -
-                   un-escape them to use in browser
-            -->
-            <url>http://www.eclipse.org/downloads/download.php?r=1&amp;nf=1&amp;file=/rt/eclipselink/maven.repo</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>project.local</id>
-            <name>project</name>
-            <url>file:${project.basedir}/repo</url>
-        </repository>
-        <repository>
-            <id>jasper-reports</id>
-            <url>http://jasperreports.sourceforge.net/maven2</url>
-        </repository>
-        <!--
-        Repository hosting NetBeans modules, especially APIs.
-        Versions are based on IDE releases, e.g.: RELEASE691
-        To create your own repository, use: nbm:populate-repository
-        -->
-        <repository>
-            <id>netbeans</id>
-            <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
+            <url>https://maven.vaadin.com/vaadin-addons</url>
         </repository>
     </repositories>
 
     <modules>
         <module>VM-Core</module>
         <module>Validation-Manager-Web</module>
-        <module>WizardsForVaadin</module>
-        <module>tableexport-for-vaadin</module>
+        <!-- WizardsForVaadin and tableexport-for-vaadin submodules are no
+            longer referenced by the Flow application (their Vaadin 8 add-ons
+            were replaced in phase 4b). They are excluded from the build because
+            their Vaadin 8 dependency stack carries known CVEs; delete or
+            migrate them separately. -->
     </modules>
     
     <profiles>
@@ -318,19 +279,6 @@
                                 <phase>verify</phase>
                                 <goals>
                                     <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.versioneye</groupId>
-                        <artifactId>versioneye-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>versioneye:update</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -398,4 +346,36 @@
             </build>
         </profile>
     </profiles>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Force patched versions of transitive dependencies flagged by
+                security scans (OSV/Snyk); the platforms above otherwise pin
+                their own. -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.22.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.22.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.20.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>2.26.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.23.2</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

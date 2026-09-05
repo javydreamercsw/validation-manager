@@ -15,19 +15,18 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.tester;
 
-import com.vaadin.event.Action;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TreeTable;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
-import com.validation.manager.core.VMUI;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 import com.validation.manager.core.db.ExecutionStep;
 import com.validation.manager.core.db.ExecutionStepPK;
 import com.validation.manager.core.db.TestCase;
@@ -55,171 +54,248 @@ import net.sourceforge.javydreamercsw.validation.manager.web.quality.QualityScre
  */
 public abstract class ExecutionScreen extends AbstractProvider {
 
+    /**
+     * A row in the test case tree. Rows carry the same synthetic String ids
+     * the v7 TreeTable used ("p" + project id, "tce" + execution id, "es" +
+     * execution step ids) so the status column and context menu handling keep
+     * working unchanged.
+     */
+    public static class Row {
+
+        private final String id;
+        private String name = "";
+        private String summary = "";
+        private String assignmentDate = "";
+
+        Row(String id) {
+            this.id = id;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getSummary() {
+            return summary;
+        }
+
+        public void setSummary(String summary) {
+            this.summary = summary;
+        }
+
+        public String getAssignmentDate() {
+            return assignmentDate;
+        }
+
+        public void setAssignmentDate(String assignmentDate) {
+            this.assignmentDate = assignmentDate;
+        }
+    }
+
     private ExecutionWindow executionWindow = null;
-    private final TreeTable testCaseTree;
+    private final TreeGrid<Row> testCaseTree;
+    //v8 Grid caption has no Flow equivalent; rendered as a Span above the grid
+    private final com.vaadin.flow.component.html.Span treeCaption
+            = new com.vaadin.flow.component.html.Span();
+    private final Map<String, Row> rows = new HashMap<>();
 
     public ExecutionScreen() {
-        testCaseTree = new TreeTable("available.tests");
-        testCaseTree.setAnimationsEnabled(true);
-        testCaseTree.addContainerProperty("general.name",
-                String.class, "");
-        testCaseTree.addGeneratedColumn("general.status",
-                (Table source, Object itemId, Object columnId) -> {
-                    if ("general.status".equals(columnId)
-                    && itemId instanceof String) {
-                        String id = (String) itemId;
-                        String message;
-                        HorizontalLayout icons = new HorizontalLayout();
-                        Button label = new Button();
-                        Button label2 = new Button();
-                        icons.addComponent(label2);
-                        icons.addComponent(label);
-                        label.addStyleName(ValoTheme.BUTTON_BORDERLESS
-                                + " labelButton");
-                        label2.addStyleName(ValoTheme.BUTTON_BORDERLESS
-                                + " labelButton");
-                        Map<String, Integer> summary = new HashMap<>();
-                        boolean locked = false;
-                        if (id.startsWith("tce")) {
-                            TestCaseExecutionServer tce
-                            = new TestCaseExecutionServer(
-                                    Integer.parseInt(id.substring(3)));
-                            summary = getSummary(tce, -1);
-                            locked = isLocked(tce);
-                        } else if (id.startsWith("es")) {
-                            ExecutionStepServer es
-                            = new ExecutionStepServer(extractExecutionStepPK(id));
-                            summary = getSummary(
-                                    es.getTestCaseExecution(),
-                                    Integer.parseInt(id
-                                            .substring(id.lastIndexOf("-") + 1)));
-                            locked = es.getLocked();
-                        }
-                        if (locked) {
-                            label2.setIcon(VaadinIcons.LOCK);
-                            label2.setDescription(TRANSLATOR.translate("message.locked"));
-                        }
-                        if (!summary.isEmpty()) {
-                            if (summary.containsKey("result.fail")) {
-                                //At least one failure means the test case is failing
-                                message = "result.fail";
-                            } else if (summary.containsKey("result.blocked")) {
-                                //It is blocked
-                                message = "result.blocked";
-                            } else if (summary.containsKey("result.pending")
-                            && !summary.containsKey("result.pass")) {
-                                //Still not done
-                                message = "result.pending";
-                            } else if (summary.containsKey("result.pending")
-                            && summary.containsKey("result.pass")) {
-                                //In progress
-                                message = "result.progress";
-                            } else {
-                                //All is pass
-                                message = "result.pass";
-                            }
-                            label.setCaption(TRANSLATOR
-                                    .translate(message));
-                            label.setDescription(TRANSLATOR
-                                    .translate(message));
-                            //Completed. Now check result
-                            switch (message) {
-                                case "result.pass":
-                                    label.setIcon(VaadinIcons.CHECK);
-                                    break;
-                                case "result.fail":
-                                    label.setIcon(VaadinIcons.CLOSE);
-                                    break;
-                                case "result.blocked":
-                                    label.setIcon(VaadinIcons.PAUSE);
-                                    break;
-                                case "result.pending":
-                                    label.setIcon(VaadinIcons.CLOCK);
-                                    break;
-                                case "result.progress":
-                                    label.setIcon(VaadinIcons.AUTOMATION);
-                                    break;
-                                default:
-                                    label.setIcon(VaadinIcons.CLOCK);
-                                    break;
-                            }
-                            return icons;
-                        }
-                    }
-                    return new Label();
-                });
-        testCaseTree.addContainerProperty("general.summary",
-                String.class, "");
-        testCaseTree.addContainerProperty("general.assignment.date",
-                String.class, "");
-        testCaseTree.setVisibleColumns(new Object[]{
-            "general.name",
-            "general.status",
-            "general.summary",
-            "general.assignment.date"});
-        testCaseTree.addActionHandler(new Action.Handler() {
-            @Override
-            public Action[] getActions(Object target, Object sender) {
-                List<Action> actions = new ArrayList<>();
-                if (target instanceof String) {
-                    String t = (String) target;
-                    int tcID = -1;
-                    TestCaseExecutionServer tce = null;
-                    if (t.startsWith("es")) {
-                        tce = new TestCaseExecutionServer(new ExecutionStepServer(
-                                extractExecutionStepPK(t))
-                                .getTestCaseExecution().getId());
-                        tcID = Integer.parseInt(t
-                                .substring(t.lastIndexOf("-") + 1));
-                    } else if (t.startsWith("tce")) {
-                        tce = new TestCaseExecutionServer(
-                                Integer.parseInt(t.substring(3)));
-                    }
-                    if (!isLocked(tce, tcID)
-                            && ExecutionScreen.this instanceof TesterScreenProvider) {
-                        actions.add(new Action(TRANSLATOR
-                                .translate("general.execute"),
-                                VMUI.EXECUTION_ICON));
-                    } else if (isLocked(tce, tcID)
-                            && ExecutionScreen.this instanceof QualityScreenProvider) {
-                        actions.add(new Action(TRANSLATOR
-                                .translate("general.review"),
-                                VaadinIcons.EYE));
-                    }
-                    actions.add(new Action(TRANSLATOR
-                            .translate("general.export"), VaadinIcons.DOWNLOAD));
-                }
-                return actions.toArray(new Action[actions.size()]);
-            }
-
-            @Override
-            public void handleAction(Action action, Object sender, Object target) {
-                List<TestCaseExecutionServer> executions = new ArrayList<>();
-                int tcID = -1;
-                if (((String) target).startsWith("tce")) {
-                    executions.add(new TestCaseExecutionServer(
-                            Integer.parseInt(((String) target).substring(3))));
-                } else if (((String) target).startsWith("es")) {
-                    executions.add(new TestCaseExecutionServer(new ExecutionStepServer(
-                            extractExecutionStepPK((String) target))
-                            .getTestCaseExecution().getId()));
-                    tcID = Integer.parseInt(((String) target)
-                            .substring(((String) target).lastIndexOf("-") + 1));
-                }
-                //Parse the information to get the exact Execution Step
-                if (action.getCaption().equals(TRANSLATOR
-                        .translate("general.export"))) {
-                    viewExecutionScreen(executions, tcID);
-                } else {
-                    showExecutionScreen(executions, tcID);
-                }
+        testCaseTree = new TreeGrid<>();
+        testCaseTree.addColumn(Row::getName)
+                .setKey("general.name")
+                .setHeader(TRANSLATOR.translate("general.name"))
+                .setFlexGrow(1);
+        testCaseTree.addComponentColumn(this::getStatusComponent)
+                .setKey("general.status")
+                .setHeader(TRANSLATOR.translate("general.status"))
+                .setFlexGrow(1);
+        testCaseTree.addColumn(Row::getSummary)
+                .setKey("general.summary")
+                .setHeader(TRANSLATOR.translate("general.summary"));
+        testCaseTree.addColumn(Row::getAssignmentDate)
+                .setKey("general.assignment.date")
+                .setHeader(TRANSLATOR.translate("general.assignment.date"));
+        testCaseTree.setHierarchyColumn("general.name");
+        treeCaption.setText(TRANSLATOR.translate("available.tests"));
+        //Context menu replacing the v7 Action.Handler. The native menu opens
+        //on right click by itself; a right-click listener only needs to select
+        //the row so the menu can be rebuilt for it.
+        ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setTarget(testCaseTree);
+        testCaseTree.addItemClickListener((com.vaadin.flow.component.grid.ItemClickEvent<Row> event) -> {
+            //Select item on right click and rebuild the menu for it
+            testCaseTree.asSingleSelect().setValue(event.getItem());
+            contextMenu.removeAll();
+            Row selected = event.getItem();
+            if (selected != null) {
+                addContextMenuItems(contextMenu, selected.getId());
             }
         });
     }
 
+    private Component getStatusComponent(Row row) {
+        String id = row.getId();
+        String message;
+        HorizontalLayout icons = new HorizontalLayout();
+        Button label = new Button();
+        Button label2 = new Button();
+        icons.add(label2);
+        icons.add(label);
+        label.addThemeNames("tertiary");
+        label2.addThemeNames("tertiary");
+        Map<String, Integer> summary = new HashMap<>();
+        boolean locked = false;
+        if (id.startsWith("tce")) {
+            TestCaseExecutionServer tce
+            = new TestCaseExecutionServer(
+                    Integer.parseInt(id.substring(3)));
+            summary = getSummary(tce, -1);
+            locked = isLocked(tce);
+        } else if (id.startsWith("es")) {
+            ExecutionStepServer es
+            = new ExecutionStepServer(extractExecutionStepPK(id));
+            summary = getSummary(
+                    es.getTestCaseExecution(),
+                    Integer.parseInt(id
+                            .substring(id.lastIndexOf("-") + 1)));
+            locked = es.getLocked();
+        }
+        if (locked) {
+            label2.setIcon(new Icon(VaadinIcon.LOCK));
+            label2.setTooltipText(TRANSLATOR.translate("message.locked"));
+        }
+        if (!summary.isEmpty()) {
+            if (summary.containsKey("result.fail")) {
+                //At least one failure means the test case is failing
+                message = "result.fail";
+            } else if (summary.containsKey("result.blocked")) {
+                //It is blocked
+                message = "result.blocked";
+            } else if (summary.containsKey("result.pending")
+            && !summary.containsKey("result.pass")) {
+                //Still not done
+                message = "result.pending";
+            } else if (summary.containsKey("result.pending")
+            && summary.containsKey("result.pass")) {
+                //In progress
+                message = "result.progress";
+            } else {
+                //All is pass
+                message = "result.pass";
+            }
+            label.setText(TRANSLATOR
+                    .translate(message));
+            label.setTooltipText(TRANSLATOR
+                    .translate(message));
+            //Completed. Now check result
+            switch (message) {
+                case "result.pass":
+                    label.setIcon(new Icon(VaadinIcon.CHECK));
+                    break;
+                case "result.fail":
+                    label.setIcon(new Icon(VaadinIcon.CLOSE));
+                    break;
+                case "result.blocked":
+                    label.setIcon(new Icon(VaadinIcon.PAUSE));
+                    break;
+                case "result.pending":
+                    label.setIcon(new Icon(VaadinIcon.CLOCK));
+                    break;
+                case "result.progress":
+                    label.setIcon(new Icon(VaadinIcon.AUTOMATION));
+                    break;
+                default:
+                    label.setIcon(new Icon(VaadinIcon.CLOCK));
+                    break;
+            }
+            return icons;
+        }
+        return new HorizontalLayout();
+    }
+
+    /**
+     * Build the context menu entries for the given row id, mirroring the v7
+     * Action.Handler behavior.
+     */
+    private void addContextMenuItems(ContextMenu menu, String id) {
+        TestCaseExecutionServer tce;
+        int tcID;
+        if (id.startsWith("es")) {
+            tce = new TestCaseExecutionServer(new ExecutionStepServer(
+                    extractExecutionStepPK(id))
+                    .getTestCaseExecution().getId());
+            tcID = Integer.parseInt(id.substring(id.lastIndexOf("-") + 1));
+        } else if (id.startsWith("tce")) {
+            tce = new TestCaseExecutionServer(
+                    Integer.parseInt(id.substring(3)));
+            tcID = -1;
+        } else {
+            //Project rows: no execution behind them, mirrors v7 null target
+            tce = null;
+            tcID = -1;
+        }
+        if (!isLocked(tce, tcID)
+                && ExecutionScreen.this instanceof TesterScreenProvider) {
+            menu.addItem(TRANSLATOR
+                    .translate("general.execute"),
+                    (selectedItem) -> {
+                        showExecutionFor(id);
+                    });
+        } else if (isLocked(tce, tcID)
+                && ExecutionScreen.this instanceof QualityScreenProvider) {
+            menu.addItem(TRANSLATOR
+                    .translate("general.review"),
+                    (selectedItem) -> {
+                        showExecutionFor(id);
+                    });
+        }
+        menu.addItem(TRANSLATOR
+                .translate("general.export"),
+                (selectedItem) -> {
+                    exportFor(id);
+                });
+    }
+
+    private void exportFor(String target) {
+        viewExecutionScreen(getExecutionsFor(target), getTcIdFor(target));
+    }
+
+    private void showExecutionFor(String target) {
+        showExecutionScreen(getExecutionsFor(target), getTcIdFor(target));
+    }
+
+    private List<TestCaseExecutionServer> getExecutionsFor(String target) {
+        List<TestCaseExecutionServer> executions = new ArrayList<>();
+        int tcID = getTcIdFor(target);
+        if (target.startsWith("tce")) {
+            executions.add(new TestCaseExecutionServer(
+                    Integer.parseInt(target.substring(3))));
+        } else if (target.startsWith("es")) {
+            executions.add(new TestCaseExecutionServer(new ExecutionStepServer(
+                    extractExecutionStepPK(target))
+                    .getTestCaseExecution().getId()));
+        }
+        return executions;
+    }
+
+    private int getTcIdFor(String target) {
+        return target.startsWith("es")
+                ? Integer.parseInt(target
+                        .substring(target.lastIndexOf("-") + 1))
+                : -1;
+    }
+
     private void viewExecutionScreen(List<TestCaseExecutionServer> executions,
             int tcID) {
-        UI.getCurrent().addWindow(TestCaseExporter
+        ValidationManagerUI.getInstance().openDialog(TestCaseExporter
                 .getExecutionExporter(executions, tcID));
     }
 
@@ -277,17 +353,13 @@ public abstract class ExecutionScreen extends AbstractProvider {
         if (executionWindow == null) {
             executionWindow = new ExecutionWindow(executions, tcID,
                     this instanceof QualityScreenProvider);
-            executionWindow.setCaption(TRANSLATOR
+            executionWindow.setHeaderTitle(TRANSLATOR
                     .translate("test.execution"));
-            executionWindow.setVisible(true);
-            executionWindow.setClosable(false);
             executionWindow.setResizable(false);
-            executionWindow.center();
-            executionWindow.setModal(true);
             executionWindow.setSizeFull();
         }
-        if (!ValidationManagerUI.getInstance().getWindows().contains(executionWindow)) {
-            ValidationManagerUI.getInstance().addWindow(executionWindow);
+        if (!ValidationManagerUI.getInstance().isOpen(executionWindow)) {
+            ValidationManagerUI.getInstance().openDialog(executionWindow);
         }
     }
 
@@ -295,7 +367,7 @@ public abstract class ExecutionScreen extends AbstractProvider {
     public Component getContent() {
         VerticalLayout vl = new VerticalLayout();
         update();
-        vl.addComponent(testCaseTree);
+        vl.add(treeCaption, testCaseTree);
         vl.setId(getComponentCaption());
         return vl;
     }
@@ -303,28 +375,24 @@ public abstract class ExecutionScreen extends AbstractProvider {
     @Override
     public void update() {
         if (executionWindow != null) {
-            executionWindow.setCaption(TRANSLATOR
+            executionWindow.setHeaderTitle(TRANSLATOR
                     .translate("test.execution"));
         }
-        testCaseTree.setCaption(TRANSLATOR
+        treeCaption.setText(TRANSLATOR
                 .translate("available.tests"));
-        testCaseTree.removeAllItems();
+        TreeData<Row> treeData = new TreeData<>();
+        rows.clear();
+        testCaseTree.setDataProvider(new TreeDataProvider<>(treeData));
         if (ValidationManagerUI.getInstance().getUser() != null) {
             ProjectServer.getProjects().forEach(p -> {
                 if (p.getParentProjectId() == null) {
-                    testCaseTree.addItem(new Object[]{p.getName(),
-                        "", "",}, "p" + p.getId());
-                    testCaseTree.setItemIcon("p" + p.getId(),
-                            ValidationManagerUI.PROJECT_ICON);
+                    Row projectRow = addRow(treeData, null,
+                            "p" + p.getId(), p.getName());
                     p.getProjectList().forEach(sp -> {
                         //Add subprojects
-                        testCaseTree.addItem(new Object[]{sp.getName(),
-                            "", "",}, "p" + sp.getId());
-                        testCaseTree.setParent("p" + sp.getId(), "p" + p.getId());
-                        testCaseTree.setItemIcon("p" + sp.getId(),
-                                ValidationManagerUI.PROJECT_ICON);
+                        Row subProjectRow = addRow(treeData, projectRow,
+                                "p" + sp.getId(), sp.getName());
                         //Add applicable Executions
-                        Map<Integer, ExecutionStep> tests = new HashMap<>();
                         sp.getTestProjectList().forEach(test -> {
                             test.getTestPlanList().forEach(tp -> {
                                 tp.getTestCaseList().forEach(testCase -> {
@@ -332,12 +400,10 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                     testCase.getStepList().forEach(s -> {
                                         s.getExecutionStepList().forEach(es -> {
                                             TestCaseExecution tce = es.getTestCaseExecution();
-                                            testCaseTree.addItem(new Object[]{tce.getName(),
-                                                "", "",}, "tce" + tce.getId());
-                                            testCaseTree.setParent("tce" + tce.getId(),
-                                                    "p" + sp.getId());
-                                            testCaseTree.setItemIcon("tce" + tce.getId(),
-                                                    ValidationManagerUI.EXECUTION_ICON);
+                                            Row tceRow = addRow(treeData,
+                                                    subProjectRow,
+                                                    "tce" + tce.getId(),
+                                                    tce.getName());
                                             if (this instanceof QualityScreenProvider
                                                     && es.getLocked()
                                                     || (es.getAssignee() != null
@@ -355,14 +421,12 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                                     String key = "es" + es.getExecutionStepPK().getTestCaseExecutionId()
                                                             + "-" + es.getStep().getStepPK().getId()
                                                             + "-" + tc.getTestCasePK().getId();
-                                                    testCaseTree.addItem(new Object[]{tc.getName(),
-                                                        tc.getSummary(), format.format(time),},
-                                                            key);
-                                                    testCaseTree.setParent(key, "tce"
-                                                            + tce.getId());
-                                                    testCaseTree.setItemIcon(key,
-                                                            ValidationManagerUI.TEST_ICON);
-                                                    testCaseTree.setChildrenAllowed(key, false);
+                                                    Row stepRow = addRow(treeData,
+                                                            tceRow, key,
+                                                            tc.getName());
+                                                    stepRow.setSummary(tc.getSummary() == null
+                                                            ? "" : new String(tc.getSummary()));
+                                                    stepRow.setAssignmentDate(format.format(time));
                                                 }
                                             }
                                         });
@@ -371,22 +435,34 @@ public abstract class ExecutionScreen extends AbstractProvider {
                                 });
                             });
                         });
-                        //Make columns autofit
-                        int count = 0;
-                        for (Object id : testCaseTree.getVisibleColumns()) {
-                            if (count < 2) {
-                                testCaseTree.setColumnExpandRatio(id, 1.0f);
-                            }
-                            count++;
-                        }
-                        testCaseTree.setSizeFull();
                     });
                 }
             });
         }
+        //v7 TreeTable rows were expanded by default
+        testCaseTree.expandRecursively(treeData.getRootItems(),
+                Integer.MAX_VALUE);
         //Update column titles
-        for (String h : testCaseTree.getColumnHeaders()) {
-            testCaseTree.setColumnHeader(h, TRANSLATOR.translate(h));
+        for (String h : new String[]{"general.name", "general.status",
+            "general.summary", "general.assignment.date"}) {
+            testCaseTree.getColumnByKey(h).setHeader(TRANSLATOR.translate(h));
         }
+        testCaseTree.setSizeFull();
+    }
+
+    /**
+     * Create a row (or reuse the existing one with the same id) and hook it
+     * into the tree.
+     */
+    private Row addRow(TreeData<Row> treeData, Row parent, String id,
+            String name) {
+        Row row = rows.get(id);
+        if (row == null) {
+            row = new Row(id);
+            rows.put(id, row);
+            treeData.addItem(parent, row);
+        }
+        row.setName(name);
+        return row;
     }
 }

@@ -15,8 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.ui.TwinColSelect;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.db.Requirement;
@@ -26,10 +25,13 @@ import java.util.List;
 import org.openide.util.Lookup;
 
 /**
+ * Requirement picker. The v8 TwinColSelect has no Flow port; a
+ * {@link MultiSelectComboBox} keeps the multi-select contract.
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class RequirementSelectionComponent extends TwinColSelect {
+public final class RequirementSelectionComponent
+        extends MultiSelectComboBox<Requirement> {
 
     private static final InternationalizationProvider TRANSLATOR
             = Lookup.getDefault().lookup(InternationalizationProvider.class);
@@ -37,7 +39,7 @@ public final class RequirementSelectionComponent extends TwinColSelect {
 
     public RequirementSelectionComponent(Project p) {
         this.p = p;
-        setCaption(TRANSLATOR.translate("linked.requirement"));
+        setLabel(TRANSLATOR.translate("linked.requirement"));
         init();
     }
 
@@ -51,13 +53,8 @@ public final class RequirementSelectionComponent extends TwinColSelect {
         List<Requirement> reqs = Tool.extractRequirements(p);
         Collections.sort(reqs, (Requirement o1, Requirement o2)
                 -> o1.getUniqueId().compareTo(o2.getUniqueId()));
-        BeanItemContainer<Requirement> requirementContainer
-                = new BeanItemContainer<>(Requirement.class,
-                        reqs);
-        setItemCaptionPropertyId("uniqueId");
-        setContainerDataSource(requirementContainer);
-        setRows(5);
-        setLeftColumnCaption(TRANSLATOR.translate("available.requirement"));
-        setRightColumnCaption(TRANSLATOR.translate("linked.requirement"));
+        setItems(reqs);
+        setItemLabelGenerator(Requirement::getUniqueId);
+        setLabel(TRANSLATOR.translate("linked.requirement"));
     }
 }

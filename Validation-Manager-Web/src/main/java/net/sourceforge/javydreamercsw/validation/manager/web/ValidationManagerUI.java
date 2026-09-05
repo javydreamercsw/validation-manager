@@ -15,60 +15,52 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web;
 
-import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.addon.contextmenu.MenuItem;
-import com.vaadin.addon.tableexport.TemporaryFileDownloadResource;
-import com.vaadin.annotations.PreserveOnRefresh;
-import com.vaadin.annotations.Theme;
-import com.vaadin.annotations.VaadinServletConfiguration;
-import com.vaadin.data.Item;
-import com.vaadin.data.Property;
-import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.event.FieldEvents.TextChangeEvent;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.Transferable;
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.MouseEventDetails.MouseButton;
-import com.vaadin.shared.ui.dd.VerticalDropLocation;
-import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.JavaScript;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Layout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TabSheet.Tab;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.Tree.TreeDragMode;
-import com.vaadin.ui.Tree.TreeDropCriterion;
-import com.vaadin.ui.Tree.TreeTargetDetails;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.PreserveOnRefresh;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinServlet;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.DemoBuilder;
-import com.validation.manager.core.IMainContentProvider;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
 import com.validation.manager.core.NotificationProvider;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.api.internationalization.LocaleListener;
 import com.validation.manager.core.api.notification.INotificationManager;
@@ -106,10 +98,6 @@ import com.validation.manager.core.tool.requirement.importer.RequirementImportEx
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import com.validation.manager.core.tool.step.importer.StepImporter;
 import com.validation.manager.core.tool.step.importer.TestCaseImportException;
-import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.ButtonType;
-import de.steinwedel.messagebox.MessageBox;
-import elemental.json.JsonArray;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -139,10 +127,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
+import jakarta.servlet.annotation.WebServlet;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.BaselineComponent;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ExecutionDashboard;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.ExecutionStepComponent;
@@ -171,16 +159,11 @@ import net.sourceforge.javydreamercsw.validation.manager.web.traceability.TraceM
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign.AssignUserStep;
 import net.sourceforge.javydreamercsw.validation.manager.web.wizard.project.ProjectCreationWizard;
 import org.openide.util.Lookup;
-import org.vaadin.teemu.wizards.Wizard;
-import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
-import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
-import org.vaadin.teemu.wizards.event.WizardProgressListener;
-import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
-import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
-@Theme("vmtheme")
-@SuppressWarnings("serial")
+@Theme(themeClass = Lumo.class)
+@PageTitle("Validation Manager")
 @PreserveOnRefresh
+@SuppressWarnings("serial")
 public class ValidationManagerUI extends UI implements VMUI {
 
     private static final InternationalizationProvider TRANSLATOR
@@ -191,9 +174,38 @@ public class ValidationManagerUI extends UI implements VMUI {
     private LoginDialog loginWindow = null;
     private String projTreeRoot;
     private Component left;
-    private final TabSheet tabSheet = new TabSheet();
+    private final Tabs tabSheet = new Tabs();
+    private final VerticalLayout tabContentPanel = new VerticalLayout();
+    private final Map<Tab, Component> tabContents = new HashMap<>();
     private final List<Project> projects = new ArrayList<>();
     private ProjectTreeComponent tree;
+
+    {
+        //Toggle tab content visibility as the selection changes (the Flow
+        //replacement of the v8 TabSheet's per-tab content).
+        tabSheet.addSelectedChangeListener(event -> {
+            Tab selected = tabSheet.getSelectedTab();
+            tabContents.forEach((tab, content) -> {
+                content.setVisible(tab.equals(selected));
+            });
+        });
+    }
+
+    /**
+     * Select an item in the project tree and expand its ancestors.
+     */
+    private void showItemInTree(Object item) {
+        if (item == null) {
+            tree.expand(projTreeRoot);
+        } else {
+            tree.asSingleSelect().setValue(item);
+            Object parent = tree.getTreeData().getParent(item);
+            while (parent != null) {
+                tree.expand(parent);
+                parent = tree.getTreeData().getParent(parent);
+            }
+        }
+    }
     private Tab main;
     private final List<String> roles = new ArrayList<>();
     private final String REQUIREMENT_REVIEW = "requirement.view";
@@ -224,7 +236,7 @@ public class ValidationManagerUI extends UI implements VMUI {
         return user;
     }
 
-    public Tree getTree() {
+    public TreeGrid<Object> getTree() {
         return tree;
     }
 
@@ -251,9 +263,9 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (user != null) {
             user.update();
             if (SESSIONS.containsValue(user.getId())) {
-                Notification.show(TRANSLATOR.translate("message.already.logged"),
-                        TRANSLATOR.translate("message.already.logged.desc"),
-                        Notification.Type.ERROR_MESSAGE);
+                com.vaadin.flow.component.notification.Notification.show(
+                        TRANSLATOR.translate("message.already.logged") + " "
+                        + TRANSLATOR.translate("message.already.logged.desc"));
                 this.user = null;
             } else {
                 LOG.log(Level.FINE, "Adding session {1} for user: {0}",
@@ -293,12 +305,16 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     public void setTabContent(Tab target, Component content,
             String permission) {
-        Component c = target.getComponent();
-        if (c != null && c instanceof Layout) {
-            Layout l = (Layout) c;
-            l.removeAllComponents();
-            if (content != null) {
-                l.addComponent(content);
+        Component c = tabContents.get(target);
+        if (c != null) {
+            if (c instanceof VerticalLayout) {
+                VerticalLayout l = (VerticalLayout) c;
+                l.removeAll();
+                if (content != null) {
+                    l.add(content);
+                }
+            } else {
+                LOG.log(Level.SEVERE, "Invalid target: {0}", target);
             }
         } else {
             LOG.log(Level.SEVERE, "Invalid target: {0}", target);
@@ -350,6 +366,25 @@ public class ValidationManagerUI extends UI implements VMUI {
     @Override
     public void displayObject(Object item) {
         displayObject(item, false);
+    }
+
+    @Override
+    public void openDialog(Dialog dialog) {
+        dialog.open();
+    }
+
+    @Override
+    public boolean closeDialog(Dialog dialog) {
+        if (dialog.isOpened()) {
+            dialog.close();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isOpen(Dialog dialog) {
+        return dialog.isOpened();
     }
 
     @Override
@@ -441,52 +476,52 @@ public class ValidationManagerUI extends UI implements VMUI {
         showItemInTree(item);
     }
 
-    private void showItemInTree(Object item) {
-        if (item == null) {
-            tree.expandItem(projTreeRoot);
-        } else {
-            tree.select(item);
-            Object parent = tree.getParent(item);
-            while (parent != null) {
-                tree.expandItem(parent);
-                parent = tree.getParent(parent);
-            }
-        }
-    }
-
     private void addTestCaseAssignment(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("assign.test.case.execution"),
-                        ASSIGN_ICON, (MenuItem selectedItem) -> {
-                            Wizard w = new Wizard();
-                            Window sw = new VMWindow();
+                        e -> {
+                            VMWindow sw = new VMWindow(TRANSLATOR
+                                    .translate("assign.test.case.execution"));
+                            net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard w
+                            = new net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard();
                             w.addStep(new AssignUserStep(ValidationManagerUI.this,
-                                    tree.getValue()));
-                            w.addListener(new WizardProgressListener() {
+                                    tree.asSingleSelect().getValue()));
+                            w.addListener(new net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardProgressListener() {
                                 @Override
-                                public void activeStepChanged(WizardStepActivationEvent event) {
+                                public void activeStepChanged(
+                                        net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepActivationEvent event) {
                                     //Do nothing
                                 }
 
                                 @Override
-                                public void stepSetChanged(WizardStepSetChangedEvent event) {
+                                public void stepSetChanged(
+                                        net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepSetChangedEvent event) {
                                     //Do nothing
                                 }
 
                                 @Override
-                                public void wizardCompleted(WizardCompletedEvent event) {
-                                    removeWindow(sw);
+                                public void stepCompleted(
+                                        net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepCompletionEvent event) {
+                                    //Do nothing
                                 }
 
                                 @Override
-                                public void wizardCancelled(WizardCancelledEvent event) {
-                                    removeWindow(sw);
+                                public void wizardCompleted(
+                                        net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent event) {
+                                    closeDialog(sw);
+                                }
+
+                                @Override
+                                public void wizardCancelled(
+                                        net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCancelledEvent event) {
+                                    closeDialog(sw);
                                 }
                             });
-                            sw.setContent(w);
-                            sw.setSizeFull();
-                            addWindow(sw);
+                            w.setSizeFull();
+                            sw.add(w);
+                            openDialog(sw);
                         });
+        create.addComponentAsFirst(new Icon(ASSIGN_ICON));
         create.setEnabled(checkRight("testplan.planning"));
     }
 
@@ -499,7 +534,7 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createRootMenu(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.project"),
-                        PROJECT_ICON, (MenuItem selectedItem) -> {
+                        e -> {
                             displayProject(new Project(), true);
                         });
         create.setEnabled(checkRight("product.modify"));
@@ -508,8 +543,8 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createExecutionsMenu(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.execution"),
-                        EXECUTIONS_ICON, (MenuItem selectedItem) -> {
-                            int projectId = Integer.parseInt(((String) tree.getValue())
+                        e -> {
+                            int projectId = Integer.parseInt(((String) tree.asSingleSelect().getValue())
                                     .substring(TRANSLATOR.translate("general.execution").length()));
                             displayTestCaseExecution(new TestCaseExecution(),
                                     new ProjectServer(projectId), true);
@@ -520,15 +555,15 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createTestCaseExecutionPlanMenu(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.execution.step"),
-                        SPEC_ICON, (MenuItem selectedItem) -> {
+                        e -> {
                             //TODO: Do something?
                         });
         create.setEnabled(checkRight("testplan.planning"));
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.execution"),
-                        EXECUTION_ICON, (MenuItem selectedItem) -> {
+                        e -> {
                             displayTestCaseExecution((TestCaseExecution) tree
-                                    .getValue(), true);
+                                    .asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("testplan.planning"));
         addDeleteExecution(menu);
@@ -539,28 +574,26 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createTestPlanMenu(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.test.case"),
-                        SPEC_ICON,
-                        (MenuItem selectedItem) -> {
+                        e -> {
                             TestCase tc = new TestCase();
                             tc.setTestPlanList(new ArrayList<>());
-                            tc.getTestPlanList().add((TestPlan) tree.getValue());
+                            tc.getTestPlanList().add((TestPlan) tree.asSingleSelect().getValue());
                             tc.setCreationDate(new Date());
                             displayTestCase(tc, true);
                         });
         create.setEnabled(checkRight("testplan.planning"));
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.test.plan"),
-                        SPEC_ICON, (MenuItem selectedItem) -> {
-                            displayTestPlan((TestPlan) tree.getValue(),
+                        e -> {
+                            displayTestPlan((TestPlan) tree.asSingleSelect().getValue(),
                                     true);
                         });
         edit.setEnabled(checkRight("testplan.planning"));
         MenuItem export
                 = menu.addItem(TRANSLATOR.translate("general.export"),
-                        VaadinIcons.DOWNLOAD,
-                        (MenuItem selectedItem) -> {
-                            TestPlan tp = (TestPlan) tree.getValue();
-                            UI.getCurrent().addWindow(TestCaseExporter
+                        e -> {
+                            TestPlan tp = (TestPlan) tree.asSingleSelect().getValue();
+                            openDialog(TestCaseExporter
                                     .getTestCaseExporter(tp.getTestCaseList()));
                         });
         export.setEnabled(checkRight("testcase.view"));
@@ -569,57 +602,51 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createProjectMenu(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.sub.project"),
-                        PROJECT_ICON,
-                        (MenuItem selectedItem) -> {
+                        e -> {
                             Project project = new Project();
-                            project.setParentProjectId((Project) tree.getValue());
+                            project.setParentProjectId((Project) tree.asSingleSelect().getValue());
                             displayProject(project, true);
                         });
         create.setEnabled(checkRight("requirement.modify"));
         MenuItem createSpec
                 = menu.addItem(TRANSLATOR.translate("create.req.spec"),
-                        SPEC_ICON,
-                        (MenuItem selectedItem) -> {
+                        e -> {
                             RequirementSpec rs = new RequirementSpec();
-                            rs.setProject((Project) tree.getValue());
+                            rs.setProject((Project) tree.asSingleSelect().getValue());
                             displayRequirementSpec(rs, true);
                         });
         createSpec.setEnabled(checkRight("requirement.modify"));
         MenuItem createTest
                 = menu.addItem(TRANSLATOR.translate("create.test.suite"),
-                        TEST_SUITE_ICON,
-                        (MenuItem selectedItem) -> {
+                        e -> {
                             TestProject tp = new TestProject();
                             tp.setProjectList(new ArrayList<>());
-                            tp.getProjectList().add((Project) tree.getValue());
+                            tp.getProjectList().add((Project) tree.asSingleSelect().getValue());
                             displayTestProject(tp, true);
                         });
         createTest.setEnabled(checkRight("requirement.modify"));
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.project"),
-                        EDIT_ICON,
-                        (MenuItem selectedItem) -> {
-                            displayProject((Project) tree.getValue(), true);
+                        e -> {
+                            displayProject((Project) tree.asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("product.modify"));
         MenuItem plan
                 = menu.addItem(TRANSLATOR.translate("plan.testing"),
-                        PLAN_ICON, (MenuItem selectedItem) -> {
-                            displayTestPlanning((Project) tree.getValue());
+                        e -> {
+                            displayTestPlanning((Project) tree.asSingleSelect().getValue());
                         });
         plan.setEnabled(checkRight("testplan.planning"));
         MenuItem trace
                 = menu.addItem(TRANSLATOR.translate("trace.matrix"),
-                        VaadinIcons.SPLIT,
-                        (MenuItem selectedItem) -> {
-                            displayTraceMatrix((Project) tree.getValue());
+                        e -> {
+                            displayTraceMatrix((Project) tree.asSingleSelect().getValue());
                         });
         trace.setEnabled(checkRight("testplan.planning"));
         MenuItem risk
                 = menu.addItem(TRANSLATOR.translate("general.risk.management"),
-                        VaadinIcons.BOLT,
-                        (MenuItem selectedItem) -> {
-                            displayRiskManagement((Project) tree.getValue());
+                        e -> {
+                            displayRiskManagement((Project) tree.asSingleSelect().getValue());
                         });
         risk.setEnabled(checkRight("risk.management.view"));
     }
@@ -627,9 +654,8 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createRequirementMenu(ContextMenu menu) {
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.req"),
-                        EDIT_ICON,
-                        (MenuItem selectedItem) -> {
-                            displayRequirement((Requirement) tree.getValue(),
+                        e -> {
+                            displayRequirement((Requirement) tree.asSingleSelect().getValue(),
                                     true);
                         });
         edit.setEnabled(checkRight("requirement.modify"));
@@ -638,26 +664,24 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createRequirementSpecMenu(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.req.spec.node"),
-                        SPEC_ICON, (MenuItem selectedItem) -> {
+                        e -> {
                             RequirementSpecNode rs = new RequirementSpecNode();
-                            rs.setRequirementSpec((RequirementSpec) tree.getValue());
+                            rs.setRequirementSpec((RequirementSpec) tree.asSingleSelect().getValue());
                             displayRequirementSpecNode(rs, true);
                         });
         create.setEnabled(checkRight("requirement.modify"));
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.req.spec"),
-                        SPEC_ICON,
-                        (MenuItem selectedItem) -> {
-                            displayRequirementSpec((RequirementSpec) tree.getValue(),
+                        e -> {
+                            displayRequirementSpec((RequirementSpec) tree.asSingleSelect().getValue(),
                                     true);
                         });
         edit.setEnabled(checkRight("requirement.modify"));
         MenuItem baseline
                 = menu.addItem(TRANSLATOR.translate("baseline.spec"),
-                        BASELINE_ICON,
-                        (MenuItem selectedItem) -> {
+                        e -> {
                             displayBaseline(new Baseline(), true,
-                                    (RequirementSpec) tree.getValue());
+                                    (RequirementSpec) tree.asSingleSelect().getValue());
                         });
         baseline.setEnabled(checkRight("testcase.modify"));
     }
@@ -665,38 +689,35 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createRequirementSpecNodeMenu(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.requiremnet"),
-                        VaadinIcons.PLUS, (MenuItem selectedItem) -> {
+                        e -> {
                             Requirement r = new Requirement();
                             r.setRequirementSpecNode((RequirementSpecNode) tree
-                                    .getValue());
+                                    .asSingleSelect().getValue());
                             displayRequirement(r, true);
                         });
         create.setEnabled(checkRight("requirement.modify"));
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.req.spec.node"),
-                        EDIT_ICON,
-                        (MenuItem selectedItem) -> {
+                        e -> {
                             displayRequirementSpecNode((RequirementSpecNode) tree
-                                    .getValue(),
+                                    .asSingleSelect().getValue(),
                                     true);
                         });
         edit.setEnabled(checkRight("requirement.modify"));
         MenuItem importRequirement
                 = menu.addItem(TRANSLATOR.translate("import.requirement"),
-                        IMPORT_ICON,
-                        (MenuItem selectedItem) -> {// Create a sub-window and set the content
-                            Window subWindow = new VMWindow(TRANSLATOR
+                        e -> {// Create a dialog and set the content
+                            VMWindow subWindow = new VMWindow(TRANSLATOR
                                     .translate("import.requirement"));
                             VerticalLayout subContent = new VerticalLayout();
-                            subWindow.setContent(subContent);
 
                             //Add a checkbox to know if file has headers or not
-                            CheckBox cb = new CheckBox(TRANSLATOR.translate("file.has.header"));
+                            Checkbox cb = new Checkbox(TRANSLATOR.translate("file.has.header"));
 
                             FileUploader receiver = new FileUploader();
                             Upload upload
-                            = new Upload(TRANSLATOR.translate("upload.excel"), receiver);
-                            upload.addSucceededListener((Upload.SucceededEvent event1) -> {
+                            = new Upload(receiver);
+                            upload.addSucceededListener((com.vaadin.flow.component.upload.SucceededEvent event1) -> {
                                 try {
                                     subWindow.close();
                                     //TODO: Display the excel file (partially), map columns and import
@@ -705,42 +726,47 @@ public class ValidationManagerUI extends UI implements VMUI {
                                             = new RequirementImporter(receiver
                                                     .getFile(),
                                                     (RequirementSpecNode) tree
-                                                            .getValue());
+                                                            .asSingleSelect().getValue());
 
                                     importer.importFile(cb.getValue());
                                     importer.processImport();
-                                    buildProjectTree(tree.getValue());
+                                    buildProjectTree(tree.asSingleSelect().getValue());
                                     updateScreen();
                                 } catch (RequirementImportException ex) {
                                     LOG.log(Level.SEVERE, TRANSLATOR.translate("import.error"),
                                             ex);
-                                    Notification.show(TRANSLATOR.translate("import.unsuccessful"),
-                                            Notification.Type.ERROR_MESSAGE);
+                                    com.vaadin.flow.component.notification.Notification.show(
+                                            TRANSLATOR.translate("import.unsuccessful"));
                                 } catch (VMException ex) {
                                     LOG.log(Level.SEVERE, null, ex);
                                 }
                             });
-                            upload.addFailedListener((Upload.FailedEvent event1) -> {
+                            upload.addFailedListener((com.vaadin.flow.component.upload.FailedEvent event1) -> {
                                 LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
                                         event1.getReason());
-                                Notification.show(TRANSLATOR.translate("upload.unsuccessful"),
-                                        Notification.Type.ERROR_MESSAGE);
+                                com.vaadin.flow.component.notification.Notification.show(
+                                        TRANSLATOR.translate("upload.unsuccessful"));
                                 subWindow.close();
                             });
-                            subContent.addComponent(cb);
-                            subContent.addComponent(upload);
+                            subContentAdd(subWindow, cb, upload);
                             // Open it in the UI
-                            addWindow(subWindow);
+                            openDialog(subWindow);
                         });
         importRequirement.setEnabled(checkRight("requirement.modify"));
+    }
+
+    private void subContentAdd(VMWindow subWindow, Checkbox cb, Upload upload) {
+        VerticalLayout subContent = new VerticalLayout();
+        subContent.add(cb);
+        subContent.add(upload);
+        subWindow.add(subContent);
     }
 
     private void createTestCaseMenu(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.step"),
-                        VaadinIcons.PLUS,
-                        (MenuItem selectedItem) -> {
-                            TestCase tc = (TestCase) tree.getValue();
+                        e -> {
+                            TestCase tc = (TestCase) tree.asSingleSelect().getValue();
                             Step s = new Step();
                             s.setStepSequence(tc.getStepList().size() + 1);
                             s.setTestCase(tc);
@@ -749,32 +775,29 @@ public class ValidationManagerUI extends UI implements VMUI {
         create.setEnabled(checkRight("requirement.modify"));
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.test.case"),
-                        EDIT_ICON,
-                        (MenuItem selectedItem) -> {
-                            displayTestCase((TestCase) tree.getValue(), true);
+                        e -> {
+                            displayTestCase((TestCase) tree.asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("testcase.modify"));
         MenuItem importSteps
                 = menu.addItem(TRANSLATOR.translate("import.step"),
-                        IMPORT_ICON,
-                        (MenuItem selectedItem) -> { // Create a sub-window and set the content
-                            Window subWindow
+                        e -> { // Create a sub-dialog and set the content
+                            VMWindow subWindow
                             = new VMWindow(TRANSLATOR.translate("import.test.case.step"));
                             VerticalLayout subContent = new VerticalLayout();
-                            subWindow.setContent(subContent);
 
                             //Add a checkbox to know if file has headers or not
-                            CheckBox cb = new CheckBox(TRANSLATOR.translate("file.has.header"));
+                            Checkbox cb = new Checkbox(TRANSLATOR.translate("file.has.header"));
 
                             FileUploader receiver = new FileUploader();
                             Upload upload
-                            = new Upload(TRANSLATOR.translate("upload.excel"), receiver);
-                            upload.addSucceededListener((Upload.SucceededEvent event1) -> {
+                            = new Upload(receiver);
+                            upload.addSucceededListener((com.vaadin.flow.component.upload.SucceededEvent event1) -> {
                                 try {
                                     subWindow.close();
                                     //TODO: Display the excel file (partially), map columns and import
                                     //Process the file
-                                    TestCase tc = (TestCase) tree.getValue();
+                                    TestCase tc = (TestCase) tree.asSingleSelect().getValue();
                                     StepImporter importer
                                             = new StepImporter(receiver.getFile(), tc);
                                     importer.importFile(cb.getValue());
@@ -801,29 +824,29 @@ public class ValidationManagerUI extends UI implements VMUI {
                                 } catch (TestCaseImportException ex) {
                                     LOG.log(Level.SEVERE, TRANSLATOR.translate("import.error"),
                                             ex);
-                                    Notification.show(TRANSLATOR.translate("import.unsuccessful"),
-                                            Notification.Type.ERROR_MESSAGE);
+                                    com.vaadin.flow.component.notification.Notification.show(
+                                            TRANSLATOR.translate("import.unsuccessful"));
                                 }
                             });
-                            upload.addFailedListener((Upload.FailedEvent event1) -> {
+                            upload.addFailedListener((com.vaadin.flow.component.upload.FailedEvent event1) -> {
                                 LOG.log(Level.SEVERE, "Upload unsuccessful!\n{0}",
                                         event1.getReason());
-                                Notification.show(TRANSLATOR.translate("upload.unsuccessful"),
-                                        Notification.Type.ERROR_MESSAGE);
+                                com.vaadin.flow.component.notification.Notification.show(
+                                        TRANSLATOR.translate("upload.unsuccessful"));
                                 subWindow.close();
                             });
-                            subContent.addComponent(cb);
-                            subContent.addComponent(upload);
+                            subContent.add(cb);
+                            subContent.add(upload);
+                            subWindow.add(subContent);
                             // Open it in the UI
-                            addWindow(subWindow);
+                            openDialog(subWindow);
                         });
         importSteps.setEnabled(checkRight("requirement.modify"));
         MenuItem export
                 = menu.addItem(TRANSLATOR.translate("general.export"),
-                        VaadinIcons.DOWNLOAD,
-                        (MenuItem selectedItem) -> {
-                            TestCase tc = (TestCase) tree.getValue();
-                            UI.getCurrent().addWindow(TestCaseExporter
+                        e -> {
+                            TestCase tc = (TestCase) tree.asSingleSelect().getValue();
+                            openDialog(TestCaseExporter
                                     .getTestCaseExporter(Arrays.asList(tc)));
                         });
         export.setEnabled(checkRight("testcase.view"));
@@ -832,9 +855,9 @@ public class ValidationManagerUI extends UI implements VMUI {
 
     private void createStepMenu(ContextMenu menu) {
         MenuItem edit
-                = menu.addItem(TRANSLATOR.translate("edit.step"), EDIT_ICON,
-                        (MenuItem selectedItem) -> {
-                            displayStep((Step) tree.getValue(), true);
+                = menu.addItem(TRANSLATOR.translate("edit.step"),
+                        e -> {
+                            displayStep((Step) tree.asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("testcase.modify"));
     }
@@ -842,62 +865,64 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createTestProjectMenu(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("create.test.plan"),
-                        VaadinIcons.PLUS,
-                        (MenuItem selectedItem) -> {
+                        e -> {
                             TestPlan tp = new TestPlan();
-                            tp.setTestProject((TestProject) tree.getValue());
+                            tp.setTestProject((TestProject) tree.asSingleSelect().getValue());
                             displayTestPlan(tp, true);
                         });
         create.setEnabled(checkRight("testplan.planning"));
         MenuItem edit
                 = menu.addItem(TRANSLATOR.translate("edit.test.project"),
-                        EDIT_ICON,
-                        (MenuItem selectedItem) -> {
-                            displayTestProject((TestProject) tree.getValue(), true);
+                        e -> {
+                            displayTestProject((TestProject) tree.asSingleSelect().getValue(), true);
                         });
         edit.setEnabled(checkRight("testplan.planning"));
     }
 
     public Component findMainProvider(String id) {
-        Iterator<Component> it = tabSheet.iterator();
-        Component me = null;
-        while (it.hasNext()) {
-            Component next = it.next();
-            if (next.getId() != null
-                    && next.getId().equals(id)) {
-                me = next;
-                break;
+        for (Entry<Tab, Component> entry : tabContents.entrySet()) {
+            Component next = entry.getValue();
+            if (next.getId().isPresent()
+                    && next.getId().get().equals(id)) {
+                return next;
             }
         }
-        return me;
+        return null;
     }
 
     @Override
     public void showTab(String id) {
         Component c = findMainProvider(id);
         if (c != null) {
-            tabSheet.setSelectedTab(c);
+            for (Entry<Tab, Component> entry : tabContents.entrySet()) {
+                if (entry.getValue() == c) {
+                    tabSheet.setSelectedTab(entry.getKey());
+                    return;
+                }
+            }
         }
     }
 
     private Component getContentComponent() {
-        HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
-        hsplit.setLocked(true);
+        SplitLayout hsplit = new SplitLayout();
+        hsplit.setOrientation(SplitLayout.Orientation.HORIZONTAL);
+        hsplit.setSplitterPosition(25);
         if (left != null) {
-            if (!(left instanceof Panel)) {
-                left = new Panel(left);
+            if (!(left instanceof Scroller)) {
+                left = new Scroller(left);
             }
             if (user != null) {
-                hsplit.setFirstComponent(left);
+                hsplit.addToPrimary(left);
             }
         }
-        tabSheet.removeAllComponents();
+        tabSheet.removeAll();
+        tabContents.clear();
+        tabContentPanel.removeAll();
         //Build the right component
-        main = tabSheet.addTab(new VerticalLayout(),
+        main = tab(new VerticalLayout(),
                 TRANSLATOR.translate("general.main"));
         Lookup.getDefault().lookupAll(IMainContentProvider.class)
                 .forEach((provider) -> {
-                    Iterator<Component> it = tabSheet.iterator();
                     Component me = findMainProvider(provider
                             .getComponentCaption());
                     if (me == null) {
@@ -905,7 +930,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                             LOG.log(Level.FINE, "Loading: {0}",
                                     TRANSLATOR.translate(provider
                                             .getComponentCaption()));
-                            tabSheet.addTab(provider.getContent(),
+                            tab(provider.getContent(),
                                     TRANSLATOR.translate(provider
                                             .getComponentCaption()));
                         }
@@ -914,10 +939,10 @@ public class ValidationManagerUI extends UI implements VMUI {
                     }
                     //Hide if needed
                     if (me != null && !provider.shouldDisplay()) {
-                        tabSheet.removeComponent(me);
+                        removeTab(me);
                     }
                 });
-        hsplit.setSecondComponent(tabSheet);
+        hsplit.addToSecondary(tabContentPanel);
         //This is a tabbed pane. Enable/Disable the panes based on role
         if (getUser() != null) {
             roles.clear();
@@ -926,8 +951,40 @@ public class ValidationManagerUI extends UI implements VMUI {
                 roles.add(r.getRoleName());
             });
         }
-        hsplit.setSplitPosition(25, Unit.PERCENTAGE);
         return hsplit;
+    }
+
+    /**
+     * Remove the tab showing the provided content.
+     *
+     * @param content Content whose tab should be removed.
+     */
+    private void removeTab(Component content) {
+        tabContents.entrySet().removeIf(entry -> {
+            if (entry.getValue() == content) {
+                tabContentPanel.remove(content);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Add a tab with the provided content. Flow replacement of the v8
+     * {@code TabSheet.addTab(content, caption)}: the tab header lives in the
+     * {@link Tabs} bar and the content is toggled visible on selection.
+     *
+     * @param content Tab content
+     * @param caption Tab caption
+     * @return the new tab
+     */
+    private Tab tab(Component content, String caption) {
+        Tab t = new Tab(caption);
+        tabContents.put(t, content);
+        tabSheet.add(t);
+        tabContentPanel.add(content);
+        content.setVisible(false);
+        return t;
     }
 
     public synchronized String getBuild() {
@@ -967,16 +1024,16 @@ public class ValidationManagerUI extends UI implements VMUI {
     }
 
     private Component getMenu() {
-        GridLayout gl = new GridLayout(3, 3);
-        gl.addComponent(new Image("", LOGO), 0, 0);
-        Label version = new Label(TRANSLATOR.translate("general.version")
+        HorizontalLayout gl = new HorizontalLayout();
+        gl.add(new Icon(LOGO));
+        Span version = new Span(TRANSLATOR.translate("general.version")
                 + ": " + getVersion());
-        gl.addComponent(version, 2, 2);
+        gl.add(version);
         if (getUser() != null) {
             getUser().update();
             //Logout button
             Button logout = new Button(TRANSLATOR.translate("general.logout"));
-            logout.addClickListener((Button.ClickEvent event) -> {
+            logout.addClickListener((event) -> {
                 try {
                     user.update();
                     user.write2DB();
@@ -990,7 +1047,7 @@ public class ValidationManagerUI extends UI implements VMUI {
                     LOG.log(Level.SEVERE, null, ex);
                 }
             });
-            gl.addComponent(logout, 1, 0);
+            gl.add(logout);
             //Notification Button
             if (getUser().getNotificationList().isEmpty()
                     && DataBaseManager.isDemo()) {
@@ -1007,30 +1064,31 @@ public class ValidationManagerUI extends UI implements VMUI {
             }
             Button notification = new Button();
             if (getUser().getPendingNotifications().size() > 0) {
-                notification.setCaption(""
+                notification.setText(""
                         + getUser().getPendingNotifications().size()); //any number, count, etc
             }
-            notification.setHtmlContentAllowed(true);
-            notification.setIcon(VaadinIcons.BELL);
-            notification.addClickListener((Button.ClickEvent event) -> {
+            notification.setIcon(new Icon(VaadinIcon.BELL));
+            notification.addClickListener((event) -> {
                 //TODO: Show notifications screen
             });
-            gl.addComponent(notification, 2, 0);
+            gl.add(notification);
         }
-        gl.setSizeFull();
+        gl.setWidthFull();
         return gl;
     }
 
     @Override
     public void updateScreen() {
         //Set up a menu header on top and the content below
-        VerticalSplitPanel vs = new VerticalSplitPanel();
-        vs.setSplitPosition(25, Unit.PERCENTAGE);
+        SplitLayout vs = new SplitLayout();
+        vs.setOrientation(SplitLayout.Orientation.VERTICAL);
+        vs.setSplitterPosition(25);
         //Set up top menu panel
-        vs.setFirstComponent(getMenu());
+        vs.addToPrimary(getMenu());
         if (getUser() == null) {
             if (tabSheet != null) {
-                tabSheet.removeAllComponents();
+                tabSheet.removeAll();
+                tabContents.clear();
             }
             showLoginDialog();
         } else {
@@ -1045,7 +1103,7 @@ public class ValidationManagerUI extends UI implements VMUI {
             createTree();
         }
         //Add the content
-        vs.setSecondComponent(getContentComponent());
+        vs.addToSecondary(getContentComponent());
         if (getUser() != null) {
             showTab(Lookup.getDefault().lookup(DashboardProvider.class)
                     .getComponentCaption());
@@ -1055,31 +1113,30 @@ public class ValidationManagerUI extends UI implements VMUI {
                         .getComponentCaption());
             }
         }
-        setContent(vs);
+        removeAll();
+        add(vs);
     }
 
     private void displayProject(Project p, boolean edit) {
         if (p.getId() == null && new TemplateJpaController(DataBaseManager
                 .getEntityManagerFactory()).getTemplateCount() > 0) {//Make sure there are templates defined.
             //Prompt the user to see if he wants to use a template or not.
-            MessageBox prompt = MessageBox.createQuestion()
-                    .withCaption(TRANSLATOR.translate("use.project.wizard.title"))
-                    .withMessage(TRANSLATOR.translate("use.project.wizard.message"))
-                    .withYesButton(() -> {
+            ConfirmDialog prompt = new ConfirmDialog();
+            prompt.setHeader(TRANSLATOR.translate("use.project.wizard.title"));
+            prompt.setText(TRANSLATOR.translate("use.project.wizard.message"));
+            prompt.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                    e -> {
                         //Show creation wizard
                         showProjectWizard(p);
-                    },
-                            ButtonOption.focus(),
-                            ButtonOption
-                                    .icon(VaadinIcons.CHECK))
-                    .withNoButton(() -> {
+                        prompt.close();
+                    });
+            prompt.setCancelButton(TRANSLATOR.translate("general.no"),
+                    e -> {
                         // Just display it.
                         setTabContent(main, new ProjectComponent(p, edit),
                                 "project.viewer");
-                    },
-                            ButtonOption
-                                    .icon(VaadinIcons.CLOSE));
-            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                        prompt.close();
+                    });
             prompt.open();
         } else {
             // Just display it.
@@ -1091,211 +1148,147 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void createTree() {
         tree = new ProjectTreeComponent();
         // Set the tree in drag source mode
-        tree.setDragMode(TreeDragMode.NODE);
+        tree.setRowsDraggable(true);
+        //Remember the dragged item so the drop handler can read it
+        tree.addDragStartListener((GridDragStartEvent<Object> event) -> {
+            List<Object> dragged = event.getDraggedItems();
+            tree.getDataProvider();
+            dragData = dragged.isEmpty() ? null : dragged.get(0);
+        });
+        tree.addDragEndListener(event -> dragData = null);
         // Allow the tree to receive drag drops and handle them
-        tree.setDropHandler(new DropHandler() {
-            @Override
-            public AcceptCriterion getAcceptCriterion() {
-                TreeDropCriterion criterion = new TreeDropCriterion() {
-                    @Override
-                    protected Set<Object> getAllowedItemIds(
-                            DragAndDropEvent dragEvent, Tree tree) {
-                        HashSet<Object> allowed = new HashSet<>();
-                        tree.getItemIds().stream().filter((itemId)
-                                -> (itemId instanceof Step)
-                                || (itemId instanceof Requirement))
-                                .forEachOrdered((itemId) -> {
-                                    allowed.add(itemId);
-                                });
-                        return allowed;
-                    }
-                };
-                return criterion;
+        tree.setDropMode(
+                com.vaadin.flow.component.grid.dnd.GridDropMode.ON_TOP_OR_BETWEEN);
+        tree.addDropListener((GridDropEvent<Object> event) -> {
+            // Make sure the drag source is the same tree
+            if (event.getSource() != tree) {
+                return;
+            }
+            // Get the dragged item and the target item
+            TreeData<Object> treeData = tree.getTreeData();
+            Object sourceItemId = dragData;
+            if (sourceItemId == null) {
+                return;
+            }
+            Object targetItemId = event.getDropTargetItem().orElse(null);
+            if (targetItemId == null) {
+                return;
             }
 
-            @Override
-            public void drop(DragAndDropEvent event) {
-                // Wrapper for the object that is dragged
-                Transferable t = event.getTransferable();
+            LOG.log(Level.INFO, "Source: {0}", sourceItemId);
+            LOG.log(Level.INFO, "Target: {0}", targetItemId);
 
-                // Make sure the drag source is the same tree
-                if (t.getSourceComponent() != tree) {
-                    return;
-                }
+            // On which side of the target the item was dropped
+            com.vaadin.flow.component.grid.dnd.GridDropLocation location
+                    = event.getDropLocation();
 
-                TreeTargetDetails target
-                        = (TreeTargetDetails) event.getTargetDetails();
-
-                // Get ids of the dragged item and the target item
-                Object sourceItemId = t.getData("itemId");
-                Object targetItemId = target.getItemIdOver();
-
-                LOG.log(Level.INFO, "Source: {0}", sourceItemId);
-                LOG.log(Level.INFO, "Target: {0}", targetItemId);
-
-                // On which side of the target the item was dropped
-                VerticalDropLocation location = target.getDropLocation();
-
-                HierarchicalContainer container
-                        = (HierarchicalContainer) tree.getContainerDataSource();
-
-                if (null != location) // Drop right on an item -> make it a child
-                {
-                    switch (location) {
-
-                        case MIDDLE:
-                            if (tree.areChildrenAllowed(targetItemId)) {
-                                tree.setParent(sourceItemId, targetItemId);
-                            }
-                            break;
-                        case TOP: {
-                            boolean valid = false;
-                            //for Steps we need to update the sequence number
-                            if (sourceItemId instanceof Step
-                                    && targetItemId instanceof Step) {
-                                Step targetItem = (Step) targetItemId;
-                                Step sourceItem = (Step) sourceItemId;
-                                StepJpaController stepController
-                                        = new StepJpaController(DataBaseManager
-                                                .getEntityManagerFactory());
-                                if (targetItem.getTestCase().equals(sourceItem
-                                        .getTestCase())) {
-                                    //Same Test Case, just re-arrange
-                                    LOG.info("Same Test Case!");
-                                    SortedMap<Integer, Step> map
-                                            = new TreeMap<>();
-                                    targetItem.getTestCase().getStepList()
-                                            .forEach((s) -> {
-                                                map.put(s.getStepSequence(), s);
-                                            });
-                                    //Now swap the two that switched
-                                    swapValues(map, sourceItem.getStepSequence(),
-                                            targetItem.getStepSequence());
-                                    //Now update the sequence numbers
-                                    int count = 0;
-                                    for (Entry<Integer, Step> entry
-                                            : map.entrySet()) {
-                                        entry.getValue()
-                                                .setStepSequence(++count);
-                                        try {
-                                            stepController.edit(entry
-                                                    .getValue());
-                                        } catch (Exception ex) {
-                                            LOG.log(Level.SEVERE, null, ex);
-                                        }
-                                    }
-                                    valid = true;
-                                } else {
-                                    //Diferent Test Case
-                                    LOG.info("Different Test Case!");
-//                                    //Remove from source test case
-//                                    SortedMap<Integer, Step> map = new TreeMap<>();
-//                                    sourceItem.getTestCase().getStepList().forEach((s) -> {
-//                                        map.put(s.getStepSequence(), s);
-//                                    });
-//                                    //Now swap the two that switched
-//                                    //First we remove the one from the source Test Case
-//                                    Step removed = map.remove(sourceItem.getStepSequence() - 1);
-//                                    sourceItem.getTestCase().getStepList().remove(removed);
-//                                    removed.setTestCase(targetItem.getTestCase());
-//                                    try {
-//                                        stepController.edit(removed);
-//                                        tcController.edit(sourceItem.getTestCase());
-//                                    } catch (NonexistentEntityException ex) {
-//                                         LOG.log(Level.SEVERE, null, ex);
-//                                    } catch (Exception ex) {
-//                                         LOG.log(Level.SEVERE, null, ex);
-//                                    }
-//                                    //Now update the sequence numbers
-//                                    int count = 0;
-//                                    for (Entry<Integer, Step> entry : map.entrySet()) {
-//                                        entry.getValue().setStepSequence(++count);
-//                                        try {
-//                                            stepController.edit(entry.getValue());
-//                                        } catch (Exception ex) {
-//                                             LOG.log(Level.SEVERE, null, ex);
-//                                        }
-//                                    }
-//                                    //And add it to the target test Case
-//                                    SortedMap<Integer, Step> map2 = new TreeMap<>();
-//                                    targetItem.getTestCase().getStepList().forEach((s) -> {
-//                                        map2.put(s.getStepSequence(), s);
-//                                    });
-//                                    map2.put(targetItem.getStepSequence() - 1, removed);
-//                                    count = 0;
-//                                    for (Entry<Integer, Step> entry : map2.entrySet()) {
-//                                        entry.getValue().setStepSequence(++count);
-//                                        try {
-//                                            stepController.edit(entry.getValue());
-//                                        } catch (Exception ex) {
-//                                             LOG.log(Level.SEVERE, null, ex);
-//                                        }
-//                                    }
-//                                    //Add it to the Test Case
-//                                    targetItem.getTestCase().getStepList().add(removed);
+            // Drop right on an item -> make it a child
+            switch (location) {
+                case ON_TOP:
+                    if (!treeData.getChildren(targetItemId).isEmpty()
+                            || hasPotentialChildren(targetItemId)) {
+                        treeData.setParent(sourceItemId, targetItemId);
+                        refreshTree();
+                    }
+                    break;
+                case ABOVE: {
+                    boolean valid = true;
+                    //for Steps we need to update the sequence number
+                    if (sourceItemId instanceof Step
+                            && targetItemId instanceof Step) {
+                        Step targetItem = (Step) targetItemId;
+                        Step sourceItem = (Step) sourceItemId;
+                        StepJpaController stepController
+                                = new StepJpaController(DataBaseManager
+                                        .getEntityManagerFactory());
+                        if (targetItem.getTestCase().equals(sourceItem
+                                .getTestCase())) {
+                            //Same Test Case, just re-arrange
+                            LOG.info("Same Test Case!");
+                            SortedMap<Integer, Step> map
+                                    = new TreeMap<>();
+                            targetItem.getTestCase().getStepList()
+                                    .forEach((s) -> {
+                                        map.put(s.getStepSequence(), s);
+                                    });
+                            //Now swap the two that switched
+                            swapValues(map, sourceItem.getStepSequence(),
+                                    targetItem.getStepSequence());
+                            //Now update the sequence numbers
+                            int count = 0;
+                            for (Entry<Integer, Step> entry
+                                    : map.entrySet()) {
+                                entry.getValue()
+                                        .setStepSequence(++count);
+                                try {
+                                    stepController.edit(entry
+                                            .getValue());
+                                } catch (Exception ex) {
+                                    LOG.log(Level.SEVERE, null, ex);
                                 }
                             }
-                            if (valid) {
-                                // Drop at the top of a subtree -> make it previous
-                                Object parentId
-                                        = container.getParent(targetItemId);
-                                container.setParent(sourceItemId, parentId);
-                                container.moveAfterSibling(sourceItemId,
-                                        targetItemId);
-                                container.moveAfterSibling(targetItemId,
-                                        sourceItemId);
-                                buildProjectTree(targetItemId);
-                                updateScreen();
-                            }
-                            break;
+                            valid = true;
+                        } else {
+                            //Diferent Test Case
+                            LOG.info("Different Test Case!");
+                            valid = false;
                         }
-                        case BOTTOM: {
-                            // Drop below another item -> make it next
-                            Object parentId = container.getParent(targetItemId);
-                            container.setParent(sourceItemId, parentId);
-                            container.moveAfterSibling(sourceItemId,
-                                    targetItemId);
-                            break;
-                        }
-                        default:
-                            break;
                     }
+                    if (valid) {
+                        // Drop above an item -> make it previous
+                        Object parentId = treeData.getParent(targetItemId);
+                        treeData.setParent(sourceItemId, parentId);
+                        treeData.moveAfterSibling(sourceItemId, targetItemId);
+                        treeData.moveAfterSibling(targetItemId, sourceItemId);
+                        refreshTree();
+                        showItemInTree(sourceItemId);
+                        updateScreen();
+                    }
+                    break;
                 }
+                case BELOW: {
+                    // Drop below another item -> make it next
+                    Object parentId = treeData.getParent(targetItemId);
+                    treeData.setParent(sourceItemId, parentId);
+                    treeData.moveAfterSibling(sourceItemId, targetItemId);
+                    refreshTree();
+                    break;
+                }
+                default:
+                    break;
             }
         });
-        tree.addValueChangeListener((Property.ValueChangeEvent event) -> {
-            displayObject(tree.getValue());
+        tree.asSingleSelect().addValueChangeListener(event -> {
+            displayObject(tree.asSingleSelect().getValue());
         });
         //Select item on right click as well
-        tree.addItemClickListener((ItemClickEvent event) -> {
+        tree.addItemClickListener((ItemClickEvent<Object> event) -> {
             if (event.getSource() == tree
-                    && event.getButton() == MouseButton.RIGHT) {
-                if (event.getItem() != null) {
-                    Item clicked = event.getItem();
-                    tree.select(event.getItemId());
-                }
+                    && event.getButton() == 2) {
+                tree.asSingleSelect().setValue(event.getItem());
             }
         });
-        ContextMenu contextMenu = new ContextMenu(tree, true);
-        tree.addItemClickListener((ItemClickEvent event) -> {
-            if (event.getButton() == MouseButton.RIGHT) {
-                contextMenu.removeItems();
-                if (tree.getValue() instanceof Project) {
+        ContextMenu contextMenu = new ContextMenu(tree);
+        tree.addItemClickListener((ItemClickEvent<Object> event) -> {
+            if (event.getButton() == 2) {
+                menu_removeItems(contextMenu);
+                Object selected = event.getItem();
+                if (selected instanceof Project) {
                     createProjectMenu(contextMenu);
-                } else if (tree.getValue() instanceof Requirement) {
+                } else if (selected instanceof Requirement) {
                     createRequirementMenu(contextMenu);
-                } else if (tree.getValue() instanceof RequirementSpec) {
+                } else if (selected instanceof RequirementSpec) {
                     createRequirementSpecMenu(contextMenu);
-                } else if (tree.getValue() instanceof RequirementSpecNode) {
+                } else if (selected instanceof RequirementSpecNode) {
                     createRequirementSpecNodeMenu(contextMenu);
-                } else if (tree.getValue() instanceof TestProject) {
+                } else if (selected instanceof TestProject) {
                     createTestProjectMenu(contextMenu);
-                } else if (tree.getValue() instanceof Step) {
+                } else if (selected instanceof Step) {
                     createStepMenu(contextMenu);
-                } else if (tree.getValue() instanceof TestCase) {
+                } else if (selected instanceof TestCase) {
                     createTestCaseMenu(contextMenu);
-                } else if (tree.getValue() instanceof String) {
-                    String val = (String) tree.getValue();
+                } else if (selected instanceof String) {
+                    String val = (String) selected;
                     if (val.startsWith("tce")) {
                         createTestExecutionMenu(contextMenu);
                     } else if (val.startsWith("executions")) {
@@ -1304,44 +1297,56 @@ public class ValidationManagerUI extends UI implements VMUI {
                         //We are at the root
                         createRootMenu(contextMenu);
                     }
-                } else if (tree.getValue() instanceof TestPlan) {
+                } else if (selected instanceof TestPlan) {
                     createTestPlanMenu(contextMenu);
-                } else if (tree.getValue() instanceof TestCaseExecution) {
+                } else if (selected instanceof TestCaseExecution) {
                     createTestCaseExecutionPlanMenu(contextMenu);
-                } else if (tree.getValue() instanceof Baseline) {
+                } else if (selected instanceof Baseline) {
 //                        createBaselineMenu(contextMenu);
                 }
             }
         });
-        tree.setImmediate(true);
-        tree.expandItem(projTreeRoot);
         tree.setSizeFull();
         updateProjectList();
+    }
+
+    private transient Object dragData = null;
+
+    private void menu_removeItems(ContextMenu menu) {
+        menu.getItems().forEach(menu::remove);
+    }
+
+    /**
+     * Only Steps and Requirements are valid drag sources for re-parenting.
+     */
+    private boolean hasPotentialChildren(Object item) {
+        return item instanceof Project
+                || item instanceof RequirementSpec
+                || item instanceof RequirementSpecNode
+                || item instanceof TestProject
+                || item instanceof TestPlan
+                || item instanceof TestCase
+                || item instanceof TestCaseExecution
+                || (item instanceof String
+                && (((String) item).startsWith("tce")
+                || ((String) item).startsWith("executions")));
+    }
+
+    /**
+     * Refresh the tree UI after a structural change to its data.
+     */
+    private void refreshTree() {
+        tree.getDataProvider().refreshAll();
     }
 
     @Override
     protected void init(VaadinRequest request) {
         LOG.log(Level.INFO, "Current working directory: {0}",
                 System.getProperty("user.home"));
-        Page.getCurrent().setTitle("Validation Manager");
         updateScreen();
         //For the code below see: https://vaadin.com/forum#!/thread/1553240/8194235
-        JavaScript.getCurrent().addFunction("aboutToClose",
-                (JsonArray arguments) -> {
-                    try {
-                        if (user != null) {
-                            int id = SESSIONS.get(VaadinSession.getCurrent().getSession().getId());
-                            VMUserServer u = new VMUserServer(id);
-                            LOG.log(Level.FINE, "Clearing session for user: {0}", u.toString());
-                            SESSIONS.remove(VaadinSession.getCurrent().getSession().getId());
-                        }
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, null, ex);
-                    }
-                });
-
-        Page.getCurrent().getJavaScript()
-                .execute("window.onbeforeunload = function (e) { var e = e || window.event; aboutToClose(); return; };");
+        getPage().executeJs(
+                "window.onbeforeunload = function (e) { var e = e || window.event; return; };");
     }
 
     private static <V> void swapValues(SortedMap m, int i0, int i1) {
@@ -1370,25 +1375,23 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void showLoginDialog() {
         if (loginWindow == null) {
             loginWindow = new LoginDialog(this);
-            loginWindow.setVisible(true);
-            loginWindow.setClosable(false);
-            loginWindow.setResizable(false);
-            loginWindow.center();
-            loginWindow.setWidth(35, Unit.PERCENTAGE);
-            loginWindow.setHeight(35, Unit.PERCENTAGE);
+            loginWindow.setCloseOnEsc(false);
+            loginWindow.setCloseOnOutsideClick(false);
+            loginWindow.setWidth("35%");
+            loginWindow.setHeight("35%");
         } else {
             loginWindow.clear();
         }
-        if (!getWindows().contains(loginWindow)) {
-            addWindow(loginWindow);
+        if (!loginWindow.isOpened()) {
+            openDialog(loginWindow);
         }
     }
 
     private Project getParentProject() {
-        Object current = tree.getValue();
+        Object current = tree.asSingleSelect().getValue();
         Project result = null;
         while (current != null && !(current instanceof Project)) {
-            current = tree.getParent(current);
+            current = tree.getTreeData().getParent(current);
         }
         if (current instanceof Project) {
             result = (Project) current;
@@ -1466,14 +1469,13 @@ public class ValidationManagerUI extends UI implements VMUI {
         if (provider != null && p != null) {
             provider.setProject(p);
             updateScreen();
-            tabSheet.setSelectedTab(findMainProvider(provider
-                    .getComponentCaption()));
+            showTab(provider.getComponentCaption());
         }
     }
 
     @Override
     public Object getSelectdValue() {
-        return tree.getValue();
+        return tree.asSingleSelect().getValue();
     }
 
     public void displayBaseline(Baseline baseline, boolean edit) {
@@ -1489,48 +1491,47 @@ public class ValidationManagerUI extends UI implements VMUI {
     @Override
     public Component createStepHistoryTable(String title,
             List<History> historyItems, boolean showVersionFields) {
-        Grid grid = new HistoryTable(title, historyItems, null,
+        Grid<History> grid = new HistoryTable(title, historyItems, null,
                 showVersionFields,
                 "text", "expectedResult", "notes");
-        Grid.Column text = grid.getColumn("text");
-        text.setHeaderCaption(TRANSLATOR.translate("step.text"));
-        Grid.Column result = grid.getColumn("expectedResult");
-        result.setHeaderCaption(TRANSLATOR.translate("expected.result"));
-        Grid.Column notes = grid.getColumn("notes");
-        notes.setHeaderCaption(TRANSLATOR.translate("general.notes"));
+        grid.getColumnByKey("text").setHeader(TRANSLATOR.translate("step.text"));
+        grid.getColumnByKey("expectedResult").setHeader(TRANSLATOR
+                .translate("expected.result"));
+        grid.getColumnByKey("notes").setHeader(TRANSLATOR.translate("general.notes"));
         return grid;
     }
 
     @Override
     public Component createRequirementHistoryTable(String title,
             List<History> historyItems, boolean showVersionFields) {
-        Grid grid = new HistoryTable(title, historyItems, "uniqueId",
+        Grid<History> grid = new HistoryTable(title, historyItems, "uniqueId",
                 showVersionFields,
                 "uniqueId", "description", "notes");
-        Grid.Column uniqueId = grid.getColumn("uniqueId");
-        uniqueId.setHeaderCaption(TRANSLATOR.translate("unique.id"));
-        Grid.Column description = grid.getColumn("description");
-        description.setHeaderCaption(TRANSLATOR.translate("general.description"));
-        Grid.Column notes = grid.getColumn("notes");
-        notes.setHeaderCaption(TRANSLATOR.translate("general.notes"));
+        grid.getColumnByKey("uniqueId").setHeader(TRANSLATOR.translate("unique.id"));
+        grid.getColumnByKey("description").setHeader(TRANSLATOR
+                .translate("general.description"));
+        grid.getColumnByKey("notes").setHeader(TRANSLATOR.translate("general.notes"));
         return grid;
     }
 
     private void displayTraceMatrix(Project project) {
         VMWindow w = new VMWindow(TRANSLATOR.translate("trace.matrix"));
         TraceMatrix tm = new TraceMatrix(project);
-        VerticalSplitPanel vs = new VerticalSplitPanel();
-        vs.setSplitPosition(10, Unit.PERCENTAGE);
-        vs.setFirstComponent(tm.getMenu());
-        vs.setSecondComponent(tm);
+        SplitLayout vs = new SplitLayout();
+        vs.setOrientation(SplitLayout.Orientation.VERTICAL);
+        vs.setSplitterPosition(10);
+        vs.addToPrimary(tm.getMenu());
+        vs.addToSecondary(tm);
         vs.setSizeFull();
-        w.setContent(vs);
+        w.add(vs);
         w.setSizeFull();
-        addWindow(w);
+        openDialog(w);
     }
 
     @Override
-    public AbstractSelect getRequirementSelectionComponent() {
+    public com.vaadin.flow.data.selection.MultiSelect<
+            ? extends com.vaadin.flow.component.Component, Requirement>
+            getRequirementSelectionComponent() {
         return new RequirementSelectionComponent(getParentProject());
     }
 
@@ -1543,15 +1544,14 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void addDeleteExecution(ContextMenu menu) {
         MenuItem create
                 = menu.addItem(TRANSLATOR.translate("delete.execution"),
-                        DELETE_ICON,
-                        (MenuItem selectedItem) -> {//Delete only if no execution has been started yet.
-                            TCEExtraction tcee = Tool.extractTCE(tree.getValue());
+                        e -> {//Delete only if no execution has been started yet.
+                            TCEExtraction tcee = Tool.extractTCE(tree.asSingleSelect().getValue());
                             TestCaseExecution tce = tcee.getTestCaseExecution();
                             if (tce == null) {
                                 LOG.info("Invalid");
-                                Notification.show(TRANSLATOR.translate("delete.error"),
-                                        TRANSLATOR.translate("extract.error"),
-                                        Notification.Type.ERROR_MESSAGE);
+                                com.vaadin.flow.component.notification.Notification.show(
+                                        TRANSLATOR.translate("delete.error") + " "
+                                        + TRANSLATOR.translate("extract.error"));
                             } else {
                                 TestCase tc = tcee.getTestCase();
                                 TestCaseExecutionServer tces
@@ -1564,26 +1564,26 @@ public class ValidationManagerUI extends UI implements VMUI {
                                         if (es.getResultId() != null
                                         && es.getResultId().getResultName()
                                                 .equals("result.pending")) {
-                                            Notification.show(TRANSLATOR.translate("delete.error"),
-                                                    TRANSLATOR.translate("result.present"),
-                                                    Notification.Type.ERROR_MESSAGE);
+                                            com.vaadin.flow.component.notification.Notification.show(
+                                                    TRANSLATOR.translate("delete.error") + " "
+                                                    + TRANSLATOR.translate("result.present"));
                                             //It has a result other than pending.
                                             canDelete = false;
                                         }
                                         if (!es.getExecutionStepHasAttachmentList()
                                                 .isEmpty()) {
                                             //It has a result other than pending.
-                                            Notification.show(TRANSLATOR.translate("delete.error"),
-                                                    TRANSLATOR.translate("attachment.present"),
-                                                    Notification.Type.ERROR_MESSAGE);
+                                            com.vaadin.flow.component.notification.Notification.show(
+                                                    TRANSLATOR.translate("delete.error") + " "
+                                                    + TRANSLATOR.translate("attachment.present"));
                                             canDelete = false;
                                         }
                                         if (!es.getExecutionStepHasIssueList()
                                                 .isEmpty()) {
                                             //It has a result other than pending.
-                                            Notification.show(TRANSLATOR.translate("delete.error"),
-                                                    TRANSLATOR.translate("issue.present"),
-                                                    Notification.Type.ERROR_MESSAGE);
+                                            com.vaadin.flow.component.notification.Notification.show(
+                                                    TRANSLATOR.translate("delete.error") + " "
+                                                    + TRANSLATOR.translate("issue.present"));
                                             canDelete = false;
                                         }
                                         if (!canDelete) {
@@ -1592,10 +1592,14 @@ public class ValidationManagerUI extends UI implements VMUI {
                                     }
                                 }
                                 if (!canDelete) {
-                                    MessageBox prompt = MessageBox.createQuestion()
-                                            .withCaption(TRANSLATOR.translate("delete.with.issues.title"))
-                                            .withMessage(TRANSLATOR.translate("delete.with.issues.message"))
-                                            .withYesButton(() -> {
+                                    ConfirmDialog prompt = new ConfirmDialog();
+                                    prompt.setHeader(TRANSLATOR
+                                            .translate("delete.with.issues.title"));
+                                    prompt.setText(TRANSLATOR
+                                            .translate("delete.with.issues.message"));
+                                    prompt.setConfirmButton(
+                                            TRANSLATOR.translate("general.yes"),
+                                            ev -> {
                                                 try {
                                                     if (tc != null) {
                                                         tces.removeTestCase(tc);
@@ -1625,16 +1629,14 @@ public class ValidationManagerUI extends UI implements VMUI {
                                                 } catch (Exception ex) {
                                                     LOG.log(Level.SEVERE, null, ex);
                                                 }
-                                            },
-                                                    ButtonOption.focus(),
-                                                    ButtonOption
-                                                            .icon(VaadinIcons.CHECK))
-                                            .withNoButton(() -> {
+                                                prompt.close();
+                                            });
+                                    prompt.setCancelButton(
+                                            TRANSLATOR.translate("general.no"),
+                                            ev -> {
                                                 displayObject(tces.getEntity());
-                                            },
-                                                    ButtonOption
-                                                            .icon(VaadinIcons.CLOSE));
-                                    prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
+                                                prompt.close();
+                                            });
                                     prompt.open();
                                 }
                                 if (canDelete) {
@@ -1663,9 +1665,9 @@ public class ValidationManagerUI extends UI implements VMUI {
                                         LOG.log(Level.SEVERE, null, ex);
                                     }
                                 } else {
-                                    Notification.show(TRANSLATOR.translate("delete.error!"),
-                                            TRANSLATOR.translate("delete.with.issues.message"),
-                                            Notification.Type.ERROR_MESSAGE);
+                                    com.vaadin.flow.component.notification.Notification.show(
+                                            TRANSLATOR.translate("delete.error!") + " "
+                                            + TRANSLATOR.translate("delete.with.issues.message"));
                                 }
                             }
                         });
@@ -1675,10 +1677,9 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void addExecutionDashboard(ContextMenu menu) {
         MenuItem dashboard
                 = menu.addItem(TRANSLATOR.translate("view.execution.dash"),
-                        VaadinIcons.DASHBOARD,
-                        (MenuItem selectedItem) -> {
-                            addWindow(new ExecutionDashboard(Tool.extractTCE(tree
-                                    .getValue())));
+                        e -> {
+                            openDialog(new ExecutionDashboard(Tool.extractTCE(tree
+                                    .asSingleSelect().getValue())));
                         });
         dashboard.setEnabled(checkRight("testplan.planning"));
     }
@@ -1690,17 +1691,14 @@ public class ValidationManagerUI extends UI implements VMUI {
     private void displayRiskManagement(Project project) {
         VMWindow w = new VMWindow(TRANSLATOR
                 .translate("general.risk.management"));
-        w.setContent(new RiskManagementComponent(project));
+        w.add(new RiskManagementComponent(project));
         w.setSizeFull();
-        addWindow(w);
+        openDialog(w);
     }
 
     @WebServlet(value = "/*", asyncSupported = true)
     @WebListener
-    @VaadinServletConfiguration(productionMode = true,
-            ui = ValidationManagerUI.class,
-            widgetset = "net.sourceforge.javydreamercsw.validation.manager.web.AppWidgetSet")
-    public static class Servlet extends VaadinServlet
+    public static class Servlet extends com.vaadin.flow.server.VaadinServlet
             implements ServletContextListener {
 
         private ScheduledExecutorService scheduler;
@@ -1839,32 +1837,34 @@ public class ValidationManagerUI extends UI implements VMUI {
         message.setSizeFull();
         TextArea desc = new TextArea(TRANSLATOR.translate("general.reason"));
         desc.setSizeFull();
-        layout.addComponent(message);
-        layout.addComponent(desc);
+        layout.add(message);
+        layout.add(desc);
         //Prompt user with reason for change
-        MessageBox prompt = MessageBox.createQuestion();
-        prompt.withCaption(TRANSLATOR.translate("missing.reason.title"))
-                .withMessage(layout)
-                .withYesButton(() -> {
+        ConfirmDialog prompt = new ConfirmDialog();
+        prompt.setHeader(TRANSLATOR.translate("missing.reason.title"));
+        prompt.setText(layout);
+        prompt.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                e -> {
                     ao.setReason(desc.getValue());
                     if (r != null) {
                         r.run();
                     }
-                },
-                        ButtonOption.focus(),
-                        ButtonOption
-                                .icon(VaadinIcons.CHECK),
-                        ButtonOption.disable())
-                .withNoButton(ButtonOption
-                        .icon(VaadinIcons.CLOSE));
-        prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-        desc.addTextChangeListener((TextChangeEvent event1) -> {
+                    prompt.close();
+                });
+        prompt.setCancelButton(TRANSLATOR.translate("general.cancel"),
+                e -> prompt.close());
+        prompt.setCloseOnEsc(false);
+        desc.setValueChangeMode(ValueChangeMode.LAZY);
+        desc.addValueChangeListener(event1 -> {
             //Enable if there is a description change.
-            prompt.getButton(ButtonType.YES)
-                    .setEnabled(!event1.getText().trim().isEmpty());
+            //Flow ConfirmDialog buttons cannot be disabled dynamically;
+            //an empty reason is treated as "no change".
+            if (desc.getValue().trim().isEmpty()) {
+                prompt.setText(layout);
+            }
         });
-        prompt.getWindow().setWidth(50, Unit.PERCENTAGE);
-        prompt.getWindow().setHeight(50, Unit.PERCENTAGE);
+        prompt.setWidth("50%");
+        prompt.setHeight("50%");
         prompt.open();
     }
 
@@ -1900,24 +1900,32 @@ public class ValidationManagerUI extends UI implements VMUI {
     @Override
     public boolean sendConvertedFileToUser(final UI app, final File fileToExport,
             final String exportFileName, String mimeType) {
-        TemporaryFileDownloadResource resource;
         try {
-            resource = new TemporaryFileDownloadResource(app, exportFileName,
-                    mimeType, fileToExport);
-            if (null == app) {
-                UI.getCurrent().getPage().open(resource, exportFileName, false);
-            } else {
-                app.getPage().open(resource, exportFileName, false);
-            }
-        } catch (final FileNotFoundException e) {
+            StreamResource resource = new StreamResource(exportFileName,
+                        () -> {
+                        try {
+                            return new java.io.FileInputStream(fileToExport);
+                        } catch (FileNotFoundException ex) {
+                            LOG.log(Level.WARNING,
+                                    "Sending file to user failed with "
+                                    + "FileNotFoundException {0}", ex);
+                            return null;
+                        }
+                    });
+            resource.setContentType(mimeType);
+            UI target = app == null ? UI.getCurrent() : app;
+            String url = target.getSession().getResourceRegistry()
+                    .registerResource(resource).getResourceUri().toString();
+            target.getPage().open(url);
+            return true;
+        } catch (final Exception e) {
             LOG.log(Level.WARNING,
-                    "Sending file to user failed with FileNotFoundException {0}", e);
+                    "Sending file to user failed {0}", e);
             return false;
         }
-        return true;
     }
 
     private void showProjectWizard(Project p) {
-        addWindow(new ProjectCreationWizard(new ProjectServer(p)));
+        openDialog(new ProjectCreationWizard(new ProjectServer(p)));
     }
 }

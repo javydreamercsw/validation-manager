@@ -28,8 +28,8 @@ import com.validation.manager.core.server.core.ActivityServer;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 

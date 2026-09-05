@@ -19,7 +19,7 @@ import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.History;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.PostLoad;
+import jakarta.persistence.PostLoad;
 
 /**
  *

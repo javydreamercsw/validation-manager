@@ -15,10 +15,11 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.util.converter.Converter;
+import com.vaadin.flow.data.converter.Converter;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
 import com.validation.manager.core.VMException;
 import com.validation.manager.core.tool.MD5;
-import java.util.Locale;
 import org.openide.util.Exceptions;
 
 /**
@@ -28,31 +29,17 @@ import org.openide.util.Exceptions;
 public class UserPasswordConverter implements Converter<String, String> {
 
     @Override
-    public String convertToModel(String value,
-            Class<? extends String> targetType, Locale locale)
-            throws ConversionException {
-        return value;
+    public Result<String> convertToModel(String value, ValueContext context) {
+        return Result.ok(value == null ? "" : value);
     }
 
     @Override
-    public String convertToPresentation(String value,
-            Class<? extends String> targetType, Locale locale)
-            throws ConversionException {
+    public String convertToPresentation(String value, ValueContext context) {
         try {
             return value == null ? "" : MD5.encrypt(value);
         } catch (VMException ex) {
             Exceptions.printStackTrace(ex);
         }
         return "";
-    }
-
-    @Override
-    public Class<String> getModelType() {
-        return String.class;
-    }
-
-    @Override
-    public Class<String> getPresentationType() {
-        return String.class;
     }
 }

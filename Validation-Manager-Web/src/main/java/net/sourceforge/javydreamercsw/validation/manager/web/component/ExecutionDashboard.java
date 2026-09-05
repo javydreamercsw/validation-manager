@@ -15,21 +15,24 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.server.StreamResource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.openide.util.Lookup;
-import org.vaadin.addon.JFreeChartWrapper;
-
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.ExecutionResult;
 import com.validation.manager.core.server.core.ExecutionResultServer;
@@ -56,9 +59,9 @@ public final class ExecutionDashboard extends VMWindow {
     }
 
     private void init() {
-        setCaption(TRANSLATOR.translate("execution.dash"));
-        setHeight(100, Unit.PERCENTAGE);
-        setWidth(100, Unit.PERCENTAGE);
+        setHeaderTitle(TRANSLATOR.translate("execution.dash"));
+        setWidth("100%");
+        setHeight("100%");
         //Gather stats
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         extractions.forEach((e) -> {
@@ -87,7 +90,27 @@ public final class ExecutionDashboard extends VMWindow {
                 true, // include legend
                 true,
                 false);
-        setContent(new JFreeChartWrapper(chart));
+        //Render the chart to PNG bytes (the JFreeChartWrapper add-on has no
+        //Flow port).
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ChartUtils.writeChartAsPNG(bos, chart, 800, 600);
+            byte[] png = bos.toByteArray();
+            StreamResource resource = new StreamResource("execution-dash.png",
+                    () -> new ByteArrayInputStream(png));
+            Image image = new Image(resource,
+                    TRANSLATOR.translate("execution.progress"));
+            image.setWidth("100%");
+            image.setHeight("100%");
+            add(image);
+        } catch (java.io.IOException ex) {
+            //Fell back to the raw chart title on rendering failure
+            com.vaadin.flow.component.html.Span error
+                    = new com.vaadin.flow.component.html.Span(
+                            TRANSLATOR.translate("execution.progress"));
+            add(error);
+        }
+        open();
     }
 
     private class ExecutionStats {

@@ -15,41 +15,30 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.notification;
 
-import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.addon.contextmenu.MenuItem;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.converter.Converter;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Grid.SelectionMode;
-import com.vaadin.ui.Grid.SingleSelectionModel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.IMainContentProvider;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.data.renderer.TextRenderer;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.IMainContentProvider;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Notification;
-import com.validation.manager.core.db.NotificationType;
-import com.validation.manager.core.db.controller.NotificationTypeJpaController;
 import com.validation.manager.core.server.core.NotificationServer;
 import com.validation.manager.core.server.core.VMSettingServer;
+import com.vaadin.flow.component.UI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
-import net.sourceforge.javydreamercsw.validation.manager.web.component.UserToStringConverter;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.provider.AbstractProvider;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
-import org.vaadin.gridutil.cell.GridCellFilter;
 
 /**
  *
@@ -76,115 +65,49 @@ public class NotificationScreenProvider extends AbstractProvider {
     public Component getContent() {
         VerticalLayout vs = new VerticalLayout();
         //On top put a list of notifications
-        BeanItemContainer<Notification> container
-                = new BeanItemContainer<>(Notification.class);
-        ValidationManagerUI.getInstance().getUser().getNotificationList()
-                .forEach(n -> {
-                    container.addBean(n);
-                });
-//        Unable to use VerticalSplitPanel as I hoped.
-//        See: https://github.com/vaadin/framework/issues/9460
-//        VerticalSplitPanel vs = new VerticalSplitPanel();
-//        vs.setSplitPosition(25, Sizeable.Unit.PERCENTAGE);
+        List<Notification> notifications
+                = ValidationManagerUI.getInstance().getUser().getNotificationList();
         TextArea text = new TextArea(TRANSLATOR.translate("general.text"));
-        text.setWordwrap(true);
         text.setReadOnly(true);
         text.setSizeFull();
-        Grid grid = new Grid(TRANSLATOR.translate("general.notifications"),
-                container);
-        grid.setColumns("notificationType", "author", "creationDate", "archieved");
-        if (container.size() > 0) {
-            grid.setHeightMode(HeightMode.ROW);
-            grid.setHeightByRows(container.size() > 5 ? 5 : container.size());
+        Grid<Notification> grid = new Grid<>();
+        grid.setItems(notifications);
+        grid.addColumn(new TextRenderer<>(value -> Lookup.getDefault()
+                .lookup(InternationalizationProvider.class)
+                .translate(((com.validation.manager.core.db.Notification) value)
+                        .getNotificationType().getTypeName())))
+                .setKey("notificationType")
+                .setHeader(TRANSLATOR.translate("notification.type"));
+        grid.addColumn(n -> n.getAuthor())
+                .setKey("author")
+                .setHeader(TRANSLATOR.translate("notification.author"));
+        java.text.DateFormat format = new SimpleDateFormat(
+                VMSettingServer.getSetting("date.format").getStringVal());
+        grid.addColumn(n -> n.getCreationDate() == null ? ""
+                : format.format(n.getCreationDate()))
+                .setKey("creationDate")
+                .setHeader(TRANSLATOR.translate("creation.time"));
+        grid.addColumn(n -> n.getArchieved()
+                ? TRANSLATOR.translate("general.yes")
+                : TRANSLATOR.translate("general.no"))
+                .setKey("archieved")
+                .setHeader(TRANSLATOR.translate("general.archived"));
+        if (!notifications.isEmpty()) {
+            //v8 capped the grid at 5 rows; Flow shows all rows instead.
+            grid.setAllRowsVisible(true);
         }
-        GridCellFilter filter = new GridCellFilter(grid);
-        filter.setBooleanFilter("archieved",
-                new GridCellFilter.BooleanRepresentation(VaadinIcons.CHECK,
-                        TRANSLATOR.translate("general.yes")),
-                new GridCellFilter.BooleanRepresentation(VaadinIcons.CLOSE,
-                        TRANSLATOR.translate("general.no")));
-        filter.setDateFilter("creationDate",
-                new SimpleDateFormat(VMSettingServer.getSetting("date.format")
-                        .getStringVal()), true);
-        grid.sort("creationDate");
-        Column nt = grid.getColumn("notificationType");
-        nt.setHeaderCaption(TRANSLATOR.translate("notification.type"));
-        nt.setConverter(new Converter<String, NotificationType>() {
-            @Override
-            public NotificationType convertToModel(String value,
-                    Class<? extends NotificationType> targetType,
-                    Locale locale) throws Converter.ConversionException {
-                for (NotificationType n : new NotificationTypeJpaController(DataBaseManager
-                        .getEntityManagerFactory())
-                        .findNotificationTypeEntities()) {
-                    if (Lookup.getDefault().lookup(InternationalizationProvider.class)
-                            .translate(n.getTypeName()).equals(value)) {
-                        return n;
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            public String convertToPresentation(NotificationType value,
-                    Class<? extends String> targetType, Locale locale)
-                    throws Converter.ConversionException {
-                return Lookup.getDefault().lookup(InternationalizationProvider.class)
-                        .translate(value.getTypeName());
-            }
-
-            @Override
-            public Class<NotificationType> getModelType() {
-                return NotificationType.class;
-            }
-
-            @Override
-            public Class<String> getPresentationType() {
-                return String.class;
-            }
-        });
-        Column author = grid.getColumn("author");
-        author.setConverter(new UserToStringConverter());
-        author.setHeaderCaption(TRANSLATOR.translate("notification.author"));
-        Column creation = grid.getColumn("creationDate");
-        creation.setHeaderCaption(TRANSLATOR.translate("creation.time"));
-        Column archive = grid.getColumn("archieved");
-        archive.setHeaderCaption(TRANSLATOR.translate("general.archived"));
-        archive.setConverter(new Converter<String, Boolean>() {
-            @Override
-            public Boolean convertToModel(String value,
-                    Class<? extends Boolean> targetType,
-                    Locale locale) throws Converter.ConversionException {
-                return value.equals(TRANSLATOR.translate("general.yes"));
-            }
-
-            @Override
-            public String convertToPresentation(Boolean value,
-                    Class<? extends String> targetType, Locale locale)
-                    throws Converter.ConversionException {
-                return value ? TRANSLATOR.translate("general.yes")
-                        : TRANSLATOR.translate("general.no");
-            }
-
-            @Override
-            public Class<Boolean> getModelType() {
-                return Boolean.class;
-            }
-
-            @Override
-            public Class<String> getPresentationType() {
-                return String.class;
-            }
-        });
-        grid.setSelectionMode(SelectionMode.SINGLE);
+        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.setSizeFull();
-        ContextMenu menu = new ContextMenu(grid, true);
+        //The gridutil date filter row has no Flow equivalent; the date is
+        //still sortable via the column header.
+        ContextMenu menu = new ContextMenu(grid);
         menu.addItem(TRANSLATOR.translate("notification.mark.unread"),
-                (MenuItem selectedItem) -> {
-                    Object selected = ((SingleSelectionModel) grid.getSelectionModel())
-                            .getSelectedRow();
+                e -> {
+                    Notification selected = grid.getSelectedItems().stream()
+                            .findFirst().orElse(null);
                     if (selected != null) {
-                        NotificationServer ns = new NotificationServer((Notification) selected);
+                        NotificationServer ns
+                                = new NotificationServer(selected);
                         ns.setAcknowledgeDate(null);
                         try {
                             ns.write2DB();
@@ -196,11 +119,12 @@ public class NotificationScreenProvider extends AbstractProvider {
                     }
                 });
         menu.addItem(TRANSLATOR.translate("notification.archive"),
-                (MenuItem selectedItem) -> {
-                    Object selected = ((SingleSelectionModel) grid.getSelectionModel())
-                            .getSelectedRow();
+                e -> {
+                    Notification selected = grid.getSelectedItems().stream()
+                            .findFirst().orElse(null);
                     if (selected != null) {
-                        NotificationServer ns = new NotificationServer((Notification) selected);
+                        NotificationServer ns
+                                = new NotificationServer(selected);
                         ns.setArchieved(true);
                         try {
                             ns.write2DB();
@@ -213,18 +137,17 @@ public class NotificationScreenProvider extends AbstractProvider {
                 });
         grid.addSelectionListener(selectionEvent -> {
             // Get selection from the selection model
-            Object selected = ((SingleSelectionModel) grid.getSelectionModel())
-                    .getSelectedRow();
+            Notification selected = grid.getSelectedItems().stream()
+                    .findFirst().orElse(null);
             if (selected != null) {
                 text.setReadOnly(false);
-                Notification n = (Notification) selected;
-                text.setValue(n.getContent());
+                text.setValue(selected.getContent());
                 text.setReadOnly(true);
-                if (n.getAcknowledgeDate() != null) {
+                if (selected.getAcknowledgeDate() != null) {
                     try {
                         //Mark as read
                         NotificationServer ns
-                                = new NotificationServer((Notification) n);
+                                = new NotificationServer(selected);
                         ns.setAcknowledgeDate(new Date());
                         ns.write2DB();
                     } catch (VMException ex) {
@@ -233,8 +156,8 @@ public class NotificationScreenProvider extends AbstractProvider {
                 }
             }
         });
-        vs.addComponent(grid);
-        vs.addComponent(text);
+        vs.add(grid);
+        vs.add(text);
         vs.setSizeFull();
         vs.setId(getComponentCaption());
         return vs;

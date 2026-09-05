@@ -15,27 +15,25 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.addon.contextmenu.ContextMenu;
-import com.vaadin.addon.contextmenu.MenuItem;
-import com.vaadin.data.Item;
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.Resource;
-import com.vaadin.shared.MouseEventDetails;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
-import static com.validation.manager.core.VMUI.PROJECT_ICON;
 import com.validation.manager.core.db.ProjectType;
 import com.validation.manager.core.db.Template;
 import com.validation.manager.core.db.TemplateNode;
@@ -44,46 +42,41 @@ import com.validation.manager.core.db.controller.ProjectTypeJpaController;
 import com.validation.manager.core.db.controller.TemplateNodeJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.TemplateNodeServer;
-import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.MessageBox;
+import java.util.HashMap;
+import java.util.Map;
 import org.openide.util.Exceptions;
-import org.vaadin.teemu.wizards.Wizard;
-import org.vaadin.teemu.wizards.WizardStep;
-import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
-import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
-import org.vaadin.teemu.wizards.event.WizardProgressListener;
-import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
-import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class TemplateComponent extends Panel {
+public class TemplateComponent extends VerticalLayout {
 
     private final Template template;
     private final boolean edit;
-    private Tree tree;
+    private TreeGrid<Object> tree;
+    //The template is the root item, template nodes are keyed by their PK.
+    private final TreeData<Object> treeData = new TreeData<>();
+    private final Map<TemplateNodePK, TemplateNode> nodeIndex
+            = new HashMap<>();
+    private TreeDataProvider<Object> dataProvider;
 
     public TemplateComponent(Template t, boolean edit) {
-        super(TRANSLATOR.translate("general.template"));
         this.template = t;
         this.edit = edit;
         init();
     }
 
     public TemplateComponent(Template t, boolean edit, String caption) {
-        super(caption);
         this.template = t;
         this.edit = edit;
+        add(new com.vaadin.flow.component.html.Span(caption));
         init();
     }
 
     private void init() {
-        tree = new Tree();
-        tree.addItem(getTemplate());
-        tree.setItemIcon(getTemplate(), VaadinIcons.FILE_TREE);
-        tree.setItemCaption(getTemplate(), getTemplate().getTemplateName());
+        tree = new TreeGrid<>();
+        treeData.addRootItems(getTemplate());
         if (getTemplate().getTemplateNodeList() != null) {
             getTemplate().getTemplateNodeList().forEach(node -> {
                 if (node.getTemplateNode() == null) {
@@ -92,87 +85,121 @@ public class TemplateComponent extends Panel {
                 }
             });
         }
-        //Select item on right click as well
-        tree.addItemClickListener((ItemClickEvent event) -> {
-            if (event.getSource() == tree
-                    && event.getButton() == MouseEventDetails.MouseButton.RIGHT) {
-                if (event.getItem() != null) {
-                    Item clicked = event.getItem();
-                    tree.select(event.getItemId());
-                }
-            }
-        });
-        //Add context menu
-        ContextMenu menu = new ContextMenu(tree, true);
+        dataProvider = new TreeDataProvider<>(treeData);
+        tree.setDataProvider(dataProvider);
+        tree.addComponentHierarchyColumn(this::getCaptionCell)
+                .setKey("caption");
+        tree.expand(getTemplate());
+        //Select item on right click as well (Flow's ContextMenu opens on
+        //right click automatically).
+        ContextMenu menu = new ContextMenu(tree);
+        menu.setTarget(tree);
         if (edit) {
-            tree.addItemClickListener((ItemClickEvent event) -> {
-                if (event.getButton() == MouseEventDetails.MouseButton.RIGHT) {
-                    menu.removeItems();
-                    if (tree.getValue() != null) {
-                        if (tree.getValue() instanceof Template) {
-                            Template t = (Template) tree.getValue();
-                            if (t.getId() < 1_000) {
-                                return;
-                            }
-                        }
-                        MenuItem create
-                                = menu.addItem(TRANSLATOR.translate("general.add.child"),
-                                        PROJECT_ICON, (MenuItem selectedItem) -> {
-                                            displayChildCreationWizard();
-                                        });
-                        MenuItem delete
-                                = menu.addItem(TRANSLATOR.translate("general.delete"),
-                                        PROJECT_ICON, (MenuItem selectedItem) -> {
-                                            displayChildDeletionWizard();
-                                        });
-                        //Don't allow to delete the root node.
-                        delete.setEnabled(!tree.isRoot(tree.getValue()));
+            menu.addItem(TRANSLATOR.translate("general.add.child"),
+                    e -> {
+                        displayChildCreationWizard();
+                    });
+            MenuItem delete = menu.addItem(
+                    TRANSLATOR.translate("general.delete"),
+                    e -> {
+                        displayChildDeletionWizard();
+                    });
+            //Don't allow to delete the root node; close the menu when the
+            //right-clicked row isn't a deletable template (v8 had an
+            //opened-listener for this; Flow exposes addOpenedChangeListener).
+            delete.setEnabled(tree.asSingleSelect().getValue() != null
+                    && treeData.getParent(tree.asSingleSelect().getValue()) != null);
+            menu.addOpenedChangeListener(event -> {
+                if (menu.isOpened() && tree.asSingleSelect().getValue()
+                        instanceof Template) {
+                    Template t = (Template) tree.asSingleSelect().getValue();
+                    if (t.getId() < 1_000) {
+                        menu.close();
                     }
                 }
             });
+            //Don't allow to delete the root node.
+            delete.setEnabled(treeData.getParent(tree.asSingleSelect()
+                    .getValue()) != null);
         }
+        com.vaadin.flow.data.binder.Binder<Template> binder
+                = new com.vaadin.flow.data.binder.Binder<>(Template.class);
+        binder.setBean(getTemplate());
         TextField nameField
                 = new TextField(TRANSLATOR.translate("general.name"));
-        VerticalLayout vl = new VerticalLayout();
-        BeanFieldGroup binder = new BeanFieldGroup(getTemplate().getClass());
-        binder.setItemDataSource(getTemplate());
-        binder.bind(nameField, "templateName");
+        binder.forField(nameField)
+                .bind("templateName");
         nameField.addValueChangeListener(listener -> {
             getTemplate().setTemplateName(nameField.getValue());
         });
-        nameField.setNullRepresentation("");
-        ComboBox type = new ComboBox(TRANSLATOR.translate("general.type"));
-        BeanItemContainer<ProjectType> container
-                = new BeanItemContainer<>(ProjectType.class,
-                        new ProjectTypeJpaController(DataBaseManager
-                                .getEntityManagerFactory())
-                                .findProjectTypeEntities());
-        type.setContainerDataSource(container);
-        for (Object o : type.getItemIds()) {
-            ProjectType id = ((ProjectType) o);
-            type.setItemCaption(id, TRANSLATOR.translate(id.getTypeName()));
-        }
+        com.vaadin.flow.component.combobox.ComboBox<ProjectType> type
+                = new com.vaadin.flow.component.combobox.ComboBox<>(TRANSLATOR
+                        .translate("general.type"));
+        type.setItems(new ProjectTypeJpaController(DataBaseManager
+                .getEntityManagerFactory())
+                .findProjectTypeEntities());
+        type.setItemLabelGenerator(id
+                -> TRANSLATOR.translate(id.getTypeName()));
         type.addValueChangeListener(listener -> {
             if (type.getValue() != null) {
-                getTemplate().setProjectTypeId((ProjectType) type.getValue());
+                getTemplate().setProjectTypeId(type.getValue());
             }
         });
         binder.bind(type, "projectTypeId");
-        vl.addComponent(nameField);
-        vl.addComponent(type);
+        VerticalLayout vl = new VerticalLayout();
+        vl.add(nameField, type);
         if (template.getId() != null) {
-            vl.addComponent(tree);
+            vl.add(tree);
         }
         binder.setReadOnly(!edit);
-        setContent(vl);
+        add(vl);
+    }
+
+    private Component getCaptionCell(Object item) {
+        return new com.vaadin.flow.component.html.Span(getCaptionFor(item));
+    }
+
+    private String getCaptionFor(Object item) {
+        if (item instanceof Template) {
+            return ((Template) item).getTemplateName();
+        } else if (item instanceof TemplateNodePK) {
+            TemplateNode node = nodeIndex.get((TemplateNodePK) item);
+            return node == null ? String.valueOf(item)
+                    : TRANSLATOR.translate(node.getNodeName());
+        }
+        return String.valueOf(item);
+    }
+
+    private VaadinIcon getIconFor(Object item) {
+        if (item instanceof Template) {
+            return VaadinIcon.FILE_TREE;
+        } else if (item instanceof TemplateNodePK) {
+            TemplateNode node = nodeIndex.get((TemplateNodePK) item);
+            if (node == null || node.getTemplateNodeType() == null) {
+                return VaadinIcon.FOLDER;
+            }
+            switch (node.getTemplateNodeType().getId()) {
+                case 1://Requirement
+                    return VaadinIcon.PIN;
+                case 2://Test Plan
+                    return VaadinIcon.BULLETS;
+                case 3://Just a folder
+                    return VaadinIcon.FOLDER;
+                case 4://Risk Management
+                    return VaadinIcon.EYE;
+                default://Folder by default
+                    return VaadinIcon.FOLDER;
+            }
+        }
+        return null;
     }
 
     private void displayChildCreationWizard() {
-        Wizard w = new Wizard();
-        Window cw = new VMWindow();
+        FlowWizard w = new FlowWizard();
+        VMWindow cw = new VMWindow();
         TemplateNodeComponent tc
                 = new TemplateNodeComponent(new TemplateNode(), true);
-        w.addStep(new WizardStep() {
+        w.addStep(new FlowWizardStep() {
 
             @Override
             public String getCaption() {
@@ -194,30 +221,40 @@ public class TemplateComponent extends Panel {
                 return false;
             }
         });
-        w.addListener(new WizardProgressListener() {
+        w.addListener(new net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardProgressListener() {
             @Override
-            public void activeStepChanged(WizardStepActivationEvent event) {
+            public void activeStepChanged(
+                    net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepActivationEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void stepSetChanged(WizardStepSetChangedEvent event) {
+            public void stepSetChanged(
+                    net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepSetChangedEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void wizardCompleted(WizardCompletedEvent event) {
+            public void stepCompleted(
+                    net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepCompletionEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(
+                    net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent event) {
                 try {
                     //Add the item
                     TemplateNode tn = tc.getNode(), parent = null;
                     Template template = null;
-                    if (tree.getValue() instanceof TemplateNodePK) {
+                    if (tree.asSingleSelect().getValue() instanceof TemplateNodePK) {
                         TemplateNodeServer node
-                                = new TemplateNodeServer((TemplateNodePK) tree.getValue());
+                                = new TemplateNodeServer((TemplateNodePK) tree
+                                        .asSingleSelect().getValue());
                         template = node.getTemplate();
                         parent = node.getEntity();
-                    } else if (tree.getValue() instanceof Template) {
-                        template = (Template) tree.getValue();
+                    } else if (tree.asSingleSelect().getValue() instanceof Template) {
+                        template = (Template) tree.asSingleSelect().getValue();
                     }
                     tn.setTemplate(template);
                     if (parent != null) {
@@ -226,82 +263,59 @@ public class TemplateComponent extends Panel {
                     new TemplateNodeJpaController(DataBaseManager
                             .getEntityManagerFactory()).create(tn);
                     addTemplateNode(tn);
-                    UI.getCurrent().removeWindow(cw);
+                    dataProvider.refreshAll();
+                    cw.close();
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
                 }
             }
 
             @Override
-            public void wizardCancelled(WizardCancelledEvent event) {
-                UI.getCurrent().removeWindow(cw);
+            public void wizardCancelled(
+                    net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCancelledEvent event) {
+                cw.close();
             }
         });
-        cw.setContent(w);
-        cw.setSizeFull();
-        UI.getCurrent().addWindow(cw);
+        cw.add(w);
+        cw.open();
     }
 
     private void addTemplateNode(TemplateNode node) {
         Object key = node.getTemplateNodePK();
-        tree.addItem(key);
-        tree.setItemCaption(key,
-                TRANSLATOR.translate(node.getNodeName()));
-        tree.setChildrenAllowed(key,
-                !node.getTemplateNodeList().isEmpty());
-        if (node.getTemplateNode() != null) {
-            tree.setParent(key,
-                    node.getTemplateNode().getTemplateNodePK());
-        } else {
-            tree.setParent(key,
-                    node.getTemplate());
+        nodeIndex.put((TemplateNodePK) key, node);
+        //Parent is set on insertion; children presence implies children allowed
+        treeData.addItem(node.getTemplateNode() != null
+                ? node.getTemplateNode().getTemplateNodePK()
+                : node.getTemplate(),
+                key);
+        if (node.getTemplateNodeList() != null) {
+            node.getTemplateNodeList().forEach(sub -> {
+                addTemplateNode(sub);
+            });
         }
-        Resource icon;
-        switch (node.getTemplateNodeType().getId()) {
-            case 1://Requirement
-                icon = VMUI.REQUIREMENT_ICON;
-                break;
-            case 2://Test Plan
-                icon = VMUI.PLAN_ICON;
-                break;
-            case 3://Just a folder
-                icon = VaadinIcons.FOLDER;
-                break;
-            case 4://Risk Management
-                icon = VaadinIcons.EYE;
-                break;
-            default://Folder by default
-                icon = VaadinIcons.FOLDER;
-        }
-        tree.setItemIcon(key, icon);
-        node.getTemplateNodeList().forEach(sub -> {
-            addTemplateNode(sub);
-        });
     }
 
     private void displayChildDeletionWizard() {
-        MessageBox prompt = MessageBox.createQuestion()
-                .withCaption(TRANSLATOR.translate("general.delete.child"))
-                .withMessage(TRANSLATOR.translate("template.delete.message"))
-                .withYesButton(() -> {
-                    try {
-                        TemplateNodeServer node
-                                = new TemplateNodeServer((TemplateNodePK) tree.getValue());
-                        TemplateNodeServer.delete(node.getEntity());
-                        tree.getChildren(tree.getValue()).forEach(child -> {
-                            tree.removeItem(child);
-                        });
-                        tree.removeItem(node.getTemplateNodePK());
-                    } catch (NonexistentEntityException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                },
-                        ButtonOption.focus(),
-                        ButtonOption
-                                .icon(VaadinIcons.CHECK))
-                .withNoButton(ButtonOption
-                        .icon(VaadinIcons.CLOSE));
-        prompt.getWindow().setIcon(VMUI.SMALL_APP_ICON);
+        ConfirmDialog prompt = new ConfirmDialog();
+        prompt.setHeader(TRANSLATOR.translate("general.delete.child"));
+        prompt.setText(TRANSLATOR.translate("template.delete.message"));
+        prompt.setConfirmButton(TRANSLATOR.translate("general.yes"), (e) -> {
+            try {
+                TemplateNodeServer node
+                        = new TemplateNodeServer((TemplateNodePK) tree
+                                .asSingleSelect().getValue());
+                TemplateNodeServer.delete(node.getEntity());
+                //Removes the node and its children
+                treeData.removeItem(node.getTemplateNodePK());
+                dataProvider.refreshAll();
+            } catch (NonexistentEntityException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        });
+        prompt.setCancelable(true);
+        prompt.setCancelButton(TRANSLATOR.translate("general.no"), (e) -> {
+            //Nothing to do
+        });
         prompt.open();
     }
 

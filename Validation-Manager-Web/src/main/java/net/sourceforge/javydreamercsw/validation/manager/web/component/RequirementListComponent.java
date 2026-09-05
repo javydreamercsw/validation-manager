@@ -15,9 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.shared.ui.grid.HeightMode;
-import com.vaadin.ui.Grid;
+import com.vaadin.flow.component.grid.Grid;
 import com.validation.manager.core.api.internationalization.InternationalizationProvider;
 import com.validation.manager.core.db.Requirement;
 import java.util.List;
@@ -27,7 +25,7 @@ import org.openide.util.Lookup;
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class RequirementListComponent extends Grid {
+public final class RequirementListComponent extends Grid<Requirement> {
 
     private final List<Requirement> requirementList;
     private static final InternationalizationProvider TRANSLATOR
@@ -35,28 +33,36 @@ public final class RequirementListComponent extends Grid {
 
     public RequirementListComponent(List<Requirement> requirementList) {
         this.requirementList = requirementList;
-        setCaption(TRANSLATOR.translate("related.requirements"));
+        setHeaderRow(TRANSLATOR.translate("related.requirements"));
         init();
     }
 
     public RequirementListComponent(String caption,
             List<Requirement> requirementList) {
-        super(caption);
+        super();
         this.requirementList = requirementList;
+        setHeaderRow(caption);
         init();
     }
 
+    private void setHeaderRow(String caption) {
+        // v8 Grid caption: render as an attached header element.
+        getElement().insertChild(0,
+                com.vaadin.flow.dom.ElementFactory.createDiv(caption));
+    }
+
     private void init() {
-        BeanItemContainer<Requirement> children
-                = new BeanItemContainer<>(Requirement.class);
-        children.addAll(requirementList);
-        setContainerDataSource(children);
-        setColumns("uniqueId");
-        Grid.Column uniqueId = getColumn("uniqueId");
-        uniqueId.setHeaderCaption(TRANSLATOR.translate("unique.id"));
-        setHeightMode(HeightMode.ROW);
-        setHeightByRows(children.size() > 5 ? 5 : children.size());
+        setItems(requirementList);
+        Grid.Column<Requirement> uniqueId
+                = addColumn(Requirement::getUniqueId)
+                        .setKey("uniqueId")
+                        .setHeader(TRANSLATOR.translate("unique.id"));
+        setHeight(requirementList.size() > 5 ? "160px"
+                : (requirementList.size() * 40) + "px");
         setSizeFull();
-        children.sort(new Object[]{"uniqueId"}, new boolean[]{true});
+        com.vaadin.flow.component.grid.GridSortOrderBuilder<Requirement> builder
+                = new com.vaadin.flow.component.grid.GridSortOrderBuilder<>();
+        builder.thenAsc(uniqueId);
+        sort(builder.build());
     }
 }

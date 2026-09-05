@@ -15,7 +15,7 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.importer;
 
-import com.vaadin.ui.Upload;
+import com.vaadin.flow.component.upload.Receiver;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  *
  * @author Javier Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class FileUploader implements Upload.Receiver {
+public class FileUploader implements Receiver {
 
     private File file;         // File to write to.
     private static final Logger LOG

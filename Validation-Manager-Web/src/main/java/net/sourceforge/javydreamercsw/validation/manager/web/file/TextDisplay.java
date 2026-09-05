@@ -15,9 +15,8 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.file;
 
-import com.vaadin.server.Sizeable;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.Window;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.textfield.TextArea;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,6 +27,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
 import org.openide.util.lookup.ServiceProvider;
 
+/**
+ *
+ * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
+ */
 @ServiceProvider(service = IFileDisplay.class)
 public class TextDisplay extends AbstractFileDisplay
         implements IFileDisplay {
@@ -38,15 +41,15 @@ public class TextDisplay extends AbstractFileDisplay
     }
 
     @Override
-    public Window getViewer(File f) {
+    public VMWindow getViewer(File f) {
         BufferedReader br = null;
-        Window w = new VMWindow(f.getName());
-        w.setHeight(80, Sizeable.Unit.PERCENTAGE);
-        w.setWidth(80, Sizeable.Unit.PERCENTAGE);
-        //Just a plain panel will do
+        VMWindow w = new VMWindow(f.getName());
+        w.setHeight("80%");
+        w.setWidth("80%");
+        //Just a plain read-only text area will do
         TextArea text = new TextArea();
         text.setSizeFull();
-        w.setContent(text);
+        w.add(text);
         try {
             br = new BufferedReader(new FileReader(f));
             String line;

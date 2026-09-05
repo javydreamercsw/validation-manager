@@ -15,19 +15,19 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
-import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.UI;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.combobox.ComboBox;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.Template;
 import com.validation.manager.core.server.core.ProjectServer;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
-import org.vaadin.teemu.wizards.Wizard;
-import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
-import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
-import org.vaadin.teemu.wizards.event.WizardProgressListener;
-import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
-import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCancelledEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardProgressListener;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepCompletionEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepActivationEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepSetChangedEvent;
 
 /**
  *
@@ -39,7 +39,7 @@ public final class ProjectCreationWizard extends VMWindow {
     private String type;
     private String category;
     private ProjectTemplateManager process;
-    private final Wizard wizard = new Wizard();
+    private final FlowWizard wizard = new FlowWizard();
     private static final Logger LOG
             = Logger.getLogger(ProjectCreationWizard.class.getSimpleName());
     private ProjectServer ps;
@@ -48,36 +48,39 @@ public final class ProjectCreationWizard extends VMWindow {
         this.ps = p;
         wizard.addStep(new ProjectTypeStep(this));
         wizard.addStep(new ProjectTemplateStep(this));
-        wizard.addListener(new WizardProgressListener() {
+        wizard.addListener(new FlowWizardProgressListener() {
             @Override
-            public void activeStepChanged(WizardStepActivationEvent event) {
+            public void activeStepChanged(FlowWizardStepActivationEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void stepSetChanged(WizardStepSetChangedEvent event) {
+            public void stepSetChanged(FlowWizardStepSetChangedEvent event) {
                 //Do nothing
             }
 
             @Override
-            public void wizardCompleted(WizardCompletedEvent event) {
+            public void stepCompleted(FlowWizardStepCompletionEvent event) {
+                //Do nothing
+            }
+
+            @Override
+            public void wizardCompleted(FlowWizardCompletedEvent event) {
                 //Create the structure from template
                 process.run();
-                if (UI.getCurrent() != null) {//For unit tests
-                    UI.getCurrent().removeWindow(ProjectCreationWizard.this);
-                }
+                //Flow equivalent of v8 UI.removeWindow(this)
+                ProjectCreationWizard.this.close();
             }
 
             @Override
-            public void wizardCancelled(WizardCancelledEvent event) {
-                if (UI.getCurrent() != null) {//For unit tests
-                    UI.getCurrent().removeWindow(ProjectCreationWizard.this);
-                }
+            public void wizardCancelled(FlowWizardCancelledEvent event) {
+                //Flow equivalent of v8 UI.removeWindow(this)
+                ProjectCreationWizard.this.close();
             }
         });
-        setContent(wizard);
-        setWidth(50, Unit.PERCENTAGE);
-        setHeight(50, Unit.PERCENTAGE);
+        add(wizard);
+        setWidth("50%");
+        setHeight("50%");
     }
 
     /**
@@ -125,7 +128,7 @@ public final class ProjectCreationWizard extends VMWindow {
     /**
      * @return the wizard
      */
-    public Wizard getWizard() {
+    public FlowWizard getWizard() {
         return wizard;
     }
 
@@ -157,12 +160,9 @@ public final class ProjectCreationWizard extends VMWindow {
         this.ps = ps;
     }
 
-    public void translateSelect(AbstractSelect s) {
-        for (Object o : s.getItemIds()) {
-            String id = ((String) o);
-            s.setItemCaption(id, (id.startsWith("template")
-                    ? (id.substring(id.length() - 1) + "-") : "")
-                    + TRANSLATOR.translate((String) id));
-        }
+    public void translateSelect(ComboBox<String> s) {
+        s.setItemLabelGenerator(id -> (id.startsWith("template")
+                ? (id.substring(id.length() - 1) + "-") : "")
+                + TRANSLATOR.translate(id));
     }
 }

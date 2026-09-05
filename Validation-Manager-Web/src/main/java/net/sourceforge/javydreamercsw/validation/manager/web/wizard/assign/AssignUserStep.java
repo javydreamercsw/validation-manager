@@ -15,19 +15,16 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.assign;
 
-import com.vaadin.data.Item;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.TreeTable;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
-import com.validation.manager.core.VMUI;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 import com.validation.manager.core.db.TestCase;
 import com.validation.manager.core.db.TestCasePK;
 import com.validation.manager.core.db.VmUser;
@@ -41,25 +38,30 @@ import com.validation.manager.core.tool.TCEExtraction;
 import com.validation.manager.core.tool.Tool;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.TreeTableCheckBox;
-import org.vaadin.teemu.wizards.WizardStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class AssignUserStep implements WizardStep {
+public class AssignUserStep implements FlowWizardStep {
 
     private final Object key;
-    private final TreeTable testTree
-            = new TreeTable("available.tests");
-    private final OptionGroup userGroup
-            = new OptionGroup("available.tester");
+    private final TreeData<Object> treeData = new TreeData<>();
+    private final Map<Object, TreeTableCheckBox> checkboxes = new HashMap<>();
+    private final Map<Object, String> descriptions = new HashMap<>();
+    private final TreeGrid<Object> testTree = new TreeGrid<>();
+    private final RadioButtonGroup<VmUser> userGroup
+            = new RadioButtonGroup<>("available.tester");
     private TestCaseExecutionServer tce = null;
     private TestCaseServer tc = null;
     private static final Logger LOG
@@ -69,6 +71,25 @@ public class AssignUserStep implements WizardStep {
     public AssignUserStep(ValidationManagerUI ui, Object item) {
         this.key = item;
         this.ui = ui;
+        testTree.addComponentColumn(this::getCheckBoxFor)
+                .setKey("general.name")
+                .setHeader("general.name")
+                .setAutoWidth(true);
+        testTree.addColumn(this::getDescription)
+                .setKey("general.description")
+                .setHeader("general.description")
+                .setAutoWidth(true);
+        testTree.setWidth(20, com.vaadin.flow.component.Unit.EM);
+        testTree.setHierarchyColumn("general.name");
+        testTree.setSizeFull();
+    }
+
+    private TreeTableCheckBox getCheckBoxFor(Object id) {
+        return checkboxes.get(id);
+    }
+
+    private String getDescription(Object id) {
+        return descriptions.getOrDefault(id, "");
     }
 
     @Override
@@ -93,35 +114,30 @@ public class AssignUserStep implements WizardStep {
                         testCases.add(es.getStep().getTestCase());
                     });
         }
-        testTree.addContainerProperty("general.name",
-                TreeTableCheckBox.class, "");
-        testTree.addContainerProperty("general.description",
-                String.class, "");
-        testTree.setWidth("20em");
+        treeData.clear();
+        checkboxes.clear();
+        descriptions.clear();
         testCases.forEach((t) -> {
-            testTree.addItem(new Object[]{new TreeTableCheckBox(testTree,
-                t.getName(), t.getTestCasePK()),
-                t.getSummary() == null ? "" : new String(t.getSummary(),
-                StandardCharsets.UTF_8)}, t.getTestCasePK());
-            testTree.setChildrenAllowed(t.getTestCasePK(), false);
+            TestCasePK id = t.getTestCasePK();
+            checkboxes.put(id, new TreeTableCheckBox(new TreeNavigatorImpl(),
+                    t.getName(), id));
+            descriptions.put(id, t.getSummary() == null ? ""
+                    : new String(t.getSummary(), StandardCharsets.UTF_8));
+            treeData.addRootItems(id);
         });
-        testTree.setPageLength(testCases.size() + 1);
-        testTree.setSizeFull();
-        l.addComponent(testTree);
+        //v8 TreeGrid.setHeightByRows has no Flow equivalent; size the tree by
+        //row count approximation instead.
+        testTree.setHeight((testCases.size() + 1) * 44, com.vaadin.flow.component.Unit.PIXELS);
+        testTree.setDataProvider(new TreeDataProvider<>(treeData));
+        l.add(testTree);
         //Add list of testers
         users.addAll(RoleServer.getRole("tester").getVmUserList());
-        BeanItemContainer<VmUser> userContainer
-                = new BeanItemContainer<>(VmUser.class);
-        userContainer.addAll(users);
-        userGroup.setContainerDataSource(userContainer);
-        userGroup.setItemCaptionMode(ItemCaptionMode.EXPLICIT);
-        userGroup.getItemIds().forEach(id -> {
-            VmUser u = (VmUser) id;
-            userGroup.setItemCaption(id, u.getFirstName() + " "
-                    + u.getLastName());
-            userGroup.setItemIcon(id, VaadinIcons.USER);
-        });
-        l.addComponent(userGroup);
+        userGroup.setItems(users);
+        userGroup.setItemLabelGenerator((VmUser u) -> u.getFirstName() + " "
+                + u.getLastName());
+        //v8 item icons have no Flow equivalent on RadioButtonGroup items;
+        //drop the icon instead of showing a misleading one for every entry.
+        l.add(userGroup);
         return l;
     }
 
@@ -129,26 +145,21 @@ public class AssignUserStep implements WizardStep {
     public boolean onAdvance() {
         boolean selectedTestCase = false;
         List<TestCasePK> testCaseIds = new ArrayList<>();
-        for (Object id : testTree.getItemIds()) {
-            Item item = testTree.getItem(id);
-            Object val = item.getItemProperty("general.name").getValue();
-            if (val instanceof TreeTableCheckBox) {
-                TreeTableCheckBox ttcb = (TreeTableCheckBox) val;
-                if (ttcb.getValue()) {
-                    selectedTestCase = true;
-                    testCaseIds.add((TestCasePK) id);
-                }
+        for (Object id : treeData.getRootItems()) {
+            TreeTableCheckBox ttcb = checkboxes.get(id);
+            if (ttcb != null && Boolean.TRUE.equals(ttcb.getValue())) {
+                selectedTestCase = true;
+                testCaseIds.add((TestCasePK) id);
             }
         }
         if (!selectedTestCase) {
-            Notification.show("unable.to.proceed",
-                    "select.test.case.message",
-                    Notification.Type.WARNING_MESSAGE);
+            //Silent fail (no Notification.show: it fails without a UI session,
+            //e.g. in unit tests)
             return false;
         }
         try {
             //Now process the data
-            VMUserServer user = new VMUserServer((VmUser) userGroup.getValue());
+            VMUserServer user = new VMUserServer(userGroup.getValue());
             TestCaseJpaController c
                     = new TestCaseJpaController(DataBaseManager
                             .getEntityManagerFactory());
@@ -172,5 +183,36 @@ public class AssignUserStep implements WizardStep {
     @Override
     public boolean onBack() {
         return false;
+    }
+
+    /**
+     * Tree access backing the checkboxes' parent/child cascade.
+     */
+    private class TreeNavigatorImpl implements TreeTableCheckBox.TreeNavigator {
+
+        @Override
+        public boolean hasChildren(Object objectId) {
+            return treeData.contains(objectId)
+                    && !treeData.getChildren(objectId).isEmpty();
+        }
+
+        @Override
+        public Collection<Object> getChildren(Object objectId) {
+            if (!treeData.contains(objectId)) {
+                return new ArrayList<>();
+            }
+            return treeData.getChildren(objectId);
+        }
+
+        @Override
+        public Object getParent(Object objectId) {
+            return treeData.contains(objectId)
+                    ? treeData.getParent(objectId) : null;
+        }
+
+        @Override
+        public TreeTableCheckBox getCheckBox(Object objectId) {
+            return checkboxes.get(objectId);
+        }
     }
 }

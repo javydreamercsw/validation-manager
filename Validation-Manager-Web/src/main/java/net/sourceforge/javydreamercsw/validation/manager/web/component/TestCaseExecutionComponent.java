@@ -15,21 +15,17 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.VMException;
-import com.validation.manager.core.VMUI;
 import com.validation.manager.core.db.History;
 import com.validation.manager.core.db.Requirement;
 import com.validation.manager.core.db.TestCaseExecution;
@@ -38,8 +34,6 @@ import com.validation.manager.core.server.core.ExecutionStepServer;
 import com.validation.manager.core.server.core.ProjectServer;
 import com.validation.manager.core.server.core.TestCaseExecutionServer;
 import com.validation.manager.core.tool.Tool;
-import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.MessageBox;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,18 +41,19 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
-import org.vaadin.teemu.wizards.Wizard;
-import org.vaadin.teemu.wizards.event.WizardCancelledEvent;
-import org.vaadin.teemu.wizards.event.WizardCompletedEvent;
-import org.vaadin.teemu.wizards.event.WizardProgressListener;
-import org.vaadin.teemu.wizards.event.WizardStepActivationEvent;
-import org.vaadin.teemu.wizards.event.WizardStepSetChangedEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCancelledEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardProgressListener;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepActivationEvent;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepSetChangedEvent;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class TestCaseExecutionComponent extends Panel {
+public final class TestCaseExecutionComponent extends VMWindow {
 
     private final TestCaseExecution tce;
     private final boolean edit;
@@ -71,45 +66,35 @@ public final class TestCaseExecutionComponent extends Panel {
         this.tce = tce;
         this.ps = ps;
         this.edit = edit;
-        setCaption(TRANSLATOR.translate("test.case.execution.detail"));
+        setHeaderTitle(TRANSLATOR.translate("test.case.execution.detail"));
         init();
     }
 
     public TestCaseExecutionComponent(TestCaseExecution tce, ProjectServer ps,
             boolean edit, String caption) {
-        super(caption);
         this.tce = tce;
         this.edit = edit;
         this.ps = ps;
+        setHeaderTitle(caption);
         init();
     }
 
     private void init() {
         FormLayout layout = new FormLayout();
-        setContent(layout);
-        addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(tce.getClass());
-        binder.setItemDataSource(tce);
-        Field<?> name = binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "name");
-        name.setRequired(true);
-        name.setRequiredError(TRANSLATOR.translate("missing.name.message"));
-        layout.addComponent(name);
-        Field<?> scope = binder.buildAndBind(TRANSLATOR.translate("general.scope"),
-                "scope");
-        layout.addComponent(scope);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        name.setRequiredIndicatorVisible(true);
+        TextField scope = new TextField(TRANSLATOR.translate("general.scope"));
         //TODO: Show when finished
         TextArea conclusion = new TextArea(TRANSLATOR.translate("general.conclusion"));
-        binder.bind(conclusion, "conclusion");
-        layout.addComponent(conclusion);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
-        cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
+        cancel.addClickListener((event) -> {
             if (tce.getId() == null) {
-                ((VMUI) UI.getCurrent()).displayObject(((VMUI) UI.getCurrent())
-                        .getSelectdValue());
+                ((ValidationManagerUI) getUI().orElse(null))
+                        .displayObject(((ValidationManagerUI) getUI().orElse(null))
+                                .getSelectdValue());
             } else {
-                ((VMUI) UI.getCurrent()).displayObject(tce, false);
+                ((ValidationManagerUI) getUI().orElse(null))
+                        .displayObject(tce, false);
             }
         });
         if (edit) {
@@ -117,10 +102,10 @@ public final class TestCaseExecutionComponent extends Panel {
                 TestCaseExecutionServer tces = new TestCaseExecutionServer();
                 //Creating a new one
                 Button save = new Button(TRANSLATOR.translate("general.save"));
-                save.addClickListener((Button.ClickEvent event) -> {
-                    if (name.getValue() == null) {
-                        Notification.show(name.getRequiredError(),
-                                Notification.Type.ERROR_MESSAGE);
+                save.addClickListener((event) -> {
+                    if (name.getValue() == null
+                            || name.getValue().trim().isEmpty()) {
+                        Notification.show(TRANSLATOR.translate("missing.name.message"));
                         return;
                     }
                     Map<Requirement, History> history = new HashMap<>();
@@ -143,32 +128,41 @@ public final class TestCaseExecutionComponent extends Panel {
                             }
                         });
                         if (!toApprove.isEmpty()) {
-                            MessageBox mb = MessageBox.create();
-                            mb.asModal(true)
-                                    .withCaption(TRANSLATOR.translate("missing.baseline.requirement.title"))
-                                    .withMessage(TRANSLATOR.translate("missing.baseline.requirement.message"))
-                                    .withButtonAlignment(Alignment.MIDDLE_CENTER)
-                                    .withOkButton(() -> {
+                            ConfirmDialog prompt = new ConfirmDialog();
+                            prompt.setHeader(TRANSLATOR
+                                    .translate("missing.baseline.requirement.title"));
+                            prompt.setText(TRANSLATOR
+                                    .translate("missing.baseline.requirement.message"));
+                            prompt.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                                    (e) -> {
                                         //Start the wizard
-                                        Wizard w = new Wizard();
+                                        FlowWizard w = new FlowWizard();
                                         VMWindow sw = new VMWindow();
-                                        w.setDisplayedMaxTitles(3);
                                         toApprove.forEach(r -> {
                                             w.addStep(new SelectRequirementVersionStep(r));
                                         });
-                                        w.addListener(new WizardProgressListener() {
+                                        w.addListener(new net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardProgressListener() {
                                             @Override
-                                            public void activeStepChanged(WizardStepActivationEvent event) {
+                                            public void activeStepChanged(
+                                                    FlowWizardStepActivationEvent event) {
                                                 //Do nothing
                                             }
 
                                             @Override
-                                            public void stepSetChanged(WizardStepSetChangedEvent event) {
+                                            public void stepSetChanged(
+                                                    FlowWizardStepSetChangedEvent event) {
                                                 //Do nothing
                                             }
 
                                             @Override
-                                            public void wizardCompleted(WizardCompletedEvent event) {
+                                            public void stepCompleted(
+                                                    net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardStepCompletionEvent event) {
+                                                //Do nothing
+                                            }
+
+                                            @Override
+                                            public void wizardCompleted(
+                                                    net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.event.FlowWizardCompletedEvent event) {
                                                 //Process the selections
                                                 w.getSteps().forEach(s -> {
                                                     SelectRequirementVersionStep step
@@ -176,23 +170,24 @@ public final class TestCaseExecutionComponent extends Panel {
                                                     history.put(step.getRequirement(),
                                                             step.getHistory());
                                                 });
-                                                UI.getCurrent().removeWindow(sw);
+                                                sw.close();
                                             }
 
                                             @Override
-                                            public void wizardCancelled(WizardCancelledEvent event) {
-                                                UI.getCurrent().removeWindow(sw);
+                                            public void wizardCancelled(
+                                                    FlowWizardCancelledEvent event) {
+                                                sw.close();
                                             }
                                         });
-                                        sw.setContent(w);
-                                        sw.setSizeFull();
-                                        UI.getCurrent().addWindow(sw);
-                                    }, ButtonOption.focus(),
-                                            ButtonOption.icon(VaadinIcons.CHECK))
-                                    .withCancelButton(
-                                            ButtonOption.icon(VaadinIcons.CLOSE)
-                                    ).getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-                            mb.open();
+                                        sw.add(w);
+                                        sw.open();
+                                    });
+                            prompt.setCancelable(true);
+                            prompt.setCancelButton(TRANSLATOR.translate("general.cancel"),
+                                    (e) -> {
+                                        //Nothing to do
+                                    });
+                            prompt.open();
                         }
                     }
                     if (!history.isEmpty()) {
@@ -225,57 +220,57 @@ public final class TestCaseExecutionComponent extends Panel {
                             }
                             tces.write2DB();
                             tces.update(tce, tces.getEntity());
-                            ((VMUI) UI.getCurrent()).updateProjectList();
-                            ((VMUI) UI.getCurrent()).updateScreen();
-                            ((VMUI) UI.getCurrent()).displayObject(tce);
+                            ((ValidationManagerUI) getUI().orElse(null))
+                                    .updateProjectList();
+                            ((ValidationManagerUI) getUI().orElse(null))
+                                    .updateScreen();
+                            ((ValidationManagerUI) getUI().orElse(null))
+                                    .displayObject(tce);
                         } catch (Exception ex) {
                             LOG.log(Level.SEVERE, null, ex);
                         }
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
+                hl.add(save, cancel);
+                layout.add(name, scope, conclusion, hl);
             } else {
                 TestCaseExecutionServer tces = new TestCaseExecutionServer(tce);
                 //Editing existing one
                 Button update = new Button(TRANSLATOR.translate("general.update"));
-                update.addClickListener((Button.ClickEvent event) -> {
+                update.addClickListener((event) -> {
                     tces.setConclusion(conclusion.getValue());
                     tces.setScope(scope.getValue().toString());
                     tces.setName(name.getValue().toString());
                     try {
-                        ((VMUI) UI.getCurrent()).handleVersioning(tces, () -> {
-                            try {
-                                tces.write2DB();
-                                tces.update(tce, tces.getEntity());
-                                ((VMUI) UI.getCurrent()).displayObject(tce);
-                            } catch (NonexistentEntityException ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            } catch (Exception ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            }
-                        });
+                        ((ValidationManagerUI) getUI().orElse(null))
+                                .handleVersioning(tces, () -> {
+                                    try {
+                                        tces.write2DB();
+                                        tces.update(tce, tces.getEntity());
+                                        ((ValidationManagerUI) getUI().orElse(null))
+                                                .displayObject(tce);
+                                    } catch (NonexistentEntityException ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                        Notification.show(TRANSLATOR
+                                                .translate("general.error.record.update"));
+                                    } catch (Exception ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                        Notification.show(TRANSLATOR
+                                                .translate("general.error.record.update"));
+                                    }
+                                });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
+                hl.add(update, cancel);
+                layout.add(name, scope, conclusion, hl);
             }
+        } else {
+            layout.add(name, scope, conclusion, cancel);
         }
-        binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
-        layout.setSizeFull();
-        setSizeFull();
+        add(layout);
     }
 }

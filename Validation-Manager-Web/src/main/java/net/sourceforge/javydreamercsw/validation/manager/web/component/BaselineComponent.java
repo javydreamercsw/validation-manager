@@ -15,19 +15,17 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.component;
 
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.themes.ValoTheme;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.DataBaseManager;
 import com.validation.manager.core.db.Baseline;
 import com.validation.manager.core.db.History;
@@ -36,8 +34,6 @@ import com.validation.manager.core.db.controller.BaselineJpaController;
 import com.validation.manager.core.db.controller.exceptions.NonexistentEntityException;
 import com.validation.manager.core.server.core.BaselineServer;
 import com.validation.manager.core.tool.Tool;
-import de.steinwedel.messagebox.ButtonOption;
-import de.steinwedel.messagebox.MessageBox;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -48,140 +44,131 @@ import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public final class BaselineComponent extends Panel {
+public final class BaselineComponent extends VerticalLayout {
 
     private static final Logger LOG
             = Logger.getLogger(BaselineComponent.class.getSimpleName());
 
     public BaselineComponent(Baseline baseline,
             boolean edit, RequirementSpec rs) {
-        super(TRANSLATOR.translate("baseline.detail"));
+        Span caption = new Span(TRANSLATOR.translate("baseline.detail"));
+        add(caption);
         FormLayout layout = new FormLayout();
-        setContent(layout);
-        addStyleName(ValoTheme.FORMLAYOUT_LIGHT);
-        BeanFieldGroup binder = new BeanFieldGroup(baseline.getClass());
-        binder.setItemDataSource(baseline);
-        Field<?> id = binder.buildAndBind(TRANSLATOR.translate("general.name"), "baselineName");
-        layout.addComponent(id);
-        Field desc = binder.buildAndBind(TRANSLATOR.translate("general.description"), "description",
-                TextArea.class
-        );
+        add(layout);
+        Binder<Baseline> binder = new Binder<>(Baseline.class);
+        binder.setBean(baseline);
+        TextField name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.bind(name, "baselineName");
+        layout.add(name);
+        TextArea desc = new TextArea(TRANSLATOR.translate("general.description"));
+        binder.bind(desc, "description");
         desc.setSizeFull();
-        layout.addComponent(desc);
+        layout.add(desc);
         Button cancel = new Button(TRANSLATOR.translate("general.cancel"));
         if (rs != null) {
             List<History> potential = new ArrayList<>();
             Tool.extractRequirements(rs).forEach((r) -> {
                 potential.add(r.getHistoryList().get(r.getHistoryList().size() - 1));
             });
-            layout.addComponent(((ValidationManagerUI) UI.getCurrent())
+            layout.add(((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
                     .createRequirementHistoryTable(TRANSLATOR.translate("included.requirements"),
                             potential, true));
         } else {
-            layout.addComponent(((ValidationManagerUI) UI.getCurrent())
+            layout.add(((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
                     .createRequirementHistoryTable(TRANSLATOR.translate("included.requirements"),
                             baseline.getHistoryList(), true));
         }
-        cancel.addClickListener((Button.ClickEvent event) -> {
-            binder.discard();
-            ((ValidationManagerUI) UI.getCurrent())
-                    .displayObject(((ValidationManagerUI) UI.getCurrent())
-                            .getTree().getValue());
+        cancel.addClickListener((event) -> {
+            ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                    .displayObject(((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                            .getTree().asSingleSelect().getValue());
         });
         if (edit) {
             if (baseline.getId() == null) {
                 //Creating a new one
                 Button save = new Button(TRANSLATOR.translate("general.save"));
-                save.addClickListener((Button.ClickEvent event) -> {
-                    try {
-                        binder.commit();
-                        if (rs != null) {
-                            MessageBox prompt = MessageBox.createQuestion()
-                                    .withCaption(TRANSLATOR.translate("save.baseline.title"))
-                                    .withMessage(TRANSLATOR.translate("save.baseine.message")
-                                            + "requirements will be released to a new major version")
-                                    .withYesButton(() -> {
-                                        Baseline entity = BaselineServer
-                                                .createBaseline(
-                                                        baseline.getBaselineName(),
-                                                        baseline.getDescription(),
-                                                        rs)
-                                                .getEntity();
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .updateProjectList();
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .buildProjectTree(entity);
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .displayObject(entity, false);
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .updateScreen();
-                                    },
-                                            ButtonOption.focus(),
-                                            ButtonOption
-                                                    .icon(VaadinIcons.CHECK))
-                                    .withNoButton(() -> {
-                                        ((ValidationManagerUI) UI.getCurrent())
-                                                .displayObject(((ValidationManagerUI) UI
-                                                        .getCurrent()).getTree().getValue());
-                                    },
-                                            ButtonOption
-                                                    .icon(VaadinIcons.CLOSE));
-                            prompt.getWindow().setIcon(ValidationManagerUI.SMALL_APP_ICON);
-                            prompt.open();
-                        } else {
-                            //Recreate the tree to show the addition
-                            ((ValidationManagerUI) UI.getCurrent()).displayObject(baseline, true);
-                        }
-                        ((ValidationManagerUI) UI.getCurrent()).updateProjectList();
-                        ((ValidationManagerUI) UI.getCurrent()).updateScreen();
-                    } catch (FieldGroup.CommitException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
+                save.addClickListener((event) -> {
+                    if (rs != null) {
+                        ConfirmDialog prompt = new ConfirmDialog();
+                        prompt.setHeader(TRANSLATOR.translate("save.baseline.title"));
+                        prompt.setText(TRANSLATOR.translate("save.baseine.message")
+                                + "requirements will be released to a new major version");
+                        prompt.setConfirmButton(TRANSLATOR.translate("general.yes"),
+                                (e) -> {
+                                    Baseline entity = BaselineServer
+                                            .createBaseline(
+                                                    baseline.getBaselineName(),
+                                                    baseline.getDescription(),
+                                                    rs)
+                                            .getEntity();
+                                    ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                            .updateProjectList();
+                                    ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                            .buildProjectTree(entity);
+                                    ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                            .displayObject(entity, false);
+                                    ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                            .updateScreen();
+                                });
+                        prompt.setRejectable(true);
+                        prompt.setRejectButton(TRANSLATOR.translate("general.no"),
+                                (e) -> {
+                                    ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                            .displayObject(((ValidationManagerUI) com.vaadin
+                                                    .flow.component.UI.getCurrent())
+                                                    .getTree().asSingleSelect().getValue());
+                                });
+                        prompt.setCancelable(false);
+                        prompt.open();
+                    } else {
+                        //Recreate the tree to show the addition
+                        ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                .displayObject(baseline, true);
                     }
+                    ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                            .updateProjectList();
+                    ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                            .updateScreen();
                 });
                 HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(save);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
+                hl.add(save, cancel);
+                layout.add(hl);
             } else {
                 //Editing existing one
                 Button update = new Button(TRANSLATOR.translate("general.update"));
-                update.addClickListener((Button.ClickEvent event) -> {
+                update.addClickListener((event) -> {
                     try {
-                        ((ValidationManagerUI) UI.getCurrent()).handleVersioning(baseline, () -> {
-                            try {
-                                new BaselineJpaController(DataBaseManager
-                                        .getEntityManagerFactory()).edit(baseline);
-                                //Recreate the tree to show the addition
-                                ((ValidationManagerUI) UI.getCurrent()).buildProjectTree(baseline);
-                                ((ValidationManagerUI) UI.getCurrent()).displayBaseline(baseline, false);
-                            } catch (NonexistentEntityException ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            } catch (Exception ex) {
-                                LOG.log(Level.SEVERE, null, ex);
-                                Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                        ex.getLocalizedMessage(),
-                                        Notification.Type.ERROR_MESSAGE);
-                            }
-                        });
+                        ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                .handleVersioning(baseline, () -> {
+                                    try {
+                                        new BaselineJpaController(DataBaseManager
+                                                .getEntityManagerFactory()).edit(baseline);
+                                        //Recreate the tree to show the addition
+                                        ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                                .buildProjectTree(baseline);
+                                        ((ValidationManagerUI) com.vaadin.flow.component.UI.getCurrent())
+                                                .displayBaseline(baseline, false);
+                                    } catch (NonexistentEntityException ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                        Notification.show(TRANSLATOR
+                                                .translate("general.error.record.update"));
+                                    } catch (Exception ex) {
+                                        LOG.log(Level.SEVERE, null, ex);
+                                        Notification.show(TRANSLATOR
+                                                .translate("general.error.record.update"));
+                                    }
+                                });
                     } catch (Exception ex) {
                         LOG.log(Level.SEVERE, null, ex);
-                        Notification.show(TRANSLATOR.translate("general.error.record.update"),
-                                ex.getLocalizedMessage(),
-                                Notification.Type.ERROR_MESSAGE);
+                        Notification.show(TRANSLATOR.translate("general.error.record.update"));
                     }
                 });
                 HorizontalLayout hl = new HorizontalLayout();
-                hl.addComponent(update);
-                hl.addComponent(cancel);
-                layout.addComponent(hl);
+                hl.add(update, cancel);
+                layout.add(hl);
             }
         }
-        binder.setBuffered(true);
         binder.setReadOnly(!edit);
-        binder.bindMemberFields(this);
         setSizeFull();
     }
 

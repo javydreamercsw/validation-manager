@@ -15,9 +15,9 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
-import com.vaadin.ui.UI;
-import com.validation.manager.core.VMUI;
+import com.vaadin.flow.component.UI;
 import com.validation.manager.core.server.core.ProjectServer;
+import net.sourceforge.javydreamercsw.validation.manager.web.core.VMUI;
 
 /**
  *

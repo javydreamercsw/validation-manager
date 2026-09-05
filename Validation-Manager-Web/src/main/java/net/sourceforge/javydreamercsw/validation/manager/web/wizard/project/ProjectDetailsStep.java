@@ -15,21 +15,21 @@
  */
 package net.sourceforge.javydreamercsw.validation.manager.web.wizard.project;
 
-import com.vaadin.data.fieldgroup.BeanFieldGroup;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.FormLayout;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import static com.validation.manager.core.ContentProvider.TRANSLATOR;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import static net.sourceforge.javydreamercsw.validation.manager.web.core.ContentProvider.TRANSLATOR;
 import com.validation.manager.core.db.Project;
 import com.validation.manager.core.server.core.ProjectServer;
-import org.vaadin.teemu.wizards.WizardStep;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 
 /**
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-public class ProjectDetailsStep implements WizardStep {
+public class ProjectDetailsStep implements FlowWizardStep {
 
     private final ProjectServer ps;
     private final ProjectCreationWizard w;
@@ -39,17 +39,14 @@ public class ProjectDetailsStep implements WizardStep {
     public ProjectDetailsStep(ProjectCreationWizard wizard) {
         this.w = wizard;
         ps = new ProjectServer(new Project());
-        BeanFieldGroup binder = new BeanFieldGroup(ps.getClass());
-        binder.setItemDataSource(ps);
-        name = (TextField) binder.buildAndBind(TRANSLATOR.translate("general.name"),
-                "name", TextField.class);
-        name.setNullRepresentation("");
-        notes = (TextArea) binder.buildAndBind(TRANSLATOR.translate("general.notes"),
-                "notes", TextArea.class);
-        notes.setNullRepresentation("");
+        Binder<ProjectServer> binder = new Binder<>(ProjectServer.class);
+        binder.setBean(ps);
+        name = new TextField(TRANSLATOR.translate("general.name"));
+        binder.forField(name).withNullRepresentation("").bind("name");
+        name.setRequiredIndicatorVisible(true);
+        notes = new TextArea(TRANSLATOR.translate("general.notes"));
+        binder.forField(notes).withNullRepresentation("").bind("notes");
         notes.setSizeFull();
-        name.setRequired(true);
-        name.setRequiredError(TRANSLATOR.translate("missing.name.message"));
     }
 
     @Override
@@ -60,8 +57,8 @@ public class ProjectDetailsStep implements WizardStep {
     @Override
     public Component getContent() {
         FormLayout layout = new FormLayout();
-        layout.addComponent(getName());
-        layout.addComponent(getNotes());
+        layout.add(getName());
+        layout.add(getNotes());
         return layout;
     }
 
