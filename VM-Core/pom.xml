@@ -312,7 +312,7 @@
     <properties>
         <!-- EclipseLink 4.x is Java 11 bytecode; source/target 1.8 would reject it -->
         <maven.compiler.release>11</maven.compiler.release>
-        <pdfbox.version>2.0.24</pdfbox.version>
+        <pdfbox.version>2.0.37</pdfbox.version>
         <jacoco.version>0.8.8</jacoco.version>
         <jacoco.outputDir>${project.basedir}/target/jacoco.exec</jacoco.outputDir>
     </properties>
