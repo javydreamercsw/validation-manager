@@ -98,7 +98,6 @@ import com.validation.manager.core.tool.requirement.importer.RequirementImportEx
 import com.validation.manager.core.tool.requirement.importer.RequirementImporter;
 import com.validation.manager.core.tool.step.importer.StepImporter;
 import com.validation.manager.core.tool.step.importer.TestCaseImportException;
-import elemental.json.JsonArray;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;

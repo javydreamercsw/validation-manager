@@ -14,7 +14,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vaadin.platform.version>24.10.9</vaadin.platform.version>
+        <vaadin.platform.version>25.2.6</vaadin.platform.version>
         <openoffice.version>4.1.2</openoffice.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <version>6.0.0</version>
+            <version>6.1.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- Metro 4.x is the Jakarta EE 9+ (jakarta.*) line; 2.4.0 is javax-only -->
@@ -68,6 +68,11 @@
             <groupId>org.glassfish.metro</groupId>
             <artifactId>webservices-rt</artifactId>
             <version>4.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.19.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -169,8 +174,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <!-- Flow 24 requires Java 17 -->
-                    <release>17</release>
+                    <!-- Flow 25 requires Java 21 -->
+                    <release>21</release>
                     <debug>false</debug>
                 </configuration>
             </plugin>
