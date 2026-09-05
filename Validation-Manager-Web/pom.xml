@@ -41,6 +41,17 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>
+            <exclusions>
+                <!-- Collaboration Engine is a commercial Vaadin product that
+                    rides along inside vaadin-core; the app never uses it and
+                    its presence forces license validation (interactive, browser
+                    based) on every production frontend build, breaking headless
+                    CI. -->
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>collaboration-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

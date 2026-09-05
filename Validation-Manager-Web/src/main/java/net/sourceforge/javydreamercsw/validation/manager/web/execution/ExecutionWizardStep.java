@@ -111,9 +111,13 @@ public class ExecutionWizardStep implements FlowWizardStep {
     private DateTimePicker start;
     private DateTimePicker end;
     private DateTimePicker reviewDate;
-    // TODO: (phase-4b-2) FlowWizard has no re-render API; content rebuilds
-    // when the step is re-entered.
+
+    /**
+     * Re-render this step in place (the v8 {@code Wizard.updateCurrentStep()}
+     * behavior; getContent() rebuilds from current state).
+     */
     private void refreshStep() {
+        w.updateCurrentStep();
     }
 
     private static final Logger LOG
@@ -998,9 +1002,7 @@ public class ExecutionWizardStep implements FlowWizardStep {
      * server state).
      */
     private void refreshCurrentStep() {
-        // TODO(phase-4b-2): FlowWizard needs an explicit step re-render API;
-        // until then updated attachments/issues appear when the step is
-        // re-entered (Back then Next) instead of immediately.
+        w.updateCurrentStep();
     }
 
     /**

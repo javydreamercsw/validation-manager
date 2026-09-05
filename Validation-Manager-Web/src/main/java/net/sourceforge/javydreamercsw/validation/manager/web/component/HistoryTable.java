@@ -92,12 +92,10 @@ public final class HistoryTable extends Grid<History> {
             }
         }
         if (!historyItems.isEmpty()) {
-            // v8 HeightMode.ROW: cap the visible rows (Flow has no
-            // setHeightByRows; emulate with a fixed height).
-            // TODO: (phase-4b-2) replace with setAllRowsVisible(true) when the
-            // surrounding layout can grow.
-            setHeight(historyItems.size() > 5 ? "160px" : (historyItems.size() * 40)
-                    + "px");
+            //v8 HeightMode.ROW + setHeightByRows: show all rows without a
+            //vertical scrollbar (the grid itself still respects the layout's
+            //size via setSizeFull below).
+            setAllRowsVisible(true);
         }
         setSizeFull();
     }

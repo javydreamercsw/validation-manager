@@ -80,9 +80,13 @@ public final class TreeTableCheckBox extends Checkbox {
 
     private void initialize() {
         //The parent/child cascade runs for both user toggles and programmatic
-        //value changes, like the v8 doSetValue() did.
-        // TODO: (phase-4b-2) native Checkbox is bi-state on click; the
-        // tri-state (indeterminate) mirror here is programmatic only.
+        //value changes, like the v8 doSetValue() did (user clicks reach
+        //setPresentationValue(), which routes into applyValue()).
+        //Click semantics match the v8 IndeterminateCheckBox with
+        //setUserCanToggleIndeterminate(false): from indeterminate, the first
+        //click resolves to the underlying checked bit (no indeterminate
+        //toggling by the user), and the parent/child cascade only runs for
+        //transitions between defined values, same as the v8 doSetValue().
         addValueChangeListener(e -> applyValue(e.getValue()));
         if (this.value == null) {
             setIndeterminate(true);

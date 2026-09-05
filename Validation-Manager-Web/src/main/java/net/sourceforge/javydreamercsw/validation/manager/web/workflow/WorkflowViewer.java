@@ -40,24 +40,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.javydreamercsw.validation.manager.web.ValidationManagerUI;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.VMWindow;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.VizGraph;
 
 /**
- * Workflow manager screen. The graphviz based vizcomponent addon has no Flow
- * port, so the graph is shown as an indented text outline until a proper Flow
- * graph viewer is integrated.
+ * Workflow manager screen. The graph is rendered with graphviz (DOT rendered
+ * to inline SVG via {@link VizGraph}, a wrapper around the WebAssembly build
+ * of Graphviz) replacing the v7-era vizcomponent add-on.
  *
  * @author Javier A. Ortiz Bultron javier.ortiz.78@gmail.com
  */
-// TODO: (phase-4b-2) render the workflow as a graph once a Flow graphviz
-// component is available.
 public final class WorkflowViewer extends VMWindow {
 
-    private final Span diagram = new Span();
+    private final VizGraph diagram = new VizGraph();
     private final List<Object> added = new ArrayList<>();
     private final List<Object> deleted = new ArrayList<>();
     private final Map<Integer, String> nodes = new HashMap<>();
-    //Map has source node and edge destination name.
-    private final Map<String, Map.Entry<Integer, String>> edges = new HashMap<>();
+    //Map has transition name -> (source step id, destination step id).
+    private final Map<String, Map.Entry<Integer, Integer>> edges = new HashMap<>();
     private static final Logger LOG
             = Logger.getLogger(WorkflowViewer.class.getSimpleName());
     private Object selected = null;
@@ -82,7 +81,7 @@ public final class WorkflowViewer extends VMWindow {
     }
 
     private void cleanGraph() {
-        //Nothing to clean in the text based fallback
+        diagram.clear();
     }
 
     protected void init() {
@@ -151,10 +150,8 @@ public final class WorkflowViewer extends VMWindow {
                                     new HashMap.SimpleEntry<>(
                                             (Integer) selected,
                                             nodeList.getValue() == null
-                                            ? null : String.valueOf(
-                                                    nodeList.getValue())));
-                            edges.put(KEY + "--" + transitionName.getValue(),
-                                    edges.get(transitionName.getValue()));
+                                            ? null : (Integer) nodeList
+                                                    .getValue()));
                             added.add(transitionName.getValue());
                             refreshWorkflow();
                         }
@@ -177,7 +174,7 @@ public final class WorkflowViewer extends VMWindow {
                     e -> {
                         if (selected instanceof String) {
                             String edgeName = (String) selected;
-                            Map.Entry<Integer, String> edge
+                            Map.Entry<Integer, Integer> edge
                                     = edges.remove(edgeName);
                             if (edge != null) {
                                 addToDelete(edge);
@@ -251,6 +248,9 @@ public final class WorkflowViewer extends VMWindow {
      */
     private void displayWorkflow(Workflow w) {
         StringBuilder sb = new StringBuilder();
+        sb.append("digraph \"").append(escapeDot(w.getWorkflowName()))
+                .append("\" {");
+        sb.append("  rankdir=TB;");
         nodes.clear();
         //Create the nodes
         w.getWorkflowStepList().forEach(step -> {
@@ -259,17 +259,25 @@ public final class WorkflowViewer extends VMWindow {
             step.getSourceTransitions().forEach(t -> {
                 addStep(t.getWorkflowStepSource(), sb);
                 addStep(t.getWorkflowStepTarget(), sb);
-                sb.append("<br/>")
-                        .append(TRANSLATOR.translate(t.getTransitionName()))
-                        .append(": ")
-                        .append(TRANSLATOR.translate(t.getWorkflowStepSource()
-                                .getStepName()))
-                        .append(" -&gt; ")
-                        .append(TRANSLATOR.translate(t.getWorkflowStepTarget()
-                                .getStepName()));
+                String source = dotId(t.getWorkflowStepSource()
+                        .getWorkflowStepPK().getId());
+                String target = dotId(t.getWorkflowStepTarget()
+                        .getWorkflowStepPK().getId());
+                sb.append("  ").append(source).append(" -> ")
+                        .append(target).append(" [label=\"")
+                        .append(escapeDot(TRANSLATOR.translate(
+                                t.getTransitionName())))
+                        .append("\"];");
+                edges.put(TRANSLATOR.translate(t.getTransitionName()),
+                        new HashMap.SimpleEntry<>(
+                                t.getWorkflowStepSource()
+                                        .getWorkflowStepPK().getId(),
+                                t.getWorkflowStepTarget()
+                                        .getWorkflowStepPK().getId()));
             });
         });
-        diagram.getElement().setProperty("innerHTML", sb.toString());
+        sb.append("}");
+        diagram.setGraph(sb.toString());
     }
 
     /**
@@ -277,14 +285,20 @@ public final class WorkflowViewer extends VMWindow {
      */
     private void refreshWorkflow() {
         StringBuilder sb = new StringBuilder();
+        sb.append("digraph workflow {");
+        sb.append("  rankdir=TB;");
         nodes.values().forEach(node -> {
-            sb.append("<br/>").append(node);
+            sb.append("  ").append(dotId(nodeId(node))).append(" [label=\"")
+                    .append(escapeDot(node)).append("\"];");
         });
         edges.values().forEach(edge -> {
-            sb.append("<br/>").append(edge.getKey()).append(" -&gt; ")
-                    .append(edge.getValue());
+            if (edge.getValue() != null) {
+                sb.append("  ").append(dotId(edge.getKey())).append(" -> ")
+                        .append(dotId(edge.getValue())).append(";");
+            }
         });
-        diagram.getElement().setProperty("innerHTML", sb.toString());
+        sb.append("}");
+        diagram.setGraph(sb.toString());
         selected = null;
         updateControls();
     }
@@ -293,8 +307,38 @@ public final class WorkflowViewer extends VMWindow {
         if (!nodes.containsKey(step.getWorkflowStepPK().getId())) {
             String node = TRANSLATOR.translate(step.getStepName());
             nodes.put(step.getWorkflowStepPK().getId(), node);
-            sb.append("<br/>").append(node);
+            sb.append("  ").append(dotId(step.getWorkflowStepPK().getId()))
+                    .append(" [label=\"").append(escapeDot(node))
+                    .append("\"];");
         }
+    }
+
+    /**
+     * @return a DOT-safe node identifier for a workflow step id (quoted, as
+     * ids can be negative for steps added in the editor).
+     */
+    private String dotId(int id) {
+        return "\"n" + id + "\"";
+    }
+
+    /**
+     * Reverse lookup of a node label's step id (edited-only nodes use
+     * negative ids).
+     */
+    private int nodeId(String label) {
+        for (Map.Entry<Integer, String> e : nodes.entrySet()) {
+            if (e.getValue().equals(label)) {
+                return e.getKey();
+            }
+        }
+        return -1;
+    }
+
+    private static String escapeDot(String text) {
+        return text == null ? "" : text
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n");
     }
 
     private VerticalLayout getList() {

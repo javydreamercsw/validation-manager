@@ -24,6 +24,7 @@ import com.validation.manager.core.db.Template;
 import com.validation.manager.core.db.controller.TemplateJpaController;
 import java.util.ArrayList;
 import java.util.List;
+import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizard;
 import net.sourceforge.javydreamercsw.validation.manager.web.component.wizard.FlowWizardStep;
 
 /**
@@ -77,11 +78,14 @@ class ProjectTemplateStep implements FlowWizardStep {
                 }
                 wizard.getWizard().addStep(new ProjectDetailsStep(wizard));
             } else {
-                //Remove added steps. The Flow wizard has no removeStep; the
-                //GAMP/details steps become unreachable because onAdvance of
-                //this step keeps gating progress (TODO(phase-4b-2): add
-                //removeStep to FlowWizard and restore exact removal).
-                //Do nothing beyond leaving the extra steps in place.
+                //Remove the steps added on the earlier selection (GAMP and
+                //project details). The active step (this one) and anything
+                //before it can't be removed, so only drop what follows it.
+                FlowWizard fw = this.wizard.getWizard();
+                List<FlowWizardStep> steps = fw.getSteps();
+                for (int i = steps.size() - 1; i > 1; i--) {
+                    fw.removeStep(steps.get(i));
+                }
             }
         });
         vl.add(getTemplates());
