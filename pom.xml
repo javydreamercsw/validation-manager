@@ -46,8 +46,8 @@
         <vm.version>${project.version}</vm.version>
         <vaadin.version>8.14.3</vaadin.version>
         <netbeans.version>RELEASE310</netbeans.version>
-        <junit.version>4.12</junit.version>
-        <mysql.version>8.0.31</mysql.version>
+        <junit.version>4.13.2</junit.version>
+        <mysql.version>9.5.0</mysql.version>
         <!-- 2.x removed syntax EclipseLink 2.7 emits (bare IDENTITY); EclipseLink 4.x
         (jakarta, phase-4) generates H2 2.x-compatible DDL -->
         <h2.version>2.4.240</h2.version>
