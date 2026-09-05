@@ -45,13 +45,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <vm.version>${project.version}</vm.version>
         <vaadin.version>8.14.3</vaadin.version>
-        <netbeans.version>RELEASE126</netbeans.version>
-        <junit.version>4.12</junit.version>
-        <mysql.version>8.0.31</mysql.version>
+        <netbeans.version>RELEASE310</netbeans.version>
+        <junit.version>4.13.2</junit.version>
+        <mysql.version>9.5.0</mysql.version>
         <!-- 2.x removed syntax EclipseLink 2.7 emits (bare IDENTITY); EclipseLink 4.x
         (jakarta, phase-4) generates H2 2.x-compatible DDL -->
         <h2.version>2.4.240</h2.version>
-        <poi.version>4.1.1</poi.version>
+        <poi.version>5.5.1</poi.version>
         <vaadin.icons.version>3.0.1</vaadin.icons.version>
     </properties>
     
@@ -231,8 +231,11 @@
     <modules>
         <module>VM-Core</module>
         <module>Validation-Manager-Web</module>
-        <module>WizardsForVaadin</module>
-        <module>tableexport-for-vaadin</module>
+        <!-- WizardsForVaadin and tableexport-for-vaadin submodules are no
+            longer referenced by the Flow application (their Vaadin 8 add-ons
+            were replaced in phase 4b). They are excluded from the build because
+            their Vaadin 8 dependency stack carries known CVEs; delete or
+            migrate them separately. -->
     </modules>
     
     <profiles>
@@ -343,4 +346,36 @@
             </build>
         </profile>
     </profiles>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Force patched versions of transitive dependencies flagged by
+                security scans (OSV/Snyk); the platforms above otherwise pin
+                their own. -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.22.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>2.22.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.20.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>2.26.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.23.2</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

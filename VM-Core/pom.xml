@@ -130,9 +130,13 @@
             <version>2.14.0</version>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.6</version>
         </dependency>
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
@@ -307,7 +311,7 @@
     <properties>
         <!-- EclipseLink 4.x is Java 11 bytecode; source/target 1.8 would reject it -->
         <maven.compiler.release>11</maven.compiler.release>
-        <pdfbox.version>2.0.24</pdfbox.version>
+        <pdfbox.version>2.0.37</pdfbox.version>
         <jacoco.version>0.8.8</jacoco.version>
         <jacoco.outputDir>${project.basedir}/target/jacoco.exec</jacoco.outputDir>
     </properties>
